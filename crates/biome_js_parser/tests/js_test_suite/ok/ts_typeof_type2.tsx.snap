@@ -1,0 +1,114 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```tsx
+type X = typeof Array
+<div>a</div>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@0..5 "type" [] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@5..7 "X" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
+            ty: TsTypeofType {
+                typeof_token: TYPEOF_KW@9..16 "typeof" [] [Whitespace(" ")],
+                expression_name: JsReferenceIdentifier {
+                    value_token: IDENT@16..21 "Array" [] [],
+                },
+                type_arguments: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxElement {
+                    opening_element: JsxOpeningElement {
+                        l_angle_token: L_ANGLE@21..23 "<" [Newline("\n")] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@23..26 "div" [] [],
+                        },
+                        type_arguments: missing (optional),
+                        attributes: JsxAttributeList [],
+                        r_angle_token: R_ANGLE@26..27 ">" [] [],
+                    },
+                    children: JsxChildList [
+                        JsxText {
+                            value_token: JSX_TEXT_LITERAL@27..28 "a" [] [],
+                        },
+                    ],
+                    closing_element: JsxClosingElement {
+                        l_angle_token: L_ANGLE@28..29 "<" [] [],
+                        slash_token: SLASH@29..30 "/" [] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@30..33 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@33..34 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@34..35 ";" [] [],
+        },
+    ],
+    eof_token: EOF@35..36 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..36
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..35
+    0: TS_TYPE_ALIAS_DECLARATION@0..21
+      0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@5..7
+        0: IDENT@5..7 "X" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@7..9 "=" [] [Whitespace(" ")]
+      4: TS_TYPEOF_TYPE@9..21
+        0: TYPEOF_KW@9..16 "typeof" [] [Whitespace(" ")]
+        1: JS_REFERENCE_IDENTIFIER@16..21
+          0: IDENT@16..21 "Array" [] []
+        2: (empty)
+      5: (empty)
+    1: JS_EXPRESSION_STATEMENT@21..35
+      0: JSX_TAG_EXPRESSION@21..34
+        0: JSX_ELEMENT@21..34
+          0: JSX_OPENING_ELEMENT@21..27
+            0: L_ANGLE@21..23 "<" [Newline("\n")] []
+            1: JSX_NAME@23..26
+              0: JSX_IDENT@23..26 "div" [] []
+            2: (empty)
+            3: JSX_ATTRIBUTE_LIST@26..26
+            4: R_ANGLE@26..27 ">" [] []
+          1: JSX_CHILD_LIST@27..28
+            0: JSX_TEXT@27..28
+              0: JSX_TEXT_LITERAL@27..28 "a" [] []
+          2: JSX_CLOSING_ELEMENT@28..34
+            0: L_ANGLE@28..29 "<" [] []
+            1: SLASH@29..30 "/" [] []
+            2: JSX_NAME@30..33
+              0: JSX_IDENT@30..33 "div" [] []
+            3: R_ANGLE@33..34 ">" [] []
+      1: SEMICOLON@34..35 ";" [] []
+  4: EOF@35..36 "" [Newline("\n")] []
+
+```

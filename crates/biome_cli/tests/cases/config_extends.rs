@@ -3,7 +3,6 @@ use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_formatter::LineWidth;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -28,10 +27,10 @@ fn extends_config_ok_formatter_no_linter() {
     let test_file = Path::new("test.js");
     fs.insert(test_file.into(), r#"debugger; console.log("string"); "#);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("check"), test_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", test_file.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -76,10 +75,10 @@ fn extends_config_ok_linter_not_formatter() {
     let test_file = Path::new("test.js");
     fs.insert(test_file.into(), r#"debugger; console.log("string"); "#);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("check"), test_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", test_file.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -114,10 +113,10 @@ fn extends_should_raise_an_error_for_unresolved_configuration() {
     let test_file = Path::new("test.js");
     fs.insert(test_file.into(), r#"debugger; console.log("string"); "#);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("check"), test_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", test_file.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -152,12 +151,12 @@ fn extends_should_raise_an_error_for_unresolved_configuration_and_show_verbose()
     let test_file = Path::new("test.js");
     fs.insert(test_file.into(), r#"debugger; console.log("string"); "#);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
+                "check",
                 "--verbose",
                 test_file.as_os_str().to_str().unwrap(),
             ]
@@ -197,12 +196,12 @@ fn extends_resolves_when_using_config_path() {
     let test_file = Path::new("test.js");
     fs.insert(test_file.into(), r#"debugger; console.log("string"); "#);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
+                "check",
                 "--config-path=config/",
                 test_file.as_os_str().to_str().unwrap(),
             ]
@@ -244,17 +243,10 @@ fn applies_extended_values_in_current_config() {
         r#"debugger; const a = ["lorem", "ipsum"]; "#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                "--write",
-                test_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test_file.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -288,17 +280,10 @@ fn respects_unaffected_values_from_extended_config() {
         r#"debugger; const a = ["lorem", "ipsum"]; "#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                "--write",
-                test_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test_file.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -335,17 +320,10 @@ fn allows_reverting_fields_in_extended_config_to_default() {
         r#"debugger; const a = ["lorem", "ipsum"]; "#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                "--write",
-                test_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test_file.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -390,8 +368,8 @@ fn extends_config_merge_overrides() {
     let test_file = Path::new("test.js");
     fs.insert(test_file.into(), "debugger; const a = 0;");
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["lint", test_file.as_os_str().to_str().unwrap()].as_slice()),
     );

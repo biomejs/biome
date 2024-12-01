@@ -1,7 +1,8 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxChildList, JsxElement};
-use biome_rowan::{AstNode, AstNodeList, TextRange};
+use biome_diagnostics::Severity;
+use biome_js_syntax::{AnyJsxTag, JsxChildList};
+use biome_rowan::{AstNodeList, TextRange};
 
 declare_lint_rule! {
     /// It detects possible "wrong" semicolons inside JSX elements.
@@ -47,20 +48,24 @@ declare_lint_rule! {
         name: "noSuspiciousSemicolonInJsx",
         language: "js",
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
 impl Rule for NoSuspiciousSemicolonInJsx {
-    type Query = Ast<AnyJsxElement>;
+    type Query = Ast<AnyJsxTag>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let jsx_element = node.parent::<JsxElement>()?;
-        if let AnyJsxElement::JsxOpeningElement(_) = node {
-            let has_semicolon = has_suspicious_semicolon(&jsx_element.children());
+        if let Some(children) = match node {
+            AnyJsxTag::JsxElement(element) => Some(element.children()),
+            AnyJsxTag::JsxFragment(fragment) => Some(fragment.children()),
+            _ => None,
+        } {
+            let has_semicolon = has_suspicious_semicolon(&children);
             if let Some(incorrect_semicolon) = has_semicolon {
                 return Some(incorrect_semicolon);
             }

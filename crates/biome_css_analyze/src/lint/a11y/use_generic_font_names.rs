@@ -6,8 +6,9 @@ use biome_css_syntax::{
     AnyCssAtRule, AnyCssGenericComponentValue, AnyCssValue, CssAtRule,
     CssGenericComponentValueList, CssGenericProperty, CssSyntaxKind,
 };
+use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 use crate::utils::{
     find_font_family, is_css_variable, is_font_family_keyword, is_system_family_name_keyword,
@@ -65,6 +66,7 @@ declare_lint_rule! {
         name: "useGenericFontNames",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword")],
     }
 }
@@ -77,8 +79,8 @@ impl Rule for UseGenericFontNames {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let property_name = node.name().ok()?.text();
-        let property_name = property_name.to_lowercase_cow();
+        let property_name = node.name().ok()?.to_trimmed_string();
+        let property_name = property_name.to_ascii_lowercase_cow();
 
         // Ignore `@font-face`. See more detail: https://drafts.csswg.org/css-fonts/#font-face-rule
         if is_in_font_face_at_rule(node) {
@@ -115,7 +117,7 @@ impl Rule for UseGenericFontNames {
 
         // Ignore the last value if it's a CSS variable now.
         let last_value = font_families.last()?;
-        if is_css_variable(&last_value.text()) {
+        if is_css_variable(&last_value.to_trimmed_string()) {
             return None;
         }
 
@@ -138,7 +140,7 @@ impl Rule for UseGenericFontNames {
                 markup! {
                     "For examples and more information, see" <Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/generic-family">" the MDN Web Docs"</Hyperlink>
                 },
-                &["serif", "sans-serif", "monospace", "etc."],
+                ["serif", "sans-serif", "monospace", "etc."],
             ),
         )
     }
@@ -157,11 +159,13 @@ fn is_shorthand_font_property_with_keyword(properties: &CssGenericComponentValue
     properties.into_iter().len() == 1
         && properties
             .into_iter()
-            .any(|p| is_system_family_name_keyword(&p.text()))
+            .any(|p| is_system_family_name_keyword(&p.to_trimmed_string()))
 }
 
 fn has_generic_font_family_property(nodes: &[AnyCssValue]) -> bool {
-    nodes.iter().any(|n| is_font_family_keyword(&n.text()))
+    nodes
+        .iter()
+        .any(|n| is_font_family_keyword(&n.to_trimmed_string()))
 }
 
 fn collect_font_family_properties(properties: CssGenericComponentValueList) -> Vec<AnyCssValue> {

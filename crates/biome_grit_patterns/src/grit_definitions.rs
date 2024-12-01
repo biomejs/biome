@@ -82,7 +82,7 @@ pub fn scan_definitions(
         match definition? {
             AnyGritDefinition::AnyGritPattern(_) => continue, // Handled separately.
             AnyGritDefinition::GritPatternDefinition(node) => {
-                let name = node.name()?.text();
+                let name = node.name()?.to_trimmed_string();
                 let name = name.trim();
                 if pattern_definition_info.contains_key(name) {
                     return Err(CompileError::DuplicatePatternDefinition(name.to_owned()));
@@ -92,14 +92,14 @@ pub fn scan_definitions(
                     name.to_owned(),
                     DefinitionInfo {
                         index: pattern_index,
-                        parameters: collect_variables(node.args()?.grit_variable_list())?,
+                        parameters: collect_variables(node.args())?,
                     },
                 );
 
                 pattern_index += 1;
             }
             AnyGritDefinition::GritPredicateDefinition(node) => {
-                let name = node.name()?.text();
+                let name = node.name()?.to_trimmed_string();
                 let name = name.trim();
                 if predicate_definition_info.contains_key(name) {
                     return Err(CompileError::DuplicatePredicateDefinition(name.to_owned()));
@@ -109,14 +109,14 @@ pub fn scan_definitions(
                     name.to_owned(),
                     DefinitionInfo {
                         index: predicate_index,
-                        parameters: collect_variables(node.args()?.grit_variable_list())?,
+                        parameters: collect_variables(node.args())?,
                     },
                 );
 
                 predicate_index += 1;
             }
             AnyGritDefinition::GritFunctionDefinition(node) => {
-                let name = node.name()?.text();
+                let name = node.name()?.to_trimmed_string();
                 let name = name.trim();
                 if function_definition_info.contains_key(name) {
                     return Err(CompileError::DuplicateFunctionDefinition(name.to_owned()));

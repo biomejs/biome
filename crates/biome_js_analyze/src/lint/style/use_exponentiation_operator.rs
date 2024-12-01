@@ -1,8 +1,9 @@
 use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::{make, syntax::T};
 use biome_js_syntax::{
     global_identifier, AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsBinaryOperator,
@@ -58,6 +59,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("prefer-exponentiation-operator")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -161,7 +163,7 @@ impl Rule for UseExponentiationOperator {
             .append_trivia_pieces(node.syntax().last_trailing_trivia()?.pieces())?;
         mutation.replace_node_discard_trivia(AnyJsExpression::from(node.clone()), new_node);
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use the '**' operator instead of 'Math.pow'." }.to_owned(),
             mutation,

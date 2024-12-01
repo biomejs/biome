@@ -3,6 +3,7 @@ use crate::services::semantic::Semantic;
 use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsxElementName, JsCallExpression, JsxAttribute, JsxOpeningElement, JsxSelfClosingElement,
     TextRange,
@@ -42,6 +43,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("button-has-type")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -70,7 +72,7 @@ impl Rule for UseButtonType {
                 if !is_button(&name)? {
                     return None;
                 }
-                let type_attribute = element.find_attribute_by_name("type").ok()?;
+                let type_attribute = element.find_attribute_by_name("type");
                 let Some(attribute) = type_attribute else {
                     let has_spread_prop = element
                         .attributes()
@@ -92,7 +94,7 @@ impl Rule for UseButtonType {
                 if !is_button(&name)? {
                     return None;
                 }
-                let type_attribute = element.find_attribute_by_name("type").ok()?;
+                let type_attribute = element.find_attribute_by_name("type");
                 let Some(attribute) = type_attribute else {
                     let has_spread_prop = element
                         .attributes()

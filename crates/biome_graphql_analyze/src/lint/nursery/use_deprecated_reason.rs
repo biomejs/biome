@@ -47,7 +47,7 @@ impl Rule for UseDeprecatedReason {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let name = node.name().ok()?;
-        if name.text() != "deprecated" {
+        if name.to_trimmed_string() != "deprecated" {
             return None;
         }
         // Fire diagnostic if the directive does not have any arguments
@@ -55,9 +55,11 @@ impl Rule for UseDeprecatedReason {
             return Some(node.clone());
         };
         let arguments = arguments.arguments();
-        let has_reason = arguments
-            .into_iter()
-            .any(|argument| argument.name().is_ok_and(|name| name.text() == "reason"));
+        let has_reason = arguments.into_iter().any(|argument| {
+            argument
+                .name()
+                .is_ok_and(|name| name.to_trimmed_string() == "reason")
+        });
         if has_reason {
             None
         } else {

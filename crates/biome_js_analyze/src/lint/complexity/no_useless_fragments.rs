@@ -2,16 +2,17 @@ use crate::react::{jsx_member_name_is_react_fragment, jsx_reference_identifier_i
 use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{
-    js_string_literal_expression, jsx_expression_child, jsx_string, jsx_string_literal,
-    jsx_tag_expression, token, JsxExpressionChildBuilder,
+    js_string_literal_expression, jsx_expression_attribute_value, jsx_expression_child, jsx_string,
+    jsx_string_literal, jsx_tag_expression, token, JsxExpressionChildBuilder,
 };
 use biome_js_syntax::{
-    AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsLogicalExpression,
+    AnyJsExpression, AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsLogicalExpression,
     JsParenthesizedExpression, JsSyntaxKind, JsxChildList, JsxElement, JsxExpressionAttributeValue,
-    JsxFragment, JsxTagExpression, JsxText, T,
+    JsxExpressionChild, JsxFragment, JsxTagExpression, JsxText, T,
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt};
 
@@ -64,6 +65,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-no-useless-fragment")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -124,6 +126,7 @@ impl Rule for NoUselessFragments {
         let model = ctx.model();
         let mut in_jsx_attr_expr = false;
         let mut in_js_logical_expr = false;
+        let mut in_jsx_expr = false;
         match node {
             NoUselessFragmentsQuery::JsxFragment(fragment) => {
                 let parents_where_fragments_must_be_preserved = node.syntax().parent().map_or(
@@ -138,6 +141,9 @@ impl Rule for NoUselessFragments {
                                 }
                                 if JsLogicalExpression::can_cast(parent.kind()) {
                                     in_js_logical_expr = true;
+                                }
+                                if JsxExpressionChild::can_cast(parent.kind()) {
+                                    in_jsx_expr = true;
                                 }
                                 match JsParenthesizedExpression::try_cast(parent) {
                                     Ok(parenthesized_expression) => {
@@ -190,7 +196,19 @@ impl Rule for NoUselessFragments {
                                 }
                             }
                             JsSyntaxKind::JSX_TEXT => {
-                                if !child.syntax().text().to_string().trim().is_empty() {
+                                // We need to whitespaces and newlines from the original string.
+                                // Since in the JSX newlines aren't trivia, we require to allocate a string to trim from those characters.
+                                let original_text = child.to_trimmed_string();
+                                let child_text = original_text.trim();
+
+                                if (in_jsx_expr || in_js_logical_expr)
+                                    && contains_html_character_references(child_text)
+                                {
+                                    children_where_fragments_must_preserved = true;
+                                    break;
+                                }
+
+                                if !child_text.is_empty() {
                                     significant_children += 1;
                                     if first_significant_child.is_none() {
                                         first_significant_child = Some(child);
@@ -280,7 +298,7 @@ impl Rule for NoUselessFragments {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
 
-        let in_jsx_attr = node.syntax().grand_parent().map_or(false, |parent| {
+        let is_in_jsx_attr = node.syntax().grand_parent().map_or(false, |parent| {
             JsxExpressionAttributeValue::can_cast(parent.kind())
         });
 
@@ -288,7 +306,6 @@ impl Rule for NoUselessFragments {
             .syntax()
             .parent()
             .map_or(false, |parent| JsxChildList::can_cast(parent.kind()));
-
         if is_in_list {
             let new_child = match state {
                 NoUselessFragmentsState::Empty => None,
@@ -305,7 +322,6 @@ impl Rule for NoUselessFragments {
                 Some(grand_parent) => grand_parent.into_syntax(),
                 None => parent.into_syntax(),
             };
-
             let child = node
                 .children()
                 .iter()
@@ -314,14 +330,29 @@ impl Rule for NoUselessFragments {
                     | JsSyntaxKind::JSX_ELEMENT
                     | JsSyntaxKind::JSX_EXPRESSION_CHILD
                     | JsSyntaxKind::JSX_FRAGMENT => true,
-                    JsSyntaxKind::JSX_TEXT => !child.syntax().text().to_string().trim().is_empty(),
+                    JsSyntaxKind::JSX_TEXT => !child
+                        .syntax()
+                        .text_with_trivia()
+                        .to_string()
+                        .trim()
+                        .is_empty(),
                     _ => false,
                 });
 
             if let Some(child) = child {
                 let new_node = match child {
                     AnyJsxChild::JsxElement(node) => {
-                        Some(jsx_tag_expression(AnyJsxTag::JsxElement(node)).into_syntax())
+                        let jsx_tag_expr = jsx_tag_expression(AnyJsxTag::JsxElement(node));
+                        if is_in_jsx_attr {
+                            let jsx_expr_attr_value = jsx_expression_attribute_value(
+                                token(T!['{']),
+                                AnyJsExpression::JsxTagExpression(jsx_tag_expr.clone()),
+                                token(T!['}']),
+                            );
+                            Some(jsx_expr_attr_value.into_syntax())
+                        } else {
+                            Some(jsx_tag_expr.into_syntax())
+                        }
                     }
                     AnyJsxChild::JsxFragment(node) => {
                         Some(jsx_tag_expression(AnyJsxTag::JsxFragment(node)).into_syntax())
@@ -342,7 +373,7 @@ impl Rule for NoUselessFragments {
                         }
                     }
                     AnyJsxChild::JsxExpressionChild(child) => {
-                        if in_jsx_attr
+                        if is_in_jsx_attr
                             || !JsxTagExpression::can_cast(node.syntax().parent()?.kind())
                         {
                             child.expression().map(|expression| {
@@ -381,7 +412,7 @@ impl Rule for NoUselessFragments {
         }
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the Fragment" }.to_owned(),
             mutation,
@@ -400,4 +431,10 @@ impl Rule for NoUselessFragments {
             "A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed "<Hyperlink href="https://legacy.reactjs.org/docs/fragments.html#keyed-fragments">"fragment"</Hyperlink>"."
         }))
     }
+}
+
+fn contains_html_character_references(s: &str) -> bool {
+    let and = s.find('&');
+    let semi = s.find(';');
+    matches!((and, semi), (Some(and), Some(semi)) if and < semi)
 }

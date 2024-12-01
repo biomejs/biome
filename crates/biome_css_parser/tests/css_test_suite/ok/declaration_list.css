@@ -31,6 +31,15 @@ a {
     prop1: --custom;
 }
 
+a {
+    prop1: 1px;
+    prop2: 2px;;;
+}
+
+a {
+    prop1: 1px;;;
+}
+
 div {
 	flex: 1 1 auto !important;
 }

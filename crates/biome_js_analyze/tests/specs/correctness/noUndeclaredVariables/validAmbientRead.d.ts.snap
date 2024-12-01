@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validAmbientRead.d.ts
+snapshot_kind: text
+---
+# Input
+```ts
+import type { TransformStream as TransformWebStream } from "node:stream/web";
+
+export class TextLineStream extends TransformWebStream<string, string> {}
+
+```

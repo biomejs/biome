@@ -9,8 +9,8 @@ Command to use in CI environments. Runs formatter, linter and import sorting to 
 Files won't be modified, the command is a read-only operation.
 
 Usage: ci [--formatter-enabled=<true|false>] [--linter-enabled=<true|false>] [
---organize-imports-enabled=<true|false>] [--assists-enabled=<true|false>] [--changed] [--since=REF]
-[PATH]...
+--organize-imports-enabled=<true|false>] [--assist-enabled=<true|false>] [--changed] [--since=REF] [
+PATH]...
 
 The configuration that is contained inside the file `biome.json`
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
@@ -33,8 +33,6 @@ The configuration that is contained inside the file `biome.json`
                               Configuration in `biome.json` will override `.editorconfig`
                               configuration. Default: false.
         --indent-style=<tab|space>  The indent style.
-        --indent-size=NUMBER  The size of the indentation, 2 by default (deprecated, use
-                              `indent-width`)
         --indent-width=NUMBER  The size of the indentation, 2 by default
         --line-ending=<lf|crlf|cr>  The type of line ending.
         --line-width=NUMBER   What's the max width of a line. Defaults to 80.
@@ -45,8 +43,6 @@ The configuration that is contained inside the file `biome.json`
         --jsx-quote-style=<double|single>  The type of quotes used in JSX. Defaults to double.
         --quote-properties=<preserve|as-needed>  When properties in objects are quoted. Defaults to
                               asNeeded.
-        --trailing-comma=<all|es5|none>  Print trailing commas wherever possible in multi-line
-                              comma-separated syntactic structures. Defaults to "all".
         --trailing-commas=<all|es5|none>  Print trailing commas wherever possible in multi-line
                               comma-separated syntactic structures. Defaults to "all".
         --semicolons=<always|as-needed>  Whether the formatter prints semicolons for all statements
@@ -60,8 +56,6 @@ The configuration that is contained inside the file `biome.json`
                               super languages) files.
         --javascript-formatter-indent-style=<tab|space>  The indent style applied to JavaScript (and
                               its super languages) files.
-        --javascript-formatter-indent-size=NUMBER  The size of the indentation applied to JavaScript
-                              (and its super languages) files. Default to 2.
         --javascript-formatter-indent-width=NUMBER  The size of the indentation applied to
                               JavaScript (and its super languages) files. Default to 2.
         --javascript-formatter-line-ending=<lf|crlf|cr>  The type of line ending applied to
@@ -82,8 +76,6 @@ The configuration that is contained inside the file `biome.json`
                               languages) files.
         --json-formatter-indent-width=NUMBER  The size of the indentation applied to JSON (and its
                               super languages) files. Default to 2.
-        --json-formatter-indent-size=NUMBER  The size of the indentation applied to JSON (and its
-                              super languages) files. Default to 2.
         --json-formatter-line-ending=<lf|crlf|cr>  The type of line ending applied to JSON (and its
                               super languages) files.
         --json-formatter-line-width=NUMBER  What's the max width of a line applied to JSON (and its
@@ -92,7 +84,7 @@ The configuration that is contained inside the file `biome.json`
                               multi-line comma-separated syntactic structures. Defaults to "none".
         --json-linter-enabled=<true|false>  Control the linter for JSON (and its super languages)
                               files.
-        --json-assists-enabled=<true|false>  Control the linter for JSON (and its super languages)
+        --json-assist-enabled=<true|false>  Control the linter for JSON (and its super languages)
                               files.
         --css-formatter-enabled=<true|false>  Control the formatter for CSS (and its super
                               languages) files.
@@ -107,7 +99,7 @@ The configuration that is contained inside the file `biome.json`
         --css-formatter-quote-style=<double|single>  The type of quotes used in CSS code. Defaults
                               to double.
         --css-linter-enabled=<true|false>  Control the linter for CSS files.
-        --css-assists-enabled=<true|false>  Control the assists for CSS files.
+        --css-assist-enabled=<true|false>  Control the assists for CSS files.
         --graphql-formatter-enabled=<true|false>  Control the formatter for GraphQL files.
         --graphql-formatter-indent-style=<tab|space>  The indent style applied to GraphQL files.
         --graphql-formatter-indent-width=NUMBER  The size of the indentation applied to GraphQL
@@ -119,7 +111,7 @@ The configuration that is contained inside the file `biome.json`
         --graphql-formatter-quote-style=<double|single>  The type of quotes used in GraphQL code.
                               Defaults to double.
         --graphql-linter-enabled=<true|false>  Control the formatter for GraphQL files.
-        --assists-enabled=<true|false>  Whether Biome should enable assists via LSP.
+        --assist-enabled=<true|false>  Whether Biome should enable assist via LSP.
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain
@@ -162,7 +154,7 @@ Available options:
         --formatter-enabled=<true|false>  Allow to enable or disable the formatter check.
         --linter-enabled=<true|false>  Allow to enable or disable the linter check.
         --organize-imports-enabled=<true|false>  Allow to enable or disable the organize imports.
-        --assists-enabled=<true|false>  Allow to enable or disable the assists.
+        --assist-enabled=<true|false>  Allow to enable or disable the assist.
         --changed             When set to true, only the files that have been changed compared to
                               your `defaultBranch` configuration will be linted.
         --since=REF           Use this to specify the base branch to compare against when you're

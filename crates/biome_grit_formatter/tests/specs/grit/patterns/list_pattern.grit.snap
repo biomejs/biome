@@ -1,0 +1,42 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: grit/patterns/list_pattern.grit
+snapshot_kind: text
+---
+# Input
+
+```grit
+`var $x = [$numbers]`=>`var firstPrimes = [$numbers]`where{$numbers<:[`2`,`3`,`5`]}
+
+
+`var $x = [$numbers]`=>`var numbersLong = [$numbers]`where{$numbers<:[`2`,`3`,`5`,`6`,`7`,`8`,`2`,`3`,`5`,`6`,`7`,`8`,`2`,`3`,`5`,`6`,`7`,`8`,`2`,`3`,`5`,`6`,`7`,`8`]}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+-----
+
+```grit
+`var $x = [$numbers]` => `var firstPrimes = [$numbers]` where {
+	$numbers <: [`2`, `3`, `5`]
+}
+
+`var $x = [$numbers]` => `var numbersLong = [$numbers]` where {
+	$numbers <: [
+		`2`, `3`, `5`, `6`, `7`, `8`, `2`, `3`, `5`, `6`, `7`, `8`, `2`, `3`, `5`,
+		`6`, `7`, `8`, `2`, `3`, `5`, `6`, `7`, `8`
+	]
+}
+```

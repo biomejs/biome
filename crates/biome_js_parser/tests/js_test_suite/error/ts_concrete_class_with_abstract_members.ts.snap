@@ -1,0 +1,263 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class A {
+   abstract my_age: number;
+   abstract name(): string;
+   abstract get age(): number;
+   abstract set age(v);
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..8 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@8..9 "{" [] [],
+            members: JsClassMemberList [
+                JsBogusMember {
+                    items: [
+                        TsPropertySignatureModifierList [
+                            TsAbstractModifier {
+                                modifier_token: ABSTRACT_KW@9..22 "abstract" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")],
+                            },
+                        ],
+                        JsLiteralMemberName {
+                            value: IDENT@22..28 "my_age" [] [],
+                        },
+                        TsTypeAnnotation {
+                            colon_token: COLON@28..30 ":" [] [Whitespace(" ")],
+                            ty: TsNumberType {
+                                number_token: NUMBER_KW@30..36 "number" [] [],
+                            },
+                        },
+                        SEMICOLON@36..37 ";" [] [],
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        TsMethodSignatureModifierList [
+                            TsAbstractModifier {
+                                modifier_token: ABSTRACT_KW@37..50 "abstract" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")],
+                            },
+                        ],
+                        JsLiteralMemberName {
+                            value: IDENT@50..54 "name" [] [],
+                        },
+                        JsParameters {
+                            l_paren_token: L_PAREN@54..55 "(" [] [],
+                            items: JsParameterList [],
+                            r_paren_token: R_PAREN@55..56 ")" [] [],
+                        },
+                        TsReturnTypeAnnotation {
+                            colon_token: COLON@56..58 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@58..64 "string" [] [],
+                            },
+                        },
+                        SEMICOLON@64..65 ";" [] [],
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        TsMethodSignatureModifierList [
+                            TsAbstractModifier {
+                                modifier_token: ABSTRACT_KW@65..78 "abstract" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")],
+                            },
+                        ],
+                        GET_KW@78..82 "get" [] [Whitespace(" ")],
+                        JsLiteralMemberName {
+                            value: IDENT@82..85 "age" [] [],
+                        },
+                        L_PAREN@85..86 "(" [] [],
+                        R_PAREN@86..87 ")" [] [],
+                        TsTypeAnnotation {
+                            colon_token: COLON@87..89 ":" [] [Whitespace(" ")],
+                            ty: TsNumberType {
+                                number_token: NUMBER_KW@89..95 "number" [] [],
+                            },
+                        },
+                        SEMICOLON@95..96 ";" [] [],
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        TsMethodSignatureModifierList [
+                            TsAbstractModifier {
+                                modifier_token: ABSTRACT_KW@96..109 "abstract" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")],
+                            },
+                        ],
+                        SET_KW@109..113 "set" [] [Whitespace(" ")],
+                        JsLiteralMemberName {
+                            value: IDENT@113..116 "age" [] [],
+                        },
+                        L_PAREN@116..117 "(" [] [],
+                        JsFormalParameter {
+                            decorators: JsDecoratorList [],
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@117..118 "v" [] [],
+                            },
+                            question_mark_token: missing (optional),
+                            type_annotation: missing (optional),
+                            initializer: missing (optional),
+                        },
+                        R_PAREN@118..119 ")" [] [],
+                        SEMICOLON@119..120 ";" [] [],
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@120..122 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@122..123 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..123
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..122
+    0: JS_CLASS_DECLARATION@0..122
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..8
+        0: IDENT@6..8 "A" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@8..9 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@9..120
+        0: JS_BOGUS_MEMBER@9..37
+          0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@9..22
+            0: TS_ABSTRACT_MODIFIER@9..22
+              0: ABSTRACT_KW@9..22 "abstract" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@22..28
+            0: IDENT@22..28 "my_age" [] []
+          2: TS_TYPE_ANNOTATION@28..36
+            0: COLON@28..30 ":" [] [Whitespace(" ")]
+            1: TS_NUMBER_TYPE@30..36
+              0: NUMBER_KW@30..36 "number" [] []
+          3: SEMICOLON@36..37 ";" [] []
+        1: JS_BOGUS_MEMBER@37..65
+          0: TS_METHOD_SIGNATURE_MODIFIER_LIST@37..50
+            0: TS_ABSTRACT_MODIFIER@37..50
+              0: ABSTRACT_KW@37..50 "abstract" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@50..54
+            0: IDENT@50..54 "name" [] []
+          2: JS_PARAMETERS@54..56
+            0: L_PAREN@54..55 "(" [] []
+            1: JS_PARAMETER_LIST@55..55
+            2: R_PAREN@55..56 ")" [] []
+          3: TS_RETURN_TYPE_ANNOTATION@56..64
+            0: COLON@56..58 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@58..64
+              0: STRING_KW@58..64 "string" [] []
+          4: SEMICOLON@64..65 ";" [] []
+        2: JS_BOGUS_MEMBER@65..96
+          0: TS_METHOD_SIGNATURE_MODIFIER_LIST@65..78
+            0: TS_ABSTRACT_MODIFIER@65..78
+              0: ABSTRACT_KW@65..78 "abstract" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")]
+          1: GET_KW@78..82 "get" [] [Whitespace(" ")]
+          2: JS_LITERAL_MEMBER_NAME@82..85
+            0: IDENT@82..85 "age" [] []
+          3: L_PAREN@85..86 "(" [] []
+          4: R_PAREN@86..87 ")" [] []
+          5: TS_TYPE_ANNOTATION@87..95
+            0: COLON@87..89 ":" [] [Whitespace(" ")]
+            1: TS_NUMBER_TYPE@89..95
+              0: NUMBER_KW@89..95 "number" [] []
+          6: SEMICOLON@95..96 ";" [] []
+        3: JS_BOGUS_MEMBER@96..120
+          0: TS_METHOD_SIGNATURE_MODIFIER_LIST@96..109
+            0: TS_ABSTRACT_MODIFIER@96..109
+              0: ABSTRACT_KW@96..109 "abstract" [Newline("\n"), Whitespace("   ")] [Whitespace(" ")]
+          1: SET_KW@109..113 "set" [] [Whitespace(" ")]
+          2: JS_LITERAL_MEMBER_NAME@113..116
+            0: IDENT@113..116 "age" [] []
+          3: L_PAREN@116..117 "(" [] []
+          4: JS_FORMAL_PARAMETER@117..118
+            0: JS_DECORATOR_LIST@117..117
+            1: JS_IDENTIFIER_BINDING@117..118
+              0: IDENT@117..118 "v" [] []
+            2: (empty)
+            3: (empty)
+            4: (empty)
+          5: R_PAREN@118..119 ")" [] []
+          6: SEMICOLON@119..120 ";" [] []
+      9: R_CURLY@120..122 "}" [Newline("\n")] []
+  4: EOF@122..123 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_concrete_class_with_abstract_members.ts:2:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Only abstract classes can have abstract members
+  
+    1 │ class A {
+  > 2 │    abstract my_age: number;
+      │    ^^^^^^^^
+    3 │    abstract name(): string;
+    4 │    abstract get age(): number;
+  
+ts_concrete_class_with_abstract_members.ts:3:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Only abstract classes can have abstract members
+  
+    1 │ class A {
+    2 │    abstract my_age: number;
+  > 3 │    abstract name(): string;
+      │    ^^^^^^^^
+    4 │    abstract get age(): number;
+    5 │    abstract set age(v);
+  
+ts_concrete_class_with_abstract_members.ts:4:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Only abstract classes can have abstract members
+  
+    2 │    abstract my_age: number;
+    3 │    abstract name(): string;
+  > 4 │    abstract get age(): number;
+      │    ^^^^^^^^
+    5 │    abstract set age(v);
+    6 │ }
+  
+ts_concrete_class_with_abstract_members.ts:5:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Only abstract classes can have abstract members
+  
+    3 │    abstract name(): string;
+    4 │    abstract get age(): number;
+  > 5 │    abstract set age(v);
+      │    ^^^^^^^^
+    6 │ }
+    7 │ 
+  
+```

@@ -1,6 +1,7 @@
 use js_sys::Error;
 use wasm_bindgen::prelude::*;
 
+use biome_fs::MemoryFileSystem;
 use biome_service::workspace::{
     self, ChangeFileParams, CloseFileParams, FixFileParams, FormatFileParams, FormatOnTypeParams,
     FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams, GetFormatterIRParams,
@@ -32,7 +33,7 @@ impl Workspace {
     #[allow(clippy::new_without_default)]
     pub fn new() -> Workspace {
         Workspace {
-            inner: workspace::server(),
+            inner: workspace::server(Box::new(MemoryFileSystem::default())),
         }
     }
 

@@ -15,8 +15,8 @@ use crate::workspace::{
 };
 use crate::WorkspaceError;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
-    RuleCategoriesBuilder, RuleCategory, RuleError,
+    AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategoriesBuilder, RuleCategory,
+    RuleError,
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
@@ -141,11 +141,11 @@ impl ServiceLanguage for GraphqlLanguage {
         _language: Option<&Self::LinterSettings>,
         path: &BiomePath,
         _file_source: &DocumentFileSource,
+        suppression_reason: Option<String>,
     ) -> AnalyzerOptions {
-        AnalyzerOptions {
-            configuration: AnalyzerConfiguration::default(),
-            file_path: path.to_path_buf(),
-        }
+        AnalyzerOptions::default()
+            .with_file_path(path.as_path())
+            .with_suppression_reason(suppression_reason)
     }
 }
 
@@ -262,7 +262,7 @@ fn format_on_type(
 
     let tree = parse.syntax();
 
-    let range = tree.text_range();
+    let range = tree.text_range_with_trivia();
     if offset < range.start() || offset > range.end() {
         return Err(WorkspaceError::FormatError(FormatError::RangeError {
             input: TextRange::at(offset, TextSize::from(0)),
@@ -289,109 +289,110 @@ fn format_on_type(
 }
 
 fn lint(params: LintParams) -> LintResults {
-    debug_span!("Linting GraphQL file", path =? params.path, language =? params.language).in_scope(
-        move || {
-            let workspace_settings = &params.workspace;
-            let analyzer_options = workspace_settings
-                .analyzer_options::<GraphqlLanguage>(params.path, &params.language);
-            let tree = params.parse.tree();
+    let _ = debug_span!("Linting GraphQL file", path =? params.path, language =? params.language)
+        .entered();
+    let workspace_settings = &params.workspace;
+    let analyzer_options = workspace_settings.analyzer_options::<GraphqlLanguage>(
+        params.path,
+        &params.language,
+        params.suppression_reason,
+    );
+    let tree = params.parse.tree();
 
-            let has_only_filter = !params.only.is_empty();
-            let rules = params
-                .workspace
-                .settings()
-                .as_ref()
-                .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
+    let has_only_filter = !params.only.is_empty();
+    let rules = params
+        .workspace
+        .settings()
+        .as_ref()
+        .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
 
-            let (enabled_rules, disabled_rules) =
-                AnalyzerVisitorBuilder::new(params.workspace.settings())
-                    .with_syntax_rules()
-                    .with_linter_rules(&params.only, &params.skip, params.path.as_path())
-                    .with_assists_rules(&params.only, &params.skip, params.path.as_path())
-                    .finish();
-            let mut diagnostics = params.parse.into_diagnostics();
+    let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
+        .with_only(&params.only)
+        .with_skip(&params.skip)
+        .with_path(params.path.as_path())
+        .with_enabled_rules(&params.enabled_rules)
+        .finish();
+    let mut diagnostics = params.parse.into_diagnostics();
 
-            let filter = AnalysisFilter {
-                categories: params.categories,
-                enabled_rules: Some(enabled_rules.as_slice()),
-                disabled_rules: &disabled_rules,
-                range: None,
-            };
+    let filter = AnalysisFilter {
+        categories: params.categories,
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
 
-            // Do not report unused suppression comment diagnostics if:
-            // - it is a syntax-only analyzer pass, or
-            // - if a single rule is run.
-            let ignores_suppression_comment =
-                !filter.categories.contains(RuleCategory::Lint) || has_only_filter;
+    // Do not report unused suppression comment diagnostics if:
+    // - it is a syntax-only analyzer pass, or
+    // - if a single rule is run.
+    let ignores_suppression_comment =
+        !filter.categories.contains(RuleCategory::Lint) || has_only_filter;
 
-            let mut diagnostic_count = diagnostics.len() as u32;
-            let mut errors = diagnostics
-                .iter()
-                .filter(|diag| diag.severity() <= Severity::Error)
-                .count();
+    let mut diagnostic_count = diagnostics.len() as u32;
+    let mut errors = diagnostics
+        .iter()
+        .filter(|diag| diag.severity() <= Severity::Error)
+        .count();
 
-            info!("Analyze file {}", params.path.display());
-            let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, |signal| {
-                if let Some(mut diagnostic) = signal.diagnostic() {
-                    // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
-                    if ignores_suppression_comment
-                        && diagnostic.category() == Some(category!("suppressions/unused"))
-                    {
-                        return ControlFlow::<Never>::Continue(());
-                    }
+    info!("Analyze file {}", params.path.display());
+    let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, |signal| {
+        if let Some(mut diagnostic) = signal.diagnostic() {
+            // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
+            if ignores_suppression_comment
+                && diagnostic.category() == Some(category!("suppressions/unused"))
+            {
+                return ControlFlow::<Never>::Continue(());
+            }
 
-                    diagnostic_count += 1;
+            diagnostic_count += 1;
 
-                    // We do now check if the severity of the diagnostics should be changed.
-                    // The configuration allows to change the severity of the diagnostics emitted by rules.
-                    let severity = diagnostic
-                        .category()
-                        .filter(|category| category.name().starts_with("lint/"))
-                        .map_or_else(
-                            || diagnostic.severity(),
-                            |category| {
-                                rules
-                                    .as_ref()
-                                    .and_then(|rules| rules.get_severity_from_code(category))
-                                    .unwrap_or(Severity::Warning)
-                            },
-                        );
+            // We do now check if the severity of the diagnostics should be changed.
+            // The configuration allows to change the severity of the diagnostics emitted by rules.
+            let severity = diagnostic
+                .category()
+                .filter(|category| category.name().starts_with("lint/"))
+                .map_or_else(
+                    || diagnostic.severity(),
+                    |category| {
+                        rules
+                            .as_ref()
+                            .and_then(|rules| rules.get_severity_from_code(category))
+                            .unwrap_or(Severity::Warning)
+                    },
+                );
 
-                    if severity >= Severity::Error {
-                        errors += 1;
-                    }
+            if severity >= Severity::Error {
+                errors += 1;
+            }
 
-                    if diagnostic_count <= params.max_diagnostics {
-                        for action in signal.actions() {
-                            if !action.is_suppression() {
-                                diagnostic = diagnostic.add_code_suggestion(action.into());
-                            }
-                        }
-
-                        let error = diagnostic.with_severity(severity);
-
-                        diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
+            if diagnostic_count <= params.max_diagnostics {
+                for action in signal.actions() {
+                    if !action.is_suppression() {
+                        diagnostic = diagnostic.add_code_suggestion(action.into());
                     }
                 }
 
-                ControlFlow::<Never>::Continue(())
-            });
+                let error = diagnostic.with_severity(severity);
 
-            diagnostics.extend(
-                analyze_diagnostics
-                    .into_iter()
-                    .map(biome_diagnostics::serde::Diagnostic::new)
-                    .collect::<Vec<_>>(),
-            );
-            let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
-
-            LintResults {
-                diagnostics,
-                errors,
-                skipped_diagnostics,
+                diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
             }
-        },
-    )
+        }
+
+        ControlFlow::<Never>::Continue(())
+    });
+
+    diagnostics.extend(
+        analyze_diagnostics
+            .into_iter()
+            .map(biome_diagnostics::serde::Diagnostic::new)
+            .collect::<Vec<_>>(),
+    );
+    let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
+
+    LintResults {
+        diagnostics,
+        errors,
+        skipped_diagnostics,
+    }
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
@@ -405,6 +406,8 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         language,
         only,
         skip,
+        suppression_reason,
+        enabled_rules: rules,
     } = params;
     debug_span!("Code actions GraphQL", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
@@ -416,20 +419,22 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 };
             };
 
-            let analyzer_options = workspace.analyzer_options::<GraphqlLanguage>(path, &language);
+            let analyzer_options =
+                workspace.analyzer_options::<GraphqlLanguage>(path, &language, suppression_reason);
             let mut actions = Vec::new();
             let (enabled_rules, disabled_rules) =
                 AnalyzerVisitorBuilder::new(params.workspace.settings())
-                    .with_syntax_rules()
-                    .with_linter_rules(&only, &skip, params.path.as_path())
-                    .with_assists_rules(&only, &skip, params.path.as_path())
+                    .with_only(&only)
+                    .with_skip(&skip)
+                    .with_path(path.as_path())
+                    .with_enabled_rules(&rules)
                     .finish();
 
             let filter = AnalysisFilter {
                 categories: RuleCategoriesBuilder::default()
                     .with_syntax()
                     .with_lint()
-                    .with_action()
+                    .with_assist()
                     .build(),
                 enabled_rules: Some(enabled_rules.as_slice()),
                 disabled_rules: &disabled_rules,
@@ -473,9 +478,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let rules = settings.as_linter_rules(params.biome_path.as_path());
 
     let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
-        .with_syntax_rules()
-        .with_linter_rules(&params.only, &params.skip, params.biome_path.as_path())
-        .with_assists_rules(&params.only, &params.skip, params.biome_path.as_path())
+        .with_only(&params.only)
+        .with_skip(&params.skip)
+        .with_path(params.biome_path.as_path())
         .finish();
 
     let filter = AnalysisFilter {
@@ -491,9 +496,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let mut actions = Vec::new();
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
-    let analyzer_options = params
-        .workspace
-        .analyzer_options::<GraphqlLanguage>(params.biome_path, &params.document_file_source);
+    let analyzer_options = params.workspace.analyzer_options::<GraphqlLanguage>(
+        params.biome_path,
+        &params.document_file_source,
+        params.suppression_reason,
+    );
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
             let current_diagnostic = signal.diagnostic();
@@ -528,6 +535,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             errors = errors.saturating_sub(1);
                             return ControlFlow::Break(action);
                         }
+                    }
+                    FixFileMode::ApplySuppressions => {
+                        // TODO: implement once a GraphQL suppression action is available
                     }
                 }
             }

@@ -1,0 +1,139 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class Foo {
+  @dec static {
+    this.a = "test";
+  }
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..10 "Foo" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@10..11 "{" [] [],
+            members: JsClassMemberList [
+                JsBogusMember {
+                    items: [
+                        JsDecorator {
+                            at_token: AT@11..15 "@" [Newline("\n"), Whitespace("  ")] [],
+                            expression: JsIdentifierExpression {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@15..19 "dec" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        STATIC_KW@19..26 "static" [] [Whitespace(" ")],
+                        L_CURLY@26..27 "{" [] [],
+                        JsStatementList [
+                            JsExpressionStatement {
+                                expression: JsAssignmentExpression {
+                                    left: JsStaticMemberAssignment {
+                                        object: JsThisExpression {
+                                            this_token: THIS_KW@27..36 "this" [Newline("\n"), Whitespace("    ")] [],
+                                        },
+                                        dot_token: DOT@36..37 "." [] [],
+                                        member: JsName {
+                                            value_token: IDENT@37..39 "a" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    operator_token: EQ@39..41 "=" [] [Whitespace(" ")],
+                                    right: JsStringLiteralExpression {
+                                        value_token: JS_STRING_LITERAL@41..47 "\"test\"" [] [],
+                                    },
+                                },
+                                semicolon_token: SEMICOLON@47..48 ";" [] [],
+                            },
+                        ],
+                        R_CURLY@48..52 "}" [Newline("\n"), Whitespace("  ")] [],
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@52..54 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@54..55 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..55
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..54
+    0: JS_CLASS_DECLARATION@0..54
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..10
+        0: IDENT@6..10 "Foo" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@10..11 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@11..52
+        0: JS_BOGUS_MEMBER@11..52
+          0: JS_DECORATOR@11..19
+            0: AT@11..15 "@" [Newline("\n"), Whitespace("  ")] []
+            1: JS_IDENTIFIER_EXPRESSION@15..19
+              0: JS_REFERENCE_IDENTIFIER@15..19
+                0: IDENT@15..19 "dec" [] [Whitespace(" ")]
+          1: STATIC_KW@19..26 "static" [] [Whitespace(" ")]
+          2: L_CURLY@26..27 "{" [] []
+          3: JS_STATEMENT_LIST@27..48
+            0: JS_EXPRESSION_STATEMENT@27..48
+              0: JS_ASSIGNMENT_EXPRESSION@27..47
+                0: JS_STATIC_MEMBER_ASSIGNMENT@27..39
+                  0: JS_THIS_EXPRESSION@27..36
+                    0: THIS_KW@27..36 "this" [Newline("\n"), Whitespace("    ")] []
+                  1: DOT@36..37 "." [] []
+                  2: JS_NAME@37..39
+                    0: IDENT@37..39 "a" [] [Whitespace(" ")]
+                1: EQ@39..41 "=" [] [Whitespace(" ")]
+                2: JS_STRING_LITERAL_EXPRESSION@41..47
+                  0: JS_STRING_LITERAL@41..47 "\"test\"" [] []
+              1: SEMICOLON@47..48 ";" [] []
+          4: R_CURLY@48..52 "}" [Newline("\n"), Whitespace("  ")] []
+      9: R_CURLY@52..54 "}" [Newline("\n")] []
+  4: EOF@54..55 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_static_initialization_block_member_with_decorators.ts:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static class blocks cannot have any modifier.
+  
+    1 │ class Foo {
+  > 2 │   @dec static {
+      │   ^^^^
+    3 │     this.a = "test";
+    4 │   }
+  
+```

@@ -1,5 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_json_syntax::{JsonMemberName, JsonObjectValue, TextRange};
 use biome_rowan::{AstNode, AstSeparatedList};
 use rustc_hash::FxHashMap;
@@ -31,13 +32,14 @@ declare_lint_rule! {
         name: "noDuplicateObjectKeys",
         language: "json",
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
 impl Rule for NoDuplicateObjectKeys {
     type Query = Ast<JsonObjectValue>;
     type State = (JsonMemberName, Vec<TextRange>);
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -62,10 +64,8 @@ impl Rule for NoDuplicateObjectKeys {
                 }
             }
         }
-
         let duplicated_keys: Vec<_> = names.into_iter().collect();
-
-        duplicated_keys
+        duplicated_keys.into_boxed_slice()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

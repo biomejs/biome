@@ -1,9 +1,9 @@
 use crate::matcher::Pattern;
 use crate::settings::Settings;
-use crate::{DynRef, WorkspaceError};
+use crate::WorkspaceError;
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::{CantLoadExtendFile, EditorConfigDiagnostic};
-use biome_configuration::VERSION;
+use biome_configuration::{push_to_analyzer_assist, VERSION};
 use biome_configuration::{
     push_to_analyzer_rules, BiomeConfigDiagnostic, ConfigurationPathHint, ConfigurationPayload,
     PartialConfiguration,
@@ -106,7 +106,7 @@ impl LoadedConfiguration {
     ///
     fn try_from_payload(
         value: Option<ConfigurationPayload>,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
     ) -> Result<Self, WorkspaceError> {
         let Some(value) = value else {
             return Ok(LoadedConfiguration::default());
@@ -149,7 +149,7 @@ impl LoadedConfiguration {
 
 /// Load the partial configuration for this session of the CLI.
 pub fn load_configuration(
-    fs: &DynRef<'_, dyn FileSystem>,
+    fs: &dyn FileSystem,
     path_hint: ConfigurationPathHint,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
     let config = load_config(fs, path_hint)?;
@@ -163,7 +163,7 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 
 /// Load the configuration from the file system.
 ///
-/// The configuration file will be read from the `file_system`. A [path hint](ConfigurationPathHint) should be provided.
+/// The configuration file will be read from the `fs`. A [path hint](ConfigurationPathHint) should be provided.
 ///
 /// - If the path hint is a path to a file that is provided by the user, the function will try to load that file or error.
 ///     The name doesn't have to be `biome.json` or `biome.jsonc`. And if it doesn't end with `.json`, Biome will try to
@@ -175,9 +175,7 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 /// - Otherwise, the function will try to traverse upwards the file system until it finds a `biome.json` or `biome.jsonc`
 ///     file, or there aren't directories anymore. In this case, the function will not error but return an `Ok(None)`, which
 ///     means Biome will use the default configuration.
-fn load_config(
-    file_system: &DynRef<'_, dyn FileSystem>,
-    path_hint: ConfigurationPathHint,
+fn load_config(fs: &dyn FileSystem, path_hint: ConfigurationPathHint
 ) -> LoadConfig {
     let name = if path_hint.is_root() { "root" } else { "" };
 
@@ -191,7 +189,7 @@ fn load_config(
         ConfigurationPathHint::FromChildWorkspace(ref path) => path.clone(),
         // Path hint from user means the command is invoked from the CLI
         // So we use the working directory (CWD) as the resolution base path
-        ConfigurationPathHint::FromUser(_) | ConfigurationPathHint::None => file_system
+        ConfigurationPathHint::FromUser(_) | ConfigurationPathHint::None => fs
             .working_directory()
             .map_or(PathBuf::new(), |working_directory| working_directory),
     };
@@ -199,8 +197,8 @@ fn load_config(
     // If the configuration path hint is from user and is a file path,
     // we'll load it directly
     if let ConfigurationPathHint::FromUser(ref config_file_path) = path_hint {
-        if file_system.path_is_file(config_file_path) {
-            let content = file_system.read_file_from_path(config_file_path)?;
+        if fs.path_is_file(config_file_path) {
+            let content = fs.read_file_from_path(config_file_path)?;
             let parser_options = match config_file_path.extension().map(OsStr::as_encoded_bytes) {
                 Some(b"json") => JsonParserOptions::default(),
                 _ => JsonParserOptions::default()
@@ -225,34 +223,15 @@ fn load_config(
         ConfigurationPathHint::FromUser(path) => path,
         ConfigurationPathHint::FromWorkspace(path) => path,
         ConfigurationPathHint::FromChildWorkspace(path) => path,
-        ConfigurationPathHint::None => file_system.working_directory().unwrap_or_default(),
+        ConfigurationPathHint::None => fs.working_directory().unwrap_or_default(),
     };
 
     // We first search for `biome.json` or `biome.jsonc` files
-    if let Some(auto_search_result) = match file_system.auto_search(
+    if let Some(auto_search_result) = fs.auto_search(
         &configuration_directory,
         ConfigName::file_names().as_slice(),
         should_error,
-    ) {
-        Ok(Some(auto_search_result)) => Some(auto_search_result),
-        // We then search for the deprecated `rome.json` file
-        // if neither `biome.json` nor `biome.jsonc` is found
-        // TODO: The following arms should be removed in v2.0.0
-        Ok(None) => file_system.auto_search(
-            &configuration_directory,
-            [file_system.deprecated_config_name()].as_slice(),
-            should_error,
-        )?,
-        Err(error) => file_system
-            .auto_search(
-                &configuration_directory,
-                [file_system.deprecated_config_name()].as_slice(),
-                should_error,
-            )
-            // Map the error so users won't see error messages
-            // that contains `rome.json`
-            .map_err(|_| error)?,
-    } {
+    )? {
         let AutoSearchResult { content, file_path } = auto_search_result;
 
         let parser_options = match file_path.extension().map(OsStr::as_encoded_bytes) {
@@ -276,13 +255,13 @@ fn load_config(
 }
 
 pub fn load_editorconfig(
-    file_system: &DynRef<'_, dyn FileSystem>,
+    fs: &dyn FileSystem,
     workspace_root: PathBuf,
 ) -> Result<(Option<PartialConfiguration>, Vec<EditorConfigDiagnostic>), WorkspaceError> {
     // How .editorconfig is supposed to be resolved: https://editorconfig.org/#file-location
     // We currently don't support the `root` property, so we just search for the file like we do for biome.json
     if let Some(auto_search_result) =
-        match file_system.auto_search(&workspace_root, [".editorconfig"].as_slice(), false) {
+        match fs.auto_search(&workspace_root, [".editorconfig"].as_slice(), false) {
             Ok(result) => result,
             Err(error) => return Err(WorkspaceError::from(error)),
         }
@@ -328,7 +307,7 @@ pub fn load_editorconfig(
 /// - the configuration file already exists
 /// - the program doesn't have the write rights
 pub fn create_config(
-    fs: &mut DynRef<dyn FileSystem>,
+    fs: &dyn FileSystem,
     mut configuration: PartialConfiguration,
     emit_jsonc: bool,
 ) -> Result<(), WorkspaceError> {
@@ -356,10 +335,11 @@ pub fn create_config(
         let schema_path = Path::new("./node_modules/@biomejs/biome/configuration_schema.json");
         let options = OpenOptions::default().read(true);
         if fs.open_with_options(schema_path, options).is_ok() {
-            configuration.schema = schema_path.to_str().map(String::from);
+            configuration.schema = schema_path.to_str().map(Into::into);
         }
     } else {
-        configuration.schema = Some(format!("https://biomejs.dev/schemas/{VERSION}/schema.json"));
+        configuration.schema =
+            Some(format!("https://biomejs.dev/schemas/{VERSION}/schema.json").into());
     }
 
     let contents = serde_json::to_string_pretty(&configuration)
@@ -380,23 +360,27 @@ pub fn create_config(
 
 /// Returns the rules applied to a specific [Path], given the [Settings]
 pub fn to_analyzer_rules(settings: &Settings, path: &Path) -> AnalyzerRules {
-    let linter_settings = &settings.linter;
-    let overrides = &settings.override_settings;
     let mut analyzer_rules = AnalyzerRules::default();
-    if let Some(rules) = linter_settings.rules.as_ref() {
+    if let Some(rules) = settings.linter.rules.as_ref() {
         push_to_analyzer_rules(rules, js_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, css_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, json_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
     }
-
+    if let Some(rules) = settings.assist.actions.as_ref() {
+        push_to_analyzer_assist(rules, js_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_assist(rules, css_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_assist(rules, json_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_assist(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
+    }
+    let overrides = &settings.override_settings;
     overrides.override_analyzer_rules(path, analyzer_rules)
 }
 
 pub trait PartialConfigurationExt {
     fn apply_extends(
         &mut self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         file_path: &Path,
         external_resolution_base_path: &Path,
         diagnostics: &mut Vec<Error>,
@@ -404,7 +388,7 @@ pub trait PartialConfigurationExt {
 
     fn deserialize_extends(
         &mut self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         relative_resolution_base_path: &Path,
         external_resolution_base_path: &Path,
     ) -> Result<Vec<Deserialized<PartialConfiguration>>, WorkspaceError>;
@@ -413,7 +397,7 @@ pub trait PartialConfigurationExt {
 
     fn retrieve_gitignore_matches(
         &self,
-        file_system: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         vcs_base_path: Option<&Path>,
     ) -> Result<(Option<PathBuf>, Vec<String>), WorkspaceError>;
 }
@@ -427,7 +411,7 @@ impl PartialConfigurationExt for PartialConfiguration {
     /// If a configuration can't be resolved from the file system, the operation will fail.
     fn apply_extends(
         &mut self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         file_path: &Path,
         external_resolution_base_path: &Path,
         diagnostics: &mut Vec<Error>,
@@ -469,7 +453,7 @@ impl PartialConfigurationExt for PartialConfiguration {
     /// It attempts to deserialize all the configuration files that were specified in the `extends` property
     fn deserialize_extends(
         &mut self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         relative_resolution_base_path: &Path,
         external_resolution_base_path: &Path,
     ) -> Result<Vec<Deserialized<PartialConfiguration>>, WorkspaceError> {
@@ -479,7 +463,7 @@ impl PartialConfigurationExt for PartialConfiguration {
 
         let mut deserialized_configurations = vec![];
         for extend_entry in extends.iter() {
-            let extend_entry_as_path = Path::new(extend_entry);
+            let extend_entry_as_path = Path::new(extend_entry.as_ref());
 
             let extend_configuration_file_path = if extend_entry_as_path.starts_with(".")
                 // TODO: Remove extension in Biome 2.0
@@ -487,9 +471,9 @@ impl PartialConfigurationExt for PartialConfiguration {
                     extend_entry_as_path.extension().map(OsStr::as_encoded_bytes),
                     Some(b"json" | b"jsonc")
                 ) {
-                relative_resolution_base_path.join(extend_entry)
+                relative_resolution_base_path.join(extend_entry.as_ref())
             } else {
-                fs.resolve_configuration(extend_entry.as_str(), external_resolution_base_path)
+                fs.resolve_configuration(extend_entry.as_ref(), external_resolution_base_path)
                     .map_err(|error| {
                         BiomeConfigDiagnostic::cant_resolve(
                             external_resolution_base_path.display().to_string(),
@@ -547,36 +531,7 @@ impl PartialConfigurationExt for PartialConfiguration {
 
     /// Checks for the presence of deprecated fields and updates the
     /// configuration to apply them to the new schema.
-    fn migrate_deprecated_fields(&mut self) {
-        // TODO: remove in biome 2.0
-        if let Some(formatter) = self.formatter.as_mut() {
-            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
-                formatter.indent_width = formatter.indent_size;
-            }
-        }
-
-        // TODO: remove in biome 2.0
-        if let Some(formatter) = self
-            .javascript
-            .as_mut()
-            .and_then(|js| js.formatter.as_mut())
-        {
-            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
-                formatter.indent_width = formatter.indent_size;
-            }
-
-            if formatter.trailing_comma.is_some() && formatter.trailing_commas.is_none() {
-                formatter.trailing_commas = formatter.trailing_comma;
-            }
-        }
-
-        // TODO: remove in biome 2.0
-        if let Some(formatter) = self.json.as_mut().and_then(|json| json.formatter.as_mut()) {
-            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
-                formatter.indent_width = formatter.indent_size;
-            }
-        }
-    }
+    fn migrate_deprecated_fields(&mut self) {}
 
     /// This function checks if the VCS integration is enabled, and if so, it will attempts to resolve the
     /// VCS root directory and the `.gitignore` file.
@@ -586,7 +541,7 @@ impl PartialConfigurationExt for PartialConfiguration {
     /// A tuple with VCS root folder and the contents of the `.gitignore` file
     fn retrieve_gitignore_matches(
         &self,
-        file_system: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         vcs_base_path: Option<&Path>,
     ) -> Result<(Option<PathBuf>, Vec<String>), WorkspaceError> {
         let Some(vcs) = &self.vcs else {
@@ -601,7 +556,7 @@ impl PartialConfigurationExt for PartialConfiguration {
             };
             if let Some(client_kind) = &vcs.client_kind {
                 if !vcs.ignore_file_disabled() {
-                    let result = file_system
+                    let result = fs
                         .auto_search(&vcs_base_path, &[client_kind.ignore_file()], false)
                         .map_err(WorkspaceError::from)?;
 

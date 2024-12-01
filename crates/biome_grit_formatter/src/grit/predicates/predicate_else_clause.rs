@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use biome_grit_syntax::GritPredicateElseClause;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_grit_syntax::{GritPredicateElseClause, GritPredicateElseClauseFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritPredicateElseClause;
 impl FormatNodeRule<GritPredicateElseClause> for FormatGritPredicateElseClause {
@@ -9,6 +9,11 @@ impl FormatNodeRule<GritPredicateElseClause> for FormatGritPredicateElseClause {
         node: &GritPredicateElseClause,
         f: &mut GritFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GritPredicateElseClauseFields {
+            else_predicate,
+            else_token,
+        } = node.as_fields();
+
+        write!(f, [else_token.format(), space(), else_predicate.format()])
     }
 }

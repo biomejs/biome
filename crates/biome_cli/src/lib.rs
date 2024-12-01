@@ -6,9 +6,8 @@
 //! to parse commands and arguments, redirect the execution of the commands and
 //! execute the traversal of directory and files, based on the command that were passed.
 
-use biome_console::{markup, ColorMode, Console, ConsoleExt};
-use biome_fs::OsFileSystem;
-use biome_service::{App, DynRef, Workspace, WorkspaceRef};
+use biome_console::{ColorMode, Console};
+use biome_service::{App, Workspace, WorkspaceRef};
 use commands::search::SearchCommandPayload;
 use std::env;
 
@@ -23,11 +22,13 @@ mod panic;
 mod reporter;
 mod service;
 
-use crate::cli_options::ColorsArg;
+use crate::cli_options::{CliOptions, ColorsArg};
 use crate::commands::check::CheckCommandPayload;
 use crate::commands::ci::CiCommandPayload;
 use crate::commands::format::FormatCommandPayload;
 use crate::commands::lint::LintCommandPayload;
+use crate::commands::migrate::MigrateCommandPayload;
+use crate::commands::CommandRunner;
 pub use crate::commands::{biome_command, BiomeCommand};
 pub use crate::logging::{setup_cli_subscriber, LoggingLevel};
 pub use diagnostics::CliDiagnostic;
@@ -53,11 +54,7 @@ impl<'app> CliSession<'app> {
         console: &'app mut dyn Console,
     ) -> Result<Self, CliDiagnostic> {
         Ok(Self {
-            app: App::new(
-                DynRef::Owned(Box::<OsFileSystem>::default()),
-                console,
-                WorkspaceRef::Borrowed(workspace),
-            ),
+            app: App::new(console, WorkspaceRef::Borrowed(workspace)),
         })
     }
 
@@ -66,12 +63,6 @@ impl<'app> CliSession<'app> {
         let has_metrics = command.has_metrics();
         if has_metrics {
             crate::metrics::init_metrics();
-        }
-        // TODO: remove in Biome v2
-        if env::var_os("BIOME_LOG_DIR").is_some() {
-            self.app.console.log(markup! {
-                <Warn>"The use of BIOME_LOG_DIR is deprecated. Use BIOME_LOG_PATH instead."</Warn>
-            });
         }
 
         let result = match command {
@@ -87,8 +78,6 @@ impl<'app> CliSession<'app> {
             } => commands::daemon::start(self, config_path, Some(log_path), Some(log_prefix_name)),
             BiomeCommand::Stop => commands::daemon::stop(self),
             BiomeCommand::Check {
-                apply,
-                apply_unsafe,
                 write,
                 fix,
                 unsafe_,
@@ -99,35 +88,33 @@ impl<'app> CliSession<'app> {
                 linter_enabled,
                 organize_imports_enabled,
                 formatter_enabled,
-                assists_enabled,
+                assist_enabled,
                 staged,
                 changed,
                 since,
-            } => commands::check::check(
+            } => run_command(
                 self,
+                &cli_options,
                 CheckCommandPayload {
-                    apply_unsafe,
-                    apply,
                     write,
                     fix,
                     unsafe_,
-                    cli_options,
                     configuration,
                     paths,
                     stdin_file_path,
                     linter_enabled,
                     organize_imports_enabled,
                     formatter_enabled,
-                    assists_enabled,
+                    assist_enabled,
                     staged,
                     changed,
                     since,
                 },
             ),
             BiomeCommand::Lint {
-                apply,
-                apply_unsafe,
                 write,
+                suppress,
+                suppression_reason,
                 fix,
                 unsafe_,
                 cli_options,
@@ -145,15 +132,15 @@ impl<'app> CliSession<'app> {
                 javascript_linter,
                 json_linter,
                 graphql_linter,
-            } => commands::lint::lint(
+            } => run_command(
                 self,
+                &cli_options,
                 LintCommandPayload {
-                    apply_unsafe,
-                    apply,
                     write,
+                    suppress,
+                    suppression_reason,
                     fix,
                     unsafe_,
-                    cli_options,
                     linter_configuration,
                     paths,
                     only,
@@ -174,22 +161,22 @@ impl<'app> CliSession<'app> {
                 linter_enabled,
                 formatter_enabled,
                 organize_imports_enabled,
-                assists_enabled,
+                assist_enabled,
                 configuration,
                 paths,
                 cli_options,
                 changed,
                 since,
-            } => commands::ci::ci(
+            } => run_command(
                 self,
+                &cli_options,
                 CiCommandPayload {
                     linter_enabled,
                     formatter_enabled,
                     organize_imports_enabled,
-                    assists_enabled,
+                    assist_enabled,
                     configuration,
                     paths,
-                    cli_options,
                     changed,
                     since,
                 },
@@ -210,15 +197,15 @@ impl<'app> CliSession<'app> {
                 staged,
                 changed,
                 since,
-            } => commands::format::format(
+            } => run_command(
                 self,
+                &cli_options,
                 FormatCommandPayload {
                     javascript_formatter,
                     formatter_configuration,
                     stdin_file_path,
                     write,
                     fix,
-                    cli_options,
                     paths,
                     vcs_configuration,
                     files_configuration,
@@ -243,21 +230,33 @@ impl<'app> CliSession<'app> {
                 write,
                 fix,
                 sub_command,
-            } => commands::migrate::migrate(self, cli_options, write, fix, sub_command),
+            } => run_command(
+                self,
+                &cli_options,
+                MigrateCommandPayload {
+                    write,
+                    fix,
+                    sub_command,
+                    configuration_directory_path: None,
+                    configuration_file_path: None,
+                },
+            ),
             BiomeCommand::Search {
                 cli_options,
                 files_configuration,
                 paths,
                 pattern,
+                language,
                 stdin_file_path,
                 vcs_configuration,
-            } => commands::search::search(
+            } => run_command(
                 self,
+                &cli_options,
                 SearchCommandPayload {
-                    cli_options,
                     files_configuration,
                     paths,
                     pattern,
+                    language,
                     stdin_file_path,
                     vcs_configuration,
                 },
@@ -290,4 +289,13 @@ pub fn to_color_mode(color: Option<&ColorsArg>) -> ColorMode {
         Some(ColorsArg::Force) => ColorMode::Enabled,
         None => ColorMode::Auto,
     }
+}
+
+pub(crate) fn run_command(
+    session: CliSession,
+    cli_options: &CliOptions,
+    mut command: impl CommandRunner,
+) -> Result<(), CliDiagnostic> {
+    let command = &mut command;
+    command.run(session, cli_options)
 }

@@ -1,0 +1,121 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+type A = string & number;
+type B = & A & void & null;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@0..5 "type" [] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
+            ty: TsIntersectionType {
+                leading_separator_token: missing (optional),
+                types: TsIntersectionTypeElementList [
+                    TsStringType {
+                        string_token: STRING_KW@9..16 "string" [] [Whitespace(" ")],
+                    },
+                    AMP@16..18 "&" [] [Whitespace(" ")],
+                    TsNumberType {
+                        number_token: NUMBER_KW@18..24 "number" [] [],
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@24..25 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@25..31 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@31..33 "B" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@33..35 "=" [] [Whitespace(" ")],
+            ty: TsIntersectionType {
+                leading_separator_token: AMP@35..37 "&" [] [Whitespace(" ")],
+                types: TsIntersectionTypeElementList [
+                    TsReferenceType {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@37..39 "A" [] [Whitespace(" ")],
+                        },
+                        type_arguments: missing (optional),
+                    },
+                    AMP@39..41 "&" [] [Whitespace(" ")],
+                    TsVoidType {
+                        void_token: VOID_KW@41..46 "void" [] [Whitespace(" ")],
+                    },
+                    AMP@46..48 "&" [] [Whitespace(" ")],
+                    TsNullLiteralType {
+                        literal_token: NULL_KW@48..52 "null" [] [],
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@52..53 ";" [] [],
+        },
+    ],
+    eof_token: EOF@53..54 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..54
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..53
+    0: TS_TYPE_ALIAS_DECLARATION@0..25
+      0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@5..7
+        0: IDENT@5..7 "A" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@7..9 "=" [] [Whitespace(" ")]
+      4: TS_INTERSECTION_TYPE@9..24
+        0: (empty)
+        1: TS_INTERSECTION_TYPE_ELEMENT_LIST@9..24
+          0: TS_STRING_TYPE@9..16
+            0: STRING_KW@9..16 "string" [] [Whitespace(" ")]
+          1: AMP@16..18 "&" [] [Whitespace(" ")]
+          2: TS_NUMBER_TYPE@18..24
+            0: NUMBER_KW@18..24 "number" [] []
+      5: SEMICOLON@24..25 ";" [] []
+    1: TS_TYPE_ALIAS_DECLARATION@25..53
+      0: TYPE_KW@25..31 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@31..33
+        0: IDENT@31..33 "B" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@33..35 "=" [] [Whitespace(" ")]
+      4: TS_INTERSECTION_TYPE@35..52
+        0: AMP@35..37 "&" [] [Whitespace(" ")]
+        1: TS_INTERSECTION_TYPE_ELEMENT_LIST@37..52
+          0: TS_REFERENCE_TYPE@37..39
+            0: JS_REFERENCE_IDENTIFIER@37..39
+              0: IDENT@37..39 "A" [] [Whitespace(" ")]
+            1: (empty)
+          1: AMP@39..41 "&" [] [Whitespace(" ")]
+          2: TS_VOID_TYPE@41..46
+            0: VOID_KW@41..46 "void" [] [Whitespace(" ")]
+          3: AMP@46..48 "&" [] [Whitespace(" ")]
+          4: TS_NULL_LITERAL_TYPE@48..52
+            0: NULL_KW@48..52 "null" [] []
+      5: SEMICOLON@52..53 ";" [] []
+  4: EOF@53..54 "" [Newline("\n")] []
+
+```

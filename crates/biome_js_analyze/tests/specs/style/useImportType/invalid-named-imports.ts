@@ -9,11 +9,10 @@ import { X, Y } from "";
 type XX = X;
 const YY = Y;
 
-//import { type U, V } from "";
-//type VV = V;
+import { type H, type I, type J } from "";
+export type { H, I, J };
 
-import { type X, type Y, type Z } from "";
-export type { X, Y, Z };
+import type { type M, N, type O } from "";
 
 // multiline
 import {

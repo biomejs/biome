@@ -15,11 +15,10 @@ import { X, Y } from "";
 type XX = X;
 const YY = Y;
 
-//import { type U, V } from "";
-//type VV = V;
+import { type H, type I, type J } from "";
+export type { H, I, J };
 
-import { type X, type Y, type Z } from "";
-export type { X, Y, Z };
+import type { type M, N, type O } from "";
 
 // multiline
 import {
@@ -34,12 +33,12 @@ export { U, type V, type W };
 
 # Diagnostics
 ```
-invalid-named-imports.ts:1:1 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-named-imports.ts:1:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Some named imports are only used as types.
   
   > 1 │ import { A, B, C, D, E } from "";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ type AA = A;
     3 │ type BB = typeof B;
   
@@ -64,9 +63,9 @@ invalid-named-imports.ts:1:1 lint/style/useImportType  FIXABLE  ━━━━━�
     2 │ type AA = A;
     3 │ type BB = typeof B;
   
-  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
-  i Safe fix: Use import type.
+  i Safe fix: Add inline type keywords.
   
     1 │ import·{·type·A,·type·B,·type·C,·D,·E·}·from·"";
       │          +++++   +++++   +++++                  
@@ -74,14 +73,14 @@ invalid-named-imports.ts:1:1 lint/style/useImportType  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid-named-imports.ts:8:1 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-named-imports.ts:8:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Some named imports are only used as types.
   
      6 │ const EE = E;
      7 │ 
    > 8 │ import { X, Y } from "";
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+       │        ^^^^^^^^^^^^^^^^
      9 │ type XX = X;
     10 │ const YY = Y;
   
@@ -94,9 +93,9 @@ invalid-named-imports.ts:8:1 lint/style/useImportType  FIXABLE  ━━━━━�
      9 │ type XX = X;
     10 │ const YY = Y;
   
-  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
-  i Safe fix: Use import type.
+  i Safe fix: Add inline type keywords.
   
     8 │ import·{·type·X,·Y·}·from·"";
       │          +++++               
@@ -104,81 +103,116 @@ invalid-named-imports.ts:8:1 lint/style/useImportType  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid-named-imports.ts:15:1 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-named-imports.ts:12:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All these imports are only used as types.
   
-    13 │ //type VV = V;
+    10 │ const YY = Y;
+    11 │ 
+  > 12 │ import { type H, type I, type J } from "";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ export type { H, I, J };
     14 │ 
-  > 15 │ import { type X, type Y, type Z } from "";
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    16 │ export type { X, Y, Z };
-    17 │ 
   
-  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
   i Safe fix: Use import type.
   
-    13 13 │   //type VV = V;
+    10 10 │   const YY = Y;
+    11 11 │   
+    12    │ - import·{·type·H,·type·I,·type·J·}·from·"";
+       12 │ + import·type·{·H,·I,·J·}·from·"";
+    13 13 │   export type { H, I, J };
     14 14 │   
-    15    │ - import·{·type·X,·type·Y,·type·Z·}·from·"";
-       15 │ + import·type·{·X,·Y,·Z·}·from·"";
-    16 16 │   export type { X, Y, Z };
-    17 17 │   
   
 
 ```
 
 ```
-invalid-named-imports.ts:19:1 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-named-imports.ts:15:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type keyword makes all inline type keywords useless.
+  
+    13 │ export type { H, I, J };
+    14 │ 
+  > 15 │ import type { type M, N, type O } from "";
+       │        ^^^^
+    16 │ 
+    17 │ // multiline
+  
+  i This inline type keyword is useless.
+  
+    13 │ export type { H, I, J };
+    14 │ 
+  > 15 │ import type { type M, N, type O } from "";
+       │               ^^^^
+    16 │ 
+    17 │ // multiline
+  
+  i This inline type keyword is useless.
+  
+    13 │ export type { H, I, J };
+    14 │ 
+  > 15 │ import type { type M, N, type O } from "";
+       │                          ^^^^
+    16 │ 
+    17 │ // multiline
+  
+  i Safe fix: Remove useless inline type keywords.
+  
+    15 │ import·type·{·type·M,·N,·type·O·}·from·"";
+       │               -----      -----            
+
+```
+
+```
+invalid-named-imports.ts:18:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Some named imports are only used as types.
   
-    18 │ // multiline
-  > 19 │ import {
-       │ ^^^^^^^^
-  > 20 │     U,
-  > 21 │     V,
-  > 22 │     // leading comment
-  > 23 │     W,
-  > 24 │ } from "";
-       │ ^^^^^^^^^^
-    25 │ export { U, type V, type W };
-    26 │ 
+    17 │ // multiline
+  > 18 │ import {
+       │        ^
+  > 19 │     U,
+  > 20 │     V,
+  > 21 │     // leading comment
+  > 22 │     W,
+  > 23 │ } from "";
+       │ ^^^^^^^^^
+    24 │ export { U, type V, type W };
+    25 │ 
   
   i This import is only used as a type.
   
-    19 │ import {
-    20 │     U,
-  > 21 │     V,
+    18 │ import {
+    19 │     U,
+  > 20 │     V,
        │     ^
-    22 │     // leading comment
-    23 │     W,
+    21 │     // leading comment
+    22 │     W,
   
   i This import is only used as a type.
   
-    21 │     V,
-    22 │     // leading comment
-  > 23 │     W,
+    20 │     V,
+    21 │     // leading comment
+  > 22 │     W,
        │     ^
-    24 │ } from "";
-    25 │ export { U, type V, type W };
+    23 │ } from "";
+    24 │ export { U, type V, type W };
   
-  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
-  i Safe fix: Use import type.
+  i Safe fix: Add inline type keywords.
   
-    19 19 │   import {
-    20 20 │       U,
-    21    │ - ····V,
-       21 │ + ····type·V,
-    22 22 │       // leading comment
-    23    │ - ····W,
-       23 │ + ····type·W,
-    24 24 │   } from "";
-    25 25 │   export { U, type V, type W };
+    18 18 │   import {
+    19 19 │       U,
+    20    │ - ····V,
+       20 │ + ····type·V,
+    21 21 │       // leading comment
+    22    │ - ····W,
+       22 │ + ····type·W,
+    23 23 │   } from "";
+    24 24 │   export { U, type V, type W };
   
 
 ```
-
-

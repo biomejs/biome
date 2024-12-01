@@ -1,9 +1,9 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyTsType, JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsVoidType, T};
 use biome_rowan::{AstNode, BatchMutationExt};
@@ -64,6 +64,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-invalid-void-type")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -107,7 +108,7 @@ impl Rule for NoConfusingVoidType {
             AnyTsType::from(make::ts_undefined_type(make::token(T![undefined]))),
         );
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             Applicability::MaybeIncorrect,
             markup! { "Use "<Emphasis>"undefined"</Emphasis>" instead." }.to_owned(),
             mutation,

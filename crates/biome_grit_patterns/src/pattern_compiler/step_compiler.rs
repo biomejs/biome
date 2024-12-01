@@ -41,6 +41,7 @@ impl StepCompiler {
             | Pattern::CallBuiltIn(_)
             | Pattern::CallFunction(_)
             | Pattern::CallForeignFunction(_)
+            | Pattern::CallbackPattern(_)
             | Pattern::Assignment(_)
             | Pattern::Accumulate(_)
             | Pattern::Any(_)
@@ -59,7 +60,6 @@ impl StepCompiler {
             | Pattern::CodeSnippet(_)
             | Pattern::Variable(_)
             | Pattern::Rewrite(_)
-            | Pattern::Log(_)
             | Pattern::Range(_)
             | Pattern::Within(_)
             | Pattern::After(_)
@@ -99,10 +99,7 @@ impl StepCompiler {
                 }
             }
         }
-        let pattern = wrap_pattern_in_before_and_after_each_file(
-            pattern,
-            &context.compilation.pattern_definition_info,
-        )?;
+        let pattern = wrap_pattern_in_before_and_after_each_file(pattern, context)?;
 
         Ok(Step::new(pattern))
     }

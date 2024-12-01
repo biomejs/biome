@@ -1,9 +1,9 @@
 use crate::{services::semantic::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     global_identifier, static_value::StaticValue, AnyJsExpression, JsCallExpression,
@@ -80,6 +80,7 @@ declare_lint_rule! {
             RuleSource::Eslint("no-new-native-nonconstructor"),
         ],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -139,7 +140,7 @@ impl Rule for NoInvalidBuiltinInstantiation {
                 mutation
                     .replace_node::<AnyJsExpression>(node.clone().into(), call_expression.into());
                 Some(JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! { "Remove "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
                     mutation,
@@ -151,7 +152,7 @@ impl Rule for NoInvalidBuiltinInstantiation {
                 mutation
                     .replace_node::<AnyJsExpression>(node.clone().into(), new_expression.into());
                 Some(JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! { "Add "<Emphasis>"new"</Emphasis>" keyword." }.to_owned(),
                     mutation,

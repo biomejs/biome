@@ -1,10 +1,9 @@
-use std::borrow::Cow;
-
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxAttribute, JsxChildList, JsxElement};
 use biome_rowan::{AstNode, AstNodeList};
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
     /// Enforces the usage of the `title` element for the `svg` element.
@@ -104,6 +103,7 @@ declare_lint_rule! {
         name: "noSvgWithoutTitle",
         language: "jsx",
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -116,7 +116,7 @@ impl Rule for NoSvgWithoutTitle {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if node.name_value_token()?.text_trimmed() != "svg" {
+        if node.name_value_token().ok()?.text_trimmed() != "svg" {
             return None;
         }
 
@@ -152,8 +152,8 @@ impl Rule for NoSvgWithoutTitle {
             return Some(());
         };
 
-        match role_attribute_text.to_lowercase_cow() {
-            Cow::Borrowed("img") => {
+        match role_attribute_text.to_ascii_lowercase_cow().as_ref() {
+            "img" => {
                 let [aria_label, aria_labelledby] = node
                     .attributes()
                     .find_by_names(["aria-label", "aria-labelledby"]);
@@ -166,7 +166,7 @@ impl Rule for NoSvgWithoutTitle {
                 Some(())
             }
             // if role attribute is empty, the svg element should have title element
-            Cow::Borrowed("") => Some(()),
+            "" => Some(()),
             _ => None,
         }
     }
@@ -198,7 +198,7 @@ fn is_valid_attribute_value(
         .filter_map(|child| {
             let jsx_element = child.as_jsx_element()?;
             let opening_element = jsx_element.opening_element().ok()?;
-            let maybe_attribute = opening_element.find_attribute_by_name("id").ok()?;
+            let maybe_attribute = opening_element.find_attribute_by_name("id");
             let child_attribute_value = maybe_attribute?.initializer()?.value().ok()?;
             let is_valid = attribute_value.as_static_value()?.text()
                 == child_attribute_value.as_static_value()?.text();

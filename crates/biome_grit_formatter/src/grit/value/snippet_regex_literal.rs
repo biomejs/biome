@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use biome_grit_syntax::GritSnippetRegexLiteral;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_grit_syntax::{GritSnippetRegexLiteral, GritSnippetRegexLiteralFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritSnippetRegexLiteral;
 impl FormatNodeRule<GritSnippetRegexLiteral> for FormatGritSnippetRegexLiteral {
@@ -9,6 +9,7 @@ impl FormatNodeRule<GritSnippetRegexLiteral> for FormatGritSnippetRegexLiteral {
         node: &GritSnippetRegexLiteral,
         f: &mut GritFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GritSnippetRegexLiteralFields { value_token } = node.as_fields();
+        write!(f, [value_token.format()])
     }
 }

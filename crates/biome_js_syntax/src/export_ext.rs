@@ -11,6 +11,22 @@ declare_node_union! {
     pub AnyIdentifier = AnyJsBindingPattern | AnyTsIdentifierBinding | JsIdentifierExpression | JsLiteralExportName | JsReferenceIdentifier
 }
 
+impl AnyIdentifier {
+    pub fn name_token(&self) -> Option<JsSyntaxToken> {
+        match self {
+            Self::AnyJsBindingPattern(id) => id
+                .as_any_js_binding()?
+                .as_js_identifier_binding()?
+                .name_token(),
+            Self::AnyTsIdentifierBinding(id) => id.as_ts_identifier_binding()?.name_token(),
+            Self::JsIdentifierExpression(id) => id.name().ok()?.value_token(),
+            Self::JsLiteralExportName(id) => id.value(),
+            Self::JsReferenceIdentifier(id) => id.value_token(),
+        }
+        .ok()
+    }
+}
+
 declare_node_union! {
     pub AnyJsExported = AnyJsExpression | AnyJsExportClause | AnyIdentifier | AnyTsType | TsEnumDeclaration
 }
@@ -200,7 +216,7 @@ impl JsExport {
                             }),
                             AnyJsExportNamedSpecifier::JsExportNamedSpecifier(specifier) => {
                                 specifier.exported_name().ok().map(|exported_name| {
-                                    if exported_name.text() == "default" {
+                                    if exported_name.to_trimmed_string() == "default" {
                                         return ExportedItem {
                                             identifier: specifier.local_name().ok().map(
                                                 |local_name| {

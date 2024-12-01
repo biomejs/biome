@@ -8,11 +8,11 @@ use crate::utils::{into_lsp_error, panic_to_lsp_error};
 use crate::{handlers, requests};
 use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
-use biome_fs::{ConfigName, FileSystem, OsFileSystem, ROME_JSON};
+use biome_fs::{ConfigName, FileSystem, OsFileSystem};
 use biome_service::workspace::{
     RageEntry, RageParams, RageResult, RegisterProjectFolderParams, UnregisterProjectFolderParams,
 };
-use biome_service::{workspace, DynRef, Workspace};
+use biome_service::{workspace, Workspace};
 use futures::future::ready;
 use futures::FutureExt;
 use rustc_hash::FxHashMap;
@@ -153,14 +153,6 @@ impl LSPServer {
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::String(format!(
                                 "{}/.editorconfig",
-                                base_path.display()
-                            )),
-                            kind: Some(WatchKind::all()),
-                        },
-                        // TODO: Biome 2.0 remove it
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(format!(
-                                "{}/rome.json",
                                 base_path.display()
                             )),
                             kind: Some(WatchKind::all()),
@@ -333,9 +325,8 @@ impl LanguageServer for LSPServer {
                     if let Some(base_path) = base_path {
                         let possible_rome_json = file_path.strip_prefix(&base_path);
                         if let Ok(watched_file) = possible_rome_json {
-                            if watched_file.display().to_string() == ROME_JSON
-                                || ConfigName::file_names()
-                                    .contains(&&*watched_file.display().to_string())
+                            if ConfigName::file_names()
+                                .contains(&&*watched_file.display().to_string())
                                 || watched_file.ends_with(".editorconfig")
                             {
                                 self.session.load_workspace_settings().await;
@@ -568,30 +559,25 @@ impl ServerFactory {
     }
 
     pub fn create(&self, config_path: Option<PathBuf>) -> ServerConnection {
-        self.create_with_fs(config_path, DynRef::Owned(Box::<OsFileSystem>::default()))
+        self.create_with_fs(config_path, Box::new(OsFileSystem::default()))
     }
 
     /// Create a new [ServerConnection] from this factory
     pub fn create_with_fs(
         &self,
         config_path: Option<PathBuf>,
-        fs: DynRef<'static, dyn FileSystem>,
+        fs: Box<dyn FileSystem>,
     ) -> ServerConnection {
         let workspace = self
             .workspace
             .clone()
-            .unwrap_or_else(workspace::server_sync);
+            .unwrap_or_else(|| workspace::server_sync(fs));
 
         let session_key = SessionKey(self.next_session_key.fetch_add(1, Ordering::Relaxed));
 
         let mut builder = LspService::build(move |client| {
-            let mut session = Session::new(
-                session_key,
-                client,
-                workspace,
-                self.cancellation.clone(),
-                fs,
-            );
+            let mut session =
+                Session::new(session_key, client, workspace, self.cancellation.clone());
             if let Some(path) = config_path {
                 session.set_config_path(path);
             }
@@ -630,6 +616,7 @@ impl ServerFactory {
         workspace_method!(builder, get_control_flow_graph);
         workspace_method!(builder, get_formatter_ir);
         workspace_method!(builder, change_file);
+        workspace_method!(builder, check_file_size);
         workspace_method!(builder, get_file_content);
         workspace_method!(builder, close_file);
         workspace_method!(builder, pull_diagnostics);
@@ -640,6 +627,9 @@ impl ServerFactory {
         workspace_method!(builder, fix_file);
         workspace_method!(builder, rename);
         workspace_method!(builder, organize_imports);
+        workspace_method!(builder, parse_pattern);
+        workspace_method!(builder, search_pattern);
+        workspace_method!(builder, drop_pattern);
 
         let (service, socket) = builder.finish();
         ServerConnection { socket, service }

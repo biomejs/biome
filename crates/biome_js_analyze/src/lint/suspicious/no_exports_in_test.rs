@@ -3,6 +3,7 @@ use biome_analyze::{
     RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     assign_ext::AnyJsMemberAssignment, AnyJsExpression, AnyJsRoot, JsAssignmentExpression,
     JsCallExpression, JsExport, JsLanguage,
@@ -41,6 +42,7 @@ declare_lint_rule! {
         name: "noExportsInTest",
         language: "js",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::EslintJest("no-export")],
         source_kind: RuleSourceKind::Inspired,
     }
@@ -64,9 +66,10 @@ impl MaybeExport {
                                 AnyJsMemberAssignment::JsComputedMemberAssignment(_) => false,
                                 AnyJsMemberAssignment::JsStaticMemberAssignment(static_member) => {
                                     // module.exports = {}
-                                    let indent_text = ident.text();
-                                    let member_text =
-                                        static_member.member().map(|member| member.text());
+                                    let indent_text = ident.to_trimmed_string();
+                                    let member_text = static_member
+                                        .member()
+                                        .map(|member| member.to_trimmed_string());
                                     indent_text == "module"
                                         && member_text
                                             .is_ok_and(|member_text| member_text == "exports")
@@ -74,8 +77,12 @@ impl MaybeExport {
                             },
                             AnyJsExpression::JsStaticMemberExpression(member_expr) => {
                                 // modules.exports.foo = {}, module.exports[foo] = {}
-                                let object_text = member_expr.object().map(|object| object.text());
-                                let member_text = member_expr.member().map(|member| member.text());
+                                let object_text = member_expr
+                                    .object()
+                                    .map(|object| object.to_trimmed_string());
+                                let member_text = member_expr
+                                    .member()
+                                    .map(|member| member.to_trimmed_string());
                                 object_text.is_ok_and(|text| text == "module")
                                     && member_text.is_ok_and(|member_text| member_text == "exports")
                             }

@@ -49,10 +49,10 @@ declare_lint_rule! {
 impl Rule for NoDuplicatedFields {
     type Query = Ast<AnyGraphqlOperationDefinition>;
     type State = DuplicatedField;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
-    fn run(ctx: &RuleContext<Self>) -> Vec<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let operation = ctx.query();
         let mut duplicated_fields = vec![];
         match operation {
@@ -68,8 +68,7 @@ impl Rule for NoDuplicatedFields {
                 duplicated_fields.extend(check_duplicated_selection_fields(selection_set))
             }
         };
-
-        duplicated_fields
+        duplicated_fields.into_boxed_slice()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -133,7 +132,7 @@ fn check_duplicated_selection_fields(selection_set: &GraphqlSelectionSet) -> Vec
         let Ok(name) = field.alias().map_or(field.name(), |alias| alias.value()) else {
             continue;
         };
-        let name = name.text();
+        let name = name.to_trimmed_string();
 
         if unique_field_names.contains(&name) {
             duplicated_fields.push(DuplicatedField {
@@ -162,7 +161,7 @@ fn check_duplicated_variable_definitions(
         let Ok(name) = variable.name() else {
             continue;
         };
-        let name = name.text();
+        let name = name.to_trimmed_string();
         if unique_variables.contains(&name) {
             duplicated_fields.push(DuplicatedField {
                 name,
@@ -183,7 +182,7 @@ fn check_duplicated_arguments(arguments: &GraphqlArguments) -> Vec<DuplicatedFie
         let Ok(name) = argument.name() else {
             continue;
         };
-        let name = name.text();
+        let name = name.to_trimmed_string();
         if unique_arguments.contains(&name) {
             duplicated_fields.push(DuplicatedField {
                 name,

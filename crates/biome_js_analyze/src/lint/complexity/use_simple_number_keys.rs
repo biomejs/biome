@@ -1,9 +1,8 @@
 use crate::JsRuleAction;
 
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsObjectMember, JsLiteralMemberName, JsObjectExpression, JsSyntaxKind, JsSyntaxToken,
@@ -49,6 +48,7 @@ declare_lint_rule! {
         name: "useSimpleNumberKeys",
         language: "js",
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
 }
@@ -57,28 +57,28 @@ declare_lint_rule! {
 pub enum NumberLiteral {
     Binary {
         node: JsLiteralMemberName,
-        value: String,
+        value: Box<str>,
         big_int: bool,
     },
     Decimal {
         node: JsLiteralMemberName,
-        value: String,
+        value: Box<str>,
         big_int: bool,
         underscore: bool,
     },
     Octal {
         node: JsLiteralMemberName,
-        value: String,
+        value: Box<str>,
         big_int: bool,
     },
     Hexadecimal {
         node: JsLiteralMemberName,
-        value: String,
+        value: Box<str>,
         big_int: bool,
     },
     FloatingPoint {
         node: JsLiteralMemberName,
-        value: String,
+        value: Box<str>,
         exponent: bool,
         underscore: bool,
     },
@@ -149,7 +149,7 @@ impl TryFrom<AnyJsObjectMember> for NumberLiteral {
                 if contains_dot {
                     return Ok(Self::FloatingPoint {
                         node: literal_member_name,
-                        value,
+                        value: value.into_boxed_str(),
                         exponent,
                         underscore,
                     });
@@ -157,7 +157,7 @@ impl TryFrom<AnyJsObjectMember> for NumberLiteral {
                 if !is_first_char_zero {
                     return Ok(Self::Decimal {
                         node: literal_member_name,
-                        value,
+                        value: value.into_boxed_str(),
                         big_int,
                         underscore,
                     });
@@ -167,21 +167,21 @@ impl TryFrom<AnyJsObjectMember> for NumberLiteral {
                     Some(b'b' | b'B') => {
                         return Ok(Self::Binary {
                             node: literal_member_name,
-                            value,
+                            value: value.into_boxed_str(),
                             big_int,
                         })
                     }
                     Some(b'o' | b'O') => {
                         return Ok(Self::Octal {
                             node: literal_member_name,
-                            value,
+                            value: value.into_boxed_str(),
                             big_int,
                         })
                     }
                     Some(b'x' | b'X') => {
                         return Ok(Self::Hexadecimal {
                             node: literal_member_name,
-                            value,
+                            value: value.into_boxed_str(),
                             big_int,
                         })
                     }
@@ -191,14 +191,14 @@ impl TryFrom<AnyJsObjectMember> for NumberLiteral {
                 if largest_digit < b'8' {
                     return Ok(Self::Octal {
                         node: literal_member_name,
-                        value,
+                        value: value.into_boxed_str(),
                         big_int,
                     });
                 }
 
                 Ok(Self::Decimal {
                     node: literal_member_name,
-                    value,
+                    value: value.into_boxed_str(),
                     big_int,
                     underscore,
                 })
@@ -229,13 +229,13 @@ impl NumberLiteral {
         }
     }
 
-    fn value(&self) -> &String {
+    fn value(&self) -> &str {
         match self {
-            Self::Decimal { value, .. } => value,
-            Self::Binary { value, .. } => value,
-            Self::FloatingPoint { value, .. } => value,
-            Self::Octal { value, .. } => value,
-            Self::Hexadecimal { value, .. } => value,
+            Self::Decimal { value, .. } => value.as_ref(),
+            Self::Binary { value, .. } => value.as_ref(),
+            Self::FloatingPoint { value, .. } => value.as_ref(),
+            Self::Octal { value, .. } => value.as_ref(),
+            Self::Hexadecimal { value, .. } => value.as_ref(),
         }
     }
 }
@@ -267,13 +267,12 @@ pub struct RuleState(WrongNumberLiteralName, NumberLiteral);
 impl Rule for UseSimpleNumberKeys {
     type Query = Ast<JsObjectExpression>;
     type State = RuleState;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let mut signals: Self::Signals = Vec::new();
+        let mut result = Vec::new();
         let node = ctx.query();
-
         for number_literal in node
             .members()
             .into_iter()
@@ -282,32 +281,31 @@ impl Rule for UseSimpleNumberKeys {
         {
             match number_literal {
                 NumberLiteral::Decimal { big_int: true, .. } => {
-                    signals.push(RuleState(WrongNumberLiteralName::BigInt, number_literal))
+                    result.push(RuleState(WrongNumberLiteralName::BigInt, number_literal))
                 }
                 NumberLiteral::FloatingPoint {
                     underscore: true, ..
                 }
                 | NumberLiteral::Decimal {
                     underscore: true, ..
-                } => signals.push(RuleState(
+                } => result.push(RuleState(
                     WrongNumberLiteralName::WithUnderscore,
                     number_literal,
                 )),
                 NumberLiteral::Binary { .. } => {
-                    signals.push(RuleState(WrongNumberLiteralName::Binary, number_literal))
+                    result.push(RuleState(WrongNumberLiteralName::Binary, number_literal))
                 }
-                NumberLiteral::Hexadecimal { .. } => signals.push(RuleState(
+                NumberLiteral::Hexadecimal { .. } => result.push(RuleState(
                     WrongNumberLiteralName::Hexadecimal,
                     number_literal,
                 )),
                 NumberLiteral::Octal { .. } => {
-                    signals.push(RuleState(WrongNumberLiteralName::Octal, number_literal))
+                    result.push(RuleState(WrongNumberLiteralName::Octal, number_literal))
                 }
                 _ => (),
             }
         }
-
-        signals
+        result.into_boxed_slice()
     }
 
     fn diagnostic(
@@ -355,7 +353,7 @@ impl Rule for UseSimpleNumberKeys {
         };
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             message,
             mutation,

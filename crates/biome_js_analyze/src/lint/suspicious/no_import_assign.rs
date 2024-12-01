@@ -1,6 +1,7 @@
 use crate::services::semantic::Semantic;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{AnyJsImportSpecifier, JsIdentifierAssignment, JsIdentifierBinding};
 
@@ -52,6 +53,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-import-assign")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -59,12 +61,12 @@ impl Rule for NoImportAssign {
     type Query = Semantic<AnyJsImportSpecifier>;
     /// The first element of the tuple is the invalid `JsIdentifierAssignment`, the second element of the tuple is the imported `JsIdentifierBinding`.
     type State = (JsIdentifierAssignment, JsIdentifierBinding);
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
-    fn run(ctx: &RuleContext<Self>) -> Vec<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let label_statement = ctx.query();
-        let mut invalid_assign_list = vec![];
+        let mut invalid_assign_list = Vec::new();
         let local_name_binding = match label_statement {
             // `import {x as xx} from 'y'`
             //          ^^^^^^^
@@ -102,6 +104,7 @@ impl Rule for NoImportAssign {
                 Some(invalid_assign_list)
             })
             .unwrap_or_default()
+            .into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

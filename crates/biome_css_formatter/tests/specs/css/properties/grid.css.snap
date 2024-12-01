@@ -17,6 +17,20 @@ info: css/properties/grid.css
 	grid-template-rows: [first header-start] 50px [main-start] 1fr [footer-start] 50px [last];
 }
 
+#grid {
+  grid-template-columns:
+		1fr /* first comment */
+		auto /* second comment */
+		2fr /* third comment */  
+}
+
+div {
+	grid-template-columns:
+		1fr /* first comment */
+		auto /* second comment */
+		40px /* third comment */
+		2fr /* fourth comment */
+}
 ```
 
 
@@ -44,6 +58,21 @@ Quote style: Double Quotes
 	display: grid;
 	grid-template-columns: [first nav-start] 150px [main-start] 1fr [last];
 	grid-template-rows: [first header-start] 50px [main-start] 1fr [footer-start] 50px [last];
+}
+
+#grid {
+	grid-template-columns:
+		1fr /* first comment */
+		auto /* second comment */
+		2fr; /* third comment */
+}
+
+div {
+	grid-template-columns:
+		1fr /* first comment */
+		auto /* second comment */
+		40px /* third comment */
+		2fr; /* fourth comment */
 }
 ```
 

@@ -36,7 +36,7 @@ biome_js_syntax = { path = "../biome_js_syntax" }
 insta           = { workspace = true }
 
 [features]
-serde = ["dep:serde", "schemars", "biome_rowan/serde"]
+serde = ["dep:serde", "dep:schemars", "biome_deserialize/serde", "biome_rowan/serde"]
 
 # cargo-workspaces metadata
 [package.metadata.workspaces]

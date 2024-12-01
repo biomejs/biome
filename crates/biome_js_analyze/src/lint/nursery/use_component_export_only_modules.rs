@@ -71,9 +71,8 @@ declare_lint_rule! {
     ///
     /// Some tools, such as [Vite], allow exporting constants along with components. By enabling the following, the rule will support the pattern.
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options":{
     ///         "allowConstantExport" : true
     ///     }
@@ -82,12 +81,11 @@ declare_lint_rule! {
     ///
     /// ### `allowExportNames`
     ///
-    /// If you use a framework that handles [Hot Mudule Replacement(HMR)] of some specific exports, you can use this option to avoid warning for them.
+    /// If you use a framework that handles [Hot Module Replacement(HMR)] of some specific exports, you can use this option to avoid warning for them.
     ///
     /// Example for [Remix](https://remix.run/docs/en/main/discussion/hot-module-replacement#supported-exports):
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options":{
     ///         "allowExportNames": ["json", "loader", "headers", "meta", "links", "scripts"]
     ///     }
@@ -95,7 +93,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// [`meta` in Remix]: https://remix.run/docs/en/main/route/meta
-    /// [Hot Mudule Replacement(HMR)]: https://remix.run/docs/en/main/discussion/hot-module-replacement
+    /// [Hot Module Replacement(HMR)]: https://remix.run/docs/en/main/discussion/hot-module-replacement
     /// [`React Fast Refresh`]: https://github.com/facebook/react/tree/main/packages/react-refresh
     /// [Remix]: https://remix.run/
     /// [Vite]: https://vitejs.dev/
@@ -119,8 +117,8 @@ pub struct UseComponentExportOnlyModulesOptions {
     #[serde(default)]
     allow_constant_export: bool,
     /// A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    allow_export_names: Vec<String>,
+    #[serde(default, skip_serializing_if = "<[_]>::is_empty")]
+    allow_export_names: Box<[Box<str>]>,
 }
 
 enum ErrorType {
@@ -139,13 +137,13 @@ const JSX_FILE_EXT: [&str; 2] = [".jsx", ".tsx"];
 impl Rule for UseComponentExportOnlyModules {
     type Query = Ast<JsModule>;
     type State = UseComponentExportOnlyModulesState;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = UseComponentExportOnlyModulesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         if let Some(file_name) = ctx.file_path().file_name().and_then(|x| x.to_str()) {
             if !JSX_FILE_EXT.iter().any(|ext| file_name.ends_with(ext)) {
-                return vec![];
+                return Vec::new().into_boxed_slice();
             }
         }
         let root = ctx.query();
@@ -175,12 +173,14 @@ impl Rule for UseComponentExportOnlyModules {
                         continue;
                     }
                     // Allow exporting specific names
-                    if let Some(exported_item_id) = &exported_item.identifier {
-                        if ctx
-                            .options()
-                            .allow_export_names
-                            .contains(&exported_item_id.text())
-                        {
+                    if let Some(exported_item_id) = exported_item
+                        .identifier
+                        .as_ref()
+                        .and_then(|x| x.name_token())
+                    {
+                        if ctx.options().allow_export_names.iter().any(|export_name| {
+                            export_name.as_ref() == exported_item_id.text_trimmed()
+                        }) {
                             continue;
                         }
                     }
@@ -208,7 +208,7 @@ impl Rule for UseComponentExportOnlyModules {
         }
 
         let local_component_ids = local_declaration_ids.iter().filter_map(|id| {
-            if Case::identify(&id.text(), false) == Case::Pascal {
+            if Case::identify(&id.to_trimmed_string(), false) == Case::Pascal {
                 Some(id.range())
             } else {
                 None
@@ -240,7 +240,8 @@ impl Rule for UseComponentExportOnlyModules {
                 },
                 range: id,
             })
-            .collect::<Vec<UseComponentExportOnlyModulesState>>()
+            .collect::<Vec<_>>()
+            .into_boxed_slice()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -291,7 +292,7 @@ fn is_exported_react_component(any_exported_item: &ExportedItem) -> bool {
         any_exported_item.exported.clone()
     {
         if let Ok(AnyJsExpression::JsIdentifierExpression(fn_name)) = f.callee() {
-            if !REACT_HOOKS.contains(&fn_name.text().as_str()) {
+            if !REACT_HOOKS.contains(&fn_name.to_trimmed_string().as_str()) {
                 return false;
             }
             let Ok(args) = f.arguments() else {
@@ -313,13 +314,13 @@ fn is_exported_react_component(any_exported_item: &ExportedItem) -> bool {
             let Ok(arg_name) = arg.name() else {
                 return false;
             };
-            return Case::identify(&arg_name.text(), false) == Case::Pascal;
+            return Case::identify(&arg_name.to_trimmed_string(), false) == Case::Pascal;
         }
     }
     let Some(exported_item_id) = any_exported_item.identifier.clone() else {
         return false;
     };
-    Case::identify(&exported_item_id.text(), false) == Case::Pascal
+    Case::identify(&exported_item_id.to_trimmed_string(), false) == Case::Pascal
         && match any_exported_item.exported.clone() {
             Some(exported) => !matches!(exported, AnyJsExported::TsEnumDeclaration(_)),
             None => true,

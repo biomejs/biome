@@ -1,0 +1,468 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```tsx
+// These are valid type arguments
+<A,>() => {};
+<const A,>() => {};
+<A extends B>() => {};
+<A=string>() => {};
+<A, B>() => {};
+<A extends B<C>>() => {};
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsArrowFunctionExpression {
+                async_token: missing (optional),
+                type_parameters: TsTypeParameters {
+                    l_angle_token: L_ANGLE@0..35 "<" [Comments("// These are valid ty ..."), Newline("\n")] [],
+                    items: TsTypeParameterList [
+                        TsTypeParameter {
+                            modifiers: TsTypeParameterModifierList [],
+                            name: TsTypeParameterName {
+                                ident_token: IDENT@35..36 "A" [] [],
+                            },
+                            constraint: missing (optional),
+                            default: missing (optional),
+                        },
+                        COMMA@36..37 "," [] [],
+                    ],
+                    r_angle_token: R_ANGLE@37..38 ">" [] [],
+                },
+                parameters: JsParameters {
+                    l_paren_token: L_PAREN@38..39 "(" [] [],
+                    items: JsParameterList [],
+                    r_paren_token: R_PAREN@39..41 ")" [] [Whitespace(" ")],
+                },
+                return_type_annotation: missing (optional),
+                fat_arrow_token: FAT_ARROW@41..44 "=>" [] [Whitespace(" ")],
+                body: JsFunctionBody {
+                    l_curly_token: L_CURLY@44..45 "{" [] [],
+                    directives: JsDirectiveList [],
+                    statements: JsStatementList [],
+                    r_curly_token: R_CURLY@45..46 "}" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@46..47 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsArrowFunctionExpression {
+                async_token: missing (optional),
+                type_parameters: TsTypeParameters {
+                    l_angle_token: L_ANGLE@47..49 "<" [Newline("\n")] [],
+                    items: TsTypeParameterList [
+                        TsTypeParameter {
+                            modifiers: TsTypeParameterModifierList [
+                                TsConstModifier {
+                                    modifier_token: CONST_KW@49..55 "const" [] [Whitespace(" ")],
+                                },
+                            ],
+                            name: TsTypeParameterName {
+                                ident_token: IDENT@55..56 "A" [] [],
+                            },
+                            constraint: missing (optional),
+                            default: missing (optional),
+                        },
+                        COMMA@56..57 "," [] [],
+                    ],
+                    r_angle_token: R_ANGLE@57..58 ">" [] [],
+                },
+                parameters: JsParameters {
+                    l_paren_token: L_PAREN@58..59 "(" [] [],
+                    items: JsParameterList [],
+                    r_paren_token: R_PAREN@59..61 ")" [] [Whitespace(" ")],
+                },
+                return_type_annotation: missing (optional),
+                fat_arrow_token: FAT_ARROW@61..64 "=>" [] [Whitespace(" ")],
+                body: JsFunctionBody {
+                    l_curly_token: L_CURLY@64..65 "{" [] [],
+                    directives: JsDirectiveList [],
+                    statements: JsStatementList [],
+                    r_curly_token: R_CURLY@65..66 "}" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@66..67 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsArrowFunctionExpression {
+                async_token: missing (optional),
+                type_parameters: TsTypeParameters {
+                    l_angle_token: L_ANGLE@67..69 "<" [Newline("\n")] [],
+                    items: TsTypeParameterList [
+                        TsTypeParameter {
+                            modifiers: TsTypeParameterModifierList [],
+                            name: TsTypeParameterName {
+                                ident_token: IDENT@69..71 "A" [] [Whitespace(" ")],
+                            },
+                            constraint: TsTypeConstraintClause {
+                                extends_token: EXTENDS_KW@71..79 "extends" [] [Whitespace(" ")],
+                                ty: TsReferenceType {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@79..80 "B" [] [],
+                                    },
+                                    type_arguments: missing (optional),
+                                },
+                            },
+                            default: missing (optional),
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@80..81 ">" [] [],
+                },
+                parameters: JsParameters {
+                    l_paren_token: L_PAREN@81..82 "(" [] [],
+                    items: JsParameterList [],
+                    r_paren_token: R_PAREN@82..84 ")" [] [Whitespace(" ")],
+                },
+                return_type_annotation: missing (optional),
+                fat_arrow_token: FAT_ARROW@84..87 "=>" [] [Whitespace(" ")],
+                body: JsFunctionBody {
+                    l_curly_token: L_CURLY@87..88 "{" [] [],
+                    directives: JsDirectiveList [],
+                    statements: JsStatementList [],
+                    r_curly_token: R_CURLY@88..89 "}" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@89..90 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsArrowFunctionExpression {
+                async_token: missing (optional),
+                type_parameters: TsTypeParameters {
+                    l_angle_token: L_ANGLE@90..92 "<" [Newline("\n")] [],
+                    items: TsTypeParameterList [
+                        TsTypeParameter {
+                            modifiers: TsTypeParameterModifierList [],
+                            name: TsTypeParameterName {
+                                ident_token: IDENT@92..93 "A" [] [],
+                            },
+                            constraint: missing (optional),
+                            default: TsDefaultTypeClause {
+                                eq_token: EQ@93..94 "=" [] [],
+                                ty: TsStringType {
+                                    string_token: STRING_KW@94..100 "string" [] [],
+                                },
+                            },
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@100..101 ">" [] [],
+                },
+                parameters: JsParameters {
+                    l_paren_token: L_PAREN@101..102 "(" [] [],
+                    items: JsParameterList [],
+                    r_paren_token: R_PAREN@102..104 ")" [] [Whitespace(" ")],
+                },
+                return_type_annotation: missing (optional),
+                fat_arrow_token: FAT_ARROW@104..107 "=>" [] [Whitespace(" ")],
+                body: JsFunctionBody {
+                    l_curly_token: L_CURLY@107..108 "{" [] [],
+                    directives: JsDirectiveList [],
+                    statements: JsStatementList [],
+                    r_curly_token: R_CURLY@108..109 "}" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@109..110 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsArrowFunctionExpression {
+                async_token: missing (optional),
+                type_parameters: TsTypeParameters {
+                    l_angle_token: L_ANGLE@110..112 "<" [Newline("\n")] [],
+                    items: TsTypeParameterList [
+                        TsTypeParameter {
+                            modifiers: TsTypeParameterModifierList [],
+                            name: TsTypeParameterName {
+                                ident_token: IDENT@112..113 "A" [] [],
+                            },
+                            constraint: missing (optional),
+                            default: missing (optional),
+                        },
+                        COMMA@113..115 "," [] [Whitespace(" ")],
+                        TsTypeParameter {
+                            modifiers: TsTypeParameterModifierList [],
+                            name: TsTypeParameterName {
+                                ident_token: IDENT@115..116 "B" [] [],
+                            },
+                            constraint: missing (optional),
+                            default: missing (optional),
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@116..117 ">" [] [],
+                },
+                parameters: JsParameters {
+                    l_paren_token: L_PAREN@117..118 "(" [] [],
+                    items: JsParameterList [],
+                    r_paren_token: R_PAREN@118..120 ")" [] [Whitespace(" ")],
+                },
+                return_type_annotation: missing (optional),
+                fat_arrow_token: FAT_ARROW@120..123 "=>" [] [Whitespace(" ")],
+                body: JsFunctionBody {
+                    l_curly_token: L_CURLY@123..124 "{" [] [],
+                    directives: JsDirectiveList [],
+                    statements: JsStatementList [],
+                    r_curly_token: R_CURLY@124..125 "}" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@125..126 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsArrowFunctionExpression {
+                async_token: missing (optional),
+                type_parameters: TsTypeParameters {
+                    l_angle_token: L_ANGLE@126..128 "<" [Newline("\n")] [],
+                    items: TsTypeParameterList [
+                        TsTypeParameter {
+                            modifiers: TsTypeParameterModifierList [],
+                            name: TsTypeParameterName {
+                                ident_token: IDENT@128..130 "A" [] [Whitespace(" ")],
+                            },
+                            constraint: TsTypeConstraintClause {
+                                extends_token: EXTENDS_KW@130..138 "extends" [] [Whitespace(" ")],
+                                ty: TsReferenceType {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@138..139 "B" [] [],
+                                    },
+                                    type_arguments: TsTypeArguments {
+                                        l_angle_token: L_ANGLE@139..140 "<" [] [],
+                                        ts_type_argument_list: TsTypeArgumentList [
+                                            TsReferenceType {
+                                                name: JsReferenceIdentifier {
+                                                    value_token: IDENT@140..141 "C" [] [],
+                                                },
+                                                type_arguments: missing (optional),
+                                            },
+                                        ],
+                                        r_angle_token: R_ANGLE@141..142 ">" [] [],
+                                    },
+                                },
+                            },
+                            default: missing (optional),
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@142..143 ">" [] [],
+                },
+                parameters: JsParameters {
+                    l_paren_token: L_PAREN@143..144 "(" [] [],
+                    items: JsParameterList [],
+                    r_paren_token: R_PAREN@144..146 ")" [] [Whitespace(" ")],
+                },
+                return_type_annotation: missing (optional),
+                fat_arrow_token: FAT_ARROW@146..149 "=>" [] [Whitespace(" ")],
+                body: JsFunctionBody {
+                    l_curly_token: L_CURLY@149..150 "{" [] [],
+                    directives: JsDirectiveList [],
+                    statements: JsStatementList [],
+                    r_curly_token: R_CURLY@150..151 "}" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@151..152 ";" [] [],
+        },
+    ],
+    eof_token: EOF@152..153 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..153
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..152
+    0: JS_EXPRESSION_STATEMENT@0..47
+      0: JS_ARROW_FUNCTION_EXPRESSION@0..46
+        0: (empty)
+        1: TS_TYPE_PARAMETERS@0..38
+          0: L_ANGLE@0..35 "<" [Comments("// These are valid ty ..."), Newline("\n")] []
+          1: TS_TYPE_PARAMETER_LIST@35..37
+            0: TS_TYPE_PARAMETER@35..36
+              0: TS_TYPE_PARAMETER_MODIFIER_LIST@35..35
+              1: TS_TYPE_PARAMETER_NAME@35..36
+                0: IDENT@35..36 "A" [] []
+              2: (empty)
+              3: (empty)
+            1: COMMA@36..37 "," [] []
+          2: R_ANGLE@37..38 ">" [] []
+        2: JS_PARAMETERS@38..41
+          0: L_PAREN@38..39 "(" [] []
+          1: JS_PARAMETER_LIST@39..39
+          2: R_PAREN@39..41 ")" [] [Whitespace(" ")]
+        3: (empty)
+        4: FAT_ARROW@41..44 "=>" [] [Whitespace(" ")]
+        5: JS_FUNCTION_BODY@44..46
+          0: L_CURLY@44..45 "{" [] []
+          1: JS_DIRECTIVE_LIST@45..45
+          2: JS_STATEMENT_LIST@45..45
+          3: R_CURLY@45..46 "}" [] []
+      1: SEMICOLON@46..47 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@47..67
+      0: JS_ARROW_FUNCTION_EXPRESSION@47..66
+        0: (empty)
+        1: TS_TYPE_PARAMETERS@47..58
+          0: L_ANGLE@47..49 "<" [Newline("\n")] []
+          1: TS_TYPE_PARAMETER_LIST@49..57
+            0: TS_TYPE_PARAMETER@49..56
+              0: TS_TYPE_PARAMETER_MODIFIER_LIST@49..55
+                0: TS_CONST_MODIFIER@49..55
+                  0: CONST_KW@49..55 "const" [] [Whitespace(" ")]
+              1: TS_TYPE_PARAMETER_NAME@55..56
+                0: IDENT@55..56 "A" [] []
+              2: (empty)
+              3: (empty)
+            1: COMMA@56..57 "," [] []
+          2: R_ANGLE@57..58 ">" [] []
+        2: JS_PARAMETERS@58..61
+          0: L_PAREN@58..59 "(" [] []
+          1: JS_PARAMETER_LIST@59..59
+          2: R_PAREN@59..61 ")" [] [Whitespace(" ")]
+        3: (empty)
+        4: FAT_ARROW@61..64 "=>" [] [Whitespace(" ")]
+        5: JS_FUNCTION_BODY@64..66
+          0: L_CURLY@64..65 "{" [] []
+          1: JS_DIRECTIVE_LIST@65..65
+          2: JS_STATEMENT_LIST@65..65
+          3: R_CURLY@65..66 "}" [] []
+      1: SEMICOLON@66..67 ";" [] []
+    2: JS_EXPRESSION_STATEMENT@67..90
+      0: JS_ARROW_FUNCTION_EXPRESSION@67..89
+        0: (empty)
+        1: TS_TYPE_PARAMETERS@67..81
+          0: L_ANGLE@67..69 "<" [Newline("\n")] []
+          1: TS_TYPE_PARAMETER_LIST@69..80
+            0: TS_TYPE_PARAMETER@69..80
+              0: TS_TYPE_PARAMETER_MODIFIER_LIST@69..69
+              1: TS_TYPE_PARAMETER_NAME@69..71
+                0: IDENT@69..71 "A" [] [Whitespace(" ")]
+              2: TS_TYPE_CONSTRAINT_CLAUSE@71..80
+                0: EXTENDS_KW@71..79 "extends" [] [Whitespace(" ")]
+                1: TS_REFERENCE_TYPE@79..80
+                  0: JS_REFERENCE_IDENTIFIER@79..80
+                    0: IDENT@79..80 "B" [] []
+                  1: (empty)
+              3: (empty)
+          2: R_ANGLE@80..81 ">" [] []
+        2: JS_PARAMETERS@81..84
+          0: L_PAREN@81..82 "(" [] []
+          1: JS_PARAMETER_LIST@82..82
+          2: R_PAREN@82..84 ")" [] [Whitespace(" ")]
+        3: (empty)
+        4: FAT_ARROW@84..87 "=>" [] [Whitespace(" ")]
+        5: JS_FUNCTION_BODY@87..89
+          0: L_CURLY@87..88 "{" [] []
+          1: JS_DIRECTIVE_LIST@88..88
+          2: JS_STATEMENT_LIST@88..88
+          3: R_CURLY@88..89 "}" [] []
+      1: SEMICOLON@89..90 ";" [] []
+    3: JS_EXPRESSION_STATEMENT@90..110
+      0: JS_ARROW_FUNCTION_EXPRESSION@90..109
+        0: (empty)
+        1: TS_TYPE_PARAMETERS@90..101
+          0: L_ANGLE@90..92 "<" [Newline("\n")] []
+          1: TS_TYPE_PARAMETER_LIST@92..100
+            0: TS_TYPE_PARAMETER@92..100
+              0: TS_TYPE_PARAMETER_MODIFIER_LIST@92..92
+              1: TS_TYPE_PARAMETER_NAME@92..93
+                0: IDENT@92..93 "A" [] []
+              2: (empty)
+              3: TS_DEFAULT_TYPE_CLAUSE@93..100
+                0: EQ@93..94 "=" [] []
+                1: TS_STRING_TYPE@94..100
+                  0: STRING_KW@94..100 "string" [] []
+          2: R_ANGLE@100..101 ">" [] []
+        2: JS_PARAMETERS@101..104
+          0: L_PAREN@101..102 "(" [] []
+          1: JS_PARAMETER_LIST@102..102
+          2: R_PAREN@102..104 ")" [] [Whitespace(" ")]
+        3: (empty)
+        4: FAT_ARROW@104..107 "=>" [] [Whitespace(" ")]
+        5: JS_FUNCTION_BODY@107..109
+          0: L_CURLY@107..108 "{" [] []
+          1: JS_DIRECTIVE_LIST@108..108
+          2: JS_STATEMENT_LIST@108..108
+          3: R_CURLY@108..109 "}" [] []
+      1: SEMICOLON@109..110 ";" [] []
+    4: JS_EXPRESSION_STATEMENT@110..126
+      0: JS_ARROW_FUNCTION_EXPRESSION@110..125
+        0: (empty)
+        1: TS_TYPE_PARAMETERS@110..117
+          0: L_ANGLE@110..112 "<" [Newline("\n")] []
+          1: TS_TYPE_PARAMETER_LIST@112..116
+            0: TS_TYPE_PARAMETER@112..113
+              0: TS_TYPE_PARAMETER_MODIFIER_LIST@112..112
+              1: TS_TYPE_PARAMETER_NAME@112..113
+                0: IDENT@112..113 "A" [] []
+              2: (empty)
+              3: (empty)
+            1: COMMA@113..115 "," [] [Whitespace(" ")]
+            2: TS_TYPE_PARAMETER@115..116
+              0: TS_TYPE_PARAMETER_MODIFIER_LIST@115..115
+              1: TS_TYPE_PARAMETER_NAME@115..116
+                0: IDENT@115..116 "B" [] []
+              2: (empty)
+              3: (empty)
+          2: R_ANGLE@116..117 ">" [] []
+        2: JS_PARAMETERS@117..120
+          0: L_PAREN@117..118 "(" [] []
+          1: JS_PARAMETER_LIST@118..118
+          2: R_PAREN@118..120 ")" [] [Whitespace(" ")]
+        3: (empty)
+        4: FAT_ARROW@120..123 "=>" [] [Whitespace(" ")]
+        5: JS_FUNCTION_BODY@123..125
+          0: L_CURLY@123..124 "{" [] []
+          1: JS_DIRECTIVE_LIST@124..124
+          2: JS_STATEMENT_LIST@124..124
+          3: R_CURLY@124..125 "}" [] []
+      1: SEMICOLON@125..126 ";" [] []
+    5: JS_EXPRESSION_STATEMENT@126..152
+      0: JS_ARROW_FUNCTION_EXPRESSION@126..151
+        0: (empty)
+        1: TS_TYPE_PARAMETERS@126..143
+          0: L_ANGLE@126..128 "<" [Newline("\n")] []
+          1: TS_TYPE_PARAMETER_LIST@128..142
+            0: TS_TYPE_PARAMETER@128..142
+              0: TS_TYPE_PARAMETER_MODIFIER_LIST@128..128
+              1: TS_TYPE_PARAMETER_NAME@128..130
+                0: IDENT@128..130 "A" [] [Whitespace(" ")]
+              2: TS_TYPE_CONSTRAINT_CLAUSE@130..142
+                0: EXTENDS_KW@130..138 "extends" [] [Whitespace(" ")]
+                1: TS_REFERENCE_TYPE@138..142
+                  0: JS_REFERENCE_IDENTIFIER@138..139
+                    0: IDENT@138..139 "B" [] []
+                  1: TS_TYPE_ARGUMENTS@139..142
+                    0: L_ANGLE@139..140 "<" [] []
+                    1: TS_TYPE_ARGUMENT_LIST@140..141
+                      0: TS_REFERENCE_TYPE@140..141
+                        0: JS_REFERENCE_IDENTIFIER@140..141
+                          0: IDENT@140..141 "C" [] []
+                        1: (empty)
+                    2: R_ANGLE@141..142 ">" [] []
+              3: (empty)
+          2: R_ANGLE@142..143 ">" [] []
+        2: JS_PARAMETERS@143..146
+          0: L_PAREN@143..144 "(" [] []
+          1: JS_PARAMETER_LIST@144..144
+          2: R_PAREN@144..146 ")" [] [Whitespace(" ")]
+        3: (empty)
+        4: FAT_ARROW@146..149 "=>" [] [Whitespace(" ")]
+        5: JS_FUNCTION_BODY@149..151
+          0: L_CURLY@149..150 "{" [] []
+          1: JS_DIRECTIVE_LIST@150..150
+          2: JS_STATEMENT_LIST@150..150
+          3: R_CURLY@150..151 "}" [] []
+      1: SEMICOLON@151..152 ";" [] []
+  4: EOF@152..153 "" [Newline("\n")] []
+
+```

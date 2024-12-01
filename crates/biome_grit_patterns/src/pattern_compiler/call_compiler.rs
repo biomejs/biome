@@ -1,6 +1,4 @@
-use super::{
-    compilation_context::NodeCompilationContext, log_compiler::LogCompiler, PatternCompiler,
-};
+use super::{compilation_context::NodeCompilationContext, PatternCompiler};
 use crate::{grit_context::GritQueryContext, CompileError, NodeLikeArgumentError};
 use biome_grit_syntax::{
     AnyGritMaybeNamedArg, AnyGritPattern, GritNamedArgList, GritNodeLike, GritSyntaxKind,
@@ -20,11 +18,6 @@ pub(super) fn call_pattern_from_node_with_name(
     context: &mut NodeCompilationContext,
     is_rhs: bool,
 ) -> Result<Pattern<GritQueryContext>, CompileError> {
-    if name == "log" {
-        return LogCompiler::from_named_args(node.named_args(), context)
-            .map(|log| Pattern::Log(Box::new(log)));
-    }
-
     let named_args = named_args_from_node(node, &name, context)?;
     let mut args = named_args_to_map(named_args, context)?;
     let named_args_count = node.named_args().into_iter().count();
@@ -53,21 +46,14 @@ pub(super) fn call_pattern_from_node_with_name(
             .map_or(Pattern::Underscore, |p| p.1);
         let body = args.remove_entry("$body").map_or(Pattern::Top, |p| p.1);
         Ok(Pattern::File(Box::new(FilePattern::new(name, body))))
-    } else if let Some((index, built_in)) = context
-        .compilation
-        .built_ins
-        .get_built_ins()
-        .iter()
-        .enumerate()
-        .find(|(_, built_in)| built_in.name == name)
-    {
-        if !is_rhs {
+    } else if let Some((index, built_in)) = context.compilation.built_ins.get_with_index(&name) {
+        if !is_rhs || !built_in.position.is_pattern() {
             return Err(CompileError::UnexpectedBuiltinCall(name));
         }
 
         let params = &built_in.params;
         Ok(Pattern::CallBuiltIn(Box::new(call_built_in_from_args(
-            args, params, index, lang,
+            args, params, index, lang, &name,
         )?)))
     } else if let Some(info) = context.compilation.function_definition_info.get(&name) {
         let args = match_args_to_params(&name, args, &collect_params(&info.parameters), lang)?;
@@ -87,15 +73,13 @@ fn call_built_in_from_args(
     params: &[&str],
     index: usize,
     lang: &impl Language,
+    name: &str,
 ) -> Result<CallBuiltIn<GritQueryContext>, CompileError> {
     let mut pattern_params = Vec::with_capacity(args.len());
     for param in params.iter() {
-        match args.remove(&(lang.metavariable_prefix().to_owned() + param)) {
-            Some(p) => pattern_params.push(Some(p)),
-            None => pattern_params.push(None),
-        }
+        pattern_params.push(args.remove(&(lang.metavariable_prefix().to_owned() + param)));
     }
-    Ok(CallBuiltIn::new(index, pattern_params))
+    Ok(CallBuiltIn::new(index, name, pattern_params))
 }
 
 pub(super) fn collect_params(parameters: &[(String, ByteRange)]) -> Vec<String> {
@@ -133,7 +117,7 @@ pub(super) fn named_args_from_node(
     let expected_params = if let Some(built_in) = context
         .compilation
         .built_ins
-        .get_built_ins()
+        .as_slice()
         .iter()
         .find(|built_in| built_in.name == name)
     {
@@ -195,7 +179,7 @@ pub(super) fn node_to_args_pairs(
                     })?,
                 };
 
-                let name = var.text();
+                let name = var.to_trimmed_string();
                 let name = name
                     .strip_prefix(lang.metavariable_prefix())
                     .filter(|stripped| {
@@ -228,7 +212,7 @@ pub(super) fn node_to_args_pairs(
             Ok(AnyGritMaybeNamedArg::GritNamedArg(named_arg)) => {
                 let name = named_arg.name()?;
                 let pattern = named_arg.pattern()?;
-                Ok((name.text(), pattern))
+                Ok((name.to_trimmed_string(), pattern))
             }
             Ok(AnyGritMaybeNamedArg::GritBogusNamedArg(_)) => Err(CompileError::UnexpectedKind(
                 GritSyntaxKind::GRIT_BOGUS_NAMED_ARG.into(),

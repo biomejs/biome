@@ -442,46 +442,6 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritCurlyPattern {
         )
     }
 }
-impl FormatRule<biome_grit_syntax::GritCurlyPredicateList>
-    for crate::grit::predicates::curly_predicate_list::FormatGritCurlyPredicateList
-{
-    type Context = GritFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_grit_syntax::GritCurlyPredicateList,
-        f: &mut GritFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_grit_syntax::GritCurlyPredicateList>::fmt(self, node, f)
-    }
-}
-impl AsFormat<GritFormatContext> for biome_grit_syntax::GritCurlyPredicateList {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_grit_syntax::GritCurlyPredicateList,
-        crate::grit::predicates::curly_predicate_list::FormatGritCurlyPredicateList,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule::new(
-            self,
-            crate::grit::predicates::curly_predicate_list::FormatGritCurlyPredicateList::default(),
-        )
-    }
-}
-impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritCurlyPredicateList {
-    type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritCurlyPredicateList,
-        crate::grit::predicates::curly_predicate_list::FormatGritCurlyPredicateList,
-    >;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule::new(
-            self,
-            crate::grit::predicates::curly_predicate_list::FormatGritCurlyPredicateList::default(),
-        )
-    }
-}
 impl FormatRule<biome_grit_syntax::GritDivOperation>
     for crate::grit::patterns::div_operation::FormatGritDivOperation
 {
@@ -1644,46 +1604,6 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternAny {
         )
     }
 }
-impl FormatRule<biome_grit_syntax::GritPatternArgList>
-    for crate::grit::patterns::pattern_arg_list::FormatGritPatternArgList
-{
-    type Context = GritFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_grit_syntax::GritPatternArgList,
-        f: &mut GritFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_grit_syntax::GritPatternArgList>::fmt(self, node, f)
-    }
-}
-impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternArgList {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_grit_syntax::GritPatternArgList,
-        crate::grit::patterns::pattern_arg_list::FormatGritPatternArgList,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule::new(
-            self,
-            crate::grit::patterns::pattern_arg_list::FormatGritPatternArgList::default(),
-        )
-    }
-}
-impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternArgList {
-    type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternArgList,
-        crate::grit::patterns::pattern_arg_list::FormatGritPatternArgList,
-    >;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule::new(
-            self,
-            crate::grit::patterns::pattern_arg_list::FormatGritPatternArgList::default(),
-        )
-    }
-}
 impl FormatRule<biome_grit_syntax::GritPatternAs>
     for crate::grit::patterns::pattern_as::FormatGritPatternAs
 {
@@ -1802,40 +1722,6 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternContains {
             self,
             crate::grit::patterns::pattern_contains::FormatGritPatternContains::default(),
         )
-    }
-}
-impl FormatRule<biome_grit_syntax::GritPatternContainsUntilClause>
-    for crate::grit::patterns::pattern_contains_until_clause::FormatGritPatternContainsUntilClause
-{
-    type Context = GritFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_grit_syntax::GritPatternContainsUntilClause,
-        f: &mut GritFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_grit_syntax::GritPatternContainsUntilClause>::fmt(self, node, f)
-    }
-}
-impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternContainsUntilClause {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_grit_syntax::GritPatternContainsUntilClause,
-        crate::grit::patterns::pattern_contains_until_clause::FormatGritPatternContainsUntilClause,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule :: new (self , crate :: grit :: patterns :: pattern_contains_until_clause :: FormatGritPatternContainsUntilClause :: default ())
-    }
-}
-impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternContainsUntilClause {
-    type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternContainsUntilClause,
-        crate::grit::patterns::pattern_contains_until_clause::FormatGritPatternContainsUntilClause,
-    >;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule :: new (self , crate :: grit :: patterns :: pattern_contains_until_clause :: FormatGritPatternContainsUntilClause :: default ())
     }
 }
 impl FormatRule<biome_grit_syntax::GritPatternDefinition>
@@ -2232,6 +2118,46 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternOrElse {
         )
     }
 }
+impl FormatRule<biome_grit_syntax::GritPatternUntilClause>
+    for crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause
+{
+    type Context = GritFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_grit_syntax::GritPatternUntilClause,
+        f: &mut GritFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_grit_syntax::GritPatternUntilClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternUntilClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_grit_syntax::GritPatternUntilClause,
+        crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause::default(),
+        )
+    }
+}
+impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternUntilClause {
+    type Format = FormatOwnedWithRule<
+        biome_grit_syntax::GritPatternUntilClause,
+        crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause::default(),
+        )
+    }
+}
 impl FormatRule<biome_grit_syntax::GritPatternWhere>
     for crate::grit::patterns::pattern_where::FormatGritPatternWhere
 {
@@ -2469,6 +2395,46 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateCall {
         FormatOwnedWithRule::new(
             self,
             crate::grit::predicates::predicate_call::FormatGritPredicateCall::default(),
+        )
+    }
+}
+impl FormatRule<biome_grit_syntax::GritPredicateCurly>
+    for crate::grit::predicates::predicate_curly::FormatGritPredicateCurly
+{
+    type Context = GritFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_grit_syntax::GritPredicateCurly,
+        f: &mut GritFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_grit_syntax::GritPredicateCurly>::fmt(self, node, f)
+    }
+}
+impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPredicateCurly {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_grit_syntax::GritPredicateCurly,
+        crate::grit::predicates::predicate_curly::FormatGritPredicateCurly,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::grit::predicates::predicate_curly::FormatGritPredicateCurly::default(),
+        )
+    }
+}
+impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPredicateCurly {
+    type Format = FormatOwnedWithRule<
+        biome_grit_syntax::GritPredicateCurly,
+        crate::grit::predicates::predicate_curly::FormatGritPredicateCurly,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::grit::predicates::predicate_curly::FormatGritPredicateCurly::default(),
         )
     }
 }

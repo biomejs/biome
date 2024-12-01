@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -35,7 +36,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        4 │ + → → "rules":·{
        5 │ + → → → "recommended":·false,
        6 │ + → → → "complexity":·{·"useLiteralKeys":·"error"·},
-       7 │ + → → → "suspicious":·{·"noDuplicateClassMembers":·"off"·}
+       7 │ + → → → "suspicious":·{·"noDuplicateClassMembers":·"error"·}
        8 │ + → → }
        9 │ + → }
       10 │ + }

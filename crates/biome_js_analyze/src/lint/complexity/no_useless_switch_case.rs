@@ -1,8 +1,7 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsSwitchClause, JsCaseClause, JsDefaultClause};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, Direction};
 
@@ -64,6 +63,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-useless-switch-case")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -71,7 +71,7 @@ declare_lint_rule! {
 impl Rule for NoUselessSwitchCase {
     type Query = Ast<JsDefaultClause>;
     type State = JsCaseClause;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -107,10 +107,11 @@ impl Rule for NoUselessSwitchCase {
                     .filter_map(JsCaseClause::cast)
                     .find(|case| !case.consequent().is_empty()),
             )
-            .collect()
+            .collect::<Vec<_>>()
         } else {
-            it.collect()
+            it.collect::<Vec<_>>()
         }
+        .into_boxed_slice()
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, useless_case: &Self::State) -> Option<RuleDiagnostic> {
@@ -154,7 +155,7 @@ impl Rule for NoUselessSwitchCase {
             mutation.remove_node(useless_case);
         }
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {"Remove the useless "<Emphasis>"case"</Emphasis>"."}.to_owned(),
             mutation,

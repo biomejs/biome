@@ -8,8 +8,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
-    DeserializationVisitor, Text,
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
+    DeserializationDiagnostic, DeserializationVisitor, Text,
 };
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
@@ -90,12 +90,15 @@ impl AnyJsFunctionOrMethod {
 
     fn name(&self) -> Option<String> {
         match self {
-            AnyJsFunctionOrMethod::AnyJsFunction(function) => {
-                function.binding().as_ref().map(AnyJsBinding::text)
-            }
-            AnyJsFunctionOrMethod::JsMethodObjectMember(method) => {
-                method.name().ok().as_ref().map(AnyJsObjectMemberName::text)
-            }
+            AnyJsFunctionOrMethod::AnyJsFunction(function) => function
+                .binding()
+                .as_ref()
+                .map(AnyJsBinding::to_trimmed_string),
+            AnyJsFunctionOrMethod::JsMethodObjectMember(method) => method
+                .name()
+                .ok()
+                .as_ref()
+                .map(AnyJsObjectMemberName::to_trimmed_string),
         }
     }
 }
@@ -103,7 +106,7 @@ impl AnyJsFunctionOrMethod {
 pub enum Suggestion {
     None {
         hook_name_range: TextRange,
-        path: Vec<TextRange>,
+        path: Box<[TextRange]>,
         early_return: Option<TextRange>,
         is_nested: bool,
     },
@@ -233,12 +236,12 @@ fn is_nested_function_inside_component_or_hook(function: &AnyJsFunctionOrMethod)
     })
 }
 
-/// Model for tracking which function calls are preceeded by an early return.
+/// Model for tracking which function calls are preceded by an early return.
 ///
 /// The keys in the model are call sites and each value is the text range of an
-/// early return that preceeds such call site. Call sites without preceeding
+/// early return that precedes such call site. Call sites without preceding
 /// early returns are not included in the model. For call sites that are
-/// preceeded by multiple early returns, the return statement that we map to is
+/// preceded by multiple early returns, the return statement that we map to is
 /// implementation-defined.
 #[derive(Clone, Default)]
 struct EarlyReturnsModel(FxHashMap<JsCallExpression, TextRange>);
@@ -291,7 +294,7 @@ impl Visitor for EarlyReturnDetectionVisitor {
 
                 if let Some(entry) = self.stack.last_mut() {
                     if JsReturnStatement::can_cast(node.kind()) {
-                        entry.early_return = Some(node.text_range());
+                        entry.early_return = Some(node.text_range_with_trivia());
                     } else if let Some(call) = JsCallExpression::cast_ref(node) {
                         if let Some(early_return) = entry.early_return {
                             self.early_returns.insert(call.clone(), early_return);
@@ -428,7 +431,7 @@ impl Rule for UseHookAtTopLevel {
         let mut calls = vec![root];
 
         while let Some(CallPath { call, path }) = calls.pop() {
-            let range = call.syntax().text_range();
+            let range = call.syntax().text_range_with_trivia();
 
             let mut path = path.clone();
             path.push(range);
@@ -440,7 +443,7 @@ impl Rule for UseHookAtTopLevel {
                     // hooks to be called from the top-level.
                     return Some(Suggestion::None {
                         hook_name_range: get_hook_name_range()?,
-                        path,
+                        path: path.into_boxed_slice(),
                         early_return: None,
                         is_nested: true,
                     });
@@ -449,7 +452,7 @@ impl Rule for UseHookAtTopLevel {
                 if let Some(early_return) = early_returns.get(&call) {
                     return Some(Suggestion::None {
                         hook_name_range: get_hook_name_range()?,
-                        path,
+                        path: path.into_boxed_slice(),
                         early_return: Some(*early_return),
                         is_nested: false,
                     });
@@ -468,7 +471,7 @@ impl Rule for UseHookAtTopLevel {
             } else {
                 return Some(Suggestion::None {
                     hook_name_range: get_hook_name_range()?,
-                    path,
+                    path: path.into_boxed_slice(),
                     early_return: None,
                     is_nested: false,
                 });
@@ -558,11 +561,11 @@ pub struct DeprecatedHooksOptions {}
 
 impl Deserializable for DeprecatedHooksOptions {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(DeprecatedHooksOptionsVisitor, name, diagnostics)
+        value.deserialize(ctx, DeprecatedHooksOptionsVisitor, name)
     }
 }
 
@@ -575,19 +578,19 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
 
     fn visit_map(
         self,
+        ctx: &mut impl DeserializationContext,
         members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         _range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["hooks"];
         for (key, value) in members.flatten() {
-            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+            let Some(key_text) = Text::deserialize(ctx, &key, "") else {
                 continue;
             };
             match key_text.text() {
                 "hooks" => {
-                    diagnostics.push(
+                    ctx.report(
                         DeserializationDiagnostic::new_deprecated(
                             key_text.text(),
                             value.range()
@@ -597,7 +600,7 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
                         })
                     );
                 }
-                text => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                text => ctx.report(DeserializationDiagnostic::new_unknown_key(
                     text,
                     key.range(),
                     ALLOWED_KEYS,

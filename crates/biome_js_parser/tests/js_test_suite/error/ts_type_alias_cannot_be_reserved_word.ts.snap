@@ -1,0 +1,141 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+type undefined = any;
+type any = any;
+type string = any;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsBogusStatement {
+            items: [
+                TYPE_KW@0..5 "type" [] [Whitespace(" ")],
+                JsBogus {
+                    items: [
+                        IDENT@5..15 "undefined" [] [Whitespace(" ")],
+                    ],
+                },
+                EQ@15..17 "=" [] [Whitespace(" ")],
+                TsAnyType {
+                    any_token: ANY_KW@17..20 "any" [] [],
+                },
+                SEMICOLON@20..21 ";" [] [],
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                TYPE_KW@21..27 "type" [Newline("\n")] [Whitespace(" ")],
+                JsBogus {
+                    items: [
+                        IDENT@27..31 "any" [] [Whitespace(" ")],
+                    ],
+                },
+                EQ@31..33 "=" [] [Whitespace(" ")],
+                TsAnyType {
+                    any_token: ANY_KW@33..36 "any" [] [],
+                },
+                SEMICOLON@36..37 ";" [] [],
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                TYPE_KW@37..43 "type" [Newline("\n")] [Whitespace(" ")],
+                JsBogus {
+                    items: [
+                        IDENT@43..50 "string" [] [Whitespace(" ")],
+                    ],
+                },
+                EQ@50..52 "=" [] [Whitespace(" ")],
+                TsAnyType {
+                    any_token: ANY_KW@52..55 "any" [] [],
+                },
+                SEMICOLON@55..56 ";" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@56..57 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..57
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..56
+    0: JS_BOGUS_STATEMENT@0..21
+      0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
+      1: JS_BOGUS@5..15
+        0: IDENT@5..15 "undefined" [] [Whitespace(" ")]
+      2: EQ@15..17 "=" [] [Whitespace(" ")]
+      3: TS_ANY_TYPE@17..20
+        0: ANY_KW@17..20 "any" [] []
+      4: SEMICOLON@20..21 ";" [] []
+    1: JS_BOGUS_STATEMENT@21..37
+      0: TYPE_KW@21..27 "type" [Newline("\n")] [Whitespace(" ")]
+      1: JS_BOGUS@27..31
+        0: IDENT@27..31 "any" [] [Whitespace(" ")]
+      2: EQ@31..33 "=" [] [Whitespace(" ")]
+      3: TS_ANY_TYPE@33..36
+        0: ANY_KW@33..36 "any" [] []
+      4: SEMICOLON@36..37 ";" [] []
+    2: JS_BOGUS_STATEMENT@37..56
+      0: TYPE_KW@37..43 "type" [Newline("\n")] [Whitespace(" ")]
+      1: JS_BOGUS@43..50
+        0: IDENT@43..50 "string" [] [Whitespace(" ")]
+      2: EQ@50..52 "=" [] [Whitespace(" ")]
+      3: TS_ANY_TYPE@52..55
+        0: ANY_KW@52..55 "any" [] []
+      4: SEMICOLON@55..56 ";" [] []
+  4: EOF@56..57 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_type_alias_cannot_be_reserved_word.ts:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Type alias cannot be undefined
+  
+  > 1 │ type undefined = any;
+      │      ^^^^^^^^^
+    2 │ type any = any;
+    3 │ type string = any;
+  
+ts_type_alias_cannot_be_reserved_word.ts:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Type alias cannot be any
+  
+    1 │ type undefined = any;
+  > 2 │ type any = any;
+      │      ^^^
+    3 │ type string = any;
+    4 │ 
+  
+ts_type_alias_cannot_be_reserved_word.ts:3:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Type alias cannot be string
+  
+    1 │ type undefined = any;
+    2 │ type any = any;
+  > 3 │ type string = any;
+      │      ^^^^^^
+    4 │ 
+  
+```

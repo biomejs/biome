@@ -1,4 +1,7 @@
-use crate::{prelude::*, utils::string_utils::FormatLiteralStringToken};
+use crate::{
+    prelude::*,
+    utils::string_utils::{FormatLiteralStringToken, StringLiteralParentKind},
+};
 use biome_css_syntax::{
     AnyCssAttributeMatcherValue, CssAttributeMatcherValue, CssAttributeMatcherValueFields,
 };
@@ -35,7 +38,10 @@ impl FormatNodeRule<CssAttributeMatcherValue> for FormatCssAttributeMatcherValue
                         // does not get converted to lowercase. Once it's quoted, it
                         // will be parsed as a CssString on the next pass, at which
                         // point casing is preserved no matter what.
-                        FormatLiteralStringToken::new(&ident.value_token()?),
+                        FormatLiteralStringToken::new(
+                            &ident.value_token()?,
+                            StringLiteralParentKind::Others
+                        ),
                         format_trailing_comments(ident.syntax()),
                         format_dangling_comments(ident.syntax())
                     ]

@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleList;
+use biome_diagnostics::Severity;
 use biome_rowan::{TextRange, TokenText};
 
 use rustc_hash::FxHashSet;
@@ -49,10 +50,11 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoInvalidGridAreas {
-        version: "1.9.9",
+        version: "1.9.0",
         name: "noInvalidGridAreas",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("named-grid-areas-no-invalid")],
     }
 }

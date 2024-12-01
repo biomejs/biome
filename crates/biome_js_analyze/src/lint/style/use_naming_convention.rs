@@ -3,25 +3,28 @@ use std::ops::{Deref, Range};
 use crate::{
     services::{control_flow::AnyJsControlFlowRoot, semantic::Semantic},
     utils::{
-        regex::RestrictedRegex,
         rename::{AnyJsRenamableDeclaration, RenameSymbolExtensions},
+        restricted_regex::RestrictedRegex,
     },
     JsRuleAction,
 };
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
-use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
+use biome_deserialize::{
+    DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
+};
 use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, AnyJsClassMember, AnyJsObjectMember,
     AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource, JsIdentifierBinding,
-    JsLiteralExportName, JsLiteralMemberName, JsMethodModifierList, JsPrivateClassMemberName,
-    JsPropertyModifierList, JsSyntaxKind, JsSyntaxToken, JsVariableDeclarator, JsVariableKind,
-    Modifier, TsIdentifierBinding, TsLiteralEnumMemberName, TsMethodSignatureModifierList,
+    JsLiteralExportName, JsLiteralMemberName, JsMethodModifierList, JsModuleItemList,
+    JsPrivateClassMemberName, JsPropertyModifierList, JsSyntaxKind, JsSyntaxToken,
+    JsVariableDeclarator, JsVariableKind, Modifier, TsDeclarationModule, TsIdentifierBinding,
+    TsIndexSignatureModifierList, TsLiteralEnumMemberName, TsMethodSignatureModifierList,
     TsPropertySignatureModifierList, TsTypeParameterName,
 };
 use biome_rowan::{
@@ -232,7 +235,7 @@ declare_lint_rule! {
     ///
     /// ### TypeScript `namespace` names
     ///
-    /// A _TypeScript_ `namespace` names are in [`camelCase`] or in [`PascalCase`].
+    /// A _TypeScript_ `namespace` name is in [`camelCase`] or in [`PascalCase`].
     ///
     /// ```ts
     /// namespace mathExtra {
@@ -248,11 +251,11 @@ declare_lint_rule! {
     ///
     /// Note that some declarations are always ignored.
     /// You cannot apply a convention to them.
-    /// This is the cas eof:
+    /// This is the case for:
     ///
     /// - Member names that are not identifiers
     ///
-    ///   ```js,ignore
+    ///   ```js
     ///   class C {
     ///     ["not an identifier"]() {}
     ///   }
@@ -260,25 +263,66 @@ declare_lint_rule! {
     ///
     /// - Named imports
     ///
-    ///  ```js,ignore
+    ///  ```js
     ///   import { an_IMPORT } from "mod"
     ///   ```
     ///
-    /// - destructured object properties
+    /// - Destructured object properties
     ///
-    ///   ```js,ignore
+    ///   ```js
     ///   const { destructed_PROP } = obj;
     ///   ```
     ///
-    /// - class member marked with `override`
+    /// - Class members marked with `override`:
     ///
-    ///   ```ts,ignore
+    ///   ```ts
     ///   class C extends B {
     ///     override overridden_METHOD() {}
     ///   }
     ///   ```
     ///
-    /// - declarations inside an external TypeScript module
+    /// - Declarations inside an external TypeScript module
+    ///
+    ///   :::caution
+    ///   **Bug:** Declarations inside external TypeScript modules are currently not ignored.
+    ///   This is a bug, and is tracked under [#4545](https://github.com/biomejs/biome/issues/4545).
+    ///
+    ///   Until the bug is fixed, we recommend one of the following workarounds:
+    ///
+    ///   - Move the type declarations for external modules into separate `.d.ts` files,
+    ///     and use [overrides](https://biomejs.dev/reference/configuration/#overrides)
+    ///     in your [`biome.json`](https://biomejs.dev/reference/configuration/)
+    ///     to disable the `useNamingConvention` rule for those files:
+    ///
+    ///     ```jsonc,full_options
+    ///     {
+    ///       "linter": {
+    ///         "rules": {
+    ///           "style": {
+    ///             "useNamingConvention": "warn"
+    ///           }
+    ///           // ...
+    ///         }
+    ///       },
+    ///       // ...
+    ///       "overrides": [
+    ///         {
+    ///           "include": ["typings/*.d.ts"],
+    ///           "linter": {
+    ///             "rules": {
+    ///               "style": {
+    ///                 "useNamingConvention": "off"
+    ///               }
+    ///             }
+    ///           }
+    ///         }
+    ///       ]
+    ///     }
+    ///     ```
+    ///
+    ///   - Use [`// biome-ignore lint/style/useNamingConvention: <explanation>`](https://biomejs.dev/linter/#ignore-code)
+    ///     to ignore the problematic lines.
+    ///   :::
     ///
     ///   ```ts,ignore
     ///   declare module "myExternalModule" {
@@ -290,9 +334,8 @@ declare_lint_rule! {
     ///
     /// The rule provides several options that are detailed in the following subsections.
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "strictCase": false,
     ///         "requireAscii": true,
@@ -300,7 +343,7 @@ declare_lint_rule! {
     ///         "conventions": [
     ///             {
     ///                 "selector": {
-    ///                     "kind": "memberLike",
+    ///                     "kind": "classMember",
     ///                     "modifiers": ["private"]
     ///                 },
     ///                 "match": "_(.+)",
@@ -314,23 +357,50 @@ declare_lint_rule! {
     /// ### strictCase
     ///
     /// When this option is set to `true`, it forbids consecutive uppercase characters in [`camelCase`] and [`PascalCase`].
-    /// For instance,  when the option is set to `true`, `HTTPServer` or `aHTTPServer` will throw an error.
-    /// These names should be renamed to `HttpServer` and `aHttpServer`
     ///
-    /// When the option is set to `false`, consecutive uppercase characters are allowed.
-    /// `HTTPServer` and `aHTTPServer` are so valid.
+    /// **Default:** `true`
     ///
-    /// Default: `true`
+    /// For instance, `HTTPServer` or `aHTTPServer` are not permitted for `strictCase: true`.
+    /// These names should be renamed to `HttpServer` and `aHttpServer`:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "strictCase": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// class HTTPServer {
+    /// }
+    /// ```
+    ///
+    /// When `strictCase` is set to `false`, consecutive uppercase characters are allowed.
+    /// For example, `HTTPServer` and `aHTTPServer` would be considered valid then:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "strictCase": false
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options
+    /// class HTTPServer {
+    /// }
+    /// ```
     ///
     /// ### requireAscii
     ///
-    /// When this option is set to `true`, it forbids names that include non-ASCII characters.
-    /// For instance,  when the option is set to `true`, `café` or `안녕하세요` will throw an error.
+    /// When `true`, names must only consist of ASCII characters only,
+    /// forbidding names like `café` or `안녕하세요` that include non-ASCII characters.
     ///
-    /// When the option is set to `false`, names may include non-ASCII characters.
-    /// `café` and `안녕하세요` are so valid.
+    /// When `requireAscii` is set to `false`, names may include non-ASCII characters.
+    /// For example, `café` and `안녕하세요` would be considered valid then.
     ///
-    /// Default: `false`
+    /// **Default:** `false`
     ///
     /// **This option will be turned on by default in Biome 2.0.**
     ///
@@ -342,8 +412,8 @@ declare_lint_rule! {
     /// You can enforce another convention by setting `enumMemberCase` option.
     /// The supported cases are: [`PascalCase`], [`CONSTANT_CASE`], and [`camelCase`].
     ///
-    /// This option will be deprecated in the future.
-    /// Use the `conventions` option instead.
+    /// **This option will be deprecated in the future.**
+    /// **Use the [`conventions`](#conventions-since-v180) option instead.**
     ///
     /// ### conventions (Since v1.8.0)
     ///
@@ -353,9 +423,8 @@ declare_lint_rule! {
     ///
     /// For example, you can enforce the use of [`CONSTANT_CASE`] for global `const` declarations:
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "conventions": [
     ///             {
@@ -440,9 +509,8 @@ declare_lint_rule! {
     /// - A private property starts with `_` and consists of at least two characters
     /// - The captured name (the name without the leading `_`) is in [`camelCase`].
     ///
-    /// ```json5
+    /// ```json,options
     /// {
-    ///     // ...
     ///     "options": {
     ///         "conventions": [
     ///             {
@@ -462,9 +530,8 @@ declare_lint_rule! {
     /// then the part of the name captured by the regular expression is forwarded to the next conventions of the array.
     /// In the following example, we require that private class members start with `_` and all class members are in ["camelCase"].
     ///
-    /// ```json5
+    /// ```jsonc,options
     /// {
-    ///     // ...
     ///     "options": {
     ///         "conventions": [
     ///             {
@@ -491,9 +558,8 @@ declare_lint_rule! {
     /// Because the default conventions already ensure that class members are in ["camelCase"],
     /// the previous example can be simplified to:
     ///
-    /// ```json5
+    /// ```jsonc,options
     /// {
-    ///     // ...
     ///     "options": {
     ///         "conventions": [
     ///             {
@@ -516,9 +582,8 @@ declare_lint_rule! {
     ///
     /// You can reset all default conventions by adding a convention at the end of the array that accepts anything:
     ///
-    /// ```json5
+    /// ```jsonc,options
     /// {
-    ///     // ...
     ///     "options": {
     ///         "conventions": [
     ///             // your conventions
@@ -546,9 +611,8 @@ declare_lint_rule! {
     ///   and to be in [`PascalCase`].
     /// - All other names follow the default conventions
     ///
-    /// ```json5
+    /// ```jsonc,options
     /// {
-    ///     // ...
     ///     "options": {
     ///         "conventions": [
     ///             {
@@ -603,6 +667,7 @@ declare_lint_rule! {
     /// - Alternations `|`
     /// - Capturing groups `()`
     /// - Non-capturing groups `(?:)`
+    /// - Case-insensitive groups `(?i:)` and case-sensitive groups `(?-i:)`
     /// - A limited set of escaped characters including all special characters
     ///   and regular string escape characters `\f`, `\n`, `\r`, `\t`, `\v`
     ///
@@ -667,7 +732,7 @@ impl Rule for UseNamingConvention {
                             start: name_range_start as u16,
                             end: (name_range_start + name.len()) as u16,
                         },
-                        suggestion: Suggestion::Match(matching.to_string()),
+                        suggestion: Suggestion::Match(matching.to_string().into_boxed_str()),
                     });
                 };
                 if let Some(first_capture) = capture.iter().skip(1).find_map(|x| x) {
@@ -756,7 +821,7 @@ impl Rule for UseNamingConvention {
                     rule_category!(),
                     name_token_range,
                     markup! {
-                        "This "<Emphasis>{format_args!("{convention_selector}")}</Emphasis>" name"{trimmed_info}" should match the following regex "<Emphasis>"/"{regex}"/"</Emphasis>"."
+                        "This "<Emphasis>{format_args!("{convention_selector}")}</Emphasis>" name"{trimmed_info}" should match the following regex "<Emphasis>"/"{regex.as_ref()}"/"</Emphasis>"."
                     },
                 ))
             }
@@ -804,23 +869,28 @@ impl Rule for UseNamingConvention {
         else {
             return None;
         };
-        let model = ctx.model();
-        // A declaration file without exports and imports is a global declaration file.
-        // All types are available in every files of the project.
-        // Thus, it is not safe to suggest renaming.
-        //
-        // Note that we don't check if the file has imports.
-        // Indeed, it is a fair assumption to assume that a declaration file without exports,
-        // is certainly a file without imports.
-        let is_global_declaration_file = !model.has_exports()
-            && ctx
-                .source_type::<JsFileSource>()
-                .language()
-                .is_definition_file();
-        if is_global_declaration_file {
-            return None;
-        }
         let node = ctx.query();
+        let is_declaration_file = ctx
+            .source_type::<JsFileSource>()
+            .language()
+            .is_definition_file();
+        if is_declaration_file {
+            if let Some(items) = node
+                .syntax()
+                .ancestors()
+                .skip(1)
+                .find_map(JsModuleItemList::cast)
+            {
+                // A declaration file without exports and imports is a global declaration file.
+                // All types are available in every files of the project.
+                // Thus, it is ok if types are not used locally.
+                let is_top_level = items.parent::<TsDeclarationModule>().is_some();
+                if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
+                    return None;
+                }
+            }
+        }
+        let model = ctx.model();
         if let Some(renamable) = renamable(node, model) {
             let node = ctx.query();
             let name_token = &node.name_token().ok()?;
@@ -842,7 +912,7 @@ impl Rule for UseNamingConvention {
             let renamed = mutation.rename_any_renamable_node(model, &renamable, &new_name[..]);
             if renamed {
                 return Some(JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                      markup! { "Rename this symbol in "<Emphasis>{preferred_case.to_string()}</Emphasis>"." }.to_owned(),
                     mutation,
@@ -897,7 +967,7 @@ pub enum Suggestion {
     /// Use only ASCII characters
     Ascii,
     /// Use a name that matches this regex
-    Match(String),
+    Match(Box<str>),
     /// Use a name that follows one of these formats
     Formats(Formats),
 }
@@ -946,7 +1016,7 @@ fn renamable(
 pub struct NamingConventionOptions {
     /// If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
     /// This does not affect other [Case].
-    #[serde(default = "enabled", skip_serializing_if = "is_enabled")]
+    #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
     pub strict_case: bool,
 
     /// If `false`, then non-ASCII characters are allowed.
@@ -954,8 +1024,8 @@ pub struct NamingConventionOptions {
     pub require_ascii: bool,
 
     /// Custom conventions.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub conventions: Vec<Convention>,
+    #[serde(default, skip_serializing_if = "<[_]>::is_empty")]
+    pub conventions: Box<[Convention]>,
 
     /// Allowed cases for _TypeScript_ `enum` member names.
     #[serde(default, skip_serializing_if = "is_default")]
@@ -966,7 +1036,7 @@ impl Default for NamingConventionOptions {
         Self {
             strict_case: true,
             require_ascii: false,
-            conventions: Vec::new(),
+            conventions: Vec::new().into_boxed_slice(),
             enum_member_case: Format::default(),
         }
     }
@@ -974,9 +1044,6 @@ impl Default for NamingConventionOptions {
 
 const fn enabled() -> bool {
     true
-}
-const fn is_enabled(value: &bool) -> bool {
-    *value
 }
 fn is_default<T: Default + Eq>(value: &T) -> bool {
     value == &T::default()
@@ -1005,12 +1072,12 @@ pub struct Convention {
 impl DeserializableValidator for Convention {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializationContext,
         _name: &str,
         range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> bool {
         if self.formats.is_empty() && self.matching.is_none() {
-            diagnostics.push(
+            ctx.report(
                 DeserializationDiagnostic::new(
                     "At least one field among `format` and `match` must be set.",
                 )
@@ -1095,7 +1162,10 @@ impl Selector {
             }
         }
         if self.modifiers.contains(Modifier::Readonly)
-            && !matches!(self.kind, Kind::ClassProperty | Kind::TypeProperty)
+            && !matches!(
+                self.kind,
+                Kind::ClassProperty | Kind::IndexParameter | Kind::TypeProperty
+            )
         {
             return Err(InvalidSelector::UnsupportedModifiers(
                 self.kind,
@@ -1140,13 +1210,12 @@ impl Selector {
 impl DeserializableValidator for Selector {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializationContext,
         _name: &str,
         range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> bool {
         if let Err(error) = self.check() {
-            diagnostics
-                .push(DeserializationDiagnostic::new(format_args!("{error}")).with_range(range));
+            ctx.report(DeserializationDiagnostic::new(format_args!("{error}")).with_range(range));
             return false;
         }
         true
@@ -1239,7 +1308,9 @@ impl Selector {
             | AnyJsClassMember::TsConstructorSignatureClassMember(_)
             | AnyJsClassMember::JsEmptyClassMember(_)
             | AnyJsClassMember::JsStaticInitializationBlockClassMember(_) => return None,
-            AnyJsClassMember::TsIndexSignatureClassMember(_) => Kind::IndexParameter.into(),
+            AnyJsClassMember::TsIndexSignatureClassMember(getter) => {
+                Selector::with_modifiers(Kind::IndexParameter, getter.modifiers())
+            }
             AnyJsClassMember::JsGetterClassMember(getter) => {
                 Selector::with_modifiers(Kind::ClassGetter, getter.modifiers())
             }
@@ -1293,7 +1364,17 @@ impl Selector {
             | AnyJsBindingDeclaration::JsRestParameter(_) => Some(Kind::FunctionParameter.into()),
             AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(Kind::CatchParameter.into()),
             AnyJsBindingDeclaration::TsPropertyParameter(_) => Some(Kind::ClassProperty.into()),
-            AnyJsBindingDeclaration::TsIndexSignatureParameter(_) => Some(Kind::IndexParameter.into()),
+            AnyJsBindingDeclaration::TsIndexSignatureParameter(member_name) => {
+                if let Some(member) = member_name.parent::<>() {
+                    Selector::from_class_member(&member)
+                } else if let Some(member) = member_name.parent::<AnyTsTypeMember>() {
+                    Selector::from_type_member(&member)
+                } else if let Some(member) = member_name.parent::<AnyJsObjectMember>() {
+                    Selector::from_object_member(&member)
+                } else {
+                    Some(Kind::IndexParameter.into())
+                }
+            },
             AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => Some(Selector::with_scope(Kind::ImportNamespace, Scope::Global)),
             AnyJsBindingDeclaration::JsFunctionDeclaration(_)
             | AnyJsBindingDeclaration::JsFunctionExpression(_)
@@ -1387,7 +1468,13 @@ impl Selector {
             AnyTsTypeMember::JsBogusMember(_)
             | AnyTsTypeMember::TsCallSignatureTypeMember(_)
             | AnyTsTypeMember::TsConstructSignatureTypeMember(_) => None,
-            AnyTsTypeMember::TsIndexSignatureTypeMember(_) => Some(Kind::IndexParameter.into()),
+            AnyTsTypeMember::TsIndexSignatureTypeMember(property) => {
+                Some(if property.readonly_token().is_some() {
+                    Selector::with_modifiers(Kind::IndexParameter, Modifier::Readonly)
+                } else {
+                    Kind::IndexParameter.into()
+                })
+            }
             AnyTsTypeMember::TsGetterSignatureTypeMember(_) => Some(Kind::TypeGetter.into()),
             AnyTsTypeMember::TsMethodSignatureTypeMember(_) => Some(Kind::TypeMethod.into()),
             AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
@@ -1781,6 +1868,11 @@ impl From<JsPropertyModifierList> for Modifiers {
         Modifiers((&value).into())
     }
 }
+impl From<TsIndexSignatureModifierList> for Modifiers {
+    fn from(value: TsIndexSignatureModifierList) -> Self {
+        Modifiers((&value).into())
+    }
+}
 impl From<TsMethodSignatureModifierList> for Modifiers {
     fn from(value: TsMethodSignatureModifierList) -> Self {
         Modifiers((&value).into())
@@ -1824,14 +1916,14 @@ impl Scope {
     /// Returns the scope of `node` or `None` if the scope cannot be determined or
     /// if the scope is an external module.
     fn from_declaration(node: &AnyJsBindingDeclaration) -> Option<Scope> {
-        let control_flow_root = node
-            .syntax()
-            .ancestors()
-            .skip(1)
-            .find(|x| AnyJsControlFlowRoot::can_cast(x.kind()))?;
+        let control_flow_root = node.syntax().ancestors().skip(1).find(|x| {
+            AnyJsControlFlowRoot::can_cast(x.kind())
+                || x.kind() == JsSyntaxKind::TS_DECLARATION_MODULE
+        })?;
         match control_flow_root.kind() {
             JsSyntaxKind::JS_MODULE
             | JsSyntaxKind::JS_SCRIPT
+            | JsSyntaxKind::TS_DECLARATION_MODULE
             | JsSyntaxKind::TS_MODULE_DECLARATION => Some(Scope::Global),
             // Ignore declarations in an external module declaration
             JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION => None,

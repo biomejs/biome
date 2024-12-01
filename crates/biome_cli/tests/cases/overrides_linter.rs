@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -39,13 +38,13 @@ fn does_handle_included_file_and_disable_linter() {
     let test2 = Path::new("special/test2.js");
     fs.insert(test2.into(), FIX_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--apply"),
+                "lint",
+                "--write",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -90,13 +89,14 @@ fn does_include_file_with_different_rules() {
     let test2 = Path::new("special/test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--apply-unsafe"),
+                "lint",
+                "--write",
+                "--unsafe",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -164,13 +164,14 @@ fn does_include_file_with_different_linting_and_applies_all_of_them() {
     let test2 = Path::new("special/test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--apply-unsafe"),
+                "lint",
+                "--write",
+                "--unsafe",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -238,13 +239,14 @@ fn does_include_file_with_different_overrides() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), SIMPLE_NUMBERS_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--apply-unsafe"),
+                "lint",
+                "--write",
+                "--unsafe",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -300,13 +302,14 @@ fn does_override_the_rules() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--apply-unsafe"),
+                "lint",
+                "--write",
+                "--unsafe",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -358,13 +361,14 @@ fn does_not_change_linting_settings() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--apply-unsafe"),
+                "lint",
+                "--write",
+                "--unsafe",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -419,10 +423,10 @@ fn does_override_recommended() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(["lint", "--apply-unsafe", "."].as_slice()),
+        Args::from(["lint", "--write", "--unsafe", "."].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -475,10 +479,10 @@ fn does_override_groupe_recommended() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(["lint", "--apply-unsafe", "."].as_slice()),
+        Args::from(["lint", "--write", "--unsafe", "."].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -529,10 +533,10 @@ fn does_preserve_group_recommended_when_override_global_recommened() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(["lint", "--apply-unsafe", "."].as_slice()),
+        Args::from(["lint", "--write", "--unsafe", "."].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -583,10 +587,10 @@ fn does_preserve_individually_diabled_rules_in_overrides() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(["lint", "--apply-unsafe", "."].as_slice()),
+        Args::from(["lint", "--write", "--unsafe", "."].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -651,11 +655,7 @@ fn does_merge_all_overrides() {
     let test3 = Path::new("test3.js");
     fs.insert(test3.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from(["lint", "."].as_slice()),
-    );
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", "."].as_slice()));
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -697,11 +697,7 @@ fn does_not_conceal_overrides_globals() {
     let test = Path::new("test.js");
     fs.insert(test.into(), "export { GLOBAL_VAR };".as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from(["lint", "."].as_slice()),
-    );
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", "."].as_slice()));
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -743,11 +739,7 @@ fn takes_last_linter_enabled_into_account() {
     let test = Path::new("test.js");
     fs.insert(test.into(), "export { GLOBAL_VAR };".as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from(["lint", "."].as_slice()),
-    );
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", "."].as_slice()));
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

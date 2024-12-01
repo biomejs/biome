@@ -13,16 +13,16 @@ let a: A;
 
 # Diagnostics
 ```
-invalid-default-imports.ts:1:1 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-default-imports.ts:1:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All these imports are only used as types.
   
   > 1 │ import A from ""
-      │ ^^^^^^^^^^^^^^^^
+      │        ^^^^^^^^^
     2 │ type AA = A;
     3 │ export { type A };
   
-  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
   i Safe fix: Use import type.
   
@@ -30,5 +30,3 @@ invalid-default-imports.ts:1:1 lint/style/useImportType  FIXABLE  ━━━━�
       │        +++++         
 
 ```
-
-

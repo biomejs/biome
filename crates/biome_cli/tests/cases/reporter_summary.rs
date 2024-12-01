@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -14,10 +13,10 @@ a ==b
 a ==b
 a ==b
 
-debugger 
-debugger 
-debugger 
-debugger 
+debugger
+debugger
+debugger
+debugger
 
 let f;
 let f;
@@ -34,10 +33,10 @@ a ==b
 a ==b
 a ==b
 
-debugger 
-debugger 
-debugger 
-debugger 
+debugger
+debugger
+debugger
+debugger
 
 let f;
 let f;
@@ -45,6 +44,16 @@ let f;
 		let f;
 		let f;
 		let f;"#;
+
+const MAIN_3: &str = r#"
+
+.brokenStyle { color: f( }
+
+.style {
+                color: 
+                fakeFunction()
+}
+"#;
 
 #[test]
 fn reports_diagnostics_summary_check_command() {
@@ -57,16 +66,20 @@ fn reports_diagnostics_summary_check_command() {
     let file_path2 = Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let file_path3 = Path::new("index.css");
+    fs.insert(file_path3.into(), MAIN_3.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
+                "check",
                 "--reporter=summary",
                 "--max-diagnostics=200",
                 file_path1.as_os_str().to_str().unwrap(),
                 file_path2.as_os_str().to_str().unwrap(),
+                file_path3.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
         ),
@@ -94,16 +107,20 @@ fn reports_diagnostics_summary_ci_command() {
     let file_path2 = Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let file_path3 = Path::new("index.css");
+    fs.insert(file_path3.into(), MAIN_3.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("ci"),
+                "ci",
                 "--reporter=summary",
                 "--max-diagnostics=200",
                 file_path1.as_os_str().to_str().unwrap(),
                 file_path2.as_os_str().to_str().unwrap(),
+                file_path3.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
         ),
@@ -131,16 +148,20 @@ fn reports_diagnostics_summary_lint_command() {
     let file_path2 = Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let file_path3 = Path::new("index.css");
+    fs.insert(file_path3.into(), MAIN_3.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--reporter=summary",
                 "--max-diagnostics=200",
                 file_path1.as_os_str().to_str().unwrap(),
                 file_path2.as_os_str().to_str().unwrap(),
+                file_path3.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
         ),
@@ -168,16 +189,20 @@ fn reports_diagnostics_summary_format_command() {
     let file_path2 = Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let file_path3 = Path::new("index.css");
+    fs.insert(file_path3.into(), MAIN_3.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
+                "format",
                 "--reporter=summary",
                 "--max-diagnostics=200",
                 file_path1.as_os_str().to_str().unwrap(),
                 file_path2.as_os_str().to_str().unwrap(),
+                file_path3.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
         ),

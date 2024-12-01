@@ -1,6 +1,7 @@
 use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     inner_string_text, AnyJsArrayAssignmentPatternElement, AnyJsArrayElement, AnyJsAssignment,
     AnyJsAssignmentPattern, AnyJsExpression, AnyJsLiteralExpression, AnyJsName,
@@ -72,13 +73,14 @@ declare_lint_rule! {
             RuleSource::Clippy("self_assignment"),
         ],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
 impl Rule for NoSelfAssign {
     type Query = Ast<JsAssignmentExpression>;
     type State = IdentifiersLike;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -86,8 +88,7 @@ impl Rule for NoSelfAssign {
         let left = node.left().ok();
         let right = node.right().ok();
         let operator = node.operator().ok();
-
-        let mut state = vec![];
+        let mut result = vec![];
         if let Some(operator) = operator {
             if matches!(
                 operator,
@@ -98,12 +99,12 @@ impl Rule for NoSelfAssign {
             ) {
                 if let (Some(left), Some(right)) = (left, right) {
                     if let Ok(pair) = AnyAssignmentLike::try_from((left, right)) {
-                        compare_assignment_like(pair, &mut state);
+                        compare_assignment_like(pair, &mut result);
                     }
                 }
             }
         }
-        state
+        result.into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, identifier_like: &Self::State) -> Option<RuleDiagnostic> {

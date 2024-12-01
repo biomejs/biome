@@ -1,15 +1,14 @@
 {
-  "name": "@biomejs/wasm-nodejs",
+  "name": "@biomejs/biome_wasm",
   "collaborators": [
     "Biome Developers and Contributors"
   ],
   "description": "WebAssembly bindings to the Biome workspace API",
-  "version": "1.8.3",
+  "version": "1.9.4",
   "license": "MIT OR Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/biomejs/biome.git",
-    "directory": "packages/@biomejs/biome/wasm-nodejs"
+    "url": "https://github.com/biomejs/biome"
   },
   "files": [
     "biome_wasm_bg.wasm",

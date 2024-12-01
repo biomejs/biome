@@ -5,7 +5,7 @@ use crate::{
     Location,
 };
 use biome_console::fmt::{self, Display};
-use biome_console::markup;
+use biome_console::{markup, MarkupBuf};
 use biome_text_edit::TextEdit;
 use serde::{Deserialize, Serialize};
 use std::io;
@@ -64,6 +64,20 @@ pub trait Visit {
     /// Prints a group of advices under a common title.
     fn record_group(&mut self, title: &dyn fmt::Display, advice: &dyn Advices) -> io::Result<()> {
         let _ = (title, advice);
+        Ok(())
+    }
+
+    /// ## Warning
+    ///
+    /// The implementation of the table, for now, is tailored for two columns, and it assumes that
+    /// the longest cell is on top.
+    fn record_table(
+        &mut self,
+        padding: usize,
+        headers: &[MarkupBuf],
+        columns: &[&[MarkupBuf]],
+    ) -> io::Result<()> {
+        let _ = (headers, columns, padding);
         Ok(())
     }
 }
@@ -181,16 +195,16 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 /// Utility type implementing [Advices] that emits a
 /// code suggestion with the provided text
-pub struct CodeSuggestionAdvice<M> {
+pub struct CodeSuggestionAdvice<M: Clone> {
     pub applicability: Applicability,
     pub msg: M,
     pub suggestion: TextEdit,
 }
 
-impl<M> Advices for CodeSuggestionAdvice<M>
+impl<M: Clone> Advices for CodeSuggestionAdvice<M>
 where
     M: Display,
 {

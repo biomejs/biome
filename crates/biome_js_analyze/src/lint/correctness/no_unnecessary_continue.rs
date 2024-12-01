@@ -1,7 +1,6 @@
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsContinueStatement, JsLabeledStatement, JsSyntaxKind, JsSyntaxNode};
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -75,6 +74,7 @@ declare_lint_rule! {
         name: "noUnnecessaryContinue",
         language: "js",
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 
@@ -107,7 +107,7 @@ impl Rule for NoUnnecessaryContinue {
         let mut mutation = ctx.root().begin();
         mutation.remove_statement(node.clone().into());
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Delete the unnecessary continue statement" }.to_owned(),
             mutation,

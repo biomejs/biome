@@ -1,4 +1,3 @@
-use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{
     AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
@@ -30,11 +29,6 @@ pub struct FormatterConfiguration {
     #[partial(bpaf(long("indent-style"), argument("tab|space"), optional))]
     pub indent_style: IndentStyle,
 
-    /// The size of the indentation, 2 by default (deprecated, use `indent-width`)
-    #[partial(bpaf(long("indent-size"), argument("NUMBER"), optional))]
-    #[partial(deserializable(deprecated(use_instead = "formatter.indentWidth")))]
-    pub indent_size: IndentWidth,
-
     /// The size of the indentation, 2 by default
     #[partial(bpaf(long("indent-width"), argument("NUMBER"), optional))]
     pub indent_width: IndentWidth,
@@ -57,13 +51,13 @@ pub struct FormatterConfiguration {
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub ignore: StringSet,
+    #[partial(bpaf(hide, pure(Default::default())))]
+    pub ignore: Vec<Box<str>>,
 
     /// A list of Unix shell style patterns. The formatter will include files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub include: StringSet,
+    #[partial(bpaf(hide, pure(Default::default())))]
+    pub include: Vec<Box<str>>,
 }
 
 impl PartialFormatterConfiguration {
@@ -76,7 +70,6 @@ impl PartialFormatterConfiguration {
             enabled: self.enabled.unwrap_or_default(),
             format_with_errors: self.format_with_errors.unwrap_or_default(),
             indent_style: self.indent_style.unwrap_or_default(),
-            indent_size: self.indent_size.unwrap_or_default(),
             indent_width: self.indent_width.unwrap_or_default(),
             line_ending: self.line_ending.unwrap_or_default(),
             line_width: self.line_width.unwrap_or_default(),
@@ -94,7 +87,6 @@ impl Default for FormatterConfiguration {
         Self {
             enabled: true,
             format_with_errors: false,
-            indent_size: IndentWidth::default(),
             indent_width: IndentWidth::default(),
             indent_style: IndentStyle::default(),
             line_ending: LineEnding::default(),

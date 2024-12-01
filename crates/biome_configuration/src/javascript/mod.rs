@@ -1,8 +1,5 @@
 mod formatter;
 
-use std::str::FromStr;
-
-use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
 pub use formatter::{
@@ -35,11 +32,11 @@ pub struct JavascriptConfiguration {
     /// A list of global bindings that should be ignored by the analyzers
     ///
     /// If defined here, they should not emit diagnostics.
-    #[partial(bpaf(hide))]
-    pub globals: StringSet,
+    #[partial(bpaf(pure(Default::default()), hide))]
+    pub globals: rustc_hash::FxHashSet<Box<str>>,
 
     /// Indicates the type of runtime or transformation used for interpreting JSX.
-    #[partial(bpaf(hide))]
+    #[partial(bpaf(pure(Default::default()), hide))]
     pub jsx_runtime: JsxRuntime,
 
     #[partial(type, bpaf(external(partial_javascript_organize_imports), optional))]
@@ -63,6 +60,11 @@ pub struct JavascriptParser {
     /// These decorators belong to an old proposal, and they are subject to change.
     #[partial(bpaf(hide))]
     pub unsafe_parameter_decorators_enabled: bool,
+
+    /// Enables parsing of Grit metavariables.
+    /// Defaults to `false`.
+    #[partial(bpaf(hide))]
+    pub grit_metavariables: bool,
 }
 
 /// Indicates the type of runtime or transformation used for interpreting JSX.
@@ -87,17 +89,6 @@ pub enum JsxRuntime {
     /// the old vs. new JSX runtime, please see:
     /// <https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html>
     ReactClassic,
-}
-
-impl FromStr for JsxRuntime {
-    type Err = String;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "transparent" => Ok(Self::Transparent),
-            "react-classic" | "reactClassic" => Ok(Self::ReactClassic),
-            _ => Err("Unexpected value".to_string()),
-        }
-    }
 }
 
 /// Linter options specific to the JavaScript linter

@@ -7,7 +7,7 @@ use crate::{
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
     WorkspaceError,
 };
-use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions};
+use biome_analyze::AnalyzerOptions;
 use biome_css_syntax::TextSize;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::BiomePath;
@@ -97,11 +97,11 @@ impl ServiceLanguage for HtmlLanguage {
         _language: Option<&Self::LinterSettings>,
         path: &biome_fs::BiomePath,
         _file_source: &super::DocumentFileSource,
+        suppression_reason: Option<String>,
     ) -> AnalyzerOptions {
-        AnalyzerOptions {
-            configuration: AnalyzerConfiguration::default(),
-            file_path: path.to_path_buf(),
-        }
+        AnalyzerOptions::default()
+            .with_file_path(path.as_path())
+            .with_suppression_reason(suppression_reason)
     }
 }
 

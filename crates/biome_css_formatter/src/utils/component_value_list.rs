@@ -2,7 +2,7 @@ use crate::comments::CssComments;
 use biome_css_syntax::{CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind};
 use biome_formatter::{write, CstFormatContext};
 use biome_formatter::{FormatOptions, FormatResult};
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 use crate::prelude::*;
 use crate::CssFormatter;
@@ -178,9 +178,12 @@ where
     let is_grid_property = list
         .parent::<CssGenericProperty>()
         .and_then(|parent| parent.name().ok())
-        .and_then(|name| name.as_css_identifier().map(|name| name.text()))
+        .and_then(|name| {
+            name.as_css_identifier()
+                .map(|name| name.to_trimmed_string())
+        })
         .map_or(false, |name| {
-            let name = name.to_lowercase_cow();
+            let name = name.to_ascii_lowercase_cow();
 
             name.starts_with("grid-template") || name == "grid"
         });

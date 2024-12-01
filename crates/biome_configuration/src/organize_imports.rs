@@ -1,4 +1,3 @@
-use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -14,13 +13,13 @@ pub struct OrganizeImports {
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub ignore: StringSet,
+    #[partial(bpaf(hide, pure(Default::default())))]
+    pub ignore: Vec<Box<str>>,
 
     /// A list of Unix shell style patterns. The formatter will include files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub include: StringSet,
+    #[partial(bpaf(hide, pure(Default::default())))]
+    pub include: Vec<Box<str>>,
 }
 
 impl Default for OrganizeImports {

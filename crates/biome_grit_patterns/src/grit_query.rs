@@ -12,25 +12,22 @@ use crate::pattern_compiler::{
     compilation_context::CompilationContext, compilation_context::NodeCompilationContext,
 };
 use crate::variables::{VarRegistry, VariableLocations};
-use crate::CompileError;
-use anyhow::bail;
-use anyhow::Result;
+use crate::{BuiltInFunction, CompileError};
+use biome_analyze::RuleDiagnostic;
 use biome_grit_syntax::{GritRoot, GritRootExt};
 use grit_pattern_matcher::constants::{
     ABSOLUTE_PATH_INDEX, FILENAME_INDEX, NEW_FILES_INDEX, PROGRAM_INDEX,
 };
 use grit_pattern_matcher::file_owners::{FileOwner, FileOwners};
 use grit_pattern_matcher::pattern::{
-    FilePtr, FileRegistry, Matcher, Pattern, ResolvedPattern, State, VariableSourceLocations,
+    FilePtr, FileRegistry, Matcher, Pattern, ResolvedPattern, State, VariableSource,
 };
+use grit_util::error::{GritPatternError, GritResult};
 use grit_util::{AnalysisLogs, Ast, ByteRange, InputRanges, Range, VariableMatch};
-use im::Vector;
 use std::collections::{BTreeMap, BTreeSet};
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
-use std::sync::LazyLock;
-
-static BUILT_INS: LazyLock<BuiltIns> = LazyLock::new(BuiltIns::default);
+use std::sync::Mutex;
 
 // These need to remain ordered by index.
 const GLOBAL_VARS: [(&str, usize); 4] = [
@@ -43,7 +40,7 @@ const GLOBAL_VARS: [(&str, usize); 4] = [
 /// Represents a top-level Grit query.
 ///
 /// Grit queries provide the
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct GritQuery {
     pub pattern: Pattern<GritQueryContext>,
 
@@ -56,6 +53,9 @@ pub struct GritQuery {
     /// The name of the snippet being executed.
     pub name: Option<String>,
 
+    /// Built-in functions available to the query.
+    built_ins: BuiltIns,
+
     /// Target language for the query.
     language: GritTargetLanguage,
 
@@ -64,7 +64,7 @@ pub struct GritQuery {
 }
 
 impl GritQuery {
-    pub fn execute(&self, file: GritTargetFile) -> Result<(Vec<GritQueryResult>, AnalysisLogs)> {
+    pub fn execute(&self, file: GritTargetFile) -> GritResult<GritQueryResult> {
         let file_owners = FileOwners::new();
         let files = vec![file];
         let file_ptr = FilePtr::new(0, 0);
@@ -73,10 +73,11 @@ impl GritQuery {
             name: self.name.as_deref(),
             loadable_files: &files,
             files: &file_owners,
-            built_ins: &BUILT_INS,
+            built_ins: &self.built_ins,
             functions: &self.definitions.functions,
             patterns: &self.definitions.patterns,
             predicates: &self.definitions.predicates,
+            diagnostics: Mutex::new(Vec::new()),
         };
 
         let var_registry = VarRegistry::from_locations(&self.variable_locations);
@@ -88,25 +89,30 @@ impl GritQuery {
         let mut state = State::new(var_registry.into(), file_registry);
         let mut logs = Vec::new().into();
 
-        let mut results: Vec<GritQueryResult> = Vec::new();
+        let mut effects: Vec<GritQueryEffect> = Vec::new();
         if self
             .pattern
             .execute(&binding.into(), &mut state, &context, &mut logs)?
         {
             for file in state.files.files() {
-                if let Some(result) = GritQueryResult::from_file(file)? {
-                    results.push(result)
+                if let Some(effect) = GritQueryEffect::from_file(file)? {
+                    effects.push(effect)
                 }
             }
         }
 
-        Ok((results, logs))
+        Ok(GritQueryResult {
+            effects,
+            diagnostics: context.into_diagnostics(),
+            logs,
+        })
     }
 
     pub fn from_node(
         root: GritRoot,
         source_path: Option<&Path>,
         lang: GritTargetLanguage,
+        extra_built_ins: Vec<BuiltInFunction>,
     ) -> Result<Self, CompileError> {
         let ScannedDefinitionInfo {
             pattern_definition_info,
@@ -114,10 +120,15 @@ impl GritQuery {
             function_definition_info,
         } = scan_definitions(root.definitions())?;
 
+        let mut built_ins = BuiltIns::default();
+        for built_in in extra_built_ins {
+            built_ins.add(built_in);
+        }
+
         let context = CompilationContext {
             source_path,
             lang,
-            built_ins: &BUILT_INS,
+            built_ins: &built_ins,
             pattern_definition_info,
             predicate_definition_info,
             function_definition_info,
@@ -125,14 +136,14 @@ impl GritQuery {
 
         let mut vars_array = vec![GLOBAL_VARS
             .iter()
-            .map(|global_var| VariableSourceLocations {
+            .map(|global_var| VariableSource::Compiled {
                 name: global_var.0.to_string(),
                 file: source_path
                     .map(Path::to_string_lossy)
                     .map_or_else(|| "unnamed".to_owned(), |p| p.to_string()),
                 locations: BTreeSet::new(),
             })
-            .collect::<Vec<VariableSourceLocations>>()];
+            .collect::<Vec<VariableSource>>()];
         let mut global_vars: BTreeMap<String, usize> = GLOBAL_VARS
             .iter()
             .map(|(global_var, index)| ((*global_var).to_string(), *index))
@@ -178,30 +189,46 @@ impl GritQuery {
             pattern,
             definitions,
             name,
+            built_ins,
             language,
             diagnostics,
             variable_locations,
         })
     }
+
+    pub fn supports_css(&self) -> bool {
+        matches!(self.language, GritTargetLanguage::CssTargetLanguage(_))
+    }
+
+    pub fn supports_js(&self) -> bool {
+        matches!(self.language, GritTargetLanguage::JsTargetLanguage(_))
+    }
+}
+
+#[derive(Debug)]
+pub struct GritQueryResult {
+    pub effects: Vec<GritQueryEffect>,
+    pub diagnostics: Vec<RuleDiagnostic>,
+    pub logs: AnalysisLogs,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum GritQueryResult {
+pub enum GritQueryEffect {
     Match(Match),
     Rewrite(Rewrite),
     CreateFile(CreateFile),
 }
 
-impl GritQueryResult {
-    pub fn from_file(file: &Vector<&FileOwner<GritTargetTree>>) -> anyhow::Result<Option<Self>> {
+impl GritQueryEffect {
+    pub fn from_file(file: &[&FileOwner<GritTargetTree>]) -> GritResult<Option<Self>> {
         if file.is_empty() {
-            bail!("cannot have file with no versions")
+            return Err(GritPatternError::new("cannot have file with no versions"));
         }
 
         let result = if file.len() == 1 {
             let file = file.last().unwrap();
             if file.new {
-                Some(GritQueryResult::CreateFile(CreateFile::new(
+                Some(GritQueryEffect::CreateFile(CreateFile::new(
                     &file.name,
                     &file.tree.source(),
                 )))
@@ -209,7 +236,7 @@ impl GritQueryResult {
                 if ranges.suppressed {
                     None
                 } else {
-                    Some(GritQueryResult::Match(Match::from_file_ranges(
+                    Some(GritQueryEffect::Match(Match::from_file_ranges(
                         ranges, &file.name,
                     )))
                 }
@@ -217,9 +244,9 @@ impl GritQueryResult {
                 None
             }
         } else {
-            Some(GritQueryResult::Rewrite(Rewrite::from_file(
-                file.front().unwrap(),
-                file.back().unwrap(),
+            Some(GritQueryEffect::Rewrite(Rewrite::from_file(
+                file.first().unwrap(),
+                file.last().unwrap(),
             )?))
         };
 
@@ -279,9 +306,9 @@ pub struct Rewrite {
     pub rewritten: OutputFile,
 }
 
-impl From<Rewrite> for GritQueryResult {
+impl From<Rewrite> for GritQueryEffect {
     fn from(value: Rewrite) -> Self {
-        GritQueryResult::Rewrite(value)
+        GritQueryEffect::Rewrite(value)
     }
 }
 
@@ -296,11 +323,11 @@ impl Rewrite {
     fn from_file(
         initial: &FileOwner<GritTargetTree>,
         rewritten_file: &FileOwner<GritTargetTree>,
-    ) -> anyhow::Result<Self> {
+    ) -> GritResult<Self> {
         let original = if let Some(ranges) = &initial.matches.borrow().input_matches {
             Match::from_file_ranges(ranges, &initial.name)
         } else {
-            bail!("cannot have rewrite without matches")
+            return Err(GritPatternError::new("cannot have rewrite without matches"));
         };
         let rewritten = OutputFile::from_file(rewritten_file);
         Ok(Rewrite::new(original, rewritten))
@@ -313,9 +340,9 @@ pub struct CreateFile {
     pub ranges: Option<Vec<Range>>,
 }
 
-impl From<CreateFile> for GritQueryResult {
+impl From<CreateFile> for GritQueryEffect {
     fn from(value: CreateFile) -> Self {
-        GritQueryResult::CreateFile(value)
+        GritQueryEffect::CreateFile(value)
     }
 }
 

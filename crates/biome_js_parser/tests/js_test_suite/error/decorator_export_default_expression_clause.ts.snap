@@ -1,0 +1,93 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+@decorator
+export default a;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsBogusStatement {
+            items: [
+                JsDecorator {
+                    at_token: AT@0..1 "@" [] [],
+                    expression: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@1..10 "decorator" [] [],
+                        },
+                    },
+                },
+            ],
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@10..18 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportDefaultExpressionClause {
+                default_token: DEFAULT_KW@18..26 "default" [] [Whitespace(" ")],
+                expression: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@26..27 "a" [] [],
+                    },
+                },
+                semicolon_token: SEMICOLON@27..28 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@28..29 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..29
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..28
+    0: JS_BOGUS_STATEMENT@0..10
+      0: JS_DECORATOR@0..10
+        0: AT@0..1 "@" [] []
+        1: JS_IDENTIFIER_EXPRESSION@1..10
+          0: JS_REFERENCE_IDENTIFIER@1..10
+            0: IDENT@1..10 "decorator" [] []
+    1: JS_EXPORT@10..28
+      0: JS_DECORATOR_LIST@10..10
+      1: EXPORT_KW@10..18 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE@18..28
+        0: DEFAULT_KW@18..26 "default" [] [Whitespace(" ")]
+        1: JS_IDENTIFIER_EXPRESSION@26..27
+          0: JS_REFERENCE_IDENTIFIER@26..27
+            0: IDENT@26..27 "a" [] []
+        2: SEMICOLON@27..28 ";" [] []
+  4: EOF@28..29 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+decorator_export_default_expression_clause.ts:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+  > 1 │ @decorator
+      │ ^^^^^^^^^^
+    2 │ export default a;
+    3 │ 
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+```

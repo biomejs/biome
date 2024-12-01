@@ -1,8 +1,8 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{JsSyntaxToken, TsModuleDeclaration, T};
 use biome_rowan::BatchMutationExt;
@@ -46,6 +46,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("prefer-namespace-keyword")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
 }
@@ -78,7 +79,7 @@ impl Rule for UseNamespaceKeyword {
         let mut mutation = ctx.root().begin();
         mutation.replace_token_transfer_trivia(module_token.clone(), make::token(T![namespace]));
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {"Use "<Emphasis>"namespace"</Emphasis>" instead."}.to_owned(),
             mutation,

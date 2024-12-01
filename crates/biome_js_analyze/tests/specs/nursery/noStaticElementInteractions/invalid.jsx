@@ -23,7 +23,7 @@
 	<hgroup onClick={() => {}} />
 	<i onClick={() => {}} />
 	<kbd onClick={() => {}} />
-	<link onClick={() => {}} href="#" />
+
 	<map onClick={() => {}} />
 	<meta onClick={() => {}} />
 	<noscript onClick={() => {}} />

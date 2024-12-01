@@ -3,6 +3,7 @@ use crate::services::semantic::Semantic;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsxAttribute,
@@ -42,6 +43,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintReact("jsx-key")],
         source_kind: RuleSourceKind::SameLogic,
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -56,19 +58,19 @@ declare_node_union! {
 impl Rule for UseJsxKeyInIterable {
     type Query = Semantic<UseJsxKeyInIterableQuery>;
     type State = TextRange;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-
         match node {
             UseJsxKeyInIterableQuery::JsArrayExpression(node) => handle_collections(node, model),
             UseJsxKeyInIterableQuery::JsCallExpression(node) => {
                 handle_iterators(node, model).unwrap_or_default()
             }
         }
+        .into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -382,7 +384,7 @@ fn has_key_attribute(attributes: &JsxAttributeList) -> bool {
         // key must be statically provided, so no spread
         if let AnyJsxAttribute::JsxAttribute(attr) = attr {
             if let Ok(name) = attr.name() {
-                name.text() == "key"
+                name.to_trimmed_string() == "key"
             } else {
                 false
             }

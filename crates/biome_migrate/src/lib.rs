@@ -16,7 +16,7 @@ use biome_json_syntax::JsonLanguage;
 use biome_rowan::{BatchMutation, SyntaxToken};
 use std::convert::Infallible;
 use std::ops::Deref;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
 /// Return the static [MetadataRegistry] for the JS analyzer rules
@@ -45,10 +45,7 @@ where
     B: 'a,
 {
     let filter = AnalysisFilter::default();
-    let options = AnalyzerOptions {
-        file_path: PathBuf::from(configuration_file_path),
-        ..AnalyzerOptions::default()
-    };
+    let options = AnalyzerOptions::default().with_file_path(configuration_file_path);
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_migration_registry(&mut registry);
 
@@ -62,26 +59,35 @@ where
     impl SuppressionAction for TestAction {
         type Language = JsonLanguage;
 
-        fn find_token_to_apply_suppression(
+        fn find_token_for_inline_suppression(
             &self,
             _: SyntaxToken<Self::Language>,
         ) -> Option<ApplySuppression<Self::Language>> {
             None
         }
 
-        fn apply_suppression(
+        fn apply_inline_suppression(
             &self,
             _: &mut BatchMutation<Self::Language>,
             _: ApplySuppression<Self::Language>,
             _: &str,
+            _: &str,
         ) {
             unreachable!("")
+        }
+
+        fn apply_top_level_suppression(
+            &self,
+            _: &mut BatchMutation<Self::Language>,
+            _: SyntaxToken<Self::Language>,
+            _: &str,
+        ) {
         }
     }
     let mut analyzer = Analyzer::new(
         METADATA.deref(),
         InspectMatcher::new(migration_registry, inspect_matcher),
-        |_| -> Vec<Result<_, Infallible>> { unreachable!() },
+        |_, _| -> Vec<Result<_, Infallible>> { unreachable!() },
         Box::new(TestAction),
         &mut emit_signal,
     );

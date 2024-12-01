@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/selectors/selector_lists.css
 ---
-
 # Input
 
 ```css
@@ -23,6 +22,31 @@ h1, h2     , h3
 
 
 , h4,    h5,      h6 {}
+
+
+/* 1some medium long comment */
+.line1 selector,
+/* 2some medium long comment */
+.line1 selector {
+  background: red;
+}
+
+/* 1some medium long comment */
+.line1 selector,
+/* 2some medium long comment */
+div selector {
+  background: blue;
+}
+
+/* 1some medium long comment */
+.line1 selector,
+/* 2some medium long comment */
+.line1 selector,
+/* 3some medium long comment */
+div selector {
+  background: green;
+}
+
 ```
 
 
@@ -62,11 +86,32 @@ h4,
 h5,
 h6 {
 }
+
+/* 1some medium long comment */
+.line1 selector,
+/* 2some medium long comment */
+.line1 selector {
+	background: red;
+}
+
+/* 1some medium long comment */
+.line1 selector,
+/* 2some medium long comment */
+div selector {
+	background: blue;
+}
+
+/* 1some medium long comment */
+.line1 selector,
+/* 2some medium long comment */
+.line1 selector,
+/* 3some medium long comment */
+div selector {
+	background: green;
+}
 ```
 
 # Lines exceeding max width of 80 characters
 ```
    12: div.another.really.long#selector.that.goes.past.the.line.length.with.a.single.selector {
 ```
-
-

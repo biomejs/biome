@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
-use biome_js_syntax::{JsLanguage, JsModule};
+use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
 use biome_rowan::{AstNode, Direction, SyntaxTriviaPiece, TextRange};
 
 const IRREGULAR_WHITESPACES: &[char; 22] = &[
@@ -48,14 +48,13 @@ declare_lint_rule! {
 }
 
 impl Rule for NoIrregularWhitespace {
-    type Query = Ast<JsModule>;
+    type Query = Ast<AnyJsRoot>;
     type State = TextRange;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        get_irregular_whitespace(node)
+        get_irregular_whitespace(ctx.query().syntax()).into_boxed_slice()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
@@ -77,8 +76,7 @@ impl Rule for NoIrregularWhitespace {
     }
 }
 
-fn get_irregular_whitespace(node: &JsModule) -> Vec<TextRange> {
-    let syntax = node.syntax();
+fn get_irregular_whitespace(syntax: &JsSyntaxNode) -> Vec<TextRange> {
     let mut all_whitespaces_trivia: Vec<SyntaxTriviaPiece<JsLanguage>> = vec![];
     let is_whitespace = |trivia: &SyntaxTriviaPiece<JsLanguage>| {
         trivia.is_whitespace() && !trivia.text().replace(' ', "").is_empty()

@@ -2,6 +2,7 @@ use crate::services::semantic::SemanticServices;
 use biome_analyze::{context::RuleContext, Rule, RuleDiagnostic};
 use biome_analyze::{declare_lint_rule, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::Scope;
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{JsSyntaxKind, TextRange};
@@ -67,12 +68,13 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("no-redeclare"),
         ],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
 #[derive(Debug)]
 pub struct Redeclaration {
-    name: String,
+    name: Box<str>,
     declaration: TextRange,
     redeclaration: TextRange,
 }
@@ -80,7 +82,7 @@ pub struct Redeclaration {
 impl Rule for NoRedeclare {
     type Query = SemanticServices;
     type State = Redeclaration;
-    type Signals = Vec<Redeclaration>;
+    type Signals = Box<[Redeclaration]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -88,7 +90,7 @@ impl Rule for NoRedeclare {
         for scope in ctx.query().scopes() {
             check_redeclarations_in_single_scope(&scope, &mut redeclarations);
         }
-        redeclarations
+        redeclarations.into_boxed_slice()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -101,13 +103,13 @@ impl Rule for NoRedeclare {
             rule_category!(),
             redeclaration,
             markup! {
-               "Shouldn't redeclare '"{ name }"'. Consider to delete it or rename it."
+               "Shouldn't redeclare '"{ name.as_ref() }"'. Consider to delete it or rename it."
             },
         )
         .detail(
             declaration,
             markup! {
-               "'"{ name }"' is defined here:"
+               "'"{ name.as_ref() }"' is defined here:"
             },
         );
         Some(diag)
@@ -143,7 +145,7 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                 if let Some(decl) = id_binding.declaration() {
                     // Ignore the function itself.
                     if !matches!(decl, AnyJsBindingDeclaration::JsFunctionExpression(_)) {
-                        let name = id_binding.text();
+                        let name = id_binding.to_trimmed_string();
                         declarations.insert(name, (id_binding.syntax().text_trimmed_range(), decl));
                     }
                 }
@@ -156,7 +158,7 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
         // We consider only binding of a declaration
         // This allows to skip function parameters, methods, ...
         if let Some(decl) = id_binding.declaration() {
-            let name = id_binding.text();
+            let name = id_binding.to_trimmed_string();
             if let Some((first_text_range, first_decl)) = declarations.get(&name) {
                 // Do not report:
                 // - mergeable declarations.
@@ -172,7 +174,7 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                         && first_decl.syntax().parent() != decl.syntax().parent())
                 {
                     redeclarations.push(Redeclaration {
-                        name,
+                        name: name.into_boxed_str(),
                         declaration: *first_text_range,
                         redeclaration: id_binding.syntax().text_trimmed_range(),
                     })

@@ -1,6 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_syntax::{
@@ -77,18 +76,18 @@ declare_node_union! {
 impl Rule for NoUnusedPrivateClassMembers {
     type Query = Ast<JsClassDeclaration>;
     type State = AnyMember;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let private_members: FxHashSet<AnyMember> = get_all_declared_private_members(node);
-
         if private_members.is_empty() {
-            return vec![];
+            Vec::new()
+        } else {
+            traverse_members_usage(node.syntax(), private_members)
         }
-
-        traverse_members_usage(node.syntax(), private_members)
+        .into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -107,7 +106,7 @@ impl Rule for NoUnusedPrivateClassMembers {
         mutation.remove_node(state.clone());
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove unused declaration." }.to_owned(),
             mutation,

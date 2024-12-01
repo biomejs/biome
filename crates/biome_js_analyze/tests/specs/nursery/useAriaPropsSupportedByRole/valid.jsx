@@ -23,7 +23,6 @@
 <a href="#" aria-live />
 <a href="#" aria-owns />
 <a href="#" aria-relevant />
-<a aria-checked />
 <area href="#" aria-expanded />
 <area href="#" aria-atomic />
 <area href="#" aria-busy />
@@ -56,9 +55,8 @@
 <link href="#" aria-live />
 <link href="#" aria-owns />
 <link href="#" aria-relevant />
-<img alt="" aria-checked />
 <img alt="foobar" aria-busy />
-<menu type="toolbar" aria-activedescendant />
+<button role="tab" aria-selected="true"/>
 <menu type="toolbar" aria-atomic />
 <menu type="toolbar" aria-busy />
 <menu type="toolbar" aria-controls />

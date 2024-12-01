@@ -1,9 +1,7 @@
 use crate::JsRuleAction;
 use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::RuleSource;
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::binding_ext::{
@@ -12,8 +10,8 @@ use biome_js_syntax::binding_ext::{
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
     AnyJsExpression, JsClassExpression, JsFileSource, JsForStatement, JsFunctionExpression,
-    JsIdentifierExpression, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode, TsConditionalType,
-    TsInferType,
+    JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
+    TsConditionalType, TsDeclarationModule, TsInferType,
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 
@@ -277,24 +275,29 @@ impl Rule for NoUnusedVariables {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+        let binding = ctx.query();
         let model = ctx.model();
-        // A declaration file without exports and imports is a global declaration file.
-        // All types are available in every files of the project.
-        // Thus, it is ok if types are not used locally.
-        //
-        // Note that we don't check if the file has imports.
-        // Indeed, it is a fair assumption to assume that a declaration file without exports,
-        // is certainly a file without imports.
-        let is_global_declaration_file = !model.has_exports()
-            && ctx
-                .source_type::<JsFileSource>()
-                .language()
-                .is_definition_file();
-        if is_global_declaration_file {
-            return None;
+        let is_declaration_file = ctx
+            .source_type::<JsFileSource>()
+            .language()
+            .is_definition_file();
+        if is_declaration_file {
+            if let Some(items) = binding
+                .syntax()
+                .ancestors()
+                .skip(1)
+                .find_map(JsModuleItemList::cast)
+            {
+                // A declaration file without top-level exports and imports is a global declaration file.
+                // All top-level types and variiables are available in every files of the project.
+                // Thus, it is ok if top-level types are not used locally.
+                let is_top_level = items.parent::<TsDeclarationModule>().is_some();
+                if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
+                    return None;
+                }
+            }
         }
 
-        let binding = ctx.query();
         if matches!(binding, AnyJsIdentifierBinding::TsLiteralEnumMemberName(_)) {
             // Enum members can be unused.
             return None;
@@ -444,7 +447,7 @@ impl Rule for NoUnusedVariables {
                 mutation.rename_node_declaration(model, binding, &new_name);
 
                 Some(JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! { "If this is intentional, prepend "<Emphasis>{name_trimmed}</Emphasis>" with an underscore." }
                     .to_owned(),

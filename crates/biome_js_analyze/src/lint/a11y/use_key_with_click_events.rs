@@ -4,9 +4,10 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, AnyJsxAttribute, AnyJsxElementName};
 use biome_rowan::AstNode;
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
     /// Enforce onClick is accompanied by at least one of the following: `onKeyUp`, `onKeyDown`, `onKeyPress`.
@@ -63,6 +64,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("click-events-have-key-events")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -78,7 +80,7 @@ impl Rule for UseKeyWithClickEvents {
         match element.name() {
             Ok(AnyJsxElementName::JsxName(name)) => {
                 let name_token = name.value_token().ok()?;
-                let element_name = name_token.text_trimmed().to_lowercase_cow();
+                let element_name = name_token.text_trimmed().to_ascii_lowercase_cow();
 
                 // Don't handle interactive roles
                 // TODO Support aria roles https://github.com/rome/tools/issues/3640
@@ -95,10 +97,9 @@ impl Rule for UseKeyWithClickEvents {
         }
 
         let attributes = element.attributes();
-        let on_click_attribute = attributes.find_by_name("onClick").ok()?;
 
-        #[allow(clippy::question_mark)]
-        if on_click_attribute.is_none() {
+        #[expect(clippy::question_mark)]
+        if attributes.find_by_name("onClick").is_none() {
             return None;
         }
 

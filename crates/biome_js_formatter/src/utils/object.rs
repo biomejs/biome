@@ -55,7 +55,7 @@ pub(crate) fn write_member_name(
         }
         name => {
             write!(f, [&name])?;
-            Ok(name.text().width())
+            Ok(name.to_trimmed_string().width())
         }
     }
 }

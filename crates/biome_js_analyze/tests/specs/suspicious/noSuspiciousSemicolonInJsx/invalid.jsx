@@ -21,3 +21,21 @@ const Component3 = () => (
         <Component />;
     </div>
 )
+
+const Component4 = () => {
+  return (
+      <>
+          <div />;
+      </>
+  );
+}
+
+const Component5 = () => {
+  return (
+      <>
+        <Component>
+          <div />
+        </Component>;
+      </>
+  );
+}

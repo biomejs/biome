@@ -213,7 +213,7 @@ impl SemanticModel {
     ///     .syntax()
     ///     .descendants()
     ///     .filter_map(|x| x.cast::<JsReferenceIdentifier>())
-    ///     .find(|x| x.text() == "arguments")
+    ///     .find(|x| x.to_trimmed_string() == "arguments")
     ///     .unwrap();
     ///
     /// let block_scope = model.scope(&arguments_reference.syntax());
@@ -251,6 +251,17 @@ impl SemanticModel {
             })
     }
 
+    pub fn all_exported_bindings(&self) -> impl Iterator<Item = Binding> + '_ {
+        self.data
+            .exported
+            .iter()
+            .filter_map(|declared_at| self.data.bindings_by_start.get(declared_at).copied())
+            .map(|id| Binding {
+                data: self.data.clone(),
+                id,
+            })
+    }
+
     /// Returns the [Binding] of a reference.
     /// Can also be called from "binding" extension method.
     ///
@@ -267,7 +278,7 @@ impl SemanticModel {
     ///     .syntax()
     ///     .descendants()
     ///     .filter_map(|x| x.cast::<JsReferenceIdentifier>())
-    ///     .find(|x| x.text() == "arguments")
+    ///     .find(|x| x.to_trimmed_string() == "arguments")
     ///     .unwrap();
     ///
     /// let arguments_binding = model.binding(&arguments_reference);

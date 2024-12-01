@@ -8,7 +8,7 @@ use biome_deserialize_macros::Deserializable;
 use biome_js_analyze::{
     lint::nursery::use_consistent_member_accessibility,
     lint::style::{use_consistent_array_type, use_naming_convention},
-    utils::regex::RestrictedRegex,
+    utils::restricted_regex::RestrictedRegex,
 };
 
 use super::eslint_eslint;
@@ -160,7 +160,7 @@ impl From<NamingConventionOptions> for use_naming_convention::NamingConventionOp
         use_naming_convention::NamingConventionOptions {
             strict_case: false,
             require_ascii: false,
-            conventions,
+            conventions: conventions.into_boxed_slice(),
             enum_member_case: use_naming_convention::Format::default(),
         }
     }
@@ -499,9 +499,9 @@ impl NamingConventionSelection {
 pub(crate) struct Anything;
 impl Deserializable for Anything {
     fn deserialize(
+        _ctx: &mut impl biome_deserialize::DeserializationContext,
         _value: &impl biome_deserialize::DeserializableValue,
         _name: &str,
-        _diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
         Some(Anything)
     }

@@ -1,8 +1,7 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsDeclaration, AnyJsStatement, AnyJsSwitchClause, JsVariableStatement, TriviaPieceKind, T,
@@ -76,6 +75,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-case-declarations")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -83,7 +83,7 @@ declare_lint_rule! {
 impl Rule for NoSwitchDeclarations {
     type Query = Ast<AnyJsSwitchClause>;
     type State = TextRange;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -101,7 +101,8 @@ impl Rule for NoSwitchDeclarations {
                     None
                 }
             })
-            .collect()
+            .collect::<Vec<_>>()
+            .into_boxed_slice()
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, decl_range: &Self::State) -> Option<RuleDiagnostic> {
@@ -137,7 +138,7 @@ impl Rule for NoSwitchDeclarations {
         mutation.replace_token_discard_trivia(colon_token, new_colon_token);
         mutation.replace_node_discard_trivia(consequent, new_consequent);
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Wrap the "<Emphasis>"declaration"</Emphasis>" in a block." }.to_owned(),
             mutation,

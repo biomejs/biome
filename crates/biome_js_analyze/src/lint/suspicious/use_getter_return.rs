@@ -2,6 +2,7 @@ use crate::ControlFlowGraph;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_control_flow::{builder::ROOT_BLOCK_ID, ExceptionHandlerKind, InstructionKind};
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsGetterClassMember, JsGetterObjectMember, JsReturnStatement};
 use biome_rowan::{AstNode, NodeOrToken, TextRange};
 use roaring::RoaringBitmap;
@@ -63,13 +64,14 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("getter-return")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
 impl Rule for UseGetterReturn {
     type Query = ControlFlowGraph;
     type State = InvalidGetterReturn;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -78,7 +80,7 @@ impl Rule for UseGetterReturn {
         let mut invalid_returns = Vec::new();
         if !JsGetterClassMember::can_cast(node_kind) && !JsGetterObjectMember::can_cast(node_kind) {
             // The node is not a getter.
-            return invalid_returns;
+            return invalid_returns.into_boxed_slice();
         }
         // stack of blocks to process
         let mut block_stack = vec![ROOT_BLOCK_ID];
@@ -130,7 +132,7 @@ impl Rule for UseGetterReturn {
                 }
             }
         }
-        invalid_returns
+        invalid_returns.into_boxed_slice()
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, invalid_return: &Self::State) -> Option<RuleDiagnostic> {

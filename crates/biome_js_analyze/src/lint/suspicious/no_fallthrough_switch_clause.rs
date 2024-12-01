@@ -6,6 +6,7 @@ use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
     ExceptionHandlerKind, InstructionKind,
 };
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsDefaultClause, JsLanguage, JsSwitchStatement, JsSyntaxNode};
 use biome_rowan::{AstNode, AstNodeList, TextRange, WalkEvent};
 use roaring::RoaringBitmap;
@@ -60,22 +61,23 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-fallthrough")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
 impl Rule for NoFallthroughSwitchClause {
     type Query = ControlFlowGraph;
     type State = TextRange;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let cfg = ctx.query();
-        let mut fallthrough: Vec<TextRange> = vec![];
+        let mut fallthrough = Vec::new();
         // Return early if the graph doesn't contain any switch statements.
         // This avoids to allocate some memory.
         if !has_switch_statement(&cfg.node) {
-            return fallthrough;
+            return fallthrough.into_boxed_slice();
         }
         // block to process.
         let mut block_stack = vec![ROOT_BLOCK_ID];
@@ -189,7 +191,7 @@ impl Rule for NoFallthroughSwitchClause {
             }
             switch_clauses.clear();
         }
-        fallthrough
+        fallthrough.into_boxed_slice()
     }
 
     fn diagnostic(

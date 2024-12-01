@@ -1,0 +1,208 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+<>test</test>;
+<>test<inner> some text</inner>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    JsBogus {
+                        items: [
+                            JsxOpeningFragment {
+                                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                                r_angle_token: R_ANGLE@1..2 ">" [] [],
+                            },
+                            JsxChildList [
+                                JsxText {
+                                    value_token: JSX_TEXT_LITERAL@2..6 "test" [] [],
+                                },
+                            ],
+                            JsBogus {
+                                items: [
+                                    L_ANGLE@6..7 "<" [] [],
+                                    SLASH@7..8 "/" [] [],
+                                    JsxName {
+                                        value_token: JSX_IDENT@8..12 "test" [] [],
+                                    },
+                                    R_ANGLE@12..13 ">" [] [],
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@13..14 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxFragment {
+                    opening_fragment: JsxOpeningFragment {
+                        l_angle_token: L_ANGLE@14..16 "<" [Newline("\n")] [],
+                        r_angle_token: R_ANGLE@16..17 ">" [] [],
+                    },
+                    children: JsxChildList [
+                        JsxText {
+                            value_token: JSX_TEXT_LITERAL@17..21 "test" [] [],
+                        },
+                        JsxElement {
+                            opening_element: JsxOpeningElement {
+                                l_angle_token: L_ANGLE@21..22 "<" [] [],
+                                name: JsxName {
+                                    value_token: JSX_IDENT@22..27 "inner" [] [],
+                                },
+                                type_arguments: missing (optional),
+                                attributes: JsxAttributeList [],
+                                r_angle_token: R_ANGLE@27..28 ">" [] [],
+                            },
+                            children: JsxChildList [
+                                JsxText {
+                                    value_token: JSX_TEXT_LITERAL@28..38 " some text" [] [],
+                                },
+                            ],
+                            closing_element: JsxClosingElement {
+                                l_angle_token: L_ANGLE@38..39 "<" [] [],
+                                slash_token: SLASH@39..40 "/" [] [],
+                                name: JsxName {
+                                    value_token: JSX_IDENT@40..45 "inner" [] [],
+                                },
+                                r_angle_token: R_ANGLE@45..46 ">" [] [],
+                            },
+                        },
+                        JsxText {
+                            value_token: JSX_TEXT_LITERAL@46..48 ";\n" [] [],
+                        },
+                    ],
+                    closing_fragment: JsxClosingFragment {
+                        l_angle_token: missing (required),
+                        slash_token: missing (required),
+                        r_angle_token: missing (required),
+                    },
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@48..48 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..48
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..48
+    0: JS_EXPRESSION_STATEMENT@0..14
+      0: JS_BOGUS_EXPRESSION@0..13
+        0: JS_BOGUS@0..13
+          0: JSX_OPENING_FRAGMENT@0..2
+            0: L_ANGLE@0..1 "<" [] []
+            1: R_ANGLE@1..2 ">" [] []
+          1: JSX_CHILD_LIST@2..6
+            0: JSX_TEXT@2..6
+              0: JSX_TEXT_LITERAL@2..6 "test" [] []
+          2: JS_BOGUS@6..13
+            0: L_ANGLE@6..7 "<" [] []
+            1: SLASH@7..8 "/" [] []
+            2: JSX_NAME@8..12
+              0: JSX_IDENT@8..12 "test" [] []
+            3: R_ANGLE@12..13 ">" [] []
+      1: SEMICOLON@13..14 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@14..48
+      0: JSX_TAG_EXPRESSION@14..48
+        0: JSX_FRAGMENT@14..48
+          0: JSX_OPENING_FRAGMENT@14..17
+            0: L_ANGLE@14..16 "<" [Newline("\n")] []
+            1: R_ANGLE@16..17 ">" [] []
+          1: JSX_CHILD_LIST@17..48
+            0: JSX_TEXT@17..21
+              0: JSX_TEXT_LITERAL@17..21 "test" [] []
+            1: JSX_ELEMENT@21..46
+              0: JSX_OPENING_ELEMENT@21..28
+                0: L_ANGLE@21..22 "<" [] []
+                1: JSX_NAME@22..27
+                  0: JSX_IDENT@22..27 "inner" [] []
+                2: (empty)
+                3: JSX_ATTRIBUTE_LIST@27..27
+                4: R_ANGLE@27..28 ">" [] []
+              1: JSX_CHILD_LIST@28..38
+                0: JSX_TEXT@28..38
+                  0: JSX_TEXT_LITERAL@28..38 " some text" [] []
+              2: JSX_CLOSING_ELEMENT@38..46
+                0: L_ANGLE@38..39 "<" [] []
+                1: SLASH@39..40 "/" [] []
+                2: JSX_NAME@40..45
+                  0: JSX_IDENT@40..45 "inner" [] []
+                3: R_ANGLE@45..46 ">" [] []
+            2: JSX_TEXT@46..48
+              0: JSX_TEXT_LITERAL@46..48 ";\n" [] []
+          2: JSX_CLOSING_FRAGMENT@48..48
+            0: (empty)
+            1: (empty)
+            2: (empty)
+      1: (empty)
+  4: EOF@48..48 "" [] []
+
+```
+
+## Diagnostics
+
+```
+jsx_missing_closing_fragment.jsx:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × JSX fragment has no corresponding closing tag.
+  
+  > 1 │ <>test</test>;
+      │ ^^
+    2 │ <>test<inner> some text</inner>;
+    3 │ 
+  
+  i Opening fragment
+  
+  > 1 │ <>test</test>;
+      │ ^^
+    2 │ <>test<inner> some text</inner>;
+    3 │ 
+  
+  i Closing tag
+  
+  > 1 │ <>test</test>;
+      │         ^^^^
+    2 │ <>test<inner> some text</inner>;
+    3 │ 
+  
+jsx_missing_closing_fragment.jsx:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `<` but instead the file ends
+  
+    1 │ <>test</test>;
+    2 │ <>test<inner> some text</inner>;
+  > 3 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ <>test</test>;
+    2 │ <>test<inner> some text</inner>;
+  > 3 │ 
+      │ 
+  
+```

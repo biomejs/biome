@@ -2,7 +2,7 @@ use super::process_file::{process_file, DiffKind, FileStatus, Message};
 use super::{Execution, TraversalMode};
 use crate::cli_options::CliOptions;
 use crate::execute::diagnostics::{
-    AssistsDiffDiagnostic, CIAssistsDiffDiagnostic, CIFormatDiffDiagnostic,
+    AssistDiffDiagnostic, CIAssistDiffDiagnostic, CIFormatDiffDiagnostic,
     CIOrganizeImportsDiffDiagnostic, ContentDiffAdvice, FormatDiffDiagnostic,
     OrganizeImportsDiffDiagnostic, PanicDiagnostic,
 };
@@ -81,8 +81,8 @@ pub(crate) fn traverse(
     let matches = AtomicUsize::new(0);
     let skipped = AtomicUsize::new(0);
 
-    let fs = &*session.app.fs;
     let workspace = &*session.app.workspace;
+    let fs = workspace.fs();
 
     let max_diagnostics = execution.get_max_diagnostics();
     let remaining_diagnostics = AtomicU32::new(max_diagnostics);
@@ -473,8 +473,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             .with_file_source_code(old.clone()),
                                     );
                                 }
-                                DiffKind::Assists => {
-                                    let diag = CIAssistsDiffDiagnostic {
+                                DiffKind::Assist => {
+                                    let diag = CIAssistDiffDiagnostic {
                                         file_name: file_name.clone(),
                                         diff: ContentDiffAdvice {
                                             old: old.clone(),
@@ -515,8 +515,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             .with_file_source_code(old.clone()),
                                     )
                                 }
-                                DiffKind::Assists => {
-                                    let diag = AssistsDiffDiagnostic {
+                                DiffKind::Assist => {
+                                    let diag = AssistDiffDiagnostic {
                                         file_name: file_name.clone(),
                                         diff: ContentDiffAdvice {
                                             old: old.clone(),

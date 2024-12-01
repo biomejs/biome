@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: InvalidPascalCase.js
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -15,10 +16,8 @@ InvalidPascalCase.js lint/style/useFilenamingConvention ━━━━━━━━
   
   i The filename could be renamed to one of the following names:
     invalid-pascal-case.js
-    invalid_pascal_case.js
     invalidPascalCase.js
+    invalid_pascal_case.js
   
 
 ```
-
-

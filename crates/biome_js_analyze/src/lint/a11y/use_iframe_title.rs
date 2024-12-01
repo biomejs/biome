@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
 
@@ -66,6 +67,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("iframe-has-title")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -77,7 +79,7 @@ impl Rule for UseIframeTitle {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let name = element.name().ok()?.name_value_token()?;
+        let name = element.name().ok()?.name_value_token().ok()?;
 
         if name.text_trimmed() == "iframe" {
             if let Some(lang_attribute) = element.find_attribute_by_name("title") {

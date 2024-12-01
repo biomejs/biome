@@ -1,17 +1,20 @@
-use crate::converters::from_proto;
-use crate::converters::line_index::LineIndex;
 use crate::diagnostics::LspError;
 use crate::session::Session;
 use crate::utils;
 use anyhow::{Context, Result};
-use biome_analyze::{ActionCategory, RuleCategoriesBuilder, SourceActionKind};
+use biome_analyze::{
+    ActionCategory, RuleCategoriesBuilder, SourceActionKind, SUPPRESSION_INLINE_ACTION_CATEGORY,
+};
+use biome_configuration::analyzer::RuleSelector;
 use biome_diagnostics::Applicability;
 use biome_fs::BiomePath;
+use biome_lsp_converters::from_proto;
+use biome_lsp_converters::line_index::LineIndex;
 use biome_rowan::{TextRange, TextSize};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    FeaturesBuilder, FixFileMode, FixFileParams, GetFileContentParams, PullActionsParams,
-    SupportsFeatureParams,
+    CheckFileSizeParams, FeaturesBuilder, FixFileMode, FixFileParams, GetFileContentParams,
+    PullActionsParams, SupportsFeatureParams,
 };
 use biome_service::WorkspaceError;
 use std::borrow::Cow;
@@ -44,20 +47,27 @@ pub(crate) fn code_actions(
     let biome_path = session.file_path(&url)?;
 
     let file_features = &session.workspace.file_features(SupportsFeatureParams {
-        path: biome_path,
+        path: biome_path.clone(),
         features: FeaturesBuilder::new()
             .with_linter()
-            .with_assists()
+            .with_assist()
             .with_organize_imports()
             .build(),
     })?;
 
     if !file_features.supports_lint()
         && !file_features.supports_organize_imports()
-        && !file_features.supports_assists()
+        && !file_features.supports_assist()
     {
-        info!("Linter, assists and organize imports are disabled");
+        info!("Linter, assist and organize imports are disabled");
         return Ok(Some(Vec::new()));
+    }
+
+    let size_limit_result = session
+        .workspace
+        .check_file_size(CheckFileSizeParams { path: biome_path })?;
+    if size_limit_result.is_too_large() {
+        return Ok(None);
     }
 
     let mut has_fix_all = false;
@@ -68,7 +78,7 @@ pub(crate) fn code_actions(
             let kind = kind.as_str();
             if FIX_ALL_CATEGORY.matches(kind) {
                 has_fix_all = true;
-            } else if ActionCategory::QuickFix.to_str() == kind {
+            } else if ActionCategory::QuickFix(Cow::Borrowed("")).to_str() == kind {
                 // The action is a on-save quick-fixes
                 has_quick_fix = true;
             }
@@ -118,6 +128,11 @@ pub(crate) fn code_actions(
         // TODO: compute skip and only based on configuration
         skip: vec![],
         only: vec![],
+        suppression_reason: None,
+        enabled_rules: filters
+            .iter()
+            .filter_map(|filter| RuleSelector::from_lsp_filter(filter))
+            .collect(),
     }) {
         Ok(result) => result,
         Err(err) => {
@@ -129,7 +144,6 @@ pub(crate) fn code_actions(
         }
     };
 
-    trace!("Pull actions result: {:?}", result);
     trace!("Filters: {:?}", &filters);
 
     // Generate an additional code action to apply all safe fixes on the
@@ -154,7 +168,6 @@ pub(crate) fn code_actions(
         .actions
         .into_iter()
         .filter_map(|action| {
-            trace!("Processing action: {:?}", &action);
             // Don't apply unsafe fixes when the code action is on-save quick-fixes
             if has_quick_fix && action.suggestion.applicability == Applicability::MaybeIncorrect {
                 return None;
@@ -170,8 +183,24 @@ pub(crate) fn code_actions(
                 return None;
             }
 
-            // Filter out the refactor.* actions when assists are disabled
-            if action.category.matches("source") && !file_features.supports_assists() {
+            // Filter out suppressions if the linter isn't supported
+            if (action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY)
+                || action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY))
+                && !file_features.supports_lint()
+            {
+                return None;
+            }
+
+            // Filter out the suppressions if the client is requesting a fix all signal.
+            // Fix all should apply only the safe changes.
+            if has_fix_all
+                && (action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY)
+                    || action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY))
+            {
+                return None;
+            }
+
+            if action.category.matches("source.biome") && !file_features.supports_assist() {
                 return None;
             }
             // Remove actions that do not match the categories requested by the
@@ -239,16 +268,25 @@ fn fix_all(
             features: FeaturesBuilder::new().with_formatter().build(),
         })?
         .supports_format();
+    let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
+        path: biome_path.clone(),
+    })?;
+    if size_limit_result.is_too_large() {
+        return Ok(None);
+    }
+
     let fixed = session.workspace.fix_file(FixFileParams {
         path: biome_path,
         fix_file_mode: FixFileMode::SafeFixes,
         should_format,
         only: vec![],
         skip: vec![],
+        enabled_rules: vec![],
+        suppression_reason: None,
         rule_categories: RuleCategoriesBuilder::default()
             .with_syntax()
             .with_lint()
-            .with_action()
+            .with_assist()
             .build(),
     })?;
 

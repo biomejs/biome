@@ -95,13 +95,13 @@ impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
     }
 }
 
-// ======= ASSISTS ======
+// ======= ASSIST ======
 #[derive(Default)]
-struct AssistsRulesVisitor {
+struct AssistActionsVisitor {
     groups: BTreeMap<&'static str, BTreeMap<&'static str, RuleMetadata>>,
 }
 
-impl RegistryVisitor<JsLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<JsLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -119,7 +119,7 @@ impl RegistryVisitor<JsLanguage> for AssistsRulesVisitor {
     }
 }
 
-impl RegistryVisitor<JsonLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<JsonLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -138,7 +138,7 @@ impl RegistryVisitor<JsonLanguage> for AssistsRulesVisitor {
     }
 }
 
-impl RegistryVisitor<CssLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<CssLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -157,7 +157,7 @@ impl RegistryVisitor<CssLanguage> for AssistsRulesVisitor {
     }
 }
 
-impl RegistryVisitor<GraphqlLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<GraphqlLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -178,20 +178,19 @@ impl RegistryVisitor<GraphqlLanguage> for AssistsRulesVisitor {
 
 pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let linter_config_root = project_root().join("crates/biome_configuration/src/analyzer/linter");
-    let assists_config_root =
-        project_root().join("crates/biome_configuration/src/analyzer/assists");
+    let assist_config_root = project_root().join("crates/biome_configuration/src/analyzer/assist");
     let push_rules_directory = project_root().join("crates/biome_configuration/src/generated");
 
     let mut lint_visitor = LintRulesVisitor::default();
-    let mut assists_visitor = AssistsRulesVisitor::default();
+    let mut assist_visitor = AssistActionsVisitor::default();
     biome_js_analyze::visit_registry(&mut lint_visitor);
-    biome_js_analyze::visit_registry(&mut assists_visitor);
+    biome_js_analyze::visit_registry(&mut assist_visitor);
     biome_json_analyze::visit_registry(&mut lint_visitor);
-    biome_json_analyze::visit_registry(&mut assists_visitor);
+    biome_json_analyze::visit_registry(&mut assist_visitor);
     biome_css_analyze::visit_registry(&mut lint_visitor);
-    biome_css_analyze::visit_registry(&mut assists_visitor);
+    biome_css_analyze::visit_registry(&mut assist_visitor);
     biome_graphql_analyze::visit_registry(&mut lint_visitor);
-    biome_graphql_analyze::visit_registry(&mut assists_visitor);
+    biome_graphql_analyze::visit_registry(&mut assist_visitor);
 
     // let LintRulesVisitor { groups } = lint_visitor;
 
@@ -203,8 +202,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         RuleCategory::Lint,
     )?;
     generate_for_groups(
-        assists_visitor.groups,
-        assists_config_root.as_path(),
+        assist_visitor.groups,
+        assist_config_root.as_path(),
         push_rules_directory.as_path(),
         &mode,
         RuleCategory::Action,
@@ -225,6 +224,7 @@ fn generate_for_groups(
     let mut group_idents = Vec::with_capacity(groups.len());
     let mut group_strings = Vec::with_capacity(groups.len());
     let mut group_as_default_rules = Vec::with_capacity(groups.len());
+    let mut group_as_disabled_rules = Vec::with_capacity(groups.len());
     for (group, rules) in groups {
         let group_pascal_ident = quote::format_ident!("{}", &Case::Pascal.convert(group));
         let group_ident = quote::format_ident!("{}", group);
@@ -260,8 +260,13 @@ fn generate_for_groups(
             quote! {
                 if let Some(group) = self.#group_ident.as_ref() {
                     enabled_rules.extend(&group.get_enabled_rules());
-                    disabled_rules.extend(&group.get_disabled_rules());
                 }
+            }
+        });
+
+        group_as_disabled_rules.push(quote! {
+            if let Some(group) = self.#group_ident.as_ref() {
+                disabled_rules.extend(&group.get_disabled_rules());
             }
         });
 
@@ -283,7 +288,7 @@ fn generate_for_groups(
                 let mut split_code = category.name().split('/');
 
                 let _lint = split_code.next();
-                debug_assert_eq!(_lint, Some("assists"));
+                debug_assert_eq!(_lint, Some("assist"));
 
                 let group = <RuleGroup as std::str::FromStr>::from_str(split_code.next()?).ok()?;
                 let rule_name = split_code.next()?;
@@ -294,8 +299,8 @@ fn generate_for_groups(
                             .#group_idents
                             .as_ref()
                             .and_then(|group| group.get_rule_configuration(rule_name))
-                            .filter(|conf| !matches!(conf, RuleAssistConfiguration::Off))
-                            .map(|conf| conf.into())
+                            .filter(|(level, _)| !matches!(level, RuleAssistPlainConfiguration::Off))
+                            .map(|(level, _)| level.into())
                     )*
                 }
             }
@@ -343,8 +348,8 @@ fn generate_for_groups(
 
     let use_rule_configuration = if kind == RuleCategory::Action {
         quote! {
-            use crate::analyzer::RuleAssistConfiguration;
-            use biome_analyze::RuleFilter;
+            use crate::analyzer::{RuleAssistConfiguration, RuleAssistPlainConfiguration};
+            use biome_analyze::{options::RuleOptions, RuleFilter};
         }
     } else {
         quote! {
@@ -418,10 +423,15 @@ fn generate_for_groups(
                 /// The enabled rules are calculated from the difference with the disabled rules.
                 pub fn as_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
                     let mut enabled_rules = FxHashSet::default();
-                    let mut disabled_rules = FxHashSet::default();
                     #( #group_as_default_rules )*
+                    enabled_rules
+                }
 
-                    enabled_rules.difference(&disabled_rules).copied().collect()
+                /// It returns the disabled rules by configuration
+                pub fn as_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+                    let mut disabled_rules = FxHashSet::default();
+                    #( #group_as_disabled_rules )*
+                    disabled_rules
                 }
             }
 
@@ -440,7 +450,6 @@ fn generate_for_groups(
         quote! {
             #use_rule_configuration
             use biome_console::markup;
-            use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
             use biome_deserialize_macros::{Deserializable, Merge};
             use biome_diagnostics::{Category, Severity};
             use biome_rowan::TextRange;
@@ -492,16 +501,16 @@ fn generate_for_groups(
                 )*
             }
 
-            impl DeserializableValidator for Rules {
+            impl biome_deserialize::DeserializableValidator for Rules {
                 fn validate(
                     &mut self,
+                    ctx: &mut impl biome_deserialize::DeserializationContext,
                     _name: &str,
                     range: TextRange,
-                    diagnostics: &mut Vec<DeserializationDiagnostic>,
                 ) -> bool {
                     if self.recommended == Some(true) && self.all == Some(true) {
-                        diagnostics
-                            .push(DeserializationDiagnostic::new(markup!(
+                        ctx
+                            .report(biome_deserialize::DeserializationDiagnostic::new(markup!(
                                 <Emphasis>"'recommended'"</Emphasis>" and "<Emphasis>"'all'"</Emphasis>" can't be both "<Emphasis>"'true'"</Emphasis>". You should choose only one of them."
                             ))
                             .with_range(range)
@@ -561,6 +570,13 @@ fn generate_for_groups(
 
                     enabled_rules.difference(&disabled_rules).copied().collect()
                 }
+
+                /// It returns the disabled rules by configuration
+                pub fn as_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+                    let mut disabled_rules = FxHashSet::default();
+                    #( #group_as_disabled_rules )*
+                    disabled_rules
+                }
             }
 
             #( #struct_groups )*
@@ -603,14 +619,26 @@ fn generate_for_groups(
         }
         RuleCategory::Action => {
             quote! {
-                use crate::analyzer::assists::*;
+                use crate::analyzer::assist::*;
                 use biome_analyze::{AnalyzerRules, MetadataRegistry};
 
-                pub fn push_to_analyzer_assists(
-                    _rules: &Actions,
-                    _metadata: &MetadataRegistry,
-                    _analyzer_rules: &mut AnalyzerRules,
-                ) {}
+                pub fn push_to_analyzer_assist(
+                    rules: &Actions,
+                    metadata: &MetadataRegistry,
+                    analyzer_rules: &mut AnalyzerRules,
+                ) {
+                    #(
+                        if let Some(rules) = rules.#group_idents.as_ref() {
+                            for rule_name in #group_pascal_idents::GROUP_RULES {
+                                if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name) {
+                                    if let Some(rule_key) = metadata.find_rule(#group_strings, rule_name) {
+                                        analyzer_rules.push_rule(rule_key, rule_options);
+                                    }
+                                }
+                            }
+                        }
+                    )*
+                }
             }
         }
         RuleCategory::Syntax | RuleCategory::Transformation => unimplemented!(),
@@ -621,7 +649,7 @@ fn generate_for_groups(
 
     let file_name = match kind {
         RuleCategory::Lint => &push_directory.join("linter.rs"),
-        RuleCategory::Action => &push_directory.join("assists.rs"),
+        RuleCategory::Action => &push_directory.join("assist.rs"),
         RuleCategory::Syntax | RuleCategory::Transformation => unimplemented!(),
     };
 
@@ -650,11 +678,7 @@ fn generate_group_struct(
     let mut rule_disabled_check_line = Vec::new();
     let mut get_rule_configuration_line = Vec::new();
 
-    for (index, (rule, metadata)) in rules
-        .iter()
-        .filter(|(rule, _)| **rule != "organizeImports")
-        .enumerate()
-    {
+    for (index, (rule, metadata)) in rules.iter().enumerate() {
         let summary = {
             let mut docs = String::new();
             let parser = Parser::new(metadata.docs);
@@ -703,10 +727,10 @@ fn generate_group_struct(
         let rule_identifier = quote::format_ident!("{}", Case::Snake.convert(rule));
         let rule_config_type = quote::format_ident!(
             "{}",
-            if metadata.fix_kind != FixKind::None {
-                "RuleFixConfiguration"
-            } else if kind == RuleCategory::Action {
+            if kind == RuleCategory::Action {
                 "RuleAssistConfiguration"
+            } else if metadata.fix_kind != FixKind::None {
+                "RuleFixConfiguration"
             } else {
                 "RuleConfiguration"
             }
@@ -743,7 +767,7 @@ fn generate_group_struct(
             _ => panic!("Language not supported"),
         };
         let rule_option = if kind == RuleCategory::Action {
-            quote! { Option<#rule_config_type> }
+            quote! { Option<#rule_config_type<#rule_option_type>> }
         } else {
             quote! {
                 Option<#rule_config_type<#rule_option_type>>
@@ -778,7 +802,7 @@ fn generate_group_struct(
 
         if kind == RuleCategory::Action {
             get_rule_configuration_line.push(quote! {
-                #rule => self.#rule_identifier.as_ref().copied()
+                #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
             });
         } else {
             get_rule_configuration_line.push(quote! {
@@ -791,7 +815,7 @@ fn generate_group_struct(
 
     let get_configuration_function = if kind == RuleCategory::Action {
         quote! {
-            pub(crate) fn get_rule_configuration(&self, rule_name: &str) -> Option<RuleAssistConfiguration> {
+            pub(crate) fn get_rule_configuration(&self, rule_name: &str) -> Option<(RuleAssistPlainConfiguration, Option<RuleOptions>)> {
                 match rule_name {
                     #( #get_rule_configuration_line ),*,
                     _ => None
@@ -866,16 +890,16 @@ fn generate_group_struct(
                 #( #schema_lines_rules ),*
             }
 
-            impl DeserializableValidator for #group_pascal_ident {
+            impl biome_deserialize::DeserializableValidator for #group_pascal_ident {
                 fn validate(
                     &mut self,
+                    ctx: &mut impl biome_deserialize::DeserializationContext,
                     _name: &str,
                     range: TextRange,
-                    diagnostics: &mut Vec<DeserializationDiagnostic>,
                 ) -> bool {
                     if self.recommended == Some(true) && self.all == Some(true) {
-                        diagnostics
-                            .push(DeserializationDiagnostic::new(markup!(
+                        ctx
+                            .report(biome_deserialize::DeserializationDiagnostic::new(markup!(
                                 <Emphasis>"'recommended'"</Emphasis>" and "<Emphasis>"'all'"</Emphasis>" can't be both "<Emphasis>"'true'"</Emphasis>". You should choose only one of them."
                             ))
                             .with_range(range)

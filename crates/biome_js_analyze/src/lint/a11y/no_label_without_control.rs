@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxElementName, AnyJsxTag,
     JsSyntaxKind, JsxAttribute,
@@ -73,9 +74,8 @@ declare_lint_rule! {
     ///
     /// Both options `inputComponents` and `labelComponents` don't have support for namespace components (e.g. `<Control.Input>`).
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "inputComponents": ["CustomInput"],
     ///         "labelAttributes": ["label"],
@@ -90,6 +90,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("label-has-associated-control")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -102,7 +103,7 @@ impl Rule for NoLabelWithoutControl {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let options = ctx.options();
-        let element_name = node.name()?.name_value_token()?;
+        let element_name = node.name()?.name_value_token().ok()?;
         let element_name = element_name.text_trimmed();
         let is_allowed_element = options.has_element_name(element_name)
             || DEFAULT_LABEL_COMPONENTS.contains(&element_name);
@@ -155,11 +156,11 @@ impl Rule for NoLabelWithoutControl {
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoLabelWithoutControlOptions {
     /// Array of component names that should be considered the same as an `input` element.
-    pub input_components: Vec<String>,
+    pub input_components: Box<[Box<str>]>,
     /// Array of attributes that should be treated as the `label` accessible text content.
-    pub label_attributes: Vec<String>,
+    pub label_attributes: Box<[Box<str>]>,
     /// Array of component names that should be considered the same as a `label` element.
-    pub label_components: Vec<String>,
+    pub label_components: Box<[Box<str>]>,
 }
 
 impl NoLabelWithoutControlOptions {
@@ -175,7 +176,7 @@ impl NoLabelWithoutControlOptions {
             && !self
                 .label_attributes
                 .iter()
-                .any(|name| name == attribute_name)
+                .any(|name| name.as_ref() == attribute_name)
         {
             return false;
         }
@@ -237,7 +238,7 @@ impl NoLabelWithoutControlOptions {
                             child_iter.skip_subtree();
                             continue;
                         };
-                        let Some(element_name) = element_name.name_value_token() else {
+                        let Ok(element_name) = element_name.name_value_token() else {
                             continue;
                         };
                         let element_name = element_name.text_trimmed();
@@ -245,7 +246,7 @@ impl NoLabelWithoutControlOptions {
                             || self
                                 .input_components
                                 .iter()
-                                .any(|name| name == element_name)
+                                .any(|name| name.as_ref() == element_name)
                         {
                             return true;
                         }
@@ -260,7 +261,7 @@ impl NoLabelWithoutControlOptions {
     fn has_element_name(&self, element_name: &str) -> bool {
         self.label_components
             .iter()
-            .any(|label_component_name| label_component_name == element_name)
+            .any(|label_component_name| label_component_name.as_ref() == element_name)
     }
 }
 

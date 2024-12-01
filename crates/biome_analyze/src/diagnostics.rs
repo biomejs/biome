@@ -1,11 +1,11 @@
-use biome_console::MarkupBuf;
+use biome_console::{markup, MarkupBuf};
 use biome_diagnostics::{
     advice::CodeSuggestionAdvice, category, Advices, Category, Diagnostic, DiagnosticExt,
-    DiagnosticTags, Error, Location, Severity, Visit,
+    DiagnosticTags, Error, Location, LogCategory, MessageAndDescription, Severity, Visit,
 };
 use biome_rowan::TextRange;
 use std::borrow::Cow;
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::{Debug, Formatter};
 
 use crate::rule::RuleDiagnostic;
 
@@ -141,35 +141,61 @@ impl AnalyzerDiagnostic {
 
 #[derive(Debug, Diagnostic, Clone)]
 #[diagnostic(severity = Warning)]
-pub struct SuppressionDiagnostic {
+pub struct AnalyzerSuppressionDiagnostic {
     #[category]
     category: &'static Category,
     #[location(span)]
     range: TextRange,
     #[message]
     #[description]
-    message: String,
+    message: MessageAndDescription,
     #[tags]
     tags: DiagnosticTags,
+
+    #[advice]
+    advice: SuppressionAdvice,
 }
 
-impl SuppressionDiagnostic {
+impl AnalyzerSuppressionDiagnostic {
     pub(crate) fn new(
         category: &'static Category,
         range: TextRange,
-        message: impl Display,
+        message: impl biome_console::fmt::Display,
     ) -> Self {
         Self {
             category,
             range,
-            message: message.to_string(),
+            message: MessageAndDescription::from(markup! { {message} }.to_owned()),
             tags: DiagnosticTags::empty(),
+            advice: SuppressionAdvice::default(),
         }
     }
 
-    pub(crate) fn with_tags(mut self, tags: DiagnosticTags) -> Self {
-        self.tags |= tags;
+    pub(crate) fn note(mut self, message: MarkupBuf, range: impl Into<TextRange>) -> Self {
+        self.advice.messages.push((message, Some(range.into())));
         self
+    }
+
+    pub(crate) fn hint(mut self, message: MarkupBuf) -> Self {
+        self.advice.messages.push((message, None));
+        self
+    }
+}
+
+#[derive(Debug, Default, Clone)]
+struct SuppressionAdvice {
+    messages: Vec<(MarkupBuf, Option<TextRange>)>,
+}
+
+impl Advices for SuppressionAdvice {
+    fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        for (message, range) in &self.messages {
+            visitor.record_log(LogCategory::Info, &markup! {{message}})?;
+            let location = Location::builder().span(range);
+
+            visitor.record_frame(location.build())?
+        }
+        Ok(())
     }
 }
 

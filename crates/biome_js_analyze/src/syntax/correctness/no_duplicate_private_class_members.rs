@@ -30,13 +30,12 @@ enum MemberType {
 
 impl Rule for NoDuplicatePrivateClassMembers {
     type Query = Ast<JsClassMemberList>;
-    type State = (String, TextRange);
-    type Signals = Vec<Self::State>;
+    type State = (Box<str>, TextRange);
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let mut defined_members: FxHashMap<String, FxHashSet<MemberType>> = FxHashMap::default();
-
+        let mut defined_members: FxHashMap<Box<str>, FxHashSet<MemberType>> = FxHashMap::default();
         let node = ctx.query();
         node.into_iter()
             .filter_map(|member| {
@@ -44,7 +43,11 @@ impl Rule for NoDuplicatePrivateClassMembers {
                     .name()
                     .ok()??
                     .as_js_private_class_member_name()?
-                    .text();
+                    .id_token()
+                    .ok()?
+                    .text_trimmed()
+                    .to_string()
+                    .into_boxed_str();
                 let member_type = match member {
                     AnyJsClassMember::JsGetterClassMember(_) => MemberType::Getter,
                     AnyJsClassMember::JsMethodClassMember(_) => MemberType::Normal,
@@ -71,17 +74,16 @@ impl Rule for NoDuplicatePrivateClassMembers {
 
                 None
             })
-            .collect()
+            .collect::<Vec<_>>()
+            .into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let (member_name, range) = state;
-        let diagnostic = RuleDiagnostic::new(
+        Some(RuleDiagnostic::new(
             rule_category!(),
             range,
-            format!("Duplicate private class member {member_name:?}"),
-        );
-
-        Some(diagnostic)
+            format!("Duplicate private class member \"#{member_name}\""),
+        ))
     }
 }

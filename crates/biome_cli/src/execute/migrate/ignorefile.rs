@@ -1,13 +1,11 @@
 use std::{io, path::Path};
 
 use biome_fs::{FileSystem, OpenOptions};
-use biome_service::DynRef;
-use indexmap::IndexSet;
 
 /// Read an ignore file that follows gitignore pattern syntax,
 /// and turn them into a list of UNIX glob patterns.
 pub(crate) fn read_ignore_file(
-    fs: &DynRef<'_, dyn FileSystem>,
+    fs: &dyn FileSystem,
     ignore_filename: &str,
 ) -> io::Result<IgnorePatterns> {
     let mut file = fs.open_with_options(
@@ -21,13 +19,13 @@ pub(crate) fn read_ignore_file(
 
 #[derive(Debug)]
 pub(crate) struct IgnorePatterns {
-    pub(crate) patterns: IndexSet<String>,
+    pub(crate) patterns: Box<[Box<str>]>,
     pub(crate) has_negated_patterns: bool,
 }
 impl IgnorePatterns {
     pub(crate) fn from(content: &str) -> Self {
         let mut has_negated_patterns = false;
-        let mut patterns = IndexSet::new();
+        let mut patterns = Vec::new();
         for line in content.lines() {
             // Trailing spaces are ignored
             let line = line.trim_end();
@@ -37,7 +35,7 @@ impl IgnorePatterns {
             }
             match convert_pattern(line) {
                 Ok(pattern) => {
-                    patterns.insert(pattern);
+                    patterns.push(pattern.into_boxed_str());
                 }
                 Err(_) => {
                     has_negated_patterns = true;
@@ -47,7 +45,7 @@ impl IgnorePatterns {
             }
         }
         IgnorePatterns {
-            patterns,
+            patterns: patterns.into_boxed_slice(),
             has_negated_patterns,
         }
     }
@@ -116,16 +114,15 @@ dir/
 
         assert!(!result.has_negated_patterns);
         assert_eq!(
-            result.patterns,
+            result.patterns.as_ref(),
             [
-                "**/file-or-dir".to_string(),
-                "**/dir/".to_string(),
-                "**".to_string(),
-                "**/".to_string(),
-                "**/*".to_string(),
-                "**/*/".to_string(),
+                "**/file-or-dir".into(),
+                "**/dir/".into(),
+                "**".into(),
+                "**/".into(),
+                "**/*".into(),
+                "**/*/".into(),
             ]
-            .into()
         );
     }
 
@@ -143,16 +140,15 @@ dir/subdir/
 
         assert!(!result.has_negated_patterns);
         assert_eq!(
-            result.patterns,
+            result.patterns.as_ref(),
             [
-                "dir/dubfile-or-subdir".to_string(),
-                "dir/subdir/".to_string(),
-                "**/*".to_string(),
-                "**/*/".to_string(),
-                "**/a/b".to_string(),
-                "**/a/b/".to_string(),
+                "dir/dubfile-or-subdir".into(),
+                "dir/subdir/".into(),
+                "**/*".into(),
+                "**/*/".into(),
+                "**/a/b".into(),
+                "**/a/b/".into(),
             ]
-            .into()
         );
     }
 
@@ -170,16 +166,15 @@ dir/subdir/
 
         assert!(!result.has_negated_patterns);
         assert_eq!(
-            result.patterns,
+            result.patterns.as_ref(),
             [
-                "./dir/dubfile-or-subdir".to_string(),
-                "./dir/subdir/".to_string(),
-                "./**/*".to_string(),
-                "./**/*/".to_string(),
-                "./**/a/b".to_string(),
-                "./**/a/b/".to_string(),
+                "./dir/dubfile-or-subdir".into(),
+                "./dir/subdir/".into(),
+                "./**/*".into(),
+                "./**/*/".into(),
+                "./**/a/b".into(),
+                "./**/a/b/".into(),
             ]
-            .into()
         );
     }
 
@@ -201,9 +196,8 @@ dir/subdir/
 
         assert!(!result.has_negated_patterns);
         assert_eq!(
-            result.patterns,
-            ["**/    # This is not a comment because there is some leading spaces".to_string()]
-                .into()
+            result.patterns.as_ref(),
+            ["**/    # This is not a comment because there is some leading spaces".into()]
         );
     }
 }

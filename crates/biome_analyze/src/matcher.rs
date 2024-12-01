@@ -138,7 +138,7 @@ pub struct SignalEntry<'phase, L: Language> {
     /// Unique identifier for the rule that emitted this signal
     pub rule: RuleKey,
     /// Optional rule instances being suppressed
-    pub instances: Vec<String>,
+    pub instances: Box<[Box<str>]>,
     /// Text range in the document this signal covers
     pub text_range: TextRange,
 }
@@ -204,7 +204,7 @@ mod tests {
         ControlFlow, MetadataRegistry, Never, Phases, QueryMatcher, RuleKey, ServiceBag,
         SignalEntry, SuppressionAction, SyntaxVisitor,
     };
-    use crate::{AnalyzerOptions, SuppressionKind};
+    use crate::{AnalyzerOptions, AnalyzerSuppression};
     use biome_diagnostics::{category, DiagnosticExt};
     use biome_diagnostics::{Diagnostic, Severity};
     use biome_rowan::{
@@ -350,12 +350,13 @@ mod tests {
         };
 
         fn parse_suppression_comment(
-            comment: &'_ str,
-        ) -> Vec<Result<SuppressionKind<'_>, Infallible>> {
+            comment: &str,
+            _piece_range: TextRange,
+        ) -> Vec<Result<AnalyzerSuppression, Infallible>> {
             comment
                 .trim_start_matches("//")
                 .split(' ')
-                .map(SuppressionKind::Rule)
+                .map(AnalyzerSuppression::rule)
                 .map(Ok)
                 .collect()
         }
@@ -368,17 +369,27 @@ mod tests {
         impl SuppressionAction for TestAction {
             type Language = RawLanguage;
 
-            fn find_token_to_apply_suppression(
+            fn find_token_for_inline_suppression(
                 &self,
                 _: SyntaxToken<Self::Language>,
             ) -> Option<ApplySuppression<Self::Language>> {
                 None
             }
 
-            fn apply_suppression(
+            fn apply_inline_suppression(
                 &self,
                 _: &mut BatchMutation<Self::Language>,
                 _: ApplySuppression<Self::Language>,
+                _: &str,
+                _: &str,
+            ) {
+                unreachable!("")
+            }
+
+            fn apply_top_level_suppression(
+                &self,
+                _: &mut BatchMutation<Self::Language>,
+                _: SyntaxToken<Self::Language>,
                 _: &str,
             ) {
                 unreachable!("")

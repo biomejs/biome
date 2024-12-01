@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: valid.jsx
+---
+# Input
+```jsx
+<Head>
+	<title>Valid</title>
+	<meta name="viewport" content="initial-scale=1.0, width=device-width" />
+</Head>
+
+```

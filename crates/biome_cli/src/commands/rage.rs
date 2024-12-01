@@ -7,10 +7,10 @@ use biome_console::{
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
 use biome_diagnostics::{termcolor, PrintDescription};
 use biome_flags::biome_env;
-use biome_fs::FileSystem;
+use biome_fs::{FileSystem, OsFileSystem};
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{client, RageEntry, RageParams};
-use biome_service::{DynRef, Workspace};
+use biome_service::Workspace;
 use std::path::PathBuf;
 use std::{env, io, ops::Deref};
 use tokio::runtime::Runtime;
@@ -47,7 +47,7 @@ pub(crate) fn rage(
     {EnvVarOs("JS_RUNTIME_NAME")}
     {EnvVarOs("NODE_PACKAGE_MANAGER")}
 
-    {RageConfiguration { fs: &session.app.fs, formatter, linter }}
+    {RageConfiguration { fs: session.app.workspace.fs(), formatter, linter }}
     {WorkspaceRage(session.app.workspace.deref())}
     ));
 
@@ -136,7 +136,7 @@ impl Display for RunningRomeServer {
 ")
                 .fmt(f)?;
 
-                        match client(transport) {
+                        match client(transport, Box::new(OsFileSystem::default())) {
                             Ok(client) => WorkspaceRage(client.deref()).fmt(f)?,
                             Err(err) => {
                                 markup!(<Error>"\u{2716} Failed to connect: "</Error>).fmt(f)?;
@@ -170,13 +170,13 @@ impl Display for RunningRomeServer {
     }
 }
 
-struct RageConfiguration<'a, 'app> {
-    fs: &'a DynRef<'app, dyn FileSystem>,
+struct RageConfiguration<'a> {
+    fs: &'a dyn FileSystem,
     formatter: bool,
     linter: bool,
 }
 
-impl Display for RageConfiguration<'_, '_> {
+impl Display for RageConfiguration<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         Section("Biome Configuration").fmt(fmt)?;
 
@@ -303,7 +303,7 @@ impl Display for RageConfiguration<'_, '_> {
                             {KeyValuePair("GraphQL enabled", markup!({DebugDisplay(graphq_linter.enabled)}))}
                             {KeyValuePair("Recommended", markup!({DebugDisplay(linter_configuration.recommended.unwrap_or_default())}))}
                             {KeyValuePair("All", markup!({DebugDisplay(linter_configuration.all.unwrap_or_default())}))}
-                            {RageConfigurationLintRules("Enabled rules",linter_configuration)}
+                            {RageConfigurationLintRules("Enabled rules", linter_configuration)}
                         ).fmt(fmt)?;
                     }
                 }
@@ -328,6 +328,7 @@ impl Display for RageConfigurationLintRules<'_> {
         fmt.write_markup(markup! {{padding}{rules_str}":"})?;
         fmt.write_markup(markup! {{SOFT_LINE}})?;
         let rules = self.1.as_enabled_rules();
+        let rules = rules.iter().collect::<std::collections::BTreeSet<_>>();
         for rule in rules {
             fmt.write_markup(markup! {{padding}{rule}})?;
             fmt.write_markup(markup! {{SOFT_LINE}})?;

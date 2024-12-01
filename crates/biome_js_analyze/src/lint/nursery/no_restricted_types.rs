@@ -1,12 +1,10 @@
 use crate::JsRuleAction;
 use ::serde::{Deserialize, Serialize};
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableType, DeserializableValue, DeserializationDiagnostic,
+    Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
 use biome_js_factory::make;
 use biome_js_syntax::TsReferenceType;
@@ -30,9 +28,8 @@ declare_lint_rule! {
     /// Use the options to specify additional types that you want to restrict in your
     /// source code.
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "types": {
     ///            "Foo": {
@@ -105,7 +102,7 @@ impl Rule for NoRestrictedTypes {
         mutation.replace_element(prev_token.into(), new_token.into());
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use '"{suggested_type}"' instead" }.to_owned(),
             mutation,
@@ -126,7 +123,7 @@ impl Rule for NoRestrictedTypes {
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoRestrictedTypesOptions {
-    types: FxHashMap<String, CustomRestrictedType>,
+    types: FxHashMap<Box<str>, CustomRestrictedType>,
 }
 
 #[derive(
@@ -169,16 +166,14 @@ impl From<CustomRestrictedType> for CustomRestrictedTypeOptions {
 
 impl Deserializable for CustomRestrictedType {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         if value.visitable_type()? == DeserializableType::Str {
-            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)
-                .map(Self::Plain)
+            biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::Plain)
         } else {
-            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)
-                .map(Self::WithOptions)
+            biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::WithOptions)
         }
     }
 }

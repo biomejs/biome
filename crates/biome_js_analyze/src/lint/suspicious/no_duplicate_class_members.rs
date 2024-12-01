@@ -1,5 +1,6 @@
 use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClassMemberName, JsClassMemberList, JsGetterClassMember, JsMethodClassMember,
     JsPropertyClassMember, JsSetterClassMember, JsStaticModifier, JsSyntaxList, TextRange,
@@ -93,6 +94,7 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("no-dupe-class-members")
         ],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -179,7 +181,7 @@ struct MemberState {
 impl Rule for NoDuplicateClassMembers {
     type Query = Ast<JsClassMemberList>;
     type State = AnyClassMemberDefinition;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -215,7 +217,8 @@ impl Rule for NoDuplicateClassMembers {
 
                 None
             })
-            .collect()
+            .collect::<Vec<_>>()
+            .into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

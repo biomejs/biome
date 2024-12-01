@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxElement};
 use biome_rowan::AstNode;
 
@@ -61,6 +62,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("heading-has-content")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -74,7 +76,7 @@ impl Rule for UseHeadingContent {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let name = node.name().ok()?.name_value_token()?;
+        let name = node.name().ok()?.name_value_token().ok()?;
 
         if HEADING_ELEMENTS.contains(&name.text_trimmed()) {
             if node.has_truthy_attribute("aria-hidden") {
@@ -105,9 +107,10 @@ impl Rule for UseHeadingContent {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let range = match ctx.query() {
-            AnyJsxElement::JsxOpeningElement(node) => {
-                node.parent::<JsxElement>()?.syntax().text_range()
-            }
+            AnyJsxElement::JsxOpeningElement(node) => node
+                .parent::<JsxElement>()?
+                .syntax()
+                .text_range_with_trivia(),
             AnyJsxElement::JsxSelfClosingElement(node) => node.syntax().text_trimmed_range(),
         };
         Some(RuleDiagnostic::new(

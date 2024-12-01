@@ -1,7 +1,6 @@
 use crate::{services::semantic::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -27,17 +26,23 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// Use the options to specify the allowed `console` methods.
+    /// Use the options to explicitly allow a specific subset of `console` methods.
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///   "//": "...",
     ///   "options": {
     ///     "allow": ["assert", "error", "info", "warn"]
     ///   }
     /// }
     /// ```
     ///
+    /// ```js,expect_diagnostic,use_options
+    /// console.error("error message"); // Allowed
+    /// console.warn("warning message"); // Allowed
+    /// console.info("info message"); // Allowed
+    /// console.log("log message");
+    /// console.assert(true, "explanation"); // Allowed
+    /// ```
     pub NoConsole {
         version: "1.6.0",
         name: "noConsole",
@@ -70,7 +75,7 @@ impl Rule for NoConsole {
                 .options()
                 .allow
                 .iter()
-                .any(|allowed| allowed == member_name)
+                .any(|allowed| allowed.as_ref() == member_name)
             {
                 return None;
             }
@@ -107,7 +112,7 @@ impl Rule for NoConsole {
             }
         }
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove "<Emphasis>"console"</Emphasis>"." }.to_owned(),
             mutation,
@@ -122,5 +127,5 @@ impl Rule for NoConsole {
 #[serde(deny_unknown_fields)]
 pub struct NoConsoleOptions {
     /// Allowed calls on the console object.
-    pub allow: Vec<String>,
+    pub allow: Box<[Box<str>]>,
 }

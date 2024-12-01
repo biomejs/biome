@@ -5,3 +5,11 @@ export interface X {
 
     [specialSymbol: symbol]: unknown
 }
+
+export interface Y {
+    readonly [s: string]: unknown;
+
+    readonly [index: number]: unknown;
+
+    readonly [specialSymbol: symbol]: unknown;
+}

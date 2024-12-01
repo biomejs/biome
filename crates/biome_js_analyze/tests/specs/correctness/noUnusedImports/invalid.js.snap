@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -34,6 +35,9 @@ import {a} from 'a'
 import {d} from 'd'
 import {b} from 'b'
 export const bb = a + b
+
+import {} from "mod"
+
 ```
 
 # Diagnostics
@@ -50,7 +54,7 @@ invalid.js:2:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
      1    │ - //·Header·comment
      2    │ - import·A·from·"mod";
@@ -74,41 +78,44 @@ invalid.js:5:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
      1  1 │   // Header comment
-     2  2 │   import A from "mod";
-     3    │ - 
+     2    │ - import·A·from·"mod";
+        2 │ + import·A·from·"mod";
+     3  3 │   
      4    │ - //·Header·comment
      5    │ - import·*·as·B·from·"mod";·//·Import·comment
-     6  3 │   
-     7  4 │   // Header comment
+     6  4 │   
+     7  5 │   // Header comment
   
 
 ```
 
 ```
-invalid.js:8:10 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This import is unused.
   
      7 │ // Header comment
    > 8 │ import { C } from "mod"; // Import comment
-       │          ^
+       │        ^^^^^
      9 │ 
     10 │ // Header comment
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
+     3  3 │   
      4  4 │   // Header comment
-     5  5 │   import * as B from "mod"; // Import comment
-     6    │ - 
+     5    │ - import·*·as·B·from·"mod";·//·Import·comment
+        5 │ + import·*·as·B·from·"mod";·//·Import·comment
+     6  6 │   
      7    │ - //·Header·comment
      8    │ - import·{·C·}·from·"mod";·//·Import·comment
-     9  6 │   
-    10  7 │   // Header comment
+     9  7 │   
+    10  8 │   // Header comment
   
 
 ```
@@ -116,225 +123,199 @@ invalid.js:8:10 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
 ```
 invalid.js:11:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import is unused.
+  ! These imports are unused.
   
     10 │ // Header comment
   > 11 │ import /*a*/ D /*b*/, /*c*/{ E }/*d*/ from "mod"; // Import comment
-       │              ^
+       │              ^^^^^^^^^^^^^^^^^^^
     12 │ 
     13 │ import /*a*/ F /*b*/, /*c*/ * as G /*d*/ from "mod";
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
-    11 │ import·/*a*/·D·/*b*/,·/*c*/{·E·}/*d*/·from·"mod";·//·Import·comment
-       │              --------------                                        
-
-```
-
-```
-invalid.js:11:30 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This import is unused.
+     6  6 │   
+     7  7 │   // Header comment
+     8    │ - import·{·C·}·from·"mod";·//·Import·comment
+        8 │ + import·{·C·}·from·"mod";·//·Import·comment
+     9  9 │   
+    10    │ - //·Header·comment
+    11    │ - import·/*a*/·D·/*b*/,·/*c*/{·E·}/*d*/·from·"mod";·//·Import·comment
+    12 10 │   
+    13 11 │   import /*a*/ F /*b*/, /*c*/ * as G /*d*/ from "mod";
   
-    10 │ // Header comment
-  > 11 │ import /*a*/ D /*b*/, /*c*/{ E }/*d*/ from "mod"; // Import comment
-       │                              ^
-    12 │ 
-    13 │ import /*a*/ F /*b*/, /*c*/ * as G /*d*/ from "mod";
-  
-  i Unused imports might be the result of an incomplete refactoring.
-  
-  i Safe fix: Remove the unused import.
-  
-    11 │ import·/*a*/·D·/*b*/,·/*c*/{·E·}/*d*/·from·"mod";·//·Import·comment
-       │                     -----------------                              
 
 ```
 
 ```
 invalid.js:13:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import is unused.
+  ! These imports are unused.
   
     11 │ import /*a*/ D /*b*/, /*c*/{ E }/*d*/ from "mod"; // Import comment
     12 │ 
   > 13 │ import /*a*/ F /*b*/, /*c*/ * as G /*d*/ from "mod";
-       │              ^
+       │              ^^^^^^^^^^^^^^^^^^^^^
     14 │ 
     15 │ import {
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
-    13 │ import·/*a*/·F·/*b*/,·/*c*/·*·as·G·/*d*/·from·"mod";
-       │              ---------------                        
+     9  9 │   
+    10 10 │   // Header comment
+    11    │ - import·/*a*/·D·/*b*/,·/*c*/{·E·}/*d*/·from·"mod";·//·Import·comment
+       11 │ + import·/*a*/·D·/*b*/,·/*c*/{·E·}/*d*/·from·"mod";·//·Import·comment
+    12 12 │   
+    13    │ - import·/*a*/·F·/*b*/,·/*c*/·*·as·G·/*d*/·from·"mod";
+    14 13 │   
+    15 14 │   import {
+  
 
 ```
 
 ```
-invalid.js:13:34 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This import is unused.
   
-    11 │ import /*a*/ D /*b*/, /*c*/{ E }/*d*/ from "mod"; // Import comment
-    12 │ 
-  > 13 │ import /*a*/ F /*b*/, /*c*/ * as G /*d*/ from "mod";
-       │                                  ^
+    13 │ import /*a*/ F /*b*/, /*c*/ * as G /*d*/ from "mod";
     14 │ 
-    15 │ import {
-  
-  i Unused imports might be the result of an incomplete refactoring.
-  
-  i Safe fix: Remove the unused import.
-  
-    13 │ import·/*a*/·F·/*b*/,·/*c*/·*·as·G·/*d*/·from·"mod";
-       │                     --------------------            
-
-```
-
-```
-invalid.js:17:5 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This import is unused.
-  
-    15 │ import {
-    16 │     // Comment
+  > 15 │ import {
+       │        ^
+  > 16 │     // Comment
   > 17 │     H,
-       │     ^
-    18 │     I,
-    19 │ } from "mod";
+  > 18 │     I,
+  > 19 │ } from "mod";
+       │ ^
+    20 │ 
+    21 │ import {/*a*/J/*b*/, /*c*/K/*d*/} from "mod";
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
+    11 11 │   import /*a*/ D /*b*/, /*c*/{ E }/*d*/ from "mod"; // Import comment
+    12 12 │   
+    13    │ - import·/*a*/·F·/*b*/,·/*c*/·*·as·G·/*d*/·from·"mod";
+       13 │ + import·/*a*/·F·/*b*/,·/*c*/·*·as·G·/*d*/·from·"mod";
     14 14 │   
-    15 15 │   import {
+    15    │ - import·{
     16    │ - ····//·Comment
     17    │ - ····H,
-    18 16 │       I,
-    19 17 │   } from "mod";
-  
-
-```
-
-```
-invalid.js:18:5 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This import is unused.
-  
-    16 │     // Comment
-    17 │     H,
-  > 18 │     I,
-       │     ^
-    19 │ } from "mod";
-    20 │ 
-  
-  i Unused imports might be the result of an incomplete refactoring.
-  
-  i Safe fix: Remove the unused import.
-  
-    16 16 │       // Comment
-    17 17 │       H,
     18    │ - ····I,
-    19 18 │   } from "mod";
-    20 19 │   
+    19    │ - }·from·"mod";
+    20 15 │   
+    21 16 │   import {/*a*/J/*b*/, /*c*/K/*d*/} from "mod";
   
 
 ```
 
 ```
-invalid.js:21:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This import is unused.
   
     19 │ } from "mod";
     20 │ 
   > 21 │ import {/*a*/J/*b*/, /*c*/K/*d*/} from "mod";
-       │              ^
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^
     22 │ 
     23 │ // Header comment
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
-    21 │ import·{/*a*/J/*b*/,·/*c*/K/*d*/}·from·"mod";
-       │              -------------                   
+    17 17 │       H,
+    18 18 │       I,
+    19    │ - }·from·"mod";
+       19 │ + }·from·"mod";
+    20 20 │   
+    21    │ - import·{/*a*/J/*b*/,·/*c*/K/*d*/}·from·"mod";
+    22 21 │   
+    23 22 │   // Header comment
+  
 
 ```
 
 ```
-invalid.js:21:27 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This import is unused.
-  
-    19 │ } from "mod";
-    20 │ 
-  > 21 │ import {/*a*/J/*b*/, /*c*/K/*d*/} from "mod";
-       │                           ^
-    22 │ 
-    23 │ // Header comment
-  
-  i Unused imports might be the result of an incomplete refactoring.
-  
-  i Safe fix: Remove the unused import.
-  
-    21 │ import·{/*a*/J/*b*/,·/*c*/K/*d*/}·from·"mod";
-       │                           ------             
-
-```
-
-```
-invalid.js:24:15 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This import is unused.
   
     23 │ // Header comment
   > 24 │ import { L as M, } from "mod"; // Import comment
-       │               ^
+       │        ^^^^^^^^^^^
     25 │ 
     26 │ // See https://github.com/biomejs/biome/issues/653
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
+    19 19 │   } from "mod";
     20 20 │   
-    21 21 │   import {/*a*/J/*b*/, /*c*/K/*d*/} from "mod";
-    22    │ - 
+    21    │ - import·{/*a*/J/*b*/,·/*c*/K/*d*/}·from·"mod";
+       21 │ + import·{/*a*/J/*b*/,·/*c*/K/*d*/}·from·"mod";
+    22 22 │   
     23    │ - //·Header·comment
     24    │ - import·{·L·as·M,·}·from·"mod";·//·Import·comment
-    25 22 │   
-    26 23 │   // See https://github.com/biomejs/biome/issues/653
+    25 23 │   
+    26 24 │   // See https://github.com/biomejs/biome/issues/653
   
 
 ```
 
 ```
-invalid.js:28:9 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This import is unused.
   
     26 │ // See https://github.com/biomejs/biome/issues/653
     27 │ import {a} from 'a'
   > 28 │ import {d} from 'd'
-       │         ^
+       │        ^^^
     29 │ import {b} from 'b'
     30 │ export const bb = a + b
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
     26 26 │   // See https://github.com/biomejs/biome/issues/653
     27 27 │   import {a} from 'a'
     28    │ - import·{d}·from·'d'
     29 28 │   import {b} from 'b'
     30 29 │   export const bb = a + b
+  
+
+```
+
+```
+invalid.js:32:9 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is empty.
+  
+    30 │ export const bb = a + b
+    31 │ 
+  > 32 │ import {} from "mod"
+       │         
+    33 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused imports.
+  
+    28 28 │   import {d} from 'd'
+    29 29 │   import {b} from 'b'
+    30    │ - export·const·bb·=·a·+·b
+       30 │ + export·const·bb·=·a·+·b
+    31 31 │   
+    32    │ - import·{}·from·"mod"
+    33 32 │   
   
 
 ```

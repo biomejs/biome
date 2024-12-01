@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     static_value::StaticValue, AnyJsExpression, JsCallArguments, JsCallExpression, JsNewExpression,
     JsRegexLiteralExpression,
@@ -65,6 +66,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-control-regex")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -90,7 +92,7 @@ fn collect_control_characters(
     flags: &str,
     is_pattern_in_str: bool,
 ) -> Option<Vec<TextRange>> {
-    let mut control_chars: Vec<TextRange> = Vec::new();
+    let mut control_chars = Vec::new();
     let is_unicode_flag_set = flags.contains('u') || flags.contains('v');
     let bytes = pattern.as_bytes();
     let mut iter = pattern.bytes().enumerate();
@@ -122,11 +124,13 @@ fn collect_control_characters(
                                 continue;
                             };
                             (decode_hex(&bytes[hex_index..end]), end + 1)
-                        } else {
+                        } else if (hex_index + 4) <= bytes.len() {
                             (
                                 decode_hex(&bytes[hex_index..(hex_index + 4)]),
                                 hex_index + 4,
                             )
+                        } else {
+                            continue;
                         }
                     }
                     b'u' if (hex_index + 4) <= bytes.len() => (
@@ -196,7 +200,7 @@ fn collect_control_characters_from_expression(
 impl Rule for NoControlCharactersInRegex {
     type Query = Ast<AnyRegexExpression>;
     type State = TextRange;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -223,6 +227,7 @@ impl Rule for NoControlCharactersInRegex {
                     .unwrap_or_default()
             }
         }
+        .into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

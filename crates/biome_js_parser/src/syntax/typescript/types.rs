@@ -18,6 +18,7 @@ use crate::syntax::js_parse_error::{
     modifier_must_precede_modifier,
 };
 use crate::syntax::metavariable::parse_metavariable;
+use crate::syntax::module::ImportAssertionList;
 use crate::syntax::object::{
     is_at_object_member_name, is_nth_at_type_member_name, parse_object_member_name,
 };
@@ -1150,6 +1151,11 @@ fn parse_ts_mapped_type_optional_modifier_clause(p: &mut JsParser) -> ParsedSynt
 // type C = typeof import("test").a.b.c.d.e.f;
 // type D = import("test")<string>;
 // type E = import("test").C<string>;
+// type F = typeof import("test", { with: { "resolution-mode": "import" } });
+// type G = import("test", { with: { "resolution-mode": "import" } }).TypeFromImport;
+// type H = import("test", { with: { "resolution-mode": "import" } })<string>;
+// type I = import("test", { with: { "resolution-mode": "require" } }).C<string>;
+// type J = typeof import("test", { with: { "resolution-mode": "require" } }).a.b.c.d.e.f;
 fn parse_ts_import_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
     if !p.at(T![typeof]) && !p.at(T![import]) {
         return Absent;
@@ -1158,9 +1164,8 @@ fn parse_ts_import_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax 
     let m = p.start();
     p.eat(T![typeof]);
     p.expect(T![import]);
-    p.expect(T!['(']);
-    p.expect(JS_STRING_LITERAL);
-    p.expect(T![')']);
+
+    parse_ts_import_type_arguments(p, context).ok();
 
     if p.at(T![.]) {
         let qualifier = p.start();
@@ -1392,6 +1397,9 @@ fn parse_ts_getter_signature_type_member(p: &mut JsParser, context: TypeContext)
 // type C = { set(a) }
 // type D = { set: number }
 // type E = { set }
+// type F = { set(b: number,) }
+// type G = {set a(b,)}
+// type H = {set(a, ) }
 fn parse_ts_setter_signature_type_member(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
     if !p.at(T![set]) {
         return Absent;
@@ -1423,6 +1431,11 @@ fn parse_ts_setter_signature_type_member(p: &mut JsParser, context: TypeContext)
         context,
     )
     .or_add_diagnostic(p, expected_parameter);
+
+    if p.at(T![,]) {
+        p.bump_any();
+    }
+
     p.expect(T![')']);
     parse_ts_type_member_semi(p);
     Present(m.complete(p, TS_SETTER_SIGNATURE_TYPE_MEMBER))
@@ -1658,6 +1671,88 @@ fn parse_ts_constructor_type(p: &mut JsParser, context: TypeContext) -> ParsedSy
     p.expect(T![=>]);
     parse_ts_type(p, context).or_add_diagnostic(p, expected_ts_type);
     Present(m.complete(p, TS_CONSTRUCTOR_TYPE))
+}
+
+fn parse_ts_import_type_assertion(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(T![assert]) && !p.at(T![with]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    match p.cur() {
+        T![assert] => {
+            p.expect(T![assert]);
+        }
+        T![with] => {
+            p.expect(T![with]);
+        }
+        _ => {
+            m.abandon(p);
+            return Absent;
+        }
+    };
+
+    // bump assert or with
+    p.expect(T![:]);
+    p.expect(T!['{']);
+    ImportAssertionList::default().parse_list(p);
+
+    p.expect(T!['}']);
+
+    Present(m.complete(p, TS_IMPORT_TYPE_ASSERTION))
+}
+
+fn parse_ts_import_type_assertion_block(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(T!['{']) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    if p.at(T!['{']) {
+        p.bump(T!['{']);
+        if p.at(T!['}']) {
+            p.error(
+                p.err_builder(
+                    "Missing import type assertion keyword 'with'",
+                    p.cur_range(),
+                )
+                .with_detail(p.cur_range(), "'with' expected."),
+            );
+        }
+    }
+
+    parse_ts_import_type_assertion(p).ok();
+
+    p.expect(T!['}']);
+
+    Present(m.complete(p, TS_IMPORT_TYPE_ASSERTION_BLOCK))
+}
+
+fn parse_ts_import_type_arguments(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
+    if !p.at(T!['(']) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump(T!('('));
+    parse_ts_type(p, context).or_add_diagnostic(p, expected_ts_type);
+    if p.at(T![,]) {
+        if p.nth_at(1, T![')']) {
+            p.error(
+                p.err_builder(
+                    "ts import type may not have a trailing comma",
+                    p.cur_range(),
+                )
+                .with_detail(p.cur_range(), "Remove the trailing comma here"),
+            );
+        }
+        p.bump(T![,]);
+        parse_ts_import_type_assertion_block(p).ok();
+    }
+
+    p.expect(T![')']);
+
+    Present(m.complete(p, TS_IMPORT_TYPE_ARGUMENTS))
 }
 
 fn is_at_constructor_type(p: &mut JsParser) -> bool {

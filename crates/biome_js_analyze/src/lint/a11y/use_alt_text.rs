@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::{fmt::Display, fmt::Formatter, markup};
+use biome_diagnostics::Severity;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, static_value::StaticValue, TextRange};
 use biome_rowan::AstNode;
 
@@ -51,6 +52,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("alt-text")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -87,7 +89,7 @@ impl Rule for UseAltText {
         let has_aria_label = has_valid_label(element, "aria-label");
         let has_aria_labelledby = has_valid_label(element, "aria-labelledby");
         let aria_hidden = is_aria_hidden(element);
-        match element.name_value_token()?.text_trimmed() {
+        match element.name_value_token().ok()?.text_trimmed() {
             "object" => {
                 let has_title = has_valid_label(element, "title");
 
@@ -97,24 +99,33 @@ impl Rule for UseAltText {
                             if !opening_element.has_accessible_child() {
                                 return Some((
                                     ValidatedElement::Object,
-                                    element.syntax().text_range(),
+                                    element.syntax().text_range_with_trivia(),
                                 ));
                             }
                         }
                         AnyJsxElement::JsxSelfClosingElement(_) => {
-                            return Some((ValidatedElement::Object, element.syntax().text_range()));
+                            return Some((
+                                ValidatedElement::Object,
+                                element.syntax().text_range_with_trivia(),
+                            ));
                         }
                     }
                 }
             }
             "img" => {
                 if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
-                    return Some((ValidatedElement::Img, element.syntax().text_range()));
+                    return Some((
+                        ValidatedElement::Img,
+                        element.syntax().text_range_with_trivia(),
+                    ));
                 }
             }
             "area" => {
                 if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
-                    return Some((ValidatedElement::Area, element.syntax().text_range()));
+                    return Some((
+                        ValidatedElement::Area,
+                        element.syntax().text_range_with_trivia(),
+                    ));
                 }
             }
             "input" => {
@@ -124,7 +135,10 @@ impl Rule for UseAltText {
                     && !has_aria_labelledby
                     && !aria_hidden
                 {
-                    return Some((ValidatedElement::Input, element.syntax().text_range()));
+                    return Some((
+                        ValidatedElement::Input,
+                        element.syntax().text_range_with_trivia(),
+                    ));
                 }
             }
             _ => {}

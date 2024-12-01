@@ -1,8 +1,7 @@
 use std::{cmp::Ordering, str::FromStr};
 
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
@@ -95,7 +94,7 @@ impl Rule for NoConstantMathMinMaxClamp {
             ).detail(
                 state.0.range(),
                 markup! {
-                    "It always evaluates to "<Emphasis>{state.0.text()}</Emphasis>"."
+                    "It always evaluates to "<Emphasis>{state.0.to_trimmed_string()}</Emphasis>"."
                 }
             )
         )
@@ -108,9 +107,9 @@ impl Rule for NoConstantMathMinMaxClamp {
         mutation.replace_node(state.1.clone(), state.0.clone());
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! {"Swap "<Emphasis>{state.0.text()}</Emphasis>" with "<Emphasis>{state.1.text()}</Emphasis>"."}
+            markup! {"Swap "<Emphasis>{state.0.to_trimmed_string()}</Emphasis>" with "<Emphasis>{state.1.to_trimmed_string()}</Emphasis>"."}
             .to_owned(),
             mutation,
         ))

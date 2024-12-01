@@ -4,6 +4,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::JsRegexLiteralExpression;
 use biome_rowan::{TextRange, TextSize};
 
@@ -46,20 +47,21 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-empty-character-class")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
 impl Rule for NoEmptyCharacterClassInRegex {
     type Query = Ast<JsRegexLiteralExpression>;
     type State = Range<usize>;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut empty_classes = vec![];
         let regex = ctx.query();
         let Ok((pattern, flags)) = regex.decompose() else {
-            return empty_classes;
+            return empty_classes.into_boxed_slice();
         };
         let has_v_flag = flags.text().contains('v');
         let trimmed_text = pattern.text();
@@ -95,7 +97,7 @@ impl Rule for NoEmptyCharacterClassInRegex {
                 _ => {}
             }
         }
-        empty_classes
+        empty_classes.into_boxed_slice()
     }
 
     fn diagnostic(

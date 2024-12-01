@@ -1,10 +1,10 @@
 use std::cmp::Ordering;
 
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     numbers::split_into_radix_and_number, AnyJsExpression, AnyJsLiteralExpression,
@@ -48,6 +48,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Clippy("approx_constant")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -108,7 +109,7 @@ impl Rule for NoApproximativeNumericConstant {
             AnyJsExpression::from(new_node),
         );
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use "<Emphasis>"Math."{ constant_name }</Emphasis>" instead." }.to_owned(),
             mutation,

@@ -4,7 +4,6 @@ use crate::snap_test::{
 };
 use biome_console::{markup, BufferConsole};
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -87,12 +86,12 @@ fn sorts_imports_check() {
         SVELTE_FILE_IMPORTS_BEFORE.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
+                "check",
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
                 svelte_file_path.as_os_str().to_str().unwrap(),
@@ -125,15 +124,15 @@ fn sorts_imports_write() {
         SVELTE_FILE_IMPORTS_BEFORE.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
+                "check",
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
-                "--apply",
+                "--write",
                 svelte_file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -164,10 +163,10 @@ fn format_svelte_ts_context_module_files() {
         SVELTE_TS_CONTEXT_MODULE_FILE_UNFORMATTED.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("format"), svelte_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", svelte_file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -198,8 +197,8 @@ fn format_svelte_ts_context_module_files_write() {
         SVELTE_TS_CONTEXT_MODULE_FILE_UNFORMATTED.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -239,10 +238,10 @@ fn format_svelte_carriage_return_line_feed_files() {
         SVELTE_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("format"), svelte_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", svelte_file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -264,15 +263,15 @@ fn format_svelte_carriage_return_line_feed_files() {
 
 #[test]
 fn format_stdin_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console
         .in_buffer
         .push(SVELTE_TS_CONTEXT_MODULE_FILE_UNFORMATTED.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["format", "--stdin-file-path", "file.svelte"].as_slice()),
     );
@@ -301,15 +300,15 @@ fn format_stdin_successfully() {
 
 #[test]
 fn format_stdin_write_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console
         .in_buffer
         .push(SVELTE_TS_CONTEXT_MODULE_FILE_UNFORMATTED.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["format", "--write", "--stdin-file-path", "file.svelte"].as_slice()),
     );
@@ -338,15 +337,15 @@ fn format_stdin_write_successfully() {
 
 #[test]
 fn lint_stdin_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console
         .in_buffer
         .push(SVELTE_TS_FILE_LINT_BEFORE.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["lint", "--stdin-file-path", "file.svelte"].as_slice()),
     );
@@ -375,15 +374,15 @@ fn lint_stdin_successfully() {
 
 #[test]
 fn lint_stdin_write_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console
         .in_buffer
         .push(SVELTE_TS_FILE_LINT_BEFORE.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["lint", "--write", "--stdin-file-path", "file.svelte"].as_slice()),
     );
@@ -412,15 +411,15 @@ fn lint_stdin_write_successfully() {
 
 #[test]
 fn lint_stdin_write_unsafe_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console
         .in_buffer
         .push(SVELTE_TS_FILE_LINT_BEFORE.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -458,15 +457,15 @@ fn lint_stdin_write_unsafe_successfully() {
 
 #[test]
 fn check_stdin_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console
         .in_buffer
         .push(SVELTE_TS_FILE_CHECK_BEFORE.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["check", "--stdin-file-path", "file.svelte"].as_slice()),
     );
@@ -495,15 +494,15 @@ fn check_stdin_successfully() {
 
 #[test]
 fn check_stdin_write_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console
         .in_buffer
         .push(SVELTE_TS_FILE_CHECK_BEFORE.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["check", "--write", "--stdin-file-path", "file.svelte"].as_slice()),
     );
@@ -532,15 +531,15 @@ fn check_stdin_write_successfully() {
 
 #[test]
 fn check_stdin_write_unsafe_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console
         .in_buffer
         .push(SVELTE_TS_FILE_CHECK_BEFORE.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [

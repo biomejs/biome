@@ -1,10 +1,9 @@
 use std::borrow::Cow;
 
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::*;
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationExt};
@@ -41,6 +40,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Clippy("match_str_case_mismatch")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -48,10 +48,10 @@ declare_lint_rule! {
 impl Rule for NoStringCaseMismatch {
     type Query = Ast<QueryCandidate>;
     type State = CaseMismatchInfo;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
-    fn run(ctx: &RuleContext<Self>) -> Vec<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();
         match query {
             QueryCandidate::JsBinaryExpression(expr) => CaseMismatchInfo::from_binary_expr(expr)
@@ -59,6 +59,7 @@ impl Rule for NoStringCaseMismatch {
                 .collect(),
             QueryCandidate::JsSwitchStatement(stmt) => CaseMismatchInfo::from_switch_stmt(stmt),
         }
+        .into_boxed_slice()
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -110,7 +111,7 @@ impl Rule for NoStringCaseMismatch {
             ),
         );
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {"Use "<Emphasis>{state.expected_case.description()}</Emphasis>" string value."}.to_owned(),
             mutation,

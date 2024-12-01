@@ -2,6 +2,20 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
 ---
+## `index.css`
+
+```css
+
+
+.brokenStyle { color: f( }
+
+.style {
+                color: 
+                fakeFunction()
+}
+
+```
+
 ## `index.ts`
 
 ```ts
@@ -13,10 +27,10 @@ a ==b
 a ==b
 a ==b
 
-debugger 
-debugger 
-debugger 
-debugger 
+debugger
+debugger
+debugger
+debugger
 
 let f;
 let f;
@@ -37,10 +51,10 @@ a ==b
 a ==b
 a ==b
 
-debugger 
-debugger 
-debugger 
-debugger 
+debugger
+debugger
+debugger
+debugger
 
 let f;
 let f;
@@ -64,25 +78,38 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-Formatter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-The following files needs to be formatted:
-index.ts
-main.ts
+reporter/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Organize Imports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-The following files needs to have their imports sorted:
-index.ts
-main.ts
+  i The following files have parsing errors.
+  
+  - index.css
+  
+reporter/format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Analyzer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Some analyzer rules were triggered
+  i The following files needs to be formatted.
+  
+  - index.css
+  - index.ts
+  - main.ts
+  
+reporter/organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Rule Name                                               Diagnostics
-lint/suspicious/noImplicitAnyLet                        12 (12 error(s), 0 warning(s), 0 info(s))
-lint/suspicious/noDoubleEquals                          8 (8 error(s), 0 warning(s), 0 info(s))
-lint/suspicious/noRedeclare                             12 (12 error(s), 0 warning(s), 0 info(s))
-lint/suspicious/noDebugger                              8 (8 error(s), 0 warning(s), 0 info(s))
+  i The following files needs to have their imports sorted.
+  
+  - index.ts
+  - main.ts
+  
+reporter/analyzer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  i Some analyzer rules were triggered
+  
+  Rule Name                                        Diagnostics
+  
+  lint/correctness/noUnknownFunction               2 (2 error(s), 0 warning(s), 0 info(s))
+  lint/suspicious/noImplicitAnyLet                 12 (12 error(s), 0 warning(s), 0 info(s))
+  lint/suspicious/noDoubleEquals                   8 (8 error(s), 0 warning(s), 0 info(s))
+  lint/suspicious/noRedeclare                      12 (12 error(s), 0 warning(s), 0 info(s))
+  lint/suspicious/noDebugger                       8 (8 error(s), 0 warning(s), 0 info(s))
 
 ```
 
@@ -93,6 +120,6 @@ If you wish to apply the suggested (unsafe) fixes, use the command biome check -
 ```
 
 ```block
-Checked 2 files in <TIME>. No fixes applied.
-Found 44 errors.
+Checked 3 files in <TIME>. No fixes applied.
+Found 49 errors.
 ```

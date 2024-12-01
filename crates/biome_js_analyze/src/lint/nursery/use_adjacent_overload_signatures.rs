@@ -4,7 +4,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsModuleItem, JsClassDeclaration, JsFunctionDeclaration, JsModule, JsModuleItemList,
-    TsDeclareStatement, TsInterfaceDeclaration, TsTypeAliasDeclaration, TsTypeMemberList,
+    TsDeclarationModule, TsDeclareStatement, TsInterfaceDeclaration, TsTypeAliasDeclaration,
+    TsTypeMemberList,
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange, TokenText};
 use rustc_hash::FxHashSet;
@@ -39,7 +40,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```ts,expect_diagnostic,ignore
+    /// ```ts,expect_diagnostic
     /// class A {
     ///   fooA(s: string): void;
     ///   fooA(n: number): void;
@@ -99,7 +100,7 @@ declare_lint_rule! {
 
 impl Rule for UseAdjacentOverloadSignatures {
     type Query = Ast<DeclarationOrModuleNode>;
-    type State = Vec<(TokenText, TextRange)>;
+    type State = Box<[(TokenText, TextRange)]>;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -129,14 +130,12 @@ impl Rule for UseAdjacentOverloadSignatures {
             // Handle export function foo() {}
             DeclarationOrModuleNode::JsFunctionDeclaration(node) => collect_function(node),
             // Handle export function foo() {}
-            DeclarationOrModuleNode::JsModule(node) => {
-                let items = node.items();
-                collect_exports(&items)
-            }
+            DeclarationOrModuleNode::JsModule(node) => collect_exports(&node.items()),
+            DeclarationOrModuleNode::TsDeclarationModule(node) => collect_exports(&node.items()),
         };
 
         if !methods.is_empty() {
-            Some(methods)
+            Some(methods.into_boxed_slice())
         } else {
             None
         }
@@ -317,5 +316,12 @@ fn check_method<T: Clone + Eq + std::hash::Hash + Into<TokenText>>(
 }
 
 declare_node_union! {
-    pub DeclarationOrModuleNode = TsInterfaceDeclaration | TsTypeAliasDeclaration | TsDeclareStatement | JsClassDeclaration | JsModule | JsFunctionDeclaration
+    pub DeclarationOrModuleNode =
+        JsClassDeclaration
+        | JsFunctionDeclaration
+        | TsInterfaceDeclaration
+        | TsDeclareStatement
+        | TsTypeAliasDeclaration
+        | JsModule
+        | TsDeclarationModule
 }

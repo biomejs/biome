@@ -63,7 +63,8 @@ use biome_configuration::PartialConfiguration;
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_diagnostics::CodeSuggestion;
 use biome_formatter::Printed;
-use biome_fs::BiomePath;
+use biome_fs::{BiomePath, FileSystem};
+use biome_grit_patterns::GritTargetLanguage;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use core::str;
@@ -95,6 +96,7 @@ pub struct SupportsFeatureResult {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct FileFeaturesResult {
     pub features_supported: HashMap<FeatureKind, SupportKind>,
 }
@@ -125,7 +127,7 @@ impl FileFeaturesResult {
         (FeatureKind::Format, SupportKind::FileNotSupported),
         (FeatureKind::OrganizeImports, SupportKind::FileNotSupported),
         (FeatureKind::Search, SupportKind::FileNotSupported),
-        (FeatureKind::Assists, SupportKind::FileNotSupported),
+        (FeatureKind::Assist, SupportKind::FileNotSupported),
         (FeatureKind::Debug, SupportKind::FileNotSupported),
     ];
 
@@ -151,7 +153,7 @@ impl FileFeaturesResult {
 
         if capabilities.analyzer.code_actions.is_some() {
             self.features_supported
-                .insert(FeatureKind::Assists, SupportKind::Supported);
+                .insert(FeatureKind::Assist, SupportKind::Supported);
         }
 
         if capabilities.search.search.is_some() {
@@ -225,14 +227,14 @@ impl FileFeaturesResult {
         }
 
         // assists
-        if let Some(disabled) = settings.override_settings.assists_disabled(path) {
+        if let Some(disabled) = settings.override_settings.assist_disabled(path) {
             if disabled {
                 self.features_supported
-                    .insert(FeatureKind::Assists, SupportKind::FeatureNotEnabled);
+                    .insert(FeatureKind::Assist, SupportKind::FeatureNotEnabled);
             }
-        } else if !settings.assists().enabled {
+        } else if !settings.assist().enabled {
             self.features_supported
-                .insert(FeatureKind::Assists, SupportKind::FeatureNotEnabled);
+                .insert(FeatureKind::Assist, SupportKind::FeatureNotEnabled);
         }
 
         debug!(
@@ -282,8 +284,8 @@ impl FileFeaturesResult {
         self.supports_for(&FeatureKind::OrganizeImports)
     }
 
-    pub fn supports_assists(&self) -> bool {
-        self.supports_for(&FeatureKind::Assists)
+    pub fn supports_assist(&self) -> bool {
+        self.supports_for(&FeatureKind::Assist)
     }
 
     pub fn supports_search(&self) -> bool {
@@ -373,6 +375,7 @@ impl SupportsFeatureResult {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Eq, PartialEq, Clone)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub enum SupportKind {
     /// The feature is enabled for the file
     Supported,
@@ -408,19 +411,21 @@ impl SupportKind {
 #[bitflags]
 #[repr(u8)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub enum FeatureKind {
     Format,
     Lint,
     OrganizeImports,
     Search,
-    Assists,
+    Assist,
     Debug,
 }
 
 #[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
 #[serde(
     from = "smallvec::SmallVec<[FeatureKind; 6]>",
-    into = "smallvec::SmallVec<[FeatureKind; 6]>"
+    into = "smallvec::SmallVec<[FeatureKind; 6]>",
+    rename_all = "camelCase"
 )]
 pub struct FeatureName(BitFlags<FeatureKind>);
 
@@ -493,8 +498,8 @@ impl FeaturesBuilder {
         self
     }
 
-    pub fn with_assists(mut self) -> Self {
-        self.0.insert(FeatureKind::Assists);
+    pub fn with_assist(mut self) -> Self {
+        self.0.insert(FeatureKind::Assist);
         self
     }
 
@@ -505,6 +510,7 @@ impl FeaturesBuilder {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct UpdateSettingsParams {
     pub configuration: PartialConfiguration,
     // @ematipico TODO: have a better data structure for this
@@ -516,6 +522,7 @@ pub struct UpdateSettingsParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct ProjectFeaturesParams {
     pub manifest_path: BiomePath,
 }
@@ -526,6 +533,7 @@ pub struct ProjectFeaturesResult {}
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct OpenFileParams {
     pub path: BiomePath,
     pub content: String,
@@ -534,6 +542,7 @@ pub struct OpenFileParams {
 }
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct SetManifestForProjectParams {
     pub manifest_path: BiomePath,
     pub content: String,
@@ -552,12 +561,14 @@ impl From<(BiomePath, String)> for SetManifestForProjectParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetSyntaxTreeParams {
     pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetSyntaxTreeResult {
     pub cst: String,
     pub ast: String,
@@ -565,6 +576,7 @@ pub struct GetSyntaxTreeResult {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetControlFlowGraphParams {
     pub path: BiomePath,
     pub cursor: TextSize,
@@ -578,12 +590,34 @@ pub struct GetFormatterIRParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetFileContentParams {
+    pub path: BiomePath,
+}
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct CheckFileSizeParams {
     pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct CheckFileSizeResult {
+    pub file_size: usize,
+    pub limit: usize,
+}
+
+impl CheckFileSizeResult {
+    pub fn is_too_large(&self) -> bool {
+        self.file_size >= self.limit
+    }
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct ChangeFileParams {
     pub path: BiomePath,
     pub content: String,
@@ -592,22 +626,30 @@ pub struct ChangeFileParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct CloseFileParams {
     pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct PullDiagnosticsParams {
     pub path: BiomePath,
     pub categories: RuleCategories,
     pub max_diagnostics: u64,
+    #[serde(default)]
     pub only: Vec<RuleSelector>,
+    #[serde(default)]
     pub skip: Vec<RuleSelector>,
+    /// Rules to apply on top of the configuration
+    #[serde(default)]
+    pub enabled_rules: Vec<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct PullDiagnosticsResult {
     pub diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     pub errors: usize,
@@ -616,21 +658,29 @@ pub struct PullDiagnosticsResult {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct PullActionsParams {
     pub path: BiomePath,
     pub range: Option<TextRange>,
+    pub suppression_reason: Option<String>,
+    #[serde(default)]
     pub only: Vec<RuleSelector>,
+    #[serde(default)]
     pub skip: Vec<RuleSelector>,
+    #[serde(default)]
+    pub enabled_rules: Vec<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct PullActionsResult {
     pub actions: Vec<CodeAction>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct CodeAction {
     pub category: ActionCategory,
     pub rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
@@ -639,12 +689,14 @@ pub struct CodeAction {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct FormatFileParams {
     pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct FormatRangeParams {
     pub path: BiomePath,
     pub range: TextRange,
@@ -652,6 +704,7 @@ pub struct FormatRangeParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct FormatOnTypeParams {
     pub path: BiomePath,
     pub offset: TextSize,
@@ -659,27 +712,39 @@ pub struct FormatOnTypeParams {
 
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 /// Which fixes should be applied during the analyzing phase
 pub enum FixFileMode {
     /// Applies [safe](biome_diagnostics::Applicability::Always) fixes
     SafeFixes,
     /// Applies [safe](biome_diagnostics::Applicability::Always) and [unsafe](biome_diagnostics::Applicability::MaybeIncorrect) fixes
     SafeAndUnsafeFixes,
+    /// Applies suppression comments to existing diagnostics when using `--suppress`
+    ApplySuppressions,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct FixFileParams {
     pub path: BiomePath,
     pub fix_file_mode: FixFileMode,
     pub should_format: bool,
+    #[serde(default)]
     pub only: Vec<RuleSelector>,
+    #[serde(default)]
     pub skip: Vec<RuleSelector>,
+    /// Rules to apply to the file
+    #[serde(default)]
+    pub enabled_rules: Vec<RuleSelector>,
     pub rule_categories: RuleCategories,
+    #[serde(default)]
+    pub suppression_reason: Option<String>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct FixFileResult {
     /// New source code for the file with all fixes applied
     pub code: String,
@@ -704,6 +769,7 @@ pub struct FixAction {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct RenameParams {
     pub path: BiomePath,
     pub symbol_at: TextSize,
@@ -712,6 +778,7 @@ pub struct RenameParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct RenameResult {
     /// Range of source code modified by this rename operation
     pub range: TextRange,
@@ -721,6 +788,7 @@ pub struct RenameResult {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct ServerInfo {
     /// The name of the server as defined by the server.
     pub name: String,
@@ -732,16 +800,19 @@ pub struct ServerInfo {
 
 #[derive(Copy, Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct RageParams {}
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct RageResult {
     pub entries: Vec<RageEntry>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub enum RageEntry {
     Section(String),
     Pair { name: String, value: MarkupBuf },
@@ -750,12 +821,14 @@ pub enum RageEntry {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct OrganizeImportsParams {
     pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct OrganizeImportsResult {
     pub code: String,
 }
@@ -783,18 +856,22 @@ impl RageEntry {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct ParsePatternParams {
     pub pattern: String,
+    pub default_language: GritTargetLanguage,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct ParsePatternResult {
     pub pattern_id: PatternId,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct SearchPatternParams {
     pub path: BiomePath,
     pub pattern: PatternId,
@@ -802,6 +879,7 @@ pub struct SearchPatternParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct SearchResults {
     pub file: BiomePath,
     pub matches: Vec<TextRange>,
@@ -809,12 +887,14 @@ pub struct SearchResults {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct DropPatternParams {
     pub pattern: PatternId,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct PatternId(String);
 
 impl std::fmt::Display for PatternId {
@@ -843,6 +923,7 @@ impl From<&str> for PatternId {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct IsPathIgnoredParams {
     pub biome_path: BiomePath,
     pub features: FeatureName,
@@ -864,6 +945,9 @@ pub struct UnregisterProjectFolderParams {
 }
 
 pub trait Workspace: Send + Sync + RefUnwindSafe {
+    /// Returns the filesystem implementation to open files with.
+    fn fs(&self) -> &dyn FileSystem;
+
     /// Checks whether a certain feature is supported. There are different conditions:
     /// - Biome doesn't recognize a file, so it can't provide the feature;
     /// - the feature is disabled inside the configuration;
@@ -922,6 +1006,12 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Return the content of a file
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError>;
+
+    /// Returns `true` if the size of the file is smaller than the configured limit, `false` if equals or greater.
+    fn check_file_size(
+        &self,
+        params: CheckFileSizeParams,
+    ) -> Result<CheckFileSizeResult, WorkspaceError>;
 
     /// Change the content of an open file
     fn change_file(&self, params: ChangeFileParams) -> Result<(), WorkspaceError>;
@@ -984,21 +1074,24 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 }
 
 /// Convenience function for constructing a server instance of [Workspace]
-pub fn server() -> Box<dyn Workspace> {
-    Box::new(server::WorkspaceServer::new())
+pub fn server(fs: Box<dyn FileSystem>) -> Box<dyn Workspace> {
+    Box::new(server::WorkspaceServer::new(fs))
 }
 
 /// Convenience function for constructing a server instance of [Workspace]
-pub fn server_sync() -> Arc<dyn Workspace> {
-    Arc::new(server::WorkspaceServer::new())
+pub fn server_sync(fs: Box<dyn FileSystem>) -> Arc<dyn Workspace> {
+    Arc::new(server::WorkspaceServer::new(fs))
 }
 
 /// Convenience function for constructing a client instance of [Workspace]
-pub fn client<T>(transport: T) -> Result<Box<dyn Workspace>, WorkspaceError>
+pub fn client<T>(
+    transport: T,
+    fs: Box<dyn FileSystem>,
+) -> Result<Box<dyn Workspace>, WorkspaceError>
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync + 'static,
 {
-    Ok(Box::new(client::WorkspaceClient::new(transport)?))
+    Ok(Box::new(client::WorkspaceClient::new(transport, fs)?))
 }
 
 /// [RAII](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization)
@@ -1057,6 +1150,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             max_diagnostics: max_diagnostics.into(),
             only,
             skip,
+            enabled_rules: vec![],
         })
     }
 
@@ -1065,17 +1159,27 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         range: Option<TextRange>,
         only: Vec<RuleSelector>,
         skip: Vec<RuleSelector>,
+        suppression_reason: Option<String>,
+        enabled_rules: Vec<RuleSelector>,
     ) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
             path: self.path.clone(),
             range,
             only,
             skip,
+            suppression_reason,
+            enabled_rules,
         })
     }
 
     pub fn format_file(&self) -> Result<Printed, WorkspaceError> {
         self.workspace.format_file(FormatFileParams {
+            path: self.path.clone(),
+        })
+    }
+
+    pub fn check_file_size(&self) -> Result<CheckFileSizeResult, WorkspaceError> {
+        self.workspace.check_file_size(CheckFileSizeParams {
             path: self.path.clone(),
         })
     }
@@ -1101,6 +1205,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         rule_categories: RuleCategories,
         only: Vec<RuleSelector>,
         skip: Vec<RuleSelector>,
+        suppression_reason: Option<String>,
     ) -> Result<FixFileResult, WorkspaceError> {
         self.workspace.fix_file(FixFileParams {
             path: self.path.clone(),
@@ -1109,6 +1214,8 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             only,
             skip,
             rule_categories,
+            suppression_reason,
+            enabled_rules: vec![],
         })
     }
 

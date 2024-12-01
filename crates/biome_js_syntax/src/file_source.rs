@@ -8,6 +8,7 @@ use std::{borrow::Cow, ffi::OsStr, path::Path};
 /// Defaults to the latest stable ECMAScript standard.
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum LanguageVersion {
     ES2022,
 
@@ -34,6 +35,7 @@ impl Default for LanguageVersion {
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 pub enum ModuleKind {
     /// An ECMAScript [Script](https://tc39.es/ecma262/multipage/ecmascript-language-scripts-and-modules.html#sec-scripts)
     Script,
@@ -56,6 +58,7 @@ impl ModuleKind {
 #[derive(
     Debug, Copy, Clone, Eq, PartialEq, Hash, Default, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 pub enum LanguageVariant {
     /// Standard JavaScript or TypeScript syntax without any extensions
     #[default]
@@ -84,6 +87,7 @@ impl LanguageVariant {
 #[derive(
     Debug, Copy, Clone, Eq, PartialEq, Default, Hash, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 pub enum Language {
     #[default]
     JavaScript,
@@ -281,10 +285,16 @@ impl JsFileSource {
                 }
             }
             Language::TypeScript { .. } => {
-                if matches!(self.variant, LanguageVariant::Jsx) {
-                    "tsx"
-                } else {
-                    "ts"
+                match self.variant {
+                    LanguageVariant::Standard => "ts",
+                    LanguageVariant::StandardRestricted => {
+                        // This could also be `mts`.
+                        // We choose `cts` because we expect this extension to be more widely used.
+                        // Moreover, it allows more valid syntax such as `import type` with import
+                        // attributes (See `noTypeOnlyImportAttributes` syntax rule).
+                        "cts"
+                    }
+                    LanguageVariant::Jsx => "tsx",
                 }
             }
         }

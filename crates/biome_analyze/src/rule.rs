@@ -1,17 +1,20 @@
 use crate::categories::{ActionCategory, RuleCategory};
 use crate::context::RuleContext;
 use crate::registry::{RegistryVisitor, RuleLanguage, RuleSuppressions};
-use crate::{Phase, Phases, Queryable, SuppressionAction, SuppressionCommentEmitterPayload};
+use crate::{
+    Phase, Phases, Queryable, SourceActionKind, SuppressionAction, SuppressionCommentEmitterPayload,
+};
 use biome_console::fmt::Display;
 use biome_console::{markup, MarkupBuf};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::location::AsSpan;
-use biome_diagnostics::Applicability;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
     Visit,
 };
+use biome_diagnostics::{Applicability, Severity};
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
+use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
@@ -38,6 +41,8 @@ pub struct RuleMetadata {
     pub sources: &'static [RuleSource],
     /// The source kind of the rule
     pub source_kind: Option<RuleSourceKind>,
+    /// The default severity of the rule
+    pub severity: Severity,
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -85,7 +90,7 @@ impl TryFrom<FixKind> for Applicability {
 }
 
 #[derive(Debug, Clone, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, schemars::JsonSchema))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum RuleSource {
     /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
@@ -118,7 +123,7 @@ pub enum RuleSource {
     EslintTypeScript(&'static str),
     /// Rules from [Eslint Plugin Unicorn](https://github.com/sindresorhus/eslint-plugin-unicorn)
     EslintUnicorn(&'static str),
-    /// Rules from  [Eslint Plugin Unused Imports](https://github.com/sweepline/eslint-plugin-unused-imports)
+    /// Rules from [Eslint Plugin Unused Imports](https://github.com/sweepline/eslint-plugin-unused-imports)
     EslintUnusedImports(&'static str),
     /// Rules from [Eslint Plugin Mysticatea](https://github.com/mysticatea/eslint-plugin)
     EslintMysticatea(&'static str),
@@ -126,8 +131,12 @@ pub enum RuleSource {
     EslintBarrelFiles(&'static str),
     /// Rules from [Eslint Plugin N](https://github.com/eslint-community/eslint-plugin-n)
     EslintN(&'static str),
+    /// Rules from [Eslint Plugin Next](https://github.com/vercel/next.js/tree/canary/packages/eslint-plugin-next)
+    EslintNext(&'static str),
     /// Rules from [Stylelint](https://github.com/stylelint/stylelint)
     Stylelint(&'static str),
+    /// Rules from [Eslint Plugin No Secrets](https://github.com/nickdeis/eslint-plugin-no-secrets)
+    EslintNoSecrets(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -158,7 +167,9 @@ impl std::fmt::Display for RuleSource {
             Self::EslintMysticatea(_) => write!(f, "@mysticatea/eslint-plugin"),
             Self::EslintBarrelFiles(_) => write!(f, "eslint-plugin-barrel-files"),
             Self::EslintN(_) => write!(f, "eslint-plugin-n"),
+            Self::EslintNext(_) => write!(f, "@next/eslint-plugin-next"),
             Self::Stylelint(_) => write!(f, "Stylelint"),
+            Self::EslintNoSecrets(_) => write!(f, "eslint-plugin-no-secrets"),
         }
     }
 }
@@ -207,6 +218,8 @@ impl RuleSource {
             | Self::EslintMysticatea(rule_name)
             | Self::EslintBarrelFiles(rule_name)
             | Self::EslintN(rule_name)
+            | Self::EslintNext(rule_name)
+            | Self::EslintNoSecrets(rule_name)
             | Self::Stylelint(rule_name) => rule_name,
         }
     }
@@ -231,7 +244,9 @@ impl RuleSource {
             Self::EslintMysticatea(rule_name) => format!("@mysticatea/{rule_name}"),
             Self::EslintBarrelFiles(rule_name) => format!("barrel-files/{rule_name}"),
             Self::EslintN(rule_name) => format!("n/{rule_name}"),
+            Self::EslintNext(rule_name) => format!("@next/{rule_name}"),
             Self::Stylelint(rule_name) => format!("stylelint/{rule_name}"),
+            Self::EslintNoSecrets(rule_name) => format!("no-secrets/{rule_name}"),
         }
     }
 
@@ -256,7 +271,9 @@ impl RuleSource {
             Self::EslintMysticatea(rule_name) => format!("https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintN(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-n/blob/master/docs/rules/{rule_name}.md"),
+            Self::EslintNext(rule_name) => format!("https://nextjs.org/docs/messages/{rule_name}"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
+            Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
         }
     }
 
@@ -280,7 +297,7 @@ impl RuleSource {
 }
 
 #[derive(Debug, Default, Clone, Copy)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, schemars::JsonSchema))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum RuleSourceKind {
     /// The rule implements the same logic of the source
@@ -313,6 +330,7 @@ impl RuleMetadata {
             fix_kind: FixKind::None,
             sources: &[],
             source_kind: None,
+            severity: Severity::Information,
         }
     }
 
@@ -349,10 +367,27 @@ impl RuleMetadata {
         self
     }
 
+    pub const fn severity(mut self, severity: Severity) -> Self {
+        self.severity = severity;
+        self
+    }
+
     pub fn applicability(&self) -> Applicability {
         self.fix_kind
             .try_into()
             .expect("Fix kind is not set in the rule metadata")
+    }
+
+    pub fn action_category(&self, category: RuleCategory, group: &'static str) -> ActionCategory {
+        match category {
+            RuleCategory::Lint => {
+                ActionCategory::QuickFix(Cow::Owned(format!("{}.{}", group, self.name)))
+            }
+            RuleCategory::Action => {
+                ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed(self.name)))
+            }
+            RuleCategory::Syntax | RuleCategory::Transformation => unimplemented!(""),
+        }
     }
 }
 
@@ -527,7 +562,7 @@ macro_rules! declare_source_rule {
         /// This macro returns the corresponding [ActionCategory] to use inside the [RuleAction]
         #[allow(unused_macros)]
         macro_rules! rule_action_category {
-            () => { ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed(concat!($language, ".", $name) )))  };
+            () => { ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed($name)))  };
         }
     };
 }
@@ -584,7 +619,7 @@ macro_rules! declare_lint_group {
 /// This macro is used by the codegen script to declare an analyzer rule group,
 /// and implement the [RuleGroup] trait for it
 #[macro_export]
-macro_rules! declare_assists_group {
+macro_rules! declare_assist_group {
     ( $vis:vis $id:ident { name: $name:tt, rules: [ $( $( $rule:ident )::* , )* ] } ) => {
         $vis enum $id {}
 
@@ -609,7 +644,7 @@ macro_rules! declare_assists_group {
         // "lint" prefix, the name of this group, and the rule name argument
         #[allow(unused_macros)]
         macro_rules! group_category {
-            ( $rule_name:tt ) => { $crate::category_concat!( "assists", $name, $rule_name ) };
+            ( $rule_name:tt ) => { $crate::category_concat!( "assist", $name, $rule_name ) };
         }
 
         // Re-export the macro for child modules, so `declare_rule!` can access
@@ -788,8 +823,8 @@ pub trait Rule: RuleMeta + Sized {
     /// *Note: For `noUnusedVariables` the above may not seem very useful (and
     /// indeed it's not implemented), but for rules such as
     /// `useExhaustiveDependencies` this is actually desirable.*
-    fn instances_for_signal(_signal: &Self::State) -> Vec<String> {
-        Vec::new()
+    fn instances_for_signal(_signal: &Self::State) -> Box<[Box<str>]> {
+        Vec::new().into_boxed_slice()
     }
 
     /// Used by the analyzer to associate a range of source text to a signal in
@@ -863,12 +898,46 @@ pub trait Rule: RuleMeta + Sized {
         None
     }
 
+    fn top_level_suppression(
+        ctx: &RuleContext<Self>,
+        suppression_action: &dyn SuppressionAction<Language = RuleLanguage<Self>>,
+    ) -> Option<SuppressAction<RuleLanguage<Self>>>
+    where
+        Self: 'static,
+    {
+        if <Self::Group as RuleGroup>::Category::CATEGORY == RuleCategory::Lint {
+            let rule_category = format!(
+                "lint/{}/{}",
+                <Self::Group as RuleGroup>::NAME,
+                Self::METADATA.name
+            );
+            let suppression_text = format!("biome-ignore-all {rule_category}");
+            let root = ctx.root();
+
+            if let Some(first_token) = root.syntax().first_token() {
+                let mut mutation = root.begin();
+                suppression_action.apply_top_level_suppression(
+                    &mut mutation,
+                    first_token,
+                    suppression_text.as_str(),
+                );
+                return Some(SuppressAction {
+                    mutation,
+                    message: markup! { "Suppress rule " {rule_category} " for the whole file."}
+                        .to_owned(),
+                });
+            }
+        }
+        None
+    }
+
     /// Create a code action that allows to suppress the rule. The function
     /// returns the node to which the suppression comment is applied.
-    fn suppress(
+    fn inline_suppression(
         ctx: &RuleContext<Self>,
         text_range: &TextRange,
         suppression_action: &dyn SuppressionAction<Language = RuleLanguage<Self>>,
+        suppression_reason: Option<&str>,
     ) -> Option<SuppressAction<RuleLanguage<Self>>>
     where
         Self: 'static,
@@ -884,11 +953,12 @@ pub trait Rule: RuleMeta + Sized {
             let root = ctx.root();
             let token = root.syntax().token_at_offset(text_range.start());
             let mut mutation = root.begin();
-            suppression_action.apply_suppression_comment(SuppressionCommentEmitterPayload {
+            suppression_action.inline_suppression(SuppressionCommentEmitterPayload {
                 suppression_text: suppression_text.as_str(),
                 mutation: &mut mutation,
                 token_offset: token,
                 diagnostic_text_range: text_range,
+                suppression_reason: suppression_reason.unwrap_or("<explanation>"),
             });
 
             Some(SuppressAction {
@@ -910,7 +980,7 @@ pub trait Rule: RuleMeta + Sized {
 }
 
 /// Diagnostic object returned by a single analysis rule
-#[derive(Debug, Diagnostic)]
+#[derive(Clone, Debug, Diagnostic)]
 pub struct RuleDiagnostic {
     #[category]
     pub(crate) category: &'static Category,
@@ -925,7 +995,7 @@ pub struct RuleDiagnostic {
     pub(crate) rule_advice: RuleAdvice,
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 /// It contains possible advices to show when printing a diagnostic that belong to the rule
 pub struct RuleAdvice {
     pub(crate) details: Vec<Detail>,
@@ -934,7 +1004,7 @@ pub struct RuleAdvice {
     pub(crate) code_suggestion_list: Vec<CodeSuggestionAdvice<MarkupBuf>>,
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct SuggestionList {
     pub(crate) message: MarkupBuf,
     pub(crate) list: Vec<MarkupBuf>,
@@ -976,7 +1046,7 @@ impl Advices for RuleAdvice {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Detail {
     pub log_category: LogCategory,
     pub message: MarkupBuf,
@@ -1021,6 +1091,14 @@ impl RuleDiagnostic {
         self
     }
 
+    /// Marks this diagnostic as verbose.
+    ///
+    /// The diagnostic will only be shown when using the `--verbose` argument.
+    pub fn verbose(mut self) -> Self {
+        self.tags |= DiagnosticTags::VERBOSE;
+        self
+    }
+
     /// Attaches a label to this [`RuleDiagnostic`].
     ///
     /// The given span has to be in the file that was provided while creating this [`RuleDiagnostic`].
@@ -1053,17 +1131,18 @@ impl RuleDiagnostic {
 
     /// It creates a new footer note which contains a message and a list of possible suggestions.
     /// Useful when there's need to suggest a list of things inside a diagnostic.
-    pub fn footer_list(mut self, message: impl Display, list: &[impl Display]) -> Self {
-        if !list.is_empty() {
-            self.rule_advice.suggestion_list = Some(SuggestionList {
-                message: markup! { {message} }.to_owned(),
-                list: list
-                    .iter()
-                    .map(|msg| markup! { {msg} }.to_owned())
-                    .collect(),
-            });
-        }
-
+    pub fn footer_list(
+        mut self,
+        message: impl Display,
+        list: impl IntoIterator<Item = impl Display>,
+    ) -> Self {
+        self.rule_advice.suggestion_list = Some(SuggestionList {
+            message: markup! { {message} }.to_owned(),
+            list: list
+                .into_iter()
+                .map(|msg| markup! {{msg}}.to_owned())
+                .collect(),
+        });
         self
     }
 

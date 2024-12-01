@@ -13,6 +13,7 @@ version              = "0.5.7"
 [dependencies]
 biome_analyze            = { workspace = true }
 biome_aria               = { workspace = true }
+biome_aria_metadata      = { workspace = true }
 biome_console            = { workspace = true }
 biome_control_flow       = { workspace = true }
 biome_deserialize        = { workspace = true, features = ["smallvec"] }
@@ -28,6 +29,7 @@ biome_suppression        = { workspace = true }
 biome_unicode_table      = { workspace = true }
 bitvec                   = "1.0.1"
 enumflags2               = { workspace = true }
+globset                  = { workspace = true }
 natord                   = { workspace = true }
 regex                    = { workspace = true }
 roaring                  = "0.10.6"
@@ -37,13 +39,15 @@ serde                    = { workspace = true, features = ["derive"] }
 smallvec                 = { workspace = true }
 
 [dev-dependencies]
-biome_js_parser  = { path = "../biome_js_parser", features = ["tests"] }
-biome_test_utils = { path = "../biome_test_utils" }
-insta            = { workspace = true, features = ["glob"] }
-tests_macros     = { path = "../tests_macros" }
+biome_fs            = { workspace = true }
+biome_js_parser     = { path = "../biome_js_parser", features = ["tests"] }
+biome_plugin_loader = { workspace = true }
+biome_test_utils    = { path = "../biome_test_utils" }
+insta               = { workspace = true, features = ["glob"] }
+tests_macros        = { path = "../tests_macros" }
 
 [features]
-schema = ["schemars", "biome_deserialize/schema"]
+schema = ["schemars"]
 
 [lints]
 workspace = true

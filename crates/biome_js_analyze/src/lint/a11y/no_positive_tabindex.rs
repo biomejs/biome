@@ -4,6 +4,7 @@ use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_factory::make::{jsx_string, jsx_string_literal};
 use biome_js_semantic::SemanticModel;
@@ -53,6 +54,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("tabindex-no-positive")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -108,7 +110,7 @@ impl AnyNumberLikeExpression {
             }
             AnyNumberLikeExpression::JsUnaryExpression(unary_expression) => {
                 if unary_expression.is_signed_numeric_literal().ok()? {
-                    return Some(unary_expression.text());
+                    return Some(unary_expression.to_trimmed_string());
                 }
             }
         }
@@ -194,7 +196,7 @@ impl Rule for NoPositiveTabindex {
         };
 
         Some(JsRuleAction::new(
-            biome_analyze::ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Replace the "<Emphasis>"tableIndex"</Emphasis>" prop value with 0." }
                 .to_owned(),

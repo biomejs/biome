@@ -3,6 +3,7 @@ use crate::services::semantic::SemanticServices;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     AnyJsFunction, JsFileSource, Language, TextRange, TsAsExpression, TsReferenceType,
 };
@@ -12,6 +13,19 @@ declare_lint_rule! {
     /// Prevents the usage of variables that haven't been declared inside the document.
     ///
     /// If you need to allow-list some global bindings, you can use the [`javascript.globals`](/reference/configuration/#javascriptglobals) configuration.
+    ///
+    /// ## Options (Since v2.0.0)
+    ///
+    /// The rule provides a `checkTypes` option that make the rule checks undeclared types.
+    /// The option defaults to `true`.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "checkTypes": true
+    ///     }
+    /// }
+    /// ```
     ///
     /// ## Examples
     ///
@@ -41,9 +55,9 @@ declare_lint_rule! {
 
 impl Rule for NoUndeclaredVariables {
     type Query = SemanticServices;
-    type State = (TextRange, String);
-    type Signals = Vec<Self::State>;
-    type Options = ();
+    type State = (TextRange, Box<str>);
+    type Signals = Box<[Self::State]>;
+    type Options = UndeclaredVariablesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         ctx.query()
@@ -87,11 +101,16 @@ impl Rule for NoUndeclaredVariables {
                     return None;
                 }
 
+                if !ctx.options().check_types && identifier.is_only_type() {
+                    return None;
+                }
+
                 let span = token.text_trimmed_range();
-                let text = text.to_string();
+                let text = text.to_string().into_boxed_str();
                 Some((span, text))
             })
-            .collect()
+            .collect::<Vec<_>>()
+            .into_boxed_slice()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, (span, name): &Self::State) -> Option<RuleDiagnostic> {
@@ -99,11 +118,24 @@ impl Rule for NoUndeclaredVariables {
             rule_category!(),
             *span,
             markup! {
-                "The "<Emphasis>{name}</Emphasis>" variable is undeclared."
+                "The "<Emphasis>{name.as_ref()}</Emphasis>" variable is undeclared."
             },
         ).note(markup! {
             "By default, Biome recognizes browser and Node.js globals.\nYou can ignore more globals using the "<Hyperlink href="https://biomejs.dev/reference/configuration/#javascriptglobals">"javascript.globals"</Hyperlink>" configuration."
         }))
+    }
+}
+
+#[derive(Clone, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(default, rename_all = "camelCase")]
+pub struct UndeclaredVariablesOptions {
+    /// Check undeclared types.
+    check_types: bool,
+}
+impl Default for UndeclaredVariablesOptions {
+    fn default() -> Self {
+        Self { check_types: true }
     }
 }
 

@@ -9,7 +9,7 @@
         setId,
     } = privateNamesMap.get(name);
 
-		// rome-ignore format: test
+		// biome-ignore format: test
 		const {
 			id, static: isStatic, method: isMethod,
 			methodId, getId, setId,
@@ -18,7 +18,7 @@
     const { id1, method: isMethod1, methodId1 } = privateNamesMap.get(name);
 
 		const { id1, method: isMethod1, methodId1 } =
-			// rome-ignore format: test
+			// biome-ignore format: test
 			privateNamesMap.get(name);
 
     const {
@@ -27,12 +27,12 @@
         methodId3,
     } = anodyneCondosMalateOverateRetinol.get(bifornCringerMoshedPerplexSawder);
 
-		// rome-ignore format: test
+		// biome-ignore format: test
 		const {
 			id3, method: isMethod3,
 			methodId3,
 		} =
-			// rome-ignore format: test
+			// biome-ignore format: test
 			anodyneCondosMalateOverateRetinol.get(
 			bifornCringerMoshedPerplexSawder
 		);
@@ -49,11 +49,11 @@ const loooooooooooooooooooooooooong4 =
 	void void "looooooooooooooooooooooooooooooooooooooooooog";
 const loooooooooooooooooooooooooong5 =
 	!!"looooooooooooooooooooooooooooooooooooooooooog";
-// rome-ignore format: test
+// biome-ignore format: test
 const   loooooooooooooooooooooooooong6    =
 	void    "looooooooooooooooooooooooooooooooooooooooooog";
 const loooooooooooooooooooooooooong7    =
-	// rome-ignore format: test
+	// biome-ignore format: test
 	!      "looooooooooooooooooooooooooooooooooooooooooog";
 
 //poorly breakable member or call chain (break after operator layout)
@@ -259,7 +259,7 @@ let looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 
 const a
-	// rome-ignore format: Ignore the initializer
+	// biome-ignore format: Ignore the initializer
 				=
 
 			[A,    B,   C].push( aaa )

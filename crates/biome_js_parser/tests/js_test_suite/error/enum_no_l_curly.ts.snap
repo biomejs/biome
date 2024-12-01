@@ -1,0 +1,116 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+enum;
+enum A;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsEnumDeclaration {
+            const_token: missing (optional),
+            enum_token: ENUM_KW@0..4 "enum" [] [],
+            id: missing (required),
+            l_curly_token: missing (required),
+            members: TsEnumMemberList [],
+            r_curly_token: missing (required),
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@4..5 ";" [] [],
+        },
+        TsEnumDeclaration {
+            const_token: missing (optional),
+            enum_token: ENUM_KW@5..11 "enum" [Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@11..12 "A" [] [],
+            },
+            l_curly_token: missing (required),
+            members: TsEnumMemberList [],
+            r_curly_token: missing (required),
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@12..13 ";" [] [],
+        },
+    ],
+    eof_token: EOF@13..14 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..14
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..13
+    0: TS_ENUM_DECLARATION@0..4
+      0: (empty)
+      1: ENUM_KW@0..4 "enum" [] []
+      2: (empty)
+      3: (empty)
+      4: TS_ENUM_MEMBER_LIST@4..4
+      5: (empty)
+    1: JS_EMPTY_STATEMENT@4..5
+      0: SEMICOLON@4..5 ";" [] []
+    2: TS_ENUM_DECLARATION@5..12
+      0: (empty)
+      1: ENUM_KW@5..11 "enum" [Newline("\n")] [Whitespace(" ")]
+      2: JS_IDENTIFIER_BINDING@11..12
+        0: IDENT@11..12 "A" [] []
+      3: (empty)
+      4: TS_ENUM_MEMBER_LIST@12..12
+      5: (empty)
+    3: JS_EMPTY_STATEMENT@12..13
+      0: SEMICOLON@12..13 ";" [] []
+  4: EOF@13..14 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+enum_no_l_curly.ts:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `enum` statements must have a name
+  
+  > 1 │ enum;
+      │ ^^^^
+    2 │ enum A;
+    3 │ 
+  
+enum_no_l_curly.ts:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `;`
+  
+  > 1 │ enum;
+      │     ^
+    2 │ enum A;
+    3 │ 
+  
+  i Remove ;
+  
+enum_no_l_curly.ts:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `;`
+  
+    1 │ enum;
+  > 2 │ enum A;
+      │       ^
+    3 │ 
+  
+  i Remove ;
+  
+```

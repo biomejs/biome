@@ -1,9 +1,9 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{is_negation, AnyJsExpression, JsInExpression, JsInstanceofExpression};
 use biome_rowan::{declare_node_union, AstNode, AstNodeExt, BatchMutationExt};
@@ -38,6 +38,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-unsafe-negation")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -126,7 +127,7 @@ impl Rule for NoUnsafeNegation {
         }
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Wrap the expression with a parenthesis" }.to_owned(),
             mutation,

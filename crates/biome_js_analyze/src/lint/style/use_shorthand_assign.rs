@@ -1,6 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -81,9 +80,11 @@ impl Rule for UseShorthandAssign {
         let right = node.right().ok()?;
 
         let left_var_name = match left.as_any_js_assignment()? {
-            AnyJsAssignment::JsComputedMemberAssignment(assignment) => assignment.text(),
-            AnyJsAssignment::JsIdentifierAssignment(assignment) => assignment.text(),
-            AnyJsAssignment::JsStaticMemberAssignment(assignment) => assignment.text(),
+            AnyJsAssignment::JsComputedMemberAssignment(assignment) => {
+                assignment.to_trimmed_string()
+            }
+            AnyJsAssignment::JsIdentifierAssignment(assignment) => assignment.to_trimmed_string(),
+            AnyJsAssignment::JsStaticMemberAssignment(assignment) => assignment.to_trimmed_string(),
             _ => return None,
         };
 
@@ -151,7 +152,7 @@ impl Rule for UseShorthandAssign {
         mutation.replace_node(node.clone(), shorthand_node);
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use "<Emphasis>""{shorthand_operator.to_string()?}""</Emphasis>" instead." }
                 .to_owned(),

@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::stmt_ext::CssBlockLike;
+use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -47,6 +48,7 @@ declare_lint_rule! {
         name: "noEmptyBlock",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("block-no-empty")],
     }
 }

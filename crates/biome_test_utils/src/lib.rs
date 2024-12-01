@@ -1,5 +1,5 @@
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
-use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules};
+use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
 use biome_configuration::PartialConfiguration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
@@ -31,19 +31,13 @@ pub fn create_analyzer_options(
     input_file: &Path,
     diagnostics: &mut Vec<String>,
 ) -> AnalyzerOptions {
-    let options = AnalyzerOptions {
-        file_path: input_file.to_path_buf(),
-        ..Default::default()
-    };
+    let options = AnalyzerOptions::default().with_file_path(input_file.to_path_buf());
     // We allow a test file to configure its rule using a special
     // file with the same name as the test but with extension ".options.json"
     // that configures that specific rule.
-    let mut analyzer_configuration = AnalyzerConfiguration {
-        rules: AnalyzerRules::default(),
-        globals: vec![],
-        preferred_quote: PreferredQuote::Double,
-        jsx_runtime: Some(JsxRuntime::Transparent),
-    };
+    let mut analyzer_configuration = AnalyzerConfiguration::default()
+        .with_preferred_quote(PreferredQuote::Double)
+        .with_jsx_runtime(JsxRuntime::Transparent);
     let options_file = input_file.with_extension("options.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
         let deserialized = biome_deserialize::json::deserialize_from_json_str::<PartialConfiguration>(
@@ -68,52 +62,57 @@ pub fn create_analyzer_options(
         } else {
             let configuration = deserialized.into_deserialized().unwrap_or_default();
             let mut settings = Settings::default();
-            analyzer_configuration.preferred_quote = configuration
-                .javascript
-                .as_ref()
-                .and_then(|js| js.formatter.as_ref())
-                .and_then(|f| {
-                    f.quote_style.map(|quote_style| {
-                        if quote_style.is_double() {
-                            PreferredQuote::Double
-                        } else {
-                            PreferredQuote::Single
-                        }
+            analyzer_configuration = analyzer_configuration.with_preferred_quote(
+                configuration
+                    .javascript
+                    .as_ref()
+                    .and_then(|js| js.formatter.as_ref())
+                    .and_then(|f| {
+                        f.quote_style.map(|quote_style| {
+                            if quote_style.is_double() {
+                                PreferredQuote::Double
+                            } else {
+                                PreferredQuote::Single
+                            }
+                        })
                     })
-                })
-                .unwrap_or_default();
+                    .unwrap_or_default(),
+            );
 
             use biome_configuration::javascript::JsxRuntime::*;
-            analyzer_configuration.jsx_runtime = match configuration
-                .javascript
-                .as_ref()
-                .and_then(|js| js.jsx_runtime)
-                .unwrap_or_default()
-            {
-                ReactClassic => Some(JsxRuntime::ReactClassic),
-                Transparent => Some(JsxRuntime::Transparent),
-            };
-            analyzer_configuration.globals = configuration
-                .javascript
-                .as_ref()
-                .and_then(|js| {
-                    js.globals
-                        .as_ref()
-                        .map(|globals| globals.iter().cloned().collect())
-                })
-                .unwrap_or_default();
+            analyzer_configuration = analyzer_configuration.with_jsx_runtime(
+                match configuration
+                    .javascript
+                    .as_ref()
+                    .and_then(|js| js.jsx_runtime)
+                    .unwrap_or_default()
+                {
+                    ReactClassic => JsxRuntime::ReactClassic,
+                    Transparent => JsxRuntime::Transparent,
+                },
+            );
+            analyzer_configuration = analyzer_configuration.with_globals(
+                configuration
+                    .javascript
+                    .as_ref()
+                    .and_then(|js| {
+                        js.globals
+                            .as_ref()
+                            .map(|globals| globals.iter().cloned().collect())
+                    })
+                    .unwrap_or_default(),
+            );
 
             settings
                 .merge_with_configuration(configuration, None, None, &[])
                 .unwrap();
-            analyzer_configuration.rules = to_analyzer_rules(&settings, input_file);
+
+            analyzer_configuration =
+                analyzer_configuration.with_rules(to_analyzer_rules(&settings, input_file));
         }
     }
 
-    AnalyzerOptions {
-        configuration: analyzer_configuration,
-        ..options
-    }
+    options.with_configuration(analyzer_configuration)
 }
 
 pub fn load_manifest(input_file: &Path, diagnostics: &mut Vec<String>) -> Option<PackageJson> {
@@ -204,13 +203,19 @@ pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerActi
 /// corresponding to the directory name. E.g., `style/useWhile/test.js`
 /// will be analyzed with just the `style/useWhile` rule.
 pub fn parse_test_path(file: &Path) -> (&str, &str) {
-    let rule_folder = file.parent().unwrap();
-    let rule_name = rule_folder.file_name().unwrap();
+    let mut group_name = "";
+    let mut rule_name = "";
 
-    let group_folder = rule_folder.parent().unwrap();
-    let group_name = group_folder.file_name().unwrap();
+    for component in file.iter().rev() {
+        if component == "specs" || component == "suppression" || component == "plugin" {
+            break;
+        }
 
-    (group_name.to_str().unwrap(), rule_name.to_str().unwrap())
+        rule_name = group_name;
+        group_name = component.to_str().unwrap_or_default();
+    }
+
+    (group_name, rule_name)
 }
 
 /// This check is used in the parser test to ensure it doesn't emit

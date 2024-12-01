@@ -3,6 +3,7 @@ use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsCallExpression, JsExpressionStatement};
 use biome_rowan::AstNode;
 
@@ -34,6 +35,7 @@ declare_lint_rule! {
         name: "noRenderReturnValue",
         language: "jsx",
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

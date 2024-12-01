@@ -1,6 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::*;
 use biome_rowan::{declare_node_union, AstNode};
 
@@ -130,6 +131,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-unsafe-finally")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

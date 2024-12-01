@@ -19,6 +19,7 @@ impl FormatNodeRule<TsSetterSignatureClassMember> for FormatTsSetterSignatureCla
             name,
             l_paren_token,
             parameter,
+            comma_token,
             r_paren_token,
             semicolon_token,
         } = node.as_fields();
@@ -33,6 +34,7 @@ impl FormatNodeRule<TsSetterSignatureClassMember> for FormatTsSetterSignatureCla
                 name.format(),
                 l_paren_token.format(),
                 parameter.format(),
+                comma_token.format(),
                 r_paren_token.format(),
                 FormatOptionalSemicolon::new(semicolon_token.as_ref())
             ]

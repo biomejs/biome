@@ -16,7 +16,6 @@ let a = <caption role="button" />;
 let a = <dd role="button" />;
 let a = <details role="button" />;
 let a = <dir role="button" />;
-let a = <dl role="button" />;
 let a = <dfn role="button" />;
 let a = <dt role="button" />;
 let a = <fieldset role="button" />;

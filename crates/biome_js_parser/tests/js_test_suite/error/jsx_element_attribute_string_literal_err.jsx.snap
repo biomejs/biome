@@ -1,0 +1,204 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+function Comp() {
+	return (
+		<a
+			rel="
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@9..13 "Comp" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@13..14 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@14..16 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@16..17 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [
+                    JsReturnStatement {
+                        return_token: RETURN_KW@17..26 "return" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                        argument: JsParenthesizedExpression {
+                            l_paren_token: L_PAREN@26..27 "(" [] [],
+                            expression: JsBogusExpression {
+                                items: [
+                                    JsBogus {
+                                        items: [
+                                            JsBogus {
+                                                items: [
+                                                    L_ANGLE@27..31 "<" [Newline("\n"), Whitespace("\t\t")] [],
+                                                    JsxName {
+                                                        value_token: JSX_IDENT@31..32 "a" [] [],
+                                                    },
+                                                    JsBogus {
+                                                        items: [
+                                                            JsxAttribute {
+                                                                name: JsxName {
+                                                                    value_token: JSX_IDENT@32..39 "rel" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                                                },
+                                                                initializer: JsxAttributeInitializerClause {
+                                                                    eq_token: EQ@39..40 "=" [] [],
+                                                                    value: missing (required),
+                                                                },
+                                                            },
+                                                            JsBogus {
+                                                                items: [
+                                                                    ERROR_TOKEN@40..42 "\"\n" [] [],
+                                                                ],
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                            JsxChildList [],
+                                            JsxClosingElement {
+                                                l_angle_token: missing (required),
+                                                slash_token: missing (required),
+                                                name: missing (required),
+                                                r_angle_token: missing (required),
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            r_paren_token: missing (required),
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                ],
+                r_curly_token: missing (required),
+            },
+        },
+    ],
+    eof_token: EOF@42..42 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..42
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..42
+    0: JS_FUNCTION_DECLARATION@0..42
+      0: (empty)
+      1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@9..13
+        0: IDENT@9..13 "Comp" [] []
+      4: (empty)
+      5: JS_PARAMETERS@13..16
+        0: L_PAREN@13..14 "(" [] []
+        1: JS_PARAMETER_LIST@14..14
+        2: R_PAREN@14..16 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@16..42
+        0: L_CURLY@16..17 "{" [] []
+        1: JS_DIRECTIVE_LIST@17..17
+        2: JS_STATEMENT_LIST@17..42
+          0: JS_RETURN_STATEMENT@17..42
+            0: RETURN_KW@17..26 "return" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+            1: JS_PARENTHESIZED_EXPRESSION@26..42
+              0: L_PAREN@26..27 "(" [] []
+              1: JS_BOGUS_EXPRESSION@27..42
+                0: JS_BOGUS@27..42
+                  0: JS_BOGUS@27..42
+                    0: L_ANGLE@27..31 "<" [Newline("\n"), Whitespace("\t\t")] []
+                    1: JSX_NAME@31..32
+                      0: JSX_IDENT@31..32 "a" [] []
+                    2: JS_BOGUS@32..42
+                      0: JSX_ATTRIBUTE@32..40
+                        0: JSX_NAME@32..39
+                          0: JSX_IDENT@32..39 "rel" [Newline("\n"), Whitespace("\t\t\t")] []
+                        1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@39..40
+                          0: EQ@39..40 "=" [] []
+                          1: (empty)
+                      1: JS_BOGUS@40..42
+                        0: ERROR_TOKEN@40..42 "\"\n" [] []
+                  1: JSX_CHILD_LIST@42..42
+                  2: JSX_CLOSING_ELEMENT@42..42
+                    0: (empty)
+                    1: (empty)
+                    2: (empty)
+                    3: (empty)
+              2: (empty)
+            2: (empty)
+        3: (empty)
+  4: EOF@42..42 "" [] []
+
+```
+
+## Diagnostics
+
+```
+jsx_element_attribute_string_literal_err.jsx:4:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a JSX attribute value but instead found '"
+    '.
+  
+    2 │ 	return (
+    3 │ 		<a
+  > 4 │ 			rel="
+      │ 			    ^
+  > 5 │ 
+      │ 
+  
+  i Expected a JSX attribute value here.
+  
+    2 │ 	return (
+    3 │ 		<a
+  > 4 │ 			rel="
+      │ 			    ^
+  > 5 │ 
+      │ 
+  
+jsx_element_attribute_string_literal_err.jsx:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unterminated string literal
+  
+    3 │ 		<a
+    4 │ 			rel="
+  > 5 │ 
+      │ 
+  
+  i input ends here
+  
+    3 │ 		<a
+    4 │ 			rel="
+  > 5 │ 
+      │ 
+  
+  i string literal starts here
+  
+    2 │ 	return (
+    3 │ 		<a
+  > 4 │ 			rel="
+      │ 			    ^
+    5 │ 
+  
+```

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module/import/bracket-spacing/import_bracket_spacing.js
+snapshot_kind: text
 ---
 # Input
 
@@ -18,12 +19,12 @@ import {
 
 import TheDefault, {  named} from 'foo';
 
-import {  named} from 'foo' assert {
+import {  named} from 'foo' with {
 
     type :   "json"
 };
 
-import "very_long_import_very_long_import_very" assert {
+import "very_long_import_very_long_import_very" with {
     // something good is here
     "type": /****/ "json"
         }
@@ -35,6 +36,7 @@ import {foo as bar   } from "foo";
 import {   foo as baz,   aaa} from "foo";
 
 import(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, {assert: {type:'json'}})
+
 ```
 
 
@@ -67,9 +69,9 @@ import { adsadasdasdasdasdasdasdasdasdasdas, b, c } from "W";
 
 import TheDefault, { named } from "foo";
 
-import { named } from "foo" assert { type: "json" };
+import { named } from "foo" with { type: "json" };
 
-import "very_long_import_very_long_import_very" assert {
+import "very_long_import_very_long_import_very" with {
 	// something good is here
 	type: /****/ "json",
 };
@@ -115,9 +117,9 @@ import {adsadasdasdasdasdasdasdasdasdasdas, b, c} from "W";
 
 import TheDefault, {named} from "foo";
 
-import {named} from "foo" assert {type: "json"};
+import {named} from "foo" with {type: "json"};
 
-import "very_long_import_very_long_import_very" assert {
+import "very_long_import_very_long_import_very" with {
 	// something good is here
 	type: /****/ "json",
 };

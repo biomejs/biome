@@ -285,10 +285,8 @@ fn parse_not(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_pattern_arg_list(p: &mut GritParser) -> ParsedSyntax {
-    let m = p.start();
+fn parse_variable_list(p: &mut GritParser) {
     VariableList.parse_list(p);
-    Present(m.complete(p, GRIT_PATTERN_ARG_LIST))
 }
 
 #[inline]

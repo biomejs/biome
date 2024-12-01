@@ -1,8 +1,8 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsClass, AnyJsConstructorParameter, AnyJsFormalParameter,
     JsCallExpression, JsConstructorClassMember,
@@ -123,6 +123,7 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("no-useless-constructor"),
         ],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -214,7 +215,7 @@ impl Rule for NoUselessConstructor {
         let mut mutation = ctx.root().begin();
         mutation.remove_node(constructor.clone());
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the unnecessary constructor." }.to_owned(),
             mutation,

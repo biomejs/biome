@@ -1,16 +1,26 @@
+mod css_target_language;
 mod js_target_language;
 
+pub use css_target_language::CssTargetLanguage;
 pub use js_target_language::JsTargetLanguage;
 
+use std::borrow::Cow;
+use std::path::Path;
+use std::str::FromStr;
+
+use grit_util::{AnalysisLogs, Ast, CodeRange, EffectRange, Language, Parser, SnippetTree};
+use serde::{Deserialize, Serialize};
+
+use biome_grit_syntax::{GritLanguageDeclaration, GritSyntaxKind};
+use biome_parser::AnyParse;
+use biome_rowan::SyntaxKind;
+use biome_string_case::StrOnlyExtension;
+
+use crate::grit_css_parser::GritCssParser;
 use crate::grit_js_parser::GritJsParser;
 use crate::grit_target_node::{GritTargetNode, GritTargetSyntaxKind};
 use crate::grit_tree::GritTargetTree;
 use crate::CompileError;
-use biome_parser::AnyParse;
-use biome_rowan::SyntaxKind;
-use grit_util::{AnalysisLogs, Ast, CodeRange, EffectRange, Language, Parser, SnippetTree};
-use std::borrow::Cow;
-use std::path::Path;
 
 /// Generates the `GritTargetLanguage` enum.
 ///
@@ -19,7 +29,7 @@ use std::path::Path;
 /// implement the slightly more convenient [`GritTargetLanguageImpl`] for
 /// creating language-specific implementations.
 macro_rules! generate_target_language {
-    ($([$language:ident, $parser:ident]),+) => {
+    ($([$language:ident, $parser:ident, $name:literal]),+) => {
         #[derive(Clone, Debug)]
         pub enum GritTargetLanguage {
             $($language($language)),+
@@ -30,6 +40,54 @@ macro_rules! generate_target_language {
                 Self::$language(value)
             }
         })+
+
+        impl Serialize for GritTargetLanguage {
+            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: serde::Serializer,
+            {
+                match self {
+                    $(Self::$language(_) => Serialize::serialize($name, serializer)),+
+                }
+            }
+        }
+
+        impl<'de> Deserialize<'de> for GritTargetLanguage {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                Self::from_str(String::deserialize(deserializer)?.as_str())
+                    .map_err(serde::de::Error::custom)
+            }
+        }
+
+        impl FromStr for GritTargetLanguage {
+            type Err = String;
+
+            fn from_str(string: &str) -> Result<Self, Self::Err> {
+                match string.to_lowercase_cow() {
+                    $(name if $name.to_lowercase_cow() == name => Ok(Self::$language($language))),+,
+                    other => Err(format!("Unexpected target language: {other}")),
+                }
+            }
+        }
+
+        #[cfg(feature = "schema")]
+        impl schemars::JsonSchema for GritTargetLanguage {
+            fn schema_name() -> String {
+                "GritTargetLanguage".to_owned()
+            }
+
+            fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+                schemars::schema::Schema::Object(schemars::schema::SchemaObject {
+                    enum_values: Some(vec![
+                        $(serde_json::json!($name)),+
+                    ]),
+                    ..Default::default()
+                })
+            }
+        }
 
         impl GritTargetLanguage {
             fn metavariable_kind(&self) -> GritTargetSyntaxKind {
@@ -101,7 +159,7 @@ macro_rules! generate_target_language {
 
             fn language_name(&self) -> &'static str {
                 match self {
-                    $(Self::$language(language) => language.language_name()),+
+                    $(Self::$language(_) => $name),+
                 }
             }
 
@@ -147,13 +205,31 @@ macro_rules! generate_target_language {
 }
 
 generate_target_language! {
-    [JsTargetLanguage, GritJsParser]
+    [CssTargetLanguage, GritCssParser, "CSS"],
+    [JsTargetLanguage, GritJsParser, "JavaScript"]
+}
+
+impl Default for GritTargetLanguage {
+    fn default() -> Self {
+        Self::JsTargetLanguage(JsTargetLanguage)
+    }
 }
 
 impl GritTargetLanguage {
+    /// Returns the target language based on the language declaration given
+    /// inside a Grit pattern.
+    pub fn from_declaration(language_decl: &GritLanguageDeclaration) -> Option<Self> {
+        match language_decl.name().ok()?.language_kind().ok()?.kind() {
+            GritSyntaxKind::CSS_KW => Some(Self::CssTargetLanguage(CssTargetLanguage)),
+            GritSyntaxKind::JS_KW => Some(Self::JsTargetLanguage(JsTargetLanguage)),
+            _ => None,
+        }
+    }
+
     /// Returns the target language to use for the given file extension.
     pub fn from_extension(extension: &str) -> Option<Self> {
         match extension {
+            "css" => Some(Self::CssTargetLanguage(CssTargetLanguage)),
             "cjs" | "js" | "jsx" | "mjs" | "ts" | "tsx" => {
                 Some(Self::JsTargetLanguage(JsTargetLanguage))
             }
@@ -187,19 +263,30 @@ impl GritTargetLanguage {
 
     pub fn parse_snippet_contexts(&self, source: &str) -> Vec<SnippetTree<GritTargetTree>> {
         let source = self.substitute_metavariable_prefix(source);
-        self.snippet_context_strings()
-            .iter()
-            .map(|(pre, post)| self.get_parser().parse_snippet(pre, &source, post))
-            .filter(|result| {
-                result
-                    .tree
+
+        let mut snippet_trees: Vec<SnippetTree<GritTargetTree>> = Vec::new();
+        for (pre, post) in self.snippet_context_strings() {
+            let parse_result = self.get_parser().parse_snippet(pre, &source, post);
+
+            let has_errors = parse_result
+                .tree
+                .root_node()
+                .descendants()
+                .any(|descendant| descendant.kind().is_bogus());
+            if has_errors {
+                continue;
+            }
+
+            if !snippet_trees.iter().any(|tree| {
+                tree.tree
                     .root_node()
-                    .descendants()
-                    .map_or(false, |mut descendants| {
-                        !descendants.any(|descendant| descendant.kind().is_bogus())
-                    })
-            })
-            .collect()
+                    .matches_kinds_recursively_with(&parse_result.tree.root_node())
+            }) {
+                snippet_trees.push(parse_result);
+            }
+        }
+
+        snippet_trees
     }
 }
 
@@ -209,8 +296,6 @@ impl GritTargetLanguage {
 /// forcing them to reimplement methods that are common across implementations.
 trait GritTargetLanguageImpl {
     type Kind: SyntaxKind;
-
-    fn language_name(&self) -> &'static str;
 
     /// Returns the syntax kind for a node by name.
     ///
@@ -336,6 +421,8 @@ pub trait GritTargetParser: Parser<Tree = GritTargetTree> {
         path: Option<&Path>,
         logs: &mut AnalysisLogs,
     ) -> Option<GritTargetTree>;
+
+    fn parse_with_path(&self, source: &str, path: &Path) -> AnyParse;
 }
 
 #[derive(Clone, Debug)]

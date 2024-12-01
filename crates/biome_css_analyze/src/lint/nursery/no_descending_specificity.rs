@@ -4,6 +4,7 @@ use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnosti
 use biome_console::markup;
 use biome_css_semantic::model::{Rule as CssSemanticRule, RuleId, SemanticModel, Specificity};
 use biome_css_syntax::{AnyCssSelector, CssRoot};
+use biome_diagnostics::Severity;
 use biome_rowan::TextRange;
 
 use biome_rowan::AstNode;
@@ -76,6 +77,7 @@ declare_lint_rule! {
         name: "noDescendingSpecificity",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("no-descending-specificity")],
     }
 }
@@ -163,7 +165,7 @@ fn find_descending_selector(
 impl Rule for NoDescendingSpecificity {
     type Query = Semantic<CssRoot>;
     type State = DescendingSelector;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -180,8 +182,7 @@ impl Rule for NoDescendingSpecificity {
                 &mut descending_selectors,
             );
         }
-
-        descending_selectors
+        descending_selectors.into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {

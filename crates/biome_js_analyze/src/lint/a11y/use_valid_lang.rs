@@ -1,7 +1,8 @@
-use crate::services::aria::Aria;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_aria_metadata::{is_valid_country, is_valid_language};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
 declare_lint_rule! {
@@ -34,6 +35,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("lang")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -49,7 +51,7 @@ pub struct UseValidLangState {
 }
 
 impl Rule for UseValidLang {
-    type Query = Aria<AnyJsxElement>;
+    type Query = Ast<AnyJsxElement>;
     type State = UseValidLangState;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -65,12 +67,12 @@ impl Rule for UseValidLang {
             let mut split_value = attribute_text.split('-');
             match (split_value.next(), split_value.next()) {
                 (Some(language), Some(country)) => {
-                    if !ctx.is_valid_iso_language(language) {
+                    if !is_valid_language(language) {
                         return Some(UseValidLangState {
                             attribute_range: attribute_value.range(),
                             invalid_kind: InvalidKind::Language,
                         });
-                    } else if !ctx.is_valid_iso_country(country) {
+                    } else if !is_valid_country(country) {
                         return Some(UseValidLangState {
                             attribute_range: attribute_value.range(),
                             invalid_kind: InvalidKind::Country,
@@ -84,7 +86,7 @@ impl Rule for UseValidLang {
                 }
 
                 (Some(language), None) => {
-                    if !ctx.is_valid_iso_language(language) {
+                    if !is_valid_language(language) {
                         return Some(UseValidLangState {
                             attribute_range: attribute_value.range(),
                             invalid_kind: InvalidKind::Language,
@@ -98,7 +100,7 @@ impl Rule for UseValidLang {
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let mut diagnostic = RuleDiagnostic::new(
             rule_category!(),
             state.attribute_range,
@@ -108,7 +110,7 @@ impl Rule for UseValidLang {
         );
         diagnostic = match state.invalid_kind {
             InvalidKind::Language => {
-                let languages = ctx.iso_language_list();
+                let languages = biome_aria_metadata::languages();
                 let languages = if languages.len() > 15 {
                     &languages[..15]
                 } else {
@@ -118,7 +120,7 @@ impl Rule for UseValidLang {
                 diagnostic.footer_list("Some of valid languages:", languages)
             }
             InvalidKind::Country => {
-                let countries = ctx.iso_country_list();
+                let countries = biome_aria_metadata::countries();
                 let countries = if countries.len() > 15 {
                     &countries[..15]
                 } else {

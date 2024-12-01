@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsUnaryOperator,
     TsEnumDeclaration,
@@ -69,13 +70,14 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("prefer-literal-enum-member")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
 impl Rule for UseLiteralEnumMembers {
     type Query = Ast<TsEnumDeclaration>;
     type State = TextRange;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -83,13 +85,13 @@ impl Rule for UseLiteralEnumMembers {
         let mut result = Vec::new();
         let mut enum_member_names = FxHashSet::default();
         let Ok(enum_name) = enum_declaration.id() else {
-            return result;
+            return result.into_boxed_slice();
         };
         let Some(enum_name) = enum_name
             .as_js_identifier_binding()
             .and_then(|x| x.name_token().ok())
         else {
-            return result;
+            return result.into_boxed_slice();
         };
         let enum_name = enum_name.text_trimmed();
         for enum_member in enum_declaration.members() {
@@ -111,7 +113,7 @@ impl Rule for UseLiteralEnumMembers {
                 }
             }
         }
-        result
+        result.into_boxed_slice()
     }
 
     fn diagnostic(

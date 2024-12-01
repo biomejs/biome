@@ -2,15 +2,16 @@
 mod test {
     use biome_analyze::RuleCategories;
     use biome_configuration::analyzer::{RuleGroup, RuleSelector};
-    use biome_fs::BiomePath;
+    use biome_fs::{BiomePath, MemoryFileSystem};
     use biome_js_syntax::{JsFileSource, TextSize};
     use biome_service::file_handlers::DocumentFileSource;
     use biome_service::workspace::{
         server, FileGuard, OpenFileParams, RegisterProjectFolderParams,
     };
     use biome_service::Workspace;
+
     fn create_server() -> Box<dyn Workspace> {
-        let workspace = server();
+        let workspace = server(Box::new(MemoryFileSystem::default()));
         workspace
             .register_project_folder(RegisterProjectFolderParams {
                 set_as_current_workspace: true,
@@ -239,7 +240,7 @@ type User {
             RuleCategories::all(),
             10,
             vec![RuleSelector::Rule(
-                RuleGroup::Nursery,
+                RuleGroup::Nursery.as_str(),
                 "useDeprecatedReason",
             )],
             vec![],
@@ -247,5 +248,29 @@ type User {
         assert!(result.is_ok());
         let diagnostics = result.unwrap().diagnostics;
         assert_eq!(diagnostics.len(), 1)
+    }
+
+    #[test]
+    fn pull_grit_debug_info() {
+        let workspace = create_server();
+
+        let grit_file = FileGuard::open(
+            workspace.as_ref(),
+            OpenFileParams {
+                path: BiomePath::new("file.grit"),
+                content: r#"`function ($args) { $body }` where {
+  $args <: contains `x`
+}"#
+                .into(),
+                version: 0,
+                document_file_source: None,
+            },
+        )
+        .unwrap();
+        let result = grit_file.get_syntax_tree();
+        assert!(result.is_ok());
+        let syntax = result.unwrap().ast;
+
+        assert!(syntax.starts_with("GritRoot"))
     }
 }

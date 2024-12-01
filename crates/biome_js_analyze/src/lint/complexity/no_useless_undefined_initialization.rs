@@ -1,6 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make::js_variable_declarator_list;
@@ -60,8 +59,8 @@ declare_lint_rule! {
 
 impl Rule for NoUselessUndefinedInitialization {
     type Query = Ast<JsVariableStatement>;
-    type State = (String, TextRange);
-    type Signals = Vec<Self::State>;
+    type State = (Box<str>, TextRange);
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -69,13 +68,13 @@ impl Rule for NoUselessUndefinedInitialization {
 
         let mut signals = vec![];
         let Ok(node) = statement.declaration() else {
-            return signals;
+            return signals.into_boxed_slice();
         };
 
         let let_or_var_kind = node.is_let() || node.is_var();
 
         if !let_or_var_kind {
-            return signals;
+            return signals.into_boxed_slice();
         }
 
         for declarator in node.declarators() {
@@ -95,14 +94,14 @@ impl Rule for NoUselessUndefinedInitialization {
 
             if keyword.is_undefined() {
                 let decl_range = initializer.range();
-                let Some(binding_name) = decl.id().ok().map(|id| id.text()) else {
+                let Some(binding_name) = decl.id().ok().map(|id| id.to_trimmed_string()) else {
                     continue;
                 };
-                signals.push((binding_name, decl_range));
+                signals.push((binding_name.into(), decl_range));
             }
         }
 
-        signals
+        signals.into_boxed_slice()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -110,7 +109,7 @@ impl Rule for NoUselessUndefinedInitialization {
             rule_category!(),
             state.1,
             markup! {
-                "It's not necessary to initialize "<Emphasis>{state.0}</Emphasis>" to undefined."
+                "It's not necessary to initialize "<Emphasis>{state.0.as_ref()}</Emphasis>" to undefined."
             }).note("A variable that is declared and not initialized to any value automatically gets the value of undefined.")
         )
     }
@@ -126,7 +125,17 @@ impl Rule for NoUselessUndefinedInitialization {
             .clone()
             .into_iter()
             .filter_map(|declarator| declarator.ok())
-            .find(|decl| decl.id().is_ok_and(|id| id.text() == state.0))?;
+            .find(|decl| {
+                decl.id()
+                    .ok()
+                    .and_then(|id| {
+                        id.as_any_js_binding()?
+                            .as_js_identifier_binding()?
+                            .name_token()
+                            .ok()
+                    })
+                    .is_some_and(|id| id.text_trimmed() == state.0.as_ref())
+            })?;
 
         let current_initializer = current_declaration.initializer()?;
 
@@ -182,7 +191,7 @@ impl Rule for NoUselessUndefinedInitialization {
         mutation.replace_node_discard_trivia(assignment_statement, new_node);
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove undefined initialization." }.to_owned(),
             mutation,

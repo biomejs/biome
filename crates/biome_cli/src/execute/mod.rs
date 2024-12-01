@@ -21,10 +21,10 @@ use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::adapters::SerdeJsonError;
 use biome_diagnostics::{category, Category};
 use biome_fs::BiomePath;
+use biome_grit_patterns::GritTargetLanguage;
 use biome_service::workspace::{
     FeatureName, FeaturesBuilder, FixFileMode, FormatFileParams, OpenFileParams, PatternId,
 };
-use std::borrow::Borrow;
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
@@ -71,7 +71,7 @@ impl Execution {
                 .with_organize_imports()
                 .with_formatter()
                 .with_linter()
-                .with_assists()
+                .with_assist()
                 .build(),
             TraversalMode::Migrate { .. } => FeatureName::empty(),
             TraversalMode::Search { .. } => FeaturesBuilder::new().with_search().build(),
@@ -115,6 +115,12 @@ pub struct VcsTargeted {
     pub changed: bool,
 }
 
+impl From<(bool, bool)> for VcsTargeted {
+    fn from((staged, changed): (bool, bool)) -> Self {
+        Self { staged, changed }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum TraversalMode {
     /// This mode is enabled when running the command `biome check`
@@ -151,6 +157,10 @@ pub enum TraversalMode {
         skip: Vec<RuleSelector>,
         /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
         vcs_targeted: VcsTargeted,
+        /// Supress existing diagnostics with a `// biome-ignore` comment
+        suppress: bool,
+        /// Explanation for suppressing diagnostics with `--suppress` and `--reason`
+        suppression_reason: Option<String>,
     },
     /// This mode is enabled when running the command `biome ci`
     CI {
@@ -188,6 +198,15 @@ pub enum TraversalMode {
         ///
         /// Note that the search command does not support rewrites.
         pattern: PatternId,
+
+        /// The language to query for.
+        ///
+        /// Grit queries are specific to the grammar of the language they
+        /// target, so we currently do not support writing queries that apply
+        /// to multiple languages at once.
+        ///
+        /// If none given, the default language is JavaScript.
+        language: Option<GritTargetLanguage>,
 
         /// An optional tuple.
         /// 1. The virtual path to the file
@@ -549,7 +568,7 @@ pub fn execute_mode(
                 };
                 reporter.write(&mut GitLabReporterVisitor::new(
                     console,
-                    session.app.fs.borrow().working_directory(),
+                    session.app.workspace.fs().working_directory(),
                 ))?;
             }
             ReportMode::Junit => {

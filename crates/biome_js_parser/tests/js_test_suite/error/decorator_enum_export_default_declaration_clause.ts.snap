@@ -1,0 +1,149 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+@decorator
+export default enum A { X, Y, Z }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsBogusStatement {
+            items: [
+                JsDecorator {
+                    at_token: AT@0..1 "@" [] [],
+                    expression: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@1..10 "decorator" [] [],
+                        },
+                    },
+                },
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecoratorList [],
+                EXPORT_KW@10..18 "export" [Newline("\n")] [Whitespace(" ")],
+                JsBogus {
+                    items: [
+                        DEFAULT_KW@18..26 "default" [] [Whitespace(" ")],
+                        TsEnumDeclaration {
+                            const_token: missing (optional),
+                            enum_token: ENUM_KW@26..31 "enum" [] [Whitespace(" ")],
+                            id: JsIdentifierBinding {
+                                name_token: IDENT@31..33 "A" [] [Whitespace(" ")],
+                            },
+                            l_curly_token: L_CURLY@33..35 "{" [] [Whitespace(" ")],
+                            members: TsEnumMemberList [
+                                TsEnumMember {
+                                    name: TsLiteralEnumMemberName {
+                                        value: IDENT@35..36 "X" [] [],
+                                    },
+                                    initializer: missing (optional),
+                                },
+                                COMMA@36..38 "," [] [Whitespace(" ")],
+                                TsEnumMember {
+                                    name: TsLiteralEnumMemberName {
+                                        value: IDENT@38..39 "Y" [] [],
+                                    },
+                                    initializer: missing (optional),
+                                },
+                                COMMA@39..41 "," [] [Whitespace(" ")],
+                                TsEnumMember {
+                                    name: TsLiteralEnumMemberName {
+                                        value: IDENT@41..43 "Z" [] [Whitespace(" ")],
+                                    },
+                                    initializer: missing (optional),
+                                },
+                            ],
+                            r_curly_token: R_CURLY@43..44 "}" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@44..45 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..45
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..44
+    0: JS_BOGUS_STATEMENT@0..10
+      0: JS_DECORATOR@0..10
+        0: AT@0..1 "@" [] []
+        1: JS_IDENTIFIER_EXPRESSION@1..10
+          0: JS_REFERENCE_IDENTIFIER@1..10
+            0: IDENT@1..10 "decorator" [] []
+    1: JS_BOGUS_STATEMENT@10..44
+      0: JS_DECORATOR_LIST@10..10
+      1: EXPORT_KW@10..18 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_BOGUS@18..44
+        0: DEFAULT_KW@18..26 "default" [] [Whitespace(" ")]
+        1: TS_ENUM_DECLARATION@26..44
+          0: (empty)
+          1: ENUM_KW@26..31 "enum" [] [Whitespace(" ")]
+          2: JS_IDENTIFIER_BINDING@31..33
+            0: IDENT@31..33 "A" [] [Whitespace(" ")]
+          3: L_CURLY@33..35 "{" [] [Whitespace(" ")]
+          4: TS_ENUM_MEMBER_LIST@35..43
+            0: TS_ENUM_MEMBER@35..36
+              0: TS_LITERAL_ENUM_MEMBER_NAME@35..36
+                0: IDENT@35..36 "X" [] []
+              1: (empty)
+            1: COMMA@36..38 "," [] [Whitespace(" ")]
+            2: TS_ENUM_MEMBER@38..39
+              0: TS_LITERAL_ENUM_MEMBER_NAME@38..39
+                0: IDENT@38..39 "Y" [] []
+              1: (empty)
+            3: COMMA@39..41 "," [] [Whitespace(" ")]
+            4: TS_ENUM_MEMBER@41..43
+              0: TS_LITERAL_ENUM_MEMBER_NAME@41..43
+                0: IDENT@41..43 "Z" [] [Whitespace(" ")]
+              1: (empty)
+          5: R_CURLY@43..44 "}" [] []
+  4: EOF@44..45 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+decorator_enum_export_default_declaration_clause.ts:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+  > 1 │ @decorator
+      │ ^^^^^^^^^^
+    2 │ export default enum A { X, Y, Z }
+    3 │ 
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+decorator_enum_export_default_declaration_clause.ts:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'export default' isn't allowed for 'enum's. Move the 'enum' declaration in its own statement and then export the enum's name.
+  
+    1 │ @decorator
+  > 2 │ export default enum A { X, Y, Z }
+      │                ^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+```

@@ -73,4 +73,11 @@ a {
     }
 }
 
+:root {
+	--colors-gray-a7: black;
+	/* The formatter breaks the line */
+	--broken-shadow: 0px 0px 1px
+	var(--colors-gray-a7);
+}
+
 ```
