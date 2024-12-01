@@ -2372,6 +2372,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownAtRule": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownPseudoClass": {
 					"description": "Disallow unknown pseudo-class selectors.",
 					"anyOf": [
