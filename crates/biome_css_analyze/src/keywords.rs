@@ -5735,6 +5735,70 @@ pub(crate) const MATH_ML_TAGS: [&str; 32] = [
     "semantics",
 ];
 
+// https://www.w3.org/TR/css-nesting-1/#conditionals
+pub(crate) const CONDITIONAL_AT_RULES: [&str; 6] = [
+    "container",
+    "layer",
+    "media",
+    "scope",
+    "starting-style",
+    "supports",
+];
+
+// https://www.w3.org/TR/css-page-3/#syntax-page-selector
+pub const PAGE_MARGIN_AT_KEYWORDS: [&str; 16] = [
+    "top-left-corner",
+    "top-left",
+    "top-center",
+    "top-right",
+    "top-right-corner",
+    "bottom-left-corner",
+    "bottom-left",
+    "bottom-center",
+    "bottom-right",
+    "bottom-right-corner",
+    "left-top",
+    "left-middle",
+    "left-bottom",
+    "right-top",
+    "right-middle",
+    "right-bottom",
+];
+
+// https://www.w3.org/TR/css-fonts-4/#font-feature-values-font-feature-value-type
+pub const FONT_FEATURE_VALUE_TYPES: [&str; 7] = [
+    "annotation",
+    "character-variant",
+    "historical-forms",
+    "ornaments",
+    "styleset",
+    "stylistic",
+    "swash",
+];
+
+// https://developer.mozilla.org/en/docs/Web/CSS/At-rule
+pub const AT_RULES_KEYWORDS: [&str; 19] = [
+    "apply",
+    "charset",
+    "counter-style",
+    "custom-media",
+    "custom-selector",
+    "document",
+    "font-face",
+    "font-feature-values",
+    "font-palette-values",
+    "import",
+    "keyframes",
+    "namespace",
+    "nest",
+    "page",
+    "position-try",
+    "property",
+    "scroll-timeline",
+    "view-transition",
+    "viewport",
+];
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
@@ -6125,5 +6189,40 @@ mod tests {
         for items in MATH_ML_TAGS.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
+    }
+
+    #[test]
+    fn test_conditional_at_rules_sorted() {
+        let sorted = CONDITIONAL_AT_RULES.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(CONDITIONAL_AT_RULES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_page_margin_at_keywords_sorted() {
+        let sorted = PAGE_MARGIN_AT_KEYWORDS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(PAGE_MARGIN_AT_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_feature_value_types_sorted() {
+        let sorted = FONT_FEATURE_VALUE_TYPES.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(FONT_FEATURE_VALUE_TYPES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_feature_value_types_unique() {
+        let mut set = HashSet::new();
+        let has_duplicates = FONT_FEATURE_VALUE_TYPES.iter().any(|&x| !set.insert(x));
+        assert!(!has_duplicates);
+    }
+
+    #[test]
+    fn test_at_rules_keywords_sorted() {
+        let sorted = AT_RULES_KEYWORDS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(AT_RULES_KEYWORDS, sorted.as_slice());
     }
 }
