@@ -57,17 +57,17 @@ importers:
         version: 1.9.4
     devDependencies:
       '@types/node':
-        specifier: 20.17.7
-        version: 20.17.7
+        specifier: 20.17.9
+        version: 20.17.9
       typescript:
         specifier: 5.7.2
         version: 5.7.2
       vite:
         specifier: 5.4.11
-        version: 5.4.11(@types/node@20.17.7)
+        version: 5.4.11(@types/node@20.17.9)
       vitest:
         specifier: 1.6.0
-        version: 1.6.0(@types/node@20.17.7)(happy-dom@15.11.6)
+        version: 1.6.0(@types/node@20.17.9)(happy-dom@15.11.7)
 
   packages/@biomejs/biome:
     optionalDependencies:
@@ -128,10 +128,10 @@ importers:
         version: 5.7.2
       vite:
         specifier: 5.4.11
-        version: 5.4.11(@types/node@20.17.7)
+        version: 5.4.11(@types/node@20.17.9)
       vitest:
         specifier: 1.6.0
-        version: 1.6.0(@types/node@20.17.7)(happy-dom@15.11.6)
+        version: 1.6.0(@types/node@20.17.9)(happy-dom@15.11.7)
 
   packages/@biomejs/wasm-bundler: {}
 
@@ -142,8 +142,8 @@ importers:
   packages/aria-data:
     dependencies:
       happy-dom:
-        specifier: ^15.11.6
-        version: 15.11.6
+        specifier: ^15.11.7
+        version: 15.11.7
 
   packages/tailwindcss-config-analyzer:
     dependencies:
@@ -152,8 +152,8 @@ importers:
         version: 3.4.15
     devDependencies:
       '@types/bun':
-        specifier: 1.1.13
-        version: 1.1.13
+        specifier: 1.1.14
+        version: 1.1.14
       read-package-up:
         specifier: 11.0.0
         version: 11.0.0
@@ -589,8 +589,8 @@ packages:
   '@sinclair/typebox@0.27.8':
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
 
-  '@types/bun@1.1.13':
-    resolution: {integrity: sha512-KmQxSBgVWCl6RSuerlLGZlIWfdxkKqat0nxN61+qu4y1KDn0Ll3j7v1Pl8GnaL3a/U6GGWVTJh75ap62kR1E8Q==}
+  '@types/bun@1.1.14':
+    resolution: {integrity: sha512-opVYiFGtO2af0dnWBdZWlioLBoxSdDO5qokaazLhq8XQtGZbY4pY3/JxY8Zdf/hEwGubbp7ErZXoN1+h2yesxA==}
 
   '@types/estree@1.0.6':
     resolution: {integrity: sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw==}
@@ -601,8 +601,8 @@ packages:
   '@types/node@20.12.12':
     resolution: {integrity: sha512-eWLDGF/FOSPtAvEqeRAQ4C8LSA7M1I7i0ky1I8U7kD1J5ITyW3AsRhQrKVoWf5pFKZ2kILsEGJhsI9r93PYnOw==}
 
-  '@types/node@20.17.7':
-    resolution: {integrity: sha512-sZXXnpBFMKbao30dUAvzKbdwA2JM1fwUtVEq/kxKuPI5mMwZiRElCpTXb0Biq/LMEVpXDZL5G5V0RPnxKeyaYg==}
+  '@types/node@20.17.9':
+    resolution: {integrity: sha512-0JOXkRyLanfGPE2QRCwgxhzlBAvaRdCNMcvbd7jFfpmD4eEXll7LRwy5ymJmyeZqk7Nh7eD2LeUyQ68BbndmXw==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -791,8 +791,8 @@ packages:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
 
-  bun-types@1.1.34:
-    resolution: {integrity: sha512-br5QygTEL/TwB4uQOb96Ky22j4Gq2WxWH/8Oqv20fk5HagwKXo/akB+LiYgSfzexCt6kkcUaVm+bKiPl71xPvw==}
+  bun-types@1.1.37:
+    resolution: {integrity: sha512-C65lv6eBr3LPJWFZ2gswyrGZ82ljnH8flVE03xeXxKhi2ZGtFiO4isRKTKnitbSqtRAcaqYSR6djt1whI66AbA==}
 
   cac@6.7.14:
     resolution: {integrity: sha512-b6Ilus+c3RrdDk+JhLKUAQfzzgLEPy6wcXqS7f/xe1EETvsDP6GORG7SFuOs6cID5YkqchW/LXZbX5bc8j7ZcQ==}
@@ -1057,8 +1057,8 @@ packages:
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
-  happy-dom@15.11.6:
-    resolution: {integrity: sha512-elX7iUTu+5+3b2+NGQc0L3eWyq9jKhuJJ4GpOMxxT/c2pg9O3L5H3ty2VECX0XXZgRmmRqXyOK8brA2hDI6LsQ==}
+  happy-dom@15.11.7:
+    resolution: {integrity: sha512-KyrFvnl+J9US63TEzwoiJOQzZBJY7KgBushJA8X61DMbNsH+2ONkDuLDnCnwUiPTF42tLoEmrPyoqbenVA5zrg==}
     engines: {node: '>=18.0.0'}
 
   has-flag@3.0.0:
@@ -1996,9 +1996,9 @@ snapshots:
 
   '@sinclair/typebox@0.27.8': {}
 
-  '@types/bun@1.1.13':
+  '@types/bun@1.1.14':
     dependencies:
-      bun-types: 1.1.34
+      bun-types: 1.1.37
 
   '@types/estree@1.0.6': {}
 
@@ -2008,7 +2008,7 @@ snapshots:
     dependencies:
       undici-types: 5.26.5
 
-  '@types/node@20.17.7':
+  '@types/node@20.17.9':
     dependencies:
       undici-types: 6.19.8
 
@@ -2016,7 +2016,7 @@ snapshots:
 
   '@types/ws@8.5.10':
     dependencies:
-      '@types/node': 20.17.7
+      '@types/node': 20.17.9
 
   '@typescript-eslint/eslint-plugin@8.15.0(@typescript-eslint/parser@8.3.0(eslint@9.15.0(jiti@1.21.6))(typescript@5.7.2))(eslint@9.15.0(jiti@1.21.6))(typescript@5.7.2)':
     dependencies:
@@ -2225,7 +2225,7 @@ snapshots:
     dependencies:
       fill-range: 7.1.1
 
-  bun-types@1.1.34:
+  bun-types@1.1.37:
     dependencies:
       '@types/node': 20.12.12
       '@types/ws': 8.5.10
@@ -2537,7 +2537,7 @@ snapshots:
 
   graphemer@1.4.0: {}
 
-  happy-dom@15.11.6:
+  happy-dom@15.11.7:
     dependencies:
       entities: 4.5.0
       webidl-conversions: 7.0.0
@@ -3056,13 +3056,13 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
-  vite-node@1.6.0(@types/node@20.17.7):
+  vite-node@1.6.0(@types/node@20.17.9):
     dependencies:
       cac: 6.7.14
       debug: 4.3.7
       pathe: 1.1.2
       picocolors: 1.0.0
-      vite: 5.4.11(@types/node@20.17.7)
+      vite: 5.4.11(@types/node@20.17.9)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -3074,16 +3074,16 @@ snapshots:
       - supports-color
       - terser
 
-  vite@5.4.11(@types/node@20.17.7):
+  vite@5.4.11(@types/node@20.17.9):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.47
       rollup: 4.23.0
     optionalDependencies:
-      '@types/node': 20.17.7
+      '@types/node': 20.17.9
       fsevents: 2.3.3
 
-  vitest@1.6.0(@types/node@20.17.7)(happy-dom@15.11.6):
+  vitest@1.6.0(@types/node@20.17.9)(happy-dom@15.11.7):
     dependencies:
       '@vitest/expect': 1.6.0
       '@vitest/runner': 1.6.0
@@ -3102,12 +3102,12 @@ snapshots:
       strip-literal: 2.1.0
       tinybench: 2.9.0
       tinypool: 0.8.4
-      vite: 5.4.11(@types/node@20.17.7)
-      vite-node: 1.6.0(@types/node@20.17.7)
+      vite: 5.4.11(@types/node@20.17.9)
+      vite-node: 1.6.0(@types/node@20.17.9)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 20.17.7
-      happy-dom: 15.11.6
+      '@types/node': 20.17.9
+      happy-dom: 15.11.7
     transitivePeerDependencies:
       - less
       - lightningcss
