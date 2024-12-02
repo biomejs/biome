@@ -48,7 +48,7 @@ pub(crate) fn run<'a>(
             workspace.open_file(OpenFileParams {
                 path: biome_path.clone(),
                 version: 0,
-                content: content.into(),
+                content: Some(content.into()),
                 document_file_source: None,
             })?;
             let printed = workspace.format_file(FormatFileParams {
@@ -80,7 +80,7 @@ pub(crate) fn run<'a>(
         workspace.open_file(OpenFileParams {
             path: biome_path.clone(),
             version: 0,
-            content: content.into(),
+            content: Some(content.into()),
             document_file_source: None,
         })?;
         // apply fix file of the linter

@@ -40,7 +40,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
                 document_file_source: None,
                 path: biome_path,
                 version: 0,
-                content: input.clone(),
+                content: Some(input.clone()),
             },
         )
         .with_file_path_and_code(path.display().to_string(), category!("internalError/fs"))?;

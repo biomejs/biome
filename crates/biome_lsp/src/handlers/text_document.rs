@@ -31,7 +31,7 @@ pub(crate) async fn did_open(
     session.workspace.open_file(OpenFileParams {
         path: biome_path,
         version,
-        content,
+        content: Some(content),
         document_file_source: Some(language_hint),
     })?;
 

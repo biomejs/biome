@@ -1181,6 +1181,7 @@ dependencies = [
  "biome_string_case",
  "biome_text_edit",
  "bpaf",
+ "crossbeam",
  "enumflags2",
  "getrandom 0.2.15",
  "ignore",
@@ -1188,6 +1189,7 @@ dependencies = [
  "insta",
  "oxc_resolver",
  "papaya",
+ "rayon",
  "regex",
  "rustc-hash 2.0.0",
  "schemars",
@@ -2809,9 +2811,9 @@ dependencies = [
 
 [[package]]
 name = "papaya"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71addb3836918693eecf8aa0f1c578798246b12c4d1171a079c53433fad72706"
+checksum = "d5f8bc4fcfb351caef53d5b5d449a9e44ae910b78f58187d9a19ece1dbeaa045"
 dependencies = [
  "seize",
 ]

@@ -1,6 +1,6 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
-use crate::execute::Stdin;
+use crate::execute::{ReportMode, Stdin};
 use crate::logging::LoggingKind;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, LoggingLevel, VERSION,
@@ -822,6 +822,17 @@ pub(crate) trait CommandRunner: Sized {
         })?;
 
         let execution = self.get_execution(cli_options, console, workspace)?;
+
+        if execution.traversal_mode().should_scan_project() {
+            let result = workspace.scan_project_folder()?;
+            if cli_options.verbose && matches!(execution.report_mode(), ReportMode::Terminal { .. })
+            {
+                console.log(markup! {
+                    <Info>"Scanned project folder in "<Emphasis>{result.duration}</Emphasis></Info>
+                });
+            }
+        }
+
         Ok((execution, paths))
     }
 

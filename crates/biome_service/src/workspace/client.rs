@@ -18,8 +18,9 @@ use super::{
     ChangeFileParams, CloseFileParams, FixFileParams, FixFileResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, PullActionsParams, PullActionsResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult, SearchPatternParams,
-    SearchResults, SupportsFeatureParams, UpdateSettingsParams,
+    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult,
+    ScanProjectFolderResult, SearchPatternParams, SearchResults, SupportsFeatureParams,
+    UpdateSettingsParams,
 };
 
 pub struct WorkspaceClient<T> {
@@ -138,6 +139,10 @@ where
         params: RegisterProjectFolderParams,
     ) -> Result<ProjectKey, WorkspaceError> {
         self.request("biome/register_project_folder", params)
+    }
+
+    fn scan_project_folder(&self) -> Result<ScanProjectFolderResult, WorkspaceError> {
+        self.request("biome/scan_project_folder", ())
     }
 
     fn unregister_project_folder(

@@ -29,6 +29,8 @@ pub enum WorkspaceError {
     DirtyWorkspace(DirtyWorkspace),
     /// The file does not exist in the [crate::Workspace]
     NotFound(NotFound),
+    /// A task panicked.
+    Panic(Panic),
     /// A file is not supported. It contains the language and path of the file
     /// Use this error if Biome is trying to process a file that Biome can't understand
     SourceFileNotSupported(SourceFileNotSupported),
@@ -46,6 +48,8 @@ pub enum WorkspaceError {
     CantReadFile(CantReadFile),
     /// Error thrown when validating the configuration. Once deserialized, further checks have to be done.
     Configuration(ConfigurationDiagnostic),
+    /// An operation is attempted on the registered project, but there is no registered project.
+    NoProject(NoProject),
     /// Error thrown when Biome cannot rename a symbol.
     RenameError(RenameError),
     /// Error emitted by the underlying transport layer for a remote Workspace
@@ -77,6 +81,12 @@ impl WorkspaceError {
 
     pub fn file_ignored(path: String) -> Self {
         Self::FileIgnored(FileIgnored { path })
+    }
+
+    pub fn panic(description: impl Into<String>) -> Self {
+        Self::Panic(Panic {
+            description: description.into(),
+        })
     }
 
     pub fn source_file_not_supported(
@@ -165,6 +175,12 @@ impl From<CantLoadExtendFile> for WorkspaceError {
     }
 }
 
+impl From<WorkspaceError> for biome_diagnostics::serde::Diagnostic {
+    fn from(error: WorkspaceError) -> Self {
+        biome_diagnostics::serde::Diagnostic::new(error)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "internalError/fs",
@@ -191,6 +207,17 @@ pub struct ReportNotSerializable {
     tags(INTERNAL)
 )]
 pub struct NotFound;
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "internalError/panic",
+    message = "A workspace task panicked.",
+    tags(INTERNAL)
+)]
+pub struct Panic {
+    #[description]
+    description: String,
+}
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
@@ -268,6 +295,16 @@ Use the `files.maxSize` configuration to change the maximum size of files proces
         )
     }
 }
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "project",
+    message(
+        message("Biome attempted to perform an operation on the registered project, but no project was registered"),
+        description = "This is a bug in Biome. If this problem persists, please report here: https://github.com/biomejs/biome/issues/"
+    )
+)]
+pub struct NoProject;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SourceFileNotSupported {

@@ -138,8 +138,7 @@ impl DocumentFileSource {
 
     /// Returns the document file source corresponding to this file name from well-known files
     pub fn from_well_known(path: &Path) -> Self {
-        Self::try_from_well_known(path)
-            .map_or(DocumentFileSource::Unknown, |file_source| file_source)
+        Self::try_from_well_known(path).unwrap_or(DocumentFileSource::Unknown)
     }
 
     #[instrument(level = "debug", fields(result))]
@@ -168,8 +167,7 @@ impl DocumentFileSource {
 
     /// Returns the document file source corresponding to this file extension
     pub fn from_extension(extension: impl AsRef<OsStr>) -> Self {
-        Self::try_from_extension(extension.as_ref())
-            .map_or(DocumentFileSource::Unknown, |file_source| file_source)
+        Self::try_from_extension(extension.as_ref()).unwrap_or(DocumentFileSource::Unknown)
     }
 
     #[instrument(level = "debug", fields(result))]
@@ -203,12 +201,11 @@ impl DocumentFileSource {
     /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
     /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
     pub fn from_language_id(language_id: &str) -> Self {
-        Self::try_from_language_id(language_id)
-            .map_or(DocumentFileSource::Unknown, |file_source| file_source)
+        Self::try_from_language_id(language_id).unwrap_or(DocumentFileSource::Unknown)
     }
 
     #[instrument(level = "debug", fields(result))]
-    fn try_from_path(path: &Path) -> Result<Self, FileSourceError> {
+    pub(crate) fn try_from_path(path: &Path) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = Self::try_from_well_known(path) {
             return Ok(file_source);
         }
@@ -247,7 +244,7 @@ impl DocumentFileSource {
 
     /// Returns the document file source corresponding to the file path
     pub fn from_path(path: &Path) -> Self {
-        Self::try_from_path(path).map_or(DocumentFileSource::Unknown, |file_source| file_source)
+        Self::try_from_path(path).unwrap_or(DocumentFileSource::Unknown)
     }
 
     /// Returns the document file source if it's not unknown, otherwise returns `other`.

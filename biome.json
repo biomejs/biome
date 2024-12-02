@@ -1,6 +1,6 @@
 {
   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
-  "assists": {
+  "assist": {
     "enabled": true,
     "ignore": [
       "./packages/@biomejs/biome/configuration_schema.json"

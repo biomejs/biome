@@ -66,7 +66,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     let biome_path = BiomePath::new(configuration_file_path.as_path());
     workspace.open_file(OpenFileParams {
         path: biome_path.clone(),
-        content: biome_config_content.to_string(),
+        content: Some(biome_config_content.to_string()),
         version: 0,
         document_file_source: Some(JsonFileSource::json().into()),
     })?;

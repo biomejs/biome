@@ -33,7 +33,7 @@ mod test {
             workspace.as_ref(),
             OpenFileParams {
                 path: BiomePath::new("file.js"),
-                content: SOURCE.into(),
+                content: Some(SOURCE.into()),
                 version: 0,
                 document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
             },
@@ -54,7 +54,7 @@ mod test {
             OpenFileParams {
                 path: BiomePath::new("file.d.ts"),
                 // the following code snippet can be correctly parsed in .d.ts file but not in .ts file
-                content: "export const foo: number".into(),
+                content: Some("export const foo: number".into()),
                 version: 0,
                 document_file_source: None,
             },
@@ -73,7 +73,7 @@ mod test {
             workspace.as_ref(),
             OpenFileParams {
                 path: BiomePath::new("a.json"),
-                content: r#"{"a": 42}"#.into(),
+                content: Some(r#"{"a": 42}"#.into()),
                 version: 0,
                 document_file_source: None,
             },
@@ -86,7 +86,7 @@ mod test {
             workspace.as_ref(),
             OpenFileParams {
                 path: BiomePath::new("b.json"),
-                content: r#"{"a": 42}//comment"#.into(),
+                content: Some(r#"{"a": 42}//comment"#.into()),
                 version: 0,
                 document_file_source: None,
             },
@@ -99,7 +99,7 @@ mod test {
             workspace.as_ref(),
             OpenFileParams {
                 path: BiomePath::new("c.json"),
-                content: r#"{"a": 42,}"#.into(),
+                content: Some(r#"{"a": 42,}"#.into()),
                 version: 0,
                 document_file_source: None,
             },
@@ -112,7 +112,7 @@ mod test {
             workspace.as_ref(),
             OpenFileParams {
                 path: BiomePath::new("d.jsonc"),
-                content: r#"{"a": 42}//comment"#.into(),
+                content: Some(r#"{"a": 42}//comment"#.into()),
                 version: 0,
                 document_file_source: None,
             },
@@ -125,7 +125,7 @@ mod test {
             workspace.as_ref(),
             OpenFileParams {
                 path: BiomePath::new("e.jsonc"),
-                content: r#"{"a": 42,}"#.into(),
+                content: Some(r#"{"a": 42,}"#.into()),
                 version: 0,
                 document_file_source: None,
             },
@@ -138,7 +138,7 @@ mod test {
             workspace.as_ref(),
             OpenFileParams {
                 path: BiomePath::new(".eslintrc.json"),
-                content: r#"{"a": 42}//comment"#.into(),
+                content: Some(r#"{"a": 42}//comment"#.into()),
                 version: 0,
                 document_file_source: None,
             },
@@ -151,7 +151,7 @@ mod test {
             workspace.as_ref(),
             OpenFileParams {
                 path: BiomePath::new("project/.vscode/settings.json"),
-                content: r#"{"a": 42}//comment"#.into(),
+                content: Some(r#"{"a": 42}//comment"#.into()),
                 version: 0,
                 document_file_source: None,
             },
@@ -164,7 +164,7 @@ mod test {
             workspace.as_ref(),
             OpenFileParams {
                 path: BiomePath::new("dir/.eslintrc.json"),
-                content: r#"{"a": 42,}"#.into(),
+                content: Some(r#"{"a": 42,}"#.into()),
                 version: 0,
                 document_file_source: None,
             },
@@ -179,7 +179,7 @@ mod test {
             workspace.as_ref(),
             OpenFileParams {
                 path: BiomePath::new("tsconfig.json"),
-                content: r#"{"a": 42,}//comment"#.into(),
+                content: Some(r#"{"a": 42,}//comment"#.into()),
                 version: 0,
                 document_file_source: None,
             },
@@ -198,7 +198,8 @@ mod test {
             workspace.as_ref(),
             OpenFileParams {
                 path: BiomePath::new("file.graphql"),
-                content: r#"type Query {
+                content: Some(
+                    r#"type Query {
   me: User
 }
 
@@ -206,7 +207,8 @@ type User {
   id: ID
   name: String
 }"#
-                .into(),
+                    .into(),
+                ),
                 version: 0,
                 document_file_source: None,
             },
@@ -227,10 +229,12 @@ type User {
             workspace.as_ref(),
             OpenFileParams {
                 path: BiomePath::new("file.graphql"),
-                content: r#"query {
+                content: Some(
+                    r#"query {
   member @deprecated(abc: 123)
 }"#
-                .into(),
+                    .into(),
+                ),
                 version: 0,
                 document_file_source: None,
             },
@@ -258,10 +262,12 @@ type User {
             workspace.as_ref(),
             OpenFileParams {
                 path: BiomePath::new("file.grit"),
-                content: r#"`function ($args) { $body }` where {
+                content: Some(
+                    r#"`function ($args) { $body }` where {
   $args <: contains `x`
 }"#
-                .into(),
+                    .into(),
+                ),
                 version: 0,
                 document_file_source: None,
             },

@@ -228,6 +228,16 @@ impl Display for TraversalMode {
     }
 }
 
+impl TraversalMode {
+    pub fn should_scan_project(&self) -> bool {
+        matches!(self, Self::CI { .. })
+            || matches!(
+                self,
+                Self::Check { stdin,.. } | Self::Lint { stdin, .. } if stdin.is_none()
+            )
+    }
+}
+
 /// Tells to the execution of the traversal how the information should be reported
 #[derive(Copy, Clone, Debug)]
 pub enum ReportMode {
@@ -529,7 +539,7 @@ pub fn execute_mode(
                     })?;
                     let report_file = BiomePath::new("_report_output.json");
                     session.app.workspace.open_file(OpenFileParams {
-                        content,
+                        content: Some(content),
                         path: report_file.clone(),
                         version: 0,
                         document_file_source: None,

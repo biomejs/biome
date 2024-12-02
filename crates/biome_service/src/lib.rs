@@ -1,12 +1,8 @@
-use biome_console::Console;
-use biome_fs::{FileSystem, OsFileSystem};
-use serde::{Deserialize, Serialize};
-use std::ops::Deref;
-
 pub mod documentation;
 pub mod file_handlers;
 
 pub mod matcher;
+mod scanner;
 pub mod settings;
 pub mod workspace;
 
@@ -16,13 +12,17 @@ pub mod dome;
 #[cfg(feature = "schema")]
 pub mod workspace_types;
 
-pub use crate::matcher::Matcher;
+use std::ops::Deref;
 
-pub use crate::diagnostics::{TransportError, WorkspaceError};
-/// Exports only for this crate
-pub use crate::file_handlers::JsFormatterSettings;
-pub use crate::workspace::Workspace;
-pub use diagnostics::extension_error;
+use serde::{Deserialize, Serialize};
+
+use biome_console::Console;
+use biome_fs::{FileSystem, OsFileSystem};
+
+pub use diagnostics::{extension_error, TransportError, WorkspaceError};
+pub use file_handlers::JsFormatterSettings;
+pub use matcher::Matcher;
+pub use workspace::Workspace;
 
 /// This is the main entrypoint of the application.
 pub struct App<'app> {
