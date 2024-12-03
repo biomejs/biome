@@ -165,16 +165,6 @@ impl From<CantLoadExtendFile> for WorkspaceError {
     }
 }
 
-
-#[derive(Debug, Serialize, Deserialize, Diagnostic)]
-#[diagnostic(
-    category = "internalError/fs",
-    message(
-        message("The report can't be serialized, here's why: "{self.reason}),
-        description = "The report can't be serialized, here's why: {reason}"
-    )
-)]
-
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "internalError/fs",
