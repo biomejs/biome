@@ -26,7 +26,9 @@ invalid.css:1:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
   
   i unknown-rule is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
   
-  i See MDN web docs for more details.
+  i See MDN web docs for a known list of at-rules.
+  
+  i To fix this issue, consider removing the unknown at-rule.
   
 
 ```
@@ -44,7 +46,9 @@ invalid.css:2:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
   
   i uNkNoWn is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
   
-  i See MDN web docs for more details.
+  i See MDN web docs for a known list of at-rules.
+  
+  i To fix this issue, consider removing the unknown at-rule.
   
 
 ```
@@ -63,7 +67,9 @@ invalid.css:3:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
   
   i UNKNOWN is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
   
-  i See MDN web docs for more details.
+  i See MDN web docs for a known list of at-rules.
+  
+  i To fix this issue, consider removing the unknown at-rule.
   
 
 ```
@@ -82,7 +88,9 @@ invalid.css:4:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
   
   i unknown-at-rule is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
   
-  i See MDN web docs for more details.
+  i See MDN web docs for a known list of at-rules.
+  
+  i To fix this issue, consider removing the unknown at-rule.
   
 
 ```
@@ -101,7 +109,9 @@ invalid.css:5:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
   
   i unknown is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
   
-  i See MDN web docs for more details.
+  i See MDN web docs for a known list of at-rules.
+  
+  i To fix this issue, consider removing the unknown at-rule.
   
 
 ```
@@ -120,7 +130,9 @@ invalid.css:5:13 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
   
   i unknown-at-rule is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
   
-  i See MDN web docs for more details.
+  i See MDN web docs for a known list of at-rules.
+  
+  i To fix this issue, consider removing the unknown at-rule.
   
 
 ```
@@ -138,7 +150,9 @@ invalid.css:6:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
   
   i MY-other-at-rule is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
   
-  i See MDN web docs for more details.
+  i See MDN web docs for a known list of at-rules.
+  
+  i To fix this issue, consider removing the unknown at-rule.
   
 
 ```
@@ -155,7 +169,9 @@ invalid.css:7:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
   
   i not-my-at-rule is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
   
-  i See MDN web docs for more details.
+  i See MDN web docs for a known list of at-rules.
+  
+  i To fix this issue, consider removing the unknown at-rule.
   
 
 ```

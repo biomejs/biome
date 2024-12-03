@@ -73,9 +73,9 @@ impl Rule for NoUnknownAtRule {
         })
     }
 
-    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        let span = node.range;
-        let name = &node.name;
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let span = state.range;
+        let name = &state.name;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -86,9 +86,12 @@ impl Rule for NoUnknownAtRule {
             )
             .note(markup! {
                     ""<Emphasis>{ name }</Emphasis>" is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended."
+            })
+            .note(markup! {
+                "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule">"MDN web docs"</Hyperlink>" for a known list of at-rules."
             }).note(markup! {
-                "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule">"MDN web docs"</Hyperlink>" for more details."
-            }),
+            "To fix this issue, consider removing the unknown at-rule."
+        })
         )
     }
 }
