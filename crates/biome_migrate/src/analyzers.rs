@@ -1,9 +1,11 @@
 use crate::analyzers::nursery_rules::NurseryRules;
 use crate::analyzers::schema::Schema;
 
+use crate::analyzers::all::RulesAll;
 use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
 use biome_json_syntax::JsonLanguage;
 
+mod all;
 mod nursery_rules;
 mod schema;
 
@@ -21,6 +23,8 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<Schema>();
         // v1.8.0
         registry.record_rule::<NurseryRules>();
+        // v2.0.0
+        registry.record_rule::<RulesAll>()
     }
 }
 
