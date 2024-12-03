@@ -105,16 +105,14 @@ url-prefix(http: //www.w3.org/Style/), domain(mozilla.org), regexp('https:.*')
     }
 }
 /* TODO: the parser not supported yet */
-/* @scroll-timeline foo {} */
-/* .foo {
-    color: red;
-
-    @nest .parent & {
-        color: blue;
-    }
+/* @position-try --foo {}
+@view-transition {
+    navigation: auto;
 } */
- /* @position-try --foo {} */
- /* @viewport {
+
+/* These at-rules have already been removed from the draft. Support will be provided if there's strong demand*/
+/* @scroll-timeline foo {}
+@viewport {
      min-width: 640px;
      max-width: 800px;
  }

@@ -8,7 +8,6 @@ use biome_rowan::{declare_node_union, AstNode, TextRange};
 declare_lint_rule! {
     /// Disallow unknown at-rules.
     ///
-    /// This rule considers at-rules defined in the CSS Specifications, up to and including Editor's Drafts, to be known.
     /// For details on known at-rules, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule).
     ///
     /// ## Examples

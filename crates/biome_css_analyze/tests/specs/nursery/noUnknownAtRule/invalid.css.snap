@@ -4,6 +4,7 @@ expression: invalid.css
 ---
 # Input
 ```css
+@unknown-rule 'UTF-8';
 @uNkNoWn {}
 @UNKNOWN {}
 @unknown-at-rule {}
@@ -16,14 +17,14 @@ expression: invalid.css
 ```
 invalid.css:1:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown at-rule: uNkNoWn 
+  ! Unexpected unknown at-rule: unknown-rule 
   
-  > 1 │ @uNkNoWn {}
-      │  ^^^^^^^
-    2 │ @UNKNOWN {}
-    3 │ @unknown-at-rule {}
+  > 1 │ @unknown-rule 'UTF-8';
+      │  ^^^^^^^^^^^^
+    2 │ @uNkNoWn {}
+    3 │ @UNKNOWN {}
   
-  i uNkNoWn is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
+  i unknown-rule is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
   
   i See MDN web docs for more details.
   
@@ -33,15 +34,15 @@ invalid.css:1:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
 ```
 invalid.css:2:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown at-rule: UNKNOWN 
+  ! Unexpected unknown at-rule: uNkNoWn 
   
-    1 │ @uNkNoWn {}
-  > 2 │ @UNKNOWN {}
+    1 │ @unknown-rule 'UTF-8';
+  > 2 │ @uNkNoWn {}
       │  ^^^^^^^
-    3 │ @unknown-at-rule {}
-    4 │ @unknown { @unknown-at-rule { font-size: 14px; } }
+    3 │ @UNKNOWN {}
+    4 │ @unknown-at-rule {}
   
-  i UNKNOWN is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
+  i uNkNoWn is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
   
   i See MDN web docs for more details.
   
@@ -51,16 +52,16 @@ invalid.css:2:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
 ```
 invalid.css:3:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown at-rule: unknown-at-rule 
+  ! Unexpected unknown at-rule: UNKNOWN 
   
-    1 │ @uNkNoWn {}
-    2 │ @UNKNOWN {}
-  > 3 │ @unknown-at-rule {}
-      │  ^^^^^^^^^^^^^^^
-    4 │ @unknown { @unknown-at-rule { font-size: 14px; } }
-    5 │ @MY-other-at-rule {}
+    1 │ @unknown-rule 'UTF-8';
+    2 │ @uNkNoWn {}
+  > 3 │ @UNKNOWN {}
+      │  ^^^^^^^
+    4 │ @unknown-at-rule {}
+    5 │ @unknown { @unknown-at-rule { font-size: 14px; } }
   
-  i unknown-at-rule is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
+  i UNKNOWN is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
   
   i See MDN web docs for more details.
   
@@ -70,33 +71,14 @@ invalid.css:3:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
 ```
 invalid.css:4:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown at-rule: unknown 
-  
-    2 │ @UNKNOWN {}
-    3 │ @unknown-at-rule {}
-  > 4 │ @unknown { @unknown-at-rule { font-size: 14px; } }
-      │  ^^^^^^^
-    5 │ @MY-other-at-rule {}
-    6 │ @not-my-at-rule {}
-  
-  i unknown is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
-  
-  i See MDN web docs for more details.
-  
-
-```
-
-```
-invalid.css:4:13 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
   ! Unexpected unknown at-rule: unknown-at-rule 
   
-    2 │ @UNKNOWN {}
-    3 │ @unknown-at-rule {}
-  > 4 │ @unknown { @unknown-at-rule { font-size: 14px; } }
-      │             ^^^^^^^^^^^^^^^
-    5 │ @MY-other-at-rule {}
-    6 │ @not-my-at-rule {}
+    2 │ @uNkNoWn {}
+    3 │ @UNKNOWN {}
+  > 4 │ @unknown-at-rule {}
+      │  ^^^^^^^^^^^^^^^
+    5 │ @unknown { @unknown-at-rule { font-size: 14px; } }
+    6 │ @MY-other-at-rule {}
   
   i unknown-at-rule is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
   
@@ -108,15 +90,35 @@ invalid.css:4:13 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
 ```
 invalid.css:5:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown at-rule: MY-other-at-rule 
+  ! Unexpected unknown at-rule: unknown 
   
-    3 │ @unknown-at-rule {}
-    4 │ @unknown { @unknown-at-rule { font-size: 14px; } }
-  > 5 │ @MY-other-at-rule {}
-      │  ^^^^^^^^^^^^^^^^
-    6 │ @not-my-at-rule {}
+    3 │ @UNKNOWN {}
+    4 │ @unknown-at-rule {}
+  > 5 │ @unknown { @unknown-at-rule { font-size: 14px; } }
+      │  ^^^^^^^
+    6 │ @MY-other-at-rule {}
+    7 │ @not-my-at-rule {}
   
-  i MY-other-at-rule is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
+  i unknown is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:5:13 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected unknown at-rule: unknown-at-rule 
+  
+    3 │ @UNKNOWN {}
+    4 │ @unknown-at-rule {}
+  > 5 │ @unknown { @unknown-at-rule { font-size: 14px; } }
+      │             ^^^^^^^^^^^^^^^
+    6 │ @MY-other-at-rule {}
+    7 │ @not-my-at-rule {}
+  
+  i unknown-at-rule is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
   
   i See MDN web docs for more details.
   
@@ -126,11 +128,29 @@ invalid.css:5:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━�
 ```
 invalid.css:6:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! Unexpected unknown at-rule: MY-other-at-rule 
+  
+    4 │ @unknown-at-rule {}
+    5 │ @unknown { @unknown-at-rule { font-size: 14px; } }
+  > 6 │ @MY-other-at-rule {}
+      │  ^^^^^^^^^^^^^^^^
+    7 │ @not-my-at-rule {}
+  
+  i MY-other-at-rule is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:7:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   ! Unexpected unknown at-rule: not-my-at-rule 
   
-    4 │ @unknown { @unknown-at-rule { font-size: 14px; } }
-    5 │ @MY-other-at-rule {}
-  > 6 │ @not-my-at-rule {}
+    5 │ @unknown { @unknown-at-rule { font-size: 14px; } }
+    6 │ @MY-other-at-rule {}
+  > 7 │ @not-my-at-rule {}
       │  ^^^^^^^^^^^^^^
   
   i not-my-at-rule is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
