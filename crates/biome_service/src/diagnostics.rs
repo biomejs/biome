@@ -180,7 +180,6 @@ pub struct NotFound;
 )]
 pub struct FormatWithErrorsDisabled;
 
-
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "internalError/fs",
@@ -501,8 +500,7 @@ impl Advices for ProtectedFileAdvice {
 #[cfg(test)]
 mod test {
     use crate::diagnostics::{
-        CantReadFile, FileIgnored, FileTooLarge, NotFound,
-        SourceFileNotSupported,
+        CantReadFile, FileIgnored, FileTooLarge, NotFound, SourceFileNotSupported,
     };
     use crate::file_handlers::DocumentFileSource;
     use crate::{TransportError, WorkspaceError};
