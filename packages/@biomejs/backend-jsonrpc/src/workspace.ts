@@ -610,10 +610,6 @@ export interface PartialJsonParser {
 }
 export interface Rules {
 	a11y?: A11y;
-	/**
-	 * It enables ALL rules. The rules that belong to `nursery` won't be enabled.
-	 */
-	all?: boolean;
 	complexity?: Complexity;
 	correctness?: Correctness;
 	nursery?: Nursery;
@@ -696,10 +692,6 @@ export type TrailingCommas2 = "none" | "all";
  * A list of rules that belong to this group
  */
 export interface A11y {
-	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
 	/**
 	 * Enforce that the accessKey attribute is not used on any HTML element.
 	 */
@@ -846,10 +838,6 @@ export interface A11y {
  */
 export interface Complexity {
 	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
-	/**
 	 * Disallow primitive type aliases and misleading types.
 	 */
 	noBannedTypes?: RuleFixConfiguration_for_Null;
@@ -986,10 +974,6 @@ export interface Complexity {
  * A list of rules that belong to this group
  */
 export interface Correctness {
-	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
 	/**
 	 * Prevent passing of children as props.
 	 */
@@ -1212,10 +1196,6 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
-	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
 	noCommonJs?: RuleConfiguration_for_Null;
@@ -1433,10 +1413,6 @@ export interface Nursery {
  */
 export interface Performance {
 	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
-	/**
 	 * Disallow the use of spread (...) syntax on accumulators.
 	 */
 	noAccumulatingSpread?: RuleConfiguration_for_Null;
@@ -1466,10 +1442,6 @@ export interface Performance {
  */
 export interface Security {
 	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
-	/**
 	 * Prevent the usage of dangerous JSX props
 	 */
 	noDangerouslySetInnerHtml?: RuleConfiguration_for_Null;
@@ -1490,10 +1462,6 @@ export interface Security {
  * A list of rules that belong to this group
  */
 export interface Style {
-	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
 	/**
 	 * Disallow the use of arguments.
 	 */
@@ -1703,10 +1671,6 @@ export interface Style {
  * A list of rules that belong to this group
  */
 export interface Suspicious {
-	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
 	/**
 	 * Use standard constants instead of approximated literals.
 	 */
