@@ -65,7 +65,7 @@ impl Actions {
     #[doc = r" [Severity::Error] for recommended rules and [Severity::Warning] for other rules."]
     #[doc = r""]
     #[doc = r" If not, the function returns [None]."]
-    pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
+    pub fn get_severity_from_category(&self, category: &Category) -> Option<Severity> {
         let mut split_code = category.name().split('/');
         let _lint = split_code.next();
         debug_assert_eq!(_lint, Some("assist"));

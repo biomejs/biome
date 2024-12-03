@@ -6,7 +6,7 @@ use crate::{
     AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleGroup, RuleKey,
     RuleMetadata, ServiceBag, SignalEntry, Visitor,
 };
-use biome_diagnostics::Error;
+use biome_diagnostics::{Error, Severity};
 use biome_rowan::{AstNode, Language, RawSyntaxKind, SyntaxKind, SyntaxNode};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::{

@@ -117,7 +117,7 @@ impl Rules {
     #[doc = r" [Severity::Error] for recommended rules and [Severity::Warning] for other rules."]
     #[doc = r""]
     #[doc = r" If not, the function returns [None]."]
-    pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
+    pub fn get_severity_from_category(&self, category: &Category) -> Option<Severity> {
         let mut split_code = category.name().split('/');
         let _lint = split_code.next();
         debug_assert_eq!(_lint, Some("lint"));
@@ -131,13 +131,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if A11y::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || A11y::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
             RuleGroup::Complexity => self
@@ -146,13 +140,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if Complexity::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || Complexity::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
             RuleGroup::Correctness => self
@@ -161,13 +149,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if Correctness::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || Correctness::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
             RuleGroup::Nursery => self
@@ -176,13 +158,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if Nursery::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || Nursery::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
             RuleGroup::Performance => self
@@ -191,13 +167,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if Performance::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || Performance::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
             RuleGroup::Security => self
@@ -206,13 +176,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if Security::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || Security::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
             RuleGroup::Style => self
@@ -221,13 +185,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if Style::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || Style::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
             RuleGroup::Suspicious => self
@@ -236,13 +194,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if Suspicious::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || Suspicious::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
         };
@@ -552,42 +504,6 @@ impl A11y {
         "useValidAriaValues",
         "useValidLang",
     ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &[
-        "noAccessKey",
-        "noAriaHiddenOnFocusable",
-        "noAriaUnsupportedElements",
-        "noAutofocus",
-        "noBlankTarget",
-        "noDistractingElements",
-        "noHeaderScope",
-        "noInteractiveElementToNoninteractiveRole",
-        "noLabelWithoutControl",
-        "noNoninteractiveElementToInteractiveRole",
-        "noNoninteractiveTabindex",
-        "noPositiveTabindex",
-        "noRedundantAlt",
-        "noRedundantRoles",
-        "noSvgWithoutTitle",
-        "useAltText",
-        "useAnchorContent",
-        "useAriaActivedescendantWithTabindex",
-        "useAriaPropsForRole",
-        "useButtonType",
-        "useFocusableInteractive",
-        "useGenericFontNames",
-        "useHeadingContent",
-        "useHtmlLang",
-        "useIframeTitle",
-        "useKeyWithClickEvents",
-        "useKeyWithMouseEvents",
-        "useMediaCaption",
-        "useSemanticElements",
-        "useValidAnchor",
-        "useValidAriaProps",
-        "useValidAriaRole",
-        "useValidAriaValues",
-        "useValidLang",
-    ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
@@ -624,6 +540,45 @@ impl A11y {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
     ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noAccessKey" => Severity::Error,
+            "noAriaHiddenOnFocusable" => Severity::Error,
+            "noAriaUnsupportedElements" => Severity::Error,
+            "noAutofocus" => Severity::Error,
+            "noBlankTarget" => Severity::Error,
+            "noDistractingElements" => Severity::Error,
+            "noHeaderScope" => Severity::Error,
+            "noInteractiveElementToNoninteractiveRole" => Severity::Error,
+            "noLabelWithoutControl" => Severity::Error,
+            "noNoninteractiveElementToInteractiveRole" => Severity::Error,
+            "noNoninteractiveTabindex" => Severity::Error,
+            "noPositiveTabindex" => Severity::Error,
+            "noRedundantAlt" => Severity::Error,
+            "noRedundantRoles" => Severity::Error,
+            "noSvgWithoutTitle" => Severity::Error,
+            "useAltText" => Severity::Error,
+            "useAnchorContent" => Severity::Error,
+            "useAriaActivedescendantWithTabindex" => Severity::Error,
+            "useAriaPropsForRole" => Severity::Error,
+            "useButtonType" => Severity::Error,
+            "useFocusableInteractive" => Severity::Error,
+            "useGenericFontNames" => Severity::Error,
+            "useHeadingContent" => Severity::Error,
+            "useHtmlLang" => Severity::Error,
+            "useIframeTitle" => Severity::Error,
+            "useKeyWithClickEvents" => Severity::Error,
+            "useKeyWithMouseEvents" => Severity::Error,
+            "useMediaCaption" => Severity::Error,
+            "useSemanticElements" => Severity::Error,
+            "useValidAnchor" => Severity::Error,
+            "useValidAriaProps" => Severity::Error,
+            "useValidAriaRole" => Severity::Error,
+            "useValidAriaValues" => Severity::Error,
+            "useValidLang" => Severity::Error,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
@@ -982,10 +937,6 @@ impl A11y {
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
-    }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
     }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
@@ -1310,34 +1261,6 @@ impl Complexity {
         "useSimpleNumberKeys",
         "useSimplifiedLogicExpression",
     ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &[
-        "noBannedTypes",
-        "noEmptyTypeParameters",
-        "noExcessiveNestedTestSuites",
-        "noExtraBooleanCast",
-        "noForEach",
-        "noMultipleSpacesInRegularExpressionLiterals",
-        "noStaticOnlyClass",
-        "noThisInStatic",
-        "noUselessCatch",
-        "noUselessConstructor",
-        "noUselessEmptyExport",
-        "noUselessFragments",
-        "noUselessLabel",
-        "noUselessLoneBlockStatements",
-        "noUselessRename",
-        "noUselessSwitchCase",
-        "noUselessTernary",
-        "noUselessThisAlias",
-        "noUselessTypeConstraint",
-        "noWith",
-        "useArrowFunction",
-        "useFlatMap",
-        "useLiteralKeys",
-        "useOptionalChain",
-        "useRegexLiterals",
-        "useSimpleNumberKeys",
-    ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
@@ -1366,6 +1289,43 @@ impl Complexity {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
     ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noBannedTypes" => Severity::Error,
+            "noEmptyTypeParameters" => Severity::Error,
+            "noExcessiveCognitiveComplexity" => Severity::Information,
+            "noExcessiveNestedTestSuites" => Severity::Error,
+            "noExtraBooleanCast" => Severity::Error,
+            "noForEach" => Severity::Error,
+            "noMultipleSpacesInRegularExpressionLiterals" => Severity::Error,
+            "noStaticOnlyClass" => Severity::Error,
+            "noThisInStatic" => Severity::Error,
+            "noUselessCatch" => Severity::Error,
+            "noUselessConstructor" => Severity::Error,
+            "noUselessEmptyExport" => Severity::Error,
+            "noUselessFragments" => Severity::Error,
+            "noUselessLabel" => Severity::Error,
+            "noUselessLoneBlockStatements" => Severity::Error,
+            "noUselessRename" => Severity::Error,
+            "noUselessStringConcat" => Severity::Information,
+            "noUselessSwitchCase" => Severity::Error,
+            "noUselessTernary" => Severity::Error,
+            "noUselessThisAlias" => Severity::Error,
+            "noUselessTypeConstraint" => Severity::Error,
+            "noUselessUndefinedInitialization" => Severity::Information,
+            "noVoid" => Severity::Information,
+            "noWith" => Severity::Error,
+            "useArrowFunction" => Severity::Error,
+            "useDateNow" => Severity::Information,
+            "useFlatMap" => Severity::Error,
+            "useLiteralKeys" => Severity::Error,
+            "useOptionalChain" => Severity::Error,
+            "useRegexLiterals" => Severity::Error,
+            "useSimpleNumberKeys" => Severity::Error,
+            "useSimplifiedLogicExpression" => Severity::Information,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
@@ -1710,10 +1670,6 @@ impl Complexity {
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
-    }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
     }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
@@ -2127,47 +2083,6 @@ impl Correctness {
         "useValidForDirection",
         "useYield",
     ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &[
-        "noChildrenProp",
-        "noConstAssign",
-        "noConstantCondition",
-        "noConstructorReturn",
-        "noEmptyCharacterClassInRegex",
-        "noEmptyPattern",
-        "noFlatMapIdentity",
-        "noGlobalObjectCalls",
-        "noInnerDeclarations",
-        "noInvalidBuiltinInstantiation",
-        "noInvalidConstructorSuper",
-        "noInvalidDirectionInLinearGradient",
-        "noInvalidGridAreas",
-        "noInvalidPositionAtImportRule",
-        "noInvalidUseBeforeDeclaration",
-        "noNonoctalDecimalEscape",
-        "noPrecisionLoss",
-        "noRenderReturnValue",
-        "noSelfAssign",
-        "noSetterReturn",
-        "noStringCaseMismatch",
-        "noSwitchDeclarations",
-        "noUnknownFunction",
-        "noUnknownMediaFeatureName",
-        "noUnknownProperty",
-        "noUnknownUnit",
-        "noUnmatchableAnbSelector",
-        "noUnnecessaryContinue",
-        "noUnreachable",
-        "noUnreachableSuper",
-        "noUnsafeFinally",
-        "noUnsafeOptionalChaining",
-        "noUnusedLabels",
-        "noVoidElementsWithChildren",
-        "noVoidTypeReturn",
-        "useIsNan",
-        "useJsxKeyInIterable",
-        "useValidForDirection",
-        "useYield",
-    ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
@@ -2209,6 +2124,64 @@ impl Correctness {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]),
     ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noChildrenProp" => Severity::Error,
+            "noConstAssign" => Severity::Error,
+            "noConstantCondition" => Severity::Error,
+            "noConstantMathMinMaxClamp" => Severity::Information,
+            "noConstructorReturn" => Severity::Error,
+            "noEmptyCharacterClassInRegex" => Severity::Error,
+            "noEmptyPattern" => Severity::Error,
+            "noFlatMapIdentity" => Severity::Error,
+            "noGlobalObjectCalls" => Severity::Error,
+            "noInnerDeclarations" => Severity::Error,
+            "noInvalidBuiltinInstantiation" => Severity::Error,
+            "noInvalidConstructorSuper" => Severity::Error,
+            "noInvalidDirectionInLinearGradient" => Severity::Error,
+            "noInvalidGridAreas" => Severity::Error,
+            "noInvalidNewBuiltin" => Severity::Information,
+            "noInvalidPositionAtImportRule" => Severity::Error,
+            "noInvalidUseBeforeDeclaration" => Severity::Error,
+            "noNewSymbol" => Severity::Information,
+            "noNodejsModules" => Severity::Information,
+            "noNonoctalDecimalEscape" => Severity::Error,
+            "noPrecisionLoss" => Severity::Error,
+            "noRenderReturnValue" => Severity::Error,
+            "noSelfAssign" => Severity::Error,
+            "noSetterReturn" => Severity::Error,
+            "noStringCaseMismatch" => Severity::Error,
+            "noSwitchDeclarations" => Severity::Error,
+            "noUndeclaredDependencies" => Severity::Information,
+            "noUndeclaredVariables" => Severity::Information,
+            "noUnknownFunction" => Severity::Error,
+            "noUnknownMediaFeatureName" => Severity::Error,
+            "noUnknownProperty" => Severity::Error,
+            "noUnknownUnit" => Severity::Error,
+            "noUnmatchableAnbSelector" => Severity::Error,
+            "noUnnecessaryContinue" => Severity::Error,
+            "noUnreachable" => Severity::Error,
+            "noUnreachableSuper" => Severity::Error,
+            "noUnsafeFinally" => Severity::Error,
+            "noUnsafeOptionalChaining" => Severity::Error,
+            "noUnusedFunctionParameters" => Severity::Information,
+            "noUnusedImports" => Severity::Information,
+            "noUnusedLabels" => Severity::Error,
+            "noUnusedPrivateClassMembers" => Severity::Information,
+            "noUnusedVariables" => Severity::Information,
+            "noVoidElementsWithChildren" => Severity::Error,
+            "noVoidTypeReturn" => Severity::Error,
+            "useArrayLiterals" => Severity::Information,
+            "useExhaustiveDependencies" => Severity::Information,
+            "useHookAtTopLevel" => Severity::Information,
+            "useImportExtensions" => Severity::Information,
+            "useIsNan" => Severity::Error,
+            "useJsxKeyInIterable" => Severity::Error,
+            "useValidForDirection" => Severity::Error,
+            "useYield" => Severity::Error,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
@@ -2757,10 +2730,6 @@ impl Correctness {
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
-    }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
     }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
@@ -3252,24 +3221,6 @@ impl Nursery {
         "useTrimStartEnd",
         "useValidAutocomplete",
     ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &[
-        "noDescendingSpecificity",
-        "noDuplicateCustomProperties",
-        "noDuplicateElseIf",
-        "noDuplicateProperties",
-        "noDuplicatedFields",
-        "noMissingVarFunction",
-        "noTsIgnore",
-        "noUnknownPseudoClass",
-        "noUnknownPseudoElement",
-        "noUnknownTypeSelector",
-        "noUselessEscapeInRegex",
-        "useAriaPropsSupportedByRole",
-        "useConsistentMemberAccessibility",
-        "useDeprecatedReason",
-        "useNamedOperation",
-        "useStrictMode",
-    ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
@@ -3288,6 +3239,63 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
     ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noCommonJs" => Severity::Information,
+            "noDescendingSpecificity" => Severity::Error,
+            "noDocumentCookie" => Severity::Information,
+            "noDocumentImportInPage" => Severity::Information,
+            "noDuplicateCustomProperties" => Severity::Error,
+            "noDuplicateElseIf" => Severity::Error,
+            "noDuplicateProperties" => Severity::Error,
+            "noDuplicatedFields" => Severity::Information,
+            "noDynamicNamespaceImportAccess" => Severity::Information,
+            "noEnum" => Severity::Information,
+            "noExportedImports" => Severity::Information,
+            "noGlobalDirnameFilename" => Severity::Information,
+            "noHeadElement" => Severity::Information,
+            "noHeadImportInDocument" => Severity::Information,
+            "noImgElement" => Severity::Information,
+            "noIrregularWhitespace" => Severity::Information,
+            "noMissingVarFunction" => Severity::Error,
+            "noNestedTernary" => Severity::Information,
+            "noOctalEscape" => Severity::Information,
+            "noPackagePrivateImports" => Severity::Information,
+            "noProcessEnv" => Severity::Information,
+            "noRestrictedImports" => Severity::Information,
+            "noRestrictedTypes" => Severity::Information,
+            "noSecrets" => Severity::Information,
+            "noStaticElementInteractions" => Severity::Information,
+            "noSubstr" => Severity::Information,
+            "noTemplateCurlyInString" => Severity::Information,
+            "noTsIgnore" => Severity::Warning,
+            "noUnknownPseudoClass" => Severity::Error,
+            "noUnknownPseudoElement" => Severity::Error,
+            "noUnknownTypeSelector" => Severity::Error,
+            "noUselessEscapeInRegex" => Severity::Error,
+            "noUselessStringRaw" => Severity::Information,
+            "noUselessUndefined" => Severity::Information,
+            "noValueAtRule" => Severity::Information,
+            "useAdjacentOverloadSignatures" => Severity::Information,
+            "useAriaPropsSupportedByRole" => Severity::Error,
+            "useAtIndex" => Severity::Information,
+            "useCollapsedIf" => Severity::Information,
+            "useComponentExportOnlyModules" => Severity::Information,
+            "useConsistentCurlyBraces" => Severity::Information,
+            "useConsistentMemberAccessibility" => Severity::Error,
+            "useDeprecatedReason" => Severity::Information,
+            "useExplicitType" => Severity::Information,
+            "useGoogleFontDisplay" => Severity::Information,
+            "useGoogleFontPreconnect" => Severity::Information,
+            "useGuardForIn" => Severity::Information,
+            "useNamedOperation" => Severity::Information,
+            "useSortedClasses" => Severity::Information,
+            "useStrictMode" => Severity::Error,
+            "useTrimStartEnd" => Severity::Information,
+            "useValidAutocomplete" => Severity::Information,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
@@ -3826,10 +3834,6 @@ impl Nursery {
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
-    }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
     }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
@@ -4095,11 +4099,20 @@ impl Performance {
         "noReExportAll",
         "useTopLevelRegex",
     ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &["noAccumulatingSpread", "noDelete"];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
     ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noAccumulatingSpread" => Severity::Error,
+            "noBarrelFile" => Severity::Information,
+            "noDelete" => Severity::Error,
+            "noReExportAll" => Severity::Information,
+            "useTopLevelRegex" => Severity::Information,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
@@ -4168,10 +4181,6 @@ impl Performance {
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
-    }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
     }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
@@ -4242,16 +4251,19 @@ impl Security {
         "noDangerouslySetInnerHtmlWithChildren",
         "noGlobalEval",
     ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &[
-        "noDangerouslySetInnerHtml",
-        "noDangerouslySetInnerHtmlWithChildren",
-        "noGlobalEval",
-    ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
     ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noDangerouslySetInnerHtml" => Severity::Error,
+            "noDangerouslySetInnerHtmlWithChildren" => Severity::Error,
+            "noGlobalEval" => Severity::Error,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
@@ -4300,10 +4312,6 @@ impl Security {
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
-    }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
     }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
@@ -4588,32 +4596,6 @@ impl Style {
         "useThrowOnlyError",
         "useWhile",
     ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &[
-        "noArguments",
-        "noCommaOperator",
-        "noInferrableTypes",
-        "noNonNullAssertion",
-        "noParameterAssign",
-        "noUnusedTemplateLiteral",
-        "noUselessElse",
-        "noVar",
-        "useAsConstAssertion",
-        "useConst",
-        "useDefaultParameterLast",
-        "useEnumInitializers",
-        "useExponentiationOperator",
-        "useExportType",
-        "useImportType",
-        "useLiteralEnumMembers",
-        "useNodejsImportProtocol",
-        "useNumberNamespace",
-        "useNumericLiterals",
-        "useSelfClosingElements",
-        "useShorthandFunctionType",
-        "useSingleVarDeclarator",
-        "useTemplate",
-        "useWhile",
-    ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
@@ -4640,6 +4622,61 @@ impl Style {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
     ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noArguments" => Severity::Error,
+            "noCommaOperator" => Severity::Error,
+            "noDefaultExport" => Severity::Information,
+            "noDoneCallback" => Severity::Information,
+            "noImplicitBoolean" => Severity::Information,
+            "noInferrableTypes" => Severity::Error,
+            "noNamespace" => Severity::Information,
+            "noNamespaceImport" => Severity::Information,
+            "noNegationElse" => Severity::Information,
+            "noNonNullAssertion" => Severity::Error,
+            "noParameterAssign" => Severity::Error,
+            "noParameterProperties" => Severity::Information,
+            "noRestrictedGlobals" => Severity::Information,
+            "noShoutyConstants" => Severity::Information,
+            "noUnusedTemplateLiteral" => Severity::Error,
+            "noUselessElse" => Severity::Error,
+            "noVar" => Severity::Error,
+            "noYodaExpression" => Severity::Information,
+            "useAsConstAssertion" => Severity::Error,
+            "useBlockStatements" => Severity::Information,
+            "useCollapsedElseIf" => Severity::Information,
+            "useConsistentArrayType" => Severity::Information,
+            "useConsistentBuiltinInstantiation" => Severity::Information,
+            "useConst" => Severity::Error,
+            "useDefaultParameterLast" => Severity::Error,
+            "useDefaultSwitchClause" => Severity::Information,
+            "useEnumInitializers" => Severity::Error,
+            "useExplicitLengthCheck" => Severity::Information,
+            "useExponentiationOperator" => Severity::Error,
+            "useExportType" => Severity::Error,
+            "useFilenamingConvention" => Severity::Information,
+            "useForOf" => Severity::Information,
+            "useFragmentSyntax" => Severity::Information,
+            "useImportType" => Severity::Error,
+            "useLiteralEnumMembers" => Severity::Error,
+            "useNamingConvention" => Severity::Information,
+            "useNodeAssertStrict" => Severity::Information,
+            "useNodejsImportProtocol" => Severity::Error,
+            "useNumberNamespace" => Severity::Error,
+            "useNumericLiterals" => Severity::Error,
+            "useSelfClosingElements" => Severity::Error,
+            "useShorthandArrayType" => Severity::Information,
+            "useShorthandAssign" => Severity::Information,
+            "useShorthandFunctionType" => Severity::Error,
+            "useSingleCaseStatement" => Severity::Information,
+            "useSingleVarDeclarator" => Severity::Error,
+            "useTemplate" => Severity::Error,
+            "useThrowNewError" => Severity::Information,
+            "useThrowOnlyError" => Severity::Information,
+            "useWhile" => Severity::Error,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
@@ -5158,10 +5195,6 @@ impl Style {
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
-    }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
     }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
@@ -5702,65 +5735,6 @@ impl Suspicious {
         "useNumberToFixedDigitsArgument",
         "useValidTypeof",
     ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &[
-        "noApproximativeNumericConstant",
-        "noArrayIndexKey",
-        "noAssignInExpressions",
-        "noAsyncPromiseExecutor",
-        "noCatchAssign",
-        "noClassAssign",
-        "noCommentText",
-        "noCompareNegZero",
-        "noConfusingLabels",
-        "noConfusingVoidType",
-        "noConstEnum",
-        "noControlCharactersInRegex",
-        "noDebugger",
-        "noDoubleEquals",
-        "noDuplicateAtImportRules",
-        "noDuplicateCase",
-        "noDuplicateClassMembers",
-        "noDuplicateFontNames",
-        "noDuplicateJsxProps",
-        "noDuplicateObjectKeys",
-        "noDuplicateParameters",
-        "noDuplicateSelectorsKeyframeBlock",
-        "noDuplicateTestHooks",
-        "noEmptyBlock",
-        "noEmptyInterface",
-        "noExplicitAny",
-        "noExportsInTest",
-        "noExtraNonNullAssertion",
-        "noFallthroughSwitchClause",
-        "noFocusedTests",
-        "noFunctionAssign",
-        "noGlobalAssign",
-        "noGlobalIsFinite",
-        "noGlobalIsNan",
-        "noImplicitAnyLet",
-        "noImportAssign",
-        "noImportantInKeyframe",
-        "noLabelVar",
-        "noMisleadingCharacterClass",
-        "noMisleadingInstantiator",
-        "noMisrefactoredShorthandAssign",
-        "noPrototypeBuiltins",
-        "noRedeclare",
-        "noRedundantUseStrict",
-        "noSelfCompare",
-        "noShadowRestrictedNames",
-        "noShorthandPropertyOverrides",
-        "noSparseArray",
-        "noSuspiciousSemicolonInJsx",
-        "noThenProperty",
-        "noUnsafeDeclarationMerging",
-        "noUnsafeNegation",
-        "useDefaultSwitchClauseLast",
-        "useGetterReturn",
-        "useIsArray",
-        "useNamespaceKeyword",
-        "useValidTypeof",
-    ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
@@ -5820,6 +5794,78 @@ impl Suspicious {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[64]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[66]),
     ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noApproximativeNumericConstant" => Severity::Error,
+            "noArrayIndexKey" => Severity::Error,
+            "noAssignInExpressions" => Severity::Error,
+            "noAsyncPromiseExecutor" => Severity::Error,
+            "noCatchAssign" => Severity::Error,
+            "noClassAssign" => Severity::Error,
+            "noCommentText" => Severity::Error,
+            "noCompareNegZero" => Severity::Error,
+            "noConfusingLabels" => Severity::Error,
+            "noConfusingVoidType" => Severity::Error,
+            "noConsole" => Severity::Information,
+            "noConsoleLog" => Severity::Information,
+            "noConstEnum" => Severity::Error,
+            "noControlCharactersInRegex" => Severity::Error,
+            "noDebugger" => Severity::Error,
+            "noDoubleEquals" => Severity::Error,
+            "noDuplicateAtImportRules" => Severity::Error,
+            "noDuplicateCase" => Severity::Error,
+            "noDuplicateClassMembers" => Severity::Error,
+            "noDuplicateFontNames" => Severity::Error,
+            "noDuplicateJsxProps" => Severity::Error,
+            "noDuplicateObjectKeys" => Severity::Error,
+            "noDuplicateParameters" => Severity::Error,
+            "noDuplicateSelectorsKeyframeBlock" => Severity::Error,
+            "noDuplicateTestHooks" => Severity::Error,
+            "noEmptyBlock" => Severity::Error,
+            "noEmptyBlockStatements" => Severity::Information,
+            "noEmptyInterface" => Severity::Error,
+            "noEvolvingTypes" => Severity::Information,
+            "noExplicitAny" => Severity::Error,
+            "noExportsInTest" => Severity::Error,
+            "noExtraNonNullAssertion" => Severity::Error,
+            "noFallthroughSwitchClause" => Severity::Error,
+            "noFocusedTests" => Severity::Error,
+            "noFunctionAssign" => Severity::Error,
+            "noGlobalAssign" => Severity::Error,
+            "noGlobalIsFinite" => Severity::Error,
+            "noGlobalIsNan" => Severity::Error,
+            "noImplicitAnyLet" => Severity::Error,
+            "noImportAssign" => Severity::Error,
+            "noImportantInKeyframe" => Severity::Error,
+            "noLabelVar" => Severity::Error,
+            "noMisleadingCharacterClass" => Severity::Error,
+            "noMisleadingInstantiator" => Severity::Error,
+            "noMisplacedAssertion" => Severity::Information,
+            "noMisrefactoredShorthandAssign" => Severity::Error,
+            "noPrototypeBuiltins" => Severity::Error,
+            "noReactSpecificProps" => Severity::Information,
+            "noRedeclare" => Severity::Error,
+            "noRedundantUseStrict" => Severity::Error,
+            "noSelfCompare" => Severity::Error,
+            "noShadowRestrictedNames" => Severity::Error,
+            "noShorthandPropertyOverrides" => Severity::Error,
+            "noSkippedTests" => Severity::Information,
+            "noSparseArray" => Severity::Error,
+            "noSuspiciousSemicolonInJsx" => Severity::Error,
+            "noThenProperty" => Severity::Error,
+            "noUnsafeDeclarationMerging" => Severity::Error,
+            "noUnsafeNegation" => Severity::Error,
+            "useAwait" => Severity::Information,
+            "useDefaultSwitchClauseLast" => Severity::Error,
+            "useErrorMessage" => Severity::Information,
+            "useGetterReturn" => Severity::Error,
+            "useIsArray" => Severity::Error,
+            "useNamespaceKeyword" => Severity::Error,
+            "useNumberToFixedDigitsArgument" => Severity::Information,
+            "useValidTypeof" => Severity::Error,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
@@ -6508,10 +6554,6 @@ impl Suspicious {
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
-    }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
     }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS

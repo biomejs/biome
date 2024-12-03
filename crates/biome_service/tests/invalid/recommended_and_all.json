@@ -1,8 +1,0 @@
-{
-	"linter": {
-		"rules": {
-			"all": true,
-			"recommended": true
-		}
-	}
-}
