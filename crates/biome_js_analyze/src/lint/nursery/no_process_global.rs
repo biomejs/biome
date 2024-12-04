@@ -66,11 +66,11 @@ impl Rule for NoProcessGlobal {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "process global is discouraged."
+                    "Usage of the `process` global is discouraged."
                 },
             )
             .note(markup! {
-                "Add `import process from \"node:procee\";`"
+                "Add `import process from \"node:process\";` to this file's imports."
             })
         )
     }

@@ -21,7 +21,7 @@ const f = process.env;
 ```
 invalid.js:2:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! process global is discouraged.
+  ! Usage of the `process` global is discouraged.
   
     1 │ import a from 'b';
   > 2 │ const c = process.env;
@@ -29,7 +29,7 @@ invalid.js:2:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━�
     3 │ 
     4 │ const d = process;
   
-  i Add `import process from "node:procee";`
+  i Add `import process from "node:process";` to this file's imports.
   
 
 ```
@@ -37,7 +37,7 @@ invalid.js:2:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━�
 ```
 invalid.js:4:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! process global is discouraged.
+  ! Usage of the `process` global is discouraged.
   
     2 │ const c = process.env;
     3 │ 
@@ -46,7 +46,7 @@ invalid.js:4:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━�
     5 │ 
     6 │ const e = process.env.e;
   
-  i Add `import process from "node:procee";`
+  i Add `import process from "node:process";` to this file's imports.
   
 
 ```
@@ -54,7 +54,7 @@ invalid.js:4:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━�
 ```
 invalid.js:6:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! process global is discouraged.
+  ! Usage of the `process` global is discouraged.
   
     4 │ const d = process;
     5 │ 
@@ -63,7 +63,7 @@ invalid.js:6:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━�
     7 │ 
     8 │ // A copyright notice
   
-  i Add `import process from "node:procee";`
+  i Add `import process from "node:process";` to this file's imports.
   
 
 ```
@@ -71,13 +71,13 @@ invalid.js:6:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━�
 ```
 invalid.js:9:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! process global is discouraged.
+  ! Usage of the `process` global is discouraged.
   
     8 │ // A copyright notice
   > 9 │ const f = process.env;
       │           ^^^^^^^
   
-  i Add `import process from "node:procee";`
+  i Add `import process from "node:process";` to this file's imports.
   
 
 ```
