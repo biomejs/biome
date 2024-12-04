@@ -1,0 +1,7 @@
+@unknown-rule 'UTF-8';
+@uNkNoWn {}
+@UNKNOWN {}
+@unknown-at-rule {}
+@unknown { @unknown-at-rule { font-size: 14px; } }
+@MY-other-at-rule {}
+@not-my-at-rule {}

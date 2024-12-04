@@ -25,6 +25,22 @@ impl JsxString {
     }
 }
 
+impl AnyJsxAttributeName {
+    pub fn namespace(&self) -> Option<JsSyntaxToken> {
+        match self {
+            Self::JsxName(_) => None,
+            Self::JsxNamespaceName(name) => name.namespace().ok()?.value_token().ok(),
+        }
+    }
+
+    pub fn name(&self) -> SyntaxResult<JsSyntaxToken> {
+        match self {
+            Self::JsxName(name) => name.value_token(),
+            Self::JsxNamespaceName(name) => name.name()?.value_token(),
+        }
+    }
+}
+
 impl AnyJsxTag {
     pub fn name(&self) -> Option<AnyJsxElementName> {
         match self {
@@ -468,6 +484,26 @@ impl AnyJsxElement {
             })
     }
 }
+impl biome_aria::Element for AnyJsxElement {
+    fn name(&self) -> Option<impl AsRef<str>> {
+        Self::name(self).ok().and_then(|name| {
+            if let AnyJsxElementName::JsxName(name) = name {
+                Some(name.value_token().ok()?.token_text_trimmed())
+            } else {
+                None
+            }
+        })
+    }
+
+    fn attributes(&self) -> impl Iterator<Item = impl biome_aria::Attribute> {
+        Self::attributes(self).into_iter().filter_map(|attribute| {
+            let AnyJsxAttribute::JsxAttribute(attribute) = attribute else {
+                return None;
+            };
+            Some(attribute)
+        })
+    }
+}
 
 impl JsxAttribute {
     pub fn is_value_null_or_undefined(&self) -> bool {
@@ -484,6 +520,21 @@ impl JsxAttribute {
             AnyJsxAttributeName::JsxName(name) => name.value_token(),
             AnyJsxAttributeName::JsxNamespaceName(name) => name.name()?.value_token(),
         }
+    }
+}
+impl biome_aria::Attribute for JsxAttribute {
+    fn name(&self) -> Option<impl AsRef<str>> {
+        Self::name(self).ok().and_then(|name| {
+            if let AnyJsxAttributeName::JsxName(name) = name {
+                Some(name.value_token().ok()?.token_text_trimmed())
+            } else {
+                None
+            }
+        })
+    }
+
+    fn value(&self) -> Option<impl AsRef<str>> {
+        self.initializer()?.value().ok()?.as_static_value()
     }
 }
 

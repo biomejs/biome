@@ -32,9 +32,8 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "inputComponents": ["MyInput"]
     ///     }

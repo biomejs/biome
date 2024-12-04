@@ -9,7 +9,9 @@ use crate::syntax::expr::{is_nth_at_identifier, parse_name, ExpressionContext};
 use super::ts_parse_error::expected_ts_enum_member;
 use crate::state::EnterAmbientContext;
 use crate::syntax::auxiliary::{is_nth_at_declaration_clause, parse_declaration_clause};
-use crate::syntax::js_parse_error::{expected_identifier, expected_module_source};
+use crate::syntax::js_parse_error::{
+    expected_declare_statement, expected_identifier, expected_module_source,
+};
 use crate::syntax::module::{parse_module_item_list, parse_module_source, ModuleItemListParent};
 use crate::syntax::stmt::{semi, STMT_RECOVERY_SET};
 use crate::syntax::typescript::ts_parse_error::expected_ts_type;
@@ -241,8 +243,7 @@ pub(crate) fn parse_ts_declare_statement(p: &mut JsParser) -> ParsedSyntax {
         // test_err ts ts_declare_const_initializer
         // declare @decorator class D {}
         // declare @decorator abstract class D {}
-        parse_declaration_clause(p, stmt_start_pos)
-            .expect("Expected a declaration as guaranteed by is_at_ts_declare_statement")
+        parse_declaration_clause(p, stmt_start_pos).or_add_diagnostic(p, expected_declare_statement)
     });
 
     Present(m.complete(p, TS_DECLARE_STATEMENT))

@@ -19,7 +19,7 @@ declare_lint_rule! {
     /// The rule provides a `checkTypes` option that make the rule checks undeclared types.
     /// The option defaults to `true`.
     ///
-    /// ```json
+    /// ```json,options
     /// {
     ///     "options": {
     ///         "checkTypes": true

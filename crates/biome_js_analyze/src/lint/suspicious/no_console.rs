@@ -26,17 +26,23 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// Use the options to specify the allowed `console` methods.
+    /// Use the options to explicitly allow a specific subset of `console` methods.
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///   "//": "...",
     ///   "options": {
     ///     "allow": ["assert", "error", "info", "warn"]
     ///   }
     /// }
     /// ```
     ///
+    /// ```js,expect_diagnostic,use_options
+    /// console.error("error message"); // Allowed
+    /// console.warn("warning message"); // Allowed
+    /// console.info("info message"); // Allowed
+    /// console.log("log message");
+    /// console.assert(true, "explanation"); // Allowed
+    /// ```
     pub NoConsole {
         version: "1.6.0",
         name: "noConsole",

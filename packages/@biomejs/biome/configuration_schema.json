@@ -393,20 +393,6 @@
 			"additionalProperties": false
 		},
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
-		"Behavior": {
-			"oneOf": [
-				{
-					"description": "Require a radix specifier",
-					"type": "string",
-					"enum": ["always"]
-				},
-				{
-					"description": "Do not allow a radix specifier of `10`\n\nSee [eslint/#4048](https://github.com/eslint/eslint/issues/4048) for more info",
-					"type": "string",
-					"enum": ["avoid"]
-				}
-			]
-		},
 		"BracketSpacing": { "type": "boolean" },
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
@@ -454,7 +440,7 @@
 				"noForEach": {
 					"description": "Prefer for...of statement instead of Array.forEach.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoForEachConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1207,6 +1193,38 @@
 				"cssModules": {
 					"description": "Enables parsing of CSS Modules specific features.",
 					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"CustomRestrictedImport": {
+			"anyOf": [
+				{
+					"description": "The message to display when this module is imported.",
+					"type": "string"
+				},
+				{
+					"description": "Additional options to configure the message and allowed/disallowed import names.",
+					"allOf": [{ "$ref": "#/definitions/CustomRestrictedImportOptions" }]
+				}
+			]
+		},
+		"CustomRestrictedImportOptions": {
+			"type": "object",
+			"properties": {
+				"allowImportNames": {
+					"description": "Names of the exported members that allowed to be not be used.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"importNames": {
+					"description": "Names of the exported members that should not be used.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"message": {
+					"description": "The message to display when this module is imported.",
+					"type": "string"
 				}
 			},
 			"additionalProperties": false
@@ -2052,6 +2070,23 @@
 			},
 			"additionalProperties": false
 		},
+		"NoForEachConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoForEachOptions" }
+			]
+		},
+		"NoForEachOptions": {
+			"type": "object",
+			"properties": {
+				"allowedIdentifiers": {
+					"description": "A list of variable names allowed for `forEach` calls.",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoLabelWithoutControlConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2337,6 +2372,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownAtRule": {
+					"description": "Disallow unknown at-rules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownPseudoClass": {
 					"description": "Disallow unknown pseudo-class selectors.",
 					"anyOf": [
@@ -2457,6 +2499,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExportsLast": {
+					"description": "Require that all exports are declared after all non-export statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGoogleFontDisplay": {
 					"description": "Enforces the use of a recommended display strategy with Google Fonts.",
 					"anyOf": [
@@ -2492,10 +2541,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useParseIntRadix": {
-					"description": "Enforce the consistent use of the radix argument when using parseInt().",
+				"useNamingConvention": {
+					"description": "Validates that all enum values are capitalized.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseParseIntRadixConfiguration" },
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2782,9 +2831,11 @@
 			"type": "object",
 			"properties": {
 				"paths": {
-					"description": "A list of names that should trigger the rule",
+					"description": "A list of import paths that should trigger the rule.",
 					"type": "object",
-					"additionalProperties": { "type": "string" }
+					"additionalProperties": {
+						"$ref": "#/definitions/CustomRestrictedImport"
+					}
 				}
 			},
 			"additionalProperties": false
@@ -3021,6 +3072,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoForEachOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoForEachOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoLabelWithoutControlOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -3190,25 +3256,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseImportExtensionsOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUseParseIntRadixOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"fix": {
-					"description": "The kind of the code actions emitted by the rule",
-					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
-				},
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseParseIntRadixOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -4287,7 +4334,7 @@
 					]
 				},
 				"useValidTypeof": {
-					"description": "This rule verifies the result of typeof $expr unary expressions is being compared to valid values, either string literals containing valid type names or other typeof expressions",
+					"description": "This rule checks that the result of a `typeof' expression is compared to a valid value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -4413,22 +4460,6 @@
 					"additionalProperties": {
 						"$ref": "#/definitions/SuggestedExtensionMapping"
 					}
-				}
-			},
-			"additionalProperties": false
-		},
-		"UseParseIntRadixConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseParseIntRadixOptions" }
-			]
-		},
-		"UseParseIntRadixOptions": {
-			"type": "object",
-			"properties": {
-				"behavior": {
-					"default": "always",
-					"allOf": [{ "$ref": "#/definitions/Behavior" }]
 				}
 			},
 			"additionalProperties": false

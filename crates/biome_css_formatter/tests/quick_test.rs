@@ -13,7 +13,14 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-@charset "UTF-8";
+/* 1some medium long comment */
+.line1 selector,
+/* 2some medium long comment */
+.line1 selector,
+/* 3some medium long comment */
+div selector {
+  background: green;
+}
 "#;
     let parse = parse_css(src, CssParserOptions::default());
     println!("{parse:#?}");

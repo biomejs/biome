@@ -6957,6 +6957,46 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsConstructorType {
         )
     }
 }
+impl FormatRule<biome_js_syntax::TsDeclarationModule>
+    for crate::ts::auxiliary::declaration_module::FormatTsDeclarationModule
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::TsDeclarationModule,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::TsDeclarationModule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::TsDeclarationModule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::TsDeclarationModule,
+        crate::ts::auxiliary::declaration_module::FormatTsDeclarationModule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::ts::auxiliary::declaration_module::FormatTsDeclarationModule::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::TsDeclarationModule {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::TsDeclarationModule,
+        crate::ts::auxiliary::declaration_module::FormatTsDeclarationModule,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::ts::auxiliary::declaration_module::FormatTsDeclarationModule::default(),
+        )
+    }
+}
 impl FormatRule<biome_js_syntax::TsDeclareFunctionDeclaration>
     for crate::ts::declarations::declare_function_declaration::FormatTsDeclareFunctionDeclaration
 {

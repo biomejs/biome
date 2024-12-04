@@ -4412,6 +4412,49 @@ impl TsConstructorTypeBuilder {
         ))
     }
 }
+pub fn ts_declaration_module(
+    directives: JsDirectiveList,
+    items: JsModuleItemList,
+    eof_token: SyntaxToken,
+) -> TsDeclarationModuleBuilder {
+    TsDeclarationModuleBuilder {
+        directives,
+        items,
+        eof_token,
+        bom_token: None,
+        interpreter_token: None,
+    }
+}
+pub struct TsDeclarationModuleBuilder {
+    directives: JsDirectiveList,
+    items: JsModuleItemList,
+    eof_token: SyntaxToken,
+    bom_token: Option<SyntaxToken>,
+    interpreter_token: Option<SyntaxToken>,
+}
+impl TsDeclarationModuleBuilder {
+    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
+        self.bom_token = Some(bom_token);
+        self
+    }
+    pub fn with_interpreter_token(mut self, interpreter_token: SyntaxToken) -> Self {
+        self.interpreter_token = Some(interpreter_token);
+        self
+    }
+    pub fn build(self) -> TsDeclarationModule {
+        TsDeclarationModule::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::TS_DECLARATION_MODULE,
+            [
+                self.bom_token.map(|token| SyntaxElement::Token(token)),
+                self.interpreter_token
+                    .map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.directives.into_syntax())),
+                Some(SyntaxElement::Node(self.items.into_syntax())),
+                Some(SyntaxElement::Token(self.eof_token)),
+            ],
+        ))
+    }
+}
 pub fn ts_declare_function_declaration(
     function_token: SyntaxToken,
     id: AnyJsBinding,
