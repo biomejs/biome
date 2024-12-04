@@ -25,11 +25,6 @@ impl FormatNodeRule<CssComplexSelector> for FormatCssComplexSelector {
         });
         let mut has_leading_comments = false;
 
-        let is_selector_list_first_child = node.syntax().parent().is_some_and(|parent| {
-            matches!(parent.kind(), CssSyntaxKind::CSS_SELECTOR_LIST)
-                && node.syntax().prev_sibling().is_none()
-        });
-
         if let Some(computed_selector) = left.clone()?.as_css_compound_selector() {
             let simple_selector_has_leading_comments = computed_selector
                 .simple_selector()
@@ -48,6 +43,28 @@ impl FormatNodeRule<CssComplexSelector> for FormatCssComplexSelector {
                 simple_selector_has_leading_comments || sub_selector_has_leading_comments;
         }
 
+        // The selector list fist child like the case:
+        // .a b, .a c {}
+        // Then the complex selector `.a b` should be the first child of the selector list.
+        let is_selector_list_first_child = node.syntax().parent().is_some_and(|parent| {
+            matches!(parent.kind(), CssSyntaxKind::CSS_SELECTOR_LIST)
+                && node.syntax().prev_sibling().is_none()
+        });
+
+        // If the complex selector has leading comments and it's not the first child of the selector list,
+        // don't insert `soft_line_break_or_space` before it, because the comments will cause the selector to break.
+        // Otherwise the case like:
+        // .a b,
+        // /* comment longlonglonglong */
+        // .a c {}
+
+        // The complext selector
+        // /* comment longlonglonglong */
+        // .a c {}
+        // get formatted to
+        // /* comment longlonglonglong */
+        // .a
+        //  c {}
         if has_leading_comments && !is_selector_list_first_child {
             write!(
                 f,
