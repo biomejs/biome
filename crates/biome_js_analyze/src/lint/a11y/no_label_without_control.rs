@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 declare_lint_rule! {
     /// Enforce that a label element or component has a text label and an associated input.
     ///
-    /// An "input" is considered one of the following elements: `input`, `meter`, `output`, `progress`, `select` or `textarea`.
+    /// An "input" is considered one of the following elements: `input`, `meter`, `output`, `progress`, `select`, `textarea` or `button`.
     ///
     /// There are two supported ways to associate a label with an input:
     /// - Wrapping an input in a label element.
@@ -270,8 +270,9 @@ pub struct NoLabelWithoutControlState {
 
 const DEFAULT_LABEL_ATTRIBUTES: [&str; 3] = ["aria-label", "aria-labelledby", "alt"];
 const DEFAULT_LABEL_COMPONENTS: [&str; 1] = ["label"];
-const DEFAULT_INPUT_COMPONENTS: [&str; 6] =
-    ["input", "meter", "output", "progress", "select", "textarea"];
+const DEFAULT_INPUT_COMPONENTS: [&str; 7] = [
+    "input", "meter", "output", "progress", "select", "textarea", "button",
+];
 
 /// Returns whether the passed `AnyJsxTag` have a `for` or `htmlFor` attribute
 fn has_for_attribute(jsx_tag: &AnyJsxTag) -> bool {
