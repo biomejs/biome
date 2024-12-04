@@ -95,10 +95,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noAccessKey": {
 					"description": "Enforce that the accessKey attribute is not used on any HTML element.",
 					"anyOf": [
@@ -405,10 +401,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noBannedTypes": {
 					"description": "Disallow primitive type aliases and misleading types.",
 					"anyOf": [
@@ -728,10 +720,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noChildrenProp": {
 					"description": "Prevent passing of children as props.",
 					"anyOf": [
@@ -2165,10 +2153,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noCommonJs": {
 					"description": "Disallow use of CommonJs module system in favor of ESM style imports.",
 					"anyOf": [
@@ -2714,10 +2698,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noAccumulatingSpread": {
 					"description": "Disallow the use of spread (...) syntax on accumulators.",
 					"anyOf": [
@@ -3293,10 +3273,6 @@
 				"a11y": {
 					"anyOf": [{ "$ref": "#/definitions/A11y" }, { "type": "null" }]
 				},
-				"all": {
-					"description": "It enables ALL rules. The rules that belong to `nursery` won't be enabled.",
-					"type": ["boolean", "null"]
-				},
 				"complexity": {
 					"anyOf": [{ "$ref": "#/definitions/Complexity" }, { "type": "null" }]
 				},
@@ -3330,10 +3306,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noDangerouslySetInnerHtml": {
 					"description": "Prevent the usage of dangerous JSX props",
 					"anyOf": [
@@ -3432,10 +3404,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noArguments": {
 					"description": "Disallow the use of arguments.",
 					"anyOf": [
@@ -3813,10 +3781,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noApproximativeNumericConstant": {
 					"description": "Use standard constants instead of approximated literals.",
 					"anyOf": [

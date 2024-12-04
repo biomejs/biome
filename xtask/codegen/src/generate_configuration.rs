@@ -2,6 +2,7 @@ use biome_analyze::{
     FixKind, GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
 };
 use biome_css_syntax::CssLanguage;
+use biome_diagnostics::Severity;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
@@ -275,7 +276,7 @@ fn generate_for_groups(
             /// [Severity::Error] for recommended rules and [Severity::Warning] for other rules.
             ///
             /// If not, the function returns [None].
-            pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
+            pub fn get_severity_from_category(&self, category: &Category) -> Option<Severity> {
                 let mut split_code = category.name().split('/');
 
                 let _lint = split_code.next();
@@ -306,7 +307,7 @@ fn generate_for_groups(
             /// [Severity::Error] for recommended rules and [Severity::Warning] for other rules.
             ///
             /// If not, the function returns [None].
-            pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
+            pub fn get_severity_from_category(&self, category: &Category) -> Option<Severity> {
                 let mut split_code = category.name().split('/');
 
                 let _lint = split_code.next();
@@ -323,11 +324,7 @@ fn generate_for_groups(
                             .and_then(|group| group.get_rule_configuration(rule_name))
                             .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                             .map_or_else(|| {
-                                if #group_pascal_idents::is_recommended_rule(rule_name) {
-                                    Severity::Error
-                                } else {
-                                    Severity::Warning
-                                }
+                                #group_pascal_idents::rule_to_severity(rule_name)
                             }, |(level, _)| level.into()),
                     )*
                 };
@@ -631,6 +628,7 @@ fn generate_group_struct(
 ) -> TokenStream {
     let mut lines_recommended_rule = Vec::new();
     let mut lines_recommended_rule_as_filter = Vec::new();
+    let mut rule_to_severity = Vec::new();
     let mut lines_all_rule_as_filter = Vec::new();
     let mut lines_rule = Vec::new();
     let mut schema_lines_rules = Vec::new();
@@ -696,6 +694,19 @@ fn generate_group_struct(
             }
         );
         let rule_name = Ident::new(&to_capitalized(rule), Span::call_site());
+        let severity_ident = Ident::new(
+            match metadata.severity {
+                Severity::Hint => "Hint",
+                Severity::Information => "Information",
+                Severity::Warning => "Warning",
+                Severity::Error => "Error",
+                Severity::Fatal => "Fatal",
+            },
+            Span::call_site(),
+        );
+        rule_to_severity.push(quote! {
+            #rule => Severity::#severity_ident,
+        });
         if metadata.recommended {
             lines_recommended_rule_as_filter.push(quote! {
                 RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[#rule_position])
@@ -853,13 +864,16 @@ fn generate_group_struct(
                     #( #lines_rule ),*
                 ];
 
-                const RECOMMENDED_RULES: &'static [&'static str] = &[
-                    #( #lines_recommended_rule ),*
-                ];
-
                 const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
                     #( #lines_recommended_rule_as_filter ),*
                 ];
+
+                pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+                    match rule_name {
+                        #( #rule_to_severity )*
+                        _ => unreachable!("Rule doesn't exist")
+                    }
+                }
 
                 /// Retrieves the recommended rules
                 pub(crate) fn is_recommended_true(&self) -> bool {
@@ -887,11 +901,6 @@ fn generate_group_struct(
                 /// Checks if, given a rule name, matches one of the rules contained in this category
                 pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
                     Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
-                }
-
-                /// Checks if, given a rule name, it is marked as recommended
-                pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-                     Self::RECOMMENDED_RULES.contains(&rule_name)
                 }
 
                 pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {

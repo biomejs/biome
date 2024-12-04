@@ -53,6 +53,7 @@ configuration = [
   "biome_graphql_syntax",
   "biome_rowan",
   "pulldown-cmark",
+  "biome_diagnostics",
 ]
 license = ["ureq/default", "ureq/json", "serde", "serde_json"]
 schema = [
