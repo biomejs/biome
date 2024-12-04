@@ -42,7 +42,7 @@ impl FormatRule<CssSelectorList> for FormatCssSelectorList {
             if let Some(computed_selector) = computed_selector {
                 // Case like:
                 // .a b {}
-                /* some long comment */
+                // /* some long comment */
                 // .a c {}
                 //
                 // if .a has leading comments, it should be formatted without indent.
