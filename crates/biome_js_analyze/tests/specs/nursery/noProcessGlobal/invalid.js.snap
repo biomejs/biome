@@ -1,0 +1,83 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: invalid.js
+snapshot_kind: text
+---
+# Input
+```jsx
+import a from 'b';
+const c = process.env;
+
+const d = process;
+
+const e = process.env.e;
+
+// A copyright notice
+const f = process.env;
+```
+
+# Diagnostics
+```
+invalid.js:2:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! process global is discouraged.
+  
+    1 │ import a from 'b';
+  > 2 │ const c = process.env;
+      │           ^^^^^^^
+    3 │ 
+    4 │ const d = process;
+  
+  i Add `import process from "node:procee";`
+  
+
+```
+
+```
+invalid.js:4:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! process global is discouraged.
+  
+    2 │ const c = process.env;
+    3 │ 
+  > 4 │ const d = process;
+      │           ^^^^^^^
+    5 │ 
+    6 │ const e = process.env.e;
+  
+  i Add `import process from "node:procee";`
+  
+
+```
+
+```
+invalid.js:6:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! process global is discouraged.
+  
+    4 │ const d = process;
+    5 │ 
+  > 6 │ const e = process.env.e;
+      │           ^^^^^^^
+    7 │ 
+    8 │ // A copyright notice
+  
+  i Add `import process from "node:procee";`
+  
+
+```
+
+```
+invalid.js:9:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! process global is discouraged.
+  
+    8 │ // A copyright notice
+  > 9 │ const f = process.env;
+      │           ^^^^^^^
+  
+  i Add `import process from "node:procee";`
+  
+
+```
