@@ -43,7 +43,7 @@ impl FormatNodeRule<CssComplexSelector> for FormatCssComplexSelector {
                 simple_selector_has_leading_comments || sub_selector_has_leading_comments;
         }
 
-        // The selector list fist child like the case:
+        // The selector list first child like the case:
         // .a b, .a c {}
         // Then the complex selector `.a b` should be the first child of the selector list.
         let is_selector_list_first_child = node.syntax().parent().is_some_and(|parent| {
