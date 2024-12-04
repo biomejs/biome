@@ -319,6 +319,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fixed a panic related to bogus import statements in `useExhaustiveDependencies` ([#4568](https://github.com/biomejs/biome/issues/4568)) Contributed by @dyc3
 
+- Fixed `useSortedClasses` false positive and Supplementary test case ([#3394](https://github.com/biomejs/biome/issues/3394)) Contributed by @hangaoke1
+
 ### Parser
 
 #### Bug fixes
