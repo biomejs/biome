@@ -824,11 +824,11 @@ pub(crate) trait CommandRunner: Sized {
         let execution = self.get_execution(cli_options, console, workspace)?;
 
         if execution.traversal_mode().should_scan_project() {
-            let result = workspace.scan_project_folder()?;
+            let result = workspace.scan_current_project_folder(())?;
             if cli_options.verbose && matches!(execution.report_mode(), ReportMode::Terminal { .. })
             {
                 console.log(markup! {
-                    <Info>"Scanned project folder in "<Emphasis>{result.duration}</Emphasis></Info>
+                    <Info>"Scanned project folder in "<Emphasis>{result.duration}</Emphasis>"."</Info>
                 });
             }
         }

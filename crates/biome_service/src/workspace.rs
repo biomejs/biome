@@ -538,16 +538,22 @@ pub struct ProjectFeaturesResult {}
 #[serde(rename_all = "camelCase")]
 pub struct OpenFileParams {
     pub path: BiomePath,
-
-    /// The file's content.
-    ///
-    /// If `None`, the file will opened by the workspace from the local file system.
-    pub content: Option<String>,
-
+    pub content: FileContent,
     pub version: i32,
-
     pub document_file_source: Option<DocumentFileSource>,
 }
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", tag = "type", content = "content")]
+pub enum FileContent {
+    /// The client has loaded the content and submits it to the server.
+    FromClient(String),
+
+    /// The server will be responsible for loading the content from the file system.
+    FromServer,
+}
+
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
@@ -998,13 +1004,16 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Registers a possible workspace project folder.
     ///
-    /// Returns the key of said project. Use this key when you want to switch to different projects.
+    /// The newly registered project becomes the new current project.
+    ///
+    /// Returns the key of said project. Use this key later if you want to switch back to this
+    /// project after switching to another.
     fn register_project_folder(
         &self,
         params: RegisterProjectFolderParams,
     ) -> Result<ProjectKey, WorkspaceError>;
 
-    /// Scans the project folder and populates service data.
+    /// Scans the folder of the current project and populates service data.
     ///
     /// The first time you call this method, it may take a long data since it will traverse the
     /// entire project folder recursively, parse all included files (and possibly their
@@ -1013,7 +1022,10 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Follow-up calls may be much faster as they can reuse cached data.
     ///
     /// TODO: This method also registers file watchers to make sure the cache remains up-to-date.
-    fn scan_project_folder(&self) -> Result<ScanProjectFolderResult, WorkspaceError>;
+    fn scan_current_project_folder(
+        &self,
+        params: (), // workspace methods must have 1 argument...
+    ) -> Result<ScanProjectFolderResult, WorkspaceError>;
 
     /// Unregisters a workspace project folder.
     ///

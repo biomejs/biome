@@ -18,6 +18,7 @@ use std::error::Error;
 use std::ffi::OsStr;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
+use std::path::Path;
 use std::process::{ExitCode, Termination};
 
 /// Generic errors thrown during biome operations
@@ -29,8 +30,6 @@ pub enum WorkspaceError {
     DirtyWorkspace(DirtyWorkspace),
     /// The file does not exist in the [crate::Workspace]
     NotFound(NotFound),
-    /// A task panicked.
-    Panic(Panic),
     /// A file is not supported. It contains the language and path of the file
     /// Use this error if Biome is trying to process a file that Biome can't understand
     SourceFileNotSupported(SourceFileNotSupported),
@@ -81,12 +80,6 @@ impl WorkspaceError {
 
     pub fn file_ignored(path: String) -> Self {
         Self::FileIgnored(FileIgnored { path })
-    }
-
-    pub fn panic(description: impl Into<String>) -> Self {
-        Self::Panic(Panic {
-            description: description.into(),
-        })
     }
 
     pub fn source_file_not_supported(
@@ -208,15 +201,42 @@ pub struct ReportNotSerializable {
 )]
 pub struct NotFound;
 
-#[derive(Debug, Serialize, Deserialize, Diagnostic)]
-#[diagnostic(
-    category = "internalError/panic",
-    message = "A workspace task panicked.",
-    tags(INTERNAL)
-)]
+#[derive(Debug, Diagnostic, Deserialize, Serialize)]
+#[diagnostic(category = "internalError/panic", tags(INTERNAL))]
 pub struct Panic {
+    #[message]
     #[description]
-    description: String,
+    message: MessageAndDescription,
+}
+
+impl From<Panic> for biome_diagnostics::serde::Diagnostic {
+    fn from(error: Panic) -> Self {
+        biome_diagnostics::serde::Diagnostic::new(error)
+    }
+}
+
+impl Panic {
+    pub fn with_file(path: &Path) -> Self {
+        Self {
+            message: MessageAndDescription::from(
+                markup! {
+                    "A task panicked while processing "<Emphasis>{path.display().to_string()}</Emphasis>
+                }
+                .to_owned(),
+            ),
+        }
+    }
+
+    pub fn with_file_and_message(path: &Path, message: impl Into<String>) -> Self {
+        Self {
+            message: MessageAndDescription::from(
+                markup! {
+                    "A task panicked while processing "<Emphasis>{path.display().to_string()}</Emphasis>": "{message.into()}
+                }
+                .to_owned(),
+            ),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -300,8 +320,8 @@ Use the `files.maxSize` configuration to change the maximum size of files proces
 #[diagnostic(
     category = "project",
     message(
-        message("Biome attempted to perform an operation on the registered project, but no project was registered"),
-        description = "This is a bug in Biome. If this problem persists, please report here: https://github.com/biomejs/biome/issues/"
+        message("Biome attempted to perform an operation on the registered project, but no project was registered. This is a bug in Biome. If this problem persists, please report here: https://github.com/biomejs/biome/issues/"),
+        description = "Biome attempted to perform an operation on the registered project, but no project was registered. This is a bug in Biome. If this problem persists, please report here: https://github.com/biomejs/biome/issues/"
     )
 )]
 pub struct NoProject;

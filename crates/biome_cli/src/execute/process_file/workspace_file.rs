@@ -2,7 +2,7 @@ use crate::execute::diagnostics::{ResultExt, ResultIoExt};
 use crate::execute::process_file::SharedTraversalOptions;
 use biome_diagnostics::{category, Error};
 use biome_fs::{BiomePath, File, OpenOptions};
-use biome_service::workspace::{FileGuard, OpenFileParams};
+use biome_service::workspace::{FileContent, FileGuard, OpenFileParams};
 use biome_service::{Workspace, WorkspaceError};
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
@@ -40,7 +40,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
                 document_file_source: None,
                 path: biome_path,
                 version: 0,
-                content: Some(input.clone()),
+                content: FileContent::FromClient(input.clone()),
             },
         )
         .with_file_path_and_code(path.display().to_string(), category!("internalError/fs"))?;

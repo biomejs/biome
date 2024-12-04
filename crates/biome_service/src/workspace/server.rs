@@ -1,9 +1,9 @@
 use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams, FeatureKind,
-    FeatureName, FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
-    GetControlFlowGraphParams, GetFormatterIRParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
-    OpenFileParams, ParsePatternParams, ParsePatternResult, PatternId, ProjectKey,
-    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
+    FeatureName, FileContent, FixFileResult, FormatFileParams, FormatOnTypeParams,
+    FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams, GetSyntaxTreeParams,
+    GetSyntaxTreeResult, OpenFileParams, ParsePatternParams, ParsePatternResult, PatternId,
+    ProjectKey, PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
     RegisterProjectFolderParams, RenameResult, ScanProjectFolderResult, SearchPatternParams,
     SearchResults, SetManifestForProjectParams, SupportsFeatureParams,
     UnregisterProjectFolderParams, UpdateSettingsParams,
@@ -442,8 +442,8 @@ impl Workspace for WorkspaceServer {
         }
 
         let content = match params.content {
-            Some(content) => content,
-            None => self.fs.read_file_from_path(&params.path)?,
+            FileContent::FromClient(content) => content,
+            FileContent::FromServer => self.fs.read_file_from_path(&params.path)?,
         };
 
         let mut index = self.set_source(source);
@@ -521,7 +521,10 @@ impl Workspace for WorkspaceServer {
         }
     }
 
-    fn scan_project_folder(&self) -> Result<ScanProjectFolderResult, WorkspaceError> {
+    fn scan_current_project_folder(
+        &self,
+        _params: (),
+    ) -> Result<ScanProjectFolderResult, WorkspaceError> {
         let path = self
             .get_current_project_path()
             .ok_or(WorkspaceError::NoProject(NoProject))?;

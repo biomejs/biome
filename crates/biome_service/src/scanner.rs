@@ -12,7 +12,8 @@ use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, TraversalContext, TraversalScope};
 
-use crate::workspace::{DocumentFileSource, OpenFileParams};
+use crate::diagnostics::Panic;
+use crate::workspace::{DocumentFileSource, FileContent, OpenFileParams};
 use crate::{Workspace, WorkspaceError};
 
 pub(crate) struct ScanResult {
@@ -81,7 +82,7 @@ fn scan_folder(folder: &Path, ctx: &ScanContext) -> (Duration, BTreeSet<BiomePat
     let start = Instant::now();
     let fs = ctx.workspace.fs();
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
-        scope.evaluate(ctx, folder.to_owned());
+        scope.evaluate(ctx, folder.to_path_buf());
     }));
 
     let paths = ctx.evaluated_paths();
@@ -180,14 +181,16 @@ impl<'app> TraversalContext for ScanContext<'app> {
     }
 }
 
-/// This function wraps the [process_file] function implementing the traversal
-/// in a [catch_unwind] block and emit diagnostics in case of error (either the
-/// traversal function returns Err or panics)
+/// Instructs the workspace to open a single file and submits diagnostics in
+/// case of an error.
+///
+/// The call to the workspace method is also wrapped in a [catch_unwind] block
+/// so panics are caught, and diagnostics are submitted in case of panic too.
 fn open_file(ctx: &ScanContext, path: &BiomePath) {
     match catch_unwind(move || {
         ctx.workspace.open_file(OpenFileParams {
             path: path.clone(),
-            content: None,
+            content: FileContent::FromServer,
             document_file_source: None,
             version: 0,
         })
@@ -198,10 +201,10 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
         }
         Err(err) => {
             let error = match err.downcast::<String>() {
-                Ok(description) => WorkspaceError::panic(*description),
+                Ok(description) => Panic::with_file_and_message(path, *description),
                 Err(err) => match err.downcast::<&'static str>() {
-                    Ok(description) => WorkspaceError::panic(*description),
-                    Err(_) => WorkspaceError::panic("processing panicked"),
+                    Ok(description) => Panic::with_file_and_message(path, *description),
+                    Err(_) => Panic::with_file(path),
                 },
             };
 

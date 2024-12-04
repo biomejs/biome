@@ -141,8 +141,11 @@ where
         self.request("biome/register_project_folder", params)
     }
 
-    fn scan_project_folder(&self) -> Result<ScanProjectFolderResult, WorkspaceError> {
-        self.request("biome/scan_project_folder", ())
+    fn scan_current_project_folder(
+        &self,
+        params: (),
+    ) -> Result<ScanProjectFolderResult, WorkspaceError> {
+        self.request("biome/scan_current_project_folder", params)
     }
 
     fn unregister_project_folder(
