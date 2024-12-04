@@ -344,7 +344,7 @@ impl Settings {
     ) -> Option<biome_diagnostics::Severity> {
         let rules = self.linter.rules.as_ref();
         if let Some(rules) = rules {
-            rules.get_severity_from_code(code)
+            rules.get_severity_from_category(code)
         } else {
             None
         }

@@ -404,7 +404,7 @@ fn lint(params: LintParams) -> LintResults {
                         |category| {
                             rules
                                 .as_ref()
-                                .and_then(|rules| rules.get_severity_from_code(category))
+                                .and_then(|rules| rules.get_severity_from_category(category))
                                 .unwrap_or(Severity::Warning)
                         },
                     );

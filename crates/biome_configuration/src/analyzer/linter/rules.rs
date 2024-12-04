@@ -2,10 +2,8 @@
 
 use crate::analyzer::{RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration};
 use biome_analyze::{options::RuleOptions, RuleFilter};
-use biome_console::markup;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::{Category, Severity};
-use biome_rowan::TextRange;
 use rustc_hash::FxHashSet;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
@@ -67,16 +65,12 @@ impl std::str::FromStr for RuleGroup {
     }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
-#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Rules {
     #[doc = r" It enables the lint rules recommended by Biome. `true` by default."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
-    #[doc = r" It enables ALL rules. The rules that belong to `nursery` won't be enabled."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub all: Option<bool>,
     #[deserializable(rename = "a11y")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub a11y: Option<A11y>,
@@ -102,20 +96,6 @@ pub struct Rules {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub suspicious: Option<Suspicious>,
 }
-impl biome_deserialize::DeserializableValidator for Rules {
-    fn validate(
-        &mut self,
-        ctx: &mut impl biome_deserialize::DeserializationContext,
-        _name: &str,
-        range: TextRange,
-    ) -> bool {
-        if self.recommended == Some(true) && self.all == Some(true) {
-            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-            return false;
-        }
-        true
-    }
-}
 impl Rules {
     #[doc = r" Checks if the code coming from [biome_diagnostics::Diagnostic] corresponds to a rule."]
     #[doc = r" Usually the code is built like {group}/{rule_name}"]
@@ -137,7 +117,7 @@ impl Rules {
     #[doc = r" [Severity::Error] for recommended rules and [Severity::Warning] for other rules."]
     #[doc = r""]
     #[doc = r" If not, the function returns [None]."]
-    pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
+    pub fn get_severity_from_category(&self, category: &Category) -> Option<Severity> {
         let mut split_code = category.name().split('/');
         let _lint = split_code.next();
         debug_assert_eq!(_lint, Some("lint"));
@@ -151,13 +131,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if A11y::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || A11y::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
             RuleGroup::Complexity => self
@@ -166,13 +140,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if Complexity::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || Complexity::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
             RuleGroup::Correctness => self
@@ -181,13 +149,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if Correctness::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || Correctness::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
             RuleGroup::Nursery => self
@@ -196,13 +158,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if Nursery::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || Nursery::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
             RuleGroup::Performance => self
@@ -211,13 +167,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if Performance::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || Performance::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
             RuleGroup::Security => self
@@ -226,13 +176,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if Security::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || Security::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
             RuleGroup::Style => self
@@ -241,13 +185,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if Style::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || Style::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
             RuleGroup::Suspicious => self
@@ -256,13 +194,7 @@ impl Rules {
                 .and_then(|group| group.get_rule_configuration(rule_name))
                 .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
                 .map_or_else(
-                    || {
-                        if Suspicious::is_recommended_rule(rule_name) {
-                            Severity::Error
-                        } else {
-                            Severity::Warning
-                        }
-                    },
+                    || Suspicious::rule_to_severity(rule_name),
                     |(level, _)| level.into(),
                 ),
         };
@@ -270,7 +202,7 @@ impl Rules {
     }
     #[doc = r" Ensure that `recommended` is set to `true` or implied."]
     pub fn set_recommended(&mut self) {
-        if self.all != Some(true) && self.recommended == Some(false) {
+        if self.recommended == Some(false) {
             self.recommended = Some(true)
         }
         if let Some(group) = &mut self.a11y {
@@ -301,9 +233,6 @@ impl Rules {
     pub(crate) const fn is_recommended_false(&self) -> bool {
         matches!(self.recommended, Some(false))
     }
-    pub(crate) const fn is_all_true(&self) -> bool {
-        matches!(self.all, Some(true))
-    }
     #[doc = r" It returns the enabled rules by default."]
     #[doc = r""]
     #[doc = r" The enabled rules are calculated from the difference with the disabled rules."]
@@ -311,106 +240,61 @@ impl Rules {
         let mut enabled_rules = FxHashSet::default();
         let mut disabled_rules = FxHashSet::default();
         if let Some(group) = self.a11y.as_ref() {
-            group.collect_preset_rules(
-                self.is_all_true(),
-                !self.is_recommended_false(),
-                &mut enabled_rules,
-            );
+            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all_true() {
-            enabled_rules.extend(A11y::all_rules_as_filters());
         } else if !self.is_recommended_false() {
             enabled_rules.extend(A11y::recommended_rules_as_filters());
         }
         if let Some(group) = self.complexity.as_ref() {
-            group.collect_preset_rules(
-                self.is_all_true(),
-                !self.is_recommended_false(),
-                &mut enabled_rules,
-            );
+            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all_true() {
-            enabled_rules.extend(Complexity::all_rules_as_filters());
         } else if !self.is_recommended_false() {
             enabled_rules.extend(Complexity::recommended_rules_as_filters());
         }
         if let Some(group) = self.correctness.as_ref() {
-            group.collect_preset_rules(
-                self.is_all_true(),
-                !self.is_recommended_false(),
-                &mut enabled_rules,
-            );
+            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all_true() {
-            enabled_rules.extend(Correctness::all_rules_as_filters());
         } else if !self.is_recommended_false() {
             enabled_rules.extend(Correctness::recommended_rules_as_filters());
         }
         if let Some(group) = self.nursery.as_ref() {
             group.collect_preset_rules(
-                self.is_all_true() && biome_flags::is_unstable(),
                 !self.is_recommended_false() && biome_flags::is_unstable(),
                 &mut enabled_rules,
             );
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all_true() && biome_flags::is_unstable() {
-            enabled_rules.extend(Nursery::all_rules_as_filters());
         } else if !self.is_recommended_false() && biome_flags::is_unstable() {
             enabled_rules.extend(Nursery::recommended_rules_as_filters());
         }
         if let Some(group) = self.performance.as_ref() {
-            group.collect_preset_rules(
-                self.is_all_true(),
-                !self.is_recommended_false(),
-                &mut enabled_rules,
-            );
+            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all_true() {
-            enabled_rules.extend(Performance::all_rules_as_filters());
         } else if !self.is_recommended_false() {
             enabled_rules.extend(Performance::recommended_rules_as_filters());
         }
         if let Some(group) = self.security.as_ref() {
-            group.collect_preset_rules(
-                self.is_all_true(),
-                !self.is_recommended_false(),
-                &mut enabled_rules,
-            );
+            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all_true() {
-            enabled_rules.extend(Security::all_rules_as_filters());
         } else if !self.is_recommended_false() {
             enabled_rules.extend(Security::recommended_rules_as_filters());
         }
         if let Some(group) = self.style.as_ref() {
-            group.collect_preset_rules(
-                self.is_all_true(),
-                !self.is_recommended_false(),
-                &mut enabled_rules,
-            );
+            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all_true() {
-            enabled_rules.extend(Style::all_rules_as_filters());
         } else if !self.is_recommended_false() {
             enabled_rules.extend(Style::recommended_rules_as_filters());
         }
         if let Some(group) = self.suspicious.as_ref() {
-            group.collect_preset_rules(
-                self.is_all_true(),
-                !self.is_recommended_false(),
-                &mut enabled_rules,
-            );
+            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
             disabled_rules.extend(&group.get_disabled_rules());
-        } else if self.is_all_true() {
-            enabled_rules.extend(Suspicious::all_rules_as_filters());
         } else if !self.is_recommended_false() {
             enabled_rules.extend(Suspicious::recommended_rules_as_filters());
         }
@@ -447,7 +331,6 @@ impl Rules {
     }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
-#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
@@ -455,9 +338,6 @@ pub struct A11y {
     #[doc = r" It enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
-    #[doc = r" It enables ALL rules for this group."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub all: Option<bool>,
     #[doc = "Enforce that the accessKey attribute is not used on any HTML element."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_access_key: Option<RuleFixConfiguration<biome_js_analyze::options::NoAccessKey>>,
@@ -586,59 +466,9 @@ pub struct A11y {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_valid_lang: Option<RuleConfiguration<biome_js_analyze::options::UseValidLang>>,
 }
-impl biome_deserialize::DeserializableValidator for A11y {
-    fn validate(
-        &mut self,
-        ctx: &mut impl biome_deserialize::DeserializationContext,
-        _name: &str,
-        range: TextRange,
-    ) -> bool {
-        if self.recommended == Some(true) && self.all == Some(true) {
-            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-            return false;
-        }
-        true
-    }
-}
 impl A11y {
     const GROUP_NAME: &'static str = "a11y";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
-        "noAccessKey",
-        "noAriaHiddenOnFocusable",
-        "noAriaUnsupportedElements",
-        "noAutofocus",
-        "noBlankTarget",
-        "noDistractingElements",
-        "noHeaderScope",
-        "noInteractiveElementToNoninteractiveRole",
-        "noLabelWithoutControl",
-        "noNoninteractiveElementToInteractiveRole",
-        "noNoninteractiveTabindex",
-        "noPositiveTabindex",
-        "noRedundantAlt",
-        "noRedundantRoles",
-        "noSvgWithoutTitle",
-        "useAltText",
-        "useAnchorContent",
-        "useAriaActivedescendantWithTabindex",
-        "useAriaPropsForRole",
-        "useButtonType",
-        "useFocusableInteractive",
-        "useGenericFontNames",
-        "useHeadingContent",
-        "useHtmlLang",
-        "useIframeTitle",
-        "useKeyWithClickEvents",
-        "useKeyWithMouseEvents",
-        "useMediaCaption",
-        "useSemanticElements",
-        "useValidAnchor",
-        "useValidAriaProps",
-        "useValidAriaRole",
-        "useValidAriaValues",
-        "useValidLang",
-    ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noAccessKey",
         "noAriaHiddenOnFocusable",
         "noAriaUnsupportedElements",
@@ -710,54 +540,51 @@ impl A11y {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
     ];
-    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
-    ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noAccessKey" => Severity::Error,
+            "noAriaHiddenOnFocusable" => Severity::Error,
+            "noAriaUnsupportedElements" => Severity::Error,
+            "noAutofocus" => Severity::Error,
+            "noBlankTarget" => Severity::Error,
+            "noDistractingElements" => Severity::Error,
+            "noHeaderScope" => Severity::Error,
+            "noInteractiveElementToNoninteractiveRole" => Severity::Error,
+            "noLabelWithoutControl" => Severity::Error,
+            "noNoninteractiveElementToInteractiveRole" => Severity::Error,
+            "noNoninteractiveTabindex" => Severity::Error,
+            "noPositiveTabindex" => Severity::Error,
+            "noRedundantAlt" => Severity::Error,
+            "noRedundantRoles" => Severity::Error,
+            "noSvgWithoutTitle" => Severity::Error,
+            "useAltText" => Severity::Error,
+            "useAnchorContent" => Severity::Error,
+            "useAriaActivedescendantWithTabindex" => Severity::Error,
+            "useAriaPropsForRole" => Severity::Error,
+            "useButtonType" => Severity::Error,
+            "useFocusableInteractive" => Severity::Error,
+            "useGenericFontNames" => Severity::Error,
+            "useHeadingContent" => Severity::Error,
+            "useHtmlLang" => Severity::Error,
+            "useIframeTitle" => Severity::Error,
+            "useKeyWithClickEvents" => Severity::Error,
+            "useKeyWithMouseEvents" => Severity::Error,
+            "useMediaCaption" => Severity::Error,
+            "useSemanticElements" => Severity::Error,
+            "useValidAnchor" => Severity::Error,
+            "useValidAriaProps" => Severity::Error,
+            "useValidAriaRole" => Severity::Error,
+            "useValidAriaValues" => Severity::Error,
+            "useValidLang" => Severity::Error,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
-    }
-    pub(crate) fn is_all_true(&self) -> bool {
-        matches!(self.all, Some(true))
-    }
-    pub(crate) fn is_all_unset(&self) -> bool {
-        self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
@@ -1111,28 +938,16 @@ impl A11y {
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
-    }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
-    }
-    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
-        Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,
-        parent_is_all: bool,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
-        if self.is_all_true() || self.is_all_unset() && parent_is_all {
-            enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended_true()
-            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
-        {
+        if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }
@@ -1282,7 +1097,6 @@ impl A11y {
     }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
-#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
@@ -1290,9 +1104,6 @@ pub struct Complexity {
     #[doc = r" It enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
-    #[doc = r" It enables ALL rules for this group."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub all: Option<bool>,
     #[doc = "Disallow primitive type aliases and misleading types."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_banned_types: Option<RuleFixConfiguration<biome_js_analyze::options::NoBannedTypes>>,
@@ -1414,20 +1225,6 @@ pub struct Complexity {
     pub use_simplified_logic_expression:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseSimplifiedLogicExpression>>,
 }
-impl biome_deserialize::DeserializableValidator for Complexity {
-    fn validate(
-        &mut self,
-        ctx: &mut impl biome_deserialize::DeserializationContext,
-        _name: &str,
-        range: TextRange,
-    ) -> bool {
-        if self.recommended == Some(true) && self.all == Some(true) {
-            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-            return false;
-        }
-        true
-    }
-}
 impl Complexity {
     const GROUP_NAME: &'static str = "complexity";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
@@ -1464,34 +1261,6 @@ impl Complexity {
         "useSimpleNumberKeys",
         "useSimplifiedLogicExpression",
     ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &[
-        "noBannedTypes",
-        "noEmptyTypeParameters",
-        "noExcessiveNestedTestSuites",
-        "noExtraBooleanCast",
-        "noForEach",
-        "noMultipleSpacesInRegularExpressionLiterals",
-        "noStaticOnlyClass",
-        "noThisInStatic",
-        "noUselessCatch",
-        "noUselessConstructor",
-        "noUselessEmptyExport",
-        "noUselessFragments",
-        "noUselessLabel",
-        "noUselessLoneBlockStatements",
-        "noUselessRename",
-        "noUselessSwitchCase",
-        "noUselessTernary",
-        "noUselessThisAlias",
-        "noUselessTypeConstraint",
-        "noWith",
-        "useArrowFunction",
-        "useFlatMap",
-        "useLiteralKeys",
-        "useOptionalChain",
-        "useRegexLiterals",
-        "useSimpleNumberKeys",
-    ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
@@ -1520,52 +1289,49 @@ impl Complexity {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
     ];
-    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
-    ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noBannedTypes" => Severity::Error,
+            "noEmptyTypeParameters" => Severity::Error,
+            "noExcessiveCognitiveComplexity" => Severity::Information,
+            "noExcessiveNestedTestSuites" => Severity::Error,
+            "noExtraBooleanCast" => Severity::Error,
+            "noForEach" => Severity::Error,
+            "noMultipleSpacesInRegularExpressionLiterals" => Severity::Error,
+            "noStaticOnlyClass" => Severity::Error,
+            "noThisInStatic" => Severity::Error,
+            "noUselessCatch" => Severity::Error,
+            "noUselessConstructor" => Severity::Error,
+            "noUselessEmptyExport" => Severity::Error,
+            "noUselessFragments" => Severity::Error,
+            "noUselessLabel" => Severity::Error,
+            "noUselessLoneBlockStatements" => Severity::Error,
+            "noUselessRename" => Severity::Error,
+            "noUselessStringConcat" => Severity::Information,
+            "noUselessSwitchCase" => Severity::Error,
+            "noUselessTernary" => Severity::Error,
+            "noUselessThisAlias" => Severity::Error,
+            "noUselessTypeConstraint" => Severity::Error,
+            "noUselessUndefinedInitialization" => Severity::Information,
+            "noVoid" => Severity::Information,
+            "noWith" => Severity::Error,
+            "useArrowFunction" => Severity::Error,
+            "useDateNow" => Severity::Information,
+            "useFlatMap" => Severity::Error,
+            "useLiteralKeys" => Severity::Error,
+            "useOptionalChain" => Severity::Error,
+            "useRegexLiterals" => Severity::Error,
+            "useSimpleNumberKeys" => Severity::Error,
+            "useSimplifiedLogicExpression" => Severity::Information,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
-    }
-    pub(crate) fn is_all_true(&self) -> bool {
-        matches!(self.all, Some(true))
-    }
-    pub(crate) fn is_all_unset(&self) -> bool {
-        self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
@@ -1905,28 +1671,16 @@ impl Complexity {
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
-    }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
-    }
-    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
-        Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,
-        parent_is_all: bool,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
-        if self.is_all_true() || self.is_all_unset() && parent_is_all {
-            enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended_true()
-            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
-        {
+        if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }
@@ -2068,7 +1822,6 @@ impl Complexity {
     }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
-#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
@@ -2076,9 +1829,6 @@ pub struct Correctness {
     #[doc = r" It enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
-    #[doc = r" It enables ALL rules for this group."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub all: Option<bool>,
     #[doc = "Prevent passing of children as props."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_children_prop: Option<RuleConfiguration<biome_js_analyze::options::NoChildrenProp>>,
@@ -2276,20 +2026,6 @@ pub struct Correctness {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_yield: Option<RuleConfiguration<biome_js_analyze::options::UseYield>>,
 }
-impl biome_deserialize::DeserializableValidator for Correctness {
-    fn validate(
-        &mut self,
-        ctx: &mut impl biome_deserialize::DeserializationContext,
-        _name: &str,
-        range: TextRange,
-    ) -> bool {
-        if self.recommended == Some(true) && self.all == Some(true) {
-            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-            return false;
-        }
-        true
-    }
-}
 impl Correctness {
     const GROUP_NAME: &'static str = "correctness";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
@@ -2347,47 +2083,6 @@ impl Correctness {
         "useValidForDirection",
         "useYield",
     ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &[
-        "noChildrenProp",
-        "noConstAssign",
-        "noConstantCondition",
-        "noConstructorReturn",
-        "noEmptyCharacterClassInRegex",
-        "noEmptyPattern",
-        "noFlatMapIdentity",
-        "noGlobalObjectCalls",
-        "noInnerDeclarations",
-        "noInvalidBuiltinInstantiation",
-        "noInvalidConstructorSuper",
-        "noInvalidDirectionInLinearGradient",
-        "noInvalidGridAreas",
-        "noInvalidPositionAtImportRule",
-        "noInvalidUseBeforeDeclaration",
-        "noNonoctalDecimalEscape",
-        "noPrecisionLoss",
-        "noRenderReturnValue",
-        "noSelfAssign",
-        "noSetterReturn",
-        "noStringCaseMismatch",
-        "noSwitchDeclarations",
-        "noUnknownFunction",
-        "noUnknownMediaFeatureName",
-        "noUnknownProperty",
-        "noUnknownUnit",
-        "noUnmatchableAnbSelector",
-        "noUnnecessaryContinue",
-        "noUnreachable",
-        "noUnreachableSuper",
-        "noUnsafeFinally",
-        "noUnsafeOptionalChaining",
-        "noUnusedLabels",
-        "noVoidElementsWithChildren",
-        "noVoidTypeReturn",
-        "useIsNan",
-        "useJsxKeyInIterable",
-        "useValidForDirection",
-        "useYield",
-    ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
@@ -2429,73 +2124,70 @@ impl Correctness {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]),
     ];
-    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]),
-    ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noChildrenProp" => Severity::Error,
+            "noConstAssign" => Severity::Error,
+            "noConstantCondition" => Severity::Error,
+            "noConstantMathMinMaxClamp" => Severity::Information,
+            "noConstructorReturn" => Severity::Error,
+            "noEmptyCharacterClassInRegex" => Severity::Error,
+            "noEmptyPattern" => Severity::Error,
+            "noFlatMapIdentity" => Severity::Error,
+            "noGlobalObjectCalls" => Severity::Error,
+            "noInnerDeclarations" => Severity::Error,
+            "noInvalidBuiltinInstantiation" => Severity::Error,
+            "noInvalidConstructorSuper" => Severity::Error,
+            "noInvalidDirectionInLinearGradient" => Severity::Error,
+            "noInvalidGridAreas" => Severity::Error,
+            "noInvalidNewBuiltin" => Severity::Information,
+            "noInvalidPositionAtImportRule" => Severity::Error,
+            "noInvalidUseBeforeDeclaration" => Severity::Error,
+            "noNewSymbol" => Severity::Information,
+            "noNodejsModules" => Severity::Information,
+            "noNonoctalDecimalEscape" => Severity::Error,
+            "noPrecisionLoss" => Severity::Error,
+            "noRenderReturnValue" => Severity::Error,
+            "noSelfAssign" => Severity::Error,
+            "noSetterReturn" => Severity::Error,
+            "noStringCaseMismatch" => Severity::Error,
+            "noSwitchDeclarations" => Severity::Error,
+            "noUndeclaredDependencies" => Severity::Information,
+            "noUndeclaredVariables" => Severity::Information,
+            "noUnknownFunction" => Severity::Error,
+            "noUnknownMediaFeatureName" => Severity::Error,
+            "noUnknownProperty" => Severity::Error,
+            "noUnknownUnit" => Severity::Error,
+            "noUnmatchableAnbSelector" => Severity::Error,
+            "noUnnecessaryContinue" => Severity::Error,
+            "noUnreachable" => Severity::Error,
+            "noUnreachableSuper" => Severity::Error,
+            "noUnsafeFinally" => Severity::Error,
+            "noUnsafeOptionalChaining" => Severity::Error,
+            "noUnusedFunctionParameters" => Severity::Information,
+            "noUnusedImports" => Severity::Information,
+            "noUnusedLabels" => Severity::Error,
+            "noUnusedPrivateClassMembers" => Severity::Information,
+            "noUnusedVariables" => Severity::Information,
+            "noVoidElementsWithChildren" => Severity::Error,
+            "noVoidTypeReturn" => Severity::Error,
+            "useArrayLiterals" => Severity::Information,
+            "useExhaustiveDependencies" => Severity::Information,
+            "useHookAtTopLevel" => Severity::Information,
+            "useImportExtensions" => Severity::Information,
+            "useIsNan" => Severity::Error,
+            "useJsxKeyInIterable" => Severity::Error,
+            "useValidForDirection" => Severity::Error,
+            "useYield" => Severity::Error,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
-    }
-    pub(crate) fn is_all_true(&self) -> bool {
-        matches!(self.all, Some(true))
-    }
-    pub(crate) fn is_all_unset(&self) -> bool {
-        self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
@@ -3039,28 +2731,16 @@ impl Correctness {
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
-    }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
-    }
-    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
-        Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,
-        parent_is_all: bool,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
-        if self.is_all_true() || self.is_all_unset() && parent_is_all {
-            enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended_true()
-            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
-        {
+        if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }
@@ -3286,7 +2966,6 @@ impl Correctness {
     }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
-#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
@@ -3294,9 +2973,6 @@ pub struct Nursery {
     #[doc = r" It enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
-    #[doc = r" It enables ALL rules for this group."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub all: Option<bool>,
     #[doc = "Disallow use of CommonJs module system in favor of ESM style imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_common_js: Option<RuleConfiguration<biome_js_analyze::options::NoCommonJs>>,
@@ -3489,20 +3165,6 @@ pub struct Nursery {
     pub use_valid_autocomplete:
         Option<RuleConfiguration<biome_js_analyze::options::UseValidAutocomplete>>,
 }
-impl biome_deserialize::DeserializableValidator for Nursery {
-    fn validate(
-        &mut self,
-        ctx: &mut impl biome_deserialize::DeserializationContext,
-        _name: &str,
-        range: TextRange,
-    ) -> bool {
-        if self.recommended == Some(true) && self.all == Some(true) {
-            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-            return false;
-        }
-        true
-    }
-}
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
@@ -3559,24 +3221,6 @@ impl Nursery {
         "useTrimStartEnd",
         "useValidAutocomplete",
     ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &[
-        "noDescendingSpecificity",
-        "noDuplicateCustomProperties",
-        "noDuplicateElseIf",
-        "noDuplicateProperties",
-        "noDuplicatedFields",
-        "noMissingVarFunction",
-        "noTsIgnore",
-        "noUnknownPseudoClass",
-        "noUnknownPseudoElement",
-        "noUnknownTypeSelector",
-        "noUselessEscapeInRegex",
-        "useAriaPropsSupportedByRole",
-        "useConsistentMemberAccessibility",
-        "useDeprecatedReason",
-        "useNamedOperation",
-        "useStrictMode",
-    ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
@@ -3595,72 +3239,69 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
     ];
-    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]),
-    ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noCommonJs" => Severity::Information,
+            "noDescendingSpecificity" => Severity::Error,
+            "noDocumentCookie" => Severity::Information,
+            "noDocumentImportInPage" => Severity::Information,
+            "noDuplicateCustomProperties" => Severity::Error,
+            "noDuplicateElseIf" => Severity::Error,
+            "noDuplicateProperties" => Severity::Error,
+            "noDuplicatedFields" => Severity::Information,
+            "noDynamicNamespaceImportAccess" => Severity::Information,
+            "noEnum" => Severity::Information,
+            "noExportedImports" => Severity::Information,
+            "noGlobalDirnameFilename" => Severity::Information,
+            "noHeadElement" => Severity::Information,
+            "noHeadImportInDocument" => Severity::Information,
+            "noImgElement" => Severity::Information,
+            "noIrregularWhitespace" => Severity::Information,
+            "noMissingVarFunction" => Severity::Error,
+            "noNestedTernary" => Severity::Information,
+            "noOctalEscape" => Severity::Information,
+            "noPackagePrivateImports" => Severity::Information,
+            "noProcessEnv" => Severity::Information,
+            "noRestrictedImports" => Severity::Information,
+            "noRestrictedTypes" => Severity::Information,
+            "noSecrets" => Severity::Information,
+            "noStaticElementInteractions" => Severity::Information,
+            "noSubstr" => Severity::Information,
+            "noTemplateCurlyInString" => Severity::Information,
+            "noTsIgnore" => Severity::Warning,
+            "noUnknownPseudoClass" => Severity::Error,
+            "noUnknownPseudoElement" => Severity::Error,
+            "noUnknownTypeSelector" => Severity::Error,
+            "noUselessEscapeInRegex" => Severity::Error,
+            "noUselessStringRaw" => Severity::Information,
+            "noUselessUndefined" => Severity::Information,
+            "noValueAtRule" => Severity::Information,
+            "useAdjacentOverloadSignatures" => Severity::Information,
+            "useAriaPropsSupportedByRole" => Severity::Error,
+            "useAtIndex" => Severity::Information,
+            "useCollapsedIf" => Severity::Information,
+            "useComponentExportOnlyModules" => Severity::Information,
+            "useConsistentCurlyBraces" => Severity::Information,
+            "useConsistentMemberAccessibility" => Severity::Error,
+            "useDeprecatedReason" => Severity::Information,
+            "useExplicitType" => Severity::Information,
+            "useGoogleFontDisplay" => Severity::Information,
+            "useGoogleFontPreconnect" => Severity::Information,
+            "useGuardForIn" => Severity::Information,
+            "useNamedOperation" => Severity::Information,
+            "useSortedClasses" => Severity::Information,
+            "useStrictMode" => Severity::Error,
+            "useTrimStartEnd" => Severity::Information,
+            "useValidAutocomplete" => Severity::Information,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
-    }
-    pub(crate) fn is_all_true(&self) -> bool {
-        matches!(self.all, Some(true))
-    }
-    pub(crate) fn is_all_unset(&self) -> bool {
-        self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
@@ -4194,28 +3835,16 @@ impl Nursery {
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
-    }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
-    }
-    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
-        Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,
-        parent_is_all: bool,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
-        if self.is_all_true() || self.is_all_unset() && parent_is_all {
-            enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended_true()
-            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
-        {
+        if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }
@@ -4437,7 +4066,6 @@ impl Nursery {
     }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
-#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
@@ -4445,9 +4073,6 @@ pub struct Performance {
     #[doc = r" It enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
-    #[doc = r" It enables ALL rules for this group."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub all: Option<bool>,
     #[doc = "Disallow the use of spread (...) syntax on accumulators."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_accumulating_spread:
@@ -4465,20 +4090,6 @@ pub struct Performance {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_top_level_regex: Option<RuleConfiguration<biome_js_analyze::options::UseTopLevelRegex>>,
 }
-impl biome_deserialize::DeserializableValidator for Performance {
-    fn validate(
-        &mut self,
-        ctx: &mut impl biome_deserialize::DeserializationContext,
-        _name: &str,
-        range: TextRange,
-    ) -> bool {
-        if self.recommended == Some(true) && self.all == Some(true) {
-            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-            return false;
-        }
-        true
-    }
-}
 impl Performance {
     const GROUP_NAME: &'static str = "performance";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
@@ -4488,30 +4099,26 @@ impl Performance {
         "noReExportAll",
         "useTopLevelRegex",
     ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &["noAccumulatingSpread", "noDelete"];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
     ];
-    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
-    ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noAccumulatingSpread" => Severity::Error,
+            "noBarrelFile" => Severity::Information,
+            "noDelete" => Severity::Error,
+            "noReExportAll" => Severity::Information,
+            "useTopLevelRegex" => Severity::Information,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
-    }
-    pub(crate) fn is_all_true(&self) -> bool {
-        matches!(self.all, Some(true))
-    }
-    pub(crate) fn is_all_unset(&self) -> bool {
-        self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
@@ -4575,28 +4182,16 @@ impl Performance {
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
-    }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
-    }
-    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
-        Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,
-        parent_is_all: bool,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
-        if self.is_all_true() || self.is_all_unset() && parent_is_all {
-            enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended_true()
-            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
-        {
+        if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }
@@ -4630,7 +4225,6 @@ impl Performance {
     }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
-#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
@@ -4638,9 +4232,6 @@ pub struct Security {
     #[doc = r" It enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
-    #[doc = r" It enables ALL rules for this group."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub all: Option<bool>,
     #[doc = "Prevent the usage of dangerous JSX props"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_dangerously_set_inner_html:
@@ -4653,28 +4244,9 @@ pub struct Security {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_global_eval: Option<RuleConfiguration<biome_js_analyze::options::NoGlobalEval>>,
 }
-impl biome_deserialize::DeserializableValidator for Security {
-    fn validate(
-        &mut self,
-        ctx: &mut impl biome_deserialize::DeserializationContext,
-        _name: &str,
-        range: TextRange,
-    ) -> bool {
-        if self.recommended == Some(true) && self.all == Some(true) {
-            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-            return false;
-        }
-        true
-    }
-}
 impl Security {
     const GROUP_NAME: &'static str = "security";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
-        "noDangerouslySetInnerHtml",
-        "noDangerouslySetInnerHtmlWithChildren",
-        "noGlobalEval",
-    ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noDangerouslySetInnerHtml",
         "noDangerouslySetInnerHtmlWithChildren",
         "noGlobalEval",
@@ -4684,23 +4256,20 @@ impl Security {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
     ];
-    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
-    ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noDangerouslySetInnerHtml" => Severity::Error,
+            "noDangerouslySetInnerHtmlWithChildren" => Severity::Error,
+            "noGlobalEval" => Severity::Error,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
-    }
-    pub(crate) fn is_all_true(&self) -> bool {
-        matches!(self.all, Some(true))
-    }
-    pub(crate) fn is_all_unset(&self) -> bool {
-        self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
@@ -4744,28 +4313,16 @@ impl Security {
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
-    }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
-    }
-    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
-        Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,
-        parent_is_all: bool,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
-        if self.is_all_true() || self.is_all_unset() && parent_is_all {
-            enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended_true()
-            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
-        {
+        if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }
@@ -4791,7 +4348,6 @@ impl Security {
     }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
-#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
@@ -4799,9 +4355,6 @@ pub struct Style {
     #[doc = r" It enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
-    #[doc = r" It enables ALL rules for this group."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub all: Option<bool>,
     #[doc = "Disallow the use of arguments."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_arguments: Option<RuleConfiguration<biome_js_analyze::options::NoArguments>>,
@@ -4989,20 +4542,6 @@ pub struct Style {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_while: Option<RuleFixConfiguration<biome_js_analyze::options::UseWhile>>,
 }
-impl biome_deserialize::DeserializableValidator for Style {
-    fn validate(
-        &mut self,
-        ctx: &mut impl biome_deserialize::DeserializationContext,
-        _name: &str,
-        range: TextRange,
-    ) -> bool {
-        if self.recommended == Some(true) && self.all == Some(true) {
-            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-            return false;
-        }
-        true
-    }
-}
 impl Style {
     const GROUP_NAME: &'static str = "style";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
@@ -5057,32 +4596,6 @@ impl Style {
         "useThrowOnlyError",
         "useWhile",
     ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &[
-        "noArguments",
-        "noCommaOperator",
-        "noInferrableTypes",
-        "noNonNullAssertion",
-        "noParameterAssign",
-        "noUnusedTemplateLiteral",
-        "noUselessElse",
-        "noVar",
-        "useAsConstAssertion",
-        "useConst",
-        "useDefaultParameterLast",
-        "useEnumInitializers",
-        "useExponentiationOperator",
-        "useExportType",
-        "useImportType",
-        "useLiteralEnumMembers",
-        "useNodejsImportProtocol",
-        "useNumberNamespace",
-        "useNumericLiterals",
-        "useSelfClosingElements",
-        "useShorthandFunctionType",
-        "useSingleVarDeclarator",
-        "useTemplate",
-        "useWhile",
-    ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
@@ -5109,70 +4622,67 @@ impl Style {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
     ];
-    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
-    ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noArguments" => Severity::Error,
+            "noCommaOperator" => Severity::Error,
+            "noDefaultExport" => Severity::Information,
+            "noDoneCallback" => Severity::Information,
+            "noImplicitBoolean" => Severity::Information,
+            "noInferrableTypes" => Severity::Error,
+            "noNamespace" => Severity::Information,
+            "noNamespaceImport" => Severity::Information,
+            "noNegationElse" => Severity::Information,
+            "noNonNullAssertion" => Severity::Error,
+            "noParameterAssign" => Severity::Error,
+            "noParameterProperties" => Severity::Information,
+            "noRestrictedGlobals" => Severity::Information,
+            "noShoutyConstants" => Severity::Information,
+            "noUnusedTemplateLiteral" => Severity::Error,
+            "noUselessElse" => Severity::Error,
+            "noVar" => Severity::Error,
+            "noYodaExpression" => Severity::Information,
+            "useAsConstAssertion" => Severity::Error,
+            "useBlockStatements" => Severity::Information,
+            "useCollapsedElseIf" => Severity::Information,
+            "useConsistentArrayType" => Severity::Information,
+            "useConsistentBuiltinInstantiation" => Severity::Information,
+            "useConst" => Severity::Error,
+            "useDefaultParameterLast" => Severity::Error,
+            "useDefaultSwitchClause" => Severity::Information,
+            "useEnumInitializers" => Severity::Error,
+            "useExplicitLengthCheck" => Severity::Information,
+            "useExponentiationOperator" => Severity::Error,
+            "useExportType" => Severity::Error,
+            "useFilenamingConvention" => Severity::Information,
+            "useForOf" => Severity::Information,
+            "useFragmentSyntax" => Severity::Information,
+            "useImportType" => Severity::Error,
+            "useLiteralEnumMembers" => Severity::Error,
+            "useNamingConvention" => Severity::Information,
+            "useNodeAssertStrict" => Severity::Information,
+            "useNodejsImportProtocol" => Severity::Error,
+            "useNumberNamespace" => Severity::Error,
+            "useNumericLiterals" => Severity::Error,
+            "useSelfClosingElements" => Severity::Error,
+            "useShorthandArrayType" => Severity::Information,
+            "useShorthandAssign" => Severity::Information,
+            "useShorthandFunctionType" => Severity::Error,
+            "useSingleCaseStatement" => Severity::Information,
+            "useSingleVarDeclarator" => Severity::Error,
+            "useTemplate" => Severity::Error,
+            "useThrowNewError" => Severity::Information,
+            "useThrowOnlyError" => Severity::Information,
+            "useWhile" => Severity::Error,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
-    }
-    pub(crate) fn is_all_true(&self) -> bool {
-        matches!(self.all, Some(true))
-    }
-    pub(crate) fn is_all_unset(&self) -> bool {
-        self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
@@ -5686,28 +5196,16 @@ impl Style {
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
-    }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
-    }
-    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
-        Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,
-        parent_is_all: bool,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
-        if self.is_all_true() || self.is_all_unset() && parent_is_all {
-            enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended_true()
-            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
-        {
+        if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }
@@ -5921,7 +5419,6 @@ impl Style {
     }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
-#[deserializable(with_validator)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
@@ -5929,9 +5426,6 @@ pub struct Suspicious {
     #[doc = r" It enables the recommended rules for this group"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
-    #[doc = r" It enables ALL rules for this group."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub all: Option<bool>,
     #[doc = "Use standard constants instead of approximated literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_approximative_numeric_constant:
@@ -6170,20 +5664,6 @@ pub struct Suspicious {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_valid_typeof: Option<RuleFixConfiguration<biome_js_analyze::options::UseValidTypeof>>,
 }
-impl biome_deserialize::DeserializableValidator for Suspicious {
-    fn validate(
-        &mut self,
-        ctx: &mut impl biome_deserialize::DeserializationContext,
-        _name: &str,
-        range: TextRange,
-    ) -> bool {
-        if self.recommended == Some(true) && self.all == Some(true) {
-            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-            return false;
-        }
-        true
-    }
-}
 impl Suspicious {
     const GROUP_NAME: &'static str = "suspicious";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
@@ -6255,65 +5735,6 @@ impl Suspicious {
         "useNumberToFixedDigitsArgument",
         "useValidTypeof",
     ];
-    const RECOMMENDED_RULES: &'static [&'static str] = &[
-        "noApproximativeNumericConstant",
-        "noArrayIndexKey",
-        "noAssignInExpressions",
-        "noAsyncPromiseExecutor",
-        "noCatchAssign",
-        "noClassAssign",
-        "noCommentText",
-        "noCompareNegZero",
-        "noConfusingLabels",
-        "noConfusingVoidType",
-        "noConstEnum",
-        "noControlCharactersInRegex",
-        "noDebugger",
-        "noDoubleEquals",
-        "noDuplicateAtImportRules",
-        "noDuplicateCase",
-        "noDuplicateClassMembers",
-        "noDuplicateFontNames",
-        "noDuplicateJsxProps",
-        "noDuplicateObjectKeys",
-        "noDuplicateParameters",
-        "noDuplicateSelectorsKeyframeBlock",
-        "noDuplicateTestHooks",
-        "noEmptyBlock",
-        "noEmptyInterface",
-        "noExplicitAny",
-        "noExportsInTest",
-        "noExtraNonNullAssertion",
-        "noFallthroughSwitchClause",
-        "noFocusedTests",
-        "noFunctionAssign",
-        "noGlobalAssign",
-        "noGlobalIsFinite",
-        "noGlobalIsNan",
-        "noImplicitAnyLet",
-        "noImportAssign",
-        "noImportantInKeyframe",
-        "noLabelVar",
-        "noMisleadingCharacterClass",
-        "noMisleadingInstantiator",
-        "noMisrefactoredShorthandAssign",
-        "noPrototypeBuiltins",
-        "noRedeclare",
-        "noRedundantUseStrict",
-        "noSelfCompare",
-        "noShadowRestrictedNames",
-        "noShorthandPropertyOverrides",
-        "noSparseArray",
-        "noSuspiciousSemicolonInJsx",
-        "noThenProperty",
-        "noUnsafeDeclarationMerging",
-        "noUnsafeNegation",
-        "useDefaultSwitchClauseLast",
-        "useGetterReturn",
-        "useIsArray",
-        "useNamespaceKeyword",
-        "useValidTypeof",
-    ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
@@ -6373,87 +5794,84 @@ impl Suspicious {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[64]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[66]),
     ];
-    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[60]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[61]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[62]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[63]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[64]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[65]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[66]),
-    ];
+    pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
+        match rule_name {
+            "noApproximativeNumericConstant" => Severity::Error,
+            "noArrayIndexKey" => Severity::Error,
+            "noAssignInExpressions" => Severity::Error,
+            "noAsyncPromiseExecutor" => Severity::Error,
+            "noCatchAssign" => Severity::Error,
+            "noClassAssign" => Severity::Error,
+            "noCommentText" => Severity::Error,
+            "noCompareNegZero" => Severity::Error,
+            "noConfusingLabels" => Severity::Error,
+            "noConfusingVoidType" => Severity::Error,
+            "noConsole" => Severity::Information,
+            "noConsoleLog" => Severity::Information,
+            "noConstEnum" => Severity::Error,
+            "noControlCharactersInRegex" => Severity::Error,
+            "noDebugger" => Severity::Error,
+            "noDoubleEquals" => Severity::Error,
+            "noDuplicateAtImportRules" => Severity::Error,
+            "noDuplicateCase" => Severity::Error,
+            "noDuplicateClassMembers" => Severity::Error,
+            "noDuplicateFontNames" => Severity::Error,
+            "noDuplicateJsxProps" => Severity::Error,
+            "noDuplicateObjectKeys" => Severity::Error,
+            "noDuplicateParameters" => Severity::Error,
+            "noDuplicateSelectorsKeyframeBlock" => Severity::Error,
+            "noDuplicateTestHooks" => Severity::Error,
+            "noEmptyBlock" => Severity::Error,
+            "noEmptyBlockStatements" => Severity::Information,
+            "noEmptyInterface" => Severity::Error,
+            "noEvolvingTypes" => Severity::Information,
+            "noExplicitAny" => Severity::Error,
+            "noExportsInTest" => Severity::Error,
+            "noExtraNonNullAssertion" => Severity::Error,
+            "noFallthroughSwitchClause" => Severity::Error,
+            "noFocusedTests" => Severity::Error,
+            "noFunctionAssign" => Severity::Error,
+            "noGlobalAssign" => Severity::Error,
+            "noGlobalIsFinite" => Severity::Error,
+            "noGlobalIsNan" => Severity::Error,
+            "noImplicitAnyLet" => Severity::Error,
+            "noImportAssign" => Severity::Error,
+            "noImportantInKeyframe" => Severity::Error,
+            "noLabelVar" => Severity::Error,
+            "noMisleadingCharacterClass" => Severity::Error,
+            "noMisleadingInstantiator" => Severity::Error,
+            "noMisplacedAssertion" => Severity::Information,
+            "noMisrefactoredShorthandAssign" => Severity::Error,
+            "noPrototypeBuiltins" => Severity::Error,
+            "noReactSpecificProps" => Severity::Information,
+            "noRedeclare" => Severity::Error,
+            "noRedundantUseStrict" => Severity::Error,
+            "noSelfCompare" => Severity::Error,
+            "noShadowRestrictedNames" => Severity::Error,
+            "noShorthandPropertyOverrides" => Severity::Error,
+            "noSkippedTests" => Severity::Information,
+            "noSparseArray" => Severity::Error,
+            "noSuspiciousSemicolonInJsx" => Severity::Error,
+            "noThenProperty" => Severity::Error,
+            "noUnsafeDeclarationMerging" => Severity::Error,
+            "noUnsafeNegation" => Severity::Error,
+            "useAwait" => Severity::Information,
+            "useDefaultSwitchClauseLast" => Severity::Error,
+            "useErrorMessage" => Severity::Information,
+            "useGetterReturn" => Severity::Error,
+            "useIsArray" => Severity::Error,
+            "useNamespaceKeyword" => Severity::Error,
+            "useNumberToFixedDigitsArgument" => Severity::Information,
+            "useValidTypeof" => Severity::Error,
+            _ => unreachable!("Rule doesn't exist"),
+        }
+    }
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
     pub(crate) fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
-    }
-    pub(crate) fn is_all_true(&self) -> bool {
-        matches!(self.all, Some(true))
-    }
-    pub(crate) fn is_all_unset(&self) -> bool {
-        self.all.is_none()
     }
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
@@ -7137,28 +6555,16 @@ impl Suspicious {
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    #[doc = r" Checks if, given a rule name, it is marked as recommended"]
-    pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-        Self::RECOMMENDED_RULES.contains(&rule_name)
-    }
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
-    }
-    pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
-        Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
     pub(crate) fn collect_preset_rules(
         &self,
-        parent_is_all: bool,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
     ) {
-        if self.is_all_true() || self.is_all_unset() && parent_is_all {
-            enabled_rules.extend(Self::all_rules_as_filters());
-        } else if self.is_recommended_true()
-            || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended
-        {
+        if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }

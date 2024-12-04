@@ -619,7 +619,7 @@ pub(crate) fn is_diagnostic_error(
             || diagnostic.severity(),
             |category| {
                 rules
-                    .and_then(|rules| rules.get_severity_from_code(category))
+                    .and_then(|rules| rules.get_severity_from_category(category))
                     .unwrap_or(Severity::Warning)
             },
         );
