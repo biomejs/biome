@@ -172,6 +172,7 @@ define_categories! {
     "lint/nursery/noSubstr": "https://biomejs.dev/linter/rules/no-substr",
     "lint/nursery/noTemplateCurlyInString": "https://biomejs.dev/linter/rules/no-template-curly-in-string",
     "lint/nursery/noUndeclaredDependencies": "https://biomejs.dev/linter/rules/no-undeclared-dependencies",
+    "lint/nursery/noUnknownAtRule": "https://biomejs.dev/linter/rules/no-unknown-at-rule",
     "lint/nursery/noUnknownFunction": "https://biomejs.dev/linter/rules/no-unknown-function",
     "lint/nursery/noUnknownMediaFeatureName": "https://biomejs.dev/linter/rules/no-unknown-media-feature-name",
     "lint/nursery/noUnknownProperty": "https://biomejs.dev/linter/rules/no-unknown-property",

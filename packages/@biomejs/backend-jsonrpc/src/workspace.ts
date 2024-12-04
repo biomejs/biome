@@ -1335,6 +1335,10 @@ export interface Nursery {
 	 */
 	noTemplateCurlyInString?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unknown at-rules.
+	 */
+	noUnknownAtRule?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unknown pseudo-class selectors.
 	 */
 	noUnknownPseudoClass?: RuleConfiguration_for_Null;
@@ -3116,6 +3120,7 @@ export type Category =
 	| "lint/nursery/noSubstr"
 	| "lint/nursery/noTemplateCurlyInString"
 	| "lint/nursery/noUndeclaredDependencies"
+	| "lint/nursery/noUnknownAtRule"
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"

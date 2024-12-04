@@ -3368,6 +3368,9 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_template_curly_in_string:
         Option<RuleConfiguration<biome_js_analyze::options::NoTemplateCurlyInString>>,
+    #[doc = "Disallow unknown at-rules."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_unknown_at_rule: Option<RuleConfiguration<biome_css_analyze::options::NoUnknownAtRule>>,
     #[doc = "Disallow unknown pseudo-class selectors."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_pseudo_class:
@@ -3514,6 +3517,7 @@ impl Nursery {
         "noStaticElementInteractions",
         "noSubstr",
         "noTemplateCurlyInString",
+        "noUnknownAtRule",
         "noUnknownPseudoClass",
         "noUnknownPseudoElement",
         "noUnknownTypeSelector",
@@ -3549,6 +3553,7 @@ impl Nursery {
         "noDuplicateProperties",
         "noDuplicatedFields",
         "noMissingVarFunction",
+        "noUnknownAtRule",
         "noUnknownPseudoClass",
         "noUnknownPseudoElement",
         "noUnknownTypeSelector",
@@ -3777,7 +3782,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.no_template_curly_in_string.as_ref() {
+        if let Some(rule) = self.no_unknown_at_rule.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
@@ -4051,7 +4056,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.no_template_curly_in_string.as_ref() {
+        if let Some(rule) = self.no_unknown_at_rule.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
@@ -4333,6 +4338,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noTemplateCurlyInString" => self
                 .no_template_curly_in_string
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noUnknownAtRule" => self
+                .no_unknown_at_rule
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUnknownPseudoClass" => self

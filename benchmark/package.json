@@ -11,9 +11,9 @@
     "node": ">20.0.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "8.15.0",
-    "dprint": "0.47.5",
-    "eslint": "9.15.0",
+    "@typescript-eslint/eslint-plugin": "8.17.0",
+    "dprint": "0.47.6",
+    "eslint": "9.16.0",
     "prettier": "3.3.3"
   }
 }
