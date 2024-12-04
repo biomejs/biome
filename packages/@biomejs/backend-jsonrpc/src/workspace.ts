@@ -1431,6 +1431,10 @@ export interface Nursery {
 	 */
 	useNamingConvention?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce the consistent use of the radix argument when using parseInt().
+	 */
+	useParseIntRadix?: RuleFixConfiguration_for_UseParseIntRadixOptions;
+	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UtilityClassSortingOptions;
@@ -2107,6 +2111,9 @@ export type RuleConfiguration_for_UseComponentExportOnlyModulesOptions =
 export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ConsistentMemberAccessibilityOptions;
+export type RuleFixConfiguration_for_UseParseIntRadixOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseParseIntRadixOptions;
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
@@ -2345,6 +2352,20 @@ export interface RuleWithOptions_for_ConsistentMemberAccessibilityOptions {
 	 * Rule's options
 	 */
 	options: ConsistentMemberAccessibilityOptions;
+}
+export interface RuleWithFixOptions_for_UseParseIntRadixOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseParseIntRadixOptions;
 }
 export interface RuleWithFixOptions_for_UtilityClassSortingOptions {
 	/**
@@ -2588,6 +2609,9 @@ export interface UseComponentExportOnlyModulesOptions {
 export interface ConsistentMemberAccessibilityOptions {
 	accessibility?: Accessibility;
 }
+export interface UseParseIntRadixOptions {
+	behavior?: Behavior;
+}
 export interface UtilityClassSortingOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -2710,6 +2734,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	stableResult?: StableHookResult;
 }
 export type Accessibility = "noPublic" | "explicit" | "none";
+export type Behavior = "always" | "avoid";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
 export type Regex = string;
@@ -3150,6 +3175,7 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
+	| "lint/nursery/useParseIntRadix"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useTrimStartEnd"
