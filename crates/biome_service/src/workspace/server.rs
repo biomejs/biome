@@ -533,6 +533,10 @@ impl Workspace for WorkspaceServer {
         //       start scanning, or we might miss changes that happened during
         //       the scan.
 
+        // TODO: If a watcher is registered, we can also skip the scanning.
+        //       **But** if we are using a polling backend for the watching, we
+        //       probably want to force a poll at this moment.
+
         let result = scan(self, &path)?;
 
         Ok(ScanProjectFolderResult {

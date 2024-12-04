@@ -993,7 +993,10 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Update the global settings for this workspace
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError>;
 
-    /// Add a new file to the workspace
+    /// Add a new file to the workspace.
+    ///
+    /// If the file path is under a folder that belongs to a registered project other than the
+    /// current one, the current project is changed accordingly.
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError>;
 
     /// Add a new project to the workspace
