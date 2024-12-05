@@ -609,6 +609,7 @@ impl ServerFactory {
         workspace_method!(builder, is_path_ignored);
         workspace_method!(builder, update_settings);
         workspace_method!(builder, register_project_folder);
+        workspace_method!(builder, scan_current_project_folder);
         workspace_method!(builder, unregister_project_folder);
         workspace_method!(builder, open_file);
         workspace_method!(builder, set_manifest_for_project);

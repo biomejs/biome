@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
-snapshot_kind: text
 ---
 ## `src/file.js`
 
@@ -21,6 +20,10 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 # Emitted Messages
+
+```block
+Scanned project folder in <TIME>.
+```
 
 ```block
 src/folder_1/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

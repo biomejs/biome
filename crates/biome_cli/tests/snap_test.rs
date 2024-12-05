@@ -150,11 +150,10 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     let mut output = Cow::Borrowed(input);
 
     // There are some logs that print the timing, and we can't snapshot that message
-    // otherwise at each run we invalid the previous snapshot.
+    // otherwise at each run we invalidate the previous snapshot.
     //
     // This is a workaround, and it might not work for all cases.
-    let the_match = TIME_REGEX.find(output.as_ref()).map(|f| f.start()..f.end());
-    if let Some(found) = the_match {
+    while let Some(found) = TIME_REGEX.find(&output).map(|f| f.start()..f.end()) {
         output.to_mut().replace_range(found, " <TIME>.");
     }
 

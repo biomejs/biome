@@ -12,6 +12,10 @@ while (true);
 # Emitted Messages
 
 ```block
+Scanned project folder in <TIME>.
+```
+
+```block
 Checked 1 file in <TIME>. Fixed 1 file.
 ```
 

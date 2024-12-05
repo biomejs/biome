@@ -1,17 +1,18 @@
 use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams, FeatureKind,
-    FeatureName, FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
-    GetControlFlowGraphParams, GetFormatterIRParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
-    OpenFileParams, ParsePatternParams, ParsePatternResult, PatternId, ProjectKey,
-    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
-    RegisterProjectFolderParams, RenameResult, SearchPatternParams, SearchResults,
-    SetManifestForProjectParams, SupportsFeatureParams, UnregisterProjectFolderParams,
-    UpdateSettingsParams,
+    FeatureName, FileContent, FixFileResult, FormatFileParams, FormatOnTypeParams,
+    FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams, GetSyntaxTreeParams,
+    GetSyntaxTreeResult, OpenFileParams, ParsePatternParams, ParsePatternResult, PatternId,
+    ProjectKey, PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
+    RegisterProjectFolderParams, RenameResult, ScanProjectFolderResult, SearchPatternParams,
+    SearchResults, SetManifestForProjectParams, SupportsFeatureParams,
+    UnregisterProjectFolderParams, UpdateSettingsParams,
 };
-use crate::diagnostics::{InvalidPattern, SearchError};
+use crate::diagnostics::{InvalidPattern, NoProject, SearchError};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
+use crate::scanner::scan;
 use crate::settings::{WorkspaceSettings, WorkspaceSettingsHandleMut};
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
@@ -440,8 +441,13 @@ impl Workspace for WorkspaceServer {
             self.set_current_project(project_key);
         }
 
+        let content = match params.content {
+            FileContent::FromClient(content) => content,
+            FileContent::FromServer => self.fs.read_file_from_path(&params.path)?,
+        };
+
         let mut index = self.set_source(source);
-        let parsed = self.parse(&params.path, &params.content, index)?;
+        let parsed = self.parse(&params.path, &content, index)?;
 
         if let Some(language) = parsed.language {
             index = self.set_source(language);
@@ -450,7 +456,7 @@ impl Workspace for WorkspaceServer {
         self.documents.pin().insert(
             params.path,
             Document {
-                content: params.content,
+                content,
                 version: params.version,
                 file_source_index: index,
                 syntax: parsed.any_parse,
@@ -513,6 +519,30 @@ impl Workspace for WorkspaceServer {
         } else {
             Ok(self.workspace().as_ref().get_current_project_key())
         }
+    }
+
+    fn scan_current_project_folder(
+        &self,
+        _params: (),
+    ) -> Result<ScanProjectFolderResult, WorkspaceError> {
+        let path = self
+            .get_current_project_path()
+            .ok_or(WorkspaceError::NoProject(NoProject))?;
+
+        // TODO: Need to register a file watcher. This should happen before we
+        //       start scanning, or we might miss changes that happened during
+        //       the scan.
+
+        // TODO: If a watcher is registered, we can also skip the scanning.
+        //       **But** if we are using a polling backend for the watching, we
+        //       probably want to force a poll at this moment.
+
+        let result = scan(self, &path)?;
+
+        Ok(ScanProjectFolderResult {
+            diagnostics: result.diagnostics,
+            duration: result.duration,
+        })
     }
 
     fn unregister_project_folder(
@@ -611,7 +641,7 @@ impl Workspace for WorkspaceServer {
         Ok(())
     }
 
-    /// Remove a file from the workspace
+    /// Removes a file from the workspace.
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
         self.documents
             .pin()

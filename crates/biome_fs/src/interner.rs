@@ -22,7 +22,8 @@ impl PathInterner {
         (interner, recv)
     }
 
-    /// Insert the path.
+    /// Inserts the path.
+    ///
     /// Returns `true` if the path was not previously inserted.
     pub fn intern_path(&self, path: PathBuf) -> bool {
         let result = self.storage.pin().insert(path.clone());

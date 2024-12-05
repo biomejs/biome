@@ -23,7 +23,7 @@ describe("Workspace API", () => {
 				wasWritten: false,
 				kind: ["handleable"],
 			},
-			content: "statement()",
+			content: { type: "fromClient", content: "statement()" },
 			version: 0,
 		});
 

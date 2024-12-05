@@ -51,6 +51,9 @@
 //!     document does not implement the required capability: for instance trying to
 //!     format a file with a language that does not have a formatter
 
+mod client;
+mod server;
+
 pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 use crate::file_handlers::Capabilities;
 pub use crate::file_handlers::DocumentFileSource;
@@ -61,6 +64,7 @@ pub use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::PartialConfiguration;
 use biome_console::{markup, Markup, MarkupBuf};
+use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::CodeSuggestion;
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, FileSystem};
@@ -75,11 +79,9 @@ use slotmap::{new_key_type, DenseSlotMap};
 use smallvec::SmallVec;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 use tracing::{debug, instrument};
-
-mod client;
-mod server;
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -536,10 +538,22 @@ pub struct ProjectFeaturesResult {}
 #[serde(rename_all = "camelCase")]
 pub struct OpenFileParams {
     pub path: BiomePath,
-    pub content: String,
+    pub content: FileContent,
     pub version: i32,
     pub document_file_source: Option<DocumentFileSource>,
 }
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", tag = "type", content = "content")]
+pub enum FileContent {
+    /// The client has loaded the content and submits it to the server.
+    FromClient(String),
+
+    /// The server will be responsible for loading the content from the file system.
+    FromServer,
+}
+
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
@@ -786,6 +800,17 @@ pub struct RenameResult {
     pub indels: TextEdit,
 }
 
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct ScanProjectFolderResult {
+    /// Diagnostics reported while scanning the project.
+    pub diagnostics: Vec<Diagnostic>,
+
+    /// Duration of the scan.
+    pub duration: Duration,
+}
+
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
@@ -968,7 +993,10 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Update the global settings for this workspace
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError>;
 
-    /// Add a new file to the workspace
+    /// Add a new file to the workspace.
+    ///
+    /// If the file path is under a folder that belongs to a registered project other than the
+    /// current one, the current project is changed accordingly.
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError>;
 
     /// Add a new project to the workspace
@@ -977,13 +1005,37 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
         params: SetManifestForProjectParams,
     ) -> Result<(), WorkspaceError>;
 
-    /// Register a possible workspace project folder. Returns the key of said project. Use this key when you want to switch to different projects.
+    /// Registers a possible workspace project folder.
+    ///
+    /// The newly registered project becomes the new current project.
+    ///
+    /// Returns the key of said project. Use this key later if you want to switch back to this
+    /// project after switching to another.
     fn register_project_folder(
         &self,
         params: RegisterProjectFolderParams,
     ) -> Result<ProjectKey, WorkspaceError>;
 
-    /// Unregister a workspace project folder. The settings that belong to that project are deleted.
+    /// Scans the folder of the current project and populates service data.
+    ///
+    /// The first time you call this method, it may take a long data since it will traverse the
+    /// entire project folder recursively, parse all included files (and possibly their
+    /// dependencies), and perform processing for extracting the service data.
+    ///
+    /// Follow-up calls may be much faster as they can reuse cached data.
+    ///
+    /// TODO: This method also registers file watchers to make sure the cache remains up-to-date.
+    fn scan_current_project_folder(
+        &self,
+        params: (), // workspace methods must have 1 argument...
+    ) -> Result<ScanProjectFolderResult, WorkspaceError>;
+
+    /// Unregisters a workspace project folder.
+    ///
+    /// The settings that belong to that project are deleted.
+    ///
+    /// If a file watcher was registered as a result of a call to `scan_project_folder()`, it will
+    /// also be unregistered.
     fn unregister_project_folder(
         &self,
         params: UnregisterProjectFolderParams,
@@ -1016,7 +1068,7 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Change the content of an open file
     fn change_file(&self, params: ChangeFileParams) -> Result<(), WorkspaceError>;
 
-    /// Remove a file from the workspace
+    /// Removes a file from the workspace.
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError>;
 
     /// Retrieves the list of diagnostics associated to a file

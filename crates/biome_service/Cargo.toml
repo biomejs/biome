@@ -54,12 +54,14 @@ biome_rowan              = { workspace = true, features = ["serde"] }
 biome_string_case        = { workspace = true }
 biome_text_edit          = { workspace = true }
 bpaf                     = { workspace = true }
+crossbeam                = { workspace = true }
 enumflags2               = { workspace = true, features = ["serde"] }
 getrandom                = { workspace = true, features = ["js"] }
 ignore                   = { workspace = true }
 indexmap                 = { workspace = true, features = ["serde"] }
 oxc_resolver             = { workspace = true }
 papaya                   = { workspace = true }
+rayon                    = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }

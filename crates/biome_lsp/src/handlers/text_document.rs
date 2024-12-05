@@ -2,7 +2,8 @@ use crate::utils::apply_document_changes;
 use crate::{documents::Document, session::Session};
 use anyhow::Result;
 use biome_service::workspace::{
-    ChangeFileParams, CloseFileParams, DocumentFileSource, GetFileContentParams, OpenFileParams,
+    ChangeFileParams, CloseFileParams, DocumentFileSource, FileContent, GetFileContentParams,
+    OpenFileParams,
 };
 use tower_lsp::lsp_types;
 use tracing::{error, field};
@@ -31,7 +32,7 @@ pub(crate) async fn did_open(
     session.workspace.open_file(OpenFileParams {
         path: biome_path,
         version,
-        content,
+        content: FileContent::FromClient(content),
         document_file_source: Some(language_hint),
     })?;
 

@@ -163,7 +163,7 @@ export class Biome {
 			};
 
 			this.workspace.openFile({
-				content,
+				content: { type: "fromClient", content },
 				version: 0,
 				path: biomePath,
 			});

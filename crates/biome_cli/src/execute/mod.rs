@@ -23,7 +23,8 @@ use biome_diagnostics::{category, Category};
 use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
 use biome_service::workspace::{
-    FeatureName, FeaturesBuilder, FixFileMode, FormatFileParams, OpenFileParams, PatternId,
+    FeatureName, FeaturesBuilder, FileContent, FixFileMode, FormatFileParams, OpenFileParams,
+    PatternId,
 };
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
@@ -225,6 +226,16 @@ impl Display for TraversalMode {
             TraversalMode::Lint { .. } => write!(f, "lint"),
             TraversalMode::Search { .. } => write!(f, "search"),
         }
+    }
+}
+
+impl TraversalMode {
+    pub fn should_scan_project(&self) -> bool {
+        matches!(self, Self::CI { .. })
+            || matches!(
+                self,
+                Self::Check { stdin,.. } | Self::Lint { stdin, .. } if stdin.is_none()
+            )
     }
 }
 
@@ -529,7 +540,7 @@ pub fn execute_mode(
                     })?;
                     let report_file = BiomePath::new("_report_output.json");
                     session.app.workspace.open_file(OpenFileParams {
-                        content,
+                        content: FileContent::FromClient(content),
                         path: report_file.clone(),
                         version: 0,
                         document_file_source: None,

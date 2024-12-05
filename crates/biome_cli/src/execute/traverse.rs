@@ -25,10 +25,7 @@ use std::{
     ffi::OsString,
     panic::catch_unwind,
     path::PathBuf,
-    sync::{
-        atomic::{AtomicUsize, Ordering},
-        Once,
-    },
+    sync::atomic::{AtomicUsize, Ordering},
     thread,
     time::{Duration, Instant},
 };
@@ -45,8 +42,6 @@ pub(crate) fn traverse(
     cli_options: &CliOptions,
     mut inputs: Vec<OsString>,
 ) -> Result<TraverseResult, CliDiagnostic> {
-    init_thread_pool();
-
     if inputs.is_empty() {
         match &execution.traversal_mode {
             TraversalMode::Check { .. }
@@ -153,19 +148,6 @@ pub(crate) fn traverse(
         evaluated_paths,
         diagnostics,
     })
-}
-
-/// This function will setup the global Rayon thread pool the first time it's called
-///
-/// This is currently only used to assign friendly debug names to the threads of the pool
-fn init_thread_pool() {
-    static INIT_ONCE: Once = Once::new();
-    INIT_ONCE.call_once(|| {
-        rayon::ThreadPoolBuilder::new()
-            .thread_name(|index| format!("biome::worker_{index}"))
-            .build_global()
-            .expect("failed to initialize the global thread pool");
-    });
 }
 
 /// Initiate the filesystem traversal tasks with the provided input paths and

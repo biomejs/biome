@@ -2745,11 +2745,14 @@ export interface SetManifestForProjectParams {
 	version: number;
 }
 export interface OpenFileParams {
-	content: string;
+	content: FileContent;
 	documentFileSource?: DocumentFileSource;
 	path: BiomePath;
 	version: number;
 }
+export type FileContent =
+	| { content: string; type: "fromClient" }
+	| { type: "fromServer" };
 export type DocumentFileSource =
 	| "Unknown"
 	| { Js: JsFileSource }
