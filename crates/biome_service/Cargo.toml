@@ -67,7 +67,6 @@ rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true, features = ["raw_value"] }
-slotmap                  = { workspace = true, features = ["serde"] }
 smallvec                 = { workspace = true, features = ["serde"] }
 tracing                  = { workspace = true, features = ["attributes", "log"] }
 

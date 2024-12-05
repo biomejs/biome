@@ -300,14 +300,15 @@ where
     let supression_reason = None;
 
     let settings = workspace_settings.get_current_settings();
-    let linter = settings.map(|s| &s.linter);
-    let overrides = settings.map(|s| &s.override_settings);
+    let linter = settings.as_ref().map(|s| &s.linter);
+    let overrides = settings.as_ref().map(|s| &s.override_settings);
     let language_settings = settings
+        .as_ref()
         .map(|s| L::lookup_settings(&s.languages))
         .map(|result| &result.linter);
 
     L::resolve_analyzer_options(
-        settings,
+        settings.as_ref(),
         linter,
         overrides,
         language_settings,
@@ -338,9 +339,9 @@ fn assert_lint(
     let mut diagnostics = DiagnosticWriter::new(group, rule, test, code);
 
     // Create a synthetic workspace configuration
-    let mut settings = WorkspaceSettings::default();
-    let key = settings.insert_project(PathBuf::new());
-    settings.register_current_project(key);
+    let workspace_settings = WorkspaceSettings::default();
+    let key = workspace_settings.insert_project(PathBuf::new());
+    workspace_settings.set_current_project(key);
 
     // Load settings from the preceding `json,options` block if requested
     if test.use_options {
@@ -348,9 +349,10 @@ fn assert_lint(
             bail!("Code blocks tagged with 'use_options' must be preceded by a valid 'json,options' code block.");
         };
 
-        settings
-            .get_current_settings_mut()
-            .merge_with_configuration(partial_config.clone(), None, None, &[])?;
+        if let Some(mut settings) = workspace_settings.get_current_settings() {
+            settings.merge_with_configuration(partial_config.clone(), None, None, &[])?;
+            workspace_settings.set_current_settings(settings);
+        }
     }
 
     match test.document_file_source() {
@@ -388,7 +390,8 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsLanguage>(&settings, &file_path, test);
+                let options =
+                    create_analyzer_options::<JsLanguage>(&workspace_settings, &file_path, test);
 
                 // dbg!(&options);
                 biome_js_analyze::analyze(
@@ -401,7 +404,7 @@ fn assert_lint(
                     |signal| {
                         if let Some(mut diag) = signal.diagnostic() {
                             let category = diag.category().expect("linter diagnostic has no code");
-                            let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
+                            let severity = workspace_settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
                             "If you see this error, it means you need to run cargo codegen-configuration",
                         );
 
@@ -446,12 +449,13 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, test);
+                let options =
+                    create_analyzer_options::<JsonLanguage>(&workspace_settings, &file_path, test);
 
                 biome_json_analyze::analyze(&root, filter, &options, file_source, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         let category = diag.category().expect("linter diagnostic has no code");
-                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
+                        let severity = workspace_settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
                             "If you see this error, it means you need to run cargo codegen-configuration",
                         );
 
@@ -495,12 +499,13 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, test);
+                let options =
+                    create_analyzer_options::<JsonLanguage>(&workspace_settings, &file_path, test);
 
                 biome_css_analyze::analyze(&root, filter, &options, Vec::new(), |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         let category = diag.category().expect("linter diagnostic has no code");
-                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
+                        let severity = workspace_settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
                             "If you see this error, it means you need to run cargo codegen-configuration",
                         );
 
@@ -544,12 +549,13 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, test);
+                let options =
+                    create_analyzer_options::<JsonLanguage>(&workspace_settings, &file_path, test);
 
                 biome_graphql_analyze::analyze(&root, filter, &options, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         let category = diag.category().expect("linter diagnostic has no code");
-                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
+                        let severity = workspace_settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
                             "If you see this error, it means you need to run cargo codegen-configuration",
                         );
 
