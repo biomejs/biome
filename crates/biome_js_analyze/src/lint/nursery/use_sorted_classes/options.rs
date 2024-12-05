@@ -35,9 +35,9 @@ impl UtilityClassSortingOptions {
 
     pub(crate) fn match_function(&self, name: &str) -> bool {
         let matchers = self.functions.iter().flatten();
-        let parts = name.split(".");
+        let parts = name.split('.');
         for matcher in matchers {
-            let mut matcher = matcher.split(".");
+            let mut matcher = matcher.split('.');
             let mut parts = parts.clone();
 
             let mut zip = matcher.by_ref().zip(parts.by_ref());
