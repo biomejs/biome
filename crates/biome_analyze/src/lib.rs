@@ -370,9 +370,9 @@ where
     /// signals that start after this position in the file will be skipped
     fn flush_matches(&mut self, cutoff: Option<TextSize>) -> ControlFlow<Break> {
         while let Some(entry) = self.signal_queue.peek() {
-            let start = entry.text_range.start();
+            let entry_start = entry.text_range.start();
             if let Some(cutoff) = cutoff {
-                if start >= cutoff {
+                if entry_start >= cutoff {
                     break;
                 }
             }
@@ -384,23 +384,23 @@ where
             // with a matching range
             let suppression = self.line_suppressions.last_mut().filter(|suppression| {
                 suppression.line_index == *self.line_index
-                    && suppression.text_range.start() <= start
+                    && suppression.text_range.start() <= entry_start
             });
 
             let suppression = match suppression {
                 Some(suppression) => Some(suppression),
                 None => {
-                    let index = self.line_suppressions.binary_search_by(|suppression| {
-                        if suppression.text_range.end() < entry.text_range.start() {
-                            Ordering::Less
-                        } else if entry.text_range.end() < suppression.text_range.start() {
-                            Ordering::Greater
-                        } else {
-                            Ordering::Equal
-                        }
+                    // text-range 0 - 92
+                    // text-range 94 - 172
+                    // entry  68 - 174
+                    let index = self.line_suppressions.partition_point(|suppression| {
+                        suppression.text_range.end() < entry.text_range.start()
                     });
-
-                    index.ok().map(|index| &mut self.line_suppressions[index])
+                    if index >= self.line_suppressions.len() {
+                        None
+                    } else {
+                        Some(&mut self.line_suppressions[index])
+                    }
                 }
             };
 
