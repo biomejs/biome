@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::Diagnostic;
 use papaya::HashMap;
 pub use pattern::{MatchOptions, Pattern, PatternError};
+use rustc_hash::FxBuildHasher;
 use std::{
     path::{Path, PathBuf},
     sync::Arc,
@@ -74,7 +75,7 @@ struct Inner {
     /// Check [glob website](https://docs.rs/glob/latest/glob/struct.MatchOptions.html) for [MatchOptions]
     options: MatchOptions,
     /// Cached results for matches.
-    already_checked: HashMap<String, bool>,
+    already_checked: HashMap<String, bool, FxBuildHasher>,
 }
 
 impl Inner {

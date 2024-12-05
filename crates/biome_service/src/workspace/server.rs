@@ -1,9 +1,9 @@
 use super::{
-    ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams, FeatureKind,
-    FeatureName, FileContent, FixFileResult, FormatFileParams, FormatOnTypeParams,
-    FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams, GetSyntaxTreeParams,
-    GetSyntaxTreeResult, OpenFileParams, ParsePatternParams, ParsePatternResult, PatternId,
-    ProjectKey, PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
+    ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams, FeatureName,
+    FileContent, FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
+    GetControlFlowGraphParams, GetFormatterIRParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
+    OpenFileParams, ParsePatternParams, ParsePatternResult, PatternId, ProjectKey,
+    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
     RegisterProjectFolderParams, RenameResult, ScanProjectFolderResult, SearchPatternParams,
     SearchResults, SetManifestForProjectParams, SupportsFeatureParams,
     UnregisterProjectFolderParams, UpdateSettingsParams,
@@ -12,6 +12,7 @@ use crate::diagnostics::{InvalidPattern, NoProject, SearchError};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
+use crate::is_dir;
 use crate::scanner::scan;
 use crate::settings::WorkspaceSettings;
 use crate::workspace::{
@@ -19,7 +20,6 @@ use crate::workspace::{
     OrganizeImportsResult, RageEntry, RageParams, RageResult, ServerInfo,
 };
 use crate::{file_handlers::Features, Workspace, WorkspaceError};
-use biome_configuration::DEFAULT_FILE_SIZE_LIMIT;
 use biome_diagnostics::{
     serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
 };
@@ -35,7 +35,6 @@ use biome_rowan::NodeCache;
 use indexmap::IndexSet;
 use papaya::HashMap;
 use std::ffi::OsStr;
-use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{panic::RefUnwindSafe, sync::RwLock};
@@ -233,7 +232,7 @@ impl WorkspaceServer {
 
             for feature in features.iter() {
                 // a path is ignored if it's ignored by all features
-                ignored &= self.is_ignored_by_feature_config(path, feature)
+                ignored &= self.settings.is_ignored_by_feature_config(path, feature)
             }
             ignored
         };
@@ -271,42 +270,6 @@ impl WorkspaceServer {
                 }
             })
     }
-
-    /// Check whether a file is ignored in the feature `ignore`/`include`
-    fn is_ignored_by_feature_config(&self, path: &Path, feature: FeatureKind) -> bool {
-        let Some(settings) = self.settings.get_current_settings() else {
-            return false;
-        };
-
-        let (feature_included_files, feature_ignored_files) = match feature {
-            FeatureKind::Format => {
-                let formatter = &settings.formatter;
-                (&formatter.included_files, &formatter.ignored_files)
-            }
-            FeatureKind::Lint => {
-                let linter = &settings.linter;
-                (&linter.included_files, &linter.ignored_files)
-            }
-            FeatureKind::OrganizeImports => {
-                let organize_imports = &settings.organize_imports;
-                (
-                    &organize_imports.included_files,
-                    &organize_imports.ignored_files,
-                )
-            }
-            FeatureKind::Assist => {
-                let assists = &settings.assist;
-                (&assists.included_files, &assists.ignored_files)
-            }
-            // TODO: enable once the configuration is available
-            FeatureKind::Search => return false, // There is no search-specific config.
-            FeatureKind::Debug => return false,
-        };
-        let is_feature_included = feature_included_files.is_empty()
-            || is_dir(path)
-            || feature_included_files.matches_path(path);
-        !is_feature_included || feature_ignored_files.matches_path(path)
-    }
 }
 
 impl Workspace for WorkspaceServer {
@@ -322,16 +285,9 @@ impl Workspace for WorkspaceServer {
         let Some(document) = documents.get(&params.path) else {
             return Err(WorkspaceError::not_found());
         };
-        let limit = {
-            let limit = self
-                .settings
-                .get_current_settings()
-                .map_or(DEFAULT_FILE_SIZE_LIMIT, |settings| settings.files.max_size)
-                .get();
-            usize::try_from(limit).unwrap_or(usize::MAX)
-        };
 
         let file_size = document.content.as_bytes().len();
+        let limit = self.settings.get_max_file_size();
         Ok(CheckFileSizeResult { file_size, limit })
     }
 
@@ -365,7 +321,7 @@ impl Workspace for WorkspaceServer {
             file_features.set_ignored_for_all_features();
         } else {
             for feature in params.features.iter() {
-                if self.is_ignored_by_feature_config(path, feature) {
+                if self.settings.is_ignored_by_feature_config(path, feature) {
                     file_features.ignored(feature);
                 }
             }
@@ -902,12 +858,6 @@ impl Workspace for WorkspaceServer {
 
         Ok(result)
     }
-}
-
-/// Returns `true` if `path` is a directory or
-/// if it is a symlink that resolves to a directory.
-fn is_dir(path: &Path) -> bool {
-    path.is_dir() || (path.is_symlink() && fs::read_link(path).is_ok_and(|path| path.is_dir()))
 }
 
 /// Generates a pattern ID that we can use as "handle" for referencing

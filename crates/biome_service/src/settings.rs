@@ -1,5 +1,5 @@
-use crate::workspace::{DocumentFileSource, ProjectKey};
-use crate::{Matcher, WorkspaceError};
+use crate::workspace::{DocumentFileSource, FeatureKind, ProjectKey};
+use crate::{is_dir, Matcher, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration};
 use biome_configuration::diagnostics::InvalidIgnorePattern;
@@ -36,6 +36,7 @@ use biome_json_syntax::JsonLanguage;
 use biome_project::{NodeJsProject, PackageJson};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use papaya::HashMap;
+use rustc_hash::FxBuildHasher;
 use std::borrow::Cow;
 use std::num::NonZeroU64;
 use std::ops::Deref;
@@ -58,7 +59,7 @@ pub struct ProjectData {
 #[derive(Debug, Default)]
 pub struct WorkspaceSettings {
     /// The data of the projects.
-    data: HashMap<ProjectKey, ProjectData>,
+    data: HashMap<ProjectKey, ProjectData, FxBuildHasher>,
     /// The ID of the current project.
     current_project: RwLock<ProjectKey>,
 }
@@ -203,6 +204,55 @@ impl WorkspaceSettings {
     /// Sets which project is the current one by its key.
     pub fn set_current_project(&self, key: ProjectKey) {
         *self.current_project.write().unwrap() = key;
+    }
+
+    /// Returns the maximum file size setting.
+    pub fn get_max_file_size(&self) -> usize {
+        let limit = self
+            .data
+            .pin()
+            .get(&self.get_current_project_key())
+            .map_or(DEFAULT_FILE_SIZE_LIMIT, |data| data.settings.files.max_size)
+            .get();
+        usize::try_from(limit).unwrap_or(usize::MAX)
+    }
+
+    /// Check whether a file is ignored in the feature `ignore`/`include`
+    pub fn is_ignored_by_feature_config(&self, path: &Path, feature: FeatureKind) -> bool {
+        let data = self.data.pin();
+        let Some(project_data) = data.get(&self.get_current_project_key()) else {
+            return false;
+        };
+
+        let settings = &project_data.settings;
+        let (feature_included_files, feature_ignored_files) = match feature {
+            FeatureKind::Format => {
+                let formatter = &settings.formatter;
+                (&formatter.included_files, &formatter.ignored_files)
+            }
+            FeatureKind::Lint => {
+                let linter = &settings.linter;
+                (&linter.included_files, &linter.ignored_files)
+            }
+            FeatureKind::OrganizeImports => {
+                let organize_imports = &settings.organize_imports;
+                (
+                    &organize_imports.included_files,
+                    &organize_imports.ignored_files,
+                )
+            }
+            FeatureKind::Assist => {
+                let assists = &settings.assist;
+                (&assists.included_files, &assists.ignored_files)
+            }
+            // TODO: enable once the configuration is available
+            FeatureKind::Search => return false, // There is no search-specific config.
+            FeatureKind::Debug => return false,
+        };
+        let is_feature_included = feature_included_files.is_empty()
+            || is_dir(path)
+            || feature_included_files.matches_path(path);
+        !is_feature_included || feature_ignored_files.matches_path(path)
     }
 }
 
