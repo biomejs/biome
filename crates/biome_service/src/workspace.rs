@@ -74,11 +74,11 @@ use biome_text_edit::TextEdit;
 use core::str;
 use enumflags2::{bitflags, BitFlags};
 #[cfg(feature = "schema")]
-use schemars::{gen::SchemaGenerator, schema::Schema, JsonSchema};
-use slotmap::{new_key_type, DenseSlotMap};
+use schemars::{gen::SchemaGenerator, schema::Schema};
 use smallvec::SmallVec;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 use tracing::{debug, instrument};
@@ -1298,6 +1298,18 @@ impl<'app, W: Workspace + ?Sized> Drop for FileGuard<'app, W> {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct ProjectKey(usize);
+
+impl ProjectKey {
+    pub fn new() -> Self {
+        static KEY: AtomicUsize = AtomicUsize::new(1);
+        let key = KEY.fetch_add(1, Ordering::Relaxed);
+        Self(key)
+    }
+}
+
 #[test]
 fn test_order() {
     for items in FileFeaturesResult::PROTECTED_FILES.windows(2) {
@@ -1307,78 +1319,5 @@ fn test_order() {
             str::from_utf8(items[0]).unwrap(),
             str::from_utf8(items[1]).unwrap()
         );
-    }
-}
-
-new_key_type! {
-    pub struct ProjectKey;
-}
-
-#[cfg(feature = "schema")]
-impl JsonSchema for ProjectKey {
-    fn schema_name() -> String {
-        "ProjectKey".to_string()
-    }
-
-    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
-        <String>::json_schema(gen)
-    }
-}
-
-#[derive(Debug, Default)]
-pub struct WorkspaceData<V> {
-    /// [DenseSlotMap] is the slowest type in insertion/removal, but the fastest in iteration
-    ///
-    /// Users wouldn't change workspace folders very often,
-    paths: DenseSlotMap<ProjectKey, V>,
-}
-
-impl<V> WorkspaceData<V> {
-    /// Inserts an item
-    pub fn insert(&mut self, item: V) -> ProjectKey {
-        self.paths.insert(item)
-    }
-
-    /// Removes an item
-    pub fn remove(&mut self, key: ProjectKey) {
-        self.paths.remove(key);
-    }
-
-    /// Get a reference of the value
-    pub fn get(&self, key: ProjectKey) -> Option<&V> {
-        self.paths.get(key)
-    }
-
-    /// Get a mutable reference of the value
-    pub fn get_mut(&mut self, key: ProjectKey) -> Option<&mut V> {
-        self.paths.get_mut(key)
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.paths.is_empty()
-    }
-
-    pub fn iter(&self) -> WorkspaceDataIterator<'_, V> {
-        WorkspaceDataIterator::new(self)
-    }
-}
-
-pub struct WorkspaceDataIterator<'a, V> {
-    iterator: slotmap::dense::Iter<'a, ProjectKey, V>,
-}
-
-impl<'a, V> WorkspaceDataIterator<'a, V> {
-    fn new(data: &'a WorkspaceData<V>) -> Self {
-        Self {
-            iterator: data.paths.iter(),
-        }
-    }
-}
-
-impl<'a, V> Iterator for WorkspaceDataIterator<'a, V> {
-    type Item = (ProjectKey, &'a V);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.iterator.next()
     }
 }

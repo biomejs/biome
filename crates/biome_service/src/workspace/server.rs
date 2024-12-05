@@ -1,9 +1,9 @@
 use super::{
-    ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams, FeatureKind,
-    FeatureName, FileContent, FixFileResult, FormatFileParams, FormatOnTypeParams,
-    FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams, GetSyntaxTreeParams,
-    GetSyntaxTreeResult, OpenFileParams, ParsePatternParams, ParsePatternResult, PatternId,
-    ProjectKey, PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
+    ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams, FeatureName,
+    FileContent, FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
+    GetControlFlowGraphParams, GetFormatterIRParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
+    OpenFileParams, ParsePatternParams, ParsePatternResult, PatternId, ProjectKey,
+    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
     RegisterProjectFolderParams, RenameResult, ScanProjectFolderResult, SearchPatternParams,
     SearchResults, SetManifestForProjectParams, SupportsFeatureParams,
     UnregisterProjectFolderParams, UpdateSettingsParams,
@@ -12,16 +12,14 @@ use crate::diagnostics::{InvalidPattern, NoProject, SearchError};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
+use crate::is_dir;
 use crate::scanner::scan;
-use crate::settings::{WorkspaceSettings, WorkspaceSettingsHandleMut};
+use crate::settings::WorkspaceSettings;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
     OrganizeImportsResult, RageEntry, RageParams, RageResult, ServerInfo,
 };
-use crate::{
-    file_handlers::Features, settings::WorkspaceSettingsHandle, Workspace, WorkspaceError,
-};
-use biome_configuration::DEFAULT_FILE_SIZE_LIMIT;
+use crate::{file_handlers::Features, Workspace, WorkspaceError};
 use biome_diagnostics::{
     serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
 };
@@ -37,7 +35,6 @@ use biome_rowan::NodeCache;
 use indexmap::IndexSet;
 use papaya::HashMap;
 use std::ffi::OsStr;
-use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{panic::RefUnwindSafe, sync::RwLock};
@@ -47,7 +44,7 @@ pub(super) struct WorkspaceServer {
     /// features available throughout the application
     features: Features,
     /// global settings object for this workspace
-    settings: RwLock<WorkspaceSettings>,
+    settings: WorkspaceSettings,
     /// Stores the document (text content + version number) associated with a URL
     documents: HashMap<BiomePath, Document>,
     /// The current focused project
@@ -90,22 +87,13 @@ impl WorkspaceServer {
     pub(crate) fn new(fs: Box<dyn FileSystem>) -> Self {
         Self {
             features: Features::new(),
-            settings: RwLock::default(),
+            settings: Default::default(),
             documents: Default::default(),
             current_project_path: RwLock::default(),
             file_sources: RwLock::default(),
             patterns: Default::default(),
             fs,
         }
-    }
-
-    /// Provides a reference to the current settings
-    fn workspace(&self) -> WorkspaceSettingsHandle {
-        WorkspaceSettingsHandle::new(&self.settings)
-    }
-
-    fn workspace_mut(&self) -> WorkspaceSettingsHandleMut {
-        WorkspaceSettingsHandleMut::new(&self.settings)
     }
 
     /// Get the supported capabilities for a given file path
@@ -153,8 +141,7 @@ impl WorkspaceServer {
     /// - If no document is found in the workspace. Usually, you'll have to call [WorkspaceServer::set_manifest_for_project] to store said document.
     #[tracing::instrument(level = "trace", skip(self))]
     fn get_current_manifest(&self) -> Result<Option<PackageJson>, WorkspaceError> {
-        let workspace = self.workspace();
-        Ok(workspace.as_ref().get_current_manifest().cloned())
+        Ok(self.settings.get_current_manifest())
     }
 
     #[tracing::instrument(level = "trace", skip(self), fields(return))]
@@ -183,16 +170,12 @@ impl WorkspaceServer {
 
     /// Register a new project in the current workspace
     fn register_project(&self, path: PathBuf) -> ProjectKey {
-        let mut workspace = self.workspace_mut();
-        let workspace_mut = workspace.as_mut();
-        workspace_mut.insert_project(path.clone())
+        self.settings.insert_project(path)
     }
 
     /// Sets the current project of the current workspace
     fn set_current_project(&self, project_key: ProjectKey) {
-        let mut workspace = self.workspace_mut();
-        let workspace_mut = workspace.as_mut();
-        workspace_mut.set_current_project(project_key);
+        self.settings.set_current_project(project_key);
     }
 
     /// Checks whether the current path belongs to another project.
@@ -200,8 +183,7 @@ impl WorkspaceServer {
     /// If there's a match, and the match is for a project **other than** the current project, it
     /// returns the new key.
     fn path_belongs_to_other_project(&self, path: &BiomePath) -> Option<ProjectKey> {
-        let workspace = self.workspace();
-        workspace.as_ref().path_belongs_to_other_project(path)
+        self.settings.path_belongs_to_other_project(path)
     }
 
     /// Retrieves the parser result for a given file, calculating it if the file was not yet parsed.
@@ -231,13 +213,11 @@ impl WorkspaceServer {
             .parse
             .ok_or_else(self.build_capability_error(biome_path))?;
 
-        let workspace = self.workspace();
-        let settings = workspace.settings();
         let parsed = parse(
             biome_path,
             file_source,
             content,
-            settings,
+            self.settings.get_current_settings().as_ref(),
             &mut NodeCache::default(),
         );
         Ok(parsed)
@@ -252,7 +232,7 @@ impl WorkspaceServer {
 
             for feature in features.iter() {
                 // a path is ignored if it's ignored by all features
-                ignored &= self.is_ignored_by_feature_config(path, feature)
+                ignored &= self.settings.is_ignored_by_feature_config(path, feature)
             }
             ignored
         };
@@ -266,17 +246,17 @@ impl WorkspaceServer {
 
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
     fn is_ignored_by_top_level_config(&self, path: &Path) -> bool {
-        let settings = self.workspace();
-        let settings = settings.settings();
-        let Some(settings) = settings else {
+        let Some(files_settings) = self.settings.get_current_files_settings() else {
             return false;
         };
-        let is_included = settings.files.included_files.is_empty()
+
+        let is_included = files_settings.included_files.is_empty()
             || is_dir(path)
-            || settings.files.included_files.matches_path(path);
+            || files_settings.included_files.matches_path(path);
+
         !is_included
-            || settings.files.ignored_files.matches_path(path)
-            || settings.files.git_ignore.as_ref().is_some_and(|ignore| {
+            || files_settings.ignored_files.matches_path(path)
+            || files_settings.git_ignore.as_ref().is_some_and(|ignore| {
                 // `matched_path_or_any_parents` panics if `source` is not under the gitignore root.
                 // This checks excludes absolute paths that are not a prefix of the base root.
                 if !path.has_root() || path.starts_with(ignore.path()) {
@@ -289,43 +269,6 @@ impl WorkspaceServer {
                     false
                 }
             })
-    }
-
-    /// Check whether a file is ignored in the feature `ignore`/`include`
-    fn is_ignored_by_feature_config(&self, path: &Path, feature: FeatureKind) -> bool {
-        let settings = self.workspace();
-        let settings = settings.settings();
-        let Some(settings) = settings else {
-            return false;
-        };
-        let (feature_included_files, feature_ignored_files) = match feature {
-            FeatureKind::Format => {
-                let formatter = &settings.formatter;
-                (&formatter.included_files, &formatter.ignored_files)
-            }
-            FeatureKind::Lint => {
-                let linter = &settings.linter;
-                (&linter.included_files, &linter.ignored_files)
-            }
-            FeatureKind::OrganizeImports => {
-                let organize_imports = &settings.organize_imports;
-                (
-                    &organize_imports.included_files,
-                    &organize_imports.ignored_files,
-                )
-            }
-            FeatureKind::Assist => {
-                let assists = &settings.assist;
-                (&assists.included_files, &assists.ignored_files)
-            }
-            // TODO: enable once the configuration is available
-            FeatureKind::Search => return false, // There is no search-specific config.
-            FeatureKind::Debug => return false,
-        };
-        let is_feature_included = feature_included_files.is_empty()
-            || is_dir(path)
-            || feature_included_files.matches_path(path);
-        !is_feature_included || feature_ignored_files.matches_path(path)
     }
 }
 
@@ -342,14 +285,9 @@ impl Workspace for WorkspaceServer {
         let Some(document) = documents.get(&params.path) else {
             return Err(WorkspaceError::not_found());
         };
-        let limit = {
-            let workspace = self.workspace();
-            let settings = workspace.settings();
-            let limit = settings.map_or(DEFAULT_FILE_SIZE_LIMIT.get(), |s| s.files.max_size.get());
-            usize::try_from(limit).unwrap_or(usize::MAX)
-        };
 
         let file_size = document.content.as_bytes().len();
+        let limit = self.settings.get_max_file_size();
         Ok(CheckFileSizeResult { file_size, limit })
     }
 
@@ -360,16 +298,15 @@ impl Workspace for WorkspaceServer {
         let capabilities = self.get_file_capabilities(&params.path);
         let language = DocumentFileSource::from_path(&params.path);
         let path = params.path.as_path();
-        let settings = self.workspace();
-        let settings = settings.settings();
+        let settings = self.settings.get_current_settings();
         let mut file_features = FileFeaturesResult::new();
 
-        let file_name = path.file_name().and_then(|s| s.to_str());
+        let file_name = path.file_name().and_then(OsStr::to_str);
         file_features = file_features.with_capabilities(&capabilities);
         let Some(settings) = settings else {
             return Ok(file_features);
         };
-        file_features = file_features.with_settings_and_language(settings, &language, path);
+        file_features = file_features.with_settings_and_language(&settings, &language, path);
 
         if settings.files.ignore_unknown
             && language == DocumentFileSource::Unknown
@@ -384,7 +321,7 @@ impl Workspace for WorkspaceServer {
             file_features.set_ignored_for_all_features();
         } else {
             for feature in params.features.iter() {
-                if self.is_ignored_by_feature_config(path, feature) {
+                if self.settings.is_ignored_by_feature_config(path, feature) {
                     file_features.ignored(feature);
                 }
             }
@@ -398,30 +335,35 @@ impl Workspace for WorkspaceServer {
 
         Ok(file_features)
     }
+
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
         Ok(self.is_ignored(params.biome_path.as_path(), params.features))
     }
-    /// Update the global settings for this workspace
+
+    /// Updates the global settings for this workspace.
     ///
     /// ## Panics
     /// This function may panic if the internal settings mutex has been poisoned
     /// by another thread having previously panicked while holding the lock
     #[tracing::instrument(level = "trace", skip(self))]
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
-        let mut workspace = self.workspace_mut();
-        workspace
-            .as_mut()
-            .get_current_settings_mut()
-            .merge_with_configuration(
-                params.configuration,
-                params.workspace_directory,
-                params.vcs_base_path,
-                params.gitignore_matches.as_slice(),
-            )?;
+        let Some(mut settings) = self.settings.get_current_settings() else {
+            return Err(WorkspaceError::no_project());
+        };
+
+        settings.merge_with_configuration(
+            params.configuration,
+            params.workspace_directory,
+            params.vcs_base_path,
+            params.gitignore_matches.as_slice(),
+        )?;
+
+        self.settings.set_current_settings(settings);
 
         Ok(())
     }
-    /// Add a new file to the workspace
+
+    /// Adds a new file to the workspace.
     #[tracing::instrument(level = "trace", skip(self))]
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
         let mut source = params
@@ -474,10 +416,9 @@ impl Workspace for WorkspaceServer {
 
         let parsed = parse_json(params.content.as_str(), JsonParserOptions::default());
 
-        let mut workspace = self.workspace_mut();
         let mut node_js_project = NodeJsProject::default();
         node_js_project.deserialize_manifest(&parsed.tree());
-        workspace.as_mut().insert_manifest(node_js_project);
+        self.settings.insert_manifest(node_js_project);
 
         self.documents.pin().insert(
             params.manifest_path.clone(),
@@ -517,7 +458,7 @@ impl Workspace for WorkspaceServer {
             }
             Ok(key)
         } else {
-            Ok(self.workspace().as_ref().get_current_project_key())
+            Ok(self.settings.get_current_project_key())
         }
     }
 
@@ -549,8 +490,7 @@ impl Workspace for WorkspaceServer {
         &self,
         params: UnregisterProjectFolderParams,
     ) -> Result<(), WorkspaceError> {
-        let mut workspace = self.workspace_mut();
-        workspace.as_mut().remove_project(params.path.as_path());
+        self.settings.remove_project(params.path.as_path());
         Ok(())
     }
 
@@ -593,18 +533,17 @@ impl Workspace for WorkspaceServer {
             .debug
             .debug_formatter_ir
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let workspace = self.workspace();
-        let settings = workspace.settings();
+        let settings = self.settings.get_current_settings();
         let parse = self.get_parse(&params.path)?;
 
-        if let Some(settings) = settings {
+        if let Some(settings) = &settings {
             if !settings.formatter().format_with_errors && parse.has_errors() {
                 return Err(WorkspaceError::format_with_errors_disabled());
             }
         }
         let document_file_source = self.get_file_source(&params.path);
 
-        debug_formatter_ir(&params.path, &document_file_source, parse, workspace)
+        debug_formatter_ir(&params.path, &document_file_source, parse, settings.into())
     }
 
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
@@ -663,7 +602,7 @@ impl Workspace for WorkspaceServer {
                 info_span!("Pulling diagnostics", categories =? params.categories).in_scope(|| {
                     let results = lint(LintParams {
                         parse,
-                        workspace: &self.workspace(),
+                        workspace: &self.settings.get_current_settings().into(),
                         max_diagnostics: params.max_diagnostics as u32,
                         path: &params.path,
                         only: params.only,
@@ -716,13 +655,12 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&params.path))?;
 
         let parse = self.get_parse(&params.path)?;
-        let workspace = self.workspace();
         let manifest = self.get_current_manifest()?;
         let language = self.get_file_source(&params.path);
         Ok(code_actions(CodeActionsParams {
             parse,
             range: params.range,
-            workspace: &workspace,
+            workspace: &self.settings.get_current_settings().into(),
             path: &params.path,
             manifest,
             language,
@@ -741,17 +679,16 @@ impl Workspace for WorkspaceServer {
             .formatter
             .format
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let workspace = self.workspace();
-        let settings = workspace.settings();
+        let settings = self.settings.get_current_settings();
         let parse = self.get_parse(&params.path)?;
 
-        if let Some(settings) = settings {
+        if let Some(settings) = &settings {
             if !settings.formatter().format_with_errors && parse.has_errors() {
                 return Err(WorkspaceError::format_with_errors_disabled());
             }
         }
         let document_file_source = self.get_file_source(&params.path);
-        format(&params.path, &document_file_source, parse, workspace)
+        format(&params.path, &document_file_source, parse, settings.into())
     }
 
     fn format_range(&self, params: FormatRangeParams) -> Result<Printed, WorkspaceError> {
@@ -760,11 +697,10 @@ impl Workspace for WorkspaceServer {
             .formatter
             .format_range
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let workspace = self.workspace();
-        let settings = workspace.settings();
+        let settings = self.settings.get_current_settings();
         let parse = self.get_parse(&params.path)?;
 
-        if let Some(settings) = settings {
+        if let Some(settings) = &settings {
             if !settings.formatter().format_with_errors && parse.has_errors() {
                 return Err(WorkspaceError::format_with_errors_disabled());
             }
@@ -774,7 +710,7 @@ impl Workspace for WorkspaceServer {
             &params.path,
             &document_file_source,
             parse,
-            workspace,
+            settings.into(),
             params.range,
         )
     }
@@ -786,10 +722,9 @@ impl Workspace for WorkspaceServer {
             .format_on_type
             .ok_or_else(self.build_capability_error(&params.path))?;
 
-        let workspace = self.workspace();
-        let settings = workspace.settings();
+        let settings = self.settings.get_current_settings();
         let parse = self.get_parse(&params.path)?;
-        if let Some(settings) = settings {
+        if let Some(settings) = &settings {
             if !settings.formatter().format_with_errors && parse.has_errors() {
                 return Err(WorkspaceError::format_with_errors_disabled());
             }
@@ -800,7 +735,7 @@ impl Workspace for WorkspaceServer {
             &params.path,
             &document_file_source,
             parse,
-            workspace,
+            settings.into(),
             params.offset,
         )
     }
@@ -821,7 +756,7 @@ impl Workspace for WorkspaceServer {
             // rules: rules.as_ref().map(|x| x.borrow()),
             fix_file_mode: params.fix_file_mode,
             // filter,
-            workspace: self.workspace(),
+            workspace: self.settings.get_current_settings().into(),
             should_format: params.should_format,
             biome_path: &params.path,
             manifest,
@@ -881,11 +816,17 @@ impl Workspace for WorkspaceServer {
             .search
             .search
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let workspace = self.workspace();
+        let settings = self.settings.get_current_settings();
         let parse = self.get_parse(&params.path)?;
 
         let document_file_source = self.get_file_source(&params.path);
-        let matches = search(&params.path, &document_file_source, parse, query, workspace)?;
+        let matches = search(
+            &params.path,
+            &document_file_source,
+            parse,
+            query,
+            settings.into(),
+        )?;
 
         Ok(SearchResults {
             file: params.path,
@@ -917,12 +858,6 @@ impl Workspace for WorkspaceServer {
 
         Ok(result)
     }
-}
-
-/// Returns `true` if `path` is a directory or
-/// if it is a symlink that resolves to a directory.
-fn is_dir(path: &Path) -> bool {
-    path.is_dir() || (path.is_symlink() && fs::read_link(path).is_ok_and(|path| path.is_dir()))
 }
 
 /// Generates a pattern ID that we can use as "handle" for referencing

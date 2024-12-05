@@ -12,7 +12,7 @@ pub mod dome;
 #[cfg(feature = "schema")]
 pub mod workspace_types;
 
-use std::ops::Deref;
+use std::{fs, ops::Deref, path::Path};
 
 use serde::{Deserialize, Serialize};
 
@@ -68,4 +68,10 @@ impl<'app> Deref for WorkspaceRef<'app> {
             WorkspaceRef::Borrowed(inner) => *inner,
         }
     }
+}
+
+/// Returns `true` if `path` is a directory or
+/// if it is a symlink that resolves to a directory.
+fn is_dir(path: &Path) -> bool {
+    path.is_dir() || (path.is_symlink() && fs::read_link(path).is_ok_and(|path| path.is_dir()))
 }

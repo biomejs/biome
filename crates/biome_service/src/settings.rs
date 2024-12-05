@@ -1,5 +1,5 @@
-use crate::workspace::{DocumentFileSource, ProjectKey, WorkspaceData};
-use crate::{Matcher, WorkspaceError};
+use crate::workspace::{DocumentFileSource, FeatureKind, ProjectKey};
+use crate::{is_dir, Matcher, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration};
 use biome_configuration::diagnostics::InvalidIgnorePattern;
@@ -29,25 +29,23 @@ use biome_html_formatter::HtmlFormatOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_project::{NodeJsProject, PackageJson};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
-use rustc_hash::FxHashMap;
+use papaya::HashMap;
+use rustc_hash::FxBuildHasher;
 use std::borrow::Cow;
+use std::num::NonZeroU64;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
-use std::sync::RwLockWriteGuard;
-use std::{
-    num::NonZeroU64,
-    sync::{RwLock, RwLockReadGuard},
-};
+use std::sync::RwLock;
 use tracing::trace;
 
-#[derive(Debug, Default)]
 /// The information tracked for each project
+#[derive(Debug, Default)]
 pub struct ProjectData {
     /// The root path of the project. This path should be **absolute**.
     path: BiomePath,
@@ -57,94 +55,102 @@ pub struct ProjectData {
     project: Option<NodeJsProject>,
 }
 
-#[derive(Debug, Default)]
 /// Type that manages different projects inside the workspace.
+#[derive(Debug, Default)]
 pub struct WorkspaceSettings {
-    /// The data of the projects
-    data: WorkspaceData<ProjectData>,
+    /// The data of the projects.
+    data: HashMap<ProjectKey, ProjectData, FxBuildHasher>,
     /// The ID of the current project.
-    current_project: ProjectKey,
+    current_project: RwLock<ProjectKey>,
 }
 
 impl WorkspaceSettings {
     pub fn get_current_project_key(&self) -> ProjectKey {
-        self.current_project
-    }
-
-    pub fn get_current_project_data_mut(&mut self) -> &mut ProjectData {
-        self.data
-            .get_mut(self.current_project)
-            .expect("You must have at least one workspace.")
+        *self.current_project.read().unwrap()
     }
 
     /// Retrieves the settings of the current workspace folder
-    pub fn get_current_settings(&self) -> Option<&Settings> {
+    pub fn get_current_settings(&self) -> Option<Settings> {
         trace!("Current key {:?}", self.current_project);
-        let data = self.data.get(self.current_project);
-        if let Some(data) = data {
-            Some(&data.settings)
-        } else {
-            None
-        }
+        self.data
+            .pin()
+            .get(&self.get_current_project_key())
+            .map(|data| data.settings.clone())
     }
 
-    pub fn get_current_manifest(&self) -> Option<&PackageJson> {
-        let data = self.data.get(self.current_project);
-        if let Some(data) = data {
-            data.project.as_ref().map(|project| &project.manifest)
-        } else {
-            None
-        }
+    /// Sets the settings of the current workspace folder.
+    pub fn set_current_settings(&self, settings: Settings) {
+        let data = self.data.pin();
+        let project_key = self.get_current_project_key();
+        let Some(project_data) = data.get(&project_key) else {
+            return;
+        };
+
+        let project_data = ProjectData {
+            path: project_data.path.clone(),
+            settings,
+            project: project_data.project.clone(),
+        };
+
+        data.insert(project_key, project_data);
     }
 
-    /// Retrieves a mutable reference of the settings of the current project
-    pub fn get_current_settings_mut(&mut self) -> &mut Settings {
-        &mut self
-            .data
-            .get_mut(self.current_project)
-            .expect("You must have at least one workspace.")
-            .settings
+    /// Retrieves the files settings of the current workspace folder
+    pub fn get_current_files_settings(&self) -> Option<FilesSettings> {
+        trace!("Current key {:?}", self.current_project);
+        self.data
+            .pin()
+            .get(&self.get_current_project_key())
+            .map(|data| data.settings.files.clone())
     }
 
-    /// Register the current project using its unique key
-    pub fn register_current_project(&mut self, key: ProjectKey) {
-        self.current_project = key;
+    pub fn get_current_manifest(&self) -> Option<PackageJson> {
+        self.data
+            .pin()
+            .get(&self.get_current_project_key())
+            .and_then(|data| data.project.as_ref())
+            .map(|project| project.manifest.clone())
     }
 
-    /// Insert a new project using its folder. Use [WorkspaceSettings::get_current_settings_mut] to retrieve
-    /// a mutable reference to its [Settings] and manipulate them.
-    pub fn insert_project(&mut self, workspace_path: impl Into<PathBuf>) -> ProjectKey {
+    /// Inserts a new project using its folder.
+    pub fn insert_project(&self, workspace_path: impl Into<PathBuf>) -> ProjectKey {
         let path = BiomePath::new(workspace_path.into());
         trace!("Insert workspace folder: {:?}", path);
-        self.data.insert(ProjectData {
-            path,
-            settings: Settings::default(),
-            project: None,
-        })
+        let key = ProjectKey::new();
+        self.data.pin().insert(
+            key,
+            ProjectData {
+                path,
+                settings: Settings::default(),
+                project: None,
+            },
+        );
+        key
     }
 
-    pub fn insert_manifest(&mut self, manifest: NodeJsProject) {
-        let project_data = self.get_current_project_data_mut();
-        let _ = project_data.project.insert(manifest);
+    pub fn insert_manifest(&self, manifest: NodeJsProject) {
+        let data = self.data.pin();
+        let project_key = self.get_current_project_key();
+        let Some(project_data) = data.get(&project_key) else {
+            return;
+        };
+
+        let project_data = ProjectData {
+            path: project_data.path.clone(),
+            settings: project_data.settings.clone(),
+            project: Some(manifest),
+        };
+
+        data.insert(project_key, project_data);
     }
 
     /// Remove a project using its folder.
-    pub fn remove_project(&mut self, workspace_path: &Path) {
-        let keys_to_remove = {
-            let mut data = vec![];
-            let iter = self.data.iter();
-
-            for (key, path_to_settings) in iter {
-                if path_to_settings.path.as_path() == workspace_path {
-                    data.push(key)
-                }
+    pub fn remove_project(&self, workspace_path: &Path) {
+        let data = self.data.pin();
+        for (key, path_to_settings) in data.iter() {
+            if path_to_settings.path.as_path() == workspace_path {
+                data.remove(key);
             }
-
-            data
-        };
-
-        for key in keys_to_remove {
-            self.data.remove(key)
         }
     }
 
@@ -156,36 +162,102 @@ impl WorkspaceSettings {
         if self.data.is_empty() {
             return None;
         }
+
+        let mut belongs_to_current = false;
+        let mut belongs_to_other = None;
         trace!("Current key: {:?}", self.current_project);
-        let iter = self.data.iter();
-        for (key, path_to_settings) in iter {
+        for (key, path_to_settings) in self.data.pin().iter() {
             trace!(
                 "Workspace path {:?}, file path {:?}",
                 path_to_settings.path,
                 path
             );
-            trace!("Iter key: {:?}", key);
-            if key == self.current_project {
-                continue;
-            }
-            if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
-                trace!("Update workspace to {:?}", key);
-                return Some(key);
+            trace!("Iter key: {key:?}");
+            if *key == self.get_current_project_key() {
+                belongs_to_current = true;
+            } else if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
+                trace!("Update workspace to {key:?}");
+                belongs_to_other = Some(*key);
             }
         }
-        None
+        belongs_to_other.filter(|_| !belongs_to_current)
     }
 
-    /// Checks if the current path belongs to a registered project.
-    ///
-    /// If there's a match, and the match **isn't** the current project, the function will mark the match as the current project.
-    pub fn set_current_project(&mut self, new_key: ProjectKey) {
-        self.current_project = new_key;
+    /// Checks whether the given `path` belongs to the current project and no
+    /// other project.
+    pub fn path_belongs_only_to_current_project(&self, path: &BiomePath) -> bool {
+        let mut belongs_to_current = false;
+        let mut belongs_to_other = false;
+        for (key, path_to_settings) in self.data.pin().iter() {
+            if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
+                if *key == self.get_current_project_key() {
+                    belongs_to_current = true;
+                } else {
+                    belongs_to_other = true;
+                }
+            }
+        }
+
+        belongs_to_current && !belongs_to_other
+    }
+
+    /// Sets which project is the current one by its key.
+    pub fn set_current_project(&self, key: ProjectKey) {
+        *self.current_project.write().unwrap() = key;
+    }
+
+    /// Returns the maximum file size setting.
+    pub fn get_max_file_size(&self) -> usize {
+        let limit = self
+            .data
+            .pin()
+            .get(&self.get_current_project_key())
+            .map_or(DEFAULT_FILE_SIZE_LIMIT, |data| data.settings.files.max_size)
+            .get();
+        usize::try_from(limit).unwrap_or(usize::MAX)
+    }
+
+    /// Check whether a file is ignored in the feature `ignore`/`include`
+    pub fn is_ignored_by_feature_config(&self, path: &Path, feature: FeatureKind) -> bool {
+        let data = self.data.pin();
+        let Some(project_data) = data.get(&self.get_current_project_key()) else {
+            return false;
+        };
+
+        let settings = &project_data.settings;
+        let (feature_included_files, feature_ignored_files) = match feature {
+            FeatureKind::Format => {
+                let formatter = &settings.formatter;
+                (&formatter.included_files, &formatter.ignored_files)
+            }
+            FeatureKind::Lint => {
+                let linter = &settings.linter;
+                (&linter.included_files, &linter.ignored_files)
+            }
+            FeatureKind::OrganizeImports => {
+                let organize_imports = &settings.organize_imports;
+                (
+                    &organize_imports.included_files,
+                    &organize_imports.ignored_files,
+                )
+            }
+            FeatureKind::Assist => {
+                let assists = &settings.assist;
+                (&assists.included_files, &assists.ignored_files)
+            }
+            // TODO: enable once the configuration is available
+            FeatureKind::Search => return false, // There is no search-specific config.
+            FeatureKind::Debug => return false,
+        };
+        let is_feature_included = feature_included_files.is_empty()
+            || is_dir(path)
+            || feature_included_files.matches_path(path);
+        !is_feature_included || feature_ignored_files.matches_path(path)
     }
 }
 
 /// Global settings for the entire workspace
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Settings {
     /// Formatter settings applied to all files in the workspaces
     pub formatter: FormatSettings,
@@ -397,7 +469,7 @@ impl Settings {
 }
 
 /// Formatter settings for the entire workspace
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct FormatSettings {
     /// Enabled by default
     pub enabled: bool,
@@ -434,7 +506,7 @@ impl Default for FormatSettings {
 }
 
 /// Formatter settings for the entire workspace
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct OverrideFormatSettings {
     /// Enabled by default
     pub enabled: Option<bool>,
@@ -450,7 +522,7 @@ pub struct OverrideFormatSettings {
 }
 
 /// Linter settings for the entire workspace
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct LinterSettings {
     /// Enabled by default
     pub enabled: bool,
@@ -477,7 +549,7 @@ impl Default for LinterSettings {
 }
 
 /// Linter settings for the entire workspace
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct OverrideLinterSettings {
     /// Enabled by default
     pub enabled: Option<bool>,
@@ -487,7 +559,7 @@ pub struct OverrideLinterSettings {
 }
 
 /// Linter settings for the entire workspace
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct OrganizeImportsSettings {
     /// Enabled by default
     pub enabled: bool,
@@ -510,14 +582,14 @@ impl Default for OrganizeImportsSettings {
 }
 
 /// Organize imports settings for the entire workspace
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct OverrideOrganizeImportsSettings {
     /// Enabled by default
     pub enabled: Option<bool>,
 }
 
 /// Linter settings for the entire workspace
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct AssistSettings {
     /// Enabled by default
     pub enabled: bool,
@@ -544,7 +616,7 @@ impl Default for AssistSettings {
 }
 
 /// Assist settings for the entire workspace
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct OverrideAssistSettings {
     /// Enabled by default
     pub enabled: Option<bool>,
@@ -554,7 +626,7 @@ pub struct OverrideAssistSettings {
 }
 
 /// Static map of language names to language-specific settings
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct LanguageListSettings {
     pub javascript: LanguageSettings<JsLanguage>,
     pub json: LanguageSettings<JsonLanguage>,
@@ -709,7 +781,7 @@ pub trait ServiceLanguage: biome_rowan::Language {
     ) -> AnalyzerOptions;
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct LanguageSettings<L: ServiceLanguage> {
     /// Formatter settings for this language
     pub formatter: L::FormatterSettings,
@@ -731,7 +803,7 @@ pub struct LanguageSettings<L: ServiceLanguage> {
 }
 
 /// Filesystem settings for the entire workspace
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct FilesSettings {
     /// File size limit in bytes
     pub max_size: NonZeroU64,
@@ -788,8 +860,14 @@ fn to_file_settings(
         Some(FilesSettings {
             max_size: config.max_size,
             git_ignore,
-            ignored_files: to_matcher(working_directory.clone(), Some(config.ignore.as_slice()))?,
-            included_files: to_matcher(working_directory, Some(config.include.as_slice()))?,
+            ignored_files: Matcher::from_globs(
+                working_directory.clone(),
+                Some(config.ignore.as_slice()),
+            )?,
+            included_files: Matcher::from_globs(
+                working_directory,
+                Some(config.include.as_slice()),
+            )?,
             ignore_unknown: config.ignore_unknown,
         })
     } else {
@@ -797,32 +875,24 @@ fn to_file_settings(
     })
 }
 
-/// Handle object holding a temporary lock on the workspace settings until
-/// the deferred language-specific options resolution is called
+/// Handle object holding a pin of the workspace settings until the deferred
+/// language-specific options resolution is called.
 #[derive(Debug)]
-pub struct WorkspaceSettingsHandle<'a> {
-    inner: RwLockReadGuard<'a, WorkspaceSettings>,
+pub struct WorkspaceSettingsHandle {
+    settings: Option<Settings>,
 }
 
-impl<'a> WorkspaceSettingsHandle<'a> {
-    pub(crate) fn new(settings: &'a RwLock<WorkspaceSettings>) -> Self {
-        Self {
-            inner: settings.read().unwrap(),
-        }
+impl From<Option<Settings>> for WorkspaceSettingsHandle {
+    fn from(settings: Option<Settings>) -> Self {
+        Self { settings }
     }
+}
 
+impl WorkspaceSettingsHandle {
     pub(crate) fn settings(&self) -> Option<&Settings> {
-        self.inner.get_current_settings()
+        self.settings.as_ref()
     }
-}
 
-impl<'a> AsRef<WorkspaceSettings> for WorkspaceSettingsHandle<'a> {
-    fn as_ref(&self) -> &WorkspaceSettings {
-        &self.inner
-    }
-}
-
-impl<'a> WorkspaceSettingsHandle<'a> {
     /// Resolve the formatting context for the given language
     pub(crate) fn format_options<L>(
         &self,
@@ -832,7 +902,7 @@ impl<'a> WorkspaceSettingsHandle<'a> {
     where
         L: ServiceLanguage,
     {
-        let settings = self.inner.get_current_settings();
+        let settings = self.settings();
         let formatter = settings.map(|s| &s.formatter);
         let overrides = settings.map(|s| &s.override_settings);
         let editor_settings = settings
@@ -850,15 +920,15 @@ impl<'a> WorkspaceSettingsHandle<'a> {
     where
         L: ServiceLanguage,
     {
-        let settings = self.inner.get_current_settings();
-        let linter = settings.map(|s| &s.linter);
+        let settings = self.settings();
+        let linter_settings = settings.map(|s| &s.linter);
         let overrides = settings.map(|s| &s.override_settings);
         let editor_settings = settings
             .map(|s| L::lookup_settings(&s.languages))
             .map(|result| &result.linter);
         L::resolve_analyzer_options(
             settings,
-            linter,
+            linter_settings,
             overrides,
             editor_settings,
             path,
@@ -868,25 +938,7 @@ impl<'a> WorkspaceSettingsHandle<'a> {
     }
 }
 
-pub struct WorkspaceSettingsHandleMut<'a> {
-    inner: RwLockWriteGuard<'a, WorkspaceSettings>,
-}
-
-impl<'a> WorkspaceSettingsHandleMut<'a> {
-    pub(crate) fn new(settings: &'a RwLock<WorkspaceSettings>) -> Self {
-        Self {
-            inner: settings.write().unwrap(),
-        }
-    }
-}
-
-impl<'a> AsMut<WorkspaceSettings> for WorkspaceSettingsHandleMut<'a> {
-    fn as_mut(&mut self) -> &mut WorkspaceSettings {
-        &mut self.inner
-    }
-}
-
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct OverrideSettings {
     pub patterns: Vec<OverrideSettingPattern>,
 }
@@ -1159,7 +1211,7 @@ impl OverrideSettings {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct OverrideSettingPattern {
     pub exclude: Matcher,
     pub include: Matcher,
@@ -1173,30 +1225,9 @@ pub struct OverrideSettingPattern {
     pub assist: OverrideAssistSettings,
     /// Language specific settings
     pub languages: LanguageListSettings,
-
-    // Cache
-    // For js format options, we use the file source as the cache key because
-    // the file source params will affect how tokens are treated during formatting.
-    // So we cannot reuse the same format options for all js-family files.
-    pub(crate) cached_js_format_options: RwLock<FxHashMap<JsFileSource, JsFormatOptions>>,
-    pub(crate) cached_json_format_options: RwLock<Option<JsonFormatOptions>>,
-    pub(crate) cached_css_format_options: RwLock<Option<CssFormatOptions>>,
-    pub(crate) cached_grit_format_options: RwLock<Option<GritFormatOptions>>,
-    pub(crate) cached_graphql_format_options: RwLock<Option<GraphqlFormatOptions>>,
-    pub(crate) cached_html_format_options: RwLock<Option<HtmlFormatOptions>>,
-    pub(crate) cached_js_parser_options: RwLock<Option<JsParserOptions>>,
-    pub(crate) _cached_json_parser_options: RwLock<Option<JsonParserOptions>>,
-    pub(crate) cached_css_parser_options: RwLock<Option<CssParserOptions>>,
 }
 impl OverrideSettingPattern {
     fn apply_overrides_to_js_format_options(&self, options: &mut JsFormatOptions) {
-        if let Ok(readonly_cache) = self.cached_js_format_options.read() {
-            if let Some(cached_options) = readonly_cache.get(&options.source_type()) {
-                *options = cached_options.clone();
-                return;
-            }
-        }
-
         let js_formatter = &self.languages.javascript.formatter;
         let formatter = &self.formatter;
         if let Some(indent_style) = js_formatter.indent_style.or(formatter.indent_style) {
@@ -1241,21 +1272,9 @@ impl OverrideSettingPattern {
         {
             options.set_attribute_position(attribute_position);
         }
-
-        if let Ok(mut writeonly_cache) = self.cached_js_format_options.write() {
-            let options = options.clone();
-            writeonly_cache.insert(options.source_type(), options);
-        }
     }
 
     fn apply_overrides_to_json_format_options(&self, options: &mut JsonFormatOptions) {
-        if let Ok(readonly_cache) = self.cached_json_format_options.read() {
-            if let Some(cached_options) = readonly_cache.as_ref() {
-                *options = cached_options.clone();
-                return;
-            }
-        }
-
         let json_formatter = &self.languages.json.formatter;
         let formatter = &self.formatter;
 
@@ -1274,21 +1293,9 @@ impl OverrideSettingPattern {
         if let Some(trailing_commas) = json_formatter.trailing_commas {
             options.set_trailing_commas(trailing_commas);
         }
-
-        if let Ok(mut writeonly_cache) = self.cached_json_format_options.write() {
-            let options = options.clone();
-            let _ = writeonly_cache.insert(options);
-        }
     }
 
     fn apply_overrides_to_css_format_options(&self, options: &mut CssFormatOptions) {
-        if let Ok(readonly_cache) = self.cached_css_format_options.read() {
-            if let Some(cached_options) = readonly_cache.as_ref() {
-                *options = cached_options.clone();
-                return;
-            }
-        }
-
         let css_formatter = &self.languages.css.formatter;
         let formatter = &self.formatter;
 
@@ -1307,21 +1314,9 @@ impl OverrideSettingPattern {
         if let Some(quote_style) = css_formatter.quote_style {
             options.set_quote_style(quote_style);
         }
-
-        if let Ok(mut writeonly_cache) = self.cached_css_format_options.write() {
-            let options = options.clone();
-            let _ = writeonly_cache.insert(options);
-        }
     }
 
     fn apply_overrides_to_graphql_format_options(&self, options: &mut GraphqlFormatOptions) {
-        if let Ok(readonly_cache) = self.cached_graphql_format_options.read() {
-            if let Some(cached_options) = readonly_cache.as_ref() {
-                *options = cached_options.clone();
-                return;
-            }
-        }
-
         let graphql_formatter = &self.languages.graphql.formatter;
         let formatter = &self.formatter;
 
@@ -1346,21 +1341,9 @@ impl OverrideSettingPattern {
         if let Some(quote_style) = graphql_formatter.quote_style {
             options.set_quote_style(quote_style);
         }
-
-        if let Ok(mut writeonly_cache) = self.cached_graphql_format_options.write() {
-            let options = options.clone();
-            let _ = writeonly_cache.insert(options);
-        }
     }
 
     fn apply_overrides_to_grit_format_options(&self, options: &mut GritFormatOptions) {
-        if let Ok(readonly_cache) = self.cached_grit_format_options.read() {
-            if let Some(cached_options) = readonly_cache.as_ref() {
-                *options = cached_options.clone();
-                return;
-            }
-        }
-
         let grit_formatter = &self.languages.grit.formatter;
         let formatter = &self.formatter;
 
@@ -1376,21 +1359,9 @@ impl OverrideSettingPattern {
         if let Some(line_width) = grit_formatter.line_width.or(formatter.line_width) {
             options.set_line_width(line_width);
         }
-
-        if let Ok(mut writeonly_cache) = self.cached_grit_format_options.write() {
-            let options = options.clone();
-            let _ = writeonly_cache.insert(options);
-        }
     }
 
     fn apply_overrides_to_html_format_options(&self, options: &mut HtmlFormatOptions) {
-        if let Ok(readonly_cache) = self.cached_html_format_options.read() {
-            if let Some(cached_options) = readonly_cache.as_ref() {
-                *options = cached_options.clone();
-                return;
-            }
-        }
-
         let html_formatter = &self.languages.html.formatter;
         let formatter = &self.formatter;
 
@@ -1406,29 +1377,12 @@ impl OverrideSettingPattern {
         if let Some(line_width) = html_formatter.line_width.or(formatter.line_width) {
             options.set_line_width(line_width);
         }
-
-        if let Ok(mut writeonly_cache) = self.cached_html_format_options.write() {
-            let options = options.clone();
-            let _ = writeonly_cache.insert(options);
-        }
     }
 
     fn apply_overrides_to_js_parser_options(&self, options: &mut JsParserOptions) {
-        if let Ok(readonly_cache) = self.cached_js_parser_options.read() {
-            if let Some(cached_options) = readonly_cache.as_ref() {
-                *options = cached_options.clone();
-                return;
-            }
-        }
-
         let js_parser = &self.languages.javascript.parser;
 
         options.parse_class_parameter_decorators = js_parser.parse_class_parameter_decorators;
-
-        if let Ok(mut writeonly_cache) = self.cached_js_parser_options.write() {
-            let options = options.clone();
-            let _ = writeonly_cache.insert(options);
-        }
     }
 
     fn apply_overrides_to_json_parser_options(&self, options: &mut JsonParserOptions) {
@@ -1444,13 +1398,6 @@ impl OverrideSettingPattern {
     }
 
     fn apply_overrides_to_css_parser_options(&self, options: &mut CssParserOptions) {
-        if let Ok(readonly_cache) = self.cached_css_parser_options.read() {
-            if let Some(cached_options) = readonly_cache.as_ref() {
-                *options = *cached_options;
-                return;
-            }
-        }
-
         let css_parser = &self.languages.css.parser;
 
         if let Some(allow_wrong_line_comments) = css_parser.allow_wrong_line_comments {
@@ -1459,43 +1406,12 @@ impl OverrideSettingPattern {
         if let Some(css_modules) = css_parser.css_modules {
             options.css_modules = css_modules;
         }
-
-        if let Ok(mut writeonly_cache) = self.cached_css_parser_options.write() {
-            let options = *options;
-            let _ = writeonly_cache.insert(options);
-        }
     }
 
     #[allow(dead_code)]
     // NOTE: Currently not used because the rule options are typed using TypeId and Any, which isn't thread safe.
     // TODO: Find a way to cache this
     fn analyzer_rules_mut(&self, _analyzer_rules: &mut AnalyzerRules) {}
-}
-
-/// Creates a [Matcher] from a set of strings.
-///
-/// ## Errors
-///
-/// It can raise an error if the patterns aren't valid
-pub fn to_matcher(
-    working_directory: Option<PathBuf>,
-    globs: Option<&[Box<str>]>,
-) -> Result<Matcher, WorkspaceError> {
-    let mut matcher = Matcher::empty();
-    if let Some(working_directory) = working_directory {
-        matcher.set_root(working_directory)
-    }
-    if let Some(string_set) = globs {
-        for pattern in string_set {
-            matcher.add_pattern(pattern).map_err(|err| {
-                BiomeDiagnostic::new_invalid_ignore_pattern(
-                    pattern.to_string(),
-                    err.msg.to_string(),
-                )
-            })?;
-        }
-    }
-    Ok(matcher)
 }
 
 fn to_git_ignore(path: PathBuf, matches: &[String]) -> Result<Gitignore, WorkspaceError> {
@@ -1526,11 +1442,14 @@ pub fn to_organize_imports_settings(
 ) -> Result<OrganizeImportsSettings, WorkspaceError> {
     Ok(OrganizeImportsSettings {
         enabled: organize_imports.enabled,
-        ignored_files: to_matcher(
+        ignored_files: Matcher::from_globs(
             working_directory.clone(),
             Some(organize_imports.ignore.as_slice()),
         )?,
-        included_files: to_matcher(working_directory, Some(organize_imports.include.as_slice()))?,
+        included_files: Matcher::from_globs(
+            working_directory,
+            Some(organize_imports.include.as_slice()),
+        )?,
     })
 }
 
@@ -1597,8 +1516,8 @@ pub fn to_override_settings(
             to_graphql_language_settings(graphql, &current_settings.languages.graphql);
 
         let pattern_setting = OverrideSettingPattern {
-            include: to_matcher(working_directory.clone(), pattern.include.as_deref())?,
-            exclude: to_matcher(working_directory.clone(), pattern.ignore.as_deref())?,
+            include: Matcher::from_globs(working_directory.clone(), pattern.include.as_deref())?,
+            exclude: Matcher::from_globs(working_directory.clone(), pattern.ignore.as_deref())?,
             formatter,
             linter,
             organize_imports,
@@ -1733,8 +1652,11 @@ pub fn to_format_settings(
         format_with_errors: conf.format_with_errors,
         attribute_position: Some(conf.attribute_position),
         bracket_spacing: Some(conf.bracket_spacing),
-        ignored_files: to_matcher(working_directory.clone(), Some(conf.ignore.as_slice()))?,
-        included_files: to_matcher(working_directory, Some(conf.include.as_slice()))?,
+        ignored_files: Matcher::from_globs(
+            working_directory.clone(),
+            Some(conf.ignore.as_slice()),
+        )?,
+        included_files: Matcher::from_globs(working_directory, Some(conf.include.as_slice()))?,
     })
 }
 
@@ -1771,8 +1693,14 @@ pub fn to_linter_settings(
     Ok(LinterSettings {
         enabled: conf.enabled,
         rules: Some(conf.rules),
-        ignored_files: to_matcher(working_directory.clone(), Some(conf.ignore.as_slice()))?,
-        included_files: to_matcher(working_directory.clone(), Some(conf.include.as_slice()))?,
+        ignored_files: Matcher::from_globs(
+            working_directory.clone(),
+            Some(conf.ignore.as_slice()),
+        )?,
+        included_files: Matcher::from_globs(
+            working_directory.clone(),
+            Some(conf.include.as_slice()),
+        )?,
     })
 }
 
@@ -1796,8 +1724,14 @@ pub fn to_assist_settings(
     Ok(AssistSettings {
         enabled: conf.enabled,
         actions: Some(conf.actions),
-        ignored_files: to_matcher(working_directory.clone(), Some(conf.ignore.as_slice()))?,
-        included_files: to_matcher(working_directory.clone(), Some(conf.include.as_slice()))?,
+        ignored_files: Matcher::from_globs(
+            working_directory.clone(),
+            Some(conf.ignore.as_slice()),
+        )?,
+        included_files: Matcher::from_globs(
+            working_directory.clone(),
+            Some(conf.include.as_slice()),
+        )?,
     })
 }
 

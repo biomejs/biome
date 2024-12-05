@@ -78,6 +78,10 @@ impl WorkspaceError {
         Self::NotFound(NotFound)
     }
 
+    pub fn no_project() -> Self {
+        Self::NoProject(NoProject)
+    }
+
     pub fn file_ignored(path: String) -> Self {
         Self::FileIgnored(FileIgnored { path })
     }

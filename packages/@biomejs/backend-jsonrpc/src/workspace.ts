@@ -2738,7 +2738,7 @@ export interface RegisterProjectFolderParams {
 	path?: string;
 	setAsCurrentWorkspace: boolean;
 }
-export type ProjectKey = string;
+export type ProjectKey = number;
 export interface SetManifestForProjectParams {
 	content: string;
 	manifestPath: BiomePath;
