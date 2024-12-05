@@ -2330,6 +2330,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noProcessGlobal": {
+					"description": "Disallow the use of process global.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRestrictedImports": {
 					"description": "Disallow specified modules when loaded by import or require.",
 					"anyOf": [
