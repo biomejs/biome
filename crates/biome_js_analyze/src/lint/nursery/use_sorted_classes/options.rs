@@ -34,22 +34,17 @@ impl UtilityClassSortingOptions {
     }
 
     pub(crate) fn match_function(&self, name: &str) -> bool {
-        let matchers = self.functions.iter().flatten();
-        let parts = name.split('.');
-        for matcher in matchers {
-            let mut matcher = matcher.split('.');
-            let mut parts = parts.clone();
+        self.functions.iter().flatten().any(|matcher| {
+            let mut matcher_parts = matcher.split('.');
+            let mut name_parts = name.split('.');
 
-            let mut zip = matcher.by_ref().zip(parts.by_ref());
-            if zip.all(|(m, p)| m == "*" || m == p)
-                && matcher.next().is_none()
-                && parts.next().is_none()
-            {
-                return true;
-            }
-        }
+            let all_parts_match = matcher_parts
+                .by_ref()
+                .zip(name_parts.by_ref())
+                .all(|(m, p)| m == "*" || m == p);
 
-        false
+            all_parts_match && matcher_parts.next().is_none() && name_parts.next().is_none()
+        })
     }
 
     pub(crate) fn has_attribute(&self, name: &str) -> bool {
