@@ -1,5 +1,8 @@
 use std::{env, fs, io, path::PathBuf};
 
+use biome_formatter::prelude::Document;
+use biome_formatter::{FormatError, FormatResult};
+use biome_js_formatter::JsForeignLanguageFormatter;
 use quote::{format_ident, quote};
 
 use biome_js_factory::syntax::JsFileSource;
@@ -10,6 +13,19 @@ use biome_js_factory::{
 use biome_js_formatter::{context::JsFormatOptions, format_node};
 use biome_rowan::AstNode;
 use biome_service::workspace_types::{generate_type, methods, ModuleQueue};
+
+#[derive(Debug, Clone)]
+struct FakeFormatter;
+
+impl JsForeignLanguageFormatter for FakeFormatter {
+    fn format(
+        &self,
+        _language: biome_js_formatter::JsForeignLanguage,
+        _source: &str,
+    ) -> FormatResult<Document> {
+        Err(FormatError::SyntaxError)
+    }
+}
 
 fn main() -> io::Result<()> {
     let methods = methods();
@@ -67,7 +83,12 @@ fn main() -> io::Result<()> {
 
     // Wasm-bindgen will paste the generated TS code as-is into the final .d.ts file,
     // ensure it looks good by running it through the formatter
-    let formatted = format_node(JsFormatOptions::new(JsFileSource::ts()), module.syntax()).unwrap();
+    let formatted = format_node(
+        JsFormatOptions::new(JsFileSource::ts()),
+        FakeFormatter,
+        module.syntax(),
+    )
+    .unwrap();
     let printed = formatted.print().unwrap();
     let definitions = printed.into_code();
 
