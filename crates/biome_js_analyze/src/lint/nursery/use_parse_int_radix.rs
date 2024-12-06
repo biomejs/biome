@@ -3,17 +3,12 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
 use biome_js_syntax::{
     global_identifier, numbers::parse_js_number, AnyJsCallArgument, AnyJsExpression,
     AnyJsLiteralExpression, JsCallArgumentList, JsCallExpression, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
-use serde::{Deserialize, Serialize};
-
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
 
 declare_lint_rule! {
     /// Enforce the consistent use of the radix argument when using `parseInt()`.
@@ -21,8 +16,6 @@ declare_lint_rule! {
     /// When using the `parseInt()` function it is common to omit the second argument, the radix, and let the function try to determine from the first argument what type of number it is. By default, `parseInt()` will autodetect decimal and hexadecimal (via `0x` prefix). Prior to ECMAScript 5, `parseInt()` also autodetected octal literals, which caused problems because many developers assumed a leading `0` would be ignored.
     ///
     /// This confusion led to the suggestion that you always use the radix parameter to `parseInt()` to eliminate unintended consequences.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/radix
     ///
     /// ## Examples
     ///
@@ -58,11 +51,10 @@ impl Rule for UseParseIntRadix {
     type Query = Ast<JsCallExpression>;
     type State = State;
     type Signals = Option<Self::State>;
-    type Options = UseParseIntRadixOptions;
+    type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call_expression = ctx.query();
-        let options = ctx.options();
 
         let object_name = call_expression.callee().ok()?.get_callee_object_name()?;
 
@@ -92,11 +84,9 @@ impl Rule for UseParseIntRadix {
         }
 
         let Some(second_argument) = arguments.next() else {
-            return match options.behavior {
-                Behavior::Always => Some(State::MissingRadix),
-                _ => None,
-            };
+            return Some(State::MissingRadix);
         };
+
         let second_argument = second_argument.ok()?;
 
         let AnyJsCallArgument::AnyJsExpression(radix_argument) = second_argument else {
@@ -104,11 +94,11 @@ impl Rule for UseParseIntRadix {
             return None;
         };
 
-        match options.behavior {
-            Behavior::Avoid if is_radix_to_avoid(&radix_argument)? => Some(State::RedundantRadix),
-            _ if !is_valid_radix(&radix_argument)? => Some(State::InvalidRadix),
-            _ => None,
+        if !is_valid_radix(&radix_argument)? {
+            return Some(State::InvalidRadix);
         }
+
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -127,10 +117,6 @@ impl Rule for UseParseIntRadix {
                 markup!("Invalid radix parameter"),
                 markup!("Radix must be a non-fractional number between 2 and 36"),
             ),
-            State::RedundantRadix => (
-                markup!("Redundant radix parameter"),
-                markup!("Avoid static radix values of "<Emphasis>"10"</Emphasis>),
-            ),
         };
 
         Some(RuleDiagnostic::new(rule_category!(), node.range(), title).note(note))
@@ -142,12 +128,6 @@ impl Rule for UseParseIntRadix {
 
         let (new_args, message) = match state {
             State::MissingParameters | State::InvalidRadix => return None,
-            State::RedundantRadix => {
-                let first_argument = argument_list.iter().next()?.ok()?;
-                let args = make::js_call_argument_list([first_argument], None);
-
-                (args, markup! { "Remove the radix" })
-            }
             State::MissingRadix => {
                 let first_argument = argument_list.iter().next()?.ok()?;
 
@@ -185,28 +165,6 @@ pub enum State {
     MissingParameters,
     MissingRadix,
     InvalidRadix,
-    RedundantRadix,
-}
-
-#[derive(Debug, Default, Clone, Serialize, Deserialize, Deserializable, PartialEq, Eq)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseParseIntRadixOptions {
-    #[serde(default)]
-    pub behavior: Behavior,
-}
-
-#[derive(Debug, Default, Clone, Serialize, Deserialize, Deserializable, PartialEq, Eq)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "kebab-case")]
-pub enum Behavior {
-    /// Require a radix specifier
-    #[default]
-    Always,
-    /// Do not allow a radix specifier of `10`
-    ///
-    /// See [eslint/#4048](https://github.com/eslint/eslint/issues/4048) for more info
-    Avoid,
 }
 
 fn is_global_identifier(callee: &AnyJsExpression) -> bool {
@@ -273,18 +231,4 @@ fn f64_to_i64(value: f64) -> Option<i64> {
     }
 
     Some(value as i64)
-}
-
-/// Checks whether a given node is a static number `10`
-fn is_radix_to_avoid(expression: &AnyJsExpression) -> Option<bool> {
-    let AnyJsLiteralExpression::JsNumberLiteralExpression(js_number_literal_expression) =
-        expression.as_any_js_literal_expression()?
-    else {
-        return Some(false);
-    };
-
-    let value_token = js_number_literal_expression.value_token().ok()?;
-    let number = parse_js_number(value_token.text_trimmed())?;
-
-    Some(number == 10.0)
 }

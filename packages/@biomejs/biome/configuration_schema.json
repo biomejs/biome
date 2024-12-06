@@ -393,20 +393,6 @@
 			"additionalProperties": false
 		},
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
-		"Behavior": {
-			"oneOf": [
-				{
-					"description": "Require a radix specifier",
-					"type": "string",
-					"enum": ["always"]
-				},
-				{
-					"description": "Do not allow a radix specifier of `10`\n\nSee [eslint/#4048](https://github.com/eslint/eslint/issues/4048) for more info",
-					"type": "string",
-					"enum": ["avoid"]
-				}
-			]
-		},
 		"BracketSpacing": { "type": "boolean" },
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
@@ -2565,7 +2551,7 @@
 				"useParseIntRadix": {
 					"description": "Enforce the consistent use of the radix argument when using parseInt().",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseParseIntRadixConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3277,25 +3263,6 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseImportExtensionsOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
-		"RuleWithUseParseIntRadixOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"fix": {
-					"description": "The kind of the code actions emitted by the rule",
-					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
-				},
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseParseIntRadixOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -4500,22 +4467,6 @@
 					"additionalProperties": {
 						"$ref": "#/definitions/SuggestedExtensionMapping"
 					}
-				}
-			},
-			"additionalProperties": false
-		},
-		"UseParseIntRadixConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseParseIntRadixOptions" }
-			]
-		},
-		"UseParseIntRadixOptions": {
-			"type": "object",
-			"properties": {
-				"behavior": {
-					"default": "always",
-					"allOf": [{ "$ref": "#/definitions/Behavior" }]
 				}
 			},
 			"additionalProperties": false
