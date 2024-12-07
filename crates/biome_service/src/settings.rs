@@ -1,6 +1,6 @@
 use crate::workspace::{DocumentFileSource, FeatureKind, ProjectKey};
 use crate::{is_dir, Matcher, WorkspaceError};
-use biome_analyze::{AnalyzerOptions, AnalyzerRules};
+use biome_analyze::{AnalyzerOptions, AnalyzerRules, RuleDomain};
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration};
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::javascript::JsxRuntime;
@@ -10,7 +10,7 @@ use biome_configuration::{
     JavascriptConfiguration, LinterConfiguration, OverrideAssistsConfiguration,
     OverrideFormatterConfiguration, OverrideLinterConfiguration,
     OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
-    PartialGraphqlConfiguration, PartialJavascriptConfiguration, PartialJsonConfiguration,
+    PartialGraphqlConfiguration, PartialJavascriptConfiguration, PartialJsonConfiguration, Rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -36,7 +36,7 @@ use biome_json_syntax::JsonLanguage;
 use biome_project::{NodeJsProject, PackageJson};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use papaya::HashMap;
-use rustc_hash::FxBuildHasher;
+use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::borrow::Cow;
 use std::num::NonZeroU64;
 use std::ops::Deref;
@@ -423,10 +423,7 @@ impl Settings {
     }
 
     /// Returns linter rules taking overrides into account.
-    pub fn as_linter_rules(
-        &self,
-        path: &Path,
-    ) -> Option<Cow<biome_configuration::analyzer::linter::Rules>> {
+    pub fn as_linter_rules(&self, path: &Path) -> Option<Cow<Rules>> {
         let mut result = self.linter.rules.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
@@ -443,6 +440,28 @@ impl Settings {
                 }
             }
         }
+        result
+    }
+
+    ///
+    pub fn as_linter_domains(&self, path: &Path) -> Option<Cow<FxHashMap<RuleDomain, bool>>> {
+        let mut result = self.linter.domains.as_ref().map(Cow::Borrowed);
+        let overrides = &self.override_settings;
+        for pattern in overrides.patterns.iter() {
+            let pattern_rules = pattern.linter.domains.as_ref();
+            if let Some(pattern_rules) = pattern_rules {
+                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                    result = if let Some(mut result) = result.take() {
+                        // Override rules
+                        result.to_mut().merge_with(pattern_rules.clone());
+                        Some(result)
+                    } else {
+                        Some(Cow::Borrowed(pattern_rules))
+                    };
+                }
+            }
+        }
+
         result
     }
 
@@ -528,22 +547,26 @@ pub struct LinterSettings {
     pub enabled: bool,
 
     /// List of rules
-    pub rules: Option<biome_configuration::analyzer::linter::Rules>,
+    pub rules: Option<Rules>,
 
     /// List of ignored paths/files to match
     pub ignored_files: Matcher,
 
     /// List of included paths/files to match
     pub included_files: Matcher,
+
+    /// Rule domains
+    pub domains: Option<FxHashMap<RuleDomain, bool>>,
 }
 
 impl Default for LinterSettings {
     fn default() -> Self {
         Self {
             enabled: true,
-            rules: Some(biome_configuration::analyzer::linter::Rules::default()),
+            rules: Some(Rules::default()),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
+            domains: Default::default(),
         }
     }
 }
@@ -555,7 +578,10 @@ pub struct OverrideLinterSettings {
     pub enabled: Option<bool>,
 
     /// List of rules
-    pub rules: Option<biome_configuration::analyzer::linter::Rules>,
+    pub rules: Option<Rules>,
+
+    /// List of domains
+    pub domains: Option<FxHashMap<RuleDomain, bool>>,
 }
 
 /// Linter settings for the entire workspace
@@ -777,7 +803,7 @@ pub trait ServiceLanguage: biome_rowan::Language {
         language: Option<&Self::LinterSettings>,
         path: &BiomePath,
         file_source: &DocumentFileSource,
-        suppression_reason: Option<String>,
+        suppression_reason: Option<&str>,
     ) -> AnalyzerOptions;
 }
 
@@ -915,7 +941,7 @@ impl WorkspaceSettingsHandle {
         &self,
         path: &BiomePath,
         file_source: &DocumentFileSource,
-        suppression_reason: Option<String>,
+        suppression_reason: Option<&str>,
     ) -> AnalyzerOptions
     where
         L: ServiceLanguage,
@@ -1494,6 +1520,7 @@ pub fn to_override_settings(
             .map(|linter| OverrideLinterSettings {
                 enabled: linter.enabled,
                 rules: linter.rules,
+                domains: linter.domains,
             })
             .unwrap_or_default();
         let organize_imports = OverrideOrganizeImportsSettings {
@@ -1701,6 +1728,7 @@ pub fn to_linter_settings(
             working_directory.clone(),
             Some(conf.include.as_slice()),
         )?,
+        domains: Some(conf.domains),
     })
 }
 
@@ -1713,6 +1741,7 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
             rules: conf.rules,
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
+            domains: conf.domains,
         })
     }
 }

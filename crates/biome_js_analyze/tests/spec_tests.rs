@@ -134,7 +134,7 @@ pub(crate) fn analyze_and_snap(
         &options,
         plugins,
         source_type,
-        manifest,
+        manifest.as_ref(),
         |event| {
             if let Some(mut diag) = event.diagnostic() {
                 for action in event.actions() {

@@ -3,7 +3,7 @@ use std::ffi::OsStr;
 
 use super::{
     is_diagnostic_error, AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource,
-    ExtensionHandler, ParseResult, SearchCapabilities,
+    ExtensionHandler, ParseResult, ProcessLint, SearchCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -23,11 +23,11 @@ use crate::{extension_error, WorkspaceError};
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
-    RuleCategoriesBuilder, RuleCategory, RuleError,
+    RuleCategoriesBuilder, RuleError,
 };
 use biome_configuration::PartialConfiguration;
 use biome_deserialize::json::deserialize_from_json_ast;
-use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
+use biome_diagnostics::Applicability;
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::analyze;
@@ -132,7 +132,7 @@ impl ServiceLanguage for JsonLanguage {
         _language: Option<&Self::LinterSettings>,
         path: &BiomePath,
         _file_source: &DocumentFileSource,
-        suppression_reason: Option<String>,
+        suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         let configuration = AnalyzerConfiguration::default()
             .with_rules(
@@ -331,22 +331,31 @@ fn lint(params: LintParams) -> LintResults {
     let analyzer_options = &params.workspace.analyzer_options::<JsonLanguage>(
         params.path,
         &params.language,
-        params.suppression_reason,
+        params.suppression_reason.as_deref(),
     );
-
-    let has_only_filter = !params.only.is_empty();
-    let rules = params
-        .workspace
-        .settings()
-        .as_ref()
-        .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
 
     let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
         .with_only(&params.only)
         .with_skip(&params.skip)
         .with_path(params.path.as_path())
         .with_enabled_rules(&params.enabled_rules)
+        .with_manifest(params.manifest.as_ref())
         .finish();
+
+    let filter = AnalysisFilter {
+        categories: params.categories,
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
+
+    let mut process_lint = ProcessLint::new(&params);
+
+    let (_, analyze_diagnostics) =
+        analyze(&root, filter, &analyzer_options, file_source, |signal| {
+            process_lint.process_signal(signal)
+        });
+
     let mut diagnostics = params.parse.into_diagnostics();
     // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
     // malformed configuration
@@ -363,84 +372,7 @@ fn lint(params: LintParams) -> LintResults {
         );
     }
 
-    let filter = AnalysisFilter {
-        categories: params.categories,
-        enabled_rules: Some(enabled_rules.as_slice()),
-        disabled_rules: &disabled_rules,
-        range: None,
-    };
-
-    // Do not report unused suppression comment diagnostics if:
-    // - it is a syntax-only analyzer pass, or
-    // - if a single rule is run.
-    let ignores_suppression_comment =
-        !filter.categories.contains(RuleCategory::Lint) || has_only_filter;
-
-    let mut diagnostic_count = diagnostics.len() as u32;
-    let mut errors = diagnostics
-        .iter()
-        .filter(|diag| diag.severity() <= Severity::Error)
-        .count();
-    let skipped_diagnostics = diagnostic_count - diagnostics.len() as u32;
-
-    let (_, analyze_diagnostics) =
-        analyze(&root, filter, analyzer_options, file_source, |signal| {
-            if let Some(mut diagnostic) = signal.diagnostic() {
-                if ignores_suppression_comment
-                    && diagnostic.category() == Some(category!("suppressions/unused"))
-                {
-                    return ControlFlow::<Never>::Continue(());
-                }
-
-                diagnostic_count += 1;
-
-                // We do now check if the severity of the diagnostics should be changed.
-                // The configuration allows to change the severity of the diagnostics emitted by rules.
-                let severity = diagnostic
-                    .category()
-                    .filter(|category| category.name().starts_with("lint/"))
-                    .map_or_else(
-                        || diagnostic.severity(),
-                        |category| {
-                            rules
-                                .as_ref()
-                                .and_then(|rules| rules.get_severity_from_category(category))
-                                .unwrap_or(Severity::Warning)
-                        },
-                    );
-
-                if severity <= Severity::Error {
-                    errors += 1;
-                }
-
-                if diagnostic_count <= params.max_diagnostics {
-                    for action in signal.actions() {
-                        if !action.is_suppression() {
-                            diagnostic = diagnostic.add_code_suggestion(action.into());
-                        }
-                    }
-
-                    let error = diagnostic.with_severity(severity);
-
-                    diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
-                }
-            }
-
-            ControlFlow::<Never>::Continue(())
-        });
-
-    diagnostics.extend(
-        analyze_diagnostics
-            .into_iter()
-            .map(biome_diagnostics::serde::Diagnostic::new)
-            .collect::<Vec<_>>(),
-    );
-
-    LintResults {
-        diagnostics,
-        errors,
-        skipped_diagnostics,
-    }
+    process_lint.into_result(diagnostics, analyze_diagnostics)
 }
 
 fn code_actions(params: CodeActionsParams) -> PullActionsResult {
@@ -449,7 +381,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         workspace,
         path,
-        manifest: _,
+        manifest,
         language,
         skip,
         only,
@@ -462,7 +394,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let analyzer_options = workspace.analyzer_options::<JsonLanguage>(
         params.path,
         &params.language,
-        suppression_reason,
+        suppression_reason.as_deref(),
     );
     let mut actions = Vec::new();
     let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
@@ -470,6 +402,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         .with_skip(&skip)
         .with_path(path.as_path())
         .with_enabled_rules(&rules)
+        .with_manifest(manifest.as_ref())
         .finish();
 
     let filter = AnalysisFilter {
@@ -525,6 +458,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
         .with_only(&params.only)
         .with_skip(&params.skip)
         .with_path(params.biome_path.as_path())
+        .with_manifest(params.manifest.as_ref())
         .finish();
 
     let filter = AnalysisFilter {
@@ -552,7 +486,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let analyzer_options = params.workspace.analyzer_options::<JsonLanguage>(
         params.biome_path,
         &params.document_file_source,
-        params.suppression_reason,
+        params.suppression_reason.as_deref(),
     );
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, file_source, |signal| {

@@ -1,15 +1,17 @@
 use super::javascript::PartialJavascriptConfiguration;
 use super::json::PartialJsonConfiguration;
-use super::{PartialCssConfiguration, PartialGraphqlConfiguration};
+use super::{PartialCssConfiguration, PartialGraphqlConfiguration, Rules};
 use crate::{
     partial_css_configuration, partial_graphql_configuration, partial_javascript_configuration,
     partial_json_configuration,
 };
+use biome_analyze::RuleDomain;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
 };
 use bpaf::Bpaf;
+use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
@@ -152,7 +154,12 @@ pub struct OverrideLinterConfiguration {
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(pure(crate::analyzer::linter::Rules::default()), optional, hide)]
-    pub rules: Option<crate::analyzer::linter::Rules>,
+    pub rules: Option<Rules>,
+
+    /// List of rules
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(pure(FxHashMap::default()), optional, hide)]
+    pub domains: Option<FxHashMap<RuleDomain, bool>>,
 }
 
 #[derive(

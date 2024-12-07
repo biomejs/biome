@@ -277,6 +277,10 @@ export interface PartialJsonConfiguration {
 }
 export interface PartialLinterConfiguration {
 	/**
+	 * A list of domains
+	 */
+	domains?: {};
+	/**
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
 	enabled?: boolean;
@@ -1976,6 +1980,10 @@ export interface OverrideFormatterConfiguration {
 	lineWidth?: LineWidth;
 }
 export interface OverrideLinterConfiguration {
+	/**
+	 * List of rules
+	 */
+	domains?: {};
 	/**
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */

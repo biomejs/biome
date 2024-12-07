@@ -98,7 +98,7 @@ impl ServiceLanguage for HtmlLanguage {
         _language: Option<&Self::LinterSettings>,
         path: &biome_fs::BiomePath,
         _file_source: &super::DocumentFileSource,
-        suppression_reason: Option<String>,
+        suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         AnalyzerOptions::default()
             .with_file_path(path.as_path())

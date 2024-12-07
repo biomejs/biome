@@ -4,7 +4,7 @@ use crate::registry::{RegistryVisitor, RuleLanguage, RuleSuppressions};
 use crate::{
     Phase, Phases, Queryable, SourceActionKind, SuppressionAction, SuppressionCommentEmitterPayload,
 };
-use biome_console::fmt::Display;
+use biome_console::fmt::{Display, Formatter};
 use biome_console::{markup, MarkupBuf};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::location::AsSpan;
@@ -43,6 +43,10 @@ pub struct RuleMetadata {
     pub source_kind: Option<RuleSourceKind>,
     /// The default severity of the rule
     pub severity: Severity,
+    /// Domains applied by this rule
+    pub domains: &'static [RuleDomain],
+    /// If the project has one of these dependencies, the rule will be automatically applied, unless it's explicitly disabled
+    pub dependencies: &'static [&'static str],
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -313,6 +317,40 @@ impl RuleSourceKind {
     }
 }
 
+/// Rule domains
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(
+        schemars::JsonSchema,
+        serde::Deserialize,
+        serde::Serialize,
+        biome_deserialize_macros::Deserializable
+    )
+)]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+pub enum RuleDomain {
+    /// React library rules
+    React,
+    /// Testing rules
+    Test,
+    /// Solid.js framework rules
+    Solid,
+    /// Next.js framework rules
+    Next,
+}
+
+impl Display for RuleDomain {
+    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
+        match self {
+            RuleDomain::React => fmt.write_str("React"),
+            RuleDomain::Test => fmt.write_str("Test"),
+            RuleDomain::Solid => fmt.write_str("Solid"),
+            RuleDomain::Next => fmt.write_str("Next.js"),
+        }
+    }
+}
+
 impl RuleMetadata {
     pub const fn new(
         version: &'static str,
@@ -331,6 +369,8 @@ impl RuleMetadata {
             sources: &[],
             source_kind: None,
             severity: Severity::Information,
+            domains: &[],
+            dependencies: &[],
         }
     }
 
@@ -369,6 +409,16 @@ impl RuleMetadata {
 
     pub const fn severity(mut self, severity: Severity) -> Self {
         self.severity = severity;
+        self
+    }
+
+    pub const fn domains(mut self, domains: &'static [RuleDomain]) -> Self {
+        self.domains = domains;
+        self
+    }
+
+    pub const fn dependencies(mut self, dependencies: &'static [&'static str]) -> Self {
+        self.dependencies = dependencies;
         self
     }
 
@@ -484,6 +534,7 @@ macro_rules! declare_syntax_rule {
                 version: $version,
                 name: $name,
                 language: $language,
+                severity: biome_diagnostics::Severity::Error,
                 $( $key: $value, )*
             }
         );
@@ -993,6 +1044,8 @@ pub struct RuleDiagnostic {
     pub(crate) tags: DiagnosticTags,
     #[advice]
     pub(crate) rule_advice: RuleAdvice,
+    #[severity]
+    pub(crate) severity: Severity,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -1064,6 +1117,7 @@ impl RuleDiagnostic {
             message: MessageAndDescription::from(message),
             tags: DiagnosticTags::empty(),
             rule_advice: RuleAdvice::default(),
+            severity: Severity::default(),
         }
     }
 

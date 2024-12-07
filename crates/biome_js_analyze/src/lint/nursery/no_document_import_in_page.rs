@@ -1,5 +1,6 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_syntax::{JsFileSource, JsImport};
@@ -36,6 +37,8 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintNext("no-document-import-in-page")],
         source_kind: RuleSourceKind::SameLogic,
         recommended: false,
+        dependencies: &["next"],
+        domains: &[RuleDomain::Next],
     }
 }
 
