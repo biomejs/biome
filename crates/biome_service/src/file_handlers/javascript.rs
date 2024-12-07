@@ -449,6 +449,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         .with_skip(&params.skip)
         .with_path(params.path.as_path())
         .with_enabled_rules(&params.enabled_rules)
+        .with_manifest(params.manifest.as_ref())
         .finish();
 
     let filter = AnalysisFilter {
@@ -475,7 +476,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         analyzer_options,
         Vec::new(),
         file_source,
-        params.manifest,
+        params.manifest.as_ref(),
         |signal| {
             if let Some(mut diagnostic) = signal.diagnostic() {
                 if ignores_suppression_comment
@@ -551,65 +552,63 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         suppression_reason,
         enabled_rules: rules,
     } = params;
-    debug_span!("Code actions JavaScript", range =? range, path =? path).in_scope(move || {
-        let tree = parse.tree();
-        trace_span!("Parsed file").in_scope(move || {
-            let analyzer_options =
-                workspace.analyzer_options::<JsLanguage>(path, &language, suppression_reason);
-            let mut actions = Vec::new();
-            let (enabled_rules, disabled_rules) =
-                AnalyzerVisitorBuilder::new(params.workspace.settings())
-                    .with_only(&only)
-                    .with_skip(&skip)
-                    .with_path(path.as_path())
-                    .with_enabled_rules(&rules)
-                    .finish();
+    let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
+    let tree = parse.tree();
+    let _ = trace_span!("Parsed file").entered();
+    let analyzer_options =
+        workspace.analyzer_options::<JsLanguage>(path, &language, suppression_reason);
+    let mut actions = Vec::new();
+    let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
+        .with_only(&only)
+        .with_skip(&skip)
+        .with_path(path.as_path())
+        .with_enabled_rules(&rules)
+        .with_manifest(manifest.as_ref())
+        .finish();
 
-            let filter = AnalysisFilter {
-                categories: RuleCategoriesBuilder::default()
-                    .with_syntax()
-                    .with_lint()
-                    .with_assist()
-                    .build(),
-                enabled_rules: Some(enabled_rules.as_slice()),
-                disabled_rules: &disabled_rules,
-                range,
-            };
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default()
+            .with_syntax()
+            .with_lint()
+            .with_assist()
+            .build(),
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range,
+    };
 
-            let Some(source_type) = language.to_js_file_source() else {
-                error!("Could not determine the file source of the file");
-                return PullActionsResult {
-                    actions: Vec::new(),
-                };
-            };
+    let Some(source_type) = language.to_js_file_source() else {
+        error!("Could not determine the file source of the file");
+        return PullActionsResult {
+            actions: Vec::new(),
+        };
+    };
 
-            trace!("Javascript runs the analyzer");
-            analyze(
-                &tree,
-                filter,
-                &analyzer_options,
-                Vec::new(),
-                source_type,
-                manifest,
-                |signal| {
-                    actions.extend(signal.actions().into_code_action_iter().map(|item| {
-                        trace!("Pulled action category {:?}", item.category);
-                        CodeAction {
-                            category: item.category.clone(),
-                            rule_name: item
-                                .rule_name
-                                .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                            suggestion: item.suggestion,
-                        }
-                    }));
+    trace!("Javascript runs the analyzer");
+    analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        Vec::new(),
+        source_type,
+        manifest.as_ref(),
+        |signal| {
+            actions.extend(signal.actions().into_code_action_iter().map(|item| {
+                trace!("Pulled action category {:?}", item.category);
+                CodeAction {
+                    category: item.category.clone(),
+                    rule_name: item
+                        .rule_name
+                        .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                    suggestion: item.suggestion,
+                }
+            }));
 
-                    ControlFlow::<Never>::Continue(())
-                },
-            );
+            ControlFlow::<Never>::Continue(())
+        },
+    );
 
-            PullActionsResult { actions }
-        })
-    })
+    PullActionsResult { actions }
 }
 
 /// If applies all the safe fixes to the given syntax tree.
@@ -631,6 +630,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .with_only(&params.only)
         .with_skip(&params.skip)
         .with_path(params.biome_path.as_path())
+        .with_manifest(params.manifest.as_ref())
         .finish();
 
     let filter = AnalysisFilter {
@@ -663,7 +663,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             &analyzer_options,
             Vec::new(),
             file_source,
-            params.manifest.clone(),
+            params.manifest.as_ref(),
             |signal| {
                 let current_diagnostic = signal.diagnostic();
 

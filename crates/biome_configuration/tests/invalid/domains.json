@@ -1,0 +1,7 @@
+{
+  "linter": {
+    "domains": {
+      "DO_NOT_EXISTS": true
+    }
+  }
+}

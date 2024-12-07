@@ -311,6 +311,7 @@ fn lint(params: LintParams) -> LintResults {
         .with_skip(&params.skip)
         .with_path(params.path.as_path())
         .with_enabled_rules(&params.enabled_rules)
+        .with_manifest(params.manifest.as_ref())
         .finish();
     let mut diagnostics = params.parse.into_diagnostics();
 
@@ -402,64 +403,62 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         workspace,
         path,
-        manifest: _,
+        manifest,
         language,
         only,
         skip,
         suppression_reason,
         enabled_rules: rules,
     } = params;
-    debug_span!("Code actions GraphQL", range =? range, path =? path).in_scope(move || {
-        let tree = parse.tree();
-        trace_span!("Parsed file", tree =? tree).in_scope(move || {
-            let Some(_) = language.to_graphql_file_source() else {
-                error!("Could not determine the file source of the file");
-                return PullActionsResult {
-                    actions: Vec::new(),
-                };
-            };
+    let _ = debug_span!("Code actions GraphQL", range =? range, path =? path).entered();
+    let tree = parse.tree();
+    let _ = trace_span!("Parsed file", tree =? tree).entered();
+    let Some(_) = language.to_graphql_file_source() else {
+        error!("Could not determine the file source of the file");
+        return PullActionsResult {
+            actions: Vec::new(),
+        };
+    };
 
-            let analyzer_options =
-                workspace.analyzer_options::<GraphqlLanguage>(path, &language, suppression_reason);
-            let mut actions = Vec::new();
-            let (enabled_rules, disabled_rules) =
-                AnalyzerVisitorBuilder::new(params.workspace.settings())
-                    .with_only(&only)
-                    .with_skip(&skip)
-                    .with_path(path.as_path())
-                    .with_enabled_rules(&rules)
-                    .finish();
+    let analyzer_options =
+        workspace.analyzer_options::<GraphqlLanguage>(path, &language, suppression_reason);
+    let mut actions = Vec::new();
+    let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
+        .with_only(&only)
+        .with_skip(&skip)
+        .with_path(path.as_path())
+        .with_enabled_rules(&rules)
+        .with_manifest(manifest.as_ref())
+        .finish();
 
-            let filter = AnalysisFilter {
-                categories: RuleCategoriesBuilder::default()
-                    .with_syntax()
-                    .with_lint()
-                    .with_assist()
-                    .build(),
-                enabled_rules: Some(enabled_rules.as_slice()),
-                disabled_rules: &disabled_rules,
-                range,
-            };
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default()
+            .with_syntax()
+            .with_lint()
+            .with_assist()
+            .build(),
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range,
+    };
 
-            info!("GraphQL runs the analyzer");
+    info!("GraphQL runs the analyzer");
 
-            analyze(&tree, filter, &analyzer_options, |signal| {
-                actions.extend(signal.actions().into_code_action_iter().map(|item| {
-                    CodeAction {
-                        category: item.category.clone(),
-                        rule_name: item
-                            .rule_name
-                            .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                        suggestion: item.suggestion,
-                    }
-                }));
+    analyze(&tree, filter, &analyzer_options, |signal| {
+        actions.extend(signal.actions().into_code_action_iter().map(|item| {
+            CodeAction {
+                category: item.category.clone(),
+                rule_name: item
+                    .rule_name
+                    .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                suggestion: item.suggestion,
+            }
+        }));
 
-                ControlFlow::<Never>::Continue(())
-            });
+        ControlFlow::<Never>::Continue(())
+    });
 
-            PullActionsResult { actions }
-        })
-    })
+    PullActionsResult { actions }
 }
 
 /// If applies all the safe fixes to the given syntax tree.
@@ -481,6 +480,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .with_only(&params.only)
         .with_skip(&params.skip)
         .with_path(params.biome_path.as_path())
+        .with_manifest(params.manifest.as_ref())
         .finish();
 
     let filter = AnalysisFilter {

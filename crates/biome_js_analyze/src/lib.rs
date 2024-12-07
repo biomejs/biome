@@ -137,7 +137,7 @@ pub fn analyze<'a, F, B>(
     options: &'a AnalyzerOptions,
     plugins: Vec<Box<dyn AnalyzerPlugin>>,
     source_type: JsFileSource,
-    manifest: Option<PackageJson>,
+    manifest: Option<&'a PackageJson>,
     emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
 where
@@ -151,7 +151,7 @@ where
         options,
         plugins,
         source_type,
-        manifest,
+        manifest.cloned(),
         emit_signal,
     )
 }
@@ -199,7 +199,7 @@ let bar = 33;
             &options,
             Vec::new(),
             JsFileSource::tsx(),
-            Some(PackageJson {
+            Some(&PackageJson {
                 dependencies,
                 ..Default::default()
             }),

@@ -1,7 +1,7 @@
 use crate::react::hooks::*;
 use crate::services::semantic::Semantic;
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleDomain};
 use biome_console::markup;
 use biome_deserialize::{
     non_empty, DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
@@ -246,6 +246,8 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReactHooks("exhaustive-deps")],
         recommended: false,
+        dependencies: &["react"],
+        domains: &[RuleDomain::React, RuleDomain::Next],
     }
 }
 

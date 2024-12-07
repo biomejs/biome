@@ -30,6 +30,7 @@ use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_grit_patterns::{GritQuery, GritQueryEffect, GritTargetFile};
 use biome_grit_syntax::file_source::GritFileSource;
 use biome_html_syntax::HtmlFileSource;
+use biome_js_analyze::METADATA as js_metadata;
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{
     EmbeddingKind, JsFileSource, JsLanguage, Language, LanguageVariant, TextRange, TextSize,
@@ -833,6 +834,7 @@ struct LintVisitor<'a, 'b> {
     skip: Option<&'b [RuleSelector]>,
     settings: Option<&'b Settings>,
     path: Option<&'b Path>,
+    manifest: Option<&'b PackageJson>,
 }
 
 impl<'a, 'b> LintVisitor<'a, 'b> {
@@ -841,6 +843,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         skip: Option<&'b [RuleSelector]>,
         settings: Option<&'b Settings>,
         path: Option<&'b Path>,
+        manifest: Option<&'b PackageJson>,
     ) -> Self {
         Self {
             enabled_rules: Default::default(),
@@ -849,6 +852,60 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             skip,
             settings,
             path,
+            manifest,
+        }
+    }
+
+    fn record_rule_from_manifest<R, L>(&mut self)
+    where
+        L: biome_rowan::Language,
+        R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
+    {
+        let no_only = self.only.is_some_and(|only| only.is_empty());
+        if no_only {
+            if let Some(manifest) = self.manifest {
+                for dependency in R::METADATA.dependencies {
+                    if manifest.contains_dependency(dependency) {
+                        let filter = js_metadata
+                            .find_rule(R::Group::NAME, R::METADATA.name)
+                            .map(RuleFilter::from);
+                        if let Some(filter) = filter {
+                            self.enabled_rules.insert(filter);
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    fn record_rule_from_domains<R, L>(&mut self)
+    where
+        L: biome_rowan::Language,
+        R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
+    {
+        let no_only = self.only.is_some_and(|only| only.is_empty());
+
+        if no_only {
+            let domains = self
+                .settings
+                .and_then(|settings| settings.as_linter_domains(self.path.expect("File path")));
+            if let Some(domains) = domains {
+                for (domain, enabled) in domains.as_ref() {
+                    if R::METADATA.domains.contains(domain) {
+                        let filter = js_metadata
+                            .find_rule(R::Group::NAME, R::METADATA.name)
+                            .map(RuleFilter::from);
+                        if let Some(filter) = filter {
+                            if *enabled {
+                                self.enabled_rules.insert(filter);
+                            } else {
+                                self.disabled_rules.insert(filter);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -876,14 +933,17 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     fn push_rule<R, L>(&mut self)
     where
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
+        L: biome_rowan::Language,
     {
+        self.record_rule_from_manifest::<R, L>();
+        self.record_rule_from_domains::<R, L>();
         // Do not report unused suppression comment diagnostics if:
         // - it is a syntax-only analyzer pass, or
         // - if a single rule is run.
         if let Some(only) = self.only {
             for selector in only {
                 let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() {
+                if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
                     self.enabled_rules.insert(filter);
                 }
             }
@@ -891,7 +951,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         if let Some(skip) = self.skip {
             for selector in skip {
                 let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() {
+                if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
                     self.disabled_rules.insert(filter);
                 }
             }
@@ -907,21 +967,7 @@ impl<'a, 'b> RegistryVisitor<JsLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = JsLanguage>>(&mut self) {
-        if let Some(only) = self.only {
-            for selector in only {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
-
-        if let Some(skip) = self.skip {
-            for selector in skip {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
+        G::record_rules(self)
     }
 
     fn record_rule<R>(&mut self)
@@ -939,21 +985,7 @@ impl<'a, 'b> RegistryVisitor<JsonLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = JsonLanguage>>(&mut self) {
-        if let Some(only) = self.only {
-            for selector in only {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
-
-        if let Some(skip) = self.skip {
-            for selector in skip {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
+        G::record_rules(self)
     }
 
     fn record_rule<R>(&mut self)
@@ -973,21 +1005,7 @@ impl<'a, 'b> RegistryVisitor<CssLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = CssLanguage>>(&mut self) {
-        if let Some(only) = self.only {
-            for selector in only {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
-
-        if let Some(skip) = self.skip {
-            for selector in skip {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
+        G::record_rules(self)
     }
 
     fn record_rule<R>(&mut self)
@@ -1007,21 +1025,7 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = GraphqlLanguage>>(&mut self) {
-        if let Some(only) = self.only {
-            for selector in only {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
-
-        if let Some(skip) = self.skip {
-            for selector in skip {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
+        G::record_rules(self)
     }
 
     fn record_rule<R>(&mut self)
@@ -1182,6 +1186,7 @@ pub(crate) struct AnalyzerVisitorBuilder<'a> {
     skip: Option<&'a [RuleSelector]>,
     path: Option<&'a Path>,
     enabled_rules: Option<&'a [RuleSelector]>,
+    manifest: Option<&'a PackageJson>,
 }
 
 impl<'b> AnalyzerVisitorBuilder<'b> {
@@ -1192,6 +1197,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             skip: None,
             path: None,
             enabled_rules: None,
+            manifest: None,
         }
     }
 
@@ -1220,6 +1226,12 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     }
 
     #[must_use]
+    pub(crate) fn with_manifest(mut self, manifest: Option<&'b PackageJson>) -> Self {
+        self.manifest = manifest;
+        self
+    }
+
+    #[must_use]
     pub(crate) fn finish(self) -> (Vec<RuleFilter<'b>>, Vec<RuleFilter<'b>>) {
         let mut disabled_rules = vec![];
         let mut enabled_rules: Vec<_> = self
@@ -1239,7 +1251,13 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_graphql_analyze::visit_registry(&mut syntax);
         enabled_rules.extend(syntax.enabled_rules);
 
-        let mut lint = LintVisitor::new(self.only, self.skip, self.settings, self.path);
+        let mut lint = LintVisitor::new(
+            self.only,
+            self.skip,
+            self.settings,
+            self.path,
+            self.manifest,
+        );
 
         biome_js_analyze::visit_registry(&mut lint);
         biome_css_analyze::visit_registry(&mut lint);

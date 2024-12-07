@@ -1,6 +1,6 @@
-use biome_analyze::RuleSourceKind;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
@@ -58,6 +58,8 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintNext("no-img-element")],
         source_kind: RuleSourceKind::SameLogic,
         recommended: false,
+        dependencies: &["next"],
+        domains: &[RuleDomain::Next],
     }
 }
 

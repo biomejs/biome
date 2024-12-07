@@ -1,9 +1,11 @@
 #[rustfmt::skip]
 mod rules;
 
+use biome_analyze::RuleDomain;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
 pub use rules::*;
+use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
@@ -28,6 +30,10 @@ pub struct LinterConfiguration {
     /// match these patterns.
     #[partial(bpaf(hide, pure(Default::default())))]
     pub include: Vec<Box<str>>,
+
+    /// A list of domains
+    #[partial(bpaf(hide, pure(Default::default())))]
+    pub domains: FxHashMap<RuleDomain, bool>,
 }
 
 impl LinterConfiguration {
@@ -43,6 +49,7 @@ impl Default for LinterConfiguration {
             rules: Default::default(),
             ignore: Default::default(),
             include: Default::default(),
+            domains: Default::default(),
         }
     }
 }

@@ -1,11 +1,11 @@
 use crate::react::hooks::{is_react_component, is_react_hook, is_react_hook_call};
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
-use biome_analyze::RuleSource;
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, AddVisitor, FromServices, MissingServicesDiagnostic,
     Phase, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey, ServiceBag, Visitor,
     VisitorContext, VisitorFinishContext,
 };
+use biome_analyze::{RuleDomain, RuleSource};
 use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
@@ -70,6 +70,8 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReactHooks("rules-of-hooks")],
         recommended: false,
+        dependencies: &["react"],
+        domains: &[RuleDomain::React, RuleDomain::Next],
     }
 }
 

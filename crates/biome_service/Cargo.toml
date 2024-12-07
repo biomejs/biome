@@ -70,6 +70,9 @@ serde_json               = { workspace = true, features = ["raw_value"] }
 smallvec                 = { workspace = true, features = ["serde"] }
 tracing                  = { workspace = true, features = ["attributes", "log"] }
 
+[dev-dependencies]
+insta = { workspace = true }
+
 [features]
 experimental-html = []
 
@@ -84,10 +87,6 @@ schema = [
   "biome_graphql_syntax/schema",
   "biome_grit_syntax/schema",
 ]
-
-[dev-dependencies]
-insta        = { workspace = true }
-tests_macros = { workspace = true }
 
 [lints]
 workspace = true
