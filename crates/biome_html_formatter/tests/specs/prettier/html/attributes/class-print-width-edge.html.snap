@@ -1,0 +1,52 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/attributes/class-print-width-edge.html
+---
+# Input
+
+```html
+<div aria-hidden="true" class="border rounded-1 flex-shrink-0 bg-gray px-1 loooooooooooooooooooooooong">
+</div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,2 @@
+-<div
+-  aria-hidden="true"
+-  class="border rounded-1 flex-shrink-0 bg-gray px-1 loooooooooooooooooooooooong"
+-></div>
++<div aria-hidden="true" class="border rounded-1 flex-shrink-0 bg-gray px-1 loooooooooooooooooooooooong">
++</div>
+\ No newline at end of file
+```
+
+# Output
+
+```html
+<div aria-hidden="true" class="border rounded-1 flex-shrink-0 bg-gray px-1 loooooooooooooooooooooooong">
+</div>```
+
+# Errors
+```
+class-print-width-edge.html:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+  > 1 │ <div aria-hidden="true" class="border rounded-1 flex-shrink-0 bg-gray px-1 loooooooooooooooooooooooong">
+      │          ^
+    2 │ </div>
+    3 │ 
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: <div aria-hidden="true" class="border rounded-1 flex-shrink-0 bg-gray px-1 loooooooooooooooooooooooong">
+```

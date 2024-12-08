@@ -1,0 +1,111 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/js/template-literal.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    </head>
+    <body>
+        <script>
+            function foo() {
+                return `
+                    <div>
+                        <p>Text</p>
+                    </div>
+                `;
+            }
+        </script>
+    </body>
+</html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,15 +1,10 @@
+-<!doctype html>
+-<html lang="en">
+-  <head> </head>
+-  <body>
+-    <script>
+-      function foo() {
+-        return `
++<!DOCTYPE html>
++<htmllang="en">
++    <head>
++    </head><body>
++        <script>
++            function foo() {
++                return `
+                     <div>
+-                        <p>Text</p>
+-                    </div>
+-                `;
+-      }
+-    </script>
+-  </body>
+-</html>
++                        <p>Text</p></div>`;
++            }</script></body></html>
+\ No newline at end of file
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<htmllang="en">
+    <head>
+    </head><body>
+        <script>
+            function foo() {
+                return `
+                    <div>
+                        <p>Text</p></div>`;
+            }</script></body></html>```
+
+# Errors
+```
+template-literal.html:12:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character ```
+  
+    10 │                         <p>Text</p>
+    11 │                     </div>
+  > 12 │                 `;
+       │                 ^
+    13 │             }
+    14 │         </script>
+  
+template-literal.html:12:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `;`
+  
+    10 │                         <p>Text</p>
+    11 │                     </div>
+  > 12 │                 `;
+       │                  ^
+    13 │             }
+    14 │         </script>
+  
+template-literal.html:13:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `}`
+  
+    11 │                     </div>
+    12 │                 `;
+  > 13 │             }
+       │             ^
+    14 │         </script>
+    15 │     </body>
+  
+
+```
