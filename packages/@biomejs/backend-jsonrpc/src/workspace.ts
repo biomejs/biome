@@ -277,7 +277,7 @@ export interface PartialJsonConfiguration {
 }
 export interface PartialLinterConfiguration {
 	/**
-	 * A list of domains
+	 * An object where the keys are the names of the domains, and the values are boolean. `true` to turn-on the rules that belong to that domain, `false` to turn them off
 	 */
 	domains?: {};
 	/**

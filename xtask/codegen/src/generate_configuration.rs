@@ -690,16 +690,6 @@ fn generate_group_struct(
             }
         );
         let rule_name = Ident::new(&to_capitalized(rule), Span::call_site());
-        let severity_ident = Ident::new(
-            match metadata.severity {
-                Severity::Hint => "Hint",
-                Severity::Information => "Information",
-                Severity::Warning => "Warning",
-                Severity::Error => "Error",
-                Severity::Fatal => "Fatal",
-            },
-            Span::call_site(),
-        );
         if metadata.recommended {
             lines_recommended_rule_as_filter.push(quote! {
                 RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[#rule_position])
