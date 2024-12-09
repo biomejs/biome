@@ -1309,7 +1309,7 @@ export interface Nursery {
 	/**
 	 * Disallow the use of process global.
 	 */
-	noProcessGlobal?: RuleConfiguration_for_Null;
+	noProcessGlobal?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow specified modules when loaded by import or require.
 	 */

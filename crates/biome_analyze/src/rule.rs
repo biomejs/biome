@@ -225,7 +225,7 @@ impl RuleSource {
             | Self::EslintN(rule_name)
             | Self::EslintNext(rule_name)
             | Self::EslintNoSecrets(rule_name)
-            | Self::Stylelint(rule_name) 
+            | Self::Stylelint(rule_name)
             | Self::DenoLint(rule_name) => rule_name,
         }
     }

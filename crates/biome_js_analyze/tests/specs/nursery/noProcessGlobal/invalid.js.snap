@@ -19,7 +19,7 @@ const f = process.env;
 
 # Diagnostics
 ```
-invalid.js:2:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Usage of the `process` global is discouraged.
   
@@ -29,13 +29,23 @@ invalid.js:2:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━�
     3 │ 
     4 │ const d = process;
   
+  i `process` global is hard for tools to statically analyze, so code should not assume they are available.
+  
   i Add `import process from "node:process";` to this file's imports.
+  
+  i Safe fix: Add `import process from "node:process";` to this file's imports.
+  
+    1  1 │   import a from 'b';
+       2 │ + import·process·from·"node::process";
+       3 │ + 
+    2  4 │   const c = process.env;
+    3  5 │   
   
 
 ```
 
 ```
-invalid.js:4:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Usage of the `process` global is discouraged.
   
@@ -46,13 +56,23 @@ invalid.js:4:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━�
     5 │ 
     6 │ const e = process.env.e;
   
+  i `process` global is hard for tools to statically analyze, so code should not assume they are available.
+  
   i Add `import process from "node:process";` to this file's imports.
+  
+  i Safe fix: Add `import process from "node:process";` to this file's imports.
+  
+    1  1 │   import a from 'b';
+       2 │ + import·process·from·"node::process";
+       3 │ + 
+    2  4 │   const c = process.env;
+    3  5 │   
   
 
 ```
 
 ```
-invalid.js:6:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Usage of the `process` global is discouraged.
   
@@ -63,13 +83,23 @@ invalid.js:6:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━�
     7 │ 
     8 │ // A copyright notice
   
+  i `process` global is hard for tools to statically analyze, so code should not assume they are available.
+  
   i Add `import process from "node:process";` to this file's imports.
+  
+  i Safe fix: Add `import process from "node:process";` to this file's imports.
+  
+    1  1 │   import a from 'b';
+       2 │ + import·process·from·"node::process";
+       3 │ + 
+    2  4 │   const c = process.env;
+    3  5 │   
   
 
 ```
 
 ```
-invalid.js:9:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Usage of the `process` global is discouraged.
   
@@ -77,7 +107,17 @@ invalid.js:9:11 lint/nursery/noProcessGlobal ━━━━━━━━━━━�
   > 9 │ const f = process.env;
       │           ^^^^^^^
   
+  i `process` global is hard for tools to statically analyze, so code should not assume they are available.
+  
   i Add `import process from "node:process";` to this file's imports.
+  
+  i Safe fix: Add `import process from "node:process";` to this file's imports.
+  
+    1  1 │   import a from 'b';
+       2 │ + import·process·from·"node::process";
+       3 │ + 
+    2  4 │   const c = process.env;
+    3  5 │   
   
 
 ```
