@@ -352,7 +352,7 @@ fn lint(params: LintParams) -> LintResults {
     let mut process_lint = ProcessLint::new(&params);
 
     let (_, analyze_diagnostics) =
-        analyze(&root, filter, &analyzer_options, file_source, |signal| {
+        analyze(&root, filter, analyzer_options, file_source, |signal| {
             process_lint.process_signal(signal)
         });
 
