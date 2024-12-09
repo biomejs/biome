@@ -128,7 +128,7 @@ impl Rule for NoProcessGlobal {
             let new_items: [SyntaxNode<JsLanguage>; 2];
             let new_process_import = create_porcess_import();
 
-            // WIP: need to handle trivias properly, e.g. append below any head comments for case 2
+            // WIP: need to handle trivias properly, e.g. append new import below any head comments for case 2
             if let Some(Some(import)) = most_recent_import.map(|node| node.into_node()) {
                 let Some(import_slot) = module_item_list
                     .slots()
@@ -167,7 +167,7 @@ impl Rule for NoProcessGlobal {
 
 fn is_top_level_statement(node: &SyntaxNode<JsLanguage>) -> bool {
     match node.parent() {
-        Some(g) => JsModuleItemList::cast(g).is_some(),
+        Some(g) => JsModuleItemList::can_cast(g.kind()),
         _ => false,
     }
 }
