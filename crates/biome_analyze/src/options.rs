@@ -115,8 +115,8 @@ impl AnalyzerOptions {
         self
     }
 
-    pub fn with_suppression_reason(mut self, reason: Option<String>) -> Self {
-        self.suppression_reason = reason;
+    pub fn with_suppression_reason(mut self, reason: Option<&str>) -> Self {
+        self.suppression_reason = reason.map(String::from);
         self
     }
 

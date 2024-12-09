@@ -21,6 +21,15 @@ pub struct PackageJson {
     pub r#type: Option<PackageType>,
 }
 
+impl PackageJson {
+    /// Checks whether the `specifier` is defined in `dependencies`, `dev_dependencies` or `peer_dependencies`
+    pub fn contains_dependency(&self, specifier: &str) -> bool {
+        self.dependencies.contains(specifier)
+            || self.dev_dependencies.contains(specifier)
+            || self.peer_dependencies.contains(specifier)
+    }
+}
+
 impl Manifest for PackageJson {
     type Language = JsonLanguage;
 

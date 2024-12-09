@@ -78,7 +78,7 @@ fn analyze(
         &options,
         Vec::new(),
         source_type,
-        manifest,
+        manifest.as_ref(),
         |event| {
             if let Some(mut diag) = event.diagnostic() {
                 for action in event.actions() {

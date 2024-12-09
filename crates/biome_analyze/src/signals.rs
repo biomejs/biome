@@ -369,7 +369,10 @@ where
         )
         .ok()?;
 
-        R::diagnostic(&ctx, &self.state).map(AnalyzerDiagnostic::from)
+        R::diagnostic(&ctx, &self.state).map(|mut diagnostic| {
+            diagnostic.severity = ctx.metadata().severity;
+            AnalyzerDiagnostic::from(diagnostic)
+        })
     }
 
     fn actions(&self) -> AnalyzerActionIter<RuleLanguage<R>> {

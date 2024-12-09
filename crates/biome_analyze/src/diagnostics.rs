@@ -65,7 +65,7 @@ impl Diagnostic for AnalyzerDiagnostic {
 
     fn severity(&self) -> Severity {
         match &self.kind {
-            DiagnosticKind::Rule { .. } => Severity::Error,
+            DiagnosticKind::Rule(diagnostic) => diagnostic.severity(),
             DiagnosticKind::Raw(error) => error.severity(),
         }
     }

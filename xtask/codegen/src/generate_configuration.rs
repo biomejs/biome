@@ -316,19 +316,16 @@ fn generate_for_groups(
                 let group = <RuleGroup as std::str::FromStr>::from_str(split_code.next()?).ok()?;
                 let rule_name = split_code.next()?;
                 let rule_name = Self::has_rule(group, rule_name)?;
-                let severity = match group {
+                match group {
                     #(
                         RuleGroup::#group_pascal_idents => self
                             .#group_idents
                             .as_ref()
                             .and_then(|group| group.get_rule_configuration(rule_name))
                             .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
-                            .map_or_else(|| {
-                                #group_pascal_idents::rule_to_severity(rule_name)
-                            }, |(level, _)| level.into()),
+                            .map(|(level, _)| Severity::from(level)),
                     )*
-                };
-                Some(severity)
+                }
             }
 
         }
@@ -628,7 +625,6 @@ fn generate_group_struct(
 ) -> TokenStream {
     let mut lines_recommended_rule = Vec::new();
     let mut lines_recommended_rule_as_filter = Vec::new();
-    let mut rule_to_severity = Vec::new();
     let mut lines_all_rule_as_filter = Vec::new();
     let mut lines_rule = Vec::new();
     let mut schema_lines_rules = Vec::new();
@@ -694,19 +690,6 @@ fn generate_group_struct(
             }
         );
         let rule_name = Ident::new(&to_capitalized(rule), Span::call_site());
-        let severity_ident = Ident::new(
-            match metadata.severity {
-                Severity::Hint => "Hint",
-                Severity::Information => "Information",
-                Severity::Warning => "Warning",
-                Severity::Error => "Error",
-                Severity::Fatal => "Fatal",
-            },
-            Span::call_site(),
-        );
-        rule_to_severity.push(quote! {
-            #rule => Severity::#severity_ident,
-        });
         if metadata.recommended {
             lines_recommended_rule_as_filter.push(quote! {
                 RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[#rule_position])
@@ -867,13 +850,6 @@ fn generate_group_struct(
                 const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
                     #( #lines_recommended_rule_as_filter ),*
                 ];
-
-                pub(crate) fn rule_to_severity(rule_name: &str) -> Severity {
-                    match rule_name {
-                        #( #rule_to_severity )*
-                        _ => unreachable!("Rule doesn't exist")
-                    }
-                }
 
                 /// Retrieves the recommended rules
                 pub(crate) fn is_recommended_true(&self) -> bool {

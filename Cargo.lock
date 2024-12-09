@@ -228,6 +228,7 @@ dependencies = [
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_project",
  "biome_rowan",
  "bpaf",
  "insta",
@@ -237,6 +238,7 @@ dependencies = [
  "serde",
  "serde_ini",
  "serde_json",
+ "tests_macros",
 ]
 
 [[package]]
@@ -1196,7 +1198,6 @@ dependencies = [
  "serde",
  "serde_json",
  "smallvec",
- "tests_macros",
  "tracing",
 ]
 

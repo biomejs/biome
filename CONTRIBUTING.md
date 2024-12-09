@@ -1,4 +1,4 @@
-# 🚀 Contributing
+1# 🚀 Contributing
 
 We can use help in a bunch of areas and any help is greatly appreciated!
 
@@ -377,9 +377,9 @@ biome_js_analyze: patch
 biome_js_syntax: patch
 ---
 ```
-With this, the description will be the same for all three packages. 
+With this, the description will be the same for all three packages.
 
-However, there are cases where **you don't want** that, because we want to write a specific message for `cli` and another for `biome_js_syntax`. In this case, you're free to create **multiple changesets** in the *same PR*. In the example above, you would need to run `just new-chageset` twice, select `cli` the first time, and select `biome_js_syntax` and `biome_js_analyze` the second time. 
+However, there are cases where **you don't want** that, because we want to write a specific message for `cli` and another for `biome_js_syntax`. In this case, you're free to create **multiple changesets** in the *same PR*. In the example above, you would need to run `just new-chageset` twice, select `cli` the first time, and select `biome_js_syntax` and `biome_js_analyze` the second time.
 
 #### Choose the correct type of change
 
@@ -399,12 +399,12 @@ We are very liberal for the `biome_` crates, so don't be afraid to break the dev
 For example, you have a PR that ships a bug fix, and a new feature, and you want to document both of them. The bugfix doesn't require a long description, while the feature might need some explanation. So create two changesets, that might look like this:
 
 This is the changeset for the bugfix:
-```markdown 
+```markdown
 ---
 biome_js_syntax: patch
 ---
 
-# Fix [#000](https://path/to/000), where the parameter `foo` wasn't read by the function `apply_foo()` 
+# Fix [#000](https://path/to/000), where the parameter `foo` wasn't read by the function `apply_foo()`
 ```
 
 This is the changeset for the feature, where you show the feature usage by having an example of configuration, with the shell result:
@@ -423,7 +423,7 @@ This feature does wonders, and you can use it with this configuration:
 }
 ```
 
-And this happens: 
+And this happens:
 
 ```shell
 
