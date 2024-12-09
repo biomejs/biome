@@ -1,10 +1,11 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
 expression: invalid_hooked_non_component.jsx
 ---
 # Input
 ```jsx
-export const Hoge = () => {}
+export const Component = () => {}
 const func = () => {}
 export default memo(func)
 
@@ -16,7 +17,7 @@ invalid_hooked_non_component.jsx:3:16 lint/nursery/useComponentExportOnlyModules
 
   ! Exporting a non-component with components is not allowed.
   
-    1 │ export const Hoge = () => {}
+    1 │ export const Component = () => {}
     2 │ const func = () => {}
   > 3 │ export default memo(func)
       │                ^^^^^^^^^^
