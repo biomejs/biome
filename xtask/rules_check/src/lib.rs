@@ -11,7 +11,7 @@ use biome_console::{markup, Console};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_ast;
-use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
+use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_fs::BiomePath;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_parser::JsParserOptions;
