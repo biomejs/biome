@@ -33,6 +33,20 @@ impl UtilityClassSortingOptions {
         false
     }
 
+    pub(crate) fn match_function(&self, name: &str) -> bool {
+        self.functions.iter().flatten().any(|matcher| {
+            let mut matcher_parts = matcher.split('.');
+            let mut name_parts = name.split('.');
+
+            let all_parts_match = matcher_parts
+                .by_ref()
+                .zip(name_parts.by_ref())
+                .all(|(m, p)| m == "*" || m == p);
+
+            all_parts_match && matcher_parts.next().is_none() && name_parts.next().is_none()
+        })
+    }
+
     pub(crate) fn has_attribute(&self, name: &str) -> bool {
         CLASS_ATTRIBUTES.contains(&name)
             || self.attributes.iter().flatten().any(|v| v.as_ref() == name)
