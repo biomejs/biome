@@ -276,7 +276,6 @@ Don't forget to format your code with `just f` and lint with `just l`.
 
 That's it! Now, let's [test the rule](#testing-the-rule).
 
-
 ### Coding Tips for Rules
 
 Below, there are many tips and guidelines on how to create a lint rule using Biome infrastructure.
@@ -374,6 +373,70 @@ impl Rule for ExampleRule {
     }
 }
 ```
+
+#### Rule severity
+
+The macro accepts a `severity` field, which value comes from `biome_diagnostics::Severity`. By default, rules without `severity` will start with `Severity::Information`.
+
+If you want to change the default severity, you need to assign it:
+
+```diff
++ use biome_diagnostics::Severity;
+
+declare_lint_rule! {
+    /// Documentation
+    pub(crate) ExampleRule {
+        version: "next",
+        name: "myRuleName",
+        language: "js",
+        recommended: false,
++       severity: Severity::Warning,
+    }
+}
+```
+
+#### Rule dependencies
+
+If you write a rule that are specific to certain libraries, for example `react` or `solid`, you can add them to the metadata.
+
+Biome will automatically enable those rules by inspecting the dependencies of the closest `package.json`. In the following example, Biome will enable this rule when the dependency `solid` is a dependency:
+
+```diff
+declare_lint_rule! {
+    /// Documentation
+    pub(crate) ExampleRule {
+        version: "next",
+        name: "myRuleName",
+        language: "js",
+        recommended: false,
++       dependencies: &["solid"],
+    }
+}
+```
+#### Rule domains
+
+Domains are very specific ways to collect rules that belong to the same "concept". Domains are a way for users to opt-in/opt-out rules that belong to the same domain.
+
+Some examples of domains: testing, specific framework, specific runtime, specific library. A rule can belong to multiple domains.
+
+```diff
++ use biome_analyze::RuleDomain;
+
+
+declare_lint_rule! {
+    /// Documentation
+    pub(crate) ExampleRule {
+        version: "next",
+        name: "myRuleName",
+        language: "js",
+        recommended: false,
++       domains: &[RuleDomain::Test],
+    }
+}
+```
+
+> [!NOTE]
+> Before adding a new domain, please consult with the maintainers of the project.
 
 #### Rule Options
 

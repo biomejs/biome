@@ -443,7 +443,7 @@ impl Settings {
         result
     }
 
-    ///
+    /// Extract the domains applied to the given `path`, by looking that the base `domains`, and the once applied by `overrides`
     pub fn as_linter_domains(&self, path: &Path) -> Option<Cow<FxHashMap<RuleDomain, bool>>> {
         let mut result = self.linter.domains.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;

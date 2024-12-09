@@ -31,7 +31,8 @@ pub struct LinterConfiguration {
     #[partial(bpaf(hide, pure(Default::default())))]
     pub include: Vec<Box<str>>,
 
-    /// A list of domains
+    /// An object where the keys are the names of the domains, and the values are boolean. `true` to turn-on the rules that
+    /// belong to that domain, `false` to turn them off
     #[partial(bpaf(hide, pure(Default::default())))]
     pub domains: FxHashMap<RuleDomain, bool>,
 }
