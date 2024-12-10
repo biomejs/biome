@@ -5,7 +5,7 @@ snapshot_kind: text
 ---
 ## Input
 
-```jsx
+```js
 export *;
 export * from 5;
 export as from "test";

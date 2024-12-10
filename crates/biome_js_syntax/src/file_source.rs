@@ -310,7 +310,8 @@ impl JsFileSource {
     pub fn try_from_extension(extension: &OsStr) -> Result<Self, FileSourceError> {
         // We assume the file extension is normalized to lowercase
         match extension.as_encoded_bytes() {
-            b"js" | b"mjs" | b"jsx" => Ok(Self::jsx()),
+            b"js" | b"mjs" => Ok(Self::js_module()),
+            b"jsx" => Ok(Self::jsx()),
             b"cjs" => Ok(Self::js_script()),
             b"ts" => Ok(Self::ts()),
             b"mts" | b"cts" => Ok(Self::ts_restricted()),

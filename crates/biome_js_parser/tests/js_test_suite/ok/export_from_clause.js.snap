@@ -5,7 +5,7 @@ snapshot_kind: text
 ---
 ## Input
 
-```jsx
+```js
 export {
     default as a } from "b";
 export { default as a } from "b";

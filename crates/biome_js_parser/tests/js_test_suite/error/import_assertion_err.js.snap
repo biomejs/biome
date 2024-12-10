@@ -5,7 +5,7 @@ snapshot_kind: text
 ---
 ## Input
 
-```jsx
+```js
 import "foo" assert { type, "json" };
 import "bar" \u{61}ssert { type: "json" };
 import { foo } assert { type: "json" };

@@ -26,7 +26,7 @@ pub struct JavascriptConfiguration {
     pub assists: JavascriptAssists,
 
     /// Parsing options
-    #[partial(type, bpaf(external(partial_javascript_parser), optional))]
+    #[partial(type, bpaf(pure(Default::default()), optional))]
     pub parser: JavascriptParser,
 
     /// A list of global bindings that should be ignored by the analyzers
@@ -39,32 +39,43 @@ pub struct JavascriptConfiguration {
     #[partial(bpaf(pure(Default::default()), hide))]
     pub jsx_runtime: JsxRuntime,
 
-    #[partial(type, bpaf(external(partial_javascript_organize_imports), optional))]
+    #[partial(type, bpaf(pure(Default::default()), optional))]
     pub organize_imports: JavascriptOrganizeImports,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
+#[partial(derive(Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(default, deny_unknown_fields))]
 pub struct JavascriptOrganizeImports {}
 
 /// Options that changes how the JavaScript parser behaves
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[partial(derive(Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct JavascriptParser {
     /// It enables the experimental and unsafe parsing of parameter decorators
     ///
     /// These decorators belong to an old proposal, and they are subject to change.
-    #[partial(bpaf(hide))]
     pub unsafe_parameter_decorators_enabled: bool,
 
     /// Enables parsing of Grit metavariables.
     /// Defaults to `false`.
-    #[partial(bpaf(hide))]
     pub grit_metavariables: bool,
+
+    /// When enabled, files like `.js`/`.ts` can contain JSX syntax. Defaults to `true`.
+    pub jsx_everywhere: bool,
+}
+
+impl Default for JavascriptParser {
+    fn default() -> Self {
+        Self {
+            jsx_everywhere: true,
+            grit_metavariables: false,
+            unsafe_parameter_decorators_enabled: false,
+        }
+    }
 }
 
 /// Indicates the type of runtime or transformation used for interpreting JSX.
