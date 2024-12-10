@@ -103,45 +103,32 @@ impl Rule for NoProcessGlobal {
             // insert new import at:
             // 1. after the most recent import statement. Or, if no import exist
             // 2. at the beginning of the file
-            let mut most_recent_import = top_level_statement.prev_sibling_or_token();
-            loop {
-                match &most_recent_import {
-                    Some(node) => {
-                        if matches!(node.kind(), JsSyntaxKind::JS_IMPORT) {
-                            break;
-                        }
-
-                        most_recent_import = node.prev_sibling_or_token();
+            let mut most_recent_import = None;
+            {
+                let mut sibling_iter = top_level_statement.prev_sibling();
+                while let Some(node) = sibling_iter {
+                    if matches!(node.kind(), JsSyntaxKind::JS_IMPORT) {
+                        most_recent_import = Some(node);
+                        break;
                     }
-                    _ => break,
+                    sibling_iter = node.prev_sibling();
                 }
             }
 
-            let Some(module_item_list) = top_level_statement
+            let module_item_list = top_level_statement
                 .parent()
-                .and_then(JsModuleItemList::cast)
-            else {
-                return None;
-            };
-            let module_item_list = module_item_list.into_syntax();
+                .and_then(JsModuleItemList::cast)?.into_syntax();
             let mut slot = 0;
             let new_items: [SyntaxNode<JsLanguage>; 2];
             let new_process_import = create_porcess_import();
 
             // WIP: need to handle trivias properly, e.g. append new import below any head comments for case 2
-            if let Some(Some(import)) = most_recent_import.map(|node| node.into_node()) {
-                let Some(import_slot) = module_item_list
-                    .slots()
-                    .position(|slot| slot.into_node().as_ref() == Some(&import))
-                else {
-                    return None;
-                };
-                slot = import_slot;
+            if let Some(import) = most_recent_import {
+                // slot = module_item_list.slots().position(|slot| slot.into_node().as_ref() == Some(&import))?;
+                slot = import.index();
                 new_items = [import, new_process_import.into()];
             } else {
-                let Some(first_child) = module_item_list.first_child() else {
-                    return None;
-                };
+                let first_child = module_item_list.first_child()?;
                 new_items = [new_process_import.into(), first_child];
             }
 
@@ -177,21 +164,21 @@ fn create_porcess_import() -> JsImport {
     let new_line = [(TriviaPieceKind::Newline, "\n")];
     let source = make::js_module_source(make::js_string_literal("node::process"));
     let binding = make::js_identifier_binding(
-        make::ident("process").with_trailing_trivia(whitespace.clone()),
+        make::ident("process").with_trailing_trivia(whitespace),
     );
     let specifier = make::js_default_import_specifier(binding.into());
     let clause = make::js_import_default_clause(
         specifier,
-        make::token(T![from]).with_trailing_trivia(whitespace.clone()),
+        make::token(T![from]).with_trailing_trivia(whitespace),
         source.into(),
     )
     .build();
     make::js_import(
         make::token(T![import])
-            .with_trailing_trivia(whitespace.clone())
-            .with_leading_trivia(new_line.clone()),
+            .with_trailing_trivia(whitespace)
+            .with_leading_trivia(new_line),
         clause.into(),
     )
-    .with_semicolon_token(make::token(T![;]).with_trailing_trivia(new_line.clone()))
+    .with_semicolon_token(make::token(T![;]).with_trailing_trivia(new_line))
     .build()
 }
