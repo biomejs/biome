@@ -58,7 +58,6 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintNext("no-img-element")],
         source_kind: RuleSourceKind::SameLogic,
         recommended: false,
-        dependencies: &["next"],
         domains: &[RuleDomain::Next],
     }
 }

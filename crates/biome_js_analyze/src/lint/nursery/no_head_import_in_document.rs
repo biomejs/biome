@@ -50,7 +50,6 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintNext("no-head-import-in-document")],
         source_kind: RuleSourceKind::SameLogic,
         recommended: false,
-        dependencies: &["next"],
         domains: &[RuleDomain::Next],
     }
 }

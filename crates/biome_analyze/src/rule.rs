@@ -45,8 +45,6 @@ pub struct RuleMetadata {
     pub severity: Severity,
     /// Domains applied by this rule
     pub domains: &'static [RuleDomain],
-    /// If the project has one of these dependencies, the rule will be automatically applied, unless it's explicitly disabled
-    pub dependencies: &'static [&'static str],
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -338,6 +336,50 @@ pub enum RuleDomain {
     Solid,
     /// Next.js framework rules
     Next,
+    /// With Jest, we inject some globals
+    Jest,
+}
+
+impl RuleDomain {
+    /// If the project has one of these dependencies, the rule will be automatically applied, unless it's explicitly disabled by the configuration
+    ///
+    /// If the array is empty, it means that the rules that belong to a certain domain won't enable themselves automatically.
+    pub const fn manifest_dependencies(&self) -> &[&(&str, &str)] {
+        match self {
+            RuleDomain::React => &[&("react", ">=16.0.0")],
+            RuleDomain::Test => &[
+                &("jest", ">=26.0.0"),
+                &("mocha", ">=8.0.0"),
+                &("ava", ">=2.0.0"),
+                &("vitest", ">=1.0.0"),
+            ],
+            RuleDomain::Jest => &[&("jest", ">=26.0.0")],
+            RuleDomain::Solid => &[&("solid", ">=1.0.0")],
+            RuleDomain::Next => &[&("react", ">=16.0.0"), &("next", ">=14.0.0")],
+        }
+    }
+
+    /// Global identifiers that should be added to the `globals` of the [AnalyzerConfiguration] type
+    pub const fn globals(&self) -> &[&str] {
+        match self {
+            RuleDomain::React => &["React"],
+            RuleDomain::Test => &[],
+            RuleDomain::Solid => &[],
+            RuleDomain::Next => &[],
+            RuleDomain::Jest => &[
+                "after",
+                "afterAll",
+                "afterEach",
+                "before",
+                "beforeEach",
+                "beforeAll",
+                "describe",
+                "it",
+                "expect",
+                "test",
+            ],
+        }
+    }
 }
 
 impl Display for RuleDomain {
@@ -347,6 +389,7 @@ impl Display for RuleDomain {
             RuleDomain::Test => fmt.write_str("Test"),
             RuleDomain::Solid => fmt.write_str("Solid"),
             RuleDomain::Next => fmt.write_str("Next.js"),
+            RuleDomain::Jest => fmt.write_str("Jest"),
         }
     }
 }
@@ -370,7 +413,6 @@ impl RuleMetadata {
             source_kind: None,
             severity: Severity::Information,
             domains: &[],
-            dependencies: &[],
         }
     }
 
@@ -414,11 +456,6 @@ impl RuleMetadata {
 
     pub const fn domains(mut self, domains: &'static [RuleDomain]) -> Self {
         self.domains = domains;
-        self
-    }
-
-    pub const fn dependencies(mut self, dependencies: &'static [&'static str]) -> Self {
-        self.dependencies = dependencies;
         self
     }
 

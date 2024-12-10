@@ -963,6 +963,8 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         }
     }
 
+    /// It loops over the domains of the current rule, and check each domain specify
+    /// a dependency,
     fn record_rule_from_manifest<R, L>(&mut self)
     where
         L: biome_rowan::Language,
@@ -971,21 +973,24 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         let no_only = self.only.is_some_and(|only| only.is_empty());
         if no_only {
             if let Some(manifest) = self.manifest {
-                for dependency in R::METADATA.dependencies {
-                    if manifest.contains_dependency(dependency) {
-                        let filter = js_metadata
-                            .find_rule(R::Group::NAME, R::METADATA.name)
-                            .map(RuleFilter::from);
-                        if let Some(filter) = filter {
-                            self.enabled_rules.insert(filter);
+                for domain in R::METADATA.domains {
+                    for (dependency, version) in domain.manifest_dependencies() {
+                        if manifest.matches_dependency(dependency, version) {
+                            let filter = js_metadata
+                                .find_rule(R::Group::NAME, R::METADATA.name)
+                                .map(RuleFilter::from);
+                            if let Some(filter) = filter {
+                                self.enabled_rules.insert(filter);
+                            }
+                            return;
                         }
-                        return;
                     }
                 }
             }
         }
     }
 
+    /// It inspects the [RuleDomain] of the configuration, and if the current rule belongs to at least a configured domain, it's enabled.
     fn record_rule_from_domains<R, L>(&mut self)
     where
         L: biome_rowan::Language,

@@ -247,7 +247,6 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReactHooks("exhaustive-deps")],
         recommended: false,
-        dependencies: &["react"],
         severity: Severity::Error,
         domains: &[RuleDomain::React, RuleDomain::Next],
     }

@@ -16,7 +16,7 @@ fn enables_rules_via_dependencies() {
         file_path.into(),
         r#"{
     "dependencies": {
-        "react": "latest"
+        "react": "16.0.0"
     }
 }
 "#

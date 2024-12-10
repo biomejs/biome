@@ -6,7 +6,10 @@ use biome_deserialize::{
 };
 use biome_json_syntax::JsonLanguage;
 use biome_text_size::TextRange;
+use node_semver::Range;
 use rustc_hash::FxHashMap;
+use std::ops::Deref;
+use std::str::FromStr;
 
 #[derive(Debug, Default, Clone)]
 pub struct PackageJson {
@@ -28,6 +31,25 @@ impl PackageJson {
             || self.dev_dependencies.contains(specifier)
             || self.peer_dependencies.contains(specifier)
     }
+
+    /// Checks whether the `specifier` is defined in `dependencies`, `dev_dependencies` or `peer_dependencies`, and the `range`
+    /// of matches the one of the manifest
+    pub fn matches_dependency(&self, specifier: &str, range: &str) -> bool {
+        let iter = self
+            .dependencies
+            .iter()
+            .chain(self.dev_dependencies.iter())
+            .chain(self.peer_dependencies.iter());
+        for (manifest_name, manifest_version) in iter {
+            if let Ok(range) = Range::from_str(range) {
+                if manifest_name == specifier && manifest_version.satisfies(&range) {
+                    return true;
+                }
+            }
+        }
+
+        false
+    }
 }
 
 impl Manifest for PackageJson {
@@ -40,6 +62,14 @@ impl Manifest for PackageJson {
 
 #[derive(Debug, Default, Clone, biome_deserialize_macros::Deserializable)]
 pub struct Dependencies(FxHashMap<String, Version>);
+
+impl Deref for Dependencies {
+    type Target = FxHashMap<String, Version>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 impl Dependencies {
     pub fn to_keys(&self) -> Vec<String> {
@@ -61,15 +91,28 @@ pub enum Version {
     Literal(String),
 }
 
+impl Version {
+    pub fn satisfies(&self, range: &Range) -> bool {
+        match self {
+            Version::SemVer(version) => version.satisfies(range),
+            Version::Literal(_) => false,
+        }
+    }
+}
+
 impl From<&str> for Version {
     fn from(value: &str) -> Self {
-        Self::Literal(value.to_string())
+        node_semver::Version::parse(value)
+            .ok()
+            .map_or_else(|| Self::Literal(value.into()), Self::SemVer)
     }
 }
 
 impl From<String> for Version {
     fn from(value: String) -> Self {
-        Self::Literal(value)
+        node_semver::Version::parse(value.as_str())
+            .ok()
+            .map_or_else(|| Self::Literal(value), Self::SemVer)
     }
 }
 

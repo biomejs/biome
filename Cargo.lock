@@ -124,6 +124,7 @@ dependencies = [
  "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_parser",
+ "biome_project",
  "biome_rowan",
  "biome_suppression",
  "enumflags2",

@@ -8,7 +8,7 @@ use biome_diagnostics::serde::Diagnostic;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::Language;
 pub use license::generated::*;
-pub use node_js_project::{Dependencies, NodeJsProject, PackageJson, PackageType};
+pub use node_js_project::{Dependencies, NodeJsProject, PackageJson, PackageType, Version};
 use std::any::TypeId;
 use std::fmt::Debug;
 use std::path::Path;

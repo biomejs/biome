@@ -1,4 +1,4 @@
-1# 🚀 Contributing
+# 🚀 Contributing
 
 We can use help in a bunch of areas and any help is greatly appreciated!
 

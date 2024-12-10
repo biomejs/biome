@@ -71,7 +71,6 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReactHooks("rules-of-hooks")],
         recommended: false,
-        dependencies: &["react"],
         severity: Severity::Error,
         domains: &[RuleDomain::React, RuleDomain::Next],
     }

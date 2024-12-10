@@ -8,7 +8,7 @@ snapshot_kind: text
 ```json
 {
     "dependencies": {
-        "react": "latest"
+        "react": "16.0.0"
     }
 }
 

@@ -34,7 +34,6 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintSolid("no-react-specific-props")],
         recommended: false,
         fix_kind: FixKind::Safe,
-        dependencies: &["solid"],
         domains: &[RuleDomain::Solid],
     }
 }
