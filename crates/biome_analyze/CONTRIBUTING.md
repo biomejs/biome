@@ -376,7 +376,7 @@ impl Rule for ExampleRule {
 
 #### Rule severity
 
-The macro accepts a `severity` field, which value comes from `biome_diagnostics::Severity`. By default, rules without `severity` will start with `Severity::Information`.
+The macro accepts a `severity` field, of type `biome_diagnostics::Severity`. By default, rules without `severity` will start with `Severity::Information`.
 
 If you want to change the default severity, you need to assign it:
 
@@ -397,9 +397,9 @@ declare_lint_rule! {
 
 #### Rule dependencies
 
-If you write a rule that are specific to certain libraries, for example `react` or `solid`, you can add them to the metadata.
+If you write a rule that is specific to certain libraries, for example React or Solid, you can add them to the metadata.
 
-Biome will automatically enable those rules by inspecting the dependencies of the closest `package.json`. In the following example, Biome will enable this rule when the dependency `solid` is a dependency:
+Biome will automatically enable those rules by inspecting the dependencies of the closest `package.json`. In the following example, Biome will enable this rule when `solid` is listed in the `dependencies` field:
 
 ```diff
 declare_lint_rule! {

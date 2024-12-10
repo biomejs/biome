@@ -16,7 +16,7 @@ You can enable and disable multiple rules that belong to a domain. When you assi
   "linter": {
     "domains": {
       "test": false, // rules around testing are disabled
-      "next": true // rules around Next.js are disabled
+      "next": true // rules related to Next.js are enabled
     }
   }
 }
