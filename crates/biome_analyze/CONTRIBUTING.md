@@ -395,24 +395,6 @@ declare_lint_rule! {
 }
 ```
 
-#### Rule dependencies
-
-If you write a rule that is specific to certain libraries, for example React or Solid, you can add them to the metadata.
-
-Biome will automatically enable those rules by inspecting the dependencies of the closest `package.json`. In the following example, Biome will enable this rule when `solid` is listed in the `dependencies` field:
-
-```diff
-declare_lint_rule! {
-    /// Documentation
-    pub(crate) ExampleRule {
-        version: "next",
-        name: "myRuleName",
-        language: "js",
-        recommended: false,
-+       dependencies: &["solid"],
-    }
-}
-```
 #### Rule domains
 
 Domains are very specific ways to collect rules that belong to the same "concept". Domains are a way for users to opt-in/opt-out rules that belong to the same domain.
@@ -434,6 +416,10 @@ declare_lint_rule! {
     }
 }
 ```
+
+Rule domains can unlock various perks in the Biome analyzer:
+- A domain can define a number of `package.json` dependencies. When a user has one or more these dependencies, Biome will automatically enable the rules that belong to the domain. To add/update/remove dependencies to a domain, check the function `RuleDomain::manifest_dependencies`.
+- A domain can define a number of "globals". These globals will be used by other rules, and improve the UX of them. To add/update/remove globals to a domain, check the function `RuleDomain::globals`.
 
 > [!NOTE]
 > Before adding a new domain, please consult with the maintainers of the project.
