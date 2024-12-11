@@ -20,3 +20,17 @@ domains.json:4:7 deserialize ━━━━━━━━━━━━━━━━━
   - test
   - solid
   - next
+  
+
+
+
+domains.json:4:24 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Incorrect type, expected a string, but received a boolean.
+  
+    2 │   "linter": {
+    3 │     "domains": {
+  > 4 │       "DO_NOT_EXISTS": true
+      │                        ^^^^
+    5 │     }
+    6 │   }

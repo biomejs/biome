@@ -1088,7 +1088,6 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                     .unwrap_or_default(),
             );
         }
-        dbg!(&self.disabled_rules);
         (self.enabled_rules, self.disabled_rules)
     }
 
