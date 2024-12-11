@@ -411,7 +411,7 @@ declare_lint_rule! {
         version: "next",
         name: "myRuleName",
         language: "js",
-        recommended: false,
+        recommended: true,
 +       domains: &[RuleDomain::Test],
     }
 }
@@ -420,6 +420,9 @@ declare_lint_rule! {
 Rule domains can unlock various perks in the Biome analyzer:
 - A domain can define a number of `package.json` dependencies. When a user has one or more these dependencies, Biome will automatically enable the rules that belong to the domain. To add/update/remove dependencies to a domain, check the function `RuleDomain::manifest_dependencies`.
 - A domain can define a number of "globals". These globals will be used by other rules, and improve the UX of them. To add/update/remove globals to a domain, check the function `RuleDomain::globals`.
+
+When a rule is **recommended** and _has domains_, the rule is enabled only when the user enables the relative domains via `"recommneded"` or `"all"`.
+Instead, if the rule is **recommended** but _doesn't have domains_, the rule is always enabled by default.
 
 > [!NOTE]
 > Before adding a new domain, please consult with the maintainers of the project.

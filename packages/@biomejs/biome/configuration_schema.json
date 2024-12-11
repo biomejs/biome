@@ -1966,7 +1966,7 @@
 				"domains": {
 					"description": "An object where the keys are the names of the domains, and the values are boolean. `true` to turn-on the rules that belong to that domain, `false` to turn them off",
 					"type": ["object", "null"],
-					"additionalProperties": { "type": "boolean" }
+					"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" }
 				},
 				"enabled": {
 					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
@@ -2612,7 +2612,7 @@
 				"domains": {
 					"description": "List of rules",
 					"type": ["object", "null"],
-					"additionalProperties": { "type": "boolean" }
+					"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" }
 				},
 				"enabled": {
 					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
@@ -2848,6 +2848,25 @@
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
 				{ "$ref": "#/definitions/RuleWithNoOptions" }
+			]
+		},
+		"RuleDomainValue": {
+			"oneOf": [
+				{
+					"description": "Enables all the rules that belong to this domain",
+					"type": "string",
+					"enum": ["all"]
+				},
+				{
+					"description": "Disables all the rules that belong to this domain",
+					"type": "string",
+					"enum": ["none"]
+				},
+				{
+					"description": "It enables only the recommended rules for this domain",
+					"type": "string",
+					"enum": ["recommended"]
+				}
 			]
 		},
 		"RuleFixConfiguration": {
