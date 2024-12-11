@@ -18,14 +18,16 @@ use biome_analyze::{
     AnalyzerDiagnostic, AnalyzerOptions, AnalyzerSignal, ControlFlow, GroupCategory, Never,
     Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
-use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
 use biome_configuration::Rules;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
+use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
+use biome_graphql_analyze::METADATA as graphql_metadata;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_grit_patterns::{GritQuery, GritQueryEffect, GritTargetFile};
 use biome_grit_syntax::file_source::GritFileSource;
@@ -35,6 +37,7 @@ use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{
     EmbeddingKind, JsFileSource, JsLanguage, Language, LanguageVariant, TextRange, TextSize,
 };
+use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
@@ -967,8 +970,10 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     }
 
     /// It loops over the domains of the current rule, and check each domain specify
-    /// a dependency,
-    fn record_rule_from_manifest<R, L>(&mut self)
+    /// a dependency.
+    ///
+    /// Returns `true` if the rule was enabled, `false` otherwise
+    fn record_rule_from_manifest<R, L>(&mut self, rule_filter: RuleFilter<'static>) -> bool
     where
         L: biome_rowan::Language,
         R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
@@ -977,24 +982,27 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         if no_only {
             if let Some(manifest) = self.manifest {
                 for domain in R::METADATA.domains {
-                    for (dependency, version) in domain.manifest_dependencies() {
-                        if manifest.matches_dependency(dependency, version) {
-                            let filter = js_metadata
-                                .find_rule(R::Group::NAME, R::METADATA.name)
-                                .map(RuleFilter::from);
-                            if let Some(filter) = filter {
-                                self.enabled_rules.insert(filter);
-                            }
-                            return;
+                    self.analyzer_options
+                        .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
+
+                    for (dependency, range) in domain.manifest_dependencies() {
+                        if manifest.matches_dependency(dependency, range) {
+                            self.enabled_rules.insert(rule_filter);
+                            return true;
                         }
                     }
                 }
             }
         }
+        false
     }
 
     /// It inspects the [RuleDomain] of the configuration, and if the current rule belongs to at least a configured domain, it's enabled.
-    fn record_rule_from_domains<R, L>(&mut self)
+    ///
+    /// As per business logic, rules that have domains can be recommended, however they shouldn't be enabled when `linter.rules.recommended` is `true`.
+    ///
+    /// This means that
+    fn record_rule_from_domains<R, L>(&mut self, rule_filter: RuleFilter<'static>)
     where
         L: biome_rowan::Language,
         R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
@@ -1005,26 +1013,47 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             let domains = self
                 .settings
                 .and_then(|settings| settings.as_linter_domains(self.path.expect("File path")));
-            if let Some(domains) = domains {
-                for (domain, enabled) in domains.as_ref() {
-                    if R::METADATA.domains.contains(domain) {
-                        let filter = js_metadata
-                            .find_rule(R::Group::NAME, R::METADATA.name)
-                            .map(RuleFilter::from);
-                        if let Some(filter) = filter {
-                            if *enabled {
-                                self.enabled_rules.insert(filter);
-                                let mut globals = Vec::new();
-                                globals.extend(
-                                    domain
+
+            // If the rule is recommended, and it has some domains, it should be disabled, but only if the configuration doesn't enable some domains.
+            if R::METADATA.recommended
+                && !R::METADATA.domains.is_empty()
+                && domains.as_ref().is_none_or(|d| d.is_empty())
+            {
+                self.disabled_rules.insert(rule_filter);
+                return;
+            }
+
+            for rule_domain in R::METADATA.domains {
+                if let Some((configured_domain, configured_domain_value)) = domains
+                    .as_ref()
+                    .and_then(|domains| domains.get_key_value(rule_domain))
+                {
+                    match configured_domain_value {
+                        RuleDomainValue::All => {
+                            self.enabled_rules.insert(rule_filter);
+
+                            self.analyzer_options.push_globals(
+                                configured_domain
+                                    .globals()
+                                    .iter()
+                                    .map(|s| Box::from(*s))
+                                    .collect::<Vec<_>>(),
+                            );
+                        }
+                        RuleDomainValue::None => {
+                            self.disabled_rules.insert(rule_filter);
+                        }
+                        RuleDomainValue::Recommended => {
+                            if R::METADATA.recommended {
+                                self.enabled_rules.insert(rule_filter);
+
+                                self.analyzer_options.push_globals(
+                                    configured_domain
                                         .globals()
-                                        .into_iter()
+                                        .iter()
                                         .map(|s| Box::from(*s))
                                         .collect::<Vec<_>>(),
                                 );
-                                self.analyzer_options.add_globals(globals);
-                            } else {
-                                self.disabled_rules.insert(filter);
                             }
                         }
                     }
@@ -1054,13 +1083,20 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         (self.enabled_rules, self.disabled_rules)
     }
 
-    fn push_rule<R, L>(&mut self)
+    fn push_rule<R, L>(&mut self, rule_filter: Option<RuleFilter<'static>>)
     where
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
         L: biome_rowan::Language,
     {
-        self.record_rule_from_manifest::<R, L>();
-        self.record_rule_from_domains::<R, L>();
+        if let Some(rule_filter) = rule_filter {
+            if rule_filter.match_rule::<R>() {
+                let enabled = self.record_rule_from_manifest::<R, L>(rule_filter);
+                if !enabled {
+                    self.record_rule_from_domains::<R, L>(rule_filter);
+                }
+            }
+        };
+
         // Do not report unused suppression comment diagnostics if:
         // - it is a syntax-only analyzer pass, or
         // - if a single rule is run.
@@ -1098,7 +1134,11 @@ impl<'a, 'b> RegistryVisitor<JsLanguage> for LintVisitor<'a, 'b> {
     where
         R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
     {
-        self.push_rule::<R, <R::Query as Queryable>::Language>()
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            js_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
     }
 }
 impl<'a, 'b> RegistryVisitor<JsonLanguage> for LintVisitor<'a, 'b> {
@@ -1117,7 +1157,11 @@ impl<'a, 'b> RegistryVisitor<JsonLanguage> for LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
             + 'static,
     {
-        self.push_rule::<R, <R::Query as Queryable>::Language>()
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            json_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
     }
 }
 
@@ -1137,7 +1181,11 @@ impl<'a, 'b> RegistryVisitor<CssLanguage> for LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
             + 'static,
     {
-        self.push_rule::<R, <R::Query as Queryable>::Language>()
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            css_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
     }
 }
 
@@ -1157,7 +1205,11 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
             + 'static,
     {
-        self.push_rule::<R, <R::Query as Queryable>::Language>()
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            graphql_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
     }
 }
 

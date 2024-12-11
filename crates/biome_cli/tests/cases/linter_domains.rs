@@ -17,7 +17,7 @@ fn does_enable_test_rules() {
         r#"{
     "linter": {
         "domains": {
-            "test": true
+            "test": "all"
         }
     }
 }
@@ -78,7 +78,7 @@ fn does_disable_test_rules() {
         r#"{
     "linter": {
         "domains": {
-            "test": false
+            "test": "none"
         }
     }
 }
@@ -139,14 +139,14 @@ fn enable_test_rules_via_overrides() {
         r#"{
     "linter": {
         "domains": {
-            "test": false
+            "test": "none"
         }
     },
     "overrides": [{
         "include": ["test1.js"],
         "linter": {
             "domains": {
-                "test": true
+                "test": "all"
             }
         }
     }] 
@@ -208,7 +208,7 @@ fn does_enable_test_rules_and_skip() {
         r#"{
     "linter": {
         "domains": {
-            "test": true
+            "test": "all"
         }
     }
 }
@@ -270,7 +270,7 @@ fn does_enable_test_rules_and_only() {
         r#"{
     "linter": {
         "domains": {
-            "test": true
+            "test": "all"
         }
     }
 }

@@ -15,8 +15,9 @@ You can enable and disable multiple rules that belong to a domain. When you assi
 {
   "linter": {
     "domains": {
-      "test": false, // rules around testing are disabled
-      "next": true // rules related to Next.js are enabled
+      "test": "all", // all rules around that belong to this domain are enabled
+      "react": "recommended", // only the recommended rules ofd this domain are enabled
+      "solid": "none" // rules related to Solid are disabled
     }
   }
 }
@@ -29,15 +30,27 @@ New domains introduced:
   - `noExcessiveNestedTestSuites`
   - `noDuplicateTestHooks`
   - `noFocusedTests`
-- `next`: it will enable rules for Next.js:
+  And it will inject the following globals:
+   - `after`
+   - `afterAll`
+   - `afterEach`
+   - `before`
+   - `beforeEach`
+   - `beforeAll`
+   - `describe`
+   - `it`
+   - `expect`
+   - `test`
+- `next`: it will enable rules for Next.js projects:
+  - `useExhaustiveDependencies`
+  - `useHookAtTopLevel`
   - `noImgElement`
-  - `useExhaustiveDependencies`
-  - `useHookAtTopLevel`
   - `noHeadImportInDocument`
   - `noHeadImportInDocument`
-- `react`: it will enable rules for React.
+- `react`: it will enable rules for React projects:
   - `useExhaustiveDependencies`
   - `useHookAtTopLevel`
-- `solid`: it will enable rules for Solid.
+- `solid`: it will enable rules for Solid projects:
   - `noReactSpecificProps`
 
+For more information regarding how Biome enables rules via domains, please refer to the documentation page of each rule.

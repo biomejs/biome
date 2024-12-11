@@ -34,7 +34,19 @@ pub struct LinterConfiguration {
     /// An object where the keys are the names of the domains, and the values are boolean. `true` to turn-on the rules that
     /// belong to that domain, `false` to turn them off
     #[partial(bpaf(hide, pure(Default::default())))]
-    pub domains: FxHashMap<RuleDomain, bool>,
+    pub domains: FxHashMap<RuleDomain, RuleDomainValue>,
+}
+
+#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize, Merge)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub enum RuleDomainValue {
+    /// Enables all the rules that belong to this domain
+    All,
+    /// Disables all the rules that belong to this domain  
+    None,
+    /// It enables only the recommended rules for this domain
+    Recommended,
 }
 
 impl LinterConfiguration {

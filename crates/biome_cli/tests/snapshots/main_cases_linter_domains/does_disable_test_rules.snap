@@ -9,7 +9,7 @@ snapshot_kind: text
 {
   "linter": {
     "domains": {
-      "test": false
+      "test": "none"
     }
   }
 }

@@ -40,9 +40,9 @@ impl PackageJson {
             .iter()
             .chain(self.dev_dependencies.iter())
             .chain(self.peer_dependencies.iter());
-        for (manifest_name, manifest_version) in iter {
+        for (dependency_name, dependency_version) in iter {
             if let Ok(range) = Range::from_str(range) {
-                if manifest_name == specifier && manifest_version.satisfies(&range) {
+                if dependency_name == specifier && dependency_version.satisfies(&range) {
                     return true;
                 }
             }
@@ -87,14 +87,14 @@ impl Dependencies {
 
 #[derive(Debug, Clone)]
 pub enum Version {
-    SemVer(node_semver::Version),
+    SemVer(node_semver::Range),
     Literal(String),
 }
 
 impl Version {
-    pub fn satisfies(&self, range: &Range) -> bool {
+    pub fn satisfies(&self, other_range: &Range) -> bool {
         match self {
-            Version::SemVer(version) => version.satisfies(range),
+            Version::SemVer(range) => range.allows_any(other_range),
             Version::Literal(_) => false,
         }
     }
@@ -102,7 +102,7 @@ impl Version {
 
 impl From<&str> for Version {
     fn from(value: &str) -> Self {
-        node_semver::Version::parse(value)
+        node_semver::Range::parse(value)
             .ok()
             .map_or_else(|| Self::Literal(value.into()), Self::SemVer)
     }
@@ -110,7 +110,7 @@ impl From<&str> for Version {
 
 impl From<String> for Version {
     fn from(value: String) -> Self {
-        node_semver::Version::parse(value.as_str())
+        node_semver::Range::parse(value.as_str())
             .ok()
             .map_or_else(|| Self::Literal(value), Self::SemVer)
     }
@@ -200,7 +200,7 @@ impl Deserializable for Version {
         name: &str,
     ) -> Option<Self> {
         let value = Text::deserialize(ctx, value, name)?;
-        match value.text().parse() {
+        match node_semver::Range::parse(value.text()) {
             Ok(version) => Some(Version::SemVer(version)),
             Err(_) => Some(Version::Literal(value.text().to_string())),
         }

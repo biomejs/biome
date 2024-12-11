@@ -246,7 +246,7 @@ declare_lint_rule! {
         name: "useExhaustiveDependencies",
         language: "jsx",
         sources: &[RuleSource::EslintReactHooks("exhaustive-deps")],
-        recommended: false,
+        recommended: true,
         severity: Severity::Error,
         domains: &[RuleDomain::React, RuleDomain::Next],
     }

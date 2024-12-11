@@ -1,6 +1,7 @@
 use super::javascript::PartialJavascriptConfiguration;
 use super::json::PartialJsonConfiguration;
 use super::{PartialCssConfiguration, PartialGraphqlConfiguration, Rules};
+use crate::analyzer::RuleDomainValue;
 use crate::{
     partial_css_configuration, partial_graphql_configuration, partial_javascript_configuration,
     partial_json_configuration,
@@ -159,7 +160,7 @@ pub struct OverrideLinterConfiguration {
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(pure(FxHashMap::default()), optional, hide)]
-    pub domains: Option<FxHashMap<RuleDomain, bool>>,
+    pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
 }
 
 #[derive(

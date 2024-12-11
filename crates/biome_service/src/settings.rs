@@ -2,6 +2,7 @@ use crate::workspace::{DocumentFileSource, FeatureKind, ProjectKey};
 use crate::{is_dir, Matcher, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules, RuleDomain};
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration};
+use biome_configuration::analyzer::RuleDomainValue;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
@@ -444,7 +445,10 @@ impl Settings {
     }
 
     /// Extract the domains applied to the given `path`, by looking that the base `domains`, and the once applied by `overrides`
-    pub fn as_linter_domains(&self, path: &Path) -> Option<Cow<FxHashMap<RuleDomain, bool>>> {
+    pub fn as_linter_domains(
+        &self,
+        path: &Path,
+    ) -> Option<Cow<FxHashMap<RuleDomain, RuleDomainValue>>> {
         let mut result = self.linter.domains.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
@@ -556,7 +560,7 @@ pub struct LinterSettings {
     pub included_files: Matcher,
 
     /// Rule domains
-    pub domains: Option<FxHashMap<RuleDomain, bool>>,
+    pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
 }
 
 impl Default for LinterSettings {
@@ -581,7 +585,7 @@ pub struct OverrideLinterSettings {
     pub rules: Option<Rules>,
 
     /// List of domains
-    pub domains: Option<FxHashMap<RuleDomain, bool>>,
+    pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
 }
 
 /// Linter settings for the entire workspace
