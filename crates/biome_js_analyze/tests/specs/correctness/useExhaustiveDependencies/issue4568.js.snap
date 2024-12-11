@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue4568.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import type {Point} fom '.geomet';
 import {useEffect, seRef} 'react';
 

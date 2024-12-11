@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: customHook.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import { useEffect } from "react";
 
 function MyComponent() {
@@ -74,5 +75,3 @@ customHook.js:9:5 lint/correctness/useExhaustiveDependencies ━━━━━━�
   
 
 ```
-
-

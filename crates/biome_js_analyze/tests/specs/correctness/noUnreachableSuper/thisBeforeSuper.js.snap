@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: thisBeforeSuper.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // valid
 class B extends A {
     constructor() {
@@ -233,5 +234,3 @@ thisBeforeSuper.js:64:5 lint/correctness/noUnreachableSuper ━━━━━━�
   
 
 ```
-
-

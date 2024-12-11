@@ -5,7 +5,7 @@ use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_fs::OsFileSystem;
 use biome_js_parser::{parse, JsParserOptions};
-use biome_js_syntax::{JsFileSource, JsLanguage, ModuleKind};
+use biome_js_syntax::{JsFileSource, JsLanguage, LanguageVariant, ModuleKind};
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_project::PackageType;
 use biome_rowan::AstNode;
@@ -125,7 +125,6 @@ pub(crate) fn analyze_and_snap(
     let parsed = parse(input_code, source_type, parser_options.clone());
     let root = parsed.tree();
 
-    //
     let options = create_analyzer_options(input_file, &mut diagnostics);
 
     let (_, errors) = biome_js_analyze::analyze(

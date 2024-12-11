@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: logicalAndCases6.js
+expression: logicalAndCases6.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -76,7 +77,7 @@ foo && foo.bar('a') && foo.bar('b')
 
 # Diagnostics
 ```
-logicalAndCases6.js:2:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:2:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -98,7 +99,7 @@ logicalAndCases6.js:2:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
 ```
 
 ```
-logicalAndCases6.js:3:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:3:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -122,7 +123,7 @@ logicalAndCases6.js:3:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
 ```
 
 ```
-logicalAndCases6.js:6:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:6:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -145,7 +146,7 @@ logicalAndCases6.js:6:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
 ```
 
 ```
-logicalAndCases6.js:9:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:9:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -168,7 +169,7 @@ logicalAndCases6.js:9:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
 ```
 
 ```
-logicalAndCases6.js:12:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:12:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -191,7 +192,7 @@ logicalAndCases6.js:12:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:13:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:13:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -215,7 +216,7 @@ logicalAndCases6.js:13:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:16:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:16:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -238,7 +239,7 @@ logicalAndCases6.js:16:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:17:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:17:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -257,7 +258,7 @@ logicalAndCases6.js:17:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:18:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:18:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -276,7 +277,7 @@ logicalAndCases6.js:18:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:19:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:19:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -295,7 +296,7 @@ logicalAndCases6.js:19:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:22:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:22:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -318,7 +319,7 @@ logicalAndCases6.js:22:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:23:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:23:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -342,7 +343,7 @@ logicalAndCases6.js:23:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:24:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:24:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -366,7 +367,7 @@ logicalAndCases6.js:24:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:25:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:25:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -390,7 +391,7 @@ logicalAndCases6.js:25:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:26:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:26:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -414,7 +415,7 @@ logicalAndCases6.js:26:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:29:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:29:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -437,7 +438,7 @@ logicalAndCases6.js:29:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:29:34 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:29:34 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -460,7 +461,7 @@ logicalAndCases6.js:29:34 lint/complexity/useOptionalChain  FIXABLE  ━━━�
 ```
 
 ```
-logicalAndCases6.js:32:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:32:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -483,7 +484,7 @@ logicalAndCases6.js:32:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:34:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:34:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -507,7 +508,7 @@ logicalAndCases6.js:34:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:37:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:37:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -530,7 +531,7 @@ logicalAndCases6.js:37:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:38:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:38:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -554,7 +555,7 @@ logicalAndCases6.js:38:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:39:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:39:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -578,7 +579,7 @@ logicalAndCases6.js:39:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:40:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:40:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -602,7 +603,7 @@ logicalAndCases6.js:40:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:41:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:41:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -626,7 +627,7 @@ logicalAndCases6.js:41:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:44:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:44:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -649,7 +650,7 @@ logicalAndCases6.js:44:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:45:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:45:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -673,7 +674,7 @@ logicalAndCases6.js:45:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:46:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:46:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -697,7 +698,7 @@ logicalAndCases6.js:46:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:47:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:47:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -721,7 +722,7 @@ logicalAndCases6.js:47:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:48:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:48:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -744,7 +745,7 @@ logicalAndCases6.js:48:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:52:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:52:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -770,7 +771,7 @@ logicalAndCases6.js:52:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:57:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:57:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -788,7 +789,7 @@ logicalAndCases6.js:57:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:58:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:58:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -807,7 +808,7 @@ logicalAndCases6.js:58:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:61:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:61:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -830,7 +831,7 @@ logicalAndCases6.js:61:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:62:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:62:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -854,7 +855,7 @@ logicalAndCases6.js:62:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:64:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:64:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -873,7 +874,7 @@ logicalAndCases6.js:64:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
 ```
 
 ```
-logicalAndCases6.js:67:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+logicalAndCases6.jsx:67:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Change to an optional chain.
   
@@ -892,5 +893,3 @@ logicalAndCases6.js:67:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
   
 
 ```
-
-

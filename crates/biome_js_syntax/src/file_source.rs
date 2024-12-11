@@ -222,6 +222,10 @@ impl JsFileSource {
         self.module_kind = kind;
     }
 
+    pub fn set_variant(&mut self, variant: LanguageVariant) {
+        self.variant = variant;
+    }
+
     pub const fn with_version(mut self, version: LanguageVersion) -> Self {
         self.version = version;
         self

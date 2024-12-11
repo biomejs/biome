@@ -28,7 +28,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// <>
     ///     <a href="#" aria-expanded />
     ///     <img alt="foobar" aria-hidden />

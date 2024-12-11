@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var thing = foo ? bar : baz === qux ? quxx : foobar;
 
 foo ? baz === qux ? quxx() : foobar() : bar();

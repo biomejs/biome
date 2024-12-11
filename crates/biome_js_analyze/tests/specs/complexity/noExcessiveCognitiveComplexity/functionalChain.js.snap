@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: functionalChain.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function functionalChain(array) {
     return array
         .filter(Boolean)
@@ -38,5 +39,3 @@ functionalChain.js:4:24 lint/complexity/noExcessiveCognitiveComplexity ━━━
   
 
 ```
-
-

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsContinueStatement.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function JsContinueStatement1() {
     while (true) {
         continue;
@@ -68,5 +69,3 @@ JsContinueStatement.js:11:9 lint/correctness/noUnreachable ━━━━━━━
   
 
 ```
-
-

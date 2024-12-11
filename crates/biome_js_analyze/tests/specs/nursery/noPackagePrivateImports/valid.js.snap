@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: validPackagePrivateImports.js
+expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 /* should not generate diagnostics */
 
 // Imports within the same module are always allowed.
@@ -28,5 +29,3 @@ import map from "lodash/map.js";
 import netlify from "@astrojs/netlify/functions.js";
 
 ```
-
-

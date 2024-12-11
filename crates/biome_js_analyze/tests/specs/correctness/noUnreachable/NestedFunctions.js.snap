@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: NestedFunctions.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 const JsFunctionExpression = function () {
     return;
 }
@@ -56,5 +57,3 @@ class Class {
 statement();
 
 ```
-
-

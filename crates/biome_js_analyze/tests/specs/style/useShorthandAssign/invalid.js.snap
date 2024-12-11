@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 a = a + 1;
 a = a - 1;
 a = a * 1;
@@ -574,5 +575,3 @@ invalid.js:23:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
   
 
 ```
-
-

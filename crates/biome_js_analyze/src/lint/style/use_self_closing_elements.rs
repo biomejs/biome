@@ -34,27 +34,27 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// <div />
     ///```
     ///
-    /// ```js
+    /// ```jsx
     /// <div>child</div>
     ///```
     ///
-    /// ```js
+    /// ```jsx
     /// <Component />
     ///```
     ///
-    /// ```js
+    /// ```jsx
     /// <Component>child</Component>
     ///```
     ///
-    /// ```js
+    /// ```jsx
     /// <Foo.bar />
     ///```
     ///
-    /// ```js
+    /// ```jsx
     /// <Foo.bar>child</Foo.bar>
     ///```
     ///

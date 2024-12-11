@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function* foo() {
 	return 0;
 }
@@ -225,5 +226,3 @@ invalid.js:49:3 lint/correctness/useYield ━━━━━━━━━━━━�
   
 
 ```
-
-

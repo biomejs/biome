@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-with-dep.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import assert from "assert";
 
 ```
