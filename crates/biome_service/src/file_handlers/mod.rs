@@ -973,13 +973,18 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     /// a dependency.
     ///
     /// Returns `true` if the rule was enabled, `false` otherwise
-    fn record_rule_from_manifest<R, L>(&mut self, rule_filter: RuleFilter<'static>) -> bool
+    fn record_rule_from_manifest<R, L>(&mut self, rule_filter: RuleFilter<'static>)
     where
         L: biome_rowan::Language,
         R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         let no_only = self.only.is_some_and(|only| only.is_empty());
-        if no_only {
+        let no_domains = self
+            .settings
+            .and_then(|settings| settings.as_linter_domains(self.path.expect("File path")))
+            .is_none_or(|d| d.is_empty());
+
+        if no_only && no_domains {
             if let Some(manifest) = self.manifest {
                 for domain in R::METADATA.domains {
                     self.analyzer_options
@@ -988,13 +993,11 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                     for (dependency, range) in domain.manifest_dependencies() {
                         if manifest.matches_dependency(dependency, range) {
                             self.enabled_rules.insert(rule_filter);
-                            return true;
                         }
                     }
                 }
             }
         }
-        false
     }
 
     /// It inspects the [RuleDomain] of the configuration, and if the current rule belongs to at least a configured domain, it's enabled.
@@ -1013,6 +1016,11 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             let domains = self
                 .settings
                 .and_then(|settings| settings.as_linter_domains(self.path.expect("File path")));
+
+            // domains, no need to record the rule
+            if domains.as_ref().is_none_or(|d| d.is_empty()) {
+                return;
+            }
 
             // If the rule is recommended, and it has some domains, it should be disabled, but only if the configuration doesn't enable some domains.
             if R::METADATA.recommended
@@ -1080,6 +1088,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                     .unwrap_or_default(),
             );
         }
+        dbg!(&self.disabled_rules);
         (self.enabled_rules, self.disabled_rules)
     }
 
@@ -1090,10 +1099,10 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     {
         if let Some(rule_filter) = rule_filter {
             if rule_filter.match_rule::<R>() {
-                let enabled = self.record_rule_from_manifest::<R, L>(rule_filter);
-                if !enabled {
-                    self.record_rule_from_domains::<R, L>(rule_filter);
-                }
+                // first we want to register rules via "magic default"
+                self.record_rule_from_manifest::<R, L>(rule_filter);
+                // then we want to register rules
+                self.record_rule_from_domains::<R, L>(rule_filter);
             }
         };
 
