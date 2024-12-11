@@ -15,8 +15,8 @@ use crate::{
     WorkspaceError,
 };
 use biome_analyze::{
-    AnalyzerDiagnostic, AnalyzerSignal, ControlFlow, GroupCategory, Never, Queryable,
-    RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
+    AnalyzerDiagnostic, AnalyzerOptions, AnalyzerSignal, ControlFlow, GroupCategory, Never,
+    Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
 use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::Rules;
@@ -942,6 +942,7 @@ struct LintVisitor<'a, 'b> {
     settings: Option<&'b Settings>,
     path: Option<&'b Path>,
     manifest: Option<&'b PackageJson>,
+    analyzer_options: &'b mut AnalyzerOptions,
 }
 
 impl<'a, 'b> LintVisitor<'a, 'b> {
@@ -951,6 +952,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         settings: Option<&'b Settings>,
         path: Option<&'b Path>,
         manifest: Option<&'b PackageJson>,
+        analyzer_options: &'b mut AnalyzerOptions,
     ) -> Self {
         Self {
             enabled_rules: Default::default(),
@@ -960,6 +962,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             settings,
             path,
             manifest,
+            analyzer_options,
         }
     }
 
@@ -1011,6 +1014,15 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                         if let Some(filter) = filter {
                             if *enabled {
                                 self.enabled_rules.insert(filter);
+                                let mut globals = Vec::new();
+                                globals.extend(
+                                    domain
+                                        .globals()
+                                        .into_iter()
+                                        .map(|s| Box::from(*s))
+                                        .collect::<Vec<_>>(),
+                                );
+                                self.analyzer_options.add_globals(globals);
                             } else {
                                 self.disabled_rules.insert(filter);
                             }
@@ -1299,10 +1311,11 @@ pub(crate) struct AnalyzerVisitorBuilder<'a> {
     path: Option<&'a Path>,
     enabled_rules: Option<&'a [RuleSelector]>,
     manifest: Option<&'a PackageJson>,
+    analyzer_options: AnalyzerOptions,
 }
 
 impl<'b> AnalyzerVisitorBuilder<'b> {
-    pub(crate) fn new(settings: Option<&'b Settings>) -> Self {
+    pub(crate) fn new(settings: Option<&'b Settings>, analyzer_options: AnalyzerOptions) -> Self {
         Self {
             settings,
             only: None,
@@ -1310,6 +1323,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             path: None,
             enabled_rules: None,
             manifest: None,
+            analyzer_options,
         }
     }
 
@@ -1344,7 +1358,8 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     }
 
     #[must_use]
-    pub(crate) fn finish(self) -> (Vec<RuleFilter<'b>>, Vec<RuleFilter<'b>>) {
+    pub(crate) fn finish(self) -> (Vec<RuleFilter<'b>>, Vec<RuleFilter<'b>>, AnalyzerOptions) {
+        let mut analyzer_options = self.analyzer_options;
         let mut disabled_rules = vec![];
         let mut enabled_rules: Vec<_> = self
             .enabled_rules
@@ -1369,6 +1384,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             self.settings,
             self.path,
             self.manifest,
+            &mut analyzer_options,
         );
 
         biome_js_analyze::visit_registry(&mut lint);
@@ -1389,7 +1405,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         enabled_rules.extend(assists_enabled_rules);
         disabled_rules.extend(assists_disabled_rules);
 
-        (enabled_rules, disabled_rules)
+        (enabled_rules, disabled_rules, analyzer_options)
     }
 }
 

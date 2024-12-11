@@ -8,7 +8,7 @@ use bpaf::Args;
 use std::path::Path;
 
 #[test]
-fn enables_rules_via_dependencies() {
+fn enables_react_rules_via_dependencies() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
     let file_path = Path::new("package.json");
@@ -46,7 +46,54 @@ function Component2() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "enables_rules_via_dependencies",
+        "enables_react_rules_via_dependencies",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn enables_test_globals_via_dependencies() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("package.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+    "dependencies": {
+        "mocha": "10.0.0"
+    }
+}
+"#
+        .as_bytes(),
+    );
+
+    let content = r#"
+describe("foo", () => {
+	beforeEach(() => {
+	});
+	beforeEach(() => {
+	});
+	test("bar", () => {
+		someFn();
+	});
+});
+    "#;
+    let test = Path::new("test.js");
+    fs.insert(test.into(), content.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "enables_test_globals_via_dependencies",
         fs,
         console,
         result,

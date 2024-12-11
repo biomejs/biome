@@ -336,8 +336,6 @@ pub enum RuleDomain {
     Solid,
     /// Next.js framework rules
     Next,
-    /// With Jest, we inject some globals
-    Jest,
 }
 
 impl RuleDomain {
@@ -353,20 +351,16 @@ impl RuleDomain {
                 &("ava", ">=2.0.0"),
                 &("vitest", ">=1.0.0"),
             ],
-            RuleDomain::Jest => &[&("jest", ">=26.0.0")],
             RuleDomain::Solid => &[&("solid", ">=1.0.0")],
             RuleDomain::Next => &[&("react", ">=16.0.0"), &("next", ">=14.0.0")],
         }
     }
 
-    /// Global identifiers that should be added to the `globals` of the [AnalyzerConfiguration] type
-    pub const fn globals(&self) -> &[&str] {
+    /// Global identifiers that should be added to the `globals` of the [crate::AnalyzerConfiguration] type
+    pub const fn globals(&self) -> &'static [&'static str] {
         match self {
             RuleDomain::React => &["React"],
-            RuleDomain::Test => &[],
-            RuleDomain::Solid => &[],
-            RuleDomain::Next => &[],
-            RuleDomain::Jest => &[
+            RuleDomain::Test => &[
                 "after",
                 "afterAll",
                 "afterEach",
@@ -378,6 +372,8 @@ impl RuleDomain {
                 "expect",
                 "test",
             ],
+            RuleDomain::Solid => &[],
+            RuleDomain::Next => &[],
         }
     }
 }
@@ -389,7 +385,6 @@ impl Display for RuleDomain {
             RuleDomain::Test => fmt.write_str("Test"),
             RuleDomain::Solid => fmt.write_str("Solid"),
             RuleDomain::Next => fmt.write_str("Next.js"),
-            RuleDomain::Jest => fmt.write_str("Jest"),
         }
     }
 }

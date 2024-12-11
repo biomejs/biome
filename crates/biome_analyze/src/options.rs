@@ -120,6 +120,10 @@ impl AnalyzerOptions {
         self
     }
 
+    pub fn add_globals(&mut self, globals: Vec<Box<str>>) {
+        self.configuration.globals.extend(globals);
+    }
+
     pub fn globals(&self) -> Vec<&str> {
         self.configuration
             .globals

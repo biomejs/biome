@@ -328,19 +328,20 @@ fn lint(params: LintParams) -> LintResults {
     };
     let root: JsonRoot = params.parse.tree();
 
-    let analyzer_options = &params.workspace.analyzer_options::<JsonLanguage>(
+    let analyzer_options = params.workspace.analyzer_options::<JsonLanguage>(
         params.path,
         &params.language,
         params.suppression_reason.as_deref(),
     );
 
-    let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
-        .with_only(&params.only)
-        .with_skip(&params.skip)
-        .with_path(params.path.as_path())
-        .with_enabled_rules(&params.enabled_rules)
-        .with_manifest(params.manifest.as_ref())
-        .finish();
+    let (enabled_rules, disabled_rules, analyzer_options) =
+        AnalyzerVisitorBuilder::new(params.workspace.settings(), analyzer_options)
+            .with_only(&params.only)
+            .with_skip(&params.skip)
+            .with_path(params.path.as_path())
+            .with_enabled_rules(&params.enabled_rules)
+            .with_manifest(params.manifest.as_ref())
+            .finish();
 
     let filter = AnalysisFilter {
         categories: params.categories,
@@ -352,7 +353,7 @@ fn lint(params: LintParams) -> LintResults {
     let mut process_lint = ProcessLint::new(&params);
 
     let (_, analyze_diagnostics) =
-        analyze(&root, filter, analyzer_options, file_source, |signal| {
+        analyze(&root, filter, &analyzer_options, file_source, |signal| {
             process_lint.process_signal(signal)
         });
 
@@ -397,13 +398,14 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         suppression_reason.as_deref(),
     );
     let mut actions = Vec::new();
-    let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
-        .with_only(&only)
-        .with_skip(&skip)
-        .with_path(path.as_path())
-        .with_enabled_rules(&rules)
-        .with_manifest(manifest.as_ref())
-        .finish();
+    let (enabled_rules, disabled_rules, analyzer_options) =
+        AnalyzerVisitorBuilder::new(params.workspace.settings(), analyzer_options)
+            .with_only(&only)
+            .with_skip(&skip)
+            .with_path(path.as_path())
+            .with_enabled_rules(&rules)
+            .with_manifest(manifest.as_ref())
+            .finish();
 
     let filter = AnalysisFilter {
         categories: RuleCategoriesBuilder::default()
@@ -453,13 +455,18 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
 
     // Compute final rules (taking `overrides` into account)
     let rules = settings.as_linter_rules(params.biome_path.as_path());
-
-    let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
-        .with_only(&params.only)
-        .with_skip(&params.skip)
-        .with_path(params.biome_path.as_path())
-        .with_manifest(params.manifest.as_ref())
-        .finish();
+    let analyzer_options = params.workspace.analyzer_options::<JsonLanguage>(
+        params.biome_path,
+        &params.document_file_source,
+        params.suppression_reason.as_deref(),
+    );
+    let (enabled_rules, disabled_rules, analyzer_options) =
+        AnalyzerVisitorBuilder::new(params.workspace.settings(), analyzer_options)
+            .with_only(&params.only)
+            .with_skip(&params.skip)
+            .with_path(params.biome_path.as_path())
+            .with_manifest(params.manifest.as_ref())
+            .finish();
 
     let filter = AnalysisFilter {
         categories: RuleCategoriesBuilder::default()
@@ -483,11 +490,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let mut actions = Vec::new();
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
-    let analyzer_options = params.workspace.analyzer_options::<JsonLanguage>(
-        params.biome_path,
-        &params.document_file_source,
-        params.suppression_reason.as_deref(),
-    );
+
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, file_source, |signal| {
             let current_diagnostic = signal.diagnostic();
