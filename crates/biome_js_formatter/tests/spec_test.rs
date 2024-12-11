@@ -1,6 +1,6 @@
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_js_formatter::{context::JsFormatOptions, JsFormatLanguage};
-use biome_js_syntax::{JsFileSource, ModuleKind};
+use biome_js_syntax::{JsFileSource, LanguageVariant, ModuleKind};
 use std::path::Path;
 
 mod language {
@@ -34,6 +34,9 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, fi
     let mut source_type: JsFileSource = test_file.input_file().as_path().try_into().unwrap();
     if file_type != "module" {
         source_type = source_type.with_module_kind(ModuleKind::Script);
+    }
+    if !source_type.is_typescript() {
+        source_type.set_variant(LanguageVariant::Jsx);
     }
 
     let options = JsFormatOptions::new(source_type);

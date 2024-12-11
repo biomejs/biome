@@ -5,7 +5,7 @@ use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_fs::OsFileSystem;
 use biome_js_parser::{parse, JsParserOptions};
-use biome_js_syntax::{JsFileSource, JsLanguage, LanguageVariant, ModuleKind};
+use biome_js_syntax::{JsFileSource, JsLanguage, ModuleKind};
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_project::PackageType;
 use biome_rowan::AstNode;
