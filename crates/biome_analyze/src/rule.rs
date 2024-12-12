@@ -316,7 +316,7 @@ impl RuleSourceKind {
 }
 
 /// Rule domains
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 #[cfg_attr(
     feature = "serde",
     derive(
@@ -339,10 +339,10 @@ pub enum RuleDomain {
 }
 
 impl RuleDomain {
-    /// If the project has one of these dependencies, the rule will be automatically applied, unless it's explicitly disabled by the configuration
+    /// If the project has one of these dependencies, the domain will be automatically enabled, unless it's explicitly disabled by the configuration.
     ///
     /// If the array is empty, it means that the rules that belong to a certain domain won't enable themselves automatically.
-    pub const fn manifest_dependencies(&self) -> &[&(&str, &str)] {
+    pub const fn manifest_dependencies(self) -> &[&(&str, &str)] {
         match self {
             RuleDomain::React => &[&("react", ">=16.0.0")],
             RuleDomain::Test => &[
@@ -357,7 +357,7 @@ impl RuleDomain {
     }
 
     /// Global identifiers that should be added to the `globals` of the [crate::AnalyzerConfiguration] type
-    pub const fn globals(&self) -> &'static [&'static str] {
+    pub const fn globals(self) -> &'static [&'static str] {
         match self {
             RuleDomain::React => &["React"],
             RuleDomain::Test => &[

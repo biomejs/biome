@@ -37,7 +37,7 @@ pub struct LinterConfiguration {
     pub domains: FxHashMap<RuleDomain, RuleDomainValue>,
 }
 
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize, Merge)]
+#[derive(Clone, Copy, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize, Merge)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub enum RuleDomainValue {

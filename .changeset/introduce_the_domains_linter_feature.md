@@ -8,15 +8,15 @@ The Biome linter now has a new way to opt-in rules, with a concept called `domai
 
 Domains can be seen as concepts shared by different rules.
 
-You can enable and disable multiple rules that belong to a domain. When you assign `true`, Biome will enable the rules, when you assign `false`, Biome will disable the rules.
+You can enable and disable multiple rules that belong to a domain. When you assign `"all"`, Biome will enable all the rules, when you assign `"none"`, Biome will disable the rules, when you assign "recommended", Biome will enable all rules of the domain that are recommended.
 
 ```json5
 // biome.jsonc
 {
   "linter": {
     "domains": {
-      "test": "all", // all rules around that belong to this domain are enabled
-      "react": "recommended", // only the recommended rules ofd this domain are enabled
+      "test": "all", // all rules that belong to this domain are enabled
+      "react": "recommended", // only the recommended rules from this domain are enabled
       "solid": "none" // rules related to Solid are disabled
     }
   }
