@@ -3425,7 +3425,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_deprecated_reason:
         Option<RuleConfiguration<biome_graphql_analyze::options::UseDeprecatedReason>>,
-    #[doc = "Require explicit return types on functions and class methods."]
+    #[doc = "Require explicit argument and return types on functions and class methods."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_explicit_type: Option<RuleConfiguration<biome_js_analyze::options::UseExplicitType>>,
     #[doc = "Require that all exports are declared after all non-export statements."]
