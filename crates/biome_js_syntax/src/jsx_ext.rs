@@ -261,7 +261,7 @@ impl JsxSelfClosingElement {
 
 impl JsxAttributeList {
     /// Returns the [JsxAttribute] that match the given `names_to_lookup`.
-    /// Only attributes with name as [JsxName] can be returned.
+    /// Only attributes with name as [AnyJsxAttributeName::JsxName] can be returned.
     ///
     /// Each name of `names_to_lookup` must be unique.
     ///
