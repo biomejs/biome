@@ -6,19 +6,16 @@ snapshot_kind: text
 # Emitted Messages
 
 ```block
-# noBlankTarget
+Summary
 
-```
+- Name: noBlankTarget
+- Fix: safe
+- Suggested severity: error
+- Available from version: 1.0.0
+- This rule is recommended
 
-```block
-Fix is Safe.
+Description
 
-```
-
-```block
-This rule is recommended.
-
-# Description
 Disallow `target="_blank"` attribute without `rel="noreferrer"`
 
 When creating anchor `a` element, there are times when its link has to be opened in a new browser tab
@@ -28,9 +25,9 @@ in a security issue.
 Refer to [the noreferrer documentation](https://html.spec.whatwg.org/multipage/links.html#link-type-noreferrer)
 and the [the noopener documentation](https://html.spec.whatwg.org/multipage/links.html#link-type-noopener)
 
-## Examples
+Examples
 
-### Invalid
+Invalid
 
 ```jsx,expect_diagnostic
 <a href='http://external.link' target='_blank'>child</a>
@@ -44,7 +41,7 @@ and the [the noopener documentation](https://html.spec.whatwg.org/multipage/link
 <a {...props} href='http://external.link' target='_blank' rel='noopener'>child</a>
 ```
 
-### Valid
+Valid
 
 ```jsx
 <a href='http://external.link' rel='noreferrer' target='_blank'>child</a>
@@ -54,7 +51,7 @@ and the [the noopener documentation](https://html.spec.whatwg.org/multipage/link
 <a href='http://external.link' target='_blank' rel='noopener' {...props}>child</a>
 ```
 
-## Options
+Options
 
 The option `allowDomains` allows specific domains to use `target="_blank"` without `rel="noreferrer"`.
 In the following configuration, it's allowed to use the domains `https://example.com` and `example.org`:
@@ -91,4 +88,5 @@ The diagnostic is applied to all domains not in the allow list:
 </>
 ```
 Biome doesn't check if the list contains valid URLs.
+
 ```

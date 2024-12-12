@@ -517,9 +517,9 @@ impl<'a> ProcessLint<'a> {
                 .category()
                 .filter(|category| category.name().starts_with("lint/"))
                 .and_then(|category| {
-                    self.rules
-                        .as_ref()
-                        .and_then(|rules| rules.get_severity_from_category(category))
+                    self.rules.as_ref().and_then(|rules| {
+                        rules.get_severity_from_category(category, diagnostic.severity())
+                    })
                 })
                 .or_else(|| Some(diagnostic.severity()))
                 .unwrap_or(Severity::Warning);
@@ -730,7 +730,9 @@ pub(crate) fn is_diagnostic_error(
             || diagnostic.severity(),
             |category| {
                 rules
-                    .and_then(|rules| rules.get_severity_from_category(category))
+                    .and_then(|rules| {
+                        rules.get_severity_from_category(category, diagnostic.severity())
+                    })
                     .unwrap_or(Severity::Warning)
             },
         );

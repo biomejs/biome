@@ -44,7 +44,7 @@ debugger;
 console.log(a);
 ";
 
-const APPLY_SUGGESTED_AFTER: &str = "const a = 4;\nconsole.log(a);\n";
+const APPLY_SUGGESTED_AFTER: &str = "let a = 4;\nconsole.log(a);\n";
 
 const NO_DEBUGGER_BEFORE: &str = "debugger;\n";
 const NO_DEBUGGER_AFTER: &str = "debugger;\n";
@@ -161,7 +161,7 @@ fn maximum_diagnostics() {
             let content = format!("{:?}", m.content);
             content.contains("The number of diagnostics exceeds the number allowed by Biome")
                 && content.contains("Diagnostics not shown")
-                && content.contains("76")
+                && content.contains("28")
         }));
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -317,7 +317,7 @@ console.log(a);
 function f() { arguments; }
 ";
 
-    let expected = "const a = 4;
+    let expected = "let a = 4;
 console.log(a);
 function f() { arguments; }
 ";
@@ -343,7 +343,7 @@ function f() { arguments; }
         ),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_file_contents(&fs, test1, expected);
     assert_file_contents(&fs, test2, expected);
@@ -2007,7 +2007,7 @@ fn check_stdin_write_unsafe_successfully() {
         {message.content}
     });
 
-    assert_eq!(content, "function f() {const x=1; return{x}} class Foo {}");
+    assert_eq!(content, "function f() {var x=1; return{x}} class Foo {}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -3856,7 +3856,7 @@ console.log(a);
 function f() { arguments; }
 ";
 
-    let expected = "const a = 4;
+    let expected = "let a = 4;
 console.log(a);
 function f() { arguments; }
 ";
@@ -3878,7 +3878,7 @@ function f() { arguments; }
             .as_slice(),
         ),
     );
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_file_contents(&fs, test1, expected);
     assert_file_contents(&fs, test2, expected);
     assert_cli_snapshot(SnapshotPayload::new(
@@ -3933,6 +3933,42 @@ fn should_error_if_unchanged_files_only_with_changed_flag() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_error_if_unchanged_files_only_with_changed_flag",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn linter_shows_the_default_severity_of_rule_on() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    fs.insert(
+        Path::new("biome.json").into(),
+        r#"{
+    "linter": {
+        "rules": {
+            "style": {
+                "noVar": "on"
+            }
+        }
+    }        
+}"#
+        .as_bytes(),
+    );
+
+    let file = Path::new("file1.js");
+    fs.insert(file.into(), r#"var name = 'tobias'"#.as_bytes());
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_os_str().to_str().unwrap()].as_slice()),
+    );
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_shows_the_default_severity_of_rule_on",
         fs,
         console,
         result,

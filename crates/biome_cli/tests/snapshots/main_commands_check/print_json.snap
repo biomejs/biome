@@ -1,11 +1,12 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `fix.js`
 
 ```js
-const a = 4;
+let a = 4;
 console.log(a);
 
 ```

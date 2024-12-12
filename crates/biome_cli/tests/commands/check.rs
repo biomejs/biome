@@ -48,7 +48,7 @@ debugger;
 console.log(a);
 ";
 
-const APPLY_SUGGESTED_AFTER: &str = "const a = 4;\nconsole.log(a);\n";
+const APPLY_SUGGESTED_AFTER: &str = "let a = 4;\nconsole.log(a);\n";
 
 const NO_DEBUGGER_BEFORE: &str = "debugger;\n";
 const NO_DEBUGGER_AFTER: &str = "debugger;\n";
@@ -190,7 +190,7 @@ fn maximum_diagnostics() {
             let content = format!("{:?}", m.content);
             content.contains("The number of diagnostics exceeds the number allowed by Biome")
                 && content.contains("Diagnostics not shown")
-                && content.contains("77")
+                && content.contains("29")
         }));
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -346,7 +346,7 @@ console.log(a);
 function f() { arguments; }
 ";
 
-    let expected = "const a = 4;
+    let expected = "let a = 4;
 console.log(a);
 function f() {\n\targuments;\n}
 ";
@@ -372,7 +372,7 @@ function f() {\n\targuments;\n}
         ),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_file_contents(&fs, test1, expected);
     assert_file_contents(&fs, test2, expected);
@@ -1360,7 +1360,7 @@ fn print_verbose_write() {
         ),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -2037,7 +2037,7 @@ fn check_stdin_write_unsafe_successfully() {
 
     assert_eq!(
         content,
-        "import _ from \"lodash\";\nimport zod from \"zod\";\nfunction f() {\n\tconst x = 1;\n\treturn { x };\n}\nclass Foo {}\n"
+        "import _ from \"lodash\";\nimport zod from \"zod\";\nfunction f() {\n\tvar x = 1;\n\treturn { x };\n}\nclass Foo {}\n"
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -2905,7 +2905,7 @@ console.log(a);
 function f() { arguments; }
 ";
 
-    let expected = "const a = 4;
+    let expected = "let a = 4;
 console.log(a);
 function f() {\n\targuments;\n}
 ";
@@ -2929,7 +2929,7 @@ function f() {\n\targuments;\n}
         ),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_file_contents(&fs, test1, expected);
     assert_file_contents(&fs, test2, expected);
 
@@ -3075,7 +3075,7 @@ console.log(a);
 function f() { arguments; }
 ";
 
-    let expected = "const a = 4;
+    let expected = "let a = 4;
 console.log(a);
 function f() {\n\targuments;\n}
 ";
@@ -3099,7 +3099,7 @@ function f() {\n\targuments;\n}
         ),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_file_contents(&fs, test1, expected);
     assert_file_contents(&fs, test2, expected);
 

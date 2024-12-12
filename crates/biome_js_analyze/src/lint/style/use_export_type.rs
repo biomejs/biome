@@ -67,7 +67,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("consistent-type-exports")],
         source_kind: RuleSourceKind::Inspired,
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }

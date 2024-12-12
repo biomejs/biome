@@ -5,7 +5,7 @@ use crate::{
     Phase, Phases, Queryable, SourceActionKind, SuppressionAction, SuppressionCommentEmitterPayload,
 };
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{markup, MarkupBuf};
+use biome_console::{markup, MarkupBuf, Padding};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{
@@ -47,6 +47,114 @@ pub struct RuleMetadata {
     pub domains: &'static [RuleDomain],
 }
 
+impl biome_console::fmt::Display for RuleMetadata {
+    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
+        fmt.write_markup(markup! {
+            <Emphasis>"Summary"</Emphasis>
+        })?;
+        fmt.write_str("\n")?;
+        fmt.write_str("\n")?;
+
+        fmt.write_markup(markup! {
+            "- Name: "<Emphasis>{self.name}</Emphasis>
+        })?;
+        fmt.write_str("\n")?;
+        match self.fix_kind {
+            FixKind::None => {
+                fmt.write_markup(markup! {
+                    "- No fix available."
+                })?;
+            }
+            kind => {
+                fmt.write_markup(markup! {
+                    "- Fix: "<Emphasis>{kind}</Emphasis>
+                })?;
+            }
+        }
+        fmt.write_str("\n")?;
+
+        fmt.write_markup(markup! {
+            "- Suggested severity: "<Emphasis>{self.severity}</Emphasis>
+        })?;
+        fmt.write_str("\n")?;
+
+        fmt.write_markup(markup! {
+            "- Available from version: "<Emphasis>{self.version}</Emphasis>
+        })?;
+        fmt.write_str("\n")?;
+
+        for domain in self.domains {
+            let dependencies = domain.manifest_dependencies();
+
+            if !dependencies.is_empty() {
+                fmt.write_markup(markup! {
+                    "- The rule is enabled when one of these dependencies are detected:"
+                })?;
+                fmt.write_str("\n")?;
+                let padding = Padding::new(2);
+                for (index, (dep, range)) in dependencies.iter().enumerate() {
+                    fmt.write_markup(
+                        markup! { {padding}"- "<Emphasis>{dep}"@"{range}</Emphasis> },
+                    )?;
+                    if index + 1 < dependencies.len() {
+                        fmt.write_str("\n")?;
+                    }
+                }
+                fmt.write_str("\n")?;
+            }
+
+            let globals = domain.globals();
+
+            if !globals.is_empty() {
+                fmt.write_markup(markup! {
+                    "- The rule adds the following globals: "
+                })?;
+                fmt.write_str("\n")?;
+
+                let padding = Padding::new(2);
+                for (index, global) in globals.iter().enumerate() {
+                    fmt.write_markup(markup! { {padding}"- "<Emphasis>{global}</Emphasis> })?;
+                    if index + 1 < globals.len() {
+                        fmt.write_str("\n")?;
+                    }
+                }
+                fmt.write_str("\n")?;
+            }
+        }
+
+        fmt.write_markup(markup! {
+            "- This rule is "{if self.recommended {"recommended"} else {"not recommended"}}
+        })?;
+        fmt.write_str("\n")?;
+        fmt.write_str("\n")?;
+
+        fmt.write_markup(markup! {
+            <Emphasis>"Description"</Emphasis>
+        })?;
+        fmt.write_str("\n")?;
+        fmt.write_str("\n")?;
+
+        for line in self.docs.lines() {
+            let line = line.trim_start();
+            if let Some((_, remainder)) = line.split_once("## ") {
+                fmt.write_markup(markup! {
+                    <Emphasis>{remainder.trim_start()}</Emphasis>
+                })?;
+            } else if let Some((_, remainder)) = line.split_once("### ") {
+                fmt.write_markup(markup! {
+                    <Emphasis>{remainder.trim_start()}</Emphasis>
+                })?;
+            } else {
+                fmt.write_str(line)?;
+            }
+
+            fmt.write_str("\n")?;
+        }
+
+        Ok(())
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
@@ -73,9 +181,9 @@ pub enum FixKind {
 impl Display for FixKind {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         match self {
-            FixKind::None => fmt.write_str("None"),
-            FixKind::Safe => fmt.write_str("Safe"),
-            FixKind::Unsafe => fmt.write_str("Unsafe"),
+            FixKind::None => fmt.write_markup(markup!("none")),
+            FixKind::Safe => fmt.write_markup(markup!(<Success>"safe"</Success>)),
+            FixKind::Unsafe => fmt.write_markup(markup!(<Warn>"unsafe"</Warn>)),
         }
     }
 }

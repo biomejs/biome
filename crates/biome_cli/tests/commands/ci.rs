@@ -532,7 +532,7 @@ fn ci_runs_linter_not_formatter_issue_3495() {
         Args::from(["ci", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

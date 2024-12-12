@@ -45,7 +45,7 @@ declare_lint_rule! {
         name: "useSingleVarDeclarator",
         language: "js",
         sources: &[RuleSource::Eslint("one-var")],
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }

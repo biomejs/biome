@@ -2105,7 +2105,7 @@ export interface RuleAssistWithOptions_for_Null {
 	 */
 	options: null;
 }
-export type RulePlainConfiguration = "off" | "info" | "warn" | "error";
+export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithFixOptions_for_Null {
 	/**
 	 * The kind of the code actions emitted by the rule

@@ -94,7 +94,7 @@ declare_lint_rule! {
             RuleSource::Clippy("redundant_else 	"),
         ],
         source_kind: RuleSourceKind::Inspired,
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
