@@ -254,6 +254,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
             bracket_spacing: Some(value.bracket_spacing.into()),
             jsx_quote_style: Some(jsx_quote_style),
             attribute_position: Some(AttributePosition::default()),
+            space_inside_stuff: None,
         };
         let js_config = biome_configuration::PartialJavascriptConfiguration {
             formatter: Some(js_formatter),
