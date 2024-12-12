@@ -202,6 +202,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @lucasweng
 
+- Add [noUnwantedPolyfillio](https://biomejs.dev/linter/rules/no-unwanted-polyfillio/). Contributed by @unvalley
+
 #### Enhancements
 
 - `useExportType` and `useImportType` now ignore TypeScript declaration files ([#4416](https://github.com/biomejs/biome/pull/4416)). Contributed by @Conaclos
