@@ -40,11 +40,12 @@ impl PackageJson {
             .iter()
             .chain(self.dev_dependencies.iter())
             .chain(self.peer_dependencies.iter());
+        let Ok(range) = Range::from_str(range) else {
+            return false;
+        };
         for (dependency_name, dependency_version) in iter {
-            if let Ok(range) = Range::from_str(range) {
-                if dependency_name == specifier && dependency_version.satisfies(&range) {
-                    return true;
-                }
+            if dependency_name == specifier && dependency_version.satisfies(&range) {
+                return true;
             }
         }
 
