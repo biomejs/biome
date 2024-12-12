@@ -2380,7 +2380,7 @@
 					]
 				},
 				"noUnwantedPolyfillio": {
-					"description": "Succinct description of the rule.",
+					"description": "Prevent duplicate polyfills from Polyfill.io.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

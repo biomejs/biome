@@ -2973,7 +2973,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_type_selector:
         Option<RuleConfiguration<biome_css_analyze::options::NoUnknownTypeSelector>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Prevent duplicate polyfills from Polyfill.io."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unwanted_polyfillio:
         Option<RuleConfiguration<biome_js_analyze::options::NoUnwantedPolyfillio>>,

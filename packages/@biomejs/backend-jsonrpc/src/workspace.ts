@@ -1328,7 +1328,7 @@ export interface Nursery {
 	 */
 	noUnknownTypeSelector?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Prevent duplicate polyfills from Polyfill.io.
 	 */
 	noUnwantedPolyfillio?: RuleConfiguration_for_Null;
 	/**
