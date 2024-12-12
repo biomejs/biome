@@ -175,6 +175,8 @@ pub type NoPrecisionLoss =
     <lint::correctness::no_precision_loss::NoPrecisionLoss as biome_analyze::Rule>::Options;
 pub type NoProcessEnv =
     <lint::nursery::no_process_env::NoProcessEnv as biome_analyze::Rule>::Options;
+pub type NoProcessGlobal =
+    <lint::nursery::no_process_global::NoProcessGlobal as biome_analyze::Rule>::Options;
 pub type NoPrototypeBuiltins =
     <lint::suspicious::no_prototype_builtins::NoPrototypeBuiltins as biome_analyze::Rule>::Options;
 pub type NoReExportAll =
