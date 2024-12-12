@@ -2,7 +2,6 @@
 
 use biome_console::markup;
 use biome_parser::AnyParse;
-use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
@@ -397,6 +396,7 @@ where
 
         // Flush signals from the queue until the end of the current token is reached
         let cutoff = token.text_range().end();
+        println!("token is: {:?}", token.text());
         self.flush_matches(Some(cutoff))
     }
 
@@ -404,6 +404,7 @@ where
     /// signals that start after this position in the file will be skipped
     fn flush_matches(&mut self, cutoff: Option<TextSize>) -> ControlFlow<Break> {
         while let Some(entry) = self.signal_queue.peek() {
+            println!("entry_rule is: {:?}", entry.rule);
             let start = entry.text_range.start();
             if let Some(cutoff) = cutoff {
                 if start >= cutoff {
@@ -429,6 +430,7 @@ where
                 self.signal_queue.pop();
                 break;
             }
+            println!("self.line_suppression in analyzer: {:?}", self.suppressions.line_suppressions);
 
             // Search for an active line suppression comment covering the range of
             // this signal: first try to load the last line suppression and see
@@ -444,27 +446,27 @@ where
                             && suppression.text_range.start() <= start
                     });
 
+            println!("suppression in analyzer xxx: {:?}", suppression);
+
             let suppression = match suppression {
                 Some(suppression) => Some(suppression),
                 None => {
                     let index =
                         self.suppressions
                             .line_suppressions
-                            .binary_search_by(|suppression| {
-                                if suppression.text_range.end() < entry.text_range.start() {
-                                    Ordering::Less
-                                } else if entry.text_range.end() < suppression.text_range.start() {
-                                    Ordering::Greater
-                                } else {
-                                    Ordering::Equal
-                                }
+                            .partition_point(|suppression| {
+                                suppression.text_range.end() < entry.text_range.start()
                             });
 
-                    index
-                        .ok()
-                        .map(|index| &mut self.suppressions.line_suppressions[index])
+                    if index >= self.suppressions.line_suppressions.len() {
+                        None
+                    } else {
+                        Some(&mut self.suppressions.line_suppressions[index])
+                    }
                 }
             };
+
+            println!("suppression in analyzer yyyyy: {:?}", suppression);
 
             let suppression = suppression.filter(|suppression| {
                 if suppression.suppress_all {
