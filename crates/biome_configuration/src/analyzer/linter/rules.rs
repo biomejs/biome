@@ -2973,6 +2973,10 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_type_selector:
         Option<RuleConfiguration<biome_css_analyze::options::NoUnknownTypeSelector>>,
+    #[doc = "Succinct description of the rule."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_unwanted_polyfillio:
+        Option<RuleConfiguration<biome_js_analyze::options::NoUnwantedPolyfillio>>,
     #[doc = "Disallow unnecessary escape sequence in regular expression literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_escape_in_regex:
@@ -3086,6 +3090,7 @@ impl Nursery {
         "noUnknownPseudoClass",
         "noUnknownPseudoElement",
         "noUnknownTypeSelector",
+        "noUnwantedPolyfillio",
         "noUselessEscapeInRegex",
         "noUselessStringRaw",
         "noUselessUndefined",
@@ -3805,6 +3810,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUnknownTypeSelector" => self
                 .no_unknown_type_selector
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noUnwantedPolyfillio" => self
+                .no_unwanted_polyfillio
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUselessEscapeInRegex" => self
