@@ -1540,6 +1540,48 @@ import * as something from "../something";
 }
 
 #[test]
+fn applies_organize_imports_bug_4552() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let config = r#"{
+        "organizeImports": {
+                "enabled": true,
+                "ignore": ["index.ts"]
+        },
+        "linter": {
+                "enabled": true,
+                "rules": {
+                        "recommended": true
+                }
+        }
+}"#;
+    let file_path = Path::new("biome.json");
+    fs.insert(file_path.into(), config.as_bytes());
+
+    let file_path = Path::new("index.ts");
+    let content = r#"import { secondFunction, firstFunction } from "./import";
+"#;
+    fs.insert(file_path.into(), content.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "applies_organize_imports_bug_4552",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn shows_organize_imports_diff_on_check() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
