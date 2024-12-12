@@ -2,12 +2,14 @@ use crate::test_case::TestCase;
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategoriesBuilder};
 use biome_css_formatter::context::{CssFormatContext, CssFormatOptions};
-use biome_css_parser::CssParserOptions;
+use biome_css_parser::{parse_css, CssParserOptions};
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
-use biome_formatter::{FormatResult, Formatted, PrintResult, Printed};
+use biome_formatter::prelude::Document;
+use biome_formatter::{FormatError, FormatResult, Formatted, PrintResult, Printed};
 use biome_graphql_formatter::context::{GraphqlFormatContext, GraphqlFormatOptions};
 use biome_graphql_syntax::GraphqlSyntaxNode;
 use biome_js_formatter::context::{JsFormatContext, JsFormatOptions};
+use biome_js_formatter::{JsForeignLanguage, JsForeignLanguageFormatter};
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
 use biome_json_formatter::context::{JsonFormatContext, JsonFormatOptions};
@@ -125,6 +127,23 @@ impl Parsed {
     }
 }
 
+#[derive(Debug, Clone)]
+struct MultiLanguageFormatter;
+
+impl JsForeignLanguageFormatter for MultiLanguageFormatter {
+    fn format(&self, language: JsForeignLanguage, source: &str) -> FormatResult<Document> {
+        match language {
+            JsForeignLanguage::Css => {
+                let parse = parse_css(source, CssParserOptions::default().allow_metavariables());
+                if parse.has_errors() {
+                    return Err(FormatError::SyntaxError);
+                }
+                biome_css_formatter::format_node(CssFormatOptions::default(), &parse.syntax())
+                    .map(|formatted| formatted.into_document())
+            }
+        }
+    }
+}
 pub enum FormatNode {
     JavaScript(JsSyntaxNode, JsFileSource),
     Json(JsonSyntaxNode),
@@ -135,10 +154,12 @@ pub enum FormatNode {
 impl FormatNode {
     pub fn format_node(&self) -> FormatResult<FormattedNode> {
         match self {
-            Self::JavaScript(root, source_type) => {
-                biome_js_formatter::format_node(JsFormatOptions::new(*source_type), root)
-                    .map(FormattedNode::JavaScript)
-            }
+            Self::JavaScript(root, source_type) => biome_js_formatter::format_node(
+                JsFormatOptions::new(*source_type),
+                MultiLanguageFormatter,
+                root,
+            )
+            .map(FormattedNode::JavaScript),
             Self::Json(root) => {
                 biome_json_formatter::format_node(JsonFormatOptions::default(), root)
                     .map(FormattedNode::Json)
