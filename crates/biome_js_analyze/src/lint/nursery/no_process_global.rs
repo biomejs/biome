@@ -16,6 +16,8 @@ use biome_rowan::BatchMutationExt;
 use biome_rowan::SyntaxElement;
 use biome_rowan::SyntaxNode;
 use biome_rowan::TriviaPieceKind;
+use smallvec::smallvec;
+use smallvec::SmallVec;
 
 declare_lint_rule! {
     /// Disallow the use of `process` global.
@@ -85,87 +87,83 @@ impl Rule for NoProcessGlobal {
             ).note(markup! {
                 "`process` global is hard for tools to statically analyze, so code should not assume they are available."
             })
-            .note(markup! {
-                "Add `import process from \"node:process\";` to this file's imports."
-            }),
         )
     }
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
-        let mut mutation = ctx.root().begin();
-
-        if let Some(top_level_statement) = ctx
+        let top_level_statement = ctx
             .query()
             .syntax()
             .ancestors()
-            .find(is_top_level_statement)
-        {
-            // insert new import at:
-            // 1. after the most recent import statement. Or, if no import exist
-            // 2. at the beginning of the file
-            let mut most_recent_import = None;
-            {
-                let mut sibling_iter = top_level_statement.prev_sibling();
-                while let Some(node) = sibling_iter {
-                    if matches!(node.kind(), JsSyntaxKind::JS_IMPORT) {
-                        most_recent_import = Some(node);
-                        break;
-                    }
-                    sibling_iter = node.prev_sibling();
-                }
+            .find(is_top_level_statement)?;
+        // insert new import at:
+        // 1. after the most recent import statement. Or, if no such import exist
+        // 2. before the first statement, after any leading trivia
+        let mut most_recent_import = None;
+        let mut sibling_iter = top_level_statement.prev_sibling();
+        while let Some(node) = sibling_iter {
+            if matches!(node.kind(), JsSyntaxKind::JS_IMPORT) {
+                most_recent_import = Some(node);
+                break;
             }
-
-            let module_item_list = top_level_statement
-                .parent()
-                .and_then(JsModuleItemList::cast)?.into_syntax();
-            let mut slot = 0;
-            let new_items: [SyntaxNode<JsLanguage>; 2];
-            let new_process_import = create_porcess_import();
-
-            // WIP: need to handle trivias properly, e.g. append new import below any head comments for case 2
-            if let Some(import) = most_recent_import {
-                // slot = module_item_list.slots().position(|slot| slot.into_node().as_ref() == Some(&import))?;
-                slot = import.index();
-                new_items = [import, new_process_import.into()];
-            } else {
-                let first_child = module_item_list.first_child()?;
-                new_items = [new_process_import.into(), first_child];
-            }
-
-            let new_module_item_list = module_item_list.clone().splice_slots(
-                slot..(slot + 1),
-                new_items
-                    .into_iter()
-                    .map(|item| Some(SyntaxElement::Node(item))),
-            );
-            mutation.replace_element(module_item_list.into(), new_module_item_list.into());
-            return Some(JsRuleAction::new(
-                ctx.metadata().action_category(ctx.category(), ctx.group()),
-                ctx.metadata().applicability(),
-                markup! { "Add `import process from \"node:process\";` to this file's imports." }
-                    .to_owned(),
-                mutation,
-            ));
+            sibling_iter = node.prev_sibling();
         }
 
-        None
+        let module_item_list = top_level_statement
+            .parent()
+            .and_then(JsModuleItemList::cast)?
+            .into_syntax();
+        let mut slot = 0;
+        let new_items: SmallVec<[SyntaxNode<JsLanguage>; 2]>;
+
+        if let Some(import) = most_recent_import {
+            slot = import.index();
+            new_items = smallvec![import, create_porcess_import(false).into()];
+        } else {
+            new_items = smallvec![
+                create_porcess_import(true).into(),
+                module_item_list
+                    .first_child()?
+                    .with_leading_trivia_pieces([])?,
+            ];
+        }
+
+        let new_module_item_list = module_item_list.clone().splice_slots(
+            slot..(slot + 1),
+            new_items
+                .into_iter()
+                .map(|item| Some(SyntaxElement::Node(item))),
+        );
+
+        let mut mutation = ctx.root().begin();
+        mutation.replace_element(module_item_list.into(), new_module_item_list.into());
+
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! { "Add `import process from \"node:process\";` to this file's imports." }
+                .to_owned(),
+            mutation,
+        ))
     }
 }
 
 fn is_top_level_statement(node: &SyntaxNode<JsLanguage>) -> bool {
-    match node.parent() {
-        Some(g) => JsModuleItemList::can_cast(g.kind()),
-        _ => false,
-    }
+    node.parent()
+        .is_some_and(|node| JsModuleItemList::can_cast(node.kind()))
 }
 
-fn create_porcess_import() -> JsImport {
+fn create_porcess_import(with_trailing_new_line: bool) -> JsImport {
     let whitespace = [(TriviaPieceKind::Whitespace, " ")];
     let new_line = [(TriviaPieceKind::Newline, "\n")];
+    let mut semicolon = make::token(T![;]);
+    if with_trailing_new_line {
+        semicolon = semicolon.with_trailing_trivia(new_line);
+    }
+
     let source = make::js_module_source(make::js_string_literal("node::process"));
-    let binding = make::js_identifier_binding(
-        make::ident("process").with_trailing_trivia(whitespace),
-    );
+    let binding =
+        make::js_identifier_binding(make::ident("process").with_trailing_trivia(whitespace));
     let specifier = make::js_default_import_specifier(binding.into());
     let clause = make::js_import_default_clause(
         specifier,
@@ -173,12 +171,13 @@ fn create_porcess_import() -> JsImport {
         source.into(),
     )
     .build();
+
     make::js_import(
         make::token(T![import])
             .with_trailing_trivia(whitespace)
             .with_leading_trivia(new_line),
         clause.into(),
     )
-    .with_semicolon_token(make::token(T![;]).with_trailing_trivia(new_line))
+    .with_semicolon_token(semicolon)
     .build()
 }
