@@ -115,9 +115,13 @@ impl AnalyzerOptions {
         self
     }
 
-    pub fn with_suppression_reason(mut self, reason: Option<String>) -> Self {
-        self.suppression_reason = reason;
+    pub fn with_suppression_reason(mut self, reason: Option<&str>) -> Self {
+        self.suppression_reason = reason.map(String::from);
         self
+    }
+
+    pub fn push_globals(&mut self, globals: Vec<Box<str>>) {
+        self.configuration.globals.extend(globals);
     }
 
     pub fn globals(&self) -> Vec<&str> {

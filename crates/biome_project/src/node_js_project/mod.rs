@@ -1,7 +1,7 @@
 mod package_json;
 mod tsconfig_json;
 
-pub use crate::node_js_project::package_json::{Dependencies, PackageJson, PackageType};
+pub use crate::node_js_project::package_json::{Dependencies, PackageJson, PackageType, Version};
 use crate::node_js_project::tsconfig_json::TsConfigJson;
 use crate::{Manifest, Project, ProjectAnalyzeDiagnostic, ProjectAnalyzeResult, LICENSE_LIST};
 use biome_rowan::Language;

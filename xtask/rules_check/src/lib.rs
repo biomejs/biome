@@ -11,7 +11,7 @@ use biome_console::{markup, Console};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_ast;
-use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
+use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_fs::BiomePath;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_parser::JsParserOptions;
@@ -403,21 +403,13 @@ fn assert_lint(
                     None,
                     |signal| {
                         if let Some(mut diag) = signal.diagnostic() {
-                            let category = diag.category().expect("linter diagnostic has no code");
-                            let severity = workspace_settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
-                            "If you see this error, it means you need to run cargo codegen-configuration",
-                        );
-
                             for action in signal.actions() {
                                 if !action.is_suppression() {
                                     diag = diag.add_code_suggestion(action.into());
                                 }
                             }
 
-                            let error = diag
-                                .with_severity(severity)
-                                .with_file_path(&file_path)
-                                .with_file_source_code(code);
+                            let error = diag.with_file_path(&file_path).with_file_source_code(code);
                             let res = diagnostics.write_diagnostic(error);
 
                             // Abort the analysis on error
@@ -454,21 +446,13 @@ fn assert_lint(
 
                 biome_json_analyze::analyze(&root, filter, &options, file_source, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
-                        let category = diag.category().expect("linter diagnostic has no code");
-                        let severity = workspace_settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
-                            "If you see this error, it means you need to run cargo codegen-configuration",
-                        );
-
                         for action in signal.actions() {
                             if !action.is_suppression() {
                                 diag = diag.add_code_suggestion(action.into());
                             }
                         }
 
-                        let error = diag
-                            .with_severity(severity)
-                            .with_file_path(&file_path)
-                            .with_file_source_code(code);
+                        let error = diag.with_file_path(&file_path).with_file_source_code(code);
                         let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
@@ -504,21 +488,13 @@ fn assert_lint(
 
                 biome_css_analyze::analyze(&root, filter, &options, Vec::new(), |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
-                        let category = diag.category().expect("linter diagnostic has no code");
-                        let severity = workspace_settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
-                            "If you see this error, it means you need to run cargo codegen-configuration",
-                        );
-
                         for action in signal.actions() {
                             if !action.is_suppression() {
                                 diag = diag.add_code_suggestion(action.into());
                             }
                         }
 
-                        let error = diag
-                            .with_severity(severity)
-                            .with_file_path(&file_path)
-                            .with_file_source_code(code);
+                        let error = diag.with_file_path(&file_path).with_file_source_code(code);
                         let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
@@ -554,21 +530,13 @@ fn assert_lint(
 
                 biome_graphql_analyze::analyze(&root, filter, &options, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
-                        let category = diag.category().expect("linter diagnostic has no code");
-                        let severity = workspace_settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
-                            "If you see this error, it means you need to run cargo codegen-configuration",
-                        );
-
                         for action in signal.actions() {
                             if !action.is_suppression() {
                                 diag = diag.add_code_suggestion(action.into());
                             }
                         }
 
-                        let error = diag
-                            .with_severity(severity)
-                            .with_file_path(&file_path)
-                            .with_file_source_code(code);
+                        let error = diag.with_file_path(&file_path).with_file_source_code(code);
                         let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error

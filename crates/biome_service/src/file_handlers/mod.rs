@@ -15,25 +15,29 @@ use crate::{
     WorkspaceError,
 };
 use biome_analyze::{
-    AnalyzerDiagnostic, GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategories,
-    RuleCategory, RuleFilter, RuleGroup,
+    AnalyzerDiagnostic, AnalyzerOptions, AnalyzerSignal, ControlFlow, GroupCategory, Never,
+    Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
-use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
 use biome_configuration::Rules;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
+use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
-use biome_diagnostics::{Diagnostic, Severity};
+use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
+use biome_graphql_analyze::METADATA as graphql_metadata;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_grit_patterns::{GritQuery, GritQueryEffect, GritTargetFile};
 use biome_grit_syntax::file_source::GritFileSource;
 use biome_html_syntax::HtmlFileSource;
+use biome_js_analyze::METADATA as js_metadata;
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{
     EmbeddingKind, JsFileSource, JsLanguage, Language, LanguageVariant, TextRange, TextSize,
 };
+use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
@@ -465,6 +469,113 @@ pub(crate) struct LintResults {
     pub(crate) skipped_diagnostics: u32,
 }
 
+pub(crate) struct ProcessLint<'a> {
+    diagnostic_count: u32,
+    errors: usize,
+    diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
+    ignores_suppression_comment: bool,
+    rules: Option<Cow<'a, Rules>>,
+    max_diagnostics: u32,
+}
+
+impl<'a> ProcessLint<'a> {
+    pub(crate) fn new(params: &LintParams<'a>) -> Self {
+        Self {
+            diagnostic_count: params.parse.diagnostics().len() as u32,
+            errors: Default::default(),
+            diagnostics: Default::default(),
+            // Do not report unused suppression comment diagnostics if:
+            // - it is a syntax-only analyzer pass, or
+            // - if a single rule is run.
+            ignores_suppression_comment: !params.categories.contains(RuleCategory::Lint)
+                || !params.only.is_empty(),
+            rules: params
+                .workspace
+                .settings()
+                .as_ref()
+                .and_then(|settings| settings.as_linter_rules(params.path.as_path())),
+            max_diagnostics: params.max_diagnostics,
+        }
+    }
+
+    pub(crate) fn process_signal<L: biome_rowan::Language>(
+        &mut self,
+        signal: &dyn AnalyzerSignal<L>,
+    ) -> ControlFlow {
+        if let Some(mut diagnostic) = signal.diagnostic() {
+            if self.ignores_suppression_comment
+                && diagnostic.category() == Some(category!("suppressions/unused"))
+            {
+                return ControlFlow::<Never>::Continue(());
+            }
+
+            self.diagnostic_count += 1;
+
+            // We do now check if the severity of the diagnostics should be changed.
+            // The configuration allows to change the severity of the diagnostics emitted by rules.
+            let severity = diagnostic
+                .category()
+                .filter(|category| category.name().starts_with("lint/"))
+                .and_then(|category| {
+                    self.rules
+                        .as_ref()
+                        .and_then(|rules| rules.get_severity_from_category(category))
+                })
+                .or_else(|| Some(diagnostic.severity()))
+                .unwrap_or(Severity::Warning);
+
+            if severity >= Severity::Error {
+                self.errors += 1;
+            }
+
+            if self.diagnostic_count <= self.max_diagnostics {
+                for action in signal.actions() {
+                    if !action.is_suppression() {
+                        diagnostic = diagnostic.add_code_suggestion(action.into());
+                    }
+                }
+
+                let error = diagnostic.with_severity(severity);
+
+                self.diagnostics
+                    .push(biome_diagnostics::serde::Diagnostic::new(error));
+            }
+        }
+
+        ControlFlow::<Never>::Continue(())
+    }
+
+    pub(crate) fn into_result(
+        self,
+        parse_diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
+        analyzer_diagnostics: Vec<biome_diagnostics::Error>,
+    ) -> LintResults {
+        let mut diagnostics = parse_diagnostics;
+        let errors = diagnostics
+            .iter()
+            .filter(|diag| diag.severity() <= Severity::Error)
+            .count();
+
+        diagnostics.extend(self.diagnostics);
+
+        diagnostics.extend(
+            analyzer_diagnostics
+                .into_iter()
+                .map(biome_diagnostics::serde::Diagnostic::new)
+                .collect::<Vec<_>>(),
+        );
+        let skipped_diagnostics = self
+            .diagnostic_count
+            .saturating_sub(diagnostics.len() as u32);
+
+        LintResults {
+            errors,
+            skipped_diagnostics,
+            diagnostics,
+        }
+    }
+}
+
 pub(crate) struct CodeActionsParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) range: Option<TextRange>,
@@ -833,6 +944,8 @@ struct LintVisitor<'a, 'b> {
     skip: Option<&'b [RuleSelector]>,
     settings: Option<&'b Settings>,
     path: Option<&'b Path>,
+    manifest: Option<&'b PackageJson>,
+    analyzer_options: &'b mut AnalyzerOptions,
 }
 
 impl<'a, 'b> LintVisitor<'a, 'b> {
@@ -841,6 +954,8 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         skip: Option<&'b [RuleSelector]>,
         settings: Option<&'b Settings>,
         path: Option<&'b Path>,
+        manifest: Option<&'b PackageJson>,
+        analyzer_options: &'b mut AnalyzerOptions,
     ) -> Self {
         Self {
             enabled_rules: Default::default(),
@@ -849,6 +964,109 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             skip,
             settings,
             path,
+            manifest,
+            analyzer_options,
+        }
+    }
+
+    /// It loops over the domains of the current rule, and check each domain specify
+    /// a dependency.
+    ///
+    /// Returns `true` if the rule was enabled, `false` otherwise
+    fn record_rule_from_manifest<R, L>(&mut self, rule_filter: RuleFilter<'static>)
+    where
+        L: biome_rowan::Language,
+        R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
+    {
+        let no_only = self.only.is_some_and(|only| only.is_empty());
+        let no_domains = self
+            .settings
+            .and_then(|settings| settings.as_linter_domains(self.path.expect("File path")))
+            .is_none_or(|d| d.is_empty());
+
+        if no_only && no_domains {
+            if let Some(manifest) = self.manifest {
+                for domain in R::METADATA.domains {
+                    self.analyzer_options
+                        .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
+
+                    for (dependency, range) in domain.manifest_dependencies() {
+                        if manifest.matches_dependency(dependency, range) {
+                            self.enabled_rules.insert(rule_filter);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// It inspects the [RuleDomain] of the configuration, and if the current rule belongs to at least a configured domain, it's enabled.
+    ///
+    /// As per business logic, rules that have domains can be recommended, however they shouldn't be enabled when `linter.rules.recommended` is `true`.
+    ///
+    /// This means that
+    fn record_rule_from_domains<R, L>(&mut self, rule_filter: RuleFilter<'static>)
+    where
+        L: biome_rowan::Language,
+        R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
+    {
+        let no_only = self.only.is_some_and(|only| only.is_empty());
+
+        if no_only {
+            let domains = self
+                .settings
+                .and_then(|settings| settings.as_linter_domains(self.path.expect("File path")));
+
+            // domains, no need to record the rule
+            if domains.as_ref().is_none_or(|d| d.is_empty()) {
+                return;
+            }
+
+            // If the rule is recommended, and it has some domains, it should be disabled, but only if the configuration doesn't enable some domains.
+            if R::METADATA.recommended
+                && !R::METADATA.domains.is_empty()
+                && domains.as_ref().is_none_or(|d| d.is_empty())
+            {
+                self.disabled_rules.insert(rule_filter);
+                return;
+            }
+
+            for rule_domain in R::METADATA.domains {
+                if let Some((configured_domain, configured_domain_value)) = domains
+                    .as_ref()
+                    .and_then(|domains| domains.get_key_value(rule_domain))
+                {
+                    match configured_domain_value {
+                        RuleDomainValue::All => {
+                            self.enabled_rules.insert(rule_filter);
+
+                            self.analyzer_options.push_globals(
+                                configured_domain
+                                    .globals()
+                                    .iter()
+                                    .map(|s| Box::from(*s))
+                                    .collect::<Vec<_>>(),
+                            );
+                        }
+                        RuleDomainValue::None => {
+                            self.disabled_rules.insert(rule_filter);
+                        }
+                        RuleDomainValue::Recommended => {
+                            if R::METADATA.recommended {
+                                self.enabled_rules.insert(rule_filter);
+
+                                self.analyzer_options.push_globals(
+                                    configured_domain
+                                        .globals()
+                                        .iter()
+                                        .map(|s| Box::from(*s))
+                                        .collect::<Vec<_>>(),
+                                );
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -873,17 +1091,27 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         (self.enabled_rules, self.disabled_rules)
     }
 
-    fn push_rule<R, L>(&mut self)
+    fn push_rule<R, L>(&mut self, rule_filter: Option<RuleFilter<'static>>)
     where
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
+        L: biome_rowan::Language,
     {
+        if let Some(rule_filter) = rule_filter {
+            if rule_filter.match_rule::<R>() {
+                // first we want to register rules via "magic default"
+                self.record_rule_from_manifest::<R, L>(rule_filter);
+                // then we want to register rules
+                self.record_rule_from_domains::<R, L>(rule_filter);
+            }
+        };
+
         // Do not report unused suppression comment diagnostics if:
         // - it is a syntax-only analyzer pass, or
         // - if a single rule is run.
         if let Some(only) = self.only {
             for selector in only {
                 let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() {
+                if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
                     self.enabled_rules.insert(filter);
                 }
             }
@@ -891,7 +1119,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         if let Some(skip) = self.skip {
             for selector in skip {
                 let filter = RuleFilter::from(selector);
-                if filter.match_rule::<R>() {
+                if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
                     self.disabled_rules.insert(filter);
                 }
             }
@@ -907,28 +1135,18 @@ impl<'a, 'b> RegistryVisitor<JsLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = JsLanguage>>(&mut self) {
-        if let Some(only) = self.only {
-            for selector in only {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
-
-        if let Some(skip) = self.skip {
-            for selector in skip {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
+        G::record_rules(self)
     }
 
     fn record_rule<R>(&mut self)
     where
         R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
     {
-        self.push_rule::<R, <R::Query as Queryable>::Language>()
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            js_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
     }
 }
 impl<'a, 'b> RegistryVisitor<JsonLanguage> for LintVisitor<'a, 'b> {
@@ -939,21 +1157,7 @@ impl<'a, 'b> RegistryVisitor<JsonLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = JsonLanguage>>(&mut self) {
-        if let Some(only) = self.only {
-            for selector in only {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
-
-        if let Some(skip) = self.skip {
-            for selector in skip {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
+        G::record_rules(self)
     }
 
     fn record_rule<R>(&mut self)
@@ -961,7 +1165,11 @@ impl<'a, 'b> RegistryVisitor<JsonLanguage> for LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
             + 'static,
     {
-        self.push_rule::<R, <R::Query as Queryable>::Language>()
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            json_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
     }
 }
 
@@ -973,21 +1181,7 @@ impl<'a, 'b> RegistryVisitor<CssLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = CssLanguage>>(&mut self) {
-        if let Some(only) = self.only {
-            for selector in only {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
-
-        if let Some(skip) = self.skip {
-            for selector in skip {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
+        G::record_rules(self)
     }
 
     fn record_rule<R>(&mut self)
@@ -995,7 +1189,11 @@ impl<'a, 'b> RegistryVisitor<CssLanguage> for LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
             + 'static,
     {
-        self.push_rule::<R, <R::Query as Queryable>::Language>()
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            css_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
     }
 }
 
@@ -1007,21 +1205,7 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = GraphqlLanguage>>(&mut self) {
-        if let Some(only) = self.only {
-            for selector in only {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
-
-        if let Some(skip) = self.skip {
-            for selector in skip {
-                if RuleFilter::from(selector).match_group::<G>() {
-                    G::record_rules(self)
-                }
-            }
-        }
+        G::record_rules(self)
     }
 
     fn record_rule<R>(&mut self)
@@ -1029,7 +1213,11 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
             + 'static,
     {
-        self.push_rule::<R, <R::Query as Queryable>::Language>()
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            graphql_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
     }
 }
 
@@ -1182,16 +1370,20 @@ pub(crate) struct AnalyzerVisitorBuilder<'a> {
     skip: Option<&'a [RuleSelector]>,
     path: Option<&'a Path>,
     enabled_rules: Option<&'a [RuleSelector]>,
+    manifest: Option<&'a PackageJson>,
+    analyzer_options: AnalyzerOptions,
 }
 
 impl<'b> AnalyzerVisitorBuilder<'b> {
-    pub(crate) fn new(settings: Option<&'b Settings>) -> Self {
+    pub(crate) fn new(settings: Option<&'b Settings>, analyzer_options: AnalyzerOptions) -> Self {
         Self {
             settings,
             only: None,
             skip: None,
             path: None,
             enabled_rules: None,
+            manifest: None,
+            analyzer_options,
         }
     }
 
@@ -1220,7 +1412,14 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     }
 
     #[must_use]
-    pub(crate) fn finish(self) -> (Vec<RuleFilter<'b>>, Vec<RuleFilter<'b>>) {
+    pub(crate) fn with_manifest(mut self, manifest: Option<&'b PackageJson>) -> Self {
+        self.manifest = manifest;
+        self
+    }
+
+    #[must_use]
+    pub(crate) fn finish(self) -> (Vec<RuleFilter<'b>>, Vec<RuleFilter<'b>>, AnalyzerOptions) {
+        let mut analyzer_options = self.analyzer_options;
         let mut disabled_rules = vec![];
         let mut enabled_rules: Vec<_> = self
             .enabled_rules
@@ -1239,7 +1438,14 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         biome_graphql_analyze::visit_registry(&mut syntax);
         enabled_rules.extend(syntax.enabled_rules);
 
-        let mut lint = LintVisitor::new(self.only, self.skip, self.settings, self.path);
+        let mut lint = LintVisitor::new(
+            self.only,
+            self.skip,
+            self.settings,
+            self.path,
+            self.manifest,
+            &mut analyzer_options,
+        );
 
         biome_js_analyze::visit_registry(&mut lint);
         biome_css_analyze::visit_registry(&mut lint);
@@ -1259,7 +1465,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
         enabled_rules.extend(assists_enabled_rules);
         disabled_rules.extend(assists_disabled_rules);
 
-        (enabled_rules, disabled_rules)
+        (enabled_rules, disabled_rules, analyzer_options)
     }
 }
 

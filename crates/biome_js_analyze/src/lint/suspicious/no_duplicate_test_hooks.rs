@@ -1,6 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
-    RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor, VisitorContext,
+    RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -65,6 +65,7 @@ declare_lint_rule! {
         severity: Severity::Error,
         sources: &[RuleSource::EslintJest("no-duplicate-hooks")],
         source_kind: RuleSourceKind::Inspired,
+        domains: &[RuleDomain::Test],
     }
 }
 

@@ -1,7 +1,7 @@
 use crate::react::hooks::*;
 use crate::services::semantic::Semantic;
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleDomain};
 use biome_console::markup;
 use biome_deserialize::{
     non_empty, DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
@@ -18,6 +18,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
+use biome_diagnostics::Severity;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
@@ -245,7 +246,9 @@ declare_lint_rule! {
         name: "useExhaustiveDependencies",
         language: "jsx",
         sources: &[RuleSource::EslintReactHooks("exhaustive-deps")],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Error,
+        domains: &[RuleDomain::React, RuleDomain::Next],
     }
 }
 

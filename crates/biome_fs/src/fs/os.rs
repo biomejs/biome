@@ -17,6 +17,7 @@ use std::{
     mem,
     path::{Path, PathBuf},
 };
+use tracing::instrument;
 
 const MAX_SYMLINK_DEPTH: u8 = 3;
 
@@ -139,34 +140,33 @@ impl FileSystem for OsFileSystem {
     }
 }
 
+#[derive(Debug)]
 struct OsFile {
     inner: fs::File,
     version: i32,
 }
 
 impl File for OsFile {
+    #[instrument(level = "trace")]
     fn read_to_string(&mut self, buffer: &mut String) -> io::Result<()> {
-        tracing::debug_span!("OsFile::read_to_string").in_scope(move || {
-            // Reset the cursor to the starting position
-            self.inner.rewind()?;
-            // Read the file content
-            self.inner.read_to_string(buffer)?;
-            Ok(())
-        })
+        // Reset the cursor to the starting position
+        self.inner.rewind()?;
+        // Read the file content
+        self.inner.read_to_string(buffer)?;
+        Ok(())
     }
 
+    #[instrument(level = "trace")]
     fn set_content(&mut self, content: &[u8]) -> io::Result<()> {
-        tracing::trace_span!("OsFile::set_content").in_scope(move || {
-            // Truncate the file
-            self.inner.set_len(0)?;
-            // Reset the cursor to the starting position
-            self.inner.rewind()?;
-            // Write the byte slice
-            self.inner.write_all(content)?;
-            // new version stored
-            self.version += 1;
-            Ok(())
-        })
+        // Truncate the file
+        self.inner.set_len(0)?;
+        // Reset the cursor to the starting position
+        self.inner.rewind()?;
+        // Write the byte slice
+        self.inner.write_all(content)?;
+        // new version stored
+        self.version += 1;
+        Ok(())
     }
 
     fn file_version(&self) -> i32 {
