@@ -117,7 +117,11 @@ impl Rules {
     #[doc = r" [Severity::Error] for recommended rules and [Severity::Warning] for other rules."]
     #[doc = r""]
     #[doc = r" If not, the function returns [None]."]
-    pub fn get_severity_from_category(&self, category: &Category) -> Option<Severity> {
+    pub fn get_severity_from_category(
+        &self,
+        category: &Category,
+        rule_severity: Severity,
+    ) -> Option<Severity> {
         let mut split_code = category.name().split('/');
         let _lint = split_code.next();
         debug_assert_eq!(_lint, Some("lint"));
@@ -129,50 +133,90 @@ impl Rules {
                 .a11y
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
-                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
-                .map(|(level, _)| Severity::from(level)),
+                .and_then(|(level, _)| match level {
+                    RulePlainConfiguration::Off => None,
+                    RulePlainConfiguration::On => Some(rule_severity),
+                    RulePlainConfiguration::Info
+                    | RulePlainConfiguration::Warn
+                    | RulePlainConfiguration::Error => Some(Severity::from(level)),
+                }),
             RuleGroup::Complexity => self
                 .complexity
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
-                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
-                .map(|(level, _)| Severity::from(level)),
+                .and_then(|(level, _)| match level {
+                    RulePlainConfiguration::Off => None,
+                    RulePlainConfiguration::On => Some(rule_severity),
+                    RulePlainConfiguration::Info
+                    | RulePlainConfiguration::Warn
+                    | RulePlainConfiguration::Error => Some(Severity::from(level)),
+                }),
             RuleGroup::Correctness => self
                 .correctness
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
-                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
-                .map(|(level, _)| Severity::from(level)),
+                .and_then(|(level, _)| match level {
+                    RulePlainConfiguration::Off => None,
+                    RulePlainConfiguration::On => Some(rule_severity),
+                    RulePlainConfiguration::Info
+                    | RulePlainConfiguration::Warn
+                    | RulePlainConfiguration::Error => Some(Severity::from(level)),
+                }),
             RuleGroup::Nursery => self
                 .nursery
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
-                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
-                .map(|(level, _)| Severity::from(level)),
+                .and_then(|(level, _)| match level {
+                    RulePlainConfiguration::Off => None,
+                    RulePlainConfiguration::On => Some(rule_severity),
+                    RulePlainConfiguration::Info
+                    | RulePlainConfiguration::Warn
+                    | RulePlainConfiguration::Error => Some(Severity::from(level)),
+                }),
             RuleGroup::Performance => self
                 .performance
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
-                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
-                .map(|(level, _)| Severity::from(level)),
+                .and_then(|(level, _)| match level {
+                    RulePlainConfiguration::Off => None,
+                    RulePlainConfiguration::On => Some(rule_severity),
+                    RulePlainConfiguration::Info
+                    | RulePlainConfiguration::Warn
+                    | RulePlainConfiguration::Error => Some(Severity::from(level)),
+                }),
             RuleGroup::Security => self
                 .security
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
-                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
-                .map(|(level, _)| Severity::from(level)),
+                .and_then(|(level, _)| match level {
+                    RulePlainConfiguration::Off => None,
+                    RulePlainConfiguration::On => Some(rule_severity),
+                    RulePlainConfiguration::Info
+                    | RulePlainConfiguration::Warn
+                    | RulePlainConfiguration::Error => Some(Severity::from(level)),
+                }),
             RuleGroup::Style => self
                 .style
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
-                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
-                .map(|(level, _)| Severity::from(level)),
+                .and_then(|(level, _)| match level {
+                    RulePlainConfiguration::Off => None,
+                    RulePlainConfiguration::On => Some(rule_severity),
+                    RulePlainConfiguration::Info
+                    | RulePlainConfiguration::Warn
+                    | RulePlainConfiguration::Error => Some(Severity::from(level)),
+                }),
             RuleGroup::Suspicious => self
                 .suspicious
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
-                .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
-                .map(|(level, _)| Severity::from(level)),
+                .and_then(|(level, _)| match level {
+                    RulePlainConfiguration::Off => None,
+                    RulePlainConfiguration::On => Some(rule_severity),
+                    RulePlainConfiguration::Info
+                    | RulePlainConfiguration::Warn
+                    | RulePlainConfiguration::Error => Some(Severity::from(level)),
+                }),
         }
     }
     #[doc = r" Ensure that `recommended` is set to `true` or implied."]
@@ -4364,32 +4408,7 @@ impl Style {
         "useThrowOnlyError",
         "useWhile",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
-    ];
+    const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))

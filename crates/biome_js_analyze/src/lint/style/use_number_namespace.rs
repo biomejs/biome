@@ -70,7 +70,7 @@ declare_lint_rule! {
         name: "useNumberNamespace",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-number-properties")],
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }

@@ -2880,8 +2880,29 @@
 			]
 		},
 		"RulePlainConfiguration": {
-			"type": "string",
-			"enum": ["off", "info", "warn", "error"]
+			"oneOf": [
+				{ "type": "string", "enum": ["off"] },
+				{
+					"description": "Enables the rule using the default severity suggested by Biome",
+					"type": "string",
+					"enum": ["on"]
+				},
+				{
+					"description": "Enables the rule, and it will emit a diagnostic with information severity",
+					"type": "string",
+					"enum": ["info"]
+				},
+				{
+					"description": "Enables the rule, and it will emit a diagnostic with warning severity",
+					"type": "string",
+					"enum": ["warn"]
+				},
+				{
+					"description": "Enables the rule, and it will emit a diagnostic with error severity",
+					"type": "string",
+					"enum": ["error"]
+				}
+			]
 		},
 		"RuleWithAllowDomainOptions": {
 			"type": "object",

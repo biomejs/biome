@@ -69,7 +69,7 @@ declare_lint_rule! {
         name: "useEnumInitializers",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("prefer-enum-initializers")],
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }

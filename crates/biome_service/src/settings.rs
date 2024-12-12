@@ -17,7 +17,6 @@ use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::Merge;
-use biome_diagnostics::Category;
 use biome_formatter::{
     AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
 };
@@ -404,23 +403,6 @@ impl Settings {
     /// Retrieves the settings of the organize imports
     pub fn assist(&self) -> &AssistSettings {
         &self.assist
-    }
-
-    /// It retrieves the severity based on the `code` of the rule and the current configuration.
-    ///
-    /// The code of the has the following pattern: `{group}/{rule_name}`.
-    ///
-    /// It returns [None] if the `code` doesn't match any rule.
-    pub fn get_severity_from_rule_code(
-        &self,
-        code: &Category,
-    ) -> Option<biome_diagnostics::Severity> {
-        let rules = self.linter.rules.as_ref();
-        if let Some(rules) = rules {
-            rules.get_severity_from_category(code)
-        } else {
-            None
-        }
     }
 
     /// Returns linter rules taking overrides into account.

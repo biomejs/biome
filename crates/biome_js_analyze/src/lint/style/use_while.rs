@@ -42,7 +42,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useWhile",
         language: "js",
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
         sources: &[RuleSource::EslintSonarJs("prefer-while")],
         fix_kind: FixKind::Safe,

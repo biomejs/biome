@@ -53,7 +53,7 @@ declare_lint_rule! {
         name: "useNodejsImportProtocol",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-node-protocol")],
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }

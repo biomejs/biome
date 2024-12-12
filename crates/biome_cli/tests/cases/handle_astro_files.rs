@@ -1,7 +1,5 @@
 use crate::run_cli;
-use crate::snap_test::{
-    assert_cli_snapshot, assert_file_contents, markup_to_string, SnapshotPayload,
-};
+use crate::snap_test::{assert_cli_snapshot, markup_to_string, SnapshotPayload};
 use biome_console::{markup, BufferConsole};
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
@@ -56,12 +54,6 @@ if (foo) {
 ---
 <div></div>"#;
 
-const ASTRO_FILE_IMPORTS_AFTER: &str = r#"---
-import { Code } from "astro:components";
-import { getLocale } from "astro:i18n";
----
-<div></div>"#;
-
 const ASTRO_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED: &str =
     "---\r\n  const a    = \"b\";\r\n---\r\n<div></div>";
 
@@ -71,23 +63,6 @@ import {    something } from "file.astro";
 debugger;
 statement ( ) ;
 var foo: string = "";
----
-<div></div>"#;
-
-const ASTRO_FILE_CHECK_APPLY_AFTER: &str = r#"---
-import { something } from "file.astro";
-import { a } from "mod";
-debugger;
-statement();
-var foo = "";
----
-<div></div>"#;
-
-const ASTRO_FILE_CHECK_APPLY_UNSAFE_AFTER: &str = r#"---
-import { something } from "file.astro";
-import { a } from "mod";
-statement();
-const foo = "";
 ---
 <div></div>"#;
 
@@ -111,8 +86,6 @@ fn format_astro_files() {
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, astro_file_path, ASTRO_FILE_UNFORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -146,8 +119,6 @@ fn format_astro_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, astro_file_path, ASTRO_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_astro_files_write",
@@ -180,8 +151,6 @@ fn format_empty_astro_files_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, astro_file_path, "<div></div>");
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_empty_astro_files_write",
@@ -209,12 +178,6 @@ fn format_astro_carriage_return_line_feed_files() {
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
-
-    assert_file_contents(
-        &fs,
-        astro_file_path,
-        ASTRO_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED,
-    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -280,8 +243,6 @@ fn lint_and_fix_astro_files() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, astro_file_path, ASTRO_FILE_DEBUGGER_AFTER);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_and_fix_astro_files",
@@ -314,8 +275,6 @@ fn sorts_imports_check() {
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, astro_file_path, ASTRO_FILE_IMPORTS_BEFORE);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -350,8 +309,6 @@ fn sorts_imports_write() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, astro_file_path, ASTRO_FILE_IMPORTS_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -627,17 +584,6 @@ fn check_stdin_write_successfully() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let message = console
-        .out_buffer
-        .first()
-        .expect("Console should have written a message");
-
-    let content = markup_to_string(markup! {
-        {message.content}
-    });
-
-    assert_eq!(content, ASTRO_FILE_CHECK_APPLY_AFTER);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "check_stdin_write_successfully",
@@ -671,17 +617,6 @@ fn check_stdin_write_unsafe_successfully() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let message = console
-        .out_buffer
-        .first()
-        .expect("Console should have written a message");
-
-    let content = markup_to_string(markup! {
-        {message.content}
-    });
-
-    assert_eq!(content, ASTRO_FILE_CHECK_APPLY_UNSAFE_AFTER);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "check_stdin_write_unsafe_successfully",
@@ -709,8 +644,6 @@ fn astro_global_object() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, astro_file_path, ASTRO_FILE_ASTRO_GLOBAL_OBJECT);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

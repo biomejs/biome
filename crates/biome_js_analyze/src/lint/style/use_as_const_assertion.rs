@@ -49,7 +49,7 @@ declare_lint_rule! {
         name: "useAsConstAssertion",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("prefer-as-const")],
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }

@@ -2,7 +2,6 @@ use biome_analyze::{
     FixKind, GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleGroup, RuleMetadata,
 };
 use biome_css_syntax::CssLanguage;
-use biome_diagnostics::Severity;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
@@ -307,7 +306,7 @@ fn generate_for_groups(
             /// [Severity::Error] for recommended rules and [Severity::Warning] for other rules.
             ///
             /// If not, the function returns [None].
-            pub fn get_severity_from_category(&self, category: &Category) -> Option<Severity> {
+            pub fn get_severity_from_category(&self, category: &Category, rule_severity: Severity) -> Option<Severity> {
                 let mut split_code = category.name().split('/');
 
                 let _lint = split_code.next();
@@ -322,8 +321,13 @@ fn generate_for_groups(
                             .#group_idents
                             .as_ref()
                             .and_then(|group| group.get_rule_configuration(rule_name))
-                            .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
-                            .map(|(level, _)| Severity::from(level)),
+                            .and_then(|(level, _)| match level {
+                                RulePlainConfiguration::Off => None,
+                                RulePlainConfiguration::On => Some(rule_severity),
+                                RulePlainConfiguration::Info
+                                | RulePlainConfiguration::Warn
+                                | RulePlainConfiguration::Error => Some(Severity::from(level)),
+                            }),
                     )*
                 }
             }

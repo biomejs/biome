@@ -41,7 +41,7 @@ declare_lint_rule! {
         name: "noVar",
         language: "js",
         sources: &[RuleSource::Eslint("no-var")],
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }

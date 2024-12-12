@@ -1,8 +1,6 @@
 use crate::run_cli;
-use crate::snap_test::{
-    assert_cli_snapshot, assert_file_contents, markup_to_string, SnapshotPayload,
-};
-use biome_console::{markup, BufferConsole};
+use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayload};
+use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
 use std::path::Path;
@@ -39,39 +37,12 @@ var foo: string = "";
 </script>
 <div></div>"#;
 
-const SVELTE_TS_FILE_LINT_APPLY_AFTER: &str = r#"<script context="module" lang="ts">
-var foo = "";
-</script>
-<div></div>"#;
-
-const SVELTE_TS_FILE_LINT_APPLY_UNSAFE_AFTER: &str = r#"<script context="module" lang="ts">
-const foo = "";
-</script>
-<div></div>"#;
-
 const SVELTE_TS_FILE_CHECK_BEFORE: &str = r#"<script context="module" lang="ts">
 import { Form as   Form }     from './components/Form.svelte' ;
 import     Button     from "./components/Button.svelte";
 debugger;
 statement ( ) ;
 var foo: string = "";
-</script>
-<div></div>"#;
-
-const SVELTE_TS_FILE_CHECK_APPLY_AFTER: &str = r#"<script context="module" lang="ts">
-import Button from "./components/Button.svelte";
-import { Form } from "./components/Form.svelte";
-debugger;
-statement();
-var foo = "";
-</script>
-<div></div>"#;
-
-const SVELTE_TS_FILE_CHECK_APPLY_UNSAFE_AFTER: &str = r#"<script context="module" lang="ts">
-import Button from "./components/Button.svelte";
-import { Form } from "./components/Form.svelte";
-statement();
-const foo = "";
 </script>
 <div></div>"#;
 
@@ -278,17 +249,6 @@ fn format_stdin_successfully() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let message = console
-        .out_buffer
-        .first()
-        .expect("Console should have written a message");
-
-    let content = markup_to_string(markup! {
-        {message.content}
-    });
-
-    assert_eq!(content, SVELTE_TS_CONTEXT_MODULE_FILE_FORMATTED);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_stdin_successfully",
@@ -314,17 +274,6 @@ fn format_stdin_write_successfully() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    let message = console
-        .out_buffer
-        .first()
-        .expect("Console should have written a message");
-
-    let content = markup_to_string(markup! {
-        {message.content}
-    });
-
-    assert_eq!(content, SVELTE_TS_CONTEXT_MODULE_FILE_FORMATTED);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -352,17 +301,6 @@ fn lint_stdin_successfully() {
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    let message = console
-        .out_buffer
-        .first()
-        .expect("Console should have written a message");
-
-    let content = markup_to_string(markup! {
-        {message.content}
-    });
-
-    assert_eq!(content, SVELTE_TS_FILE_LINT_BEFORE);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_stdin_successfully",
@@ -388,17 +326,6 @@ fn lint_stdin_write_successfully() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    let message = console
-        .out_buffer
-        .first()
-        .expect("Console should have written a message");
-
-    let content = markup_to_string(markup! {
-        {message.content}
-    });
-
-    assert_eq!(content, SVELTE_TS_FILE_LINT_APPLY_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -435,17 +362,6 @@ fn lint_stdin_write_unsafe_successfully() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let message = console
-        .out_buffer
-        .first()
-        .expect("Console should have written a message");
-
-    let content = markup_to_string(markup! {
-        {message.content}
-    });
-
-    assert_eq!(content, SVELTE_TS_FILE_LINT_APPLY_UNSAFE_AFTER);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_stdin_write_unsafe_successfully",
@@ -472,17 +388,6 @@ fn check_stdin_successfully() {
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
-    let message = console
-        .out_buffer
-        .first()
-        .expect("Console should have written a message");
-
-    let content = markup_to_string(markup! {
-        {message.content}
-    });
-
-    assert_eq!(content, SVELTE_TS_FILE_CHECK_BEFORE);
-
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "check_stdin_successfully",
@@ -508,17 +413,6 @@ fn check_stdin_write_successfully() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    let message = console
-        .out_buffer
-        .first()
-        .expect("Console should have written a message");
-
-    let content = markup_to_string(markup! {
-        {message.content}
-    });
-
-    assert_eq!(content, SVELTE_TS_FILE_CHECK_APPLY_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -554,17 +448,6 @@ fn check_stdin_write_unsafe_successfully() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    let message = console
-        .out_buffer
-        .first()
-        .expect("Console should have written a message");
-
-    let content = markup_to_string(markup! {
-        {message.content}
-    });
-
-    assert_eq!(content, SVELTE_TS_FILE_CHECK_APPLY_UNSAFE_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

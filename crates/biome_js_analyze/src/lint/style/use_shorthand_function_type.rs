@@ -81,7 +81,7 @@ declare_lint_rule! {
         name: "useShorthandFunctionType",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("prefer-function-type")],
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
