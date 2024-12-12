@@ -222,6 +222,10 @@ impl JsFileSource {
         self.module_kind = kind;
     }
 
+    pub fn set_variant(&mut self, variant: LanguageVariant) {
+        self.variant = variant;
+    }
+
     pub const fn with_version(mut self, version: LanguageVersion) -> Self {
         self.version = version;
         self
@@ -310,7 +314,8 @@ impl JsFileSource {
     pub fn try_from_extension(extension: &OsStr) -> Result<Self, FileSourceError> {
         // We assume the file extension is normalized to lowercase
         match extension.as_encoded_bytes() {
-            b"js" | b"mjs" | b"jsx" => Ok(Self::jsx()),
+            b"js" | b"mjs" => Ok(Self::js_module()),
+            b"jsx" => Ok(Self::jsx()),
             b"cjs" => Ok(Self::js_script()),
             b"ts" => Ok(Self::ts()),
             b"mts" | b"cts" => Ok(Self::ts_restricted()),

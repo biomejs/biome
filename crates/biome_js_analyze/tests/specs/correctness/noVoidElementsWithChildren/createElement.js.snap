@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: createElement.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 
 
 React.createElement('img', {
@@ -61,5 +62,3 @@ createElement.js:7:1 lint/correctness/noVoidElementsWithChildren  FIXABLE  â”â”
   
 
 ```
-
-

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsTryStatement.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function JsTryStatement1() {
     try {
         tryBlock();
@@ -125,5 +126,3 @@ JsTryStatement.js:36:19 lint/correctness/noUnreachable ━━━━━━━━�
   
 
 ```
-
-

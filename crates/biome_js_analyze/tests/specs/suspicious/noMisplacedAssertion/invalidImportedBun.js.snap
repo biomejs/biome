@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidImportedBun.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import {test, expect} from "bun:test";
 
 expect("something").toBeTrue()

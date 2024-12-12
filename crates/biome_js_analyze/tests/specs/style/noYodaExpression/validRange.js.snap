@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validRange.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 if ("a" < x && x < MAX ) {}
 while ("a" < x && x < MAX ) {}
 if (1 < x && x < MAX ) {}

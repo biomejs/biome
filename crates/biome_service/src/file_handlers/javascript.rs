@@ -41,7 +41,8 @@ use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{semantic_model, SemanticModelOptions};
 use biome_js_syntax::{
-    AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, TextRange, TextSize, TokenAtOffset,
+    AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, LanguageVariant, TextRange, TextSize,
+    TokenAtOffset,
 };
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache};
@@ -74,6 +75,7 @@ pub struct JsFormatterSettings {
 pub struct JsParserSettings {
     pub parse_class_parameter_decorators: bool,
     pub grit_metavariables: bool,
+    pub jsx_everywhere: bool,
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -333,13 +335,18 @@ fn parse(
                 .parse_class_parameter_decorators
         }),
     };
+    let jsx_everywhere =
+        settings.is_some_and(|settings| settings.languages.javascript.parser.jsx_everywhere);
     if let Some(settings) = settings {
         options = settings
             .override_settings
             .to_override_js_parser_options(biome_path, options);
     }
 
-    let file_source = file_source.to_js_file_source().unwrap_or_default();
+    let mut file_source = file_source.to_js_file_source().unwrap_or_default();
+    if jsx_everywhere {
+        file_source = file_source.with_variant(LanguageVariant::Jsx);
+    }
     let parse = biome_js_parser::parse_js_with_cache(text, file_source, options, cache);
     ParseResult {
         any_parse: parse.into(),

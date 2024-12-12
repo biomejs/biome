@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var x = 1
 var x = 12345
 var x = 123.456
@@ -83,5 +84,3 @@ var x = 0X1_FFF_FFFF_FFF_FFF
 var MAX = 1.7976931348623157e+308;
 var MIN = 5e-324;
 ```
-
-

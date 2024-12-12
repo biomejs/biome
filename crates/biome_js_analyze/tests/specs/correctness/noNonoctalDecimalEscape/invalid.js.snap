@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 let x = "\8"
 let x = "\9"
 let x = "\"\8\""
@@ -1382,5 +1383,3 @@ invalid.js:44:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
 
 ```
-
-

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var foo = new Symbol("foo");
 function bar() {
 	return function Symbol() {};
@@ -99,5 +100,3 @@ invalid.js:11:11 lint/correctness/noInvalidNewBuiltin  FIXABLE  ━━━━━�
        │           ----                         
 
 ```
-
-

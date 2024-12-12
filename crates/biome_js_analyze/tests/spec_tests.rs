@@ -125,7 +125,6 @@ pub(crate) fn analyze_and_snap(
     let parsed = parse(input_code, source_type, parser_options.clone());
     let root = parsed.tree();
 
-    //
     let options = create_analyzer_options(input_file, &mut diagnostics);
 
     let (_, errors) = biome_js_analyze::analyze(

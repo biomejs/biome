@@ -545,6 +545,10 @@ export interface PartialJavascriptParser {
 	 */
 	gritMetavariables?: boolean;
 	/**
+	 * When enabled, files like `.js`/`.ts` can contain JSX syntax. Defaults to `true`.
+	 */
+	jsxEverywhere?: boolean;
+	/**
 	* It enables the experimental and unsafe parsing of parameter decorators
 
 These decorators belong to an old proposal, and they are subject to change. 

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // /* should not generate diagnostics */
 let x = "8"
 let x = "var \u8888"
@@ -47,5 +48,3 @@ let x = "\n8"
 let x = "\n\\9"
 
 ```
-
-

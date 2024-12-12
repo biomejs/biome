@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-shadowing.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 const Math = { min: () => {}, max: () => {} };
 
 Math.min(0, Math.max(100, x));

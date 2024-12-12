@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidBindingPattern.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function f({ b = a, a = 0 }) {}
 function f([b = a, a = 0]) {}
 function f({ x: [b = a, { a = 0 }] }) {}

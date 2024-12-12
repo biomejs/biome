@@ -4,7 +4,7 @@ expression: InvalidPascalCase.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export const PascalCase = {};
 ```
 

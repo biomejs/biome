@@ -5,7 +5,7 @@ snapshot_kind: text
 ---
 ## Input
 
-```jsx
+```js
 import "foo" with { type, "json" };
 import { foo } with { type: "json" };
 import foo2 from "foo.json" with { "type": "json", type: "html", "type": "js" };

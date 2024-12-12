@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // `object`
 const then = {}
 const notThen = then
@@ -84,5 +85,3 @@ export const notThen = 1
 export const {then: notThen} = 1
 export const {then: notThen = then} = 1
 ```
-
-

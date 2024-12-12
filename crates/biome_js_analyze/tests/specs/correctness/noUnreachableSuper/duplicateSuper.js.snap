@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: duplicateSuper.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // valid
 class B extends A {
     constructor(cond) {
@@ -314,5 +315,3 @@ duplicateSuper.js:75:5 lint/correctness/noUnreachableSuper ━━━━━━━
   
 
 ```
-
-

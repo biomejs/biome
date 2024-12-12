@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: noUndeclaredVariables.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // invalid
 foobar;
 function f() {

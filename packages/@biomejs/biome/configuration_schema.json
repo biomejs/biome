@@ -1714,6 +1714,10 @@
 					"description": "Enables parsing of Grit metavariables. Defaults to `false`.",
 					"type": ["boolean", "null"]
 				},
+				"jsxEverywhere": {
+					"description": "When enabled, files like `.js`/`.ts` can contain JSX syntax. Defaults to `true`.",
+					"type": ["boolean", "null"]
+				},
 				"unsafeParameterDecoratorsEnabled": {
 					"description": "It enables the experimental and unsafe parsing of parameter decorators\n\nThese decorators belong to an old proposal, and they are subject to change.",
 					"type": ["boolean", "null"]

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: missed.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // Examples which are not reported by the rule (false negative cases)
 
 function f (x) {
@@ -59,5 +60,3 @@ function f (x) {
 }
 
 ```
-
-

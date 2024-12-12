@@ -1,8 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validDestructuredObjectMember.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 const { Unknown_Style } = obj;
 ```

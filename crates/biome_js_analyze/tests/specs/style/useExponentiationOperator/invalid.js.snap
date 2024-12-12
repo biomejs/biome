@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 Math.pow(a, b);
 (Math).pow(a, b);
 
@@ -858,5 +859,3 @@ invalid.js:52:3 lint/style/useExponentiationOperator  FIXABLE  ━━━━━�
   
 
 ```
-
-

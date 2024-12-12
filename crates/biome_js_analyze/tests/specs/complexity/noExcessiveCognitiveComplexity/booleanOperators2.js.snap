@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: booleanOperators2.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function booleanOperators2() {
     if (a                                     // +1 for `if`
         &&                                    // +1
@@ -29,5 +30,3 @@ booleanOperators2.js:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━�
   
 
 ```
-
-
