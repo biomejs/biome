@@ -1343,6 +1343,10 @@ export interface Nursery {
 	 */
 	noUnknownTypeSelector?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noUnwantedPolyfillio?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
 	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
@@ -3097,7 +3101,6 @@ export type Category =
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
-	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noNestedTernary"
@@ -3123,6 +3126,7 @@ export type Category =
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
+	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessEscapeInRegex"
 	| "lint/nursery/noUselessStringRaw"
 	| "lint/nursery/noUselessUndefined"
@@ -3138,13 +3142,14 @@ export type Category =
 	| "lint/nursery/useDeprecatedReason"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
+	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useGoogleFontDisplay"
 	| "lint/nursery/useGoogleFontPreconnect"
-	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useGuardForIn"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
+	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useTrimStartEnd"
