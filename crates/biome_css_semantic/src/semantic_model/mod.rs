@@ -240,7 +240,7 @@ mod tests {
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 1);
 
-        assert_eq!(rule.selectors[0].name, ".child");
+        assert_eq!(rule.selectors[0].name, "p .child");
 
         assert_eq!(rule.declarations[0].property.name, "color");
         assert_eq!(rule.declarations[0].value.text, "var(--foo)");
@@ -261,10 +261,12 @@ mod tests {
     #[test]
     fn quick_test() {
         let parse = parse_css(
-            r#"@property --item-size {
-  syntax: "<percentage>";
-  inherits: true;
-  initial-value: 40%;
+            r#".parent {
+  color: blue;
+
+  .child {
+    color: red;
+  }
 }"#,
             CssParserOptions::default(),
         );
