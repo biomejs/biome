@@ -10,7 +10,7 @@ Summary
 
 - Name: useHookAtTopLevel
 - No fix available.
-- Suggested severity: error
+- Default severity: error
 - Available from version: 1.0.0
 
 Domains

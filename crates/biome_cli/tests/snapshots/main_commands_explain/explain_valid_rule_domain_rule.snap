@@ -10,7 +10,7 @@ Summary
 
 - Name: noFocusedTests
 - Fix: unsafe
-- Suggested severity: error
+- Default severity: error
 - Available from version: 1.6.0
 
 Domains

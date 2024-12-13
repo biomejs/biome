@@ -2883,7 +2883,7 @@
 			"oneOf": [
 				{ "type": "string", "enum": ["off"] },
 				{
-					"description": "Enables the rule using the default severity suggested by Biome",
+					"description": "Enables the rule using the default severity of the rule",
 					"type": "string",
 					"enum": ["on"]
 				},

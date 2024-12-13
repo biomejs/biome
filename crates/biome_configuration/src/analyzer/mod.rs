@@ -213,7 +213,7 @@ impl From<RuleAssistPlainConfiguration> for Severity {
 pub enum RulePlainConfiguration {
     #[default]
     Off,
-    /// Enables the rule using the default severity suggested by Biome
+    /// Enables the rule using the default severity of the rule
     On,
     /// Enables the rule, and it will emit a diagnostic with information severity
     Info,

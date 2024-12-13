@@ -74,7 +74,7 @@ impl biome_console::fmt::Display for RuleMetadata {
         fmt.write_str("\n")?;
 
         fmt.write_markup(markup! {
-            "- Suggested severity: "<Emphasis>{self.severity}</Emphasis>
+            "- Default severity: "<Emphasis>{self.severity}</Emphasis>
         })?;
         fmt.write_str("\n")?;
 

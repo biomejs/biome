@@ -10,7 +10,7 @@ Summary
 
 - Name: noBlankTarget
 - Fix: safe
-- Suggested severity: error
+- Default severity: error
 - Available from version: 1.0.0
 - This rule is not recommended
 
