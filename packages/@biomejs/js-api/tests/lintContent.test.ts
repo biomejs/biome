@@ -3,7 +3,7 @@ import { Biome, Distribution } from "../dist";
 
 describe("Biome WebAssembly lintContent", () => {
 	const inputCode = `
-	const a = "foo " + Date.now() + " bar";
+	debugger;
 	const b = /   /;
 	`;
 
@@ -24,7 +24,7 @@ describe("Biome WebAssembly lintContent", () => {
 				filePath: "example.js",
 			});
 			expect(result.diagnostics).toMatchObject([
-				{ category: "lint/style/useTemplate" },
+				{ category: "lint/suspicious/noDebugger" },
 				{
 					category:
 						"lint/complexity/noMultipleSpacesInRegularExpressionLiterals",
@@ -46,7 +46,7 @@ describe("Biome WebAssembly lintContent", () => {
 				fixFileMode: "safeFixes",
 			});
 			expect(result.diagnostics).toMatchObject([
-				{ category: "lint/style/useTemplate" },
+				{ category: "lint/suspicious/noDebugger" },
 			]);
 		});
 		it("should fix the SafeFixes only", () => {
