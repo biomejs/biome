@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `check.js`
 
@@ -33,12 +34,6 @@ check.js organizeImports ━━━━━━━━━━━━━━━━━━�
     2 2 │   import * as something from "../something";
     3 3 │   
   
-
-```
-
-```block
-Skipped 1 suggested fixes.
-If you wish to apply the suggested (unsafe) fixes, use the command biome check --fix --unsafe
 
 ```
 
