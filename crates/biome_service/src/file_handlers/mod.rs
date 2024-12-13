@@ -1264,7 +1264,8 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
             .settings
             .is_some_and(|settings| settings.organize_imports.enabled);
         if organize_imports_enabled && self.import_sorting.match_rule::<R>() {
-            self.enabled_rules.push(self.import_sorting);
+            // for now, we need to disable import sorting rule because we still have the top level organize import workspace action
+            self.disabled_rules.push(self.import_sorting);
             return;
         }
         // Do not report unused suppression comment diagnostics if:

@@ -1643,6 +1643,7 @@ async fn no_code_actions_for_ignored_json_files() -> Result<()> {
 }
 
 #[tokio::test]
+#[ignore = "To enable when import sorting will be part of the actions"]
 async fn pull_code_actions_with_import_sorting() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create(None).into_inner();
