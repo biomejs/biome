@@ -1,0 +1,63 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+snapshot_kind: text
+---
+# Emitted Messages
+
+```block
+Summary
+
+- Name: noFocusedTests
+- Fix: unsafe
+- Default severity: error
+- Available from version: 1.6.0
+
+Domains
+
+- Name: test
+- The rule is recommended for this domain
+- The rule is enabled when one of these dependencies are detected:
+  - jest@>=26.0.0
+  - mocha@>=8.0.0
+  - ava@>=2.0.0
+  - vitest@>=1.0.0
+- The rule adds the following globals: 
+  - after
+  - afterAll
+  - afterEach
+  - before
+  - beforeEach
+  - beforeAll
+  - describe
+  - it
+  - expect
+  - test
+
+
+Description
+
+ Disallow focused tests.
+
+ Disabled test are useful when developing and debugging, because it forces the test suite to run only certain tests.
+
+ However, in pull/merge request, you usually want to run all the test suite.
+
+Examples
+
+Invalid
+
+ ```js,expect_diagnostic
+ describe.only("foo", () => {});
+ ```
+
+ ```js,expect_diagnostic
+ test.only("foo", () => {});
+ ```
+
+Valid
+ ```js
+ test("foo", () => {});
+ ```
+
+```

@@ -59,7 +59,7 @@ declare_lint_rule! {
         name: "noParameterAssign",
         language: "js",
         sources: &[RuleSource::Eslint("no-param-reassign")],
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
     }
 }

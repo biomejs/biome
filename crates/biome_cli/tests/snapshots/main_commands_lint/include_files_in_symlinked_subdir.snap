@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 # Termination Message
 
@@ -37,33 +38,6 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-<TEMP_DIR>/include_files_in_symlinked_subdir/symlinked/file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
-
-  × This let declares a variable that is only assigned once.
-  
-  > 1 │ let a = 4;
-      │ ^^^
-    2 │ debugger;
-    3 │ console.log(a);
-  
-  i 'a' is never reassigned.
-  
-  > 1 │ let a = 4;
-      │     ^
-    2 │ debugger;
-    3 │ console.log(a);
-  
-  i Safe fix: Use const instead.
-  
-    1   │ - let·a·=·4;
-      1 │ + const·a·=·4;
-    2 2 │   debugger;
-    3 3 │   console.log(a);
-  
-
-```
-
-```block
 Checked 2 files in <TIME>. No fixes applied.
-Found 2 errors.
+Found 1 error.
 ```

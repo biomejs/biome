@@ -89,7 +89,7 @@ declare_lint_rule! {
         name: "useSelfClosingElements",
         language: "js",
         sources: &[RuleSource::EslintStylistic("jsx-self-closing-comp")],
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }

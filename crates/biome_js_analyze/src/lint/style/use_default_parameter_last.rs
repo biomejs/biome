@@ -56,7 +56,7 @@ declare_lint_rule! {
             RuleSource::Eslint("default-param-last"),
             RuleSource::EslintTypeScript("default-param-last")
         ],
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }

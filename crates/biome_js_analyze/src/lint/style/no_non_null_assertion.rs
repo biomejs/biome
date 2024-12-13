@@ -49,7 +49,7 @@ declare_lint_rule! {
         name: "noNonNullAssertion",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-non-null-assertion")],
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }

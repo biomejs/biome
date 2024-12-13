@@ -5,7 +5,7 @@ use crate::{
     Phase, Phases, Queryable, SourceActionKind, SuppressionAction, SuppressionCommentEmitterPayload,
 };
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{markup, MarkupBuf};
+use biome_console::{markup, MarkupBuf, Padding};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{
@@ -47,6 +47,155 @@ pub struct RuleMetadata {
     pub domains: &'static [RuleDomain],
 }
 
+impl biome_console::fmt::Display for RuleMetadata {
+    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
+        fmt.write_markup(markup! {
+            <Emphasis>"Summary"</Emphasis>
+        })?;
+        fmt.write_str("\n")?;
+        fmt.write_str("\n")?;
+
+        fmt.write_markup(markup! {
+            "- Name: "<Emphasis>{self.name}</Emphasis>
+        })?;
+        fmt.write_str("\n")?;
+        match self.fix_kind {
+            FixKind::None => {
+                fmt.write_markup(markup! {
+                    "- No fix available."
+                })?;
+            }
+            kind => {
+                fmt.write_markup(markup! {
+                    "- Fix: "<Emphasis>{kind}</Emphasis>
+                })?;
+            }
+        }
+        fmt.write_str("\n")?;
+
+        fmt.write_markup(markup! {
+            "- Default severity: "<Emphasis>{self.severity}</Emphasis>
+        })?;
+        fmt.write_str("\n")?;
+
+        fmt.write_markup(markup! {
+            "- Available from version: "<Emphasis>{self.version}</Emphasis>
+        })?;
+        fmt.write_str("\n")?;
+
+        if self.domains.is_empty() && self.recommended {
+            fmt.write_markup(markup! {
+                "- This rule is not recommended"
+            })?;
+        }
+
+        let domains = DisplayDomains(self.domains, self.recommended);
+
+        fmt.write_str("\n")?;
+
+        fmt.write_markup(markup!({ domains }))?;
+
+        fmt.write_str("\n")?;
+
+        fmt.write_markup(markup! {
+            <Emphasis>"Description"</Emphasis>
+        })?;
+        fmt.write_str("\n")?;
+        fmt.write_str("\n")?;
+
+        for line in self.docs.lines() {
+            if let Some((_, remainder)) = line.split_once("## ") {
+                fmt.write_markup(markup! {
+                    <Emphasis>{remainder.trim_start()}</Emphasis>
+                })?;
+            } else if let Some((_, remainder)) = line.split_once("### ") {
+                fmt.write_markup(markup! {
+                    <Emphasis>{remainder.trim_start()}</Emphasis>
+                })?;
+            } else {
+                fmt.write_str(line)?;
+            }
+
+            fmt.write_str("\n")?;
+        }
+
+        Ok(())
+    }
+}
+
+struct DisplayDomains(&'static [RuleDomain], bool);
+
+impl Display for DisplayDomains {
+    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
+        let domains = self.0;
+        let recommended = self.1;
+
+        if domains.is_empty() {
+            return Ok(());
+        }
+
+        fmt.write_markup(markup!(
+            <Emphasis>"Domains"</Emphasis>
+        ))?;
+        fmt.write_str("\n")?;
+        fmt.write_str("\n")?;
+
+        for domain in domains {
+            let dependencies = domain.manifest_dependencies();
+
+            fmt.write_markup(markup! {
+                "- Name: "<Emphasis>{domain}</Emphasis>
+            })?;
+            fmt.write_str("\n")?;
+
+            if recommended {
+                fmt.write_markup(markup! {
+                    "- The rule is recommended for this domain"
+                })?;
+                fmt.write_str("\n")?;
+            }
+
+            if !dependencies.is_empty() {
+                fmt.write_markup(markup! {
+                    "- The rule is enabled when one of these dependencies are detected:"
+                })?;
+                fmt.write_str("\n")?;
+                let padding = Padding::new(2);
+                for (index, (dep, range)) in dependencies.iter().enumerate() {
+                    fmt.write_markup(
+                        markup! { {padding}"- "<Emphasis>{dep}"@"{range}</Emphasis> },
+                    )?;
+                    if index + 1 < dependencies.len() {
+                        fmt.write_str("\n")?;
+                    }
+                }
+                fmt.write_str("\n")?;
+            }
+
+            let globals = domain.globals();
+
+            if !globals.is_empty() {
+                fmt.write_markup(markup! {
+                    "- The rule adds the following globals: "
+                })?;
+                fmt.write_str("\n")?;
+
+                let padding = Padding::new(2);
+                for (index, global) in globals.iter().enumerate() {
+                    fmt.write_markup(markup! { {padding}"- "<Emphasis>{global}</Emphasis> })?;
+                    if index + 1 < globals.len() {
+                        fmt.write_str("\n")?;
+                    }
+                }
+                fmt.write_str("\n")?;
+            }
+            fmt.write_str("\n")?;
+        }
+
+        Ok(())
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
@@ -73,9 +222,9 @@ pub enum FixKind {
 impl Display for FixKind {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         match self {
-            FixKind::None => fmt.write_str("None"),
-            FixKind::Safe => fmt.write_str("Safe"),
-            FixKind::Unsafe => fmt.write_str("Unsafe"),
+            FixKind::None => fmt.write_markup(markup!("none")),
+            FixKind::Safe => fmt.write_markup(markup!(<Success>"safe"</Success>)),
+            FixKind::Unsafe => fmt.write_markup(markup!(<Warn>"unsafe"</Warn>)),
         }
     }
 }
@@ -338,6 +487,18 @@ pub enum RuleDomain {
     Next,
 }
 
+impl Display for RuleDomain {
+    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
+        // use lower case naming, it needs to match the name of the configuration
+        match self {
+            RuleDomain::React => fmt.write_str("react"),
+            RuleDomain::Test => fmt.write_str("test"),
+            RuleDomain::Solid => fmt.write_str("solid"),
+            RuleDomain::Next => fmt.write_str("next"),
+        }
+    }
+}
+
 impl RuleDomain {
     /// If the project has one of these dependencies, the domain will be automatically enabled, unless it's explicitly disabled by the configuration.
     ///
@@ -352,7 +513,7 @@ impl RuleDomain {
                 &("vitest", ">=1.0.0"),
             ],
             RuleDomain::Solid => &[&("solid", ">=1.0.0")],
-            RuleDomain::Next => &[&("react", ">=16.0.0"), &("next", ">=14.0.0")],
+            RuleDomain::Next => &[&("next", ">=14.0.0")],
         }
     }
 
@@ -374,17 +535,6 @@ impl RuleDomain {
             ],
             RuleDomain::Solid => &[],
             RuleDomain::Next => &[],
-        }
-    }
-}
-
-impl Display for RuleDomain {
-    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
-        match self {
-            RuleDomain::React => fmt.write_str("React"),
-            RuleDomain::Test => fmt.write_str("Test"),
-            RuleDomain::Solid => fmt.write_str("Solid"),
-            RuleDomain::Next => fmt.write_str("Next.js"),
         }
     }
 }

@@ -177,6 +177,9 @@ impl From<RulePlainConfiguration> for Severity {
             RulePlainConfiguration::Off => {
                 unreachable!("the rule is turned off, it should not step in here")
             }
+            RulePlainConfiguration::On => {
+                unreachable!("the upstream logic should have already set the severity in this case")
+            }
         }
     }
 }
@@ -210,8 +213,13 @@ impl From<RuleAssistPlainConfiguration> for Severity {
 pub enum RulePlainConfiguration {
     #[default]
     Off,
+    /// Enables the rule using the default severity of the rule
+    On,
+    /// Enables the rule, and it will emit a diagnostic with information severity
     Info,
+    /// Enables the rule, and it will emit a diagnostic with warning severity
     Warn,
+    /// Enables the rule, and it will emit a diagnostic with error severity
     Error,
 }
 

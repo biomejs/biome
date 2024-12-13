@@ -42,7 +42,7 @@ declare_lint_rule! {
         name: "noCommaOperator",
         language: "js",
         sources: &[RuleSource::Eslint("no-sequences")],
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
     }
 }

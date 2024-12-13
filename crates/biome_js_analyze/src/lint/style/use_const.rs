@@ -78,7 +78,7 @@ declare_lint_rule! {
         name: "useConst",
         language: "js",
         sources: &[RuleSource::Eslint("prefer-const")],
-        recommended: true,
+        recommended: false,
         severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
