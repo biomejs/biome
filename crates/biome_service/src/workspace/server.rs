@@ -34,7 +34,7 @@ use biome_project::{NodeJsProject, PackageJson, PackageType, Project};
 use biome_rowan::NodeCache;
 use indexmap::IndexSet;
 use papaya::HashMap;
-use rustc_hash::FxBuildHasher;
+use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::ffi::OsStr;
 use std::panic::RefUnwindSafe;
 use std::path::{Path, PathBuf};
@@ -66,7 +66,7 @@ pub(super) struct WorkspaceServer {
     /// ## Concurrency
     ///
     /// Because `NodeCache` cannot be cloned, and `papaya` doesn't give us owned
-    /// instances of stored values, we use an `std` hash map here, wrapped in a
+    /// instances of stored values, we use an `FxHashMap` here, wrapped in a
     /// `Mutex`. The node cache is only used by writers, meaning this wouldn't
     /// be a great use case for `papaya` anyway. But it does mean we need to be
     /// careful for deadlocks, and release guards to the mutex as soon as we
@@ -79,7 +79,7 @@ pub(super) struct WorkspaceServer {
     /// anticipated. For other documents, the performance degradation due to
     /// lock contention would not be worth the potential of faster reparsing
     /// that may never actually happen.
-    node_cache: Mutex<std::collections::HashMap<PathBuf, NodeCache>>,
+    node_cache: Mutex<FxHashMap<PathBuf, NodeCache>>,
 
     /// File system implementation.
     fs: Box<dyn FileSystem>,
