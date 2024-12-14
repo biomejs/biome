@@ -16,6 +16,8 @@ use crate::diagnostics::Panic;
 use crate::workspace::{DocumentFileSource, FileContent, OpenFileParams};
 use crate::{Workspace, WorkspaceError};
 
+use super::server::WorkspaceServer;
+
 pub(crate) struct ScanResult {
     /// Diagnostics reported while scanning the project.
     pub diagnostics: Vec<Diagnostic>,
@@ -24,7 +26,10 @@ pub(crate) struct ScanResult {
     pub duration: Duration,
 }
 
-pub(crate) fn scan(workspace: &dyn Workspace, folder: &Path) -> Result<ScanResult, WorkspaceError> {
+pub(crate) fn scan(
+    workspace: &WorkspaceServer,
+    folder: &Path,
+) -> Result<ScanResult, WorkspaceError> {
     init_thread_pool();
 
     let (interner, _path_receiver) = PathInterner::new();
@@ -133,7 +138,7 @@ impl DiagnosticsCollector {
 /// Context object shared between directory traversal tasks.
 pub(crate) struct ScanContext<'app> {
     /// [Workspace] instance.
-    pub(crate) workspace: &'app dyn Workspace,
+    pub(crate) workspace: &'app WorkspaceServer,
 
     /// File paths interner cache used by the filesystem traversal.
     interner: PathInterner,
@@ -188,11 +193,12 @@ impl<'app> TraversalContext for ScanContext<'app> {
 /// so panics are caught, and diagnostics are submitted in case of panic too.
 fn open_file(ctx: &ScanContext, path: &BiomePath) {
     match catch_unwind(move || {
-        ctx.workspace.open_file(OpenFileParams {
+        ctx.workspace.open_file_by_scanner(OpenFileParams {
             path: path.clone(),
             content: FileContent::FromServer,
             document_file_source: None,
             version: 0,
+            persist_node_cache: false,
         })
     }) {
         Ok(Ok(())) => {}

@@ -71,6 +71,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         content: FileContent::FromClient(biome_config_content.to_string()),
         version: 0,
         document_file_source: Some(JsonFileSource::json().into()),
+        persist_node_cache: false,
     })?;
     let parsed = parse_json_with_cache(
         &biome_config_content,

@@ -65,8 +65,14 @@ pub struct WorkspaceSettings {
 }
 
 impl WorkspaceSettings {
+    /// Returns the key of the current project.
     pub fn get_current_project_key(&self) -> ProjectKey {
         *self.current_project.read().unwrap()
+    }
+
+    /// Sets which project is the current one by its key.
+    pub fn set_current_project(&self, key: ProjectKey) {
+        *self.current_project.write().unwrap() = key;
     }
 
     /// Retrieves the settings of the current workspace folder
@@ -76,6 +82,15 @@ impl WorkspaceSettings {
             .pin()
             .get(&self.get_current_project_key())
             .map(|data| data.settings.clone())
+    }
+
+    /// Retrieves the files settings of the current workspace folder
+    pub fn get_current_files_settings(&self) -> Option<FilesSettings> {
+        trace!("Current key {:?}", self.current_project);
+        self.data
+            .pin()
+            .get(&self.get_current_project_key())
+            .map(|data| data.settings.files.clone())
     }
 
     /// Sets the settings of the current workspace folder.
@@ -93,15 +108,6 @@ impl WorkspaceSettings {
         };
 
         data.insert(project_key, project_data);
-    }
-
-    /// Retrieves the files settings of the current workspace folder
-    pub fn get_current_files_settings(&self) -> Option<FilesSettings> {
-        trace!("Current key {:?}", self.current_project);
-        self.data
-            .pin()
-            .get(&self.get_current_project_key())
-            .map(|data| data.settings.files.clone())
     }
 
     pub fn get_current_manifest(&self) -> Option<PackageJson> {
@@ -145,10 +151,10 @@ impl WorkspaceSettings {
     }
 
     /// Remove a project using its folder.
-    pub fn remove_project(&self, workspace_path: &Path) {
+    pub fn remove_project(&self, project_path: &Path) {
         let data = self.data.pin();
-        for (key, path_to_settings) in data.iter() {
-            if path_to_settings.path.as_path() == workspace_path {
+        for (key, project_data) in data.iter() {
+            if project_data.path.as_path() == project_path {
                 data.remove(key);
             }
         }
@@ -185,25 +191,24 @@ impl WorkspaceSettings {
 
     /// Checks whether the given `path` belongs to the current project and no
     /// other project.
-    pub fn path_belongs_only_to_current_project(&self, path: &BiomePath) -> bool {
-        let mut belongs_to_current = false;
+    pub fn path_belongs_only_to_project_with_path(
+        &self,
+        path: &BiomePath,
+        project_path: &Path,
+    ) -> bool {
+        let mut belongs_to_project = false;
         let mut belongs_to_other = false;
-        for (key, path_to_settings) in self.data.pin().iter() {
-            if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
-                if *key == self.get_current_project_key() {
-                    belongs_to_current = true;
+        for project_data in self.data.pin().values() {
+            if path.strip_prefix(project_data.path.as_path()).is_ok() {
+                if project_data.path.as_path() == project_path {
+                    belongs_to_project = true;
                 } else {
                     belongs_to_other = true;
                 }
             }
         }
 
-        belongs_to_current && !belongs_to_other
-    }
-
-    /// Sets which project is the current one by its key.
-    pub fn set_current_project(&self, key: ProjectKey) {
-        *self.current_project.write().unwrap() = key;
+        belongs_to_project && !belongs_to_other
     }
 
     /// Returns the maximum file size setting.

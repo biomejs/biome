@@ -544,6 +544,7 @@ pub fn execute_mode(
                         path: report_file.clone(),
                         version: 0,
                         document_file_source: None,
+                        persist_node_cache: false,
                     })?;
                     let code = session.app.workspace.format_file(FormatFileParams {
                         path: report_file.clone(),

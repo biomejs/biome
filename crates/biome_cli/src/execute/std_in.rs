@@ -50,6 +50,7 @@ pub(crate) fn run<'a>(
                 version: 0,
                 content: FileContent::FromClient(content.into()),
                 document_file_source: None,
+                persist_node_cache: false,
             })?;
             let printed = workspace.format_file(FormatFileParams {
                 path: biome_path.clone(),
@@ -82,6 +83,7 @@ pub(crate) fn run<'a>(
             version: 0,
             content: FileContent::FromClient(content.into()),
             document_file_source: None,
+            persist_node_cache: false,
         })?;
         // apply fix file of the linter
         let file_features = workspace.file_features(SupportsFeatureParams {
