@@ -1,0 +1,73 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: with_existing_rules.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": true
+    }
+  }
+}
+```
+
+# Diagnostics
+```
+with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome defaults have changed.
+  
+  > 1 │ {
+      │ ^
+  > 2 │   "linter": {
+  > 3 │     "rules": {
+  > 4 │       "recommended": true
+  > 5 │     }
+  > 6 │   }
+  > 7 │ }
+      │ ^
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    2  2 │     "linter": {
+    3  3 │       "rules": {
+    4    │ - ······"recommended":·true
+    5    │ - ····}
+       4 │ + ······"recommended":·true,
+       5 │ + ······"style":·{
+       6 │ + ········"useLiteralEnumMembers":"error",
+       7 │ + ········"noArguments":"error",
+       8 │ + ········"noParameterAssign":"error",
+       9 │ + ········"useShorthandFunctionType":"error",
+      10 │ + ········"useExportType":"error",
+      11 │ + ········"useDefaultParameterLast":"error",
+      12 │ + ········"noVar":"error",
+      13 │ + ········"noCommaOperator":"error",
+      14 │ + ········"noNonnullAssertion":"error",
+      15 │ + ········"useNodejsImportProtocol":"error",
+      16 │ + ········"useSingleVarDeclarator":"error",
+      17 │ + ········"useConst":"error",
+      18 │ + ········"noInferrableTypes":"error",
+      19 │ + ········"useExponentiationOperator":"error",
+      20 │ + ········"noUselessElse":"error",
+      21 │ + ········"useSelfClosingElements":"error",
+      22 │ + ········"useImportType":"error",
+      23 │ + ········"useNumberNamespace":"error",
+      24 │ + ········"useWhile":"error",
+      25 │ + ········"useAsConstAssertion":"error",
+      26 │ + ········"noUnusedTemplateLiteral":"error",
+      27 │ + ········"useNumericLiterals":"error",
+      28 │ + ········"useTemplate":"error",
+      29 │ + ········"useEnumInitializers":"error"
+      30 │ + ······}
+      31 │ + ······}
+    6 32 │     }
+    7 33 │   }
+  
+
+```

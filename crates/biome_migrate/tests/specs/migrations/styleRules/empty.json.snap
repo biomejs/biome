@@ -1,0 +1,68 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: empty.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "formatter": {},
+  "javascript": {}
+}
+```
+
+# Diagnostics
+```
+empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome defaults have changed.
+  
+  > 1 │ {
+      │ ^
+  > 2 │   "formatter": {},
+  > 3 │   "javascript": {}
+  > 4 │ }
+      │ ^
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    1  1 │   {
+    2  2 │     "formatter": {},
+    3    │ - ··"javascript":·{}
+       3 │ + ··"javascript":·{},
+       4 │ + ··"linter":·{
+       5 │ + ····"rules":·{
+       6 │ + ······"style":·{
+       7 │ + ········"useLiteralEnumMembers":"error",
+       8 │ + ········"noArguments":"error",
+       9 │ + ········"noParameterAssign":"error",
+      10 │ + ········"useShorthandFunctionType":"error",
+      11 │ + ········"useExportType":"error",
+      12 │ + ········"useDefaultParameterLast":"error",
+      13 │ + ········"noVar":"error",
+      14 │ + ········"noCommaOperator":"error",
+      15 │ + ········"noNonnullAssertion":"error",
+      16 │ + ········"useNodejsImportProtocol":"error",
+      17 │ + ········"useSingleVarDeclarator":"error",
+      18 │ + ········"useConst":"error",
+      19 │ + ········"noInferrableTypes":"error",
+      20 │ + ········"useExponentiationOperator":"error",
+      21 │ + ········"noUselessElse":"error",
+      22 │ + ········"useSelfClosingElements":"error",
+      23 │ + ········"useImportType":"error",
+      24 │ + ········"useNumberNamespace":"error",
+      25 │ + ········"useWhile":"error",
+      26 │ + ········"useAsConstAssertion":"error",
+      27 │ + ········"noUnusedTemplateLiteral":"error",
+      28 │ + ········"useNumericLiterals":"error",
+      29 │ + ········"useTemplate":"error",
+      30 │ + ········"useEnumInitializers":"error"
+      31 │ + ······}
+      32 │ + ····}
+      33 │ + ··}
+    4 34 │   }
+  
+
+```

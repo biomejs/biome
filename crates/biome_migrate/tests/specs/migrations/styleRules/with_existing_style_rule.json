@@ -1,0 +1,16 @@
+{
+  "linter": {
+    "rules": {
+      "recommended": true,
+      "style": {
+        "useLiteralEnumMembers": "warn",
+        "noArguments": "warn",
+        "noParameterAssign":  "warn",
+        "useShorthandFunctionType": "warn",
+        "useExportType":  "warn",
+        "useDefaultParameterLast": "warn",
+        "noVar":  "warn"
+      }
+    }
+  }
+}

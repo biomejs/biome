@@ -59,7 +59,9 @@ pub(crate) fn analyze_and_snap(
 
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
-    let version = "1.5.0";
+    let version = read_to_string(input_file.with_extension("version.txt"))
+        .ok()
+        .unwrap_or("1.5.0".into());
     let (_, errors) =
         biome_migrate::migrate_configuration(&root, input_file, version.to_string(), |event| {
             if let Some(mut diag) = event.diagnostic() {
