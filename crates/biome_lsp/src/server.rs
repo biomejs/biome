@@ -372,7 +372,9 @@ impl LanguageServer for LSPServer {
                 let result = self
                     .session
                     .workspace
-                    .unregister_project_folder(UnregisterProjectFolderParams { path: project_path })
+                    .unregister_project_folder(UnregisterProjectFolderParams {
+                        path: project_path.into(),
+                    })
                     .map_err(into_lsp_error);
 
                 if let Err(err) = result {

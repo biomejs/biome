@@ -2760,6 +2760,12 @@ export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;
 	path: BiomePath;
+	/**
+	* Set to `true` to persist the node cache used during parsing, in order to speed up subsequent reparsing if the document has been edited.
+
+This should only be enabled if reparsing is to be expected, such as when the file is opened through the LSP Proxy. 
+	 */
+	persistNodeCache?: boolean;
 	version: number;
 }
 export type FileContent =
