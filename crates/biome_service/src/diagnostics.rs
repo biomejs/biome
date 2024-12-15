@@ -290,7 +290,7 @@ pub struct FileIgnored {
     path: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FileTooLarge {
     pub size: usize,
     pub limit: usize,

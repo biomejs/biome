@@ -9,7 +9,7 @@ use super::{
     SearchResults, SetManifestForProjectParams, SupportsFeatureParams,
     UnregisterProjectFolderParams, UpdateSettingsParams,
 };
-use crate::diagnostics::{InvalidPattern, NoProject, SearchError};
+use crate::diagnostics::{FileTooLarge, InvalidPattern, NoProject, SearchError};
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
@@ -103,7 +103,7 @@ pub(crate) struct Document {
     pub(crate) file_source_index: usize,
 
     /// The result of the parser (syntax tree + diagnostics).
-    pub(crate) syntax: AnyParse,
+    pub(crate) syntax: Result<AnyParse, FileTooLarge>,
 
     /// If `true`, this indicates the document has been opened by the scanner,
     /// and should be unloaded only when the project is unregistered.
@@ -260,6 +260,23 @@ impl WorkspaceServer {
         };
 
         let mut index = self.set_source(source);
+
+        let size = content.as_bytes().len();
+        let limit = self.settings.get_max_file_size();
+        if size > limit {
+            self.documents.pin().insert(
+                params.path,
+                Document {
+                    content,
+                    version: params.version,
+                    file_source_index: index,
+                    syntax: Err(FileTooLarge { size, limit }),
+                    opened_by_scanner,
+                },
+            );
+            return Ok(());
+        }
+
         let mut node_cache = NodeCache::default();
         let parsed = self.parse(&params.path, &content, index, &mut node_cache)?;
 
@@ -279,7 +296,7 @@ impl WorkspaceServer {
                 content,
                 version: params.version,
                 file_source_index: index,
-                syntax: parsed.any_parse,
+                syntax: Ok(parsed.any_parse),
                 opened_by_scanner,
             };
 
@@ -341,15 +358,22 @@ impl WorkspaceServer {
         Ok(())
     }
 
-    /// Retrieves the parser result for a given file, calculating it if the file was not yet parsed.
+    /// Retrieves the parser result for a given file.
     ///
     /// Returns an error if no file exists in the workspace with this path.
     fn get_parse(&self, biome_path: &BiomePath) -> Result<AnyParse, WorkspaceError> {
-        self.documents
-            .pin()
+        let documents = self.documents.pin();
+        let syntax = documents
             .get(biome_path)
-            .map(|document| document.syntax.clone())
-            .ok_or_else(WorkspaceError::not_found)
+            .map(|document| document.syntax.as_ref())
+            .ok_or_else(WorkspaceError::not_found)?;
+
+        match syntax {
+            Ok(syntax) => Ok(syntax.clone()),
+            Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(
+                biome_path.to_string_lossy().to_string(),
+            )),
+        }
     }
 
     fn parse(
@@ -541,7 +565,7 @@ impl Workspace for WorkspaceServer {
                 content: params.content,
                 version: params.version,
                 file_source_index: index,
-                syntax: parsed.into(),
+                syntax: Ok(parsed.into()),
                 opened_by_scanner: false,
             },
         );
@@ -720,7 +744,7 @@ impl Workspace for WorkspaceServer {
             content: params.content,
             version: params.version,
             file_source_index: index,
-            syntax: parsed.any_parse,
+            syntax: Ok(parsed.any_parse),
             opened_by_scanner,
         };
 

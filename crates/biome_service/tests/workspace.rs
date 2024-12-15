@@ -1,15 +1,18 @@
 #[cfg(test)]
 mod test {
+    use std::num::NonZero;
     use std::path::PathBuf;
 
     use biome_analyze::RuleCategories;
     use biome_configuration::analyzer::{RuleGroup, RuleSelector};
+    use biome_configuration::{PartialConfiguration, PartialFilesConfiguration};
     use biome_fs::{BiomePath, MemoryFileSystem};
     use biome_js_syntax::{JsFileSource, TextSize};
     use biome_service::file_handlers::DocumentFileSource;
     use biome_service::workspace::{
-        server, CloseFileParams, FileContent, FileGuard, GetFileContentParams, OpenFileParams,
-        RegisterProjectFolderParams, UnregisterProjectFolderParams,
+        server, CloseFileParams, FileContent, FileGuard, GetFileContentParams, GetSyntaxTreeParams,
+        OpenFileParams, RegisterProjectFolderParams, UnregisterProjectFolderParams,
+        UpdateSettingsParams,
     };
     use biome_service::{Workspace, WorkspaceError};
 
@@ -362,5 +365,44 @@ type User {
                 path: BiomePath::new("/project/a.ts"),
             })
             .is_err_and(|error| matches!(error, WorkspaceError::NotFound(_))));
+    }
+
+    #[test]
+    fn too_large_files_are_tracked_but_not_parsed() {
+        const FILE_CONTENT: &[u8] = b"console.log(`I'm YUUUGE!`);";
+
+        let mut fs = MemoryFileSystem::default();
+        fs.insert(PathBuf::from("/project/a.ts"), FILE_CONTENT);
+
+        let workspace = server(Box::new(fs));
+        workspace
+            .register_project_folder(RegisterProjectFolderParams {
+                set_as_current_workspace: true,
+                path: Some(PathBuf::from("/project")),
+            })
+            .unwrap();
+
+        workspace
+            .update_settings(UpdateSettingsParams {
+                configuration: PartialConfiguration {
+                    files: Some(PartialFilesConfiguration {
+                        max_size: NonZero::new(10),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                vcs_base_path: None,
+                gitignore_matches: Vec::new(),
+                workspace_directory: None,
+            })
+            .unwrap();
+
+        workspace.scan_current_project_folder(()).unwrap();
+
+        assert!(workspace
+            .get_syntax_tree(GetSyntaxTreeParams {
+                path: BiomePath::new("/project/a.ts"),
+            })
+            .is_err_and(|error| matches!(error, WorkspaceError::FileIgnored(_))));
     }
 }
