@@ -113,7 +113,7 @@ impl Rule for NoUnwantedPolyfillio {
 }
 
 // Keep in sync with next.js polyfills file : https://github.com/vercel/next.js/blob/master/packages/next-polyfill-nomodule/src/index.js
-const NEXT_POLYFILLED_FEATURES: [&str; 64] = [
+const NEXT_POLYFILLED_FEATURES: &[&str] = &[
     "Array.from",
     "Array.of",
     "Array.prototype.@@iterator",
