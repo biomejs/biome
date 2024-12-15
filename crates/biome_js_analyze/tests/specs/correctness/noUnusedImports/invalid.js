@@ -28,3 +28,5 @@ import {a} from 'a'
 import {d} from 'd'
 import {b} from 'b'
 export const bb = a + b
+
+import {} from "mod"

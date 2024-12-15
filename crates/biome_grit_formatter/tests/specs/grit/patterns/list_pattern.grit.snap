@@ -1,6 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: grit/patterns/list_pattern.grit
+snapshot_kind: text
 ---
 # Input
 
@@ -28,23 +29,14 @@ Attribute Position: Auto
 -----
 
 ```grit
-`var $x = [$numbers]`=>`var firstPrimes = [$numbers]` where {
+`var $x = [$numbers]` => `var firstPrimes = [$numbers]` where {
 	$numbers <: [`2`, `3`, `5`]
 }
 
-`var $x = [$numbers]`=>`var numbersLong = [$numbers]` where {
+`var $x = [$numbers]` => `var numbersLong = [$numbers]` where {
 	$numbers <: [
-			`2`, `3`, `5`, `6`, `7`, `8`, `2`, `3`, `5`, `6`, `7`, `8`, `2`, `3`, `5`,
-			`6`, `7`, `8`, `2`, `3`, `5`, `6`, `7`, `8`
-		],
+		`2`, `3`, `5`, `6`, `7`, `8`, `2`, `3`, `5`, `6`, `7`, `8`, `2`, `3`, `5`,
+		`6`, `7`, `8`, `2`, `3`, `5`, `6`, `7`, `8`
+	]
 }
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"`var $x = [$numbers]`=>`var firstPrimes = [$numbers]`" => 0..53
-"\t$number" => 62..70
-"`var $x = [$numbers]`=>`var numbersLong = [$numbers]` wh" => 94..150
-"\t$number" => 156..164

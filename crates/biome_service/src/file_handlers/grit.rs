@@ -1,6 +1,7 @@
 use super::{
     AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, ExtensionHandler,
-    FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
+    FormatterCapabilities, LintParams, LintResults, ParseResult, ParserCapabilities,
+    SearchCapabilities,
 };
 use crate::workspace::GetSyntaxTreeResult;
 use crate::{
@@ -8,13 +9,15 @@ use crate::{
     WorkspaceError,
 };
 use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions};
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
+use biome_diagnostics::{Diagnostic, Severity};
+use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::BiomePath;
-use biome_grit_formatter::{context::GritFormatOptions, format_node};
+use biome_grit_formatter::{context::GritFormatOptions, format_node, format_sub_tree};
 use biome_grit_parser::parse_grit_with_cache;
 use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxNode};
 use biome_parser::AnyParse;
-use biome_rowan::NodeCache;
+use biome_rowan::{NodeCache, TextRange, TextSize, TokenAtOffset};
+use tracing::debug_span;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -118,7 +121,7 @@ impl ExtensionHandler for GritFileHandler {
                 debug_formatter_ir: Some(debug_formatter_ir),
             },
             analyzer: AnalyzerCapabilities {
-                lint: None,
+                lint: Some(lint),
                 code_actions: None,
                 rename: None,
                 fix_all: None,
@@ -126,8 +129,8 @@ impl ExtensionHandler for GritFileHandler {
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
-                format_range: None,
-                format_on_type: None,
+                format_range: Some(format_range),
+                format_on_type: Some(format_on_type),
             },
             search: SearchCapabilities { search: None },
         }
@@ -190,5 +193,78 @@ fn format(
     match formatted.print() {
         Ok(printed) => Ok(printed),
         Err(error) => Err(WorkspaceError::FormatError(error.into())),
+    }
+}
+
+#[tracing::instrument(level = "debug", skip_all)]
+fn format_range(
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParse,
+    settings: WorkspaceSettingsHandle,
+    range: TextRange,
+) -> Result<Printed, WorkspaceError> {
+    let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
+
+    let tree = parse.syntax();
+    let printed = biome_grit_formatter::format_range(options, &tree, range)?;
+    Ok(printed)
+}
+
+#[tracing::instrument(level = "debug", skip_all)]
+fn format_on_type(
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParse,
+    settings: WorkspaceSettingsHandle,
+    offset: TextSize,
+) -> Result<Printed, WorkspaceError> {
+    let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
+
+    let tree = parse.syntax();
+
+    let range = tree.text_range();
+    if offset < range.start() || offset > range.end() {
+        return Err(WorkspaceError::FormatError(FormatError::RangeError {
+            input: TextRange::at(offset, TextSize::from(0)),
+            tree: range,
+        }));
+    }
+
+    let token = match tree.token_at_offset(offset) {
+        // File is empty, do nothing
+        TokenAtOffset::None => panic!("empty file"),
+        TokenAtOffset::Single(token) => token,
+        // The cursor should be right after the closing character that was just typed,
+        // select the previous token as the correct one
+        TokenAtOffset::Between(token, _) => token,
+    };
+
+    let root_node = match token.parent() {
+        Some(node) => node,
+        None => panic!("found a token with no parent"),
+    };
+
+    let printed = format_sub_tree(options, &root_node)?;
+    Ok(printed)
+}
+
+#[tracing::instrument(level = "debug", skip(params))]
+fn lint(params: LintParams) -> LintResults {
+    let _ = debug_span!("Linting Grit file", path =? params.path, language =? params.language)
+        .entered();
+    let diagnostics = params.parse.into_diagnostics();
+
+    let diagnostic_count = diagnostics.len() as u32;
+    let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
+    let errors = diagnostics
+        .iter()
+        .filter(|diag| diag.severity() <= Severity::Error)
+        .count();
+
+    LintResults {
+        diagnostics,
+        errors,
+        skipped_diagnostics,
     }
 }

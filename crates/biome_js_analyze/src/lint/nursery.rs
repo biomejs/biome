@@ -9,6 +9,7 @@ pub mod no_duplicate_else_if;
 pub mod no_dynamic_namespace_import_access;
 pub mod no_enum;
 pub mod no_exported_imports;
+pub mod no_global_dirname_filename;
 pub mod no_head_element;
 pub mod no_head_import_in_document;
 pub mod no_img_element;
@@ -33,6 +34,7 @@ pub mod use_component_export_only_modules;
 pub mod use_consistent_curly_braces;
 pub mod use_consistent_member_accessibility;
 pub mod use_explicit_type;
+pub mod use_exports_last;
 pub mod use_google_font_display;
 pub mod use_google_font_preconnect;
 pub mod use_guard_for_in;
@@ -53,6 +55,7 @@ declare_lint_group! {
             self :: no_dynamic_namespace_import_access :: NoDynamicNamespaceImportAccess ,
             self :: no_enum :: NoEnum ,
             self :: no_exported_imports :: NoExportedImports ,
+            self :: no_global_dirname_filename :: NoGlobalDirnameFilename ,
             self :: no_head_element :: NoHeadElement ,
             self :: no_head_import_in_document :: NoHeadImportInDocument ,
             self :: no_img_element :: NoImgElement ,
@@ -77,6 +80,7 @@ declare_lint_group! {
             self :: use_consistent_curly_braces :: UseConsistentCurlyBraces ,
             self :: use_consistent_member_accessibility :: UseConsistentMemberAccessibility ,
             self :: use_explicit_type :: UseExplicitType ,
+            self :: use_exports_last :: UseExportsLast ,
             self :: use_google_font_display :: UseGoogleFontDisplay ,
             self :: use_google_font_preconnect :: UseGoogleFontPreconnect ,
             self :: use_guard_for_in :: UseGuardForIn ,

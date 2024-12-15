@@ -61,10 +61,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritCurlyPattern::new_unchecked(node) };
                     $body
                 }
-                $crate::GritSyntaxKind::GRIT_CURLY_PREDICATE_LIST => {
-                    let $pattern = unsafe { $crate::GritCurlyPredicateList::new_unchecked(node) };
-                    $body
-                }
                 $crate::GritSyntaxKind::GRIT_DIV_OPERATION => {
                     let $pattern = unsafe { $crate::GritDivOperation::new_unchecked(node) };
                     $body
@@ -190,10 +186,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritPatternAny::new_unchecked(node) };
                     $body
                 }
-                $crate::GritSyntaxKind::GRIT_PATTERN_ARG_LIST => {
-                    let $pattern = unsafe { $crate::GritPatternArgList::new_unchecked(node) };
-                    $body
-                }
                 $crate::GritSyntaxKind::GRIT_PATTERN_AS => {
                     let $pattern = unsafe { $crate::GritPatternAs::new_unchecked(node) };
                     $body
@@ -274,6 +266,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::GritSyntaxKind::GRIT_PREDICATE_CALL => {
                     let $pattern = unsafe { $crate::GritPredicateCall::new_unchecked(node) };
+                    $body
+                }
+                $crate::GritSyntaxKind::GRIT_PREDICATE_CURLY => {
+                    let $pattern = unsafe { $crate::GritPredicateCurly::new_unchecked(node) };
                     $body
                 }
                 $crate::GritSyntaxKind::GRIT_PREDICATE_DEFINITION => {

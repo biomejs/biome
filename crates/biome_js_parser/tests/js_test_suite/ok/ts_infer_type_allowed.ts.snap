@@ -158,13 +158,13 @@ JsModule {
                 extends_type: TsImportType {
                     typeof_token: missing (optional),
                     import_token: IMPORT_KW@84..90 "import" [] [],
-                    arguments: JsCallArguments {
+                    arguments: TsImportTypeArguments {
                         l_paren_token: L_PAREN@90..91 "(" [] [],
-                        args: JsCallArgumentList [
-                            JsStringLiteralExpression {
-                                value_token: JS_STRING_LITERAL@91..97 "\"test\"" [] [],
-                            },
-                        ],
+                        argument: TsStringLiteralType {
+                            literal_token: JS_STRING_LITERAL@91..97 "\"test\"" [] [],
+                        },
+                        comma_token: missing (optional),
+                        ts_import_type_assertion_block: missing (optional),
                         r_paren_token: R_PAREN@97..98 ")" [] [],
                     },
                     qualifier_clause: TsImportTypeQualifier {
@@ -3197,12 +3197,13 @@ JsModule {
         2: TS_IMPORT_TYPE@84..110
           0: (empty)
           1: IMPORT_KW@84..90 "import" [] []
-          2: JS_CALL_ARGUMENTS@90..98
+          2: TS_IMPORT_TYPE_ARGUMENTS@90..98
             0: L_PAREN@90..91 "(" [] []
-            1: JS_CALL_ARGUMENT_LIST@91..97
-              0: JS_STRING_LITERAL_EXPRESSION@91..97
-                0: JS_STRING_LITERAL@91..97 "\"test\"" [] []
-            2: R_PAREN@97..98 ")" [] []
+            1: TS_STRING_LITERAL_TYPE@91..97
+              0: JS_STRING_LITERAL@91..97 "\"test\"" [] []
+            2: (empty)
+            3: (empty)
+            4: R_PAREN@97..98 ")" [] []
           3: TS_IMPORT_TYPE_QUALIFIER@98..100
             0: DOT@98..99 "." [] []
             1: JS_REFERENCE_IDENTIFIER@99..100

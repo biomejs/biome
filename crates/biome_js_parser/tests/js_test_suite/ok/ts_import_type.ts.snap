@@ -37,13 +37,13 @@ JsModule {
             ty: TsImportType {
                 typeof_token: TYPEOF_KW@9..16 "typeof" [] [Whitespace(" ")],
                 import_token: IMPORT_KW@16..22 "import" [] [],
-                arguments: JsCallArguments {
+                arguments: TsImportTypeArguments {
                     l_paren_token: L_PAREN@22..23 "(" [] [],
-                    args: JsCallArgumentList [
-                        JsStringLiteralExpression {
-                            value_token: JS_STRING_LITERAL@23..29 "\"test\"" [] [],
-                        },
-                    ],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@23..29 "\"test\"" [] [],
+                    },
+                    comma_token: missing (optional),
+                    ts_import_type_assertion_block: missing (optional),
                     r_paren_token: R_PAREN@29..30 ")" [] [],
                 },
                 qualifier_clause: missing (optional),
@@ -61,13 +61,13 @@ JsModule {
             ty: TsImportType {
                 typeof_token: missing (optional),
                 import_token: IMPORT_KW@41..47 "import" [] [],
-                arguments: JsCallArguments {
+                arguments: TsImportTypeArguments {
                     l_paren_token: L_PAREN@47..48 "(" [] [],
-                    args: JsCallArgumentList [
-                        JsStringLiteralExpression {
-                            value_token: JS_STRING_LITERAL@48..54 "\"test\"" [] [],
-                        },
-                    ],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@48..54 "\"test\"" [] [],
+                    },
+                    comma_token: missing (optional),
+                    ts_import_type_assertion_block: missing (optional),
                     r_paren_token: R_PAREN@54..55 ")" [] [],
                 },
                 qualifier_clause: missing (optional),
@@ -85,13 +85,13 @@ JsModule {
             ty: TsImportType {
                 typeof_token: TYPEOF_KW@66..73 "typeof" [] [Whitespace(" ")],
                 import_token: IMPORT_KW@73..79 "import" [] [],
-                arguments: JsCallArguments {
+                arguments: TsImportTypeArguments {
                     l_paren_token: L_PAREN@79..80 "(" [] [],
-                    args: JsCallArgumentList [
-                        JsStringLiteralExpression {
-                            value_token: JS_STRING_LITERAL@80..86 "\"test\"" [] [],
-                        },
-                    ],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@80..86 "\"test\"" [] [],
+                    },
+                    comma_token: missing (optional),
+                    ts_import_type_assertion_block: missing (optional),
                     r_paren_token: R_PAREN@86..87 ")" [] [],
                 },
                 qualifier_clause: TsImportTypeQualifier {
@@ -144,13 +144,13 @@ JsModule {
             ty: TsImportType {
                 typeof_token: missing (optional),
                 import_token: IMPORT_KW@110..116 "import" [] [],
-                arguments: JsCallArguments {
+                arguments: TsImportTypeArguments {
                     l_paren_token: L_PAREN@116..117 "(" [] [],
-                    args: JsCallArgumentList [
-                        JsStringLiteralExpression {
-                            value_token: JS_STRING_LITERAL@117..123 "\"test\"" [] [],
-                        },
-                    ],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@117..123 "\"test\"" [] [],
+                    },
+                    comma_token: missing (optional),
+                    ts_import_type_assertion_block: missing (optional),
                     r_paren_token: R_PAREN@123..124 ")" [] [],
                 },
                 qualifier_clause: missing (optional),
@@ -176,13 +176,13 @@ JsModule {
             ty: TsImportType {
                 typeof_token: missing (optional),
                 import_token: IMPORT_KW@143..149 "import" [] [],
-                arguments: JsCallArguments {
+                arguments: TsImportTypeArguments {
                     l_paren_token: L_PAREN@149..150 "(" [] [],
-                    args: JsCallArgumentList [
-                        JsStringLiteralExpression {
-                            value_token: JS_STRING_LITERAL@150..156 "\"test\"" [] [],
-                        },
-                    ],
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@150..156 "\"test\"" [] [],
+                    },
+                    comma_token: missing (optional),
+                    ts_import_type_assertion_block: missing (optional),
                     r_paren_token: R_PAREN@156..157 ")" [] [],
                 },
                 qualifier_clause: TsImportTypeQualifier {
@@ -213,41 +213,29 @@ JsModule {
             ty: TsImportType {
                 typeof_token: TYPEOF_KW@178..185 "typeof" [] [Whitespace(" ")],
                 import_token: IMPORT_KW@185..191 "import" [] [],
-                arguments: JsCallArguments {
+                arguments: TsImportTypeArguments {
                     l_paren_token: L_PAREN@191..192 "(" [] [],
-                    args: JsCallArgumentList [
-                        JsStringLiteralExpression {
-                            value_token: JS_STRING_LITERAL@192..198 "\"test\"" [] [],
-                        },
-                        COMMA@198..200 "," [] [Whitespace(" ")],
-                        JsObjectExpression {
-                            l_curly_token: L_CURLY@200..202 "{" [] [Whitespace(" ")],
-                            members: JsObjectMemberList [
-                                JsPropertyObjectMember {
-                                    name: JsLiteralMemberName {
-                                        value: IDENT@202..206 "with" [] [],
-                                    },
-                                    colon_token: COLON@206..208 ":" [] [Whitespace(" ")],
-                                    value: JsObjectExpression {
-                                        l_curly_token: L_CURLY@208..210 "{" [] [Whitespace(" ")],
-                                        members: JsObjectMemberList [
-                                            JsPropertyObjectMember {
-                                                name: JsLiteralMemberName {
-                                                    value: JS_STRING_LITERAL@210..227 "\"resolution-mode\"" [] [],
-                                                },
-                                                colon_token: COLON@227..229 ":" [] [Whitespace(" ")],
-                                                value: JsStringLiteralExpression {
-                                                    value_token: JS_STRING_LITERAL@229..238 "\"import\"" [] [Whitespace(" ")],
-                                                },
-                                            },
-                                        ],
-                                        r_curly_token: R_CURLY@238..240 "}" [] [Whitespace(" ")],
-                                    },
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@192..198 "\"test\"" [] [],
+                    },
+                    comma_token: COMMA@198..200 "," [] [Whitespace(" ")],
+                    ts_import_type_assertion_block: TsImportTypeAssertionBlock {
+                        l_curly_token: L_CURLY@200..202 "{" [] [Whitespace(" ")],
+                        type_assertion: TsImportTypeAssertion {
+                            assertion_kind: WITH_KW@202..206 "with" [] [],
+                            colon_token: COLON@206..208 ":" [] [Whitespace(" ")],
+                            l_curly_token: L_CURLY@208..210 "{" [] [Whitespace(" ")],
+                            assertions: JsImportAssertionEntryList [
+                                JsImportAssertionEntry {
+                                    key: JS_STRING_LITERAL@210..227 "\"resolution-mode\"" [] [],
+                                    colon_token: COLON@227..229 ":" [] [Whitespace(" ")],
+                                    value_token: JS_STRING_LITERAL@229..238 "\"import\"" [] [Whitespace(" ")],
                                 },
                             ],
-                            r_curly_token: R_CURLY@240..241 "}" [] [],
+                            r_curly_token: R_CURLY@238..240 "}" [] [Whitespace(" ")],
                         },
-                    ],
+                        r_curly_token: R_CURLY@240..241 "}" [] [],
+                    },
                     r_paren_token: R_PAREN@241..242 ")" [] [],
                 },
                 qualifier_clause: missing (optional),
@@ -265,41 +253,29 @@ JsModule {
             ty: TsImportType {
                 typeof_token: missing (optional),
                 import_token: IMPORT_KW@253..259 "import" [] [],
-                arguments: JsCallArguments {
+                arguments: TsImportTypeArguments {
                     l_paren_token: L_PAREN@259..260 "(" [] [],
-                    args: JsCallArgumentList [
-                        JsStringLiteralExpression {
-                            value_token: JS_STRING_LITERAL@260..266 "\"test\"" [] [],
-                        },
-                        COMMA@266..268 "," [] [Whitespace(" ")],
-                        JsObjectExpression {
-                            l_curly_token: L_CURLY@268..270 "{" [] [Whitespace(" ")],
-                            members: JsObjectMemberList [
-                                JsPropertyObjectMember {
-                                    name: JsLiteralMemberName {
-                                        value: IDENT@270..274 "with" [] [],
-                                    },
-                                    colon_token: COLON@274..276 ":" [] [Whitespace(" ")],
-                                    value: JsObjectExpression {
-                                        l_curly_token: L_CURLY@276..278 "{" [] [Whitespace(" ")],
-                                        members: JsObjectMemberList [
-                                            JsPropertyObjectMember {
-                                                name: JsLiteralMemberName {
-                                                    value: JS_STRING_LITERAL@278..295 "\"resolution-mode\"" [] [],
-                                                },
-                                                colon_token: COLON@295..297 ":" [] [Whitespace(" ")],
-                                                value: JsStringLiteralExpression {
-                                                    value_token: JS_STRING_LITERAL@297..306 "\"import\"" [] [Whitespace(" ")],
-                                                },
-                                            },
-                                        ],
-                                        r_curly_token: R_CURLY@306..308 "}" [] [Whitespace(" ")],
-                                    },
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@260..266 "\"test\"" [] [],
+                    },
+                    comma_token: COMMA@266..268 "," [] [Whitespace(" ")],
+                    ts_import_type_assertion_block: TsImportTypeAssertionBlock {
+                        l_curly_token: L_CURLY@268..270 "{" [] [Whitespace(" ")],
+                        type_assertion: TsImportTypeAssertion {
+                            assertion_kind: WITH_KW@270..274 "with" [] [],
+                            colon_token: COLON@274..276 ":" [] [Whitespace(" ")],
+                            l_curly_token: L_CURLY@276..278 "{" [] [Whitespace(" ")],
+                            assertions: JsImportAssertionEntryList [
+                                JsImportAssertionEntry {
+                                    key: JS_STRING_LITERAL@278..295 "\"resolution-mode\"" [] [],
+                                    colon_token: COLON@295..297 ":" [] [Whitespace(" ")],
+                                    value_token: JS_STRING_LITERAL@297..306 "\"import\"" [] [Whitespace(" ")],
                                 },
                             ],
-                            r_curly_token: R_CURLY@308..309 "}" [] [],
+                            r_curly_token: R_CURLY@306..308 "}" [] [Whitespace(" ")],
                         },
-                    ],
+                        r_curly_token: R_CURLY@308..309 "}" [] [],
+                    },
                     r_paren_token: R_PAREN@309..310 ")" [] [],
                 },
                 qualifier_clause: TsImportTypeQualifier {
@@ -322,41 +298,29 @@ JsModule {
             ty: TsImportType {
                 typeof_token: missing (optional),
                 import_token: IMPORT_KW@336..342 "import" [] [],
-                arguments: JsCallArguments {
+                arguments: TsImportTypeArguments {
                     l_paren_token: L_PAREN@342..343 "(" [] [],
-                    args: JsCallArgumentList [
-                        JsStringLiteralExpression {
-                            value_token: JS_STRING_LITERAL@343..349 "\"test\"" [] [],
-                        },
-                        COMMA@349..351 "," [] [Whitespace(" ")],
-                        JsObjectExpression {
-                            l_curly_token: L_CURLY@351..353 "{" [] [Whitespace(" ")],
-                            members: JsObjectMemberList [
-                                JsPropertyObjectMember {
-                                    name: JsLiteralMemberName {
-                                        value: IDENT@353..357 "with" [] [],
-                                    },
-                                    colon_token: COLON@357..359 ":" [] [Whitespace(" ")],
-                                    value: JsObjectExpression {
-                                        l_curly_token: L_CURLY@359..361 "{" [] [Whitespace(" ")],
-                                        members: JsObjectMemberList [
-                                            JsPropertyObjectMember {
-                                                name: JsLiteralMemberName {
-                                                    value: JS_STRING_LITERAL@361..378 "\"resolution-mode\"" [] [],
-                                                },
-                                                colon_token: COLON@378..380 ":" [] [Whitespace(" ")],
-                                                value: JsStringLiteralExpression {
-                                                    value_token: JS_STRING_LITERAL@380..389 "\"import\"" [] [Whitespace(" ")],
-                                                },
-                                            },
-                                        ],
-                                        r_curly_token: R_CURLY@389..391 "}" [] [Whitespace(" ")],
-                                    },
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@343..349 "\"test\"" [] [],
+                    },
+                    comma_token: COMMA@349..351 "," [] [Whitespace(" ")],
+                    ts_import_type_assertion_block: TsImportTypeAssertionBlock {
+                        l_curly_token: L_CURLY@351..353 "{" [] [Whitespace(" ")],
+                        type_assertion: TsImportTypeAssertion {
+                            assertion_kind: WITH_KW@353..357 "with" [] [],
+                            colon_token: COLON@357..359 ":" [] [Whitespace(" ")],
+                            l_curly_token: L_CURLY@359..361 "{" [] [Whitespace(" ")],
+                            assertions: JsImportAssertionEntryList [
+                                JsImportAssertionEntry {
+                                    key: JS_STRING_LITERAL@361..378 "\"resolution-mode\"" [] [],
+                                    colon_token: COLON@378..380 ":" [] [Whitespace(" ")],
+                                    value_token: JS_STRING_LITERAL@380..389 "\"import\"" [] [Whitespace(" ")],
                                 },
                             ],
-                            r_curly_token: R_CURLY@391..392 "}" [] [],
+                            r_curly_token: R_CURLY@389..391 "}" [] [Whitespace(" ")],
                         },
-                    ],
+                        r_curly_token: R_CURLY@391..392 "}" [] [],
+                    },
                     r_paren_token: R_PAREN@392..393 ")" [] [],
                 },
                 qualifier_clause: missing (optional),
@@ -382,41 +346,29 @@ JsModule {
             ty: TsImportType {
                 typeof_token: missing (optional),
                 import_token: IMPORT_KW@412..418 "import" [] [],
-                arguments: JsCallArguments {
+                arguments: TsImportTypeArguments {
                     l_paren_token: L_PAREN@418..419 "(" [] [],
-                    args: JsCallArgumentList [
-                        JsStringLiteralExpression {
-                            value_token: JS_STRING_LITERAL@419..425 "\"test\"" [] [],
-                        },
-                        COMMA@425..427 "," [] [Whitespace(" ")],
-                        JsObjectExpression {
-                            l_curly_token: L_CURLY@427..429 "{" [] [Whitespace(" ")],
-                            members: JsObjectMemberList [
-                                JsPropertyObjectMember {
-                                    name: JsLiteralMemberName {
-                                        value: IDENT@429..433 "with" [] [],
-                                    },
-                                    colon_token: COLON@433..435 ":" [] [Whitespace(" ")],
-                                    value: JsObjectExpression {
-                                        l_curly_token: L_CURLY@435..437 "{" [] [Whitespace(" ")],
-                                        members: JsObjectMemberList [
-                                            JsPropertyObjectMember {
-                                                name: JsLiteralMemberName {
-                                                    value: JS_STRING_LITERAL@437..454 "\"resolution-mode\"" [] [],
-                                                },
-                                                colon_token: COLON@454..456 ":" [] [Whitespace(" ")],
-                                                value: JsStringLiteralExpression {
-                                                    value_token: JS_STRING_LITERAL@456..466 "\"require\"" [] [Whitespace(" ")],
-                                                },
-                                            },
-                                        ],
-                                        r_curly_token: R_CURLY@466..468 "}" [] [Whitespace(" ")],
-                                    },
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@419..425 "\"test\"" [] [],
+                    },
+                    comma_token: COMMA@425..427 "," [] [Whitespace(" ")],
+                    ts_import_type_assertion_block: TsImportTypeAssertionBlock {
+                        l_curly_token: L_CURLY@427..429 "{" [] [Whitespace(" ")],
+                        type_assertion: TsImportTypeAssertion {
+                            assertion_kind: WITH_KW@429..433 "with" [] [],
+                            colon_token: COLON@433..435 ":" [] [Whitespace(" ")],
+                            l_curly_token: L_CURLY@435..437 "{" [] [Whitespace(" ")],
+                            assertions: JsImportAssertionEntryList [
+                                JsImportAssertionEntry {
+                                    key: JS_STRING_LITERAL@437..454 "\"resolution-mode\"" [] [],
+                                    colon_token: COLON@454..456 ":" [] [Whitespace(" ")],
+                                    value_token: JS_STRING_LITERAL@456..466 "\"require\"" [] [Whitespace(" ")],
                                 },
                             ],
-                            r_curly_token: R_CURLY@468..469 "}" [] [],
+                            r_curly_token: R_CURLY@466..468 "}" [] [Whitespace(" ")],
                         },
-                    ],
+                        r_curly_token: R_CURLY@468..469 "}" [] [],
+                    },
                     r_paren_token: R_PAREN@469..470 ")" [] [],
                 },
                 qualifier_clause: TsImportTypeQualifier {
@@ -447,41 +399,29 @@ JsModule {
             ty: TsImportType {
                 typeof_token: TYPEOF_KW@491..498 "typeof" [] [Whitespace(" ")],
                 import_token: IMPORT_KW@498..504 "import" [] [],
-                arguments: JsCallArguments {
+                arguments: TsImportTypeArguments {
                     l_paren_token: L_PAREN@504..505 "(" [] [],
-                    args: JsCallArgumentList [
-                        JsStringLiteralExpression {
-                            value_token: JS_STRING_LITERAL@505..511 "\"test\"" [] [],
-                        },
-                        COMMA@511..513 "," [] [Whitespace(" ")],
-                        JsObjectExpression {
-                            l_curly_token: L_CURLY@513..515 "{" [] [Whitespace(" ")],
-                            members: JsObjectMemberList [
-                                JsPropertyObjectMember {
-                                    name: JsLiteralMemberName {
-                                        value: IDENT@515..519 "with" [] [],
-                                    },
-                                    colon_token: COLON@519..521 ":" [] [Whitespace(" ")],
-                                    value: JsObjectExpression {
-                                        l_curly_token: L_CURLY@521..523 "{" [] [Whitespace(" ")],
-                                        members: JsObjectMemberList [
-                                            JsPropertyObjectMember {
-                                                name: JsLiteralMemberName {
-                                                    value: JS_STRING_LITERAL@523..540 "\"resolution-mode\"" [] [],
-                                                },
-                                                colon_token: COLON@540..542 ":" [] [Whitespace(" ")],
-                                                value: JsStringLiteralExpression {
-                                                    value_token: JS_STRING_LITERAL@542..552 "\"require\"" [] [Whitespace(" ")],
-                                                },
-                                            },
-                                        ],
-                                        r_curly_token: R_CURLY@552..554 "}" [] [Whitespace(" ")],
-                                    },
+                    argument: TsStringLiteralType {
+                        literal_token: JS_STRING_LITERAL@505..511 "\"test\"" [] [],
+                    },
+                    comma_token: COMMA@511..513 "," [] [Whitespace(" ")],
+                    ts_import_type_assertion_block: TsImportTypeAssertionBlock {
+                        l_curly_token: L_CURLY@513..515 "{" [] [Whitespace(" ")],
+                        type_assertion: TsImportTypeAssertion {
+                            assertion_kind: WITH_KW@515..519 "with" [] [],
+                            colon_token: COLON@519..521 ":" [] [Whitespace(" ")],
+                            l_curly_token: L_CURLY@521..523 "{" [] [Whitespace(" ")],
+                            assertions: JsImportAssertionEntryList [
+                                JsImportAssertionEntry {
+                                    key: JS_STRING_LITERAL@523..540 "\"resolution-mode\"" [] [],
+                                    colon_token: COLON@540..542 ":" [] [Whitespace(" ")],
+                                    value_token: JS_STRING_LITERAL@542..552 "\"require\"" [] [Whitespace(" ")],
                                 },
                             ],
-                            r_curly_token: R_CURLY@554..555 "}" [] [],
+                            r_curly_token: R_CURLY@552..554 "}" [] [Whitespace(" ")],
                         },
-                    ],
+                        r_curly_token: R_CURLY@554..555 "}" [] [],
+                    },
                     r_paren_token: R_PAREN@555..556 ")" [] [],
                 },
                 qualifier_clause: TsImportTypeQualifier {
@@ -546,12 +486,13 @@ JsModule {
       4: TS_IMPORT_TYPE@9..30
         0: TYPEOF_KW@9..16 "typeof" [] [Whitespace(" ")]
         1: IMPORT_KW@16..22 "import" [] []
-        2: JS_CALL_ARGUMENTS@22..30
+        2: TS_IMPORT_TYPE_ARGUMENTS@22..30
           0: L_PAREN@22..23 "(" [] []
-          1: JS_CALL_ARGUMENT_LIST@23..29
-            0: JS_STRING_LITERAL_EXPRESSION@23..29
-              0: JS_STRING_LITERAL@23..29 "\"test\"" [] []
-          2: R_PAREN@29..30 ")" [] []
+          1: TS_STRING_LITERAL_TYPE@23..29
+            0: JS_STRING_LITERAL@23..29 "\"test\"" [] []
+          2: (empty)
+          3: (empty)
+          4: R_PAREN@29..30 ")" [] []
         3: (empty)
         4: (empty)
       5: SEMICOLON@30..31 ";" [] []
@@ -564,12 +505,13 @@ JsModule {
       4: TS_IMPORT_TYPE@41..55
         0: (empty)
         1: IMPORT_KW@41..47 "import" [] []
-        2: JS_CALL_ARGUMENTS@47..55
+        2: TS_IMPORT_TYPE_ARGUMENTS@47..55
           0: L_PAREN@47..48 "(" [] []
-          1: JS_CALL_ARGUMENT_LIST@48..54
-            0: JS_STRING_LITERAL_EXPRESSION@48..54
-              0: JS_STRING_LITERAL@48..54 "\"test\"" [] []
-          2: R_PAREN@54..55 ")" [] []
+          1: TS_STRING_LITERAL_TYPE@48..54
+            0: JS_STRING_LITERAL@48..54 "\"test\"" [] []
+          2: (empty)
+          3: (empty)
+          4: R_PAREN@54..55 ")" [] []
         3: (empty)
         4: (empty)
       5: SEMICOLON@55..56 ";" [] []
@@ -582,12 +524,13 @@ JsModule {
       4: TS_IMPORT_TYPE@66..99
         0: TYPEOF_KW@66..73 "typeof" [] [Whitespace(" ")]
         1: IMPORT_KW@73..79 "import" [] []
-        2: JS_CALL_ARGUMENTS@79..87
+        2: TS_IMPORT_TYPE_ARGUMENTS@79..87
           0: L_PAREN@79..80 "(" [] []
-          1: JS_CALL_ARGUMENT_LIST@80..86
-            0: JS_STRING_LITERAL_EXPRESSION@80..86
-              0: JS_STRING_LITERAL@80..86 "\"test\"" [] []
-          2: R_PAREN@86..87 ")" [] []
+          1: TS_STRING_LITERAL_TYPE@80..86
+            0: JS_STRING_LITERAL@80..86 "\"test\"" [] []
+          2: (empty)
+          3: (empty)
+          4: R_PAREN@86..87 ")" [] []
         3: TS_IMPORT_TYPE_QUALIFIER@87..99
           0: DOT@87..88 "." [] []
           1: TS_QUALIFIED_NAME@88..99
@@ -623,12 +566,13 @@ JsModule {
       4: TS_IMPORT_TYPE@110..132
         0: (empty)
         1: IMPORT_KW@110..116 "import" [] []
-        2: JS_CALL_ARGUMENTS@116..124
+        2: TS_IMPORT_TYPE_ARGUMENTS@116..124
           0: L_PAREN@116..117 "(" [] []
-          1: JS_CALL_ARGUMENT_LIST@117..123
-            0: JS_STRING_LITERAL_EXPRESSION@117..123
-              0: JS_STRING_LITERAL@117..123 "\"test\"" [] []
-          2: R_PAREN@123..124 ")" [] []
+          1: TS_STRING_LITERAL_TYPE@117..123
+            0: JS_STRING_LITERAL@117..123 "\"test\"" [] []
+          2: (empty)
+          3: (empty)
+          4: R_PAREN@123..124 ")" [] []
         3: (empty)
         4: TS_TYPE_ARGUMENTS@124..132
           0: L_ANGLE@124..125 "<" [] []
@@ -646,12 +590,13 @@ JsModule {
       4: TS_IMPORT_TYPE@143..167
         0: (empty)
         1: IMPORT_KW@143..149 "import" [] []
-        2: JS_CALL_ARGUMENTS@149..157
+        2: TS_IMPORT_TYPE_ARGUMENTS@149..157
           0: L_PAREN@149..150 "(" [] []
-          1: JS_CALL_ARGUMENT_LIST@150..156
-            0: JS_STRING_LITERAL_EXPRESSION@150..156
-              0: JS_STRING_LITERAL@150..156 "\"test\"" [] []
-          2: R_PAREN@156..157 ")" [] []
+          1: TS_STRING_LITERAL_TYPE@150..156
+            0: JS_STRING_LITERAL@150..156 "\"test\"" [] []
+          2: (empty)
+          3: (empty)
+          4: R_PAREN@156..157 ")" [] []
         3: TS_IMPORT_TYPE_QUALIFIER@157..159
           0: DOT@157..158 "." [] []
           1: JS_REFERENCE_IDENTIFIER@158..159
@@ -672,31 +617,25 @@ JsModule {
       4: TS_IMPORT_TYPE@178..242
         0: TYPEOF_KW@178..185 "typeof" [] [Whitespace(" ")]
         1: IMPORT_KW@185..191 "import" [] []
-        2: JS_CALL_ARGUMENTS@191..242
+        2: TS_IMPORT_TYPE_ARGUMENTS@191..242
           0: L_PAREN@191..192 "(" [] []
-          1: JS_CALL_ARGUMENT_LIST@192..241
-            0: JS_STRING_LITERAL_EXPRESSION@192..198
-              0: JS_STRING_LITERAL@192..198 "\"test\"" [] []
-            1: COMMA@198..200 "," [] [Whitespace(" ")]
-            2: JS_OBJECT_EXPRESSION@200..241
-              0: L_CURLY@200..202 "{" [] [Whitespace(" ")]
-              1: JS_OBJECT_MEMBER_LIST@202..240
-                0: JS_PROPERTY_OBJECT_MEMBER@202..240
-                  0: JS_LITERAL_MEMBER_NAME@202..206
-                    0: IDENT@202..206 "with" [] []
-                  1: COLON@206..208 ":" [] [Whitespace(" ")]
-                  2: JS_OBJECT_EXPRESSION@208..240
-                    0: L_CURLY@208..210 "{" [] [Whitespace(" ")]
-                    1: JS_OBJECT_MEMBER_LIST@210..238
-                      0: JS_PROPERTY_OBJECT_MEMBER@210..238
-                        0: JS_LITERAL_MEMBER_NAME@210..227
-                          0: JS_STRING_LITERAL@210..227 "\"resolution-mode\"" [] []
-                        1: COLON@227..229 ":" [] [Whitespace(" ")]
-                        2: JS_STRING_LITERAL_EXPRESSION@229..238
-                          0: JS_STRING_LITERAL@229..238 "\"import\"" [] [Whitespace(" ")]
-                    2: R_CURLY@238..240 "}" [] [Whitespace(" ")]
-              2: R_CURLY@240..241 "}" [] []
-          2: R_PAREN@241..242 ")" [] []
+          1: TS_STRING_LITERAL_TYPE@192..198
+            0: JS_STRING_LITERAL@192..198 "\"test\"" [] []
+          2: COMMA@198..200 "," [] [Whitespace(" ")]
+          3: TS_IMPORT_TYPE_ASSERTION_BLOCK@200..241
+            0: L_CURLY@200..202 "{" [] [Whitespace(" ")]
+            1: TS_IMPORT_TYPE_ASSERTION@202..240
+              0: WITH_KW@202..206 "with" [] []
+              1: COLON@206..208 ":" [] [Whitespace(" ")]
+              2: L_CURLY@208..210 "{" [] [Whitespace(" ")]
+              3: JS_IMPORT_ASSERTION_ENTRY_LIST@210..238
+                0: JS_IMPORT_ASSERTION_ENTRY@210..238
+                  0: JS_STRING_LITERAL@210..227 "\"resolution-mode\"" [] []
+                  1: COLON@227..229 ":" [] [Whitespace(" ")]
+                  2: JS_STRING_LITERAL@229..238 "\"import\"" [] [Whitespace(" ")]
+              4: R_CURLY@238..240 "}" [] [Whitespace(" ")]
+            2: R_CURLY@240..241 "}" [] []
+          4: R_PAREN@241..242 ")" [] []
         3: (empty)
         4: (empty)
       5: SEMICOLON@242..243 ";" [] []
@@ -709,31 +648,25 @@ JsModule {
       4: TS_IMPORT_TYPE@253..325
         0: (empty)
         1: IMPORT_KW@253..259 "import" [] []
-        2: JS_CALL_ARGUMENTS@259..310
+        2: TS_IMPORT_TYPE_ARGUMENTS@259..310
           0: L_PAREN@259..260 "(" [] []
-          1: JS_CALL_ARGUMENT_LIST@260..309
-            0: JS_STRING_LITERAL_EXPRESSION@260..266
-              0: JS_STRING_LITERAL@260..266 "\"test\"" [] []
-            1: COMMA@266..268 "," [] [Whitespace(" ")]
-            2: JS_OBJECT_EXPRESSION@268..309
-              0: L_CURLY@268..270 "{" [] [Whitespace(" ")]
-              1: JS_OBJECT_MEMBER_LIST@270..308
-                0: JS_PROPERTY_OBJECT_MEMBER@270..308
-                  0: JS_LITERAL_MEMBER_NAME@270..274
-                    0: IDENT@270..274 "with" [] []
-                  1: COLON@274..276 ":" [] [Whitespace(" ")]
-                  2: JS_OBJECT_EXPRESSION@276..308
-                    0: L_CURLY@276..278 "{" [] [Whitespace(" ")]
-                    1: JS_OBJECT_MEMBER_LIST@278..306
-                      0: JS_PROPERTY_OBJECT_MEMBER@278..306
-                        0: JS_LITERAL_MEMBER_NAME@278..295
-                          0: JS_STRING_LITERAL@278..295 "\"resolution-mode\"" [] []
-                        1: COLON@295..297 ":" [] [Whitespace(" ")]
-                        2: JS_STRING_LITERAL_EXPRESSION@297..306
-                          0: JS_STRING_LITERAL@297..306 "\"import\"" [] [Whitespace(" ")]
-                    2: R_CURLY@306..308 "}" [] [Whitespace(" ")]
-              2: R_CURLY@308..309 "}" [] []
-          2: R_PAREN@309..310 ")" [] []
+          1: TS_STRING_LITERAL_TYPE@260..266
+            0: JS_STRING_LITERAL@260..266 "\"test\"" [] []
+          2: COMMA@266..268 "," [] [Whitespace(" ")]
+          3: TS_IMPORT_TYPE_ASSERTION_BLOCK@268..309
+            0: L_CURLY@268..270 "{" [] [Whitespace(" ")]
+            1: TS_IMPORT_TYPE_ASSERTION@270..308
+              0: WITH_KW@270..274 "with" [] []
+              1: COLON@274..276 ":" [] [Whitespace(" ")]
+              2: L_CURLY@276..278 "{" [] [Whitespace(" ")]
+              3: JS_IMPORT_ASSERTION_ENTRY_LIST@278..306
+                0: JS_IMPORT_ASSERTION_ENTRY@278..306
+                  0: JS_STRING_LITERAL@278..295 "\"resolution-mode\"" [] []
+                  1: COLON@295..297 ":" [] [Whitespace(" ")]
+                  2: JS_STRING_LITERAL@297..306 "\"import\"" [] [Whitespace(" ")]
+              4: R_CURLY@306..308 "}" [] [Whitespace(" ")]
+            2: R_CURLY@308..309 "}" [] []
+          4: R_PAREN@309..310 ")" [] []
         3: TS_IMPORT_TYPE_QUALIFIER@310..325
           0: DOT@310..311 "." [] []
           1: JS_REFERENCE_IDENTIFIER@311..325
@@ -749,31 +682,25 @@ JsModule {
       4: TS_IMPORT_TYPE@336..401
         0: (empty)
         1: IMPORT_KW@336..342 "import" [] []
-        2: JS_CALL_ARGUMENTS@342..393
+        2: TS_IMPORT_TYPE_ARGUMENTS@342..393
           0: L_PAREN@342..343 "(" [] []
-          1: JS_CALL_ARGUMENT_LIST@343..392
-            0: JS_STRING_LITERAL_EXPRESSION@343..349
-              0: JS_STRING_LITERAL@343..349 "\"test\"" [] []
-            1: COMMA@349..351 "," [] [Whitespace(" ")]
-            2: JS_OBJECT_EXPRESSION@351..392
-              0: L_CURLY@351..353 "{" [] [Whitespace(" ")]
-              1: JS_OBJECT_MEMBER_LIST@353..391
-                0: JS_PROPERTY_OBJECT_MEMBER@353..391
-                  0: JS_LITERAL_MEMBER_NAME@353..357
-                    0: IDENT@353..357 "with" [] []
-                  1: COLON@357..359 ":" [] [Whitespace(" ")]
-                  2: JS_OBJECT_EXPRESSION@359..391
-                    0: L_CURLY@359..361 "{" [] [Whitespace(" ")]
-                    1: JS_OBJECT_MEMBER_LIST@361..389
-                      0: JS_PROPERTY_OBJECT_MEMBER@361..389
-                        0: JS_LITERAL_MEMBER_NAME@361..378
-                          0: JS_STRING_LITERAL@361..378 "\"resolution-mode\"" [] []
-                        1: COLON@378..380 ":" [] [Whitespace(" ")]
-                        2: JS_STRING_LITERAL_EXPRESSION@380..389
-                          0: JS_STRING_LITERAL@380..389 "\"import\"" [] [Whitespace(" ")]
-                    2: R_CURLY@389..391 "}" [] [Whitespace(" ")]
-              2: R_CURLY@391..392 "}" [] []
-          2: R_PAREN@392..393 ")" [] []
+          1: TS_STRING_LITERAL_TYPE@343..349
+            0: JS_STRING_LITERAL@343..349 "\"test\"" [] []
+          2: COMMA@349..351 "," [] [Whitespace(" ")]
+          3: TS_IMPORT_TYPE_ASSERTION_BLOCK@351..392
+            0: L_CURLY@351..353 "{" [] [Whitespace(" ")]
+            1: TS_IMPORT_TYPE_ASSERTION@353..391
+              0: WITH_KW@353..357 "with" [] []
+              1: COLON@357..359 ":" [] [Whitespace(" ")]
+              2: L_CURLY@359..361 "{" [] [Whitespace(" ")]
+              3: JS_IMPORT_ASSERTION_ENTRY_LIST@361..389
+                0: JS_IMPORT_ASSERTION_ENTRY@361..389
+                  0: JS_STRING_LITERAL@361..378 "\"resolution-mode\"" [] []
+                  1: COLON@378..380 ":" [] [Whitespace(" ")]
+                  2: JS_STRING_LITERAL@380..389 "\"import\"" [] [Whitespace(" ")]
+              4: R_CURLY@389..391 "}" [] [Whitespace(" ")]
+            2: R_CURLY@391..392 "}" [] []
+          4: R_PAREN@392..393 ")" [] []
         3: (empty)
         4: TS_TYPE_ARGUMENTS@393..401
           0: L_ANGLE@393..394 "<" [] []
@@ -791,31 +718,25 @@ JsModule {
       4: TS_IMPORT_TYPE@412..480
         0: (empty)
         1: IMPORT_KW@412..418 "import" [] []
-        2: JS_CALL_ARGUMENTS@418..470
+        2: TS_IMPORT_TYPE_ARGUMENTS@418..470
           0: L_PAREN@418..419 "(" [] []
-          1: JS_CALL_ARGUMENT_LIST@419..469
-            0: JS_STRING_LITERAL_EXPRESSION@419..425
-              0: JS_STRING_LITERAL@419..425 "\"test\"" [] []
-            1: COMMA@425..427 "," [] [Whitespace(" ")]
-            2: JS_OBJECT_EXPRESSION@427..469
-              0: L_CURLY@427..429 "{" [] [Whitespace(" ")]
-              1: JS_OBJECT_MEMBER_LIST@429..468
-                0: JS_PROPERTY_OBJECT_MEMBER@429..468
-                  0: JS_LITERAL_MEMBER_NAME@429..433
-                    0: IDENT@429..433 "with" [] []
-                  1: COLON@433..435 ":" [] [Whitespace(" ")]
-                  2: JS_OBJECT_EXPRESSION@435..468
-                    0: L_CURLY@435..437 "{" [] [Whitespace(" ")]
-                    1: JS_OBJECT_MEMBER_LIST@437..466
-                      0: JS_PROPERTY_OBJECT_MEMBER@437..466
-                        0: JS_LITERAL_MEMBER_NAME@437..454
-                          0: JS_STRING_LITERAL@437..454 "\"resolution-mode\"" [] []
-                        1: COLON@454..456 ":" [] [Whitespace(" ")]
-                        2: JS_STRING_LITERAL_EXPRESSION@456..466
-                          0: JS_STRING_LITERAL@456..466 "\"require\"" [] [Whitespace(" ")]
-                    2: R_CURLY@466..468 "}" [] [Whitespace(" ")]
-              2: R_CURLY@468..469 "}" [] []
-          2: R_PAREN@469..470 ")" [] []
+          1: TS_STRING_LITERAL_TYPE@419..425
+            0: JS_STRING_LITERAL@419..425 "\"test\"" [] []
+          2: COMMA@425..427 "," [] [Whitespace(" ")]
+          3: TS_IMPORT_TYPE_ASSERTION_BLOCK@427..469
+            0: L_CURLY@427..429 "{" [] [Whitespace(" ")]
+            1: TS_IMPORT_TYPE_ASSERTION@429..468
+              0: WITH_KW@429..433 "with" [] []
+              1: COLON@433..435 ":" [] [Whitespace(" ")]
+              2: L_CURLY@435..437 "{" [] [Whitespace(" ")]
+              3: JS_IMPORT_ASSERTION_ENTRY_LIST@437..466
+                0: JS_IMPORT_ASSERTION_ENTRY@437..466
+                  0: JS_STRING_LITERAL@437..454 "\"resolution-mode\"" [] []
+                  1: COLON@454..456 ":" [] [Whitespace(" ")]
+                  2: JS_STRING_LITERAL@456..466 "\"require\"" [] [Whitespace(" ")]
+              4: R_CURLY@466..468 "}" [] [Whitespace(" ")]
+            2: R_CURLY@468..469 "}" [] []
+          4: R_PAREN@469..470 ")" [] []
         3: TS_IMPORT_TYPE_QUALIFIER@470..472
           0: DOT@470..471 "." [] []
           1: JS_REFERENCE_IDENTIFIER@471..472
@@ -836,31 +757,25 @@ JsModule {
       4: TS_IMPORT_TYPE@491..568
         0: TYPEOF_KW@491..498 "typeof" [] [Whitespace(" ")]
         1: IMPORT_KW@498..504 "import" [] []
-        2: JS_CALL_ARGUMENTS@504..556
+        2: TS_IMPORT_TYPE_ARGUMENTS@504..556
           0: L_PAREN@504..505 "(" [] []
-          1: JS_CALL_ARGUMENT_LIST@505..555
-            0: JS_STRING_LITERAL_EXPRESSION@505..511
-              0: JS_STRING_LITERAL@505..511 "\"test\"" [] []
-            1: COMMA@511..513 "," [] [Whitespace(" ")]
-            2: JS_OBJECT_EXPRESSION@513..555
-              0: L_CURLY@513..515 "{" [] [Whitespace(" ")]
-              1: JS_OBJECT_MEMBER_LIST@515..554
-                0: JS_PROPERTY_OBJECT_MEMBER@515..554
-                  0: JS_LITERAL_MEMBER_NAME@515..519
-                    0: IDENT@515..519 "with" [] []
-                  1: COLON@519..521 ":" [] [Whitespace(" ")]
-                  2: JS_OBJECT_EXPRESSION@521..554
-                    0: L_CURLY@521..523 "{" [] [Whitespace(" ")]
-                    1: JS_OBJECT_MEMBER_LIST@523..552
-                      0: JS_PROPERTY_OBJECT_MEMBER@523..552
-                        0: JS_LITERAL_MEMBER_NAME@523..540
-                          0: JS_STRING_LITERAL@523..540 "\"resolution-mode\"" [] []
-                        1: COLON@540..542 ":" [] [Whitespace(" ")]
-                        2: JS_STRING_LITERAL_EXPRESSION@542..552
-                          0: JS_STRING_LITERAL@542..552 "\"require\"" [] [Whitespace(" ")]
-                    2: R_CURLY@552..554 "}" [] [Whitespace(" ")]
-              2: R_CURLY@554..555 "}" [] []
-          2: R_PAREN@555..556 ")" [] []
+          1: TS_STRING_LITERAL_TYPE@505..511
+            0: JS_STRING_LITERAL@505..511 "\"test\"" [] []
+          2: COMMA@511..513 "," [] [Whitespace(" ")]
+          3: TS_IMPORT_TYPE_ASSERTION_BLOCK@513..555
+            0: L_CURLY@513..515 "{" [] [Whitespace(" ")]
+            1: TS_IMPORT_TYPE_ASSERTION@515..554
+              0: WITH_KW@515..519 "with" [] []
+              1: COLON@519..521 ":" [] [Whitespace(" ")]
+              2: L_CURLY@521..523 "{" [] [Whitespace(" ")]
+              3: JS_IMPORT_ASSERTION_ENTRY_LIST@523..552
+                0: JS_IMPORT_ASSERTION_ENTRY@523..552
+                  0: JS_STRING_LITERAL@523..540 "\"resolution-mode\"" [] []
+                  1: COLON@540..542 ":" [] [Whitespace(" ")]
+                  2: JS_STRING_LITERAL@542..552 "\"require\"" [] [Whitespace(" ")]
+              4: R_CURLY@552..554 "}" [] [Whitespace(" ")]
+            2: R_CURLY@554..555 "}" [] []
+          4: R_PAREN@555..556 ")" [] []
         3: TS_IMPORT_TYPE_QUALIFIER@556..568
           0: DOT@556..557 "." [] []
           1: TS_QUALIFIED_NAME@557..568

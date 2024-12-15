@@ -440,7 +440,7 @@
 				"noForEach": {
 					"description": "Prefer for...of statement instead of Array.forEach.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoForEachConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -917,7 +917,7 @@
 				"noUndeclaredVariables": {
 					"description": "Prevents the usage of variables that haven't been declared inside the document.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/UndeclaredVariablesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1193,6 +1193,38 @@
 				"cssModules": {
 					"description": "Enables parsing of CSS Modules specific features.",
 					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"CustomRestrictedImport": {
+			"anyOf": [
+				{
+					"description": "The message to display when this module is imported.",
+					"type": "string"
+				},
+				{
+					"description": "Additional options to configure the message and allowed/disallowed import names.",
+					"allOf": [{ "$ref": "#/definitions/CustomRestrictedImportOptions" }]
+				}
+			]
+		},
+		"CustomRestrictedImportOptions": {
+			"type": "object",
+			"properties": {
+				"allowImportNames": {
+					"description": "Names of the exported members that allowed to be not be used.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"importNames": {
+					"description": "Names of the exported members that should not be used.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"message": {
+					"description": "The message to display when this module is imported.",
+					"type": "string"
 				}
 			},
 			"additionalProperties": false
@@ -2038,6 +2070,23 @@
 			},
 			"additionalProperties": false
 		},
+		"NoForEachConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoForEachOptions" }
+			]
+		},
+		"NoForEachOptions": {
+			"type": "object",
+			"properties": {
+				"allowedIdentifiers": {
+					"description": "A list of variable names allowed for `forEach` calls.",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoLabelWithoutControlConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2218,6 +2267,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noGlobalDirnameFilename": {
+					"description": "Disallow the use of __dirname and __filename in the global scope.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noHeadElement": {
 					"description": "Prevent usage of \\<head> element in a Next.js project.",
 					"anyOf": [
@@ -2311,6 +2367,13 @@
 				},
 				"noTemplateCurlyInString": {
 					"description": "Disallow template literal placeholder syntax in regular strings.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownAtRule": {
+					"description": "Disallow unknown at-rules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2436,6 +2499,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExportsLast": {
+					"description": "Require that all exports are declared after all non-export statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGoogleFontDisplay": {
 					"description": "Enforces the use of a recommended display strategy with Google Fonts.",
 					"anyOf": [
@@ -2468,6 +2538,13 @@
 					"description": "Enforce specifying the name of GraphQL operations.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNamingConvention": {
+					"description": "Validates that all enum values are capitalized.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2754,9 +2831,11 @@
 			"type": "object",
 			"properties": {
 				"paths": {
-					"description": "A list of names that should trigger the rule",
+					"description": "A list of import paths that should trigger the rule.",
 					"type": "object",
-					"additionalProperties": { "type": "string" }
+					"additionalProperties": {
+						"$ref": "#/definitions/CustomRestrictedImport"
+					}
 				}
 			},
 			"additionalProperties": false
@@ -2993,6 +3072,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoForEachOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoForEachOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoLabelWithoutControlOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -3094,6 +3188,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/RestrictedImportsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUndeclaredVariablesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UndeclaredVariablesOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -4225,7 +4334,7 @@
 					]
 				},
 				"useValidTypeof": {
-					"description": "This rule verifies the result of typeof $expr unary expressions is being compared to valid values, either string literals containing valid type names or other typeof expressions",
+					"description": "This rule checks that the result of a `typeof' expression is compared to a valid value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -4267,6 +4376,22 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UndeclaredVariablesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUndeclaredVariablesOptions" }
+			]
+		},
+		"UndeclaredVariablesOptions": {
+			"type": "object",
+			"properties": {
+				"checkTypes": {
+					"description": "Check undeclared types.",
+					"default": true,
+					"type": "boolean"
+				}
+			}
 		},
 		"UseComponentExportOnlyModulesConfiguration": {
 			"anyOf": [

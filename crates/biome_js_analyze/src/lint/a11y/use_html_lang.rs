@@ -71,7 +71,7 @@ impl Rule for UseHtmlLang {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let name = element.name().ok()?.name_value_token()?;
+        let name = element.name().ok()?.name_value_token().ok()?;
 
         if name.text_trimmed() == "html" {
             if let Some(lang_attribute) = element.find_attribute_by_name("lang") {

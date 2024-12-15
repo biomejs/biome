@@ -17,8 +17,8 @@ expression: invalid.jsx
     <div autoFocus />
     <div autoFocus={true} />
     <div autoFocus={false} />
+    <div popover={false}><input autoFocus /></div>
 </>
-
 ```
 
 # Diagnostics
@@ -231,7 +231,7 @@ invalid.jsx:12:10 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━
   > 12 │     <div autoFocus={true} />
        │          ^^^^^^^^^^^^^^^^
     13 │     <div autoFocus={false} />
-    14 │ </>
+    14 │     <div popover={false}><input autoFocus /></div>
   
   i Unsafe fix: Remove the autoFocus attribute.
   
@@ -249,8 +249,8 @@ invalid.jsx:13:10 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━
     12 │     <div autoFocus={true} />
   > 13 │     <div autoFocus={false} />
        │          ^^^^^^^^^^^^^^^^^
-    14 │ </>
-    15 │ 
+    14 │     <div popover={false}><input autoFocus /></div>
+    15 │ </>
   
   i Unsafe fix: Remove the autoFocus attribute.
   
@@ -259,4 +259,20 @@ invalid.jsx:13:10 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━
 
 ```
 
+```
+invalid.jsx:14:33 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! Avoid the autoFocus attribute.
+  
+    12 │     <div autoFocus={true} />
+    13 │     <div autoFocus={false} />
+  > 14 │     <div popover={false}><input autoFocus /></div>
+       │                                 ^^^^^^^^^
+    15 │ </>
+  
+  i Unsafe fix: Remove the autoFocus attribute.
+  
+    14 │ ····<div·popover={false}><input·autoFocus·/></div>
+       │                                 ----------        
+
+```

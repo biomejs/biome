@@ -10,14 +10,14 @@ use biome_formatter::{
     comments::Comments,
     prelude::*,
     trivia::{format_dangling_comments, format_leading_comments, format_trailing_comments},
-    write, CstFormatContext, Format, FormatLanguage, FormatResult, Formatted,
+    write, CstFormatContext, Format, FormatLanguage, FormatResult, Formatted, Printed,
 };
 use biome_grit_syntax::{GritLanguage, GritSyntaxNode};
 use comments::GritCommentStyle;
 
 pub(crate) use crate::context::GritFormatContext;
 
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TextRange};
 use context::GritFormatOptions;
 use cst::FormatGritSyntaxNode;
 
@@ -31,6 +31,39 @@ pub fn format_node(
     root: &GritSyntaxNode,
 ) -> FormatResult<Formatted<GritFormatContext>> {
     biome_formatter::format_node(root, GritFormatLanguage::new(options))
+}
+
+/// Formats a range within a file, supported by Biome
+///
+/// This runs a simple heuristic to determine the initial indentation
+/// level of the node based on the provided [GritFormatOptions], which
+/// must match the current indentation of the file. Additionally,
+/// because the reformatting happens only locally the resulting code
+/// will be indented with the same level as the original selection,
+/// even if it's a mismatch from the rest of the block the selection is in
+///
+/// It returns a [Printed] result with a range corresponding to the
+/// range of the input that was effectively overwritten by the formatter
+pub fn format_range(
+    options: GritFormatOptions,
+    root: &GritSyntaxNode,
+    range: TextRange,
+) -> FormatResult<Printed> {
+    biome_formatter::format_range(root, range, GritFormatLanguage::new(options))
+}
+
+/// Formats a single node within a file, supported by Biome.
+///
+/// This runs a simple heuristic to determine the initial indentation
+/// level of the node based on the provided [GritFormatOptions], which
+/// must match the current indentation of the file. Additionally,
+/// because the reformatting happens only locally the resulting code
+/// will be indented with the same level as the original selection,
+/// even if it's a mismatch from the rest of the block the selection is in
+///
+/// Returns the [Printed] code.
+pub fn format_sub_tree(options: GritFormatOptions, root: &GritSyntaxNode) -> FormatResult<Printed> {
+    biome_formatter::format_sub_tree(root, GritFormatLanguage::new(options))
 }
 
 pub(crate) trait FormatNodeRule<N>

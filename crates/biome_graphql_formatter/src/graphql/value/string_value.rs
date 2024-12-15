@@ -22,7 +22,7 @@ impl FormatNodeRule<GraphqlStringValue> for FormatGraphqlStringValue {
             // But leading whitespace is significant in block strings to calculate the indentation level
             // SAFETY:
             // We check that the string starts with triple quotes and the parser guarantees that ends with triple quotes.
-            let trimmed_content = raw_content.trim_start_matches('\n').trim_end();
+            let trimmed_content = raw_content.trim_start_matches(['\n', '\r']).trim_end();
 
             // Find the minimum indentation level of non-empty lines
             let min_indent = trimmed_content

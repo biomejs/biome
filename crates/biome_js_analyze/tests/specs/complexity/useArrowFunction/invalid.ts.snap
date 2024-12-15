@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -57,6 +58,12 @@ const staticMember = function(a) {}.bind(null, 0);
 const computedMember = function(a) {}["bind"](null, 0);
 const logical = false || function () {};
 const binary = false + function () {};
+
+const withDirective = function () {
+	"use server";
+	return 0;
+}
+
 ```
 
 # Diagnostics
@@ -520,6 +527,7 @@ invalid.ts:52:26 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   > 52 │ const logical = false || function () {};
        │                          ^^^^^^^^^^^^^^
     53 │ const binary = false + function () {};
+    54 │ 
   
   i Function expressions that don't use this can be turned into arrow functions.
   
@@ -530,6 +538,7 @@ invalid.ts:52:26 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
     52    │ - const·logical·=·false·||·function·()·{};
        52 │ + const·logical·=·false·||·(()·=>·{});
     53 53 │   const binary = false + function () {};
+    54 54 │   
   
 
 ```
@@ -543,6 +552,8 @@ invalid.ts:53:24 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
     52 │ const logical = false || function () {};
   > 53 │ const binary = false + function () {};
        │                        ^^^^^^^^^^^^^^
+    54 │ 
+    55 │ const withDirective = function () {
   
   i Function expressions that don't use this can be turned into arrow functions.
   
@@ -552,8 +563,37 @@ invalid.ts:53:24 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
     52 52 │   const logical = false || function () {};
     53    │ - const·binary·=·false·+·function·()·{};
        53 │ + const·binary·=·false·+·(()·=>·{});
+    54 54 │   
+    55 55 │   const withDirective = function () {
   
 
 ```
 
+```
+invalid.ts:55:23 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! This function expression can be turned into an arrow function.
+  
+    53 │ const binary = false + function () {};
+    54 │ 
+  > 55 │ const withDirective = function () {
+       │                       ^^^^^^^^^^^^^
+  > 56 │ 	"use server";
+  > 57 │ 	return 0;
+  > 58 │ }
+       │ ^
+    59 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    53 53 │   const binary = false + function () {};
+    54 54 │   
+    55    │ - const·withDirective·=·function·()·{
+       55 │ + const·withDirective·=·()·=>·{
+    56 56 │   	"use server";
+    57 57 │   	return 0;
+  
+
+```

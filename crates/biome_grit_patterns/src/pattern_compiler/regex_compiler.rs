@@ -54,10 +54,9 @@ impl RegexCompiler {
 
         let variables: Vec<_> = node
             .variables()
-            .and_then(|variables| variables.args().ok())
+            .map(|variables| variables.args())
             .map(|args| {
-                args.grit_variable_list()
-                    .into_iter()
+                args.into_iter()
                     .filter_map(Result::ok)
                     .map(|variable| VariableCompiler::from_node(&variable, context))
                     .collect()

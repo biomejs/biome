@@ -160,7 +160,6 @@ impl DocumentFileSource {
         if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-
         if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
@@ -653,7 +652,7 @@ pub(crate) fn parse_lang_from_script_opening_tag(
                 .ok()?;
             let tag = expression.as_jsx_tag_expression()?.tag().ok()?;
             let opening_element = tag.as_jsx_element()?.opening_element().ok()?;
-            let lang_attribute = opening_element.attributes().find_by_name("lang").ok()??;
+            let lang_attribute = opening_element.attributes().find_by_name("lang")?;
             let attribute_value = lang_attribute.initializer()?.value().ok()?;
             let attribute_inner_string =
                 attribute_value.as_jsx_string()?.inner_string_text().ok()?;

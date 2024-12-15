@@ -51,7 +51,7 @@ impl Rule for NoImplicitAnyLet {
         let source_type = ctx.source_type::<JsFileSource>().language();
         let node = ctx.query();
 
-        if source_type.is_definition_file() || !source_type.is_typescript() || node.is_const() {
+        if !source_type.is_typescript() || source_type.is_definition_file() || node.is_const() {
             return None;
         }
 

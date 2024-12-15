@@ -883,7 +883,7 @@ export interface Complexity {
 	/**
 	 * Prefer for...of statement instead of Array.forEach.
 	 */
-	noForEach?: RuleConfiguration_for_Null;
+	noForEach?: RuleConfiguration_for_NoForEachOptions;
 	/**
 	 * Disallow unclear usage of consecutive space characters in regular expression literals
 	 */
@@ -1112,7 +1112,7 @@ export interface Correctness {
 	/**
 	 * Prevents the usage of variables that haven't been declared inside the document.
 	 */
-	noUndeclaredVariables?: RuleConfiguration_for_Null;
+	noUndeclaredVariables?: RuleConfiguration_for_UndeclaredVariablesOptions;
 	/**
 	 * Disallow unknown CSS value functions.
 	 */
@@ -1271,6 +1271,10 @@ export interface Nursery {
 	 */
 	noExportedImports?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of __dirname and __filename in the global scope.
+	 */
+	noGlobalDirnameFilename?: RuleFixConfiguration_for_Null;
+	/**
 	 * Prevent usage of \<head> element in a Next.js project.
 	 */
 	noHeadElement?: RuleConfiguration_for_Null;
@@ -1326,6 +1330,10 @@ export interface Nursery {
 	 * Disallow template literal placeholder syntax in regular strings.
 	 */
 	noTemplateCurlyInString?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown at-rules.
+	 */
+	noUnknownAtRule?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown pseudo-class selectors.
 	 */
@@ -1395,6 +1403,10 @@ export interface Nursery {
 	 */
 	useExplicitType?: RuleConfiguration_for_Null;
 	/**
+	 * Require that all exports are declared after all non-export statements.
+	 */
+	useExportsLast?: RuleConfiguration_for_Null;
+	/**
 	 * Enforces the use of a recommended display strategy with Google Fonts.
 	 */
 	useGoogleFontDisplay?: RuleConfiguration_for_Null;
@@ -1414,6 +1426,10 @@ export interface Nursery {
 	 * Enforce specifying the name of GraphQL operations.
 	 */
 	useNamedOperation?: RuleFixConfiguration_for_Null;
+	/**
+	 * Validates that all enum values are capitalized.
+	 */
+	useNamingConvention?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
@@ -1979,7 +1995,7 @@ export interface Suspicious {
 	 */
 	useNumberToFixedDigitsArgument?: RuleFixConfiguration_for_Null;
 	/**
-	 * This rule verifies the result of typeof $expr unary expressions is being compared to valid values, either string literals containing valid type names or other typeof expressions
+	 * This rule checks that the result of a `typeof' expression is compared to a valid value.
 	 */
 	useValidTypeof?: RuleFixConfiguration_for_Null;
 }
@@ -2058,9 +2074,15 @@ export type RuleFixConfiguration_for_ValidAriaRoleOptions =
 export type RuleConfiguration_for_ComplexityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ComplexityOptions;
+export type RuleConfiguration_for_NoForEachOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoForEachOptions;
 export type RuleConfiguration_for_NoUndeclaredDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUndeclaredDependenciesOptions;
+export type RuleConfiguration_for_UndeclaredVariablesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UndeclaredVariablesOptions;
 export type RuleConfiguration_for_UseExhaustiveDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseExhaustiveDependenciesOptions;
@@ -2206,6 +2228,16 @@ export interface RuleWithOptions_for_ComplexityOptions {
 	 */
 	options: ComplexityOptions;
 }
+export interface RuleWithOptions_for_NoForEachOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoForEachOptions;
+}
 export interface RuleWithOptions_for_NoUndeclaredDependenciesOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -2215,6 +2247,16 @@ export interface RuleWithOptions_for_NoUndeclaredDependenciesOptions {
 	 * Rule's options
 	 */
 	options: NoUndeclaredDependenciesOptions;
+}
+export interface RuleWithOptions_for_UndeclaredVariablesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UndeclaredVariablesOptions;
 }
 export interface RuleWithOptions_for_UseExhaustiveDependenciesOptions {
 	/**
@@ -2459,6 +2501,12 @@ export interface ComplexityOptions {
 	 */
 	maxAllowedComplexity?: number;
 }
+export interface NoForEachOptions {
+	/**
+	 * A list of variable names allowed for `forEach` calls.
+	 */
+	allowedIdentifiers: string[];
+}
 /**
  * Rule's options
  */
@@ -2475,6 +2523,12 @@ export interface NoUndeclaredDependenciesOptions {
 	 * If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.
 	 */
 	peerDependencies?: DependencyAvailability;
+}
+export interface UndeclaredVariablesOptions {
+	/**
+	 * Check undeclared types.
+	 */
+	checkTypes?: boolean;
 }
 /**
  * Options for the rule `useExhaustiveDependencies`
@@ -2508,7 +2562,7 @@ export interface UseImportExtensionsOptions {
  */
 export interface RestrictedImportsOptions {
 	/**
-	 * A list of names that should trigger the rule
+	 * A list of import paths that should trigger the rule.
 	 */
 	paths: {};
 }
@@ -3038,6 +3092,7 @@ export type Category =
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
+	| "lint/nursery/noGlobalDirnameFilename"
 	| "lint/nursery/noHeadElement"
 	| "lint/nursery/noHeadImportInDocument"
 	| "lint/nursery/noImgElement"
@@ -3060,6 +3115,7 @@ export type Category =
 	| "lint/nursery/noSubstr"
 	| "lint/nursery/noTemplateCurlyInString"
 	| "lint/nursery/noUndeclaredDependencies"
+	| "lint/nursery/noUnknownAtRule"
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"
@@ -3086,12 +3142,14 @@ export type Category =
 	| "lint/nursery/useDeprecatedReason"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
+	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useGoogleFontDisplay"
 	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useGuardForIn"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
+	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useTrimStartEnd"

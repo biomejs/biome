@@ -107,6 +107,7 @@ pub type NoFunctionAssign =
     <lint::suspicious::no_function_assign::NoFunctionAssign as biome_analyze::Rule>::Options;
 pub type NoGlobalAssign =
     <lint::suspicious::no_global_assign::NoGlobalAssign as biome_analyze::Rule>::Options;
+pub type NoGlobalDirnameFilename = < lint :: nursery :: no_global_dirname_filename :: NoGlobalDirnameFilename as biome_analyze :: Rule > :: Options ;
 pub type NoGlobalEval =
     <lint::security::no_global_eval::NoGlobalEval as biome_analyze::Rule>::Options;
 pub type NoGlobalIsFinite =
@@ -325,6 +326,8 @@ pub type UseExplicitType =
 pub type UseExponentiationOperator = < lint :: style :: use_exponentiation_operator :: UseExponentiationOperator as biome_analyze :: Rule > :: Options ;
 pub type UseExportType =
     <lint::style::use_export_type::UseExportType as biome_analyze::Rule>::Options;
+pub type UseExportsLast =
+    <lint::nursery::use_exports_last::UseExportsLast as biome_analyze::Rule>::Options;
 pub type UseFilenamingConvention = < lint :: style :: use_filenaming_convention :: UseFilenamingConvention as biome_analyze :: Rule > :: Options ;
 pub type UseFlatMap = <lint::complexity::use_flat_map::UseFlatMap as biome_analyze::Rule>::Options;
 pub type UseFocusableInteractive = < lint :: a11y :: use_focusable_interactive :: UseFocusableInteractive as biome_analyze :: Rule > :: Options ;

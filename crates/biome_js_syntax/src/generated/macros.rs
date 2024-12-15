@@ -819,6 +819,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::TsConstructorType::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::TS_DECLARATION_MODULE => {
+                    let $pattern = unsafe { $crate::TsDeclarationModule::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::TS_DECLARE_FUNCTION_DECLARATION => {
                     let $pattern =
                         unsafe { $crate::TsDeclareFunctionDeclaration::new_unchecked(node) };
@@ -926,6 +930,19 @@ macro_rules! map_syntax_node {
                 }
                 $crate::JsSyntaxKind::TS_IMPORT_TYPE => {
                     let $pattern = unsafe { $crate::TsImportType::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::TS_IMPORT_TYPE_ARGUMENTS => {
+                    let $pattern = unsafe { $crate::TsImportTypeArguments::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION => {
+                    let $pattern = unsafe { $crate::TsImportTypeAssertion::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION_BLOCK => {
+                    let $pattern =
+                        unsafe { $crate::TsImportTypeAssertionBlock::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::TS_IMPORT_TYPE_QUALIFIER => {
