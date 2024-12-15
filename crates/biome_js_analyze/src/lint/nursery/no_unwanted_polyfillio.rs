@@ -80,14 +80,14 @@ impl Rule for NoUnwantedPolyfillio {
             .ok()?;
 
         let features = match element_name.text_trimmed() {
-            "script" => check_unwanted_polyfill(&src_attribute_str, &NEXT_POLYFILLED_FEATURES)?,
+            "script" => check_unwanted_polyfill(&src_attribute_str, NEXT_POLYFILLED_FEATURES)?,
             _ => {
                 let semantic_model = ctx.model();
                 let reference = jsx_element.name().ok()?;
                 let reference = reference.as_jsx_reference_identifier()?;
                 let binding = semantic_model.binding(reference)?;
                 if is_next_import(&binding, NextUtility::Script) {
-                    check_unwanted_polyfill(&src_attribute_str, &NEXT_POLYFILLED_FEATURES)?
+                    check_unwanted_polyfill(&src_attribute_str, NEXT_POLYFILLED_FEATURES)?
                 } else {
                     return None;
                 }
@@ -241,29 +241,29 @@ fn check_unwanted_polyfill<'a>(
 fn test_check_unwanted_polyfill() {
     // Multiple features
     let src = "https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.includes,Array.prototype.flat";
-    let actual = check_unwanted_polyfill(src, &NEXT_POLYFILLED_FEATURES);
+    let actual = check_unwanted_polyfill(src, NEXT_POLYFILLED_FEATURES);
     let expected = Some(vec!["Array.prototype.includes", "Array.prototype.flat"]);
     assert_eq!(actual, expected);
 
     // Multiple features with encoded comma (%2C)
     let src = "https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.includes%2CArray.prototype.flat";
-    let actual = check_unwanted_polyfill(src, &NEXT_POLYFILLED_FEATURES);
+    let actual = check_unwanted_polyfill(src, NEXT_POLYFILLED_FEATURES);
     let expected = Some(vec!["Array.prototype.includes", "Array.prototype.flat"]);
     assert_eq!(actual, expected);
 
     // No query parameters
     let src = "https://polyfill.io/v3/polyfill.min.js";
-    let actual = check_unwanted_polyfill(src, &NEXT_POLYFILLED_FEATURES);
+    let actual = check_unwanted_polyfill(src, NEXT_POLYFILLED_FEATURES);
     assert_eq!(actual, None);
 
     // Differente URL
     let src = "https://example.com/polyfill.min.js?features=Array.prototype.includes";
-    let actual = check_unwanted_polyfill(src, &NEXT_POLYFILLED_FEATURES);
+    let actual = check_unwanted_polyfill(src, NEXT_POLYFILLED_FEATURES);
     assert_eq!(actual, None);
 
     // Wanted polyfill
     let src = "https://polyfill.io/v3/polyfill.min.js?features=AbortController";
-    let actual = check_unwanted_polyfill(src, &NEXT_POLYFILLED_FEATURES);
+    let actual = check_unwanted_polyfill(src, NEXT_POLYFILLED_FEATURES);
     assert_eq!(actual, None);
 }
 
