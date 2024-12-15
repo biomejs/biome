@@ -9,7 +9,7 @@ use biome_rowan::{AstNode, TextRange};
 use regex::Regex;
 
 use crate::{
-    nextjs::{is_next_import, NextLibrary},
+    nextjs::{is_next_import, NextUtility},
     services::semantic::Semantic,
 };
 
@@ -86,7 +86,7 @@ impl Rule for NoUnwantedPolyfillio {
                 let reference = jsx_element.name().ok()?;
                 let reference = reference.as_jsx_reference_identifier()?;
                 let binding = semantic_model.binding(reference)?;
-                if is_next_import(&binding, NextLibrary::Script) {
+                if is_next_import(&binding, NextUtility::Script) {
                     check_unwanted_polyfill(&src_attribute_str, &NEXT_POLYFILLED_FEATURES)?
                 } else {
                     return None;

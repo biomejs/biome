@@ -2,23 +2,23 @@ use biome_js_semantic::Binding;
 use biome_js_syntax::JsImport;
 use biome_rowan::AstNode;
 
-/// Represent Next.js libraries.
+/// Represent Next.js built-in utility.
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum NextLibrary {
+pub(crate) enum NextUtility {
     Script,
-    // you can add more libraries here
+    // you can add more here
 }
 
-impl NextLibrary {
+impl NextUtility {
     pub const fn import_names(self) -> &'static [&'static str] {
         match self {
-            NextLibrary::Script => &["next/script"],
+            NextUtility::Script => &["next/script"],
         }
     }
 }
 
-/// Check if the binding is an import from a specific Next.js library.
-pub(crate) fn is_next_import(binding: &Binding, lib: NextLibrary) -> bool {
+/// Check if the binding is an import from a specific Next.js built-in utility.
+pub(crate) fn is_next_import(binding: &Binding, lib: NextUtility) -> bool {
     binding
         .syntax()
         .ancestors()
