@@ -78,7 +78,7 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .no_unwanted_polyfillio
                 .get_or_insert(Default::default());
-            rule.set_level(rule_severity.into());
+            rule.set_level(rule.level().max(rule_severity.into()));
         }
         "@stylistic/jsx-self-closing-comp" => {
             let group = rules.style.get_or_insert_with(Default::default);
