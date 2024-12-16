@@ -38,6 +38,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- `biome migrate eslint` now correctly handles ESLint configuration with `null` values in file lists ([#4740](https://github.com/biomejs/biome/issues/4740)).
+  Contributed by @Conaclos
+
 ### Configuration
 
 ### Editors

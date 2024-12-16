@@ -676,7 +676,7 @@ fn migrate_merge_with_overrides() {
     }"#;
     let eslintrc = r#"{
         "overrides": [{
-            "files": ["bin/*.js", "lib/*.js"],
+            "files": ["bin/*.js", "lib/*.js", null],
             "excludedFiles": "*.test.js",
             "rules": {
                 "eqeqeq": ["off"]
