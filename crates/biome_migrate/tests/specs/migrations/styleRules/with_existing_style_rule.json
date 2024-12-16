@@ -8,8 +8,7 @@
         "noParameterAssign":  "warn",
         "useShorthandFunctionType": "warn",
         "useExportType":  "warn",
-        "useDefaultParameterLast": "warn",
-        "noVar":  "warn"
+        "useDefaultParameterLast": "warn"
       }
     }
   }

@@ -11,9 +11,8 @@ use biome_js_syntax::{
     AnyJsVariableDeclaration, JsModule, JsScript, JsSyntaxKind, TsGlobalDeclaration,
 };
 
+use crate::lint::style::use_const::ConstBindings;
 use biome_rowan::{AstNode, BatchMutationExt};
-
-use super::use_const::ConstBindings;
 
 declare_lint_rule! {
     /// Disallow the use of `var`

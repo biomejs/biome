@@ -3309,6 +3309,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "biome_service",
+ "log",
  "pulldown-cmark",
 ]
 

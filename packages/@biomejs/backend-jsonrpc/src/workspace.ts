@@ -1535,10 +1535,6 @@ export interface Style {
 	 */
 	noUselessElse?: RuleFixConfiguration_for_Null;
 	/**
-	 * Disallow the use of var
-	 */
-	noVar?: RuleFixConfiguration_for_Null;
-	/**
 	 * Disallow the use of yoda expressions.
 	 */
 	noYodaExpression?: RuleFixConfiguration_for_Null;
@@ -1915,6 +1911,10 @@ export interface Suspicious {
 	 * Disallow using unsafe negation.
 	 */
 	noUnsafeNegation?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow the use of var
+	 */
+	noVar?: RuleFixConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -3125,7 +3125,6 @@ export type Category =
 	| "lint/style/noShoutyConstants"
 	| "lint/style/noUnusedTemplateLiteral"
 	| "lint/style/noUselessElse"
-	| "lint/style/noVar"
 	| "lint/style/noYodaExpression"
 	| "lint/style/useAsConstAssertion"
 	| "lint/style/useBlockStatements"
@@ -3218,6 +3217,7 @@ export type Category =
 	| "lint/suspicious/noThenProperty"
 	| "lint/suspicious/noUnsafeDeclarationMerging"
 	| "lint/suspicious/noUnsafeNegation"
+	| "lint/suspicious/noVar"
 	| "lint/suspicious/useAwait"
 	| "lint/suspicious/useDefaultSwitchClauseLast"
 	| "lint/suspicious/useErrorMessage"

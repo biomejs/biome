@@ -11,7 +11,7 @@ use biome_console::{markup, Console};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_ast;
-use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
+use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, Severity};
 use biome_fs::BiomePath;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_parser::JsParserOptions;
@@ -22,17 +22,36 @@ use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
 use biome_rowan::AstNode;
 use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
 use biome_service::workspace::DocumentFileSource;
+use log::error;
 use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
 use std::collections::BTreeMap;
-use std::fmt::Write;
+use std::fmt::{Display, Formatter, Write};
 use std::path::PathBuf;
 use std::slice;
 use std::str::FromStr;
+
+#[derive(Debug)]
+struct NoStyleRuleError(String);
+
+impl NoStyleRuleError {
+    fn new(rule_name: impl Display) -> Self {
+        Self(format!("The rule '{}' that belongs to the group 'style' can't have Severity::Error. Lower down the severity or change the group.",rule_name))
+    }
+}
+
+impl Display for NoStyleRuleError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.0.as_str())
+    }
+}
+
+impl std::error::Error for NoStyleRuleError {}
 
 pub fn check_rules() -> anyhow::Result<()> {
     #[derive(Default)]
     struct LintRulesVisitor {
         groups: BTreeMap<(&'static str, &'static str), BTreeMap<&'static str, RuleMetadata>>,
+        errors: Vec<NoStyleRuleError>,
     }
 
     impl LintRulesVisitor {
@@ -40,10 +59,14 @@ pub fn check_rules() -> anyhow::Result<()> {
         where
             R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
         {
-            self.groups
-                .entry((<R::Group as RuleGroup>::NAME, R::METADATA.language))
-                .or_default()
-                .insert(R::METADATA.name, R::METADATA);
+            if R::Group::NAME == "style" && R::METADATA.severity == Severity::Error {
+                self.errors.push(NoStyleRuleError::new(R::METADATA.name))
+            } else {
+                self.groups
+                    .entry((<R::Group as RuleGroup>::NAME, R::METADATA.language))
+                    .or_default()
+                    .insert(R::METADATA.name, R::METADATA);
+            }
         }
     }
 
@@ -117,7 +140,13 @@ pub fn check_rules() -> anyhow::Result<()> {
     biome_css_analyze::visit_registry(&mut visitor);
     biome_graphql_analyze::visit_registry(&mut visitor);
 
-    let LintRulesVisitor { groups } = visitor;
+    let LintRulesVisitor { groups, errors } = visitor;
+    if !errors.is_empty() {
+        for error in errors {
+            eprintln!("{error}");
+        }
+        bail!("There are some rules that have errors.")
+    }
 
     for ((group, _), rules) in groups {
         for (_, meta) in rules {

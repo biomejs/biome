@@ -30,4 +30,5 @@ Linting rules that belong to the group `style` aren't recommended anymore. Here'
 - `useTemplate`
 - `useSingleVarDeclarator`
 - `useWhile`
-- `use_while`
+
+Use `biome migrate` to enable these rules, to avoid breaking changes.

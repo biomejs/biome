@@ -19,7 +19,7 @@ snapshot_kind: text
 ```
 with_existing_styles.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome defaults have changed.
+  ! Biome style rules aren't recommended anymore.
   
   > 1 │ {
       │ ^
@@ -46,27 +46,26 @@ with_existing_styles.json:1:1 migrate  FIXABLE  ━━━━━━━━━━�
        9 │ + ········"useShorthandFunctionType":"error",
       10 │ + ········"useExportType":"error",
       11 │ + ········"useDefaultParameterLast":"error",
-      12 │ + ········"noVar":"error",
-      13 │ + ········"noCommaOperator":"error",
+      12 │ + ········"noCommaOperator":"error",
+      13 │ + ········"useSingleVarDeclarator":"error",
       14 │ + ········"noNonnullAssertion":"error",
       15 │ + ········"useNodejsImportProtocol":"error",
-      16 │ + ········"useSingleVarDeclarator":"error",
-      17 │ + ········"useConst":"error",
-      18 │ + ········"noInferrableTypes":"error",
-      19 │ + ········"useExponentiationOperator":"error",
-      20 │ + ········"noUselessElse":"error",
-      21 │ + ········"useSelfClosingElements":"error",
-      22 │ + ········"useImportType":"error",
-      23 │ + ········"useNumberNamespace":"error",
-      24 │ + ········"useWhile":"error",
-      25 │ + ········"useAsConstAssertion":"error",
-      26 │ + ········"noUnusedTemplateLiteral":"error",
-      27 │ + ········"useNumericLiterals":"error",
-      28 │ + ········"useTemplate":"error",
-      29 │ + ········"useEnumInitializers":"error"
-      30 │ + ········}
-    6 31 │       }
-    7 32 │     }
+      16 │ + ········"useConst":"error",
+      17 │ + ········"noInferrableTypes":"error",
+      18 │ + ········"useExponentiationOperator":"error",
+      19 │ + ········"noUselessElse":"error",
+      20 │ + ········"useSelfClosingElements":"error",
+      21 │ + ········"useImportType":"error",
+      22 │ + ········"useNumberNamespace":"error",
+      23 │ + ········"useWhile":"error",
+      24 │ + ········"useAsConstAssertion":"error",
+      25 │ + ········"noUnusedTemplateLiteral":"error",
+      26 │ + ········"useNumericLiterals":"error",
+      27 │ + ········"useTemplate":"error",
+      28 │ + ········"useEnumInitializers":"error"
+      29 │ + ········}
+    6 30 │       }
+    7 31 │     }
   
 
 ```

@@ -1,4 +1,5 @@
 use crate::analyzers::all::RulesAll;
+use crate::analyzers::no_var::NoVar;
 use crate::analyzers::nursery_rules::NurseryRules;
 use crate::analyzers::schema::Schema;
 use crate::analyzers::style_rules::StyleRules;
@@ -6,6 +7,7 @@ use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
 use biome_json_syntax::JsonLanguage;
 
 mod all;
+mod no_var;
 mod nursery_rules;
 mod schema;
 mod style_rules;
@@ -27,6 +29,7 @@ impl RuleGroup for MigrationGroup {
         // v2.0.0
         registry.record_rule::<RulesAll>();
         registry.record_rule::<StyleRules>();
+        registry.record_rule::<NoVar>();
     }
 }
 
