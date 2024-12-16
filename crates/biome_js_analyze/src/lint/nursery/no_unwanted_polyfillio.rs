@@ -1,9 +1,11 @@
 use std::sync::LazyLock;
 
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleDomain, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
 use regex::Regex;
@@ -53,6 +55,8 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintNext("no-unwanted-polyfillio")],
         source_kind: RuleSourceKind::SameLogic,
         recommended: false,
+        severity: Severity::Warning,
+        domains: &[RuleDomain::Next],
     }
 }
 
