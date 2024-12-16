@@ -80,7 +80,7 @@ ou allez directement sur le [guide de démarrage][getting-started] pour commence
 
 **Biome** a des réglages par défaut robustes et ne demande pas de configuration.
 
-**Biome** vise à prendre en charge [tous les principaux langages][language-support] du développement web moderne.
+**Biome** vise à prendre en charge [les principaux langages][language-support] du développement web moderne.
 
 **Biome** [ne demande pas Node.js](https://biomejs.dev/fr/guides/manual-installation/) pour fonctionnner.
 
