@@ -82,7 +82,7 @@ ou allez directement sur le [guide de démarrage][getting-started] pour commence
 
 **Biome** vise à prendre en charge [les principaux langages][language-support] du développement web moderne.
 
-**Biome** [ne demande pas Node.js](https://biomejs.dev/fr/guides/manual-installation/) pour fonctionnner.
+**Biome** [ne requiert pas Node.js](https://biomejs.dev/fr/guides/manual-installation/) pour fonctionnner.
 
 **Biome** a une prise en charge du LSP de premier ordre, avec un analyseur sophistiqué qui représente le code source en toute fidélité et une excellente récupération des erreurs.
 
