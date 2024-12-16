@@ -104,7 +104,7 @@ Biome offre un programme de sponsoring simple qui permet aux entreprises d’obt
 
 ### Financement d’un problème
 
-Nous utilisons [Polar.sh](https://polar.sh/biomejs) pour voter pour des fonctionnalités spécifiques que vous aimeriez voir implémentées et pour les promouvoir. Jetez un œil à notre carnet de commandes et aidez-nous.
+Nous utilisons [Polar.sh](https://polar.sh/biomejs) pour voter pour des fonctionnalités spécifiques que vous aimeriez voir implémentées et pour les promouvoir. Jetez un coup d'œil aux fonctionnalités demandées et aidez-nous à les financer.
 
 ## Sponsors
 
