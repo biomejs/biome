@@ -84,7 +84,7 @@ ou allez directement sur le [guide de démarrage][getting-started] pour commence
 
 **Biome** [ne demande pas Node.js](https://biomejs.dev/fr/guides/manual-installation/) pour fonctionnner.
 
-**Biome** a une prise en charge de LSP de premier choix, avec un analyseur sophistiqué qui représente le texte source en toute fidélité et une excellente récupération des erreurs.
+**Biome** a une prise en charge du LSP de premier ordre, avec un analyseur sophistiqué qui représente le code source en toute fidélité et une excellente récupération des erreurs.
 
 **Biome** unifie des fonctionnalités précédemment disponibles sous forme d’outils séparés. Partir d’une base partagée nous permet de fournir une expérience cohérente pour traiter le code, afficher les erreurs, paralléliser le travail, la mise en cache et la configuration.
 
