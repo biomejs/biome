@@ -45,7 +45,7 @@
 Il **sort des diagnostics détaillés et contextualisés** qui vous aident à améliorer votre code et à devenir un meilleur programmeur !
 
 **Biome** est conçu dès le départ pour être utilisé [dans un éditeur de manière interactive](https://biomejs.dev/fr/guides/integrate-in-editor/).
-Il peut formater et linter du code malformé pendant que vous l’écrivez.
+Il peut formater et analyser du code malformé pendant que vous l’écrivez.
 
 ### Installation
 
