@@ -1395,6 +1395,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.use_template.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "radix" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_parse_int_radix.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "react-hooks/exhaustive-deps" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group
