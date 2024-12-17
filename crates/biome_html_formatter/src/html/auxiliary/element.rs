@@ -14,7 +14,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         let tag_name = opening_element
             .clone()
             .and_then(|e| e.name())
-            .map(|e| e.text())
+            .map(|e| e.to_string())
             .unwrap_or_default();
         // `pre` tags are "preformatted", so we should not format the content inside them. https://developer.mozilla.org/en-US/docs/Web/HTML/Element/pre
         // We ignore the `script` and `style` tags as well, since embedded language parsing/formatting is not yet implemented.

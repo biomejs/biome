@@ -8,10 +8,10 @@
 			"description": "A field for the [JSON schema](https://json-schema.org/) specification",
 			"type": ["string", "null"]
 		},
-		"assists": {
+		"assist": {
 			"description": "Specific configuration for assists",
 			"anyOf": [
-				{ "$ref": "#/definitions/AssistsConfiguration" },
+				{ "$ref": "#/definitions/AssistConfiguration" },
 				{ "type": "null" }
 			]
 		},
@@ -24,7 +24,8 @@
 		},
 		"extends": {
 			"description": "A list of paths to other JSON files, used to extends the current configuration.",
-			"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+			"type": ["array", "null"],
+			"items": { "type": "string" }
 		},
 		"files": {
 			"description": "The configuration of the filesystem",
@@ -76,6 +77,10 @@
 			"description": "A list of granular patterns that should be applied only to a sub set of files",
 			"anyOf": [{ "$ref": "#/definitions/Overrides" }, { "type": "null" }]
 		},
+		"plugins": {
+			"description": "List of plugins to load.",
+			"anyOf": [{ "$ref": "#/definitions/Plugins" }, { "type": "null" }]
+		},
 		"vcs": {
 			"description": "The configuration of the VCS integration",
 			"anyOf": [
@@ -90,10 +95,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noAccessKey": {
 					"description": "Enforce that the accessKey attribute is not used on any HTML element.",
 					"anyOf": [
@@ -370,24 +371,26 @@
 			"additionalProperties": false
 		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
-		"AssistsConfiguration": {
+		"AssistConfiguration": {
 			"type": "object",
 			"properties": {
 				"actions": {
-					"description": "Whether Biome should fail in CLI if the assists were not applied to the code.",
+					"description": "Whether Biome should fail in CLI if the assist were not applied to the code.",
 					"anyOf": [{ "$ref": "#/definitions/Actions" }, { "type": "null" }]
 				},
 				"enabled": {
-					"description": "Whether Biome should enable assists via LSP.",
+					"description": "Whether Biome should enable assist via LSP.",
 					"type": ["boolean", "null"]
 				},
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false
@@ -398,10 +401,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noBannedTypes": {
 					"description": "Disallow primitive type aliases and misleading types.",
 					"anyOf": [
@@ -721,10 +720,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noChildrenProp": {
 					"description": "Prevent passing of children as props.",
 					"anyOf": [
@@ -1103,7 +1098,7 @@
 			},
 			"additionalProperties": false
 		},
-		"CssAssists": {
+		"CssAssist": {
 			"description": "Options that changes how the CSS assists behaves",
 			"type": "object",
 			"properties": {
@@ -1118,9 +1113,9 @@
 			"description": "Options applied to CSS files",
 			"type": "object",
 			"properties": {
-				"assists": {
-					"description": "CSS assists options",
-					"anyOf": [{ "$ref": "#/definitions/CssAssists" }, { "type": "null" }]
+				"assist": {
+					"description": "CSS assist options",
+					"anyOf": [{ "$ref": "#/definitions/CssAssist" }, { "type": "null" }]
 				},
 				"formatter": {
 					"description": "CSS formatter options",
@@ -1334,7 +1329,8 @@
 			"properties": {
 				"ignore": {
 					"description": "A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				},
 				"ignoreUnknown": {
 					"description": "Tells Biome to not emit diagnostics when handling files that doesn't know",
@@ -1342,7 +1338,8 @@
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				},
 				"maxSize": {
 					"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB",
@@ -1408,15 +1405,13 @@
 				},
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
-				"indentSize": {
-					"description": "The size of the indentation, 2 by default (deprecated, use `indent-width`)",
-					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				},
 				"indentStyle": {
 					"description": "The indent style.",
@@ -1587,7 +1582,9 @@
 				},
 				"globals": {
 					"description": "A list of global bindings that should be ignored by the analyzers\n\nIf defined here, they should not emit diagnostics.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
 				},
 				"jsxRuntime": {
 					"description": "Indicates the type of runtime or transformation used for interpreting JSX.",
@@ -1649,10 +1646,6 @@
 					"description": "Control the formatter for JavaScript (and its super languages) files.",
 					"type": ["boolean", "null"]
 				},
-				"indentSize": {
-					"description": "The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.",
-					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
-				},
 				"indentStyle": {
 					"description": "The indent style applied to JavaScript (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
@@ -1688,13 +1681,6 @@
 					"description": "Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.",
 					"anyOf": [{ "$ref": "#/definitions/Semicolons" }, { "type": "null" }]
 				},
-				"trailingComma": {
-					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
-					"anyOf": [
-						{ "$ref": "#/definitions/TrailingCommas" },
-						{ "type": "null" }
-					]
-				},
 				"trailingCommas": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
 					"anyOf": [
@@ -1728,6 +1714,10 @@
 					"description": "Enables parsing of Grit metavariables. Defaults to `false`.",
 					"type": ["boolean", "null"]
 				},
+				"jsxEverywhere": {
+					"description": "When enabled, files like `.js`/`.ts` can contain JSX syntax. Defaults to `true`.",
+					"type": ["boolean", "null"]
+				},
 				"unsafeParameterDecoratorsEnabled": {
 					"description": "It enables the experimental and unsafe parsing of parameter decorators\n\nThese decorators belong to an old proposal, and they are subject to change.",
 					"type": ["boolean", "null"]
@@ -1735,7 +1725,7 @@
 			},
 			"additionalProperties": false
 		},
-		"JsonAssists": {
+		"JsonAssist": {
 			"description": "Linter options specific to the JSON linter",
 			"type": "object",
 			"properties": {
@@ -1752,7 +1742,7 @@
 			"properties": {
 				"assists": {
 					"description": "Assists options",
-					"anyOf": [{ "$ref": "#/definitions/JsonAssists" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/JsonAssist" }, { "type": "null" }]
 				},
 				"formatter": {
 					"description": "Formatting options",
@@ -1778,10 +1768,6 @@
 				"enabled": {
 					"description": "Control the formatter for JSON (and its super languages) files.",
 					"type": ["boolean", "null"]
-				},
-				"indentSize": {
-					"description": "The size of the indentation applied to JSON (and its super languages) files. Default to 2.",
-					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"indentStyle": {
 					"description": "The indent style applied to JSON (and its super languages) files.",
@@ -1981,17 +1967,24 @@
 		"LinterConfiguration": {
 			"type": "object",
 			"properties": {
+				"domains": {
+					"description": "An object where the keys are the names of the domains, and the values are boolean. `true` to turn-on the rules that belong to that domain, `false` to turn them off",
+					"type": ["object", "null"],
+					"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" }
+				},
 				"enabled": {
 					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
 					"type": ["boolean", "null"]
 				},
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				},
 				"rules": {
 					"description": "List of rules",
@@ -2186,10 +2179,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noCommonJs": {
 					"description": "Disallow use of CommonJs module system in favor of ESM style imports.",
 					"anyOf": [
@@ -2323,6 +2312,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noPackagePrivateImports": {
+					"description": "Restricts imports of \"package private\" exports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noProcessEnv": {
 					"description": "Disallow the use of process.env.",
 					"anyOf": [
@@ -2379,6 +2375,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noTsIgnore": {
+					"description": "Prevents the use of the TypeScript directive @ts-ignore.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownAtRule": {
 					"description": "Disallow unknown at-rules.",
 					"anyOf": [
@@ -2402,6 +2405,13 @@
 				},
 				"noUnknownTypeSelector": {
 					"description": "Disallow unknown type selectors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnwantedPolyfillio": {
+					"description": "Prevent duplicate polyfills from Polyfill.io.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2534,13 +2544,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useImportRestrictions": {
-					"description": "Disallows package private imports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useNamedOperation": {
 					"description": "Enforce specifying the name of GraphQL operations.",
 					"anyOf": [
@@ -2607,11 +2610,13 @@
 				},
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false
@@ -2638,10 +2643,6 @@
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
 					"type": ["boolean", "null"]
 				},
-				"indentSize": {
-					"description": "The size of the indentation, 2 by default (deprecated, use `indent-width`)",
-					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
-				},
 				"indentStyle": {
 					"description": "The indent style.",
 					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
@@ -2664,6 +2665,11 @@
 		"OverrideLinterConfiguration": {
 			"type": "object",
 			"properties": {
+				"domains": {
+					"description": "List of rules",
+					"type": ["object", "null"],
+					"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" }
+				},
 				"enabled": {
 					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
 					"type": ["boolean", "null"]
@@ -2711,11 +2717,13 @@
 				},
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				},
 				"javascript": {
 					"description": "Specific configuration for the JavaScript language",
@@ -2756,10 +2764,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noAccumulatingSpread": {
 					"description": "Disallow the use of spread (...) syntax on accumulators.",
 					"anyOf": [
@@ -2801,6 +2805,11 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"PluginConfiguration": { "anyOf": [{ "type": "string" }] },
+		"Plugins": {
+			"type": "array",
+			"items": { "$ref": "#/definitions/PluginConfiguration" }
 		},
 		"PredefinedImportGroup": {
 			"type": "string",
@@ -2863,7 +2872,7 @@
 				{ "$ref": "#/definitions/RuleAssistWithOptions_for_Options" }
 			]
 		},
-		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["on", "off"] },
+		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["off", "on"] },
 		"RuleAssistWithOptions_for_Null": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -2897,6 +2906,25 @@
 				{ "$ref": "#/definitions/RuleWithNoOptions" }
 			]
 		},
+		"RuleDomainValue": {
+			"oneOf": [
+				{
+					"description": "Enables all the rules that belong to this domain",
+					"type": "string",
+					"enum": ["all"]
+				},
+				{
+					"description": "Disables all the rules that belong to this domain",
+					"type": "string",
+					"enum": ["none"]
+				},
+				{
+					"description": "It enables only the recommended rules for this domain",
+					"type": "string",
+					"enum": ["recommended"]
+				}
+			]
+		},
 		"RuleFixConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2904,8 +2932,29 @@
 			]
 		},
 		"RulePlainConfiguration": {
-			"type": "string",
-			"enum": ["warn", "error", "info", "off"]
+			"oneOf": [
+				{ "type": "string", "enum": ["off"] },
+				{
+					"description": "Enables the rule using the default severity of the rule",
+					"type": "string",
+					"enum": ["on"]
+				},
+				{
+					"description": "Enables the rule, and it will emit a diagnostic with information severity",
+					"type": "string",
+					"enum": ["info"]
+				},
+				{
+					"description": "Enables the rule, and it will emit a diagnostic with warning severity",
+					"type": "string",
+					"enum": ["warn"]
+				},
+				{
+					"description": "Enables the rule, and it will emit a diagnostic with error severity",
+					"type": "string",
+					"enum": ["error"]
+				}
+			]
 		},
 		"RuleWithAllowDomainOptions": {
 			"type": "object",
@@ -3345,10 +3394,6 @@
 				"a11y": {
 					"anyOf": [{ "$ref": "#/definitions/A11y" }, { "type": "null" }]
 				},
-				"all": {
-					"description": "It enables ALL rules. The rules that belong to `nursery` won't be enabled.",
-					"type": ["boolean", "null"]
-				},
 				"complexity": {
 					"anyOf": [{ "$ref": "#/definitions/Complexity" }, { "type": "null" }]
 				},
@@ -3382,10 +3427,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noDangerouslySetInnerHtml": {
 					"description": "Prevent the usage of dangerous JSX props",
 					"anyOf": [
@@ -3480,19 +3521,10 @@
 				}
 			]
 		},
-		"StringSet": {
-			"type": "array",
-			"items": { "type": "string" },
-			"uniqueItems": true
-		},
 		"Style": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noArguments": {
 					"description": "Disallow the use of arguments.",
 					"anyOf": [
@@ -3870,10 +3902,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noApproximativeNumericConstant": {
 					"description": "Use standard constants instead of approximated literals.",
 					"anyOf": [

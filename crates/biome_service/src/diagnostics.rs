@@ -165,6 +165,11 @@ impl From<CantLoadExtendFile> for WorkspaceError {
         WorkspaceError::Configuration(BiomeDiagnostic::CantLoadExtendFile(value).into())
     }
 }
+impl From<WorkspaceError> for biome_diagnostics::serde::Diagnostic {
+    fn from(error: WorkspaceError) -> Self {
+        biome_diagnostics::serde::Diagnostic::new(error)
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
@@ -546,9 +551,7 @@ impl Advices for ProtectedFileAdvice {
 
 #[cfg(test)]
 mod test {
-    use crate::diagnostics::{
-        CantReadFile, FileIgnored, NotFound, SourceFileNotSupported,
-    };
+    use crate::diagnostics::{CantReadFile, FileIgnored, NotFound, SourceFileNotSupported};
     use crate::file_handlers::DocumentFileSource;
     use crate::{TransportError, WorkspaceError};
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};

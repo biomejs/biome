@@ -146,8 +146,8 @@ biome_lsp_converters         = { version = "0.1.0", path = "./crates/biome_lsp_c
 biome_markdown_factory       = { version = "0.0.1", path = "./crates/biome_markdown_factory" }
 biome_markdown_parser        = { version = "0.0.1", path = "./crates/biome_markdown_parser" }
 biome_markdown_syntax        = { version = "0.0.1", path = "./crates/biome_markdown_syntax" }
-biome_ungrammar              = { version = "0.3.1", path = "./crates/biome_ungrammar" }
 biome_plugin_loader          = { version = "0.0.1", path = "./crates/biome_plugin_loader" }
+biome_ungrammar              = { version = "0.3.1", path = "./crates/biome_ungrammar" }
 biome_yaml_factory           = { version = "0.0.1", path = "./crates/biome_yaml_factory" }
 biome_yaml_parser            = { version = "0.0.1", path = "./crates/biome_yaml_parser" }
 biome_yaml_syntax            = { version = "0.0.1", path = "./crates/biome_yaml_syntax" }

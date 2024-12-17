@@ -17,33 +17,33 @@ export interface BiomePath {
 	/**
 	 * Whether this path (usually a file) was fixed as a result of a format/lint/check command with the `--write` filag.
 	 */
-	was_written: boolean;
+	wasWritten: boolean;
 }
 export type FeatureKind =
-	| "Format"
-	| "Lint"
-	| "OrganizeImports"
-	| "Search"
-	| "Assists"
-	| "Debug";
+	| "format"
+	| "lint"
+	| "organizeImports"
+	| "search"
+	| "assist"
+	| "debug";
 export type FileKind = FileKind2[];
 /**
  * The priority of the file
  */
 export type FileKind2 =
-	| "Config"
-	| "Manifest"
-	| "Ignore"
-	| "Inspectable"
-	| "Handleable";
+	| "config"
+	| "manifest"
+	| "ignore"
+	| "inspectable"
+	| "handleable";
 export interface FileFeaturesResult {
-	features_supported: {};
+	featuresSupported: {};
 }
 export interface UpdateSettingsParams {
 	configuration: PartialConfiguration;
-	gitignore_matches: string[];
-	vcs_base_path?: string;
-	workspace_directory?: string;
+	gitignoreMatches: string[];
+	vcsBasePath?: string;
+	workspaceDirectory?: string;
 }
 /**
  * The configuration that is contained inside the file `biome.json`
@@ -56,7 +56,7 @@ export interface PartialConfiguration {
 	/**
 	 * Specific configuration for assists
 	 */
-	assists?: PartialAssistsConfiguration;
+	assist?: PartialAssistConfiguration;
 	/**
 	 * Specific configuration for the Css language
 	 */
@@ -64,7 +64,7 @@ export interface PartialConfiguration {
 	/**
 	 * A list of paths to other JSON files, used to extends the current configuration.
 	 */
-	extends?: StringSet;
+	extends?: string[];
 	/**
 	 * The configuration of the filesystem
 	 */
@@ -98,36 +98,40 @@ export interface PartialConfiguration {
 	 */
 	overrides?: Overrides;
 	/**
+	 * List of plugins to load.
+	 */
+	plugins?: Plugins;
+	/**
 	 * The configuration of the VCS integration
 	 */
 	vcs?: PartialVcsConfiguration;
 }
-export interface PartialAssistsConfiguration {
+export interface PartialAssistConfiguration {
 	/**
-	 * Whether Biome should fail in CLI if the assists were not applied to the code.
+	 * Whether Biome should fail in CLI if the assist were not applied to the code.
 	 */
 	actions?: Actions;
 	/**
-	 * Whether Biome should enable assists via LSP.
+	 * Whether Biome should enable assist via LSP.
 	 */
 	enabled?: boolean;
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
-	ignore?: StringSet;
+	ignore?: string[];
 	/**
 	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
 	 */
-	include?: StringSet;
+	include?: string[];
 }
 /**
  * Options applied to CSS files
  */
 export interface PartialCssConfiguration {
 	/**
-	 * CSS assists options
+	 * CSS assist options
 	 */
-	assists?: PartialCssAssists;
+	assist?: PartialCssAssist;
 	/**
 	 * CSS formatter options
 	 */
@@ -141,7 +145,6 @@ export interface PartialCssConfiguration {
 	 */
 	parser?: PartialCssParser;
 }
-export type StringSet = string[];
 /**
  * The configuration of the filesystem
  */
@@ -149,7 +152,7 @@ export interface PartialFilesConfiguration {
 	/**
 	 * A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.
 	 */
-	ignore?: StringSet;
+	ignore?: string[];
 	/**
 	 * Tells Biome to not emit diagnostics when handling files that doesn't know
 	 */
@@ -157,7 +160,7 @@ export interface PartialFilesConfiguration {
 	/**
 	 * A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.
 	 */
-	include?: StringSet;
+	include?: string[];
 	/**
 	 * The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB
 	 */
@@ -183,15 +186,11 @@ export interface PartialFormatterConfiguration {
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
-	ignore?: StringSet;
+	ignore?: string[];
 	/**
 	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
 	 */
-	include?: StringSet;
-	/**
-	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
-	 */
-	indentSize?: IndentWidth;
+	include?: string[];
 	/**
 	 * The indent style.
 	 */
@@ -240,7 +239,7 @@ export interface PartialJavascriptConfiguration {
 
 If defined here, they should not emit diagnostics. 
 	 */
-	globals?: StringSet;
+	globals?: string[];
 	/**
 	 * Indicates the type of runtime or transformation used for interpreting JSX.
 	 */
@@ -262,7 +261,7 @@ export interface PartialJsonConfiguration {
 	/**
 	 * Assists options
 	 */
-	assists?: PartialJsonAssists;
+	assists?: PartialJsonAssist;
 	/**
 	 * Formatting options
 	 */
@@ -278,17 +277,21 @@ export interface PartialJsonConfiguration {
 }
 export interface PartialLinterConfiguration {
 	/**
+	 * An object where the keys are the names of the domains, and the values are boolean. `true` to turn-on the rules that belong to that domain, `false` to turn them off
+	 */
+	domains?: {};
+	/**
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
 	enabled?: boolean;
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
-	ignore?: StringSet;
+	ignore?: string[];
 	/**
 	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
 	 */
-	include?: StringSet;
+	include?: string[];
 	/**
 	 * List of rules
 	 */
@@ -302,13 +305,14 @@ export interface PartialOrganizeImports {
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
-	ignore?: StringSet;
+	ignore?: string[];
 	/**
 	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
 	 */
-	include?: StringSet;
+	include?: string[];
 }
 export type Overrides = OverridePattern[];
+export type Plugins = PluginConfiguration[];
 /**
  * Set of properties to integrate Biome with a VCS software.
  */
@@ -342,7 +346,7 @@ export interface Actions {
 /**
  * Options that changes how the CSS assists behaves
  */
-export interface PartialCssAssists {
+export interface PartialCssAssist {
 	/**
 	 * Control the assists for CSS files.
 	 */
@@ -401,8 +405,8 @@ export interface PartialCssParser {
 }
 export type AttributePosition = "auto" | "multiline";
 export type BracketSpacing = boolean;
-export type IndentWidth = number;
 export type IndentStyle = "tab" | "space";
+export type IndentWidth = number;
 export type LineEnding = "lf" | "crlf" | "cr";
 /**
 	* Validated value for the `line_width` formatter options
@@ -486,10 +490,6 @@ export interface PartialJavascriptFormatter {
 	 */
 	enabled?: boolean;
 	/**
-	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
-	 */
-	indentSize?: IndentWidth;
-	/**
 	 * The indent style applied to JavaScript (and its super languages) files.
 	 */
 	indentStyle?: IndentStyle;
@@ -524,10 +524,6 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
 	 */
-	trailingComma?: TrailingCommas;
-	/**
-	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
-	 */
 	trailingCommas?: TrailingCommas;
 }
 /**
@@ -553,6 +549,10 @@ export interface PartialJavascriptParser {
 	 */
 	gritMetavariables?: boolean;
 	/**
+	 * When enabled, files like `.js`/`.ts` can contain JSX syntax. Defaults to `true`.
+	 */
+	jsxEverywhere?: boolean;
+	/**
 	* It enables the experimental and unsafe parsing of parameter decorators
 
 These decorators belong to an old proposal, and they are subject to change. 
@@ -562,7 +562,7 @@ These decorators belong to an old proposal, and they are subject to change.
 /**
  * Linter options specific to the JSON linter
  */
-export interface PartialJsonAssists {
+export interface PartialJsonAssist {
 	/**
 	 * Control the linter for JSON (and its super languages) files.
 	 */
@@ -573,10 +573,6 @@ export interface PartialJsonFormatter {
 	 * Control the formatter for JSON (and its super languages) files.
 	 */
 	enabled?: boolean;
-	/**
-	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
-	 */
-	indentSize?: IndentWidth;
 	/**
 	 * The indent style applied to JSON (and its super languages) files.
 	 */
@@ -622,10 +618,6 @@ export interface PartialJsonParser {
 }
 export interface Rules {
 	a11y?: A11y;
-	/**
-	 * It enables ALL rules. The rules that belong to `nursery` won't be enabled.
-	 */
-	all?: boolean;
 	complexity?: Complexity;
 	correctness?: Correctness;
 	nursery?: Nursery;
@@ -654,11 +646,11 @@ export interface OverridePattern {
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
-	ignore?: StringSet;
+	ignore?: string[];
 	/**
 	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
 	 */
-	include?: StringSet;
+	include?: string[];
 	/**
 	 * Specific configuration for the JavaScript language
 	 */
@@ -676,6 +668,7 @@ export interface OverridePattern {
 	 */
 	organizeImports?: OverrideOrganizeImportsConfiguration;
 }
+export type PluginConfiguration = string;
 export type VcsClientKind = "git";
 /**
  * A list of rules that belong to this group
@@ -707,10 +700,6 @@ export type TrailingCommas2 = "none" | "all";
  * A list of rules that belong to this group
  */
 export interface A11y {
-	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
 	/**
 	 * Enforce that the accessKey attribute is not used on any HTML element.
 	 */
@@ -857,10 +846,6 @@ export interface A11y {
  */
 export interface Complexity {
 	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
-	/**
 	 * Disallow primitive type aliases and misleading types.
 	 */
 	noBannedTypes?: RuleFixConfiguration_for_Null;
@@ -997,10 +982,6 @@ export interface Complexity {
  * A list of rules that belong to this group
  */
 export interface Correctness {
-	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
 	/**
 	 * Prevent passing of children as props.
 	 */
@@ -1223,10 +1204,6 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
-	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
 	noCommonJs?: RuleConfiguration_for_Null;
@@ -1303,6 +1280,10 @@ export interface Nursery {
 	 */
 	noOctalEscape?: RuleConfiguration_for_Null;
 	/**
+	 * Restricts imports of "package private" exports.
+	 */
+	noPackagePrivateImports?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of process.env.
 	 */
 	noProcessEnv?: RuleConfiguration_for_Null;
@@ -1335,6 +1316,10 @@ export interface Nursery {
 	 */
 	noTemplateCurlyInString?: RuleConfiguration_for_Null;
 	/**
+	 * Prevents the use of the TypeScript directive @ts-ignore.
+	 */
+	noTsIgnore?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow unknown at-rules.
 	 */
 	noUnknownAtRule?: RuleConfiguration_for_Null;
@@ -1350,6 +1335,10 @@ export interface Nursery {
 	 * Disallow unknown type selectors.
 	 */
 	noUnknownTypeSelector?: RuleConfiguration_for_Null;
+	/**
+	 * Prevent duplicate polyfills from Polyfill.io.
+	 */
+	noUnwantedPolyfillio?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
@@ -1423,10 +1412,6 @@ export interface Nursery {
 	 */
 	useGuardForIn?: RuleConfiguration_for_Null;
 	/**
-	 * Disallows package private imports.
-	 */
-	useImportRestrictions?: RuleConfiguration_for_Null;
-	/**
 	 * Enforce specifying the name of GraphQL operations.
 	 */
 	useNamedOperation?: RuleFixConfiguration_for_Null;
@@ -1455,10 +1440,6 @@ export interface Nursery {
  * A list of rules that belong to this group
  */
 export interface Performance {
-	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
 	/**
 	 * Disallow the use of spread (...) syntax on accumulators.
 	 */
@@ -1489,10 +1470,6 @@ export interface Performance {
  */
 export interface Security {
 	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
-	/**
 	 * Prevent the usage of dangerous JSX props
 	 */
 	noDangerouslySetInnerHtml?: RuleConfiguration_for_Null;
@@ -1513,10 +1490,6 @@ export interface Security {
  * A list of rules that belong to this group
  */
 export interface Style {
-	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
 	/**
 	 * Disallow the use of arguments.
 	 */
@@ -1726,10 +1699,6 @@ export interface Style {
  * A list of rules that belong to this group
  */
 export interface Suspicious {
-	/**
-	 * It enables ALL rules for this group.
-	 */
-	all?: boolean;
 	/**
 	 * Use standard constants instead of approximated literals.
 	 */
@@ -2018,10 +1987,6 @@ export interface OverrideFormatterConfiguration {
 	 */
 	formatWithErrors?: boolean;
 	/**
-	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
-	 */
-	indentSize?: IndentWidth;
-	/**
 	 * The indent style.
 	 */
 	indentStyle?: IndentStyle;
@@ -2039,6 +2004,10 @@ export interface OverrideFormatterConfiguration {
 	lineWidth?: LineWidth;
 }
 export interface OverrideLinterConfiguration {
+	/**
+	 * List of rules
+	 */
+	domains?: {};
 	/**
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
@@ -2138,7 +2107,7 @@ export type RuleFixConfiguration_for_NoConsoleOptions =
 export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
-export type RuleAssistPlainConfiguration = "on" | "off";
+export type RuleAssistPlainConfiguration = "off" | "on";
 export interface RuleAssistWithOptions_for_Options {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -2159,7 +2128,7 @@ export interface RuleAssistWithOptions_for_Null {
 	 */
 	options: null;
 }
-export type RulePlainConfiguration = "warn" | "error" | "info" | "off";
+export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithFixOptions_for_Null {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -2820,18 +2789,27 @@ export interface RegisterProjectFolderParams {
 	path?: string;
 	setAsCurrentWorkspace: boolean;
 }
-export type ProjectKey = string;
+export type ProjectKey = number;
 export interface SetManifestForProjectParams {
 	content: string;
-	manifest_path: BiomePath;
+	manifestPath: BiomePath;
 	version: number;
 }
 export interface OpenFileParams {
-	content: string;
-	document_file_source?: DocumentFileSource;
+	content: FileContent;
+	documentFileSource?: DocumentFileSource;
 	path: BiomePath;
+	/**
+	* Set to `true` to persist the node cache used during parsing, in order to speed up subsequent reparsing if the document has been edited.
+
+This should only be enabled if reparsing is to be expected, such as when the file is opened through the LSP Proxy. 
+	 */
+	persistNodeCache?: boolean;
 	version: number;
 }
+export type FileContent =
+	| { content: string; type: "fromClient" }
+	| { type: "fromServer" };
 export type DocumentFileSource =
 	| "Unknown"
 	| { Js: JsFileSource }
@@ -2851,8 +2829,8 @@ export interface JsFileSource {
 	version: LanguageVersion;
 }
 export interface JsonFileSource {
-	allow_comments: boolean;
-	allow_trailing_commas: boolean;
+	allowComments: boolean;
+	allowTrailingCommas: boolean;
 }
 export interface CssFileSource {
 	variant: CssVariant;
@@ -2868,29 +2846,29 @@ export interface GritFileSource {
 }
 export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
-	| "JavaScript"
-	| { TypeScript: { definition_file: boolean } };
+	| "javaScript"
+	| { typeScript: { definition_file: boolean } };
 /**
  * Is the source file an ECMAScript Module or Script. Changes the parsing semantic.
  */
-export type ModuleKind = "Script" | "Module";
-export type LanguageVariant = "Standard" | "StandardRestricted" | "Jsx";
+export type ModuleKind = "script" | "module";
+export type LanguageVariant = "standard" | "standardRestricted" | "jsx";
 /**
 	* Enum of the different ECMAScript standard versions. The versions are ordered in increasing order; The newest version comes last.
 
 Defaults to the latest stable ECMAScript standard. 
 	 */
-export type LanguageVersion = "ES2022" | "ESNext";
+export type LanguageVersion = "eS2022" | "eSNext";
 /**
 	* The style of CSS contained in the file.
 
 Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards. 
 	 */
-export type CssVariant = "Standard";
+export type CssVariant = "standard";
 /**
  * The style of GraphQL contained in the file.
  */
-export type GraphqlVariant = "Standard";
+export type GraphqlVariant = "standard";
 export type HtmlVariant = "Standard" | "Astro";
 export type GritVariant = "Standard";
 export interface ChangeFileParams {
@@ -2907,6 +2885,13 @@ export interface GetSyntaxTreeParams {
 export interface GetSyntaxTreeResult {
 	ast: string;
 	cst: string;
+}
+export interface CheckFileSizeParams {
+	path: BiomePath;
+}
+export interface CheckFileSizeResult {
+	fileSize: number;
+	limit: number;
 }
 export interface OrganizeImportsParams {
 	path: BiomePath;
@@ -2927,18 +2912,22 @@ export interface GetFormatterIRParams {
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
-	max_diagnostics: number;
-	only: RuleCode[];
+	/**
+	 * Rules to apply on top of the configuration
+	 */
+	enabledRules?: RuleCode[];
+	maxDiagnostics: number;
+	only?: RuleCode[];
 	path: BiomePath;
-	skip: RuleCode[];
+	skip?: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];
 export type RuleCode = string;
-export type RuleCategory = "Syntax" | "Lint" | "Action" | "Transformation";
+export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
 	errors: number;
-	skipped_diagnostics: number;
+	skippedDiagnostics: number;
 }
 /**
  * Serializable representation for a [Diagnostic](super::Diagnostic).
@@ -3109,6 +3098,7 @@ export type Category =
 	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noNestedTernary"
 	| "lint/nursery/noOctalEscape"
+	| "lint/nursery/noPackagePrivateImports"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noReactSpecificProps"
@@ -3119,6 +3109,7 @@ export type Category =
 	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"
 	| "lint/nursery/noTemplateCurlyInString"
+	| "lint/nursery/noTsIgnore"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownAtRule"
 	| "lint/nursery/noUnknownFunction"
@@ -3132,6 +3123,7 @@ export type Category =
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
+	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessEscapeInRegex"
 	| "lint/nursery/noUselessStringRaw"
 	| "lint/nursery/noUselessUndefined"
@@ -3284,7 +3276,7 @@ export type Category =
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useValidTypeof"
-	| "assists/source/useSortedKeys"
+	| "assist/source/useSortedKeys"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
@@ -3296,9 +3288,10 @@ export type Category =
 	| "stdin"
 	| "configuration"
 	| "organizeImports"
-	| "assists"
+	| "assist"
 	| "migrate"
 	| "deserialize"
+	| "plugin"
 	| "project"
 	| "search"
 	| "internalError/io"
@@ -3322,7 +3315,7 @@ export type Category =
 	| "suppressions/unknownGroup"
 	| "suppressions/unknownRule"
 	| "suppressions/unused"
-	| "suppressions/deprecatedSuppressionComment"
+	| "suppressions/incorrect"
 	| "args/fileNotFound"
 	| "flags/invalid"
 	| "semanticTests";
@@ -3417,18 +3410,19 @@ export interface BacktraceSymbol {
 	name?: string;
 }
 export interface PullActionsParams {
-	only: RuleCode[];
+	enabledRules?: RuleCode[];
+	only?: RuleCode[];
 	path: BiomePath;
 	range?: TextRange;
-	skip: RuleCode[];
-	suppression_reason?: string;
+	skip?: RuleCode[];
+	suppressionReason?: string;
 }
 export interface PullActionsResult {
 	actions: CodeAction[];
 }
 export interface CodeAction {
 	category: ActionCategory;
-	rule_name?: [string, string];
+	ruleName?: [string, string];
 	suggestion: CodeSuggestion;
 }
 /**
@@ -3437,10 +3431,10 @@ export interface CodeAction {
 [CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind 
 	 */
 export type ActionCategory =
-	| { QuickFix: string }
-	| { Refactor: RefactorKind }
-	| { Source: SourceActionKind }
-	| { Other: string };
+	| { quickFix: string }
+	| { refactor: RefactorKind }
+	| { source: SourceActionKind }
+	| { other: OtherActionCategory };
 /**
  * A Suggestion that is provided by Biome's linter, and can be reported to the user, and can be automatically applied if it has the right [`Applicability`].
  */
@@ -3457,23 +3451,27 @@ export interface CodeSuggestion {
 [Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information: 
 	 */
 export type RefactorKind =
-	| "None"
-	| "Extract"
-	| "Inline"
-	| "Rewrite"
-	| { Other: string };
+	| "none"
+	| "extract"
+	| "inline"
+	| "rewrite"
+	| { other: string };
 /**
  * The sub-category of a source code action
  */
 export type SourceActionKind =
-	| "FixAll"
-	| "None"
-	| "OrganizeImports"
-	| { Other: string };
+	| "fixAll"
+	| "none"
+	| "organizeImports"
+	| { other: string };
+export type OtherActionCategory =
+	| "inlineSuppression"
+	| "toplevelSuppression"
+	| { generic: string };
 /**
  * Indicates how a tool should manage this suggestion.
  */
-export type Applicability = "Always" | "MaybeIncorrect";
+export type Applicability = "always" | "maybeIncorrect";
 export interface FormatFileParams {
 	path: BiomePath;
 }
@@ -3481,7 +3479,7 @@ export interface Printed {
 	code: string;
 	range?: TextRange;
 	sourcemap: SourceMarker[];
-	verbatim_ranges: TextRange[];
+	verbatimRanges: TextRange[];
 }
 /**
  * Lightweight sourcemap marker between source and output tokens
@@ -3505,21 +3503,25 @@ export interface FormatOnTypeParams {
 	path: BiomePath;
 }
 export interface FixFileParams {
-	fix_file_mode: FixFileMode;
-	only: RuleCode[];
+	/**
+	 * Rules to apply to the file
+	 */
+	enabledRules?: RuleCode[];
+	fixFileMode: FixFileMode;
+	only?: RuleCode[];
 	path: BiomePath;
-	rule_categories: RuleCategories;
-	should_format: boolean;
-	skip: RuleCode[];
-	suppression_reason?: string;
+	ruleCategories: RuleCategories;
+	shouldFormat: boolean;
+	skip?: RuleCode[];
+	suppressionReason?: string;
 }
 /**
  * Which fixes should be applied during the analyzing phase
  */
 export type FixFileMode =
-	| "SafeFixes"
-	| "SafeAndUnsafeFixes"
-	| "ApplySuppressions";
+	| "safeFixes"
+	| "safeAndUnsafeFixes"
+	| "applySuppressions";
 export interface FixFileResult {
 	/**
 	 * List of all the code actions applied to the file
@@ -3536,7 +3538,7 @@ export interface FixFileResult {
 	/**
 	 * number of skipped suggested fixes
 	 */
-	skipped_suggested_fixes: number;
+	skippedSuggestedFixes: number;
 }
 export interface FixAction {
 	/**
@@ -3549,9 +3551,9 @@ export interface FixAction {
 	rule_name?: [string, string];
 }
 export interface RenameParams {
-	new_name: string;
+	newName: string;
 	path: BiomePath;
-	symbol_at: TextSize;
+	symbolAt: TextSize;
 }
 export interface RenameResult {
 	/**
@@ -3562,6 +3564,26 @@ export interface RenameResult {
 	 * Range of source code modified by this rename operation
 	 */
 	range: TextRange;
+}
+export interface ParsePatternParams {
+	defaultLanguage: GritTargetLanguage;
+	pattern: string;
+}
+export type GritTargetLanguage = "CSS" | "JavaScript";
+export interface ParsePatternResult {
+	patternId: PatternId;
+}
+export type PatternId = string;
+export interface SearchPatternParams {
+	path: BiomePath;
+	pattern: PatternId;
+}
+export interface SearchResults {
+	file: BiomePath;
+	matches: TextRange[];
+}
+export interface DropPatternParams {
+	pattern: PatternId;
 }
 export type Configuration = PartialConfiguration;
 export interface Workspace {
@@ -3575,6 +3597,7 @@ export interface Workspace {
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
 	getSyntaxTree(params: GetSyntaxTreeParams): Promise<GetSyntaxTreeResult>;
+	checkFileSize(params: CheckFileSizeParams): Promise<CheckFileSizeResult>;
 	organizeImports(
 		params: OrganizeImportsParams,
 	): Promise<OrganizeImportsResult>;
@@ -3590,6 +3613,9 @@ export interface Workspace {
 	formatOnType(params: FormatOnTypeParams): Promise<Printed>;
 	fixFile(params: FixFileParams): Promise<FixFileResult>;
 	rename(params: RenameParams): Promise<RenameResult>;
+	parsePattern(params: ParsePatternParams): Promise<ParsePatternResult>;
+	searchPattern(params: SearchPatternParams): Promise<SearchResults>;
+	dropPattern(params: DropPatternParams): Promise<void>;
 	destroy(): void;
 }
 export function createWorkspace(transport: Transport): Workspace {
@@ -3617,6 +3643,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		getSyntaxTree(params) {
 			return transport.request("biome/get_syntax_tree", params);
+		},
+		checkFileSize(params) {
+			return transport.request("biome/check_file_size", params);
 		},
 		organizeImports(params) {
 			return transport.request("biome/organize_imports", params);
@@ -3650,6 +3679,15 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		rename(params) {
 			return transport.request("biome/rename", params);
+		},
+		parsePattern(params) {
+			return transport.request("biome/parse_pattern", params);
+		},
+		searchPattern(params) {
+			return transport.request("biome/search_pattern", params);
+		},
+		dropPattern(params) {
+			return transport.request("biome/drop_pattern", params);
 		},
 		destroy() {
 			transport.destroy();
