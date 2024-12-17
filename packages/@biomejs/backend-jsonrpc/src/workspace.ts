@@ -1307,6 +1307,10 @@ export interface Nursery {
 	 */
 	noProcessEnv?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of process global.
+	 */
+	noProcessGlobal?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow specified modules when loaded by import or require.
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
@@ -3106,6 +3110,7 @@ export type Category =
 	| "lint/nursery/noNestedTernary"
 	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noProcessEnv"
+	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
