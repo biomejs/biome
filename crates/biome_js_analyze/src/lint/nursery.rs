@@ -17,6 +17,7 @@ pub mod no_irregular_whitespace;
 pub mod no_nested_ternary;
 pub mod no_octal_escape;
 pub mod no_process_env;
+pub mod no_process_global;
 pub mod no_restricted_imports;
 pub mod no_restricted_types;
 pub mod no_secrets;
@@ -64,6 +65,7 @@ declare_lint_group! {
             self :: no_nested_ternary :: NoNestedTernary ,
             self :: no_octal_escape :: NoOctalEscape ,
             self :: no_process_env :: NoProcessEnv ,
+            self :: no_process_global :: NoProcessGlobal ,
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_restricted_types :: NoRestrictedTypes ,
             self :: no_secrets :: NoSecrets ,

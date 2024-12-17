@@ -43,9 +43,9 @@ pub(crate) struct FlatConfigData(pub(crate) Vec<FlatConfigObject>);
 #[derive(Debug, Default, Deserializable)]
 #[deserializable(unknown_fields = "allow")]
 pub(crate) struct FlatConfigObject {
-    pub(crate) files: Vec<String>,
+    pub(crate) files: ShorthandVec<String>,
     /// The glob patterns that ignore to lint.
-    pub(crate) ignores: Vec<String>,
+    pub(crate) ignores: ShorthandVec<String>,
     // using `Option` is important to distinguish a global ignores from a config objerct
     pub(crate) language_options: Option<FlatLanguageOptions>,
     // using `Option` is important to distinguish a global ignores from a config objerct
@@ -240,6 +240,11 @@ impl<T> DerefMut for ShorthandVec<T> {
         &mut self.0
     }
 }
+impl<T> FromIterator<T> for ShorthandVec<T> {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        Self(iter.into_iter().collect())
+    }
+}
 impl<T> IntoIterator for ShorthandVec<T> {
     type Item = T;
     type IntoIter = vec::IntoIter<T>;
@@ -255,9 +260,14 @@ impl<T: Deserializable> Deserializable for ShorthandVec<T> {
     ) -> Option<Self> {
         Some(ShorthandVec(
             if value.visitable_type()? == DeserializableType::Array {
-                Deserializable::deserialize(value, name, diagnostics)?
+                <Vec<Option<T>>>::deserialize(value, name, diagnostics)?
+                    .into_iter()
+                    .flatten()
+                    .collect()
             } else {
-                Vec::from_iter([Deserializable::deserialize(value, name, diagnostics)?])
+                <Option<T>>::deserialize(value, name, diagnostics)?
+                    .into_iter()
+                    .collect()
             },
         ))
     }
