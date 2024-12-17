@@ -2379,6 +2379,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnwantedPolyfillio": {
+					"description": "Prevent duplicate polyfills from Polyfill.io.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessEscapeInRegex": {
 					"description": "Disallow unnecessary escape sequence in regular expression literals.",
 					"anyOf": [

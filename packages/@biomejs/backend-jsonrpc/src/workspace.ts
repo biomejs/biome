@@ -1328,6 +1328,10 @@ export interface Nursery {
 	 */
 	noUnknownTypeSelector?: RuleConfiguration_for_Null;
 	/**
+	 * Prevent duplicate polyfills from Polyfill.io.
+	 */
+	noUnwantedPolyfillio?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
 	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
@@ -3082,6 +3086,7 @@ export type Category =
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
+	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessEscapeInRegex"
 	| "lint/nursery/noUselessStringRaw"
 	| "lint/nursery/noUselessUndefined"
