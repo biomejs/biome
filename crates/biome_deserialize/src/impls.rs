@@ -533,7 +533,11 @@ impl<T: Deserializable> Deserializable for Option<T> {
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
-        T::deserialize(ctx, value, name).map(Option::Some)
+        if value.visitable_type() == Some(crate::DeserializableType::Null) {
+            None
+        } else {
+            T::deserialize(ctx, value, name).map(Option::Some)
+        }
     }
 }
 

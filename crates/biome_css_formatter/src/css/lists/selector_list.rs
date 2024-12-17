@@ -24,6 +24,9 @@ impl FormatRule<CssSelectorList> for FormatCssSelectorList {
         let mut joiner = f.join_with(&separator);
 
         for formatted in node.format_separated(",") {
+            // The selector case here like:
+            // .a b {}
+            // .a is a left computed selector
             let computed_selector =
                 formatted
                     .node()?
@@ -37,12 +40,27 @@ impl FormatRule<CssSelectorList> for FormatCssSelectorList {
                     });
 
             if let Some(computed_selector) = computed_selector {
+                // Case like:
+                // .a b {}
+                // /* some long comment */
+                // .a c {}
+                //
+                // if .a has leading comments, it should be formatted without indent.
+                // Otherwise the formatted result will be like:
+                // .a b {}
+                // /* some long comment */
+                //   .a c {}
                 let simple_selector_has_leading_comments = computed_selector
                     .simple_selector()
                     .and_then(|simple_selector| simple_selector.as_css_type_selector().cloned())
                     .and_then(|type_selector| type_selector.ident().ok()?.value_token().ok())
                     .is_some_and(|value_token| value_token.has_leading_comments());
 
+                // Sub selector same as the Simple Selector above:
+                // .a b {}
+                // /* some long comment */
+                // d c {}
+                // d is the Sub selector, so we also need to check if it has leading comments.
                 let sub_selector_has_leading_comments = computed_selector
                     .sub_selectors()
                     .first()

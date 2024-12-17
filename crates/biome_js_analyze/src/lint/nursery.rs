@@ -18,6 +18,7 @@ pub mod no_nested_ternary;
 pub mod no_octal_escape;
 pub mod no_package_private_imports;
 pub mod no_process_env;
+pub mod no_process_global;
 pub mod no_restricted_imports;
 pub mod no_restricted_types;
 pub mod no_secrets;
@@ -37,6 +38,7 @@ pub mod use_component_export_only_modules;
 pub mod use_consistent_curly_braces;
 pub mod use_consistent_member_accessibility;
 pub mod use_explicit_type;
+pub mod use_exports_last;
 pub mod use_google_font_display;
 pub mod use_google_font_preconnect;
 pub mod use_guard_for_in;
@@ -65,6 +67,7 @@ declare_lint_group! {
             self :: no_octal_escape :: NoOctalEscape ,
             self :: no_package_private_imports :: NoPackagePrivateImports ,
             self :: no_process_env :: NoProcessEnv ,
+            self :: no_process_global :: NoProcessGlobal ,
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_restricted_types :: NoRestrictedTypes ,
             self :: no_secrets :: NoSecrets ,
@@ -84,6 +87,7 @@ declare_lint_group! {
             self :: use_consistent_curly_braces :: UseConsistentCurlyBraces ,
             self :: use_consistent_member_accessibility :: UseConsistentMemberAccessibility ,
             self :: use_explicit_type :: UseExplicitType ,
+            self :: use_exports_last :: UseExportsLast ,
             self :: use_google_font_display :: UseGoogleFontDisplay ,
             self :: use_google_font_preconnect :: UseGoogleFontPreconnect ,
             self :: use_guard_for_in :: UseGuardForIn ,

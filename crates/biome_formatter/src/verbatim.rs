@@ -24,6 +24,16 @@ pub fn format_verbatim_node<L: Language>(node: &SyntaxNode<L>) -> FormatVerbatim
     }
 }
 
+/// "Formats" a node according to its original formatting in the source text. It's functionally equal to
+/// [`format_verbatim_node`], but it doesn't track the node as [VerbatimKind::Verbatim].
+pub fn format_verbatim_skipped<L: Language>(node: &SyntaxNode<L>) -> FormatVerbatimNode<L> {
+    FormatVerbatimNode {
+        node,
+        kind: VerbatimKind::Skipped,
+        format_comments: true,
+    }
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct FormatVerbatimNode<'node, L: Language> {
     node: &'node SyntaxNode<L>,

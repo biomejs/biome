@@ -38,6 +38,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- `biome migrate eslint` now correctly handles ESLint configuration with `null` values in file lists ([#4740](https://github.com/biomejs/biome/issues/4740)).
+  Contributed by @Conaclos
+
 ### Configuration
 
 ### Editors
@@ -181,6 +184,29 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [noUnwantedPolyfillio](https://biomejs.dev/linter/rules/no-unwanted-polyfillio/). Contributed by @unvalley
 
+- [noForEach](https://biomejs.dev/linter/rules/no-for-each/) now provides a new option `validIdentifiers` ([#3351](https://github.com/biomejs/biome/issues/3351)) to specify which variable names are allowed to call `forEach`.
+
+  Identifiers containing dots (e.g., "lib._") or empty strings are not allowed. Invalid configurations will produce a diagnostic warning.
+
+  ```json
+  {
+		"linter": {
+			"rules": {
+				"complexity": {
+					"noForEach": {
+						"level": "error",
+						"options": {
+							"allowedIdentifiers": ["Effect", "_"]
+						}
+					}
+				}
+			}
+		}
+	}
+  ```
+
+  Contributed by @lucasweng
+
 #### Enhancements
 
 - `useExportType` and `useImportType` now ignore TypeScript declaration files ([#4416](https://github.com/biomejs/biome/pull/4416)). Contributed by @Conaclos
@@ -297,6 +323,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/) no longer reports used values imported as types in an external module ([#3895])(https://github.com/biomejs/biome/issues/3895). Contributed by @Conaclos
 
 - Fixed a panic related to bogus import statements in `useExhaustiveDependencies` ([#4568](https://github.com/biomejs/biome/issues/4568)) Contributed by @dyc3
+
+- Fixed `useSortedClasses` false positive and Supplementary test case ([#3394](https://github.com/biomejs/biome/issues/3394)) Contributed by @hangaoke1
+- [noLabelWithoutControl](https://biomejs.dev/linter/rules/no-label-without-control/) detects button tags as input ([#4511])(https://github.com/biomejs/biome/issues/4511). Contributed by @unvalley
 
 ### Parser
 
@@ -425,6 +454,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add [noUselessStringRaw](https://biomejs.dev/linter/rules/no-useless-string-raw/). Contributed by @fireairforce
 - Add [nursery/useCollapsedIf](https://biomejs.dev/linter/rules/use-collapsed-if/). Contributed by @siketyan
 - Add [useGoogleFontDisplay](https://biomejs.dev/linter/rules/use-google-font-display/). Contributed by @kaioduarte
+- Add [useExportsLast](https://biomejs.dev/linter/rules/use-exports-last/). Contributed by @tommymorgan
 
 #### Bug Fixes
 

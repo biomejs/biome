@@ -3,8 +3,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
+use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{AnyJsExpression, AnyJsMemberExpression, JsCallExpression};
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange};
+use serde::{Deserialize, Serialize};
 
 declare_lint_rule! {
     /// Prefer `for...of` statement instead of `Array.forEach`.
@@ -61,6 +64,31 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ## Options
+    ///
+    /// **Since v2.0.0**
+    ///
+    /// The rule provides a `validIdentifiers` option that allows specific variable names to call `forEach`.
+    /// In the following configuration, it's allowed to call `forEach` with expressions that match `Effect` or `_`:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "allowedIdentifiers": ["Effect", "_"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options
+    /// Effect.forEach((el) => {
+    ///   f(el);
+    /// })
+    /// _.forEach((el) => {
+    ///   f(el);
+    /// })
+    /// ```
+    ///
+    /// Values with dots (e.g., "lib._") will not be accepted.
     pub NoForEach {
         version: "1.0.0",
         name: "noForEach",
@@ -78,7 +106,7 @@ impl Rule for NoForEach {
     type Query = Ast<JsCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoForEachOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -87,6 +115,24 @@ impl Rule for NoForEach {
         if member_expression.member_name()?.text() != "forEach" {
             return None;
         }
+
+        let options = ctx.options();
+        // Check if `forEach` is called by a valid identifier.
+        if !options.allowed_identifiers.is_empty() {
+            let object = member_expression.object().ok()?;
+            if let Some(reference) = object.as_js_reference_identifier() {
+                let value_token = reference.value_token().ok()?;
+                let name = value_token.text_trimmed();
+                if options
+                    .allowed_identifiers
+                    .iter()
+                    .any(|identifier| identifier.as_ref() == name)
+                {
+                    return None;
+                }
+            }
+        }
+
         // Extract first parameter and ensure we have no more than 2 parameters.
         let [Some(first), _, None] = node.arguments().ok()?.get_arguments_by_index([0, 1, 2])
         else {
@@ -116,5 +162,41 @@ impl Rule for NoForEach {
         ).note(markup!{
             <Emphasis>"forEach"</Emphasis>" may lead to performance issues when working with large arrays. When combined with functions like "<Emphasis>"filter"</Emphasis>" or "<Emphasis>"map"</Emphasis>", this causes multiple iterations over the same type."
         }))
+    }
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[deserializable(with_validator)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct NoForEachOptions {
+    #[serde(skip_serializing_if = "<[_]>::is_empty")]
+    /// A list of variable names allowed for `forEach` calls.
+    pub allowed_identifiers: Box<[Box<str>]>,
+}
+
+impl DeserializableValidator for NoForEachOptions {
+    fn validate(
+        &mut self,
+        _name: &str,
+        range: TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> bool {
+        if self
+            .allowed_identifiers
+            .iter()
+            .any(|identifier| identifier.is_empty() || identifier.contains('.'))
+        {
+            diagnostics
+                .push(
+                    DeserializationDiagnostic::new(markup!(
+                        <Emphasis>"'allowedIdentifiers'"</Emphasis>" does not accept empty values or values with dots."
+                    ))
+                    .with_range(range)
+                );
+            return false;
+        }
+
+        true
     }
 }

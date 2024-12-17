@@ -465,6 +465,14 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "deno-lint/no-process-global" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_process_global.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "dot-notation" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.use_literal_keys.get_or_insert(Default::default());
@@ -504,6 +512,14 @@ pub(crate) fn migrate_eslint_any_rule(
                 .no_package_private_imports
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
+        }
+        "import/exports-last" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_exports_last.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
         }
         "import/no-commonjs" => {
             if !options.include_nursery {

@@ -1,5 +1,5 @@
 use biome_configuration::{self as biome_config};
-use biome_deserialize::Merge;
+use biome_deserialize::{Merge, StringSet};
 use biome_js_analyze::lint::style::no_restricted_globals;
 
 use super::{eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_typescript};
@@ -62,10 +62,7 @@ impl eslint_eslint::FlatConfigData {
                 } else {
                     let mut override_pat = biome_config::OverridePattern::default();
                     if let Some(language_options) = flat_config_object.language_options {
-                        let globals = language_options
-                            .globals
-                            .enabled()
-                            .collect::<rustc_hash::FxHashSet<_>>();
+                        let globals = language_options.globals.enabled().collect::<StringSet>();
                         let js_config = biome_config::PartialJavascriptConfiguration {
                             globals: Some(globals),
                             ..Default::default()
@@ -101,10 +98,7 @@ impl eslint_eslint::FlatConfigData {
             biome_config::Rules::default()
         };
         if let Some(language_options) = global_config_object.language_options {
-            let globals = language_options
-                .globals
-                .enabled()
-                .collect::<rustc_hash::FxHashSet<_>>();
+            let globals = language_options.globals.enabled().collect::<StringSet>();
             let js_config = biome_config::PartialJavascriptConfiguration {
                 globals: Some(globals),
                 ..Default::default()
@@ -132,7 +126,7 @@ impl eslint_eslint::LegacyConfigData {
         let mut results = MigrationResults::default();
         let mut biome_config = biome_config::PartialConfiguration::default();
         if !self.globals.is_empty() {
-            let globals = self.globals.enabled().collect::<rustc_hash::FxHashSet<_>>();
+            let globals = self.globals.enabled().collect::<StringSet>();
             let js_config = biome_config::PartialJavascriptConfiguration {
                 globals: Some(globals),
                 ..Default::default()
@@ -148,7 +142,7 @@ impl eslint_eslint::LegacyConfigData {
                 .ignore_patterns
                 .into_iter()
                 .map(|p| p.0)
-                .collect::<Vec<_>>();
+                .collect::<StringSet>();
             linter.ignore = Some(ignore);
         }
         if !self.overrides.is_empty() {
@@ -156,10 +150,7 @@ impl eslint_eslint::LegacyConfigData {
             for override_elt in self.overrides {
                 let mut override_pattern = biome_config::OverridePattern::default();
                 if !override_elt.globals.is_empty() {
-                    let globals = override_elt
-                        .globals
-                        .enabled()
-                        .collect::<rustc_hash::FxHashSet<_>>();
+                    let globals = override_elt.globals.enabled().collect::<StringSet>();
                     let js_config = biome_config::PartialJavascriptConfiguration {
                         globals: Some(globals),
                         ..Default::default()
@@ -332,8 +323,8 @@ mod tests {
     #[test]
     fn flat_config_single_config_object() {
         let flat_config = FlatConfigData(vec![FlatConfigObject {
-            files: vec!["*.js".into()],
-            ignores: vec!["*.test.js".into()],
+            files: ["*.js".to_string()].into_iter().collect(),
+            ignores: ["*.test.js".to_string()].into_iter().collect(),
             language_options: None,
             rules: Some(Rules(
                 [Rule::Any(Cow::Borrowed("eqeqeq"), Severity::Error)]
@@ -348,8 +339,14 @@ mod tests {
         assert!(biome_config.formatter.is_none());
         assert!(biome_config.organize_imports.is_none());
         let linter = biome_config.linter.unwrap();
-        assert_eq!(linter.include.unwrap(), ["*.js".into()],);
-        assert_eq!(linter.ignore.unwrap(), ["*.test.js".into()],);
+        assert_eq!(
+            linter.include,
+            Some(["*.js".to_string()].into_iter().collect())
+        );
+        assert_eq!(
+            linter.ignore,
+            Some(["*.test.js".to_string()].into_iter().collect())
+        );
         assert!(linter.rules.is_some());
     }
 
@@ -357,14 +354,14 @@ mod tests {
     fn flat_config_multiple_config_object() {
         let flat_config = FlatConfigData(vec![
             FlatConfigObject {
-                files: vec![],
-                ignores: vec!["*.test.js".into()],
+                files: ShorthandVec::default(),
+                ignores: ["*.test.js".to_string()].into_iter().collect(),
                 language_options: None,
                 rules: None,
             },
             FlatConfigObject {
-                files: vec![],
-                ignores: vec![],
+                files: ShorthandVec::default(),
+                ignores: ShorthandVec::default(),
                 language_options: None,
                 rules: Some(Rules(
                     [Rule::Any(Cow::Borrowed("eqeqeq"), Severity::Error)]
@@ -373,14 +370,14 @@ mod tests {
                 )),
             },
             FlatConfigObject {
-                files: vec![],
-                ignores: vec!["*.spec.js".into()],
+                files: ShorthandVec::default(),
+                ignores: ["*.spec.js".to_string()].into_iter().collect(),
                 language_options: None,
                 rules: None,
             },
             FlatConfigObject {
-                files: vec!["*.ts".into()],
-                ignores: vec![],
+                files: ["*.ts".to_string()].into_iter().collect(),
+                ignores: ShorthandVec::default(),
                 language_options: None,
                 rules: Some(Rules(
                     [Rule::Any(Cow::Borrowed("eqeqeq"), Severity::Off)]
@@ -397,8 +394,12 @@ mod tests {
         let linter = biome_config.linter.unwrap();
         assert!(linter.include.is_none());
         assert_eq!(
-            linter.ignore.unwrap(),
-            ["*.test.js".into(), "*.spec.js".into()]
+            linter.ignore,
+            Some(
+                ["*.test.js".to_string(), "*.spec.js".to_string()]
+                    .into_iter()
+                    .collect()
+            )
         );
         assert_eq!(
             linter.rules.unwrap().suspicious.unwrap().no_double_equals,
@@ -409,7 +410,10 @@ mod tests {
         let overrides = biome_config.overrides.unwrap();
         assert_eq!(overrides.0.len(), 1);
         let override0 = overrides.0.into_iter().next().unwrap();
-        assert_eq!(override0.include.unwrap(), ["*.ts".into()],);
+        assert_eq!(
+            override0.include,
+            Some(["*.ts".to_string()].into_iter().collect())
+        );
         assert!(override0.ignore.is_none());
         assert_eq!(
             override0

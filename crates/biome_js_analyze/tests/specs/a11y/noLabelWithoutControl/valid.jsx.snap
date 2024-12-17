@@ -37,4 +37,13 @@ expression: valid.jsx
 
 <label htmlFor="three">{label}</label>;
 
+// Allow Button #4511
+<label for="btn_id"><button id="btn_id">Button</button></label>;
+<label htmlFor="btn_id"><button id="btn_id">Button</button></label>;
+<label>A label<button /></label>;
+<>
+	<button type="button" id="burger">Menu</button>
+	<label htmlFor="burger">Menu</label>;
+</>
+
 ```
