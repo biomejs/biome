@@ -1,0 +1,118 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/attributes/boolean.html
+---
+# Input
+
+```html
+<button type="submit">This is valid.</button>
+<button type="submit" disabled>This is valid.</button>
+<button type="submit" disabled="">This is valid.</button>
+<button type="submit" disabled="disabled">This is valid.</button>
+<button type="submit" disabled=true>This is valid. This will be disabled.</button>
+<button type="submit" disabled='true'>This is valid. This will be disabled.</button>
+<button type="submit" disabled="true">This is valid. This will be disabled.</button>
+<button type="submit" disabled=false>This is valid. This will be disabled.</button>
+<button type="submit" disabled="false">This is valid. This will be disabled.</button>
+<button type="submit" disabled='false'>This is valid. This will be disabled.</button>
+<button type="submit" disabled=hahah>This is valid. This will be disabled.</button>
+<button type="submit" disabled='hahah'>This is valid. This will be disabled.</button>
+<button type="submit" disabled="hahah">This is valid. This will be disabled.</button>
+<input type="checkbox" checked disabled name="cheese">
+<input type="checkbox" checked="checked" disabled="disabled" name="cheese">
+<input type='checkbox' checked="" disabled="" name=cheese >
+<div lang=""></div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,35 +1,16 @@
+-<button type="submit">This is valid.</button>
+-<button type="submit" disabled>This is valid.</button>
++<button type="submit">This is valid.</button><button type="submit" disabled>This is valid.</button>
+ <button type="submit" disabled="">This is valid.</button>
+ <button type="submit" disabled="disabled">This is valid.</button>
+-<button type="submit" disabled="true">
+-  This is valid. This will be disabled.
+-</button>
+-<button type="submit" disabled="true">
+-  This is valid. This will be disabled.
+-</button>
+-<button type="submit" disabled="true">
+-  This is valid. This will be disabled.
+-</button>
+-<button type="submit" disabled="false">
+-  This is valid. This will be disabled.
+-</button>
+-<button type="submit" disabled="false">
+-  This is valid. This will be disabled.
+-</button>
+-<button type="submit" disabled="false">
+-  This is valid. This will be disabled.
+-</button>
+-<button type="submit" disabled="hahah">
+-  This is valid. This will be disabled.
+-</button>
+-<button type="submit" disabled="hahah">
+-  This is valid. This will be disabled.
+-</button>
+-<button type="submit" disabled="hahah">
+-  This is valid. This will be disabled.
+-</button>
+-<input type="checkbox" checked disabled name="cheese" />
+-<input type="checkbox" checked="checked" disabled="disabled" name="cheese" />
+-<input type="checkbox" checked="" disabled="" name="cheese" />
++<button type="submit" disabled=true>This is valid. This will be disabled.</button>
++<button type="submit" disabled='true'>This is valid. This will be disabled.</button>
++<button type="submit" disabled="true">This is valid. This will be disabled.</button>
++<button type="submit" disabled=false>This is valid. This will be disabled.</button>
++<button type="submit" disabled="false">This is valid. This will be disabled.</button>
++<button type="submit" disabled='false'>This is valid. This will be disabled.</button>
++<button type="submit" disabled=hahah>This is valid. This will be disabled.</button>
++<button type="submit" disabled='hahah'>This is valid. This will be disabled.</button>
++<button type="submit" disabled="hahah">This is valid. This will be disabled.</button>
++<input type="checkbox" checked disabled name="cheese">
++<input type="checkbox" checked="checked" disabled="disabled" name="cheese">
++<input type='checkbox' checked="" disabled="" name=cheese >
+ <div lang=""></div>
+```
+
+# Output
+
+```html
+<button type="submit">This is valid.</button><button type="submit" disabled>This is valid.</button>
+<button type="submit" disabled="">This is valid.</button>
+<button type="submit" disabled="disabled">This is valid.</button>
+<button type="submit" disabled=true>This is valid. This will be disabled.</button>
+<button type="submit" disabled='true'>This is valid. This will be disabled.</button>
+<button type="submit" disabled="true">This is valid. This will be disabled.</button>
+<button type="submit" disabled=false>This is valid. This will be disabled.</button>
+<button type="submit" disabled="false">This is valid. This will be disabled.</button>
+<button type="submit" disabled='false'>This is valid. This will be disabled.</button>
+<button type="submit" disabled=hahah>This is valid. This will be disabled.</button>
+<button type="submit" disabled='hahah'>This is valid. This will be disabled.</button>
+<button type="submit" disabled="hahah">This is valid. This will be disabled.</button>
+<input type="checkbox" checked disabled name="cheese">
+<input type="checkbox" checked="checked" disabled="disabled" name="cheese">
+<input type='checkbox' checked="" disabled="" name=cheese >
+<div lang=""></div>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: <button type="submit">This is valid.</button><button type="submit" disabled>This is valid.</button>
+    4: <button type="submit" disabled=true>This is valid. This will be disabled.</button>
+    5: <button type="submit" disabled='true'>This is valid. This will be disabled.</button>
+    6: <button type="submit" disabled="true">This is valid. This will be disabled.</button>
+    7: <button type="submit" disabled=false>This is valid. This will be disabled.</button>
+    8: <button type="submit" disabled="false">This is valid. This will be disabled.</button>
+    9: <button type="submit" disabled='false'>This is valid. This will be disabled.</button>
+   10: <button type="submit" disabled=hahah>This is valid. This will be disabled.</button>
+   11: <button type="submit" disabled='hahah'>This is valid. This will be disabled.</button>
+   12: <button type="submit" disabled="hahah">This is valid. This will be disabled.</button>
+```

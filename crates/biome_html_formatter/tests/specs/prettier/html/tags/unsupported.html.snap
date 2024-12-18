@@ -1,0 +1,27 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/tags/unsupported.html
+---
+# Input
+
+```html
+<center></center>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-<center></center>
++<center></center>
+\ No newline at end of file
+```
+
+# Output
+
+```html
+<center></center>```

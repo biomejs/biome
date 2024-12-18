@@ -1,0 +1,137 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/script/babel.html
+---
+# Input
+
+```html
+<script type="text/babel" data-presets="react" data-type="module">
+import { h, 
+         render } from 'https://unpkg.com/preact?module';
+render(
+<h1>Hello World!</h1>,
+         document.body
+);
+</script>
+
+<script type="text/babel">
+<!--
+alert(1)
+-->
+</script>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,14 @@
+ <script type="text/babel" data-presets="react" data-type="module">
+-  import { h, render } from "https://unpkg.com/preact?module";
+-  render(<h1>Hello World!</h1>, document.body);
++import { h, 
++         render } from 'https://unpkg.com/preact?module';
++render(
++<h1>Hello World!</h1>,
++         document.body
++);
+ </script>
+ 
+ <script type="text/babel">
+-  <!--
+-  alert(1);
+-  -->
++<!--
++alert(1)
++-->
+ </script>
+```
+
+# Output
+
+```html
+<script type="text/babel" data-presets="react" data-type="module">
+import { h, 
+         render } from 'https://unpkg.com/preact?module';
+render(
+<h1>Hello World!</h1>,
+         document.body
+);
+</script>
+
+<script type="text/babel">
+<!--
+alert(1)
+-->
+</script>
+```
+
+# Errors
+```
+babel.html:1:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+  > 1 │ <script type="text/babel" data-presets="react" data-type="module">
+      │                               ^
+    2 │ import { h,·
+    3 │          render } from 'https://unpkg.com/preact?module';
+  
+babel.html:1:52 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+  > 1 │ <script type="text/babel" data-presets="react" data-type="module">
+      │                                                    ^
+    2 │ import { h,·
+    3 │          render } from 'https://unpkg.com/preact?module';
+  
+babel.html:5:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    3 │          render } from 'https://unpkg.com/preact?module';
+    4 │ render(
+  > 5 │ <h1>Hello World!</h1>,
+      │                      ^
+    6 │          document.body
+    7 │ );
+  
+babel.html:6:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `.`
+  
+    4 │ render(
+    5 │ <h1>Hello World!</h1>,
+  > 6 │          document.body
+      │                  ^
+    7 │ );
+    8 │ </script>
+  
+babel.html:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `)`
+  
+    5 │ <h1>Hello World!</h1>,
+    6 │          document.body
+  > 7 │ );
+      │ ^
+    8 │ </script>
+    9 │ 
+  
+babel.html:7:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `;`
+  
+    5 │ <h1>Hello World!</h1>,
+    6 │          document.body
+  > 7 │ );
+      │  ^
+    8 │ </script>
+    9 │ 
+  
+
+```

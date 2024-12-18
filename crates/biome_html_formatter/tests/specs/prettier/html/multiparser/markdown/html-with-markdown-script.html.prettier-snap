@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script type="text/markdown">
+      # hello
+
+      - **foo**
+      - **bar**
+    </script>
+  </head>
+  <body></body>
+</html>
