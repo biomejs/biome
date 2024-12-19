@@ -2558,6 +2558,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useParseIntRadix": {
+					"description": "Enforce the consistent use of the radix argument when using parseInt().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [
