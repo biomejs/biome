@@ -4,6 +4,8 @@ mod registry;
 mod rule_mover;
 mod version_services;
 
+pub(crate) use rule_mover::RuleMover;
+
 use crate::registry::visit_migration_registry;
 use crate::version_services::TheVersion;
 pub use biome_analyze::ControlFlow;

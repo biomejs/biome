@@ -120,30 +120,23 @@ impl Rule for StyleRules {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<MigrationAction> {
-        let node = ctx.query();
-        let mut mutation = ctx.root().begin();
+        let mut rule_mover = RuleMover::from_root(ctx.root());
 
-        let mut separators = vec![];
-        let members: Vec<_> = state
-            .iter()
-            .enumerate()
-            .map(|(index, text)| {
-                if index + 1 < state.len() {
-                    separators.push(token(T![,]))
-                }
-                json_member(
-                    json_member_name(json_string_literal(text.as_ref()).with_leading_trivia(vec![
+        for rule_to_move in state {
+            let member = json_member(
+                json_member_name(
+                    json_string_literal(rule_to_move.as_ref()).with_leading_trivia(vec![
                         (TriviaPieceKind::Newline, "\n"),
                         (TriviaPieceKind::Whitespace, " ".repeat(8).as_str()),
-                    ])),
-                    token(T![:]),
-                    AnyJsonValue::JsonStringValue(json_string_value(json_string_literal("error"))),
-                )
-            })
-            .collect();
+                    ]),
+                ),
+                token(T![:]),
+                AnyJsonValue::JsonStringValue(json_string_value(json_string_literal("error"))),
+            );
+            rule_mover.replace_rule(rule_to_move.as_ref(), member, "style");
+        }
 
-        let member = RuleMover::from_root(ctx.root(), "style");
-        member.replace(&mut mutation, members, separators);
+        let mutation = rule_mover.run_queries()?;
 
         Some(RuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),

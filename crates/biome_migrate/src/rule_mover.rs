@@ -1,19 +1,38 @@
 use biome_json_factory::make::{
-    json_member, json_member_list, json_member_name, json_object_value, json_string_literal, token,
+    json_member, json_member_list, json_member_name, json_object_value, json_string_literal,
+    json_string_value, token,
 };
 use biome_json_syntax::{
     AnyJsonValue, JsonLanguage, JsonMember, JsonMemberList, JsonObjectValue, JsonRoot,
     JsonSyntaxToken, T,
 };
-use biome_rowan::{AstNode, BatchMutation, TriviaPieceKind, WalkEvent};
+use biome_rowan::{
+    AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, TriviaPieceKind, WalkEvent,
+};
 use rustc_hash::FxHashMap;
 use std::str::FromStr;
+
+const ALL_GROUPS: &'static [&'static str] = &[
+    "nursery",
+    "suspicious",
+    "a11y",
+    "security",
+    "complexity",
+    "style",
+    "correctness",
+    "performance",
+];
 
 #[derive(Debug, Eq, Hash, PartialEq)]
 pub(crate) enum Group {
     Style,
     Suspicious,
     Nursery,
+    A11y,
+    Security,
+    Complexity,
+    Correctness,
+    Performance,
 }
 
 impl Group {
@@ -22,6 +41,11 @@ impl Group {
             Group::Style => "style",
             Group::Suspicious => "suspicious",
             Group::Nursery => "nursery",
+            Group::A11y => "a11y",
+            Group::Security => "security",
+            Group::Complexity => "complexity",
+            Group::Correctness => "correctness",
+            Group::Performance => "performance",
         }
     }
 }
@@ -34,6 +58,11 @@ impl FromStr for Group {
             "style" => Group::Style,
             "suspicious" => Group::Suspicious,
             "nursery" => Group::Nursery,
+            "a11y" => Group::A11y,
+            "security" => Group::Security,
+            "complexity" => Group::Complexity,
+            "correctness" => Group::Correctness,
+            "performance" => Group::Performance,
             _ => return Err(()),
         })
     }
@@ -67,23 +96,29 @@ impl MemberKind {
 }
 
 pub(crate) struct RuleMover {
-    pub(crate) member_found: MemberKind,
+    groups: FxHashMap<Group, JsonMember>,
     root: JsonRoot,
-    queries: Vec<MoverQuery>,
+    queries: Vec<Query>,
 }
 
-pub(crate) struct MoverQuery {
+pub(crate) struct Query {
     rule_name: String,
-    from_group: Group,
-    to_group: Group,
+    kind: QueryKind,
     rule_member: Option<JsonMember>,
+}
+
+enum QueryKind {
+    Move(Group, Group),
+    Replace(Group),
+    Remove(Group),
+    Insert(Group),
 }
 
 impl RuleMover {
     /// Attempts to find  `linter`, `linter.rules` or `linter.rules.<group>`
     pub(crate) fn from_root(root: JsonRoot) -> Self {
         let events = root.syntax().preorder();
-        let mut member_found = MemberKind::None;
+        let mut groups = FxHashMap::default();
 
         for event in events {
             match event {
@@ -95,17 +130,8 @@ impl RuleMover {
                             continue;
                         };
 
-                        if name.text() == "rules" {
-                            member_found = MemberKind::Rules(member);
-                        } else if name.text() == "linter" {
-                            member_found = MemberKind::Linter(member);
-                        } else if let Ok(group) = Group::from_str(name.text()) {
-                            if matches!(member_found, MemberKind::Groups { .. }) {
-                                member_found.push_group(group, member);
-                            } else {
-                                member_found = MemberKind::new_groups();
-                                member_found.push_group(group, member);
-                            }
+                        if let Ok(group) = Group::from_str(name.text()) {
+                            groups.insert(group, member);
                         }
                     }
                 }
@@ -115,32 +141,99 @@ impl RuleMover {
 
         Self {
             root,
-            member_found,
+            groups,
             queries: vec![],
         }
     }
 
-    pub(crate) fn register_move(&mut self, rule_name: impl ToString, from: &str, to: &str) {
+    /// Register a query where it adds a new rule to a group
+    ///
+    /// ## Panics
+    ///
+    /// It panics if the group doesn't exist. This usually means that the developer must add the new group
+    #[allow(unused)]
+    pub(crate) fn insert_rule(
+        &mut self,
+        rule_name: impl ToString,
+        rule_member: JsonMember,
+        group: &str,
+    ) {
+        let group = Group::from_str(group).expect("to be a valid group");
+
+        self.queries.push(Query {
+            rule_name: rule_name.to_string(),
+            kind: QueryKind::Insert(group),
+            rule_member: Some(rule_member),
+        })
+    }
+
+    /// Register a query where it adds a new rule to a group
+    ///
+    /// ## Panics
+    ///
+    /// It panics if the group doesn't exist. This usually means that the developer must add the new group
+    #[allow(unused)]
+    pub(crate) fn remove_rule(
+        &mut self,
+        rule_name: impl ToString,
+        rule_member: JsonMember,
+        group: &str,
+    ) {
+        let group = Group::from_str(group).expect("to be a valid group");
+
+        self.queries.push(Query {
+            rule_name: rule_name.to_string(),
+            kind: QueryKind::Remove(group),
+            rule_member: Some(rule_member),
+        })
+    }
+
+    /// Register a query where an existing rule is replaced with a new [JsonMember]
+    ///
+    /// ## Panics
+    ///
+    /// It panics if the group doesn't exist. This usually means that the developer must add the new group
+    pub(crate) fn replace_rule(
+        &mut self,
+        rule_name: impl ToString,
+        rule_member: JsonMember,
+        group: &str,
+    ) {
+        let group = Group::from_str(group).expect("to be a valid group");
+
+        self.queries.push(Query {
+            rule_name: rule_name.to_string(),
+            kind: QueryKind::Replace(group),
+            rule_member: Some(rule_member),
+        })
+    }
+
+    /// Register the move of a rule from one group to another
+    ///
+    /// ## Panics
+    ///
+    /// It panics if the group doesn't exist. This usually means that the developer must add the new group
+    pub(crate) fn move_rule(&mut self, rule_name: &str, from: &str, to: &str) {
         let from_group = Group::from_str(from).expect("to be a valid group");
         let to_group = Group::from_str(to).expect("to be a valid group");
 
         let mut rule_member = None;
-        if let MemberKind::Groups { groups } = &self.member_found {
-            for (group, member) in groups.iter() {
-                if group == &from_group {
-                    let list = member
-                        .value()
-                        .ok()
-                        .and_then(|n| n.as_json_object_value().cloned())
-                        .map(|n| n.json_member_list());
-                    if let Some(list) = list {
-                        for item in list {
-                            if let Some(member) = item.ok() {
-                                let text =
-                                    member.name().ok().and_then(|n| n.inner_string_text().ok());
+        'outer: for (group, member) in self.groups.iter() {
+            if group == &from_group {
+                let list = member
+                    .value()
+                    .ok()
+                    .and_then(|n| n.as_json_object_value().cloned())
+                    .map(|n| n.json_member_list());
+                if let Some(list) = list {
+                    for item in list {
+                        if let Some(member) = item.ok() {
+                            let text = member.name().ok().and_then(|n| n.inner_string_text().ok());
 
-                                if matches!(text, Some(rule_name)) {
-                                    rule_member = Some(member)
+                            if let Some(text) = text {
+                                if text.text() == rule_name {
+                                    rule_member = Some(member);
+                                    break 'outer;
                                 }
                             }
                         }
@@ -149,65 +242,182 @@ impl RuleMover {
             }
         }
 
-        self.queries.push(MoverQuery {
+        self.queries.push(Query {
             rule_name: rule_name.to_string(),
-            from_group,
-            to_group,
+            kind: QueryKind::Move(from_group, to_group),
             rule_member,
         })
     }
 
-    pub(crate) fn replace(
-        self,
-        mutation: &mut BatchMutation<JsonLanguage>,
-        members: Vec<JsonMember>,
-        separators: Vec<JsonSyntaxToken>,
+    /// Removes a rule from a group, and returns the new member list
+    ///
+    /// ## Panics
+    ///
+    /// It panics if the group doesn't exist. This usually means that the developer must add the new group
+    fn remove_rule_from_group(
+        groups: &mut FxHashMap<Group, JsonMember>,
+        rule_name: &str,
+        group: &Group,
     ) -> Option<()> {
-        match self.member_found {
-            MemberKind::Group(object) => {
-                let new_member = create_group_from_existing_one(
-                    members,
-                    separators,
-                    object.clone(),
-                    self.group,
-                )?;
-                mutation.replace_node(object, new_member);
+        if let Some(member) = groups.get_mut(&group) {
+            let list = member
+                .value()
+                .ok()?
+                .as_json_object_value()?
+                .json_member_list();
+            let mut new_members = Vec::with_capacity(list.len());
+            let mut new_separators = Vec::with_capacity(list.len());
+
+            for item in list.iter() {
+                let item = item.ok()?;
+                if rule_name != item.name().ok()?.inner_string_text().ok()?.text() {
+                    new_members.push(item);
+                }
             }
-            MemberKind::Rules(object) => {
-                let new_member = create_rules_member_from_existing_one(
-                    members,
-                    separators,
-                    object.clone(),
-                    self.group,
-                )?;
-                mutation.replace_node(object, new_member);
-            }
-            MemberKind::Linter(member) => {
-                let new_member =
-                    create_linter_member_from_existing_one(members, separators, member.clone())?;
-                mutation.replace_node(member, new_member);
-            }
-            MemberKind::None => {
-                let list = self
-                    .root
-                    .value()
-                    .ok()?
-                    .as_json_object_value()?
-                    .json_member_list();
-                let mut new_list = vec![];
-                let mut new_separators = vec![];
-                for item in list.clone() {
-                    let item = item.ok()?;
-                    new_list.push(item);
+
+            for index in 0..new_members.len() {
+                if index + 1 < new_members.len() {
                     new_separators.push(token(T![,]));
                 }
-                let member = create_new_linter_member(members, separators, 2, self.group);
-                new_list.push(member);
-                mutation.replace_node(list, json_member_list(new_list, new_separators));
             }
-        };
+
+            new_members.shrink_to_fit();
+            new_separators.shrink_to_fit();
+
+            *member = group_member(new_members, new_separators, group.as_str());
+        } else {
+            panic!("The group doesn't exist. This usually means that the developer needs to added to the type.")
+        }
 
         Some(())
+    }
+
+    /// It adds a rule to a group
+    ///
+    /// ## Panics
+    ///
+    /// It panics if the group doesn't exist. This usually means that the developer must add the new group
+    fn add_rule_to_group(
+        groups: &mut FxHashMap<Group, JsonMember>,
+        rule_member: JsonMember,
+        group: &Group,
+    ) -> Option<()> {
+        if let Some(member) = groups.get_mut(&group) {
+            let list = member
+                .value()
+                .ok()?
+                .as_json_object_value()?
+                .json_member_list();
+            let mut new_members = vec![];
+            let mut new_separators = vec![];
+
+            for item in list.iter() {
+                let item = item.ok()?;
+                new_members.push(item);
+            }
+
+            for _ in 0..new_members.len() {
+                new_separators.push(token(T![,]));
+            }
+
+            new_members.push(rule_member);
+
+            *member = group_member(new_members, new_separators, group.as_str());
+        } else {
+            panic!("The group doesn't exist. This usually means that the developer needs to added to the type.")
+        }
+
+        Some(())
+    }
+
+    pub(crate) fn run_queries(mut self) -> Option<BatchMutation<JsonLanguage>> {
+        let mut mutation = self.root.clone().begin();
+        for group in ALL_GROUPS {
+            let group_enum = Group::from_str(group).ok().expect("Group to be mapped");
+            if !self.groups.contains_key(&group_enum) {
+                self.groups
+                    .insert(group_enum, group_member(vec![], vec![], group));
+            }
+        }
+
+        let mut groups = self.groups;
+        for query in self.queries {
+            let Query {
+                rule_name,
+                rule_member,
+                kind,
+            } = query;
+            let rule_member = if let Some(rule_member) = rule_member {
+                rule_member
+            } else {
+                create_member(
+                    rule_name.as_str(),
+                    AnyJsonValue::JsonStringValue(json_string_value(json_string_literal("on"))),
+                    8,
+                )
+            };
+            match kind {
+                QueryKind::Move(from, to) => {
+                    RuleMover::remove_rule_from_group(&mut groups, rule_name.as_str(), &from)?;
+                    RuleMover::add_rule_to_group(&mut groups, rule_member, &to)?
+                }
+                QueryKind::Replace(group) => {
+                    RuleMover::remove_rule_from_group(&mut groups, rule_name.as_str(), &group)?;
+                    RuleMover::add_rule_to_group(&mut groups, rule_member, &group)?
+                }
+                QueryKind::Remove(group) => {
+                    RuleMover::remove_rule_from_group(&mut groups, rule_name.as_str(), &group)?;
+                }
+                QueryKind::Insert(group) => {
+                    RuleMover::add_rule_to_group(&mut groups, rule_member, &group)?
+                }
+            }
+        }
+
+        let mut members = vec![];
+        let mut separators = vec![];
+
+        for member in groups.into_values() {
+            let list = member
+                .value()
+                .ok()?
+                .as_json_object_value()?
+                .json_member_list();
+            if !list.is_empty() {
+                members.push(member);
+            }
+        }
+        for _ in 0..members.len() - 1 {
+            separators.push(token(T![,]))
+        }
+
+        let new_linter_member = create_new_linter_member(members, separators);
+
+        let list = self
+            .root
+            .value()
+            .ok()?
+            .as_json_object_value()?
+            .json_member_list();
+
+        let mut members: Vec<_> = list
+            .iter()
+            .filter_map(|el| {
+                let el = el.ok()?;
+                if el.name().ok()?.inner_string_text().ok()?.text() == "linter" {
+                    None
+                } else {
+                    Some(el)
+                }
+            })
+            .collect();
+        let mut separators: Vec<_> = list.separators().filter_map(|el| el.ok()).collect();
+
+        members.push(new_linter_member);
+        separators.push(token(T![,]));
+        mutation.replace_node(list, json_member_list(members, separators));
+
+        Some(mutation)
     }
 }
 
@@ -233,115 +443,14 @@ fn create_member(text: &str, value: AnyJsonValue, level: usize) -> JsonMember {
     )
 }
 
-/// Creates
-/// ```json
-/// {
-///     "style": {}
-/// }
-/// ```
-fn create_group_from_existing_one(
-    members: Vec<JsonMember>,
-    separators: Vec<JsonSyntaxToken>,
-    member: JsonMember,
-    new_group: &str,
-) -> Option<JsonMember> {
-    let mut new_members = vec![];
-    let mut new_separators = vec![];
-    let list = member
-        .value()
-        .ok()?
-        .as_json_object_value()?
-        .json_member_list();
-    for item in list {
-        let item = item.ok()?;
-        new_members.push(item);
-        new_separators.push(token(T![,]));
-    }
-    new_members.extend(members);
-    new_separators.extend(separators);
-
-    Some(group_member(new_members, new_separators, 8, new_group))
-}
-
-/// Creates
-///
-/// ```json
-/// {
-///     "rules": {
-///         "style": {}
-///     }
-/// }
-/// ```
-fn create_rules_member_from_existing_one(
-    members: Vec<JsonMember>,
-    separators: Vec<JsonSyntaxToken>,
-    member: JsonMember,
-    new_group: &str,
-) -> Option<JsonMember> {
-    let mut new_members = vec![];
-    let mut new_separators = vec![];
-    let list = member
-        .value()
-        .ok()?
-        .as_json_object_value()?
-        .json_member_list();
-    for item in list {
-        let item = item.ok()?;
-        new_members.push(item);
-        new_separators.push(token(T![,]));
-    }
-
-    new_members.push(group_member(members, separators, 6, new_group));
-
-    Some(rules_member(new_members, new_separators, 6))
-}
-
-/// Creates
-///
-/// ```json
-/// {
-///     "linter": {
-///         "rules": {
-///             "style": {}
-///         }
-///     }
-/// }
-/// ```
-fn create_linter_member_from_existing_one(
-    members: Vec<JsonMember>,
-    separators: Vec<JsonSyntaxToken>,
-    member: JsonMember,
-) -> Option<JsonMember> {
-    let mut new_members = vec![];
-    let mut new_separators = vec![];
-    let list = member
-        .value()
-        .ok()?
-        .as_json_object_value()?
-        .json_member_list();
-    for item in list {
-        let item = item.ok()?;
-        new_members.push(item);
-        new_separators.push(token(T![,]));
-    }
-
-    new_members.push(rules_member(members, separators, 4));
-    Some(linter_member(new_members, new_separators, 4))
-}
-
 fn group_member(
     members: Vec<JsonMember>,
     separators: Vec<JsonSyntaxToken>,
-    indentation: usize,
-    new_group: &str,
+    group_name: &str,
 ) -> JsonMember {
     let list = json_member_list(members, separators);
-    let object = create_object(list, indentation);
-    create_member(
-        new_group,
-        AnyJsonValue::JsonObjectValue(object),
-        indentation,
-    )
+    let object = create_object(list, 8);
+    create_member(group_name, AnyJsonValue::JsonObjectValue(object), 6)
 }
 
 fn rules_member(
@@ -351,7 +460,7 @@ fn rules_member(
 ) -> JsonMember {
     let list = json_member_list(members, separators);
     let object = create_object(list, indentation);
-    create_member("rules", AnyJsonValue::JsonObjectValue(object), indentation)
+    create_member("rules", AnyJsonValue::JsonObjectValue(object), 4)
 }
 
 fn linter_member(
@@ -367,11 +476,107 @@ fn linter_member(
 fn create_new_linter_member(
     members: Vec<JsonMember>,
     separators: Vec<JsonSyntaxToken>,
-    indentation: usize,
-    new_group: &str,
 ) -> JsonMember {
-    let style = group_member(members, separators, indentation * 3, new_group);
-    let rules = rules_member(vec![style], vec![], indentation * 2);
-    let linter = linter_member(vec![rules], vec![], indentation * 1);
+    let rules = rules_member(members, separators, 4);
+    let linter = linter_member(vec![rules], vec![], 2);
     linter
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_diagnostics::Error;
+    use biome_json_formatter::context::JsonFormatOptions;
+    use biome_json_formatter::format_node;
+    use biome_json_parser::{parse_json, JsonParse, JsonParserOptions};
+    use biome_test_utils::diagnostic_to_string;
+    use insta::assert_snapshot;
+
+    fn assert_snapshot(source: JsonParse, mutation: BatchMutation<JsonLanguage>) {
+        let mut buffer = String::new();
+
+        let result = format_node(JsonFormatOptions::default(), &source.syntax())
+            .expect("Should be able to format")
+            .print()
+            .expect("Should be able to format");
+
+        buffer.push_str("## Source\n\n");
+        buffer.push_str("```json\n");
+        buffer.push_str(result.as_code());
+        buffer.push_str("\n```\n\n");
+
+        buffer.push_str("## Result\n\n");
+        buffer.push_str("```\n");
+        let new_syntax_node = mutation.commit();
+        let result = format_node(JsonFormatOptions::default(), &new_syntax_node)
+            .expect("Should be able to format")
+            .print()
+            .expect("Should be able to format");
+
+        buffer.push_str(result.as_code());
+        buffer.push_str("\n```");
+
+        assert_snapshot!(buffer);
+    }
+
+    #[test]
+    fn move_rule_to_new_group() {
+        let source = r#"
+{
+    "linter": {
+        "rules": {
+            "style": {
+                "noVar": "error"
+            }
+        }
+    }
+}
+        "#;
+        let parsed = parse_json(source, JsonParserOptions::default());
+        if parsed.has_errors() {
+            for diagnostic in parsed.into_diagnostics() {
+                let error = diagnostic_to_string("file.json", source, Error::from(diagnostic));
+                eprintln!("{:?}", error);
+            }
+            panic!("Source has errors");
+        }
+        let root = parsed.tree();
+        let mut rule_mover = RuleMover::from_root(root);
+        rule_mover.move_rule("noVar", "style", "suspicious");
+
+        let mutation = rule_mover.run_queries().expect("To run queries");
+
+        assert_snapshot(parsed, mutation);
+    }
+
+    #[test]
+    fn move_rule_with_existing_rules() {
+        let source = r#"
+{
+    "linter": {
+        "rules": {
+            "style": {
+                "noVar": "error",
+                "noArguments": "error"
+            }
+        }
+    }
+}
+        "#;
+        let parsed = parse_json(source, JsonParserOptions::default());
+        if parsed.has_errors() {
+            for diagnostic in parsed.into_diagnostics() {
+                let error = diagnostic_to_string("file.json", source, Error::from(diagnostic));
+                eprintln!("{:?}", error);
+            }
+            panic!("Source has errors");
+        }
+        let root = parsed.tree();
+        let mut rule_mover = RuleMover::from_root(root);
+        rule_mover.move_rule("noVar", "style", "suspicious");
+
+        let mutation = rule_mover.run_queries().expect("To run queries");
+
+        assert_snapshot(parsed, mutation);
+    }
 }
