@@ -1,11 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 86
 expression: declare_process.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 const process = {env: {}};
 const a = process.env;
 ```

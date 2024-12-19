@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validIdentifiers.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 Effect.forEach([1, 2, 3, 4, 5], (n) =>
 	Console.log(`Current element: ${n}`).pipe(Effect.as(n * 2))
 );

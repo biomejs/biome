@@ -4,7 +4,7 @@ expression: invalid_multiline_export.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export const greet = (name) => {
 	return `Hello, ${name}!`;
 };
