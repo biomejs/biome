@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid_group_named_export.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 const foo = 1;
 const bar = 2;
 
