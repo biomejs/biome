@@ -18,7 +18,7 @@ export function f(x) {
 
 # Diagnostics
 ```
-invalidFunctions.js:4:9 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidFunctions.js:4:9 lint/suspicious/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use let or const instead of var.
   

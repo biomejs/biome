@@ -18,7 +18,6 @@ pub mod no_restricted_globals;
 pub mod no_shouty_constants;
 pub mod no_unused_template_literal;
 pub mod no_useless_else;
-pub mod no_var;
 pub mod no_yoda_expression;
 pub mod use_as_const_assertion;
 pub mod use_block_statements;
@@ -73,7 +72,6 @@ declare_lint_group! {
             self :: no_shouty_constants :: NoShoutyConstants ,
             self :: no_unused_template_literal :: NoUnusedTemplateLiteral ,
             self :: no_useless_else :: NoUselessElse ,
-            self :: no_var :: NoVar ,
             self :: no_yoda_expression :: NoYodaExpression ,
             self :: use_as_const_assertion :: UseAsConstAssertion ,
             self :: use_block_statements :: UseBlockStatements ,

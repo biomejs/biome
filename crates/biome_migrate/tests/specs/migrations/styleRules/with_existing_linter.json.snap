@@ -1,0 +1,61 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: with_existing_linter.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "linter": {}
+}
+```
+
+# Diagnostics
+```
+with_existing_linter.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rules aren't recommended anymore.
+  
+  > 1 │ {
+      │ ^
+  > 2 │   "linter": {}
+  > 3 │ }
+      │ ^
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    1  1 │   {
+    2    │ - ··"linter":·{}
+       2 │ + ··"linter":·{
+       3 │ + ····"rules":·{
+       4 │ + ········"useLiteralEnumMembers":"error",
+       5 │ + ········"noArguments":"error",
+       6 │ + ········"noParameterAssign":"error",
+       7 │ + ········"useShorthandFunctionType":"error",
+       8 │ + ········"useExportType":"error",
+       9 │ + ········"useDefaultParameterLast":"error",
+      10 │ + ········"noCommaOperator":"error",
+      11 │ + ········"useSingleVarDeclarator":"error",
+      12 │ + ········"noNonnullAssertion":"error",
+      13 │ + ········"useNodejsImportProtocol":"error",
+      14 │ + ········"useConst":"error",
+      15 │ + ········"noInferrableTypes":"error",
+      16 │ + ········"useExponentiationOperator":"error",
+      17 │ + ········"noUselessElse":"error",
+      18 │ + ········"useSelfClosingElements":"error",
+      19 │ + ········"useImportType":"error",
+      20 │ + ········"useNumberNamespace":"error",
+      21 │ + ········"useWhile":"error",
+      22 │ + ········"useAsConstAssertion":"error",
+      23 │ + ········"noUnusedTemplateLiteral":"error",
+      24 │ + ········"useNumericLiterals":"error",
+      25 │ + ········"useTemplate":"error",
+      26 │ + ········"useEnumInitializers":"error"
+      27 │ + ····}
+      28 │ + ····}
+    3 29 │   }
+  
+
+```
