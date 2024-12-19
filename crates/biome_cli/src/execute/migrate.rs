@@ -2,6 +2,7 @@ use crate::commands::MigrateSubCommand;
 use crate::diagnostics::MigrationDiagnostic;
 use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
+use biome_analyze::AnalysisFilter;
 use biome_configuration::PartialConfiguration;
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_ast;
@@ -249,6 +250,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
             loop {
                 let (action, _) = migrate_configuration(
                     &tree,
+                    AnalysisFilter::default(),
                     configuration_file_path.as_path(),
                     biome_configuration::VERSION.to_string(),
                     |signal| {

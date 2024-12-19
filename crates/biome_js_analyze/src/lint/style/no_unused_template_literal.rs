@@ -43,7 +43,7 @@ declare_lint_rule! {
         name: "noUnusedTemplateLiteral",
         language: "ts",
         recommended: false,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }

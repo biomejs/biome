@@ -55,6 +55,7 @@ pub mod no_suspicious_semicolon_in_jsx;
 pub mod no_then_property;
 pub mod no_unsafe_declaration_merging;
 pub mod no_unsafe_negation;
+pub mod no_var;
 pub mod use_await;
 pub mod use_default_switch_clause_last;
 pub mod use_error_message;
@@ -121,6 +122,7 @@ declare_lint_group! {
             self :: no_then_property :: NoThenProperty ,
             self :: no_unsafe_declaration_merging :: NoUnsafeDeclarationMerging ,
             self :: no_unsafe_negation :: NoUnsafeNegation ,
+            self :: no_var :: NoVar ,
             self :: use_await :: UseAwait ,
             self :: use_default_switch_clause_last :: UseDefaultSwitchClauseLast ,
             self :: use_error_message :: UseErrorMessage ,

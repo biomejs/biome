@@ -3644,13 +3644,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noVar": {
-					"description": "Disallow the use of var",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noYodaExpression": {
 					"description": "Disallow the use of yoda expressions.",
 					"anyOf": [
@@ -4317,6 +4310,13 @@
 				},
 				"noUnsafeNegation": {
 					"description": "Disallow using unsafe negation.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVar": {
+					"description": "Disallow the use of var",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

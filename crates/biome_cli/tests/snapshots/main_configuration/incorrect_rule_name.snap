@@ -137,7 +137,6 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noShoutyConstants
   - noUnusedTemplateLiteral
   - noUselessElse
-  - noVar
   - noYodaExpression
   - useAsConstAssertion
   - useBlockStatements

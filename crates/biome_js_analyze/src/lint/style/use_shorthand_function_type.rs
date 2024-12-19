@@ -82,7 +82,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("prefer-function-type")],
         recommended: false,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }
