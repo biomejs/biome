@@ -195,7 +195,7 @@ pub fn sort_class_name(
 
     let mut result = sorted_classes.join(" ");
 
-    if classes_len > 0 {
+    if classes_len > 0 || ignore_postfix || ignore_prefix {
         // restore front space
         if class_name.starts_with(' ') {
             result.insert(0, ' ');

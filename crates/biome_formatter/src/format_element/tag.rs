@@ -282,6 +282,8 @@ pub trait Label {
 pub enum VerbatimKind {
     Bogus,
     Suppressed,
+    /// This was intentionally skipped, not as a result of suppression.
+    Skipped,
     Verbatim {
         /// the length of the formatted node
         length: TextSize,

@@ -24,10 +24,6 @@ use std::process::{ExitCode, Termination};
 /// Generic errors thrown during biome operations
 #[derive(Deserialize, Diagnostic, Serialize)]
 pub enum WorkspaceError {
-    /// Can't export the report of the CLI into a file
-    ReportNotSerializable(ReportNotSerializable),
-    /// The project contains uncommitted changes
-    DirtyWorkspace(DirtyWorkspace),
     /// The file does not exist in the [crate::Workspace]
     NotFound(NotFound),
     /// A file is not supported. It contains the language and path of the file
@@ -41,8 +37,6 @@ pub enum WorkspaceError {
     FormatWithErrorsDisabled(FormatWithErrorsDisabled),
     /// The file could not be analyzed because a rule caused an error.
     RuleError(RuleError),
-    /// Thrown when Biome can't read a generic directory
-    CantReadDirectory(CantReadDirectory),
     /// Thrown when Biome can't read a generic file
     CantReadFile(CantReadFile),
     /// Error thrown when validating the configuration. Once deserialized, further checks have to be done.
@@ -171,30 +165,10 @@ impl From<CantLoadExtendFile> for WorkspaceError {
         WorkspaceError::Configuration(BiomeDiagnostic::CantLoadExtendFile(value).into())
     }
 }
-
 impl From<WorkspaceError> for biome_diagnostics::serde::Diagnostic {
     fn from(error: WorkspaceError) -> Self {
         biome_diagnostics::serde::Diagnostic::new(error)
     }
-}
-
-#[derive(Debug, Serialize, Deserialize, Diagnostic)]
-#[diagnostic(
-    category = "internalError/fs",
-    message = "Uncommitted changes in repository"
-)]
-pub struct DirtyWorkspace;
-
-#[derive(Debug, Serialize, Deserialize, Diagnostic)]
-#[diagnostic(
-    category = "internalError/fs",
-    message(
-        message("The report can't be serialized, here's why: "{self.reason}),
-        description = "The report can't be serialized, here's why: {reason}"
-    )
-)]
-pub struct ReportNotSerializable {
-    reason: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -249,19 +223,6 @@ impl Panic {
     message = "Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option."
 )]
 pub struct FormatWithErrorsDisabled;
-
-#[derive(Debug, Serialize, Deserialize, Diagnostic)]
-#[diagnostic(
-    category = "internalError/fs",
-    message(
-        message("Biome couldn't read the following directory, maybe for permissions reasons or it doesn't exist: "{self.path}),
-        description = "Biome couldn't read the following directory, maybe for permissions reasons or it doesn't exist: {path}"
-    )
-)]
-pub struct CantReadDirectory {
-    #[location(resource)]
-    path: String,
-}
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
@@ -590,10 +551,7 @@ impl Advices for ProtectedFileAdvice {
 
 #[cfg(test)]
 mod test {
-    use crate::diagnostics::{
-        CantReadDirectory, CantReadFile, DirtyWorkspace, FileIgnored, NotFound,
-        SourceFileNotSupported,
-    };
+    use crate::diagnostics::{CantReadFile, FileIgnored, NotFound, SourceFileNotSupported};
     use crate::file_handlers::DocumentFileSource;
     use crate::{TransportError, WorkspaceError};
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
@@ -618,14 +576,6 @@ mod test {
     }
 
     #[test]
-    fn dirty_workspace() {
-        snap_diagnostic(
-            "dirty_workspace",
-            WorkspaceError::DirtyWorkspace(DirtyWorkspace).into(),
-        )
-    }
-
-    #[test]
     fn file_ignored() {
         snap_diagnostic(
             "file_ignored",
@@ -633,17 +583,6 @@ mod test {
                 path: "example.js".to_string(),
             })
             .with_file_path("example.js"),
-        )
-    }
-
-    #[test]
-    fn cant_read_directory() {
-        snap_diagnostic(
-            "cant_read_directory",
-            WorkspaceError::CantReadDirectory(CantReadDirectory {
-                path: "example/".to_string(),
-            })
-            .with_file_path("example/"),
         )
     }
 

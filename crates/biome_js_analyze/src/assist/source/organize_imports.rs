@@ -7,7 +7,7 @@ use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::JsModule;
 use biome_rowan::BatchMutationExt;
 
-use crate::{utils::restricted_glob::RestrictedGlob, JsRuleAction};
+use crate::JsRuleAction;
 
 pub mod legacy;
 pub mod util;
@@ -94,7 +94,7 @@ pub struct Options {
 #[serde(untagged)]
 pub enum ImportGroup {
     Predefined(PredefinedImportGroup),
-    Custom(RestrictedGlob),
+    Custom(biome_glob::Glob),
 }
 impl Deserializable for ImportGroup {
     fn deserialize(

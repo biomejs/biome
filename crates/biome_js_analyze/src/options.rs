@@ -176,6 +176,8 @@ pub type NoPrecisionLoss =
     <lint::correctness::no_precision_loss::NoPrecisionLoss as biome_analyze::Rule>::Options;
 pub type NoProcessEnv =
     <lint::nursery::no_process_env::NoProcessEnv as biome_analyze::Rule>::Options;
+pub type NoProcessGlobal =
+    <lint::nursery::no_process_global::NoProcessGlobal as biome_analyze::Rule>::Options;
 pub type NoPrototypeBuiltins =
     <lint::suspicious::no_prototype_builtins::NoPrototypeBuiltins as biome_analyze::Rule>::Options;
 pub type NoReExportAll =
@@ -246,6 +248,8 @@ pub type NoUnusedPrivateClassMembers = < lint :: correctness :: no_unused_privat
 pub type NoUnusedTemplateLiteral = < lint :: style :: no_unused_template_literal :: NoUnusedTemplateLiteral as biome_analyze :: Rule > :: Options ;
 pub type NoUnusedVariables =
     <lint::correctness::no_unused_variables::NoUnusedVariables as biome_analyze::Rule>::Options;
+pub type NoUnwantedPolyfillio =
+    <lint::nursery::no_unwanted_polyfillio::NoUnwantedPolyfillio as biome_analyze::Rule>::Options;
 pub type NoUselessCatch =
     <lint::complexity::no_useless_catch::NoUselessCatch as biome_analyze::Rule>::Options;
 pub type NoUselessConstructor = < lint :: complexity :: no_useless_constructor :: NoUselessConstructor as biome_analyze :: Rule > :: Options ;
@@ -328,6 +332,8 @@ pub type UseExplicitType =
 pub type UseExponentiationOperator = < lint :: style :: use_exponentiation_operator :: UseExponentiationOperator as biome_analyze :: Rule > :: Options ;
 pub type UseExportType =
     <lint::style::use_export_type::UseExportType as biome_analyze::Rule>::Options;
+pub type UseExportsLast =
+    <lint::nursery::use_exports_last::UseExportsLast as biome_analyze::Rule>::Options;
 pub type UseFilenamingConvention = < lint :: style :: use_filenaming_convention :: UseFilenamingConvention as biome_analyze :: Rule > :: Options ;
 pub type UseFlatMap = <lint::complexity::use_flat_map::UseFlatMap as biome_analyze::Rule>::Options;
 pub type UseFocusableInteractive = < lint :: a11y :: use_focusable_interactive :: UseFocusableInteractive as biome_analyze :: Rule > :: Options ;

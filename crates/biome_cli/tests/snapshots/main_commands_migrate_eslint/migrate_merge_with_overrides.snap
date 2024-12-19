@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -20,7 +21,7 @@ expression: content
 ```json
 {
         "overrides": [{
-            "files": ["bin/*.js", "lib/*.js"],
+            "files": ["bin/*.js", "lib/*.js", null],
             "excludedFiles": "*.test.js",
             "rules": {
                 "eqeqeq": ["off"]

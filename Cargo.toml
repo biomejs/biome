@@ -115,6 +115,7 @@ biome_diagnostics_categories = { version = "0.5.7", path = "./crates/biome_diagn
 biome_diagnostics_macros     = { version = "0.5.7", path = "./crates/biome_diagnostics_macros" }
 biome_formatter              = { version = "0.5.7", path = "./crates/biome_formatter" }
 biome_fs                     = { version = "0.5.7", path = "./crates/biome_fs" }
+biome_glob                   = { version = "0.1.0", path = "./crates/biome_glob" }
 biome_graphql_analyze        = { version = "0.0.1", path = "./crates/biome_graphql_analyze" }
 biome_graphql_factory        = { version = "0.1.0", path = "./crates/biome_graphql_factory" }
 biome_graphql_formatter      = { version = "0.1.0", path = "./crates/biome_graphql_formatter" }
@@ -146,6 +147,7 @@ biome_markdown_factory       = { version = "0.0.1", path = "./crates/biome_markd
 biome_markdown_parser        = { version = "0.0.1", path = "./crates/biome_markdown_parser" }
 biome_markdown_syntax        = { version = "0.0.1", path = "./crates/biome_markdown_syntax" }
 biome_plugin_loader          = { version = "0.0.1", path = "./crates/biome_plugin_loader" }
+biome_ungrammar              = { version = "0.3.1", path = "./crates/biome_ungrammar" }
 biome_yaml_factory           = { version = "0.0.1", path = "./crates/biome_yaml_factory" }
 biome_yaml_parser            = { version = "0.0.1", path = "./crates/biome_yaml_parser" }
 biome_yaml_syntax            = { version = "0.0.1", path = "./crates/biome_yaml_syntax" }
@@ -169,11 +171,10 @@ biome_lsp            = { path = "./crates/biome_lsp" }
 biome_migrate        = { path = "./crates/biome_migrate" }
 biome_service        = { path = "./crates/biome_service" }
 biome_test_utils     = { path = "./crates/biome_test_utils" }
-biome_ungrammar      = { path = "./crates/biome_ungrammar" }
 tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
-anyhow               = "1.0.93"
+anyhow               = "1.0.94"
 bpaf                 = { version = "0.9.15", features = ["derive"] }
 countme              = "3.0.1"
 crossbeam            = "0.8.4"
@@ -184,7 +185,7 @@ globset              = "0.4.15"
 grit-pattern-matcher = "0.5"
 grit-util            = "0.5"
 ignore               = "0.4.23"
-indexmap             = { version = "2.6.0" }
+indexmap             = { version = "2.7.0" }
 insta                = "1.41.1"
 natord               = "1.0.9"
 oxc_resolver         = "1.12.0"
@@ -195,18 +196,18 @@ quickcheck_macros    = "1.0.0"
 quote                = "1.0.37"
 rayon                = "1.10.0"
 regex                = "1.11.1"
-rustc-hash           = "2.0.0"
+rustc-hash           = "2.1.0"
 schemars             = { version = "0.8.21", features = ["indexmap2", "smallvec"] }
-serde                = { version = "1.0.215", features = ["derive"] }
+serde                = { version = "1.0.216", features = ["derive"] }
 serde_ini            = "0.2.0"
 serde_json           = "1.0.133"
 similar              = "2.6.0"
 smallvec             = { version = "1.13.2", features = ["union", "const_new", "serde"] }
 syn                  = "1.0.109"
 termcolor            = "1.4.1"
-tokio                = "1.41.1"
-tracing              = { version = "0.1.40", default-features = false, features = ["std"] }
-tracing-subscriber   = "0.3.18"
+tokio                = "1.42.0"
+tracing              = { version = "0.1.41", default-features = false, features = ["std"] }
+tracing-subscriber   = "0.3.19"
 unicode-bom          = "2.0.3"
 unicode-width        = "0.1.12"
 [profile.dev.package.biome_wasm]

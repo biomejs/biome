@@ -193,6 +193,10 @@ impl BiomePath {
     pub fn is_to_inspect(&self) -> bool {
         self.kind.contains(FileKind::Inspectable)
     }
+
+    pub fn to_path_buf(&self) -> PathBuf {
+        self.path.clone()
+    }
 }
 
 #[cfg(feature = "serde")]
@@ -211,6 +215,12 @@ impl Deref for BiomePath {
 
     fn deref(&self) -> &Self::Target {
         &self.path
+    }
+}
+
+impl From<BiomePath> for PathBuf {
+    fn from(path: BiomePath) -> Self {
+        path.path
     }
 }
 

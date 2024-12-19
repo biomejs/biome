@@ -250,6 +250,8 @@ pub enum RuleSource {
     Eslint(&'static str),
     /// Rules from [GraphQL-ESLint](https://github.com/dimaMachina/graphql-eslint)
     EslintGraphql(&'static str),
+    /// Rules from [graphql-schema-linter](https://github.com/cjoudrey/graphql-schema-linter)
+    EslintGraphqlSchemaLinter(&'static str),
     /// Rules from [Eslint Plugin Import](https://github.com/import-js/eslint-plugin-import)
     EslintImport(&'static str),
     /// Rules from [Eslint Plugin Import Access](https://github.com/uhyo/eslint-plugin-import-access)
@@ -288,6 +290,8 @@ pub enum RuleSource {
     Stylelint(&'static str),
     /// Rules from [Eslint Plugin No Secrets](https://github.com/nickdeis/eslint-plugin-no-secrets)
     EslintNoSecrets(&'static str),
+    /// Rules from [deno lint](https://github.com/denoland/deno_lint)
+    DenoLint(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -302,6 +306,7 @@ impl std::fmt::Display for RuleSource {
             Self::Clippy(_) => write!(f, "Clippy"),
             Self::Eslint(_) => write!(f, "ESLint"),
             Self::EslintGraphql(_) => write!(f, "GraphQL-ESLint"),
+            Self::EslintGraphqlSchemaLinter(_) => write!(f, "graphql-schema-linter"),
             Self::EslintImport(_) => write!(f, "eslint-plugin-import"),
             Self::EslintImportAccess(_) => write!(f, "eslint-plugin-import-access"),
             Self::EslintJest(_) => write!(f, "eslint-plugin-jest"),
@@ -321,6 +326,7 @@ impl std::fmt::Display for RuleSource {
             Self::EslintNext(_) => write!(f, "@next/eslint-plugin-next"),
             Self::Stylelint(_) => write!(f, "Stylelint"),
             Self::EslintNoSecrets(_) => write!(f, "eslint-plugin-no-secrets"),
+            Self::DenoLint(_) => write!(f, "deno-lint"),
         }
     }
 }
@@ -353,6 +359,7 @@ impl RuleSource {
             Self::Clippy(rule_name)
             | Self::Eslint(rule_name)
             | Self::EslintGraphql(rule_name)
+            | Self::EslintGraphqlSchemaLinter(rule_name)
             | Self::EslintImport(rule_name)
             | Self::EslintImportAccess(rule_name)
             | Self::EslintJest(rule_name)
@@ -371,7 +378,8 @@ impl RuleSource {
             | Self::EslintN(rule_name)
             | Self::EslintNext(rule_name)
             | Self::EslintNoSecrets(rule_name)
-            | Self::Stylelint(rule_name) => rule_name,
+            | Self::Stylelint(rule_name)
+            | Self::DenoLint(rule_name) => rule_name,
         }
     }
 
@@ -379,6 +387,7 @@ impl RuleSource {
         match self {
             Self::Clippy(rule_name) | Self::Eslint(rule_name) => (*rule_name).to_string(),
             Self::EslintGraphql(rule_name) => format!("graphql/{rule_name}"),
+            Self::EslintGraphqlSchemaLinter(rule_name) => format!("graphql/{rule_name}"),
             Self::EslintImport(rule_name) => format!("import/{rule_name}"),
             Self::EslintImportAccess(rule_name) => format!("import-access/{rule_name}"),
             Self::EslintJest(rule_name) => format!("jest/{rule_name}"),
@@ -398,6 +407,7 @@ impl RuleSource {
             Self::EslintNext(rule_name) => format!("@next/{rule_name}"),
             Self::Stylelint(rule_name) => format!("stylelint/{rule_name}"),
             Self::EslintNoSecrets(rule_name) => format!("no-secrets/{rule_name}"),
+            Self::DenoLint(rule_name) => format!("deno-lint/{rule_name}"),
         }
     }
 
@@ -406,6 +416,7 @@ impl RuleSource {
             Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
             Self::EslintGraphql(rule_name) => format!("https://the-guild.dev/graphql/eslint/rules/{rule_name}"),
+            Self::EslintGraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),
             Self::EslintImport(rule_name) => format!("https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintImportAccess(_) => "https://github.com/uhyo/eslint-plugin-import-access".to_string(),
             Self::EslintJest(rule_name) => format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"),
@@ -425,6 +436,7 @@ impl RuleSource {
             Self::EslintNext(rule_name) => format!("https://nextjs.org/docs/messages/{rule_name}"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
             Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
+            Self::DenoLint(rule_name) => format!("https://lint.deno.land/rules/{rule_name}"),
         }
     }
 

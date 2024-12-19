@@ -1,14 +1,17 @@
 #[cfg(test)]
 mod test {
+    use std::path::PathBuf;
+
     use biome_analyze::RuleCategories;
     use biome_configuration::analyzer::{RuleGroup, RuleSelector};
     use biome_fs::{BiomePath, MemoryFileSystem};
     use biome_js_syntax::{JsFileSource, TextSize};
     use biome_service::file_handlers::DocumentFileSource;
     use biome_service::workspace::{
-        server, FileContent, FileGuard, OpenFileParams, RegisterProjectFolderParams,
+        server, CloseFileParams, FileContent, FileGuard, GetFileContentParams, OpenFileParams,
+        RegisterProjectFolderParams, UnregisterProjectFolderParams,
     };
-    use biome_service::Workspace;
+    use biome_service::{Workspace, WorkspaceError};
 
     fn create_server() -> Box<dyn Workspace> {
         let workspace = server(Box::new(MemoryFileSystem::default()));
@@ -36,6 +39,7 @@ mod test {
                 content: FileContent::FromClient(SOURCE.into()),
                 version: 0,
                 document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -57,6 +61,7 @@ mod test {
                 content: FileContent::FromClient("export const foo: number".into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -76,6 +81,7 @@ mod test {
                 content: FileContent::FromClient(r#"{"a": 42}"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -89,6 +95,7 @@ mod test {
                 content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -102,6 +109,7 @@ mod test {
                 content: FileContent::FromClient(r#"{"a": 42,}"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -115,6 +123,7 @@ mod test {
                 content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -128,6 +137,7 @@ mod test {
                 content: FileContent::FromClient(r#"{"a": 42,}"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -141,6 +151,7 @@ mod test {
                 content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -154,6 +165,7 @@ mod test {
                 content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -167,6 +179,7 @@ mod test {
                 content: FileContent::FromClient(r#"{"a": 42,}"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -182,6 +195,7 @@ mod test {
                 content: FileContent::FromClient(r#"{"a": 42,}//comment"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -211,6 +225,7 @@ type User {
                 ),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -237,6 +252,7 @@ type User {
                 ),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -270,6 +286,7 @@ type User {
                 ),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -278,5 +295,72 @@ type User {
         let syntax = result.unwrap().ast;
 
         assert!(syntax.starts_with("GritRoot"))
+    }
+
+    #[test]
+    fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistered() {
+        const FILE_A_CONTENT: &[u8] = b"import { bar } from './b.ts';\nfunction foo() {}";
+        const FILE_B_CONTENT: &[u8] = b"import { foo } from './a.ts';\nfunction bar() {}";
+
+        let mut fs = MemoryFileSystem::default();
+        fs.insert(PathBuf::from("/project/a.ts"), FILE_A_CONTENT);
+        fs.insert(PathBuf::from("/project/b.ts"), FILE_B_CONTENT);
+
+        let workspace = server(Box::new(fs));
+        workspace
+            .register_project_folder(RegisterProjectFolderParams {
+                set_as_current_workspace: true,
+                path: Some(PathBuf::from("/project")),
+            })
+            .unwrap();
+
+        workspace.scan_current_project_folder(()).unwrap();
+
+        macro_rules! assert_file_a_content {
+            () => {
+                assert_eq!(
+                    workspace
+                        .get_file_content(GetFileContentParams {
+                            path: BiomePath::new("/project/a.ts"),
+                        })
+                        .unwrap(),
+                    String::from_utf8(FILE_A_CONTENT.to_vec()).unwrap(),
+                );
+            };
+        }
+
+        assert_file_a_content!();
+
+        workspace
+            .open_file(OpenFileParams {
+                path: BiomePath::new("/project/a.ts"),
+                content: FileContent::FromServer,
+                version: 0,
+                document_file_source: None,
+                persist_node_cache: false,
+            })
+            .unwrap();
+
+        assert_file_a_content!();
+
+        workspace
+            .close_file(CloseFileParams {
+                path: BiomePath::new("/project/a.ts"),
+            })
+            .unwrap();
+
+        assert_file_a_content!();
+
+        workspace
+            .unregister_project_folder(UnregisterProjectFolderParams {
+                path: PathBuf::from("/project"),
+            })
+            .unwrap();
+
+        assert!(workspace
+            .get_file_content(GetFileContentParams {
+                path: BiomePath::new("/project/a.ts"),
+            })
+            .is_err_and(|error| matches!(error, WorkspaceError::NotFound(_))));
     }
 }

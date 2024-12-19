@@ -41,6 +41,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
                 path: biome_path,
                 version: 0,
                 content: FileContent::FromClient(input.clone()),
+                persist_node_cache: false,
             },
         )
         .with_file_path_and_code(path.display().to_string(), category!("internalError/fs"))?;

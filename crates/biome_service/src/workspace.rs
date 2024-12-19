@@ -52,6 +52,7 @@
 //!     format a file with a language that does not have a formatter
 
 mod client;
+mod scanner;
 mod server;
 
 pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
@@ -541,6 +542,14 @@ pub struct OpenFileParams {
     pub content: FileContent,
     pub version: i32,
     pub document_file_source: Option<DocumentFileSource>,
+
+    /// Set to `true` to persist the node cache used during parsing, in order to
+    /// speed up subsequent reparsing if the document has been edited.
+    ///
+    /// This should only be enabled if reparsing is to be expected, such as when
+    /// the file is opened through the LSP Proxy.
+    #[serde(default)]
+    pub persist_node_cache: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -966,7 +975,7 @@ pub struct RegisterProjectFolderParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct UnregisterProjectFolderParams {
-    pub path: BiomePath,
+    pub path: PathBuf,
 }
 
 pub trait Workspace: Send + Sync + RefUnwindSafe {
@@ -1032,7 +1041,8 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Unregisters a workspace project folder.
     ///
-    /// The settings that belong to that project are deleted.
+    /// The settings that belong to that project are deleted. Any open files that belong to the
+    /// project are also closed.
     ///
     /// If a file watcher was registered as a result of a call to `scan_project_folder()`, it will
     /// also be unregistered.

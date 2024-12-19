@@ -2,7 +2,6 @@ pub mod documentation;
 pub mod file_handlers;
 
 pub mod matcher;
-mod scanner;
 pub mod settings;
 pub mod workspace;
 

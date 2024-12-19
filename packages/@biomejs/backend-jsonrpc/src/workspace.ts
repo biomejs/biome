@@ -868,7 +868,7 @@ export interface Complexity {
 	/**
 	 * Prefer for...of statement instead of Array.forEach.
 	 */
-	noForEach?: RuleConfiguration_for_Null;
+	noForEach?: RuleConfiguration_for_NoForEachOptions;
 	/**
 	 * Disallow unclear usage of consecutive space characters in regular expression literals
 	 */
@@ -1288,6 +1288,10 @@ export interface Nursery {
 	 */
 	noProcessEnv?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of process global.
+	 */
+	noProcessGlobal?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow specified modules when loaded by import or require.
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
@@ -1316,6 +1320,10 @@ export interface Nursery {
 	 */
 	noTsIgnore?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow unknown at-rules.
+	 */
+	noUnknownAtRule?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unknown pseudo-class selectors.
 	 */
 	noUnknownPseudoClass?: RuleConfiguration_for_Null;
@@ -1327,6 +1335,10 @@ export interface Nursery {
 	 * Disallow unknown type selectors.
 	 */
 	noUnknownTypeSelector?: RuleConfiguration_for_Null;
+	/**
+	 * Prevent duplicate polyfills from Polyfill.io.
+	 */
+	noUnwantedPolyfillio?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
@@ -1384,6 +1396,10 @@ export interface Nursery {
 	 */
 	useExplicitType?: RuleConfiguration_for_Null;
 	/**
+	 * Require that all exports are declared after all non-export statements.
+	 */
+	useExportsLast?: RuleConfiguration_for_Null;
+	/**
 	 * Enforces the use of a recommended display strategy with Google Fonts.
 	 */
 	useGoogleFontDisplay?: RuleConfiguration_for_Null;
@@ -1399,6 +1415,10 @@ export interface Nursery {
 	 * Enforce specifying the name of GraphQL operations.
 	 */
 	useNamedOperation?: RuleFixConfiguration_for_Null;
+	/**
+	 * Validates that all enum values are capitalized.
+	 */
+	useNamingConvention?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
@@ -2027,6 +2047,9 @@ export type RuleFixConfiguration_for_ValidAriaRoleOptions =
 export type RuleConfiguration_for_ComplexityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ComplexityOptions;
+export type RuleConfiguration_for_NoForEachOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoForEachOptions;
 export type RuleConfiguration_for_NoUndeclaredDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUndeclaredDependenciesOptions;
@@ -2177,6 +2200,16 @@ export interface RuleWithOptions_for_ComplexityOptions {
 	 * Rule's options
 	 */
 	options: ComplexityOptions;
+}
+export interface RuleWithOptions_for_NoForEachOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoForEachOptions;
 }
 export interface RuleWithOptions_for_NoUndeclaredDependenciesOptions {
 	/**
@@ -2440,6 +2473,12 @@ export interface ComplexityOptions {
 	 * The maximum complexity score that we allow. Anything higher is considered excessive.
 	 */
 	maxAllowedComplexity?: number;
+}
+export interface NoForEachOptions {
+	/**
+	 * A list of variable names allowed for `forEach` calls.
+	 */
+	allowedIdentifiers: string[];
 }
 /**
  * Rule's options
@@ -2760,6 +2799,12 @@ export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;
 	path: BiomePath;
+	/**
+	* Set to `true` to persist the node cache used during parsing, in order to speed up subsequent reparsing if the document has been edited.
+
+This should only be enabled if reparsing is to be expected, such as when the file is opened through the LSP Proxy. 
+	 */
+	persistNodeCache?: boolean;
 	version: number;
 }
 export type FileContent =
@@ -3055,6 +3100,7 @@ export type Category =
 	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noPackagePrivateImports"
 	| "lint/nursery/noProcessEnv"
+	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
@@ -3065,6 +3111,7 @@ export type Category =
 	| "lint/nursery/noTemplateCurlyInString"
 	| "lint/nursery/noTsIgnore"
 	| "lint/nursery/noUndeclaredDependencies"
+	| "lint/nursery/noUnknownAtRule"
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"
@@ -3076,6 +3123,7 @@ export type Category =
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
+	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessEscapeInRegex"
 	| "lint/nursery/noUselessStringRaw"
 	| "lint/nursery/noUselessUndefined"
@@ -3091,12 +3139,14 @@ export type Category =
 	| "lint/nursery/useDeprecatedReason"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
+	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useGoogleFontDisplay"
 	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useGuardForIn"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
+	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useTrimStartEnd"

@@ -1,3 +1,4 @@
+use super::scanner::scan;
 use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams, FeatureName,
     FileContent, FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
@@ -13,7 +14,6 @@ use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
 use crate::is_dir;
-use crate::scanner::scan;
 use crate::settings::WorkspaceSettings;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
@@ -34,25 +34,53 @@ use biome_project::{NodeJsProject, PackageJson, PackageType, Project};
 use biome_rowan::NodeCache;
 use indexmap::IndexSet;
 use papaya::HashMap;
+use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::ffi::OsStr;
+use std::panic::RefUnwindSafe;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::{panic::RefUnwindSafe, sync::RwLock};
+use std::sync::{Mutex, RwLock};
 use tracing::{debug, info, info_span};
 
 pub(super) struct WorkspaceServer {
     /// features available throughout the application
     features: Features,
+
     /// global settings object for this workspace
     settings: WorkspaceSettings,
+
     /// Stores the document (text content + version number) associated with a URL
-    documents: HashMap<BiomePath, Document>,
+    documents: HashMap<BiomePath, Document, FxBuildHasher>,
+
     /// The current focused project
     current_project_path: RwLock<Option<BiomePath>>,
+
     /// Stores the document sources used across the workspace
     file_sources: RwLock<IndexSet<DocumentFileSource>>,
+
     /// Stores patterns to search for.
-    patterns: HashMap<PatternId, GritQuery>,
+    patterns: HashMap<PatternId, GritQuery, FxBuildHasher>,
+
+    /// Node cache for faster parsing of modified documents.
+    ///
+    /// ## Concurrency
+    ///
+    /// Because `NodeCache` cannot be cloned, and `papaya` doesn't give us owned
+    /// instances of stored values, we use an `FxHashMap` here, wrapped in a
+    /// `Mutex`. The node cache is only used by writers, meaning this wouldn't
+    /// be a great use case for `papaya` anyway. But it does mean we need to be
+    /// careful for deadlocks, and release guards to the mutex as soon as we
+    /// can.
+    ///
+    /// Additionally, we only use the node cache for documents opened through
+    /// the LSP proxy, since the editor use case is the one where we benefit
+    /// most from low-latency parsing, and having a document open in an editor
+    /// gives us a clear signal that edits -- and thus reparsing -- is to be
+    /// anticipated. For other documents, the performance degradation due to
+    /// lock contention would not be worth the potential of faster reparsing
+    /// that may never actually happen.
+    node_cache: Mutex<FxHashMap<PathBuf, NodeCache>>,
+
     /// File system implementation.
     fs: Box<dyn FileSystem>,
 }
@@ -65,7 +93,7 @@ pub(super) struct WorkspaceServer {
 /// could lead too hard to debug issues)
 impl RefUnwindSafe for WorkspaceServer {}
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) struct Document {
     pub(crate) content: String,
     pub(crate) version: i32,
@@ -76,6 +104,14 @@ pub(crate) struct Document {
 
     /// The result of the parser (syntax tree + diagnostics).
     pub(crate) syntax: AnyParse,
+
+    /// If `true`, this indicates the document has been opened by the scanner,
+    /// and should be unloaded only when the project is unregistered.
+    ///
+    /// Note it doesn't matter if the file is *also* opened explicitly through
+    /// the LSP Proxy, for instance. In such a case, the scanner's "claim" on
+    /// the file should be considered leading.
+    opened_by_scanner: bool,
 }
 
 impl WorkspaceServer {
@@ -92,6 +128,7 @@ impl WorkspaceServer {
             current_project_path: RwLock::default(),
             file_sources: RwLock::default(),
             patterns: Default::default(),
+            node_cache: Default::default(),
             fs,
         }
     }
@@ -168,22 +205,140 @@ impl WorkspaceServer {
         let _ = current_project_path.insert(path);
     }
 
-    /// Register a new project in the current workspace
+    /// Registers a new project in the current workspace.
     fn register_project(&self, path: PathBuf) -> ProjectKey {
         self.settings.insert_project(path)
     }
 
-    /// Sets the current project of the current workspace
+    /// Sets the current project of the current workspace.
     fn set_current_project(&self, project_key: ProjectKey) {
         self.settings.set_current_project(project_key);
     }
 
-    /// Checks whether the current path belongs to another project.
+    /// Checks whether the given `path` belongs to another registered project.
     ///
-    /// If there's a match, and the match is for a project **other than** the current project, it
-    /// returns the new key.
+    /// If there's a match, and the match is for a project **other than** the
+    /// current project, it returns the key of that project.
     fn path_belongs_to_other_project(&self, path: &BiomePath) -> Option<ProjectKey> {
         self.settings.path_belongs_to_other_project(path)
+    }
+
+    /// Opens the file and marks it as opened by the scanner.
+    pub(super) fn open_file_by_scanner(
+        &self,
+        params: OpenFileParams,
+    ) -> Result<(), WorkspaceError> {
+        self.open_file_internal(true, params)
+    }
+
+    #[tracing::instrument(level = "trace", skip(self))]
+    fn open_file_internal(
+        &self,
+        opened_by_scanner: bool,
+        params: OpenFileParams,
+    ) -> Result<(), WorkspaceError> {
+        let mut source = params
+            .document_file_source
+            .unwrap_or(DocumentFileSource::from_path(&params.path));
+        let manifest = self.get_current_manifest()?;
+
+        if let DocumentFileSource::Js(js) = &mut source {
+            if let Some(manifest) = manifest {
+                if manifest.r#type == Some(PackageType::Commonjs) && js.file_extension() == "js" {
+                    js.set_module_kind(ModuleKind::Script);
+                }
+            }
+        }
+
+        if let Some(project_key) = self.path_belongs_to_other_project(&params.path) {
+            self.set_current_project(project_key);
+        }
+
+        let content = match params.content {
+            FileContent::FromClient(content) => content,
+            FileContent::FromServer => self.fs.read_file_from_path(&params.path)?,
+        };
+
+        let mut index = self.set_source(source);
+        let mut node_cache = NodeCache::default();
+        let parsed = self.parse(&params.path, &content, index, &mut node_cache)?;
+
+        if let Some(language) = parsed.language {
+            index = self.set_source(language);
+        }
+
+        if params.persist_node_cache {
+            self.node_cache
+                .lock()
+                .unwrap()
+                .insert(params.path.to_path_buf(), node_cache);
+        }
+
+        {
+            let mut document = Document {
+                content,
+                version: params.version,
+                file_source_index: index,
+                syntax: parsed.any_parse,
+                opened_by_scanner,
+            };
+
+            let documents = self.documents.pin();
+
+            // This isn't handled atomically, so in theory two calls to
+            // `open_file()` could happen concurrently and one would overwrite
+            // the other's entry without considering the merging we do here.
+            // This would mostly be problematic if someone opens and closes a
+            // file in their IDE at just the right moment while scanning is
+            // still in progress. In such a case, the file could be gone from
+            // the workspace by the time we get to the service data extraction.
+            // This is why we check again on insertion below, and worst-case we
+            // may end up needing to do another update. That still leaves a tiny
+            // theoretical window during which another `close_file()` could have
+            // caused undesirable side-effects, but:
+            // - This window is already _very_ unlikely to occur, due to the
+            //   first check we do.
+            // - This window is also _very_ small, so the `open_file()` and
+            //   `close_file()` calls would need to arrive effectively
+            //   simultaneously.
+            //
+            // To prevent this with a 100% guarantee would require us to use
+            // `update_or_insert()`, which is atomic, but that requires cloning
+            // the document, which seems hardly worth it.
+            // That said, I don't think this code is particularly pretty either
+            // :sweat_smile:
+            if let Some(existing) = documents.get(&params.path) {
+                if existing.opened_by_scanner {
+                    document.opened_by_scanner = true;
+                }
+
+                if existing.version > params.version {
+                    document.version = existing.version;
+                }
+            }
+
+            let opened_by_scanner = document.opened_by_scanner;
+            let version = document.version;
+
+            if let Some(existing) = documents.insert(params.path.clone(), document) {
+                if (existing.opened_by_scanner && !opened_by_scanner)
+                    || (existing.version > version)
+                {
+                    documents.update(params.path, |document| {
+                        let mut document = document.clone();
+                        if existing.opened_by_scanner && !opened_by_scanner {
+                            document.opened_by_scanner = true;
+                        }
+                        if existing.version > version {
+                            document.version = version;
+                        }
+                        document
+                    });
+                }
+            }
+        }
+
+        Ok(())
     }
 
     /// Retrieves the parser result for a given file, calculating it if the file was not yet parsed.
@@ -202,6 +357,7 @@ impl WorkspaceServer {
         biome_path: &BiomePath,
         content: &str,
         file_source_index: usize,
+        node_cache: &mut NodeCache,
     ) -> Result<ParseResult, WorkspaceError> {
         let Some(file_source) = self.get_source(file_source_index) else {
             return Err(WorkspaceError::not_found());
@@ -218,7 +374,7 @@ impl WorkspaceServer {
             file_source,
             content,
             self.settings.get_current_settings().as_ref(),
-            &mut NodeCache::default(),
+            node_cache,
         );
         Ok(parsed)
     }
@@ -363,49 +519,8 @@ impl Workspace for WorkspaceServer {
         Ok(())
     }
 
-    /// Adds a new file to the workspace.
-    #[tracing::instrument(level = "trace", skip(self))]
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
-        let mut source = params
-            .document_file_source
-            .unwrap_or(DocumentFileSource::from_path(&params.path));
-        let manifest = self.get_current_manifest()?;
-
-        if let DocumentFileSource::Js(js) = &mut source {
-            if let Some(manifest) = manifest {
-                if manifest.r#type == Some(PackageType::Commonjs) && js.file_extension() == "js" {
-                    js.set_module_kind(ModuleKind::Script);
-                }
-            }
-        }
-
-        if let Some(project_key) = self.path_belongs_to_other_project(&params.path) {
-            self.set_current_project(project_key);
-        }
-
-        let content = match params.content {
-            FileContent::FromClient(content) => content,
-            FileContent::FromServer => self.fs.read_file_from_path(&params.path)?,
-        };
-
-        let mut index = self.set_source(source);
-        let parsed = self.parse(&params.path, &content, index)?;
-
-        if let Some(language) = parsed.language {
-            index = self.set_source(language);
-        }
-
-        self.documents.pin().insert(
-            params.path,
-            Document {
-                content,
-                version: params.version,
-                file_source_index: index,
-                syntax: parsed.any_parse,
-            },
-        );
-
-        Ok(())
+        self.open_file_internal(false, params)
     }
 
     fn set_manifest_for_project(
@@ -427,6 +542,7 @@ impl Workspace for WorkspaceServer {
                 version: params.version,
                 file_source_index: index,
                 syntax: parsed.into(),
+                opened_by_scanner: false,
             },
         );
         Ok(())
@@ -490,7 +606,24 @@ impl Workspace for WorkspaceServer {
         &self,
         params: UnregisterProjectFolderParams,
     ) -> Result<(), WorkspaceError> {
+        // Limit the scope of the pin and the lock inside.
+        {
+            let documents = self.documents.pin();
+            let mut node_cache = self.node_cache.lock().unwrap();
+            for (path, document) in documents.iter() {
+                if document.opened_by_scanner
+                    && self
+                        .settings
+                        .path_belongs_only_to_project_with_path(path, &params.path)
+                {
+                    documents.remove(path);
+                    node_cache.remove(params.path.as_path());
+                }
+            }
+        }
+
         self.settings.remove_project(params.path.as_path());
+
         Ok(())
     }
 
@@ -557,22 +690,46 @@ impl Workspace for WorkspaceServer {
     /// Changes the content of an open file.
     fn change_file(&self, params: ChangeFileParams) -> Result<(), WorkspaceError> {
         let documents = self.documents.pin();
-        let index = documents
+        let (index, opened_by_scanner) = documents
             .get(&params.path)
             .map(|document| {
                 debug_assert!(params.version > document.version);
-                document.file_source_index
+                (document.file_source_index, document.opened_by_scanner)
             })
             .ok_or_else(WorkspaceError::not_found)?;
 
-        let parsed = self.parse(&params.path, &params.content, index)?;
+        // We remove the node cache for the document, if it exists.
+        // This is done so that we need to hold the lock as short as possible
+        // (it's released directly after the statement). The potential downside
+        // is that if two calls to `change_file()` happen concurrently, then the
+        // second would have a cache miss, and not update the cache either.
+        // This seems an unlikely scenario however, and the impact is small
+        // anyway, so this seems a worthwhile tradeoff.
+        let node_cache = self
+            .node_cache
+            .lock()
+            .unwrap()
+            .remove(params.path.as_path());
+
+        let persist_node_cache = node_cache.is_some();
+        let mut node_cache = node_cache.unwrap_or_default();
+
+        let parsed = self.parse(&params.path, &params.content, index, &mut node_cache)?;
 
         let document = Document {
             content: params.content,
             version: params.version,
             file_source_index: index,
             syntax: parsed.any_parse,
+            opened_by_scanner,
         };
+
+        if persist_node_cache {
+            self.node_cache
+                .lock()
+                .unwrap()
+                .insert(params.path.to_path_buf(), node_cache);
+        }
 
         documents
             .insert(params.path, document)
@@ -580,12 +737,27 @@ impl Workspace for WorkspaceServer {
         Ok(())
     }
 
-    /// Removes a file from the workspace.
+    /// Closes a file that is opened in the workspace.
+    ///
+    /// This only unloads the document from the workspace if the file is NOT
+    /// opened by the scanner as well. If the scanner has opened the file, it
+    /// may still be required for multi-file analysis.
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
-        self.documents
-            .pin()
-            .remove(&params.path)
-            .ok_or_else(WorkspaceError::not_found)?;
+        {
+            let documents = self.documents.pin();
+            let document = documents
+                .get(&params.path)
+                .ok_or_else(WorkspaceError::not_found)?;
+            if !document.opened_by_scanner {
+                documents.remove(&params.path);
+            }
+        }
+
+        self.node_cache
+            .lock()
+            .unwrap()
+            .remove(params.path.as_path());
+
         Ok(())
     }
 

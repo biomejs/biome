@@ -34,6 +34,7 @@ pub(crate) async fn did_open(
         version,
         content: FileContent::FromClient(content),
         document_file_source: Some(language_hint),
+        persist_node_cache: true,
     })?;
 
     session.insert_document(url.clone(), doc);
