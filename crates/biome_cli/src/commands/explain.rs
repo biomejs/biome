@@ -1,4 +1,4 @@
-use biome_analyze::{FixKind, RuleMetadata};
+use biome_analyze::RuleMetadata;
 use biome_console::{markup, ConsoleExt};
 use biome_flags::biome_env;
 use biome_service::documentation::Doc;
@@ -8,34 +8,7 @@ use crate::{CliDiagnostic, CliSession};
 
 fn print_rule(session: CliSession, metadata: &RuleMetadata) {
     session.app.console.log(markup! {
-        "# "{metadata.name}"\n"
-    });
-
-    match metadata.fix_kind {
-        FixKind::None => {
-            session.app.console.log(markup! {
-                "No fix available.\n"
-            });
-        }
-        kind => {
-            session.app.console.log(markup! {
-                "Fix is "{kind}".\n"
-            });
-        }
-    }
-
-    let docs = metadata
-        .docs
-        .lines()
-        .map(|line| line.trim_start())
-        .collect::<Vec<_>>()
-        .join("\n");
-
-    session.app.console.log(markup! {
-        "This rule is "{if metadata.recommended {"recommended."} else {"not recommended."}}
-        "\n\n"
-        "# Description\n"
-        {docs}
+        {metadata}
     });
 }
 

@@ -61,7 +61,8 @@ impl SemanticModelBuilder {
                 | GRAPHQL_VARIABLE_REFERENCE
                 | GRAPHQL_OPERATION_DEFINITION
         ) {
-            self.node_by_range.insert(node.text_range(), node.clone());
+            self.node_by_range
+                .insert(node.text_range_with_trivia(), node.clone());
         }
     }
 

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: remaining-content.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import d from 'd';
 import c from 'c';
 
@@ -28,5 +29,3 @@ function test() {}
  function test() {}
 
 ```
-
-

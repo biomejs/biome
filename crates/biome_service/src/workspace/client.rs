@@ -1,10 +1,12 @@
 use crate::workspace::{
-    FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
-    OrganizeImportsResult, ProjectKey, RageParams, RageResult, RegisterProjectFolderParams,
-    ServerInfo, SetManifestForProjectParams, UnregisterProjectFolderParams,
+    CheckFileSizeParams, CheckFileSizeResult, FileFeaturesResult, GetFileContentParams,
+    IsPathIgnoredParams, OrganizeImportsParams, OrganizeImportsResult, ProjectKey, RageParams,
+    RageResult, RegisterProjectFolderParams, ServerInfo, SetManifestForProjectParams,
+    UnregisterProjectFolderParams,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
+use biome_fs::FileSystem;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::json;
 use std::{
@@ -16,14 +18,16 @@ use super::{
     ChangeFileParams, CloseFileParams, FixFileParams, FixFileResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, PullActionsParams, PullActionsResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult, SearchPatternParams,
-    SearchResults, SupportsFeatureParams, UpdateSettingsParams,
+    PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult,
+    ScanProjectFolderResult, SearchPatternParams, SearchResults, SupportsFeatureParams,
+    UpdateSettingsParams,
 };
 
 pub struct WorkspaceClient<T> {
     transport: T,
     request_id: AtomicU64,
     server_info: Option<ServerInfo>,
+    fs: Box<dyn FileSystem>,
 }
 
 pub trait WorkspaceTransport {
@@ -52,11 +56,12 @@ impl<T> WorkspaceClient<T>
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync,
 {
-    pub fn new(transport: T) -> Result<Self, WorkspaceError> {
+    pub fn new(transport: T, fs: Box<dyn FileSystem>) -> Result<Self, WorkspaceError> {
         let mut client = Self {
             transport,
             request_id: AtomicU64::new(0),
             server_info: None,
+            fs,
         };
 
         // TODO: The current implementation of the JSON-RPC protocol in
@@ -101,6 +106,10 @@ impl<T> Workspace for WorkspaceClient<T>
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync,
 {
+    fn fs(&self) -> &dyn FileSystem {
+        self.fs.as_ref()
+    }
+
     fn file_features(
         &self,
         params: SupportsFeatureParams,
@@ -132,6 +141,13 @@ where
         self.request("biome/register_project_folder", params)
     }
 
+    fn scan_current_project_folder(
+        &self,
+        params: (),
+    ) -> Result<ScanProjectFolderResult, WorkspaceError> {
+        self.request("biome/scan_current_project_folder", params)
+    }
+
     fn unregister_project_folder(
         &self,
         params: UnregisterProjectFolderParams,
@@ -159,6 +175,13 @@ where
 
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
         self.request("biome/get_file_content", params)
+    }
+
+    fn check_file_size(
+        &self,
+        params: CheckFileSizeParams,
+    ) -> Result<CheckFileSizeResult, WorkspaceError> {
+        self.request("biome/check_file_size", params)
     }
 
     fn change_file(&self, params: ChangeFileParams) -> Result<(), WorkspaceError> {

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: side-effect-imports.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import "z"
 import { D } from "d";
 import { C } from "c";

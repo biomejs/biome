@@ -9,8 +9,8 @@ use biome_diagnostics::PrintDiagnostic;
 use biome_fs::BiomePath;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    ChangeFileParams, DropPatternParams, FeaturesBuilder, FixFileParams, FormatFileParams,
-    OpenFileParams, OrganizeImportsParams, SupportsFeatureParams,
+    ChangeFileParams, DropPatternParams, FeaturesBuilder, FileContent, FixFileParams,
+    FormatFileParams, OpenFileParams, OrganizeImportsParams, SupportsFeatureParams,
 };
 use biome_service::WorkspaceError;
 use std::borrow::Cow;
@@ -48,8 +48,9 @@ pub(crate) fn run<'a>(
             workspace.open_file(OpenFileParams {
                 path: biome_path.clone(),
                 version: 0,
-                content: content.into(),
+                content: FileContent::FromClient(content.into()),
                 document_file_source: None,
+                persist_node_cache: false,
             })?;
             let printed = workspace.format_file(FormatFileParams {
                 path: biome_path.clone(),
@@ -80,8 +81,9 @@ pub(crate) fn run<'a>(
         workspace.open_file(OpenFileParams {
             path: biome_path.clone(),
             version: 0,
-            content: content.into(),
+            content: FileContent::FromClient(content.into()),
             document_file_source: None,
+            persist_node_cache: false,
         })?;
         // apply fix file of the linter
         let file_features = workspace.file_features(SupportsFeatureParams {
@@ -122,6 +124,7 @@ pub(crate) fn run<'a>(
                     only: only.clone(),
                     skip: skip.clone(),
                     suppression_reason: None,
+                    enabled_rules: vec![],
                     rule_categories: RuleCategoriesBuilder::default()
                         .with_syntax()
                         .with_lint()

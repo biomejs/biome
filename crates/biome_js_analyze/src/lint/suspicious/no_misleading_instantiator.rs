@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::{markup, MarkupBuf};
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClassMember, AnyTsType, AnyTsTypeMember, ClassMemberName, JsClassDeclaration,
     JsSyntaxToken, TsDeclareStatement, TsInterfaceDeclaration, TsReferenceType,
@@ -54,6 +55,7 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-misused-new")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

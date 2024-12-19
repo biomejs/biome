@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: reactCreateElementValid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 React.createElement("div", { tabIndex: '0' })
 React.createElement("div", { tabIndex: '-1' })
 React.createElement("div", { tabIndex: dynamic })
@@ -23,5 +24,3 @@ React.createElement("div", props)
 React.createElement("div", {})
 
 ```
-
-

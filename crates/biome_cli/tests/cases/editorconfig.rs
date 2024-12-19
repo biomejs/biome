@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -25,14 +24,14 @@ max_line_length = 300
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
-                ("--use-editorconfig=true"),
+                "format",
+                "--write",
+                "--use-editorconfig=true",
                 test_file.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -81,17 +80,10 @@ max_line_length = 300
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                ("--write"),
-                test_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test_file.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -125,13 +117,13 @@ max_line_length = 300
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
-                ("--use-editorconfig=true"),
+                "check",
+                "--use-editorconfig=true",
                 test_file.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -180,10 +172,10 @@ max_line_length = 300
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("check"), test_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", test_file.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -231,14 +223,14 @@ indent_style = tab
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
-                ("--use-editorconfig=true"),
+                "format",
+                "--write",
+                "--use-editorconfig=true",
                 test_file.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -275,14 +267,14 @@ max_line_length = 90
     fs.insert(test_file.into(), r#"console.log("really long string that should break if the line width is <=90, but not at 100");
 "#);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
-                ("--line-width=100"),
-                ("--use-editorconfig=true"),
+                "check",
+                "--line-width=100",
+                "--use-editorconfig=true",
                 test_file.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -336,13 +328,13 @@ indent_style = space
     "#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
-                ("--use-editorconfig=true"),
+                "check",
+                "--use-editorconfig=true",
                 test_file.as_os_str().to_str().unwrap(),
                 test_file2.as_os_str().to_str().unwrap(),
             ]
@@ -380,13 +372,13 @@ max_line_length = 300
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("ci"),
-                ("--use-editorconfig=true"),
+                "ci",
+                "--use-editorconfig=true",
                 test_file.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -435,10 +427,10 @@ max_line_length = 300
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("ci"), test_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["ci", test_file.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -472,14 +464,14 @@ insert_final_newline = false
 "#;
     fs.insert(test_file.into(), contents);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
-                ("--use-editorconfig=true"),
+                "format",
+                "--write",
+                "--use-editorconfig=true",
                 test_file.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),

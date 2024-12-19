@@ -9,8 +9,18 @@ impl FormatNodeRule<GritWithin> for FormatGritWithin {
         let GritWithinFields {
             pattern,
             within_token,
+            until_clause,
         } = node.as_fields();
 
-        write!(f, [within_token.format(), space(), pattern.format()])
+        write!(
+            f,
+            [
+                within_token.format(),
+                space(),
+                pattern.format(),
+                space(),
+                until_clause.format()
+            ]
+        )
     }
 }

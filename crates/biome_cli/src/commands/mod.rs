@@ -1,7 +1,6 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
-use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
-use crate::execute::Stdin;
+use crate::execute::{ReportMode, Stdin};
 use crate::logging::LoggingKind;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, LoggingLevel, VERSION,
@@ -22,14 +21,15 @@ use biome_configuration::{
 };
 use biome_configuration::{BiomeDiagnostic, PartialConfiguration};
 use biome_console::{markup, Console, ConsoleExt};
-use biome_diagnostics::{Diagnostic, PrintDiagnostic};
+use biome_diagnostics::PrintDiagnostic;
 use biome_fs::{BiomePath, FileSystem};
+use biome_grit_patterns::GritTargetLanguage;
 use biome_service::configuration::{
     load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::documentation::Doc;
 use biome_service::workspace::{FixFileMode, RegisterProjectFolderParams, UpdateSettingsParams};
-use biome_service::{DynRef, Workspace, WorkspaceError};
+use biome_service::{Workspace, WorkspaceError};
 use bpaf::Bpaf;
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -117,14 +117,6 @@ pub enum BiomeCommand {
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
 
-        /// Alias for `--write`, writes safe fixes, formatting and import sorting (deprecated, use `--write`)
-        #[bpaf(long("apply"), switch, hide_usage)]
-        apply: bool,
-
-        /// Alias for `--write --unsafe`, writes safe and unsafe fixes, formatting and import sorting (deprecated, use `--write --unsafe`)
-        #[bpaf(long("apply-unsafe"), switch, hide_usage)]
-        apply_unsafe: bool,
-
         /// Allow to enable or disable the formatter check.
         #[bpaf(
             long("formatter-enabled"),
@@ -145,9 +137,9 @@ pub enum BiomeCommand {
         )]
         organize_imports_enabled: Option<bool>,
 
-        /// Allow to enable or disable the assists.
-        #[bpaf(long("assists-enabled"), argument("true|false"), optional)]
-        assists_enabled: Option<bool>,
+        /// Allow to enable or disable the assist.
+        #[bpaf(long("assist-enabled"), argument("true|false"), optional)]
+        assist_enabled: Option<bool>,
 
         #[bpaf(external(partial_configuration), hide_usage, optional)]
         configuration: Option<PartialConfiguration>,
@@ -194,14 +186,6 @@ pub enum BiomeCommand {
         /// Alias for `--write`, writes safe fixes
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
-
-        /// Alias for `--write`, writes safe fixes (deprecated, use `--write`)
-        #[bpaf(long("apply"), switch, hide_usage)]
-        apply: bool,
-
-        /// Alias for `--write --unsafe`, writes safe and unsafe fixes (deprecated, use `--write --unsafe`)
-        #[bpaf(long("apply-unsafe"), switch, hide_usage)]
-        apply_unsafe: bool,
 
         /// Fixes lint rule violations with a comment a suppression instead of using a rule code action (fix)
         #[bpaf(long("suppress"))]
@@ -349,9 +333,9 @@ pub enum BiomeCommand {
         #[bpaf(long("organize-imports-enabled"), argument("true|false"), optional)]
         organize_imports_enabled: Option<bool>,
 
-        /// Allow to enable or disable the assists.
-        #[bpaf(long("assists-enabled"), argument("true|false"), optional)]
-        assists_enabled: Option<bool>,
+        /// Allow to enable or disable the assist.
+        #[bpaf(long("assist-enabled"), argument("true|false"), optional)]
+        assist_enabled: Option<bool>,
 
         #[bpaf(external(partial_configuration), hide_usage, optional)]
         configuration: Option<PartialConfiguration>,
@@ -460,6 +444,16 @@ pub enum BiomeCommand {
         /// Example: `echo 'let a;' | biome search '`let $var`' --stdin-file-path=file.js`
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
+
+        /// The language to which the pattern applies.
+        ///
+        /// Grit queries are specific to the grammar of the language they
+        /// target, so we currently do not support writing queries that apply
+        /// to multiple languages at once.
+        ///
+        /// If none given, the default language is JavaScript.
+        #[bpaf(long("language"), short('l'))]
+        language: Option<GritTargetLanguage>,
 
         /// The GritQL pattern to search for.
         ///
@@ -626,21 +620,6 @@ pub(crate) fn validate_configuration_diagnostics(
     console: &mut dyn Console,
     verbose: bool,
 ) -> Result<(), CliDiagnostic> {
-    if let Some(file_path) = loaded_configuration
-        .file_path
-        .as_ref()
-        .and_then(|f| f.file_name())
-        .and_then(|f| f.to_str())
-    {
-        if file_path == "rome.json" {
-            let diagnostic = DeprecatedConfigurationFile::new(file_path);
-            if diagnostic.tags().is_verbose() && verbose {
-                console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}})
-            } else {
-                console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}})
-            }
-        }
-    }
     let diagnostics = loaded_configuration.as_diagnostics_iter();
     for diagnostic in diagnostics {
         if diagnostic.tags().is_verbose() && verbose {
@@ -662,9 +641,7 @@ pub(crate) fn validate_configuration_diagnostics(
     Ok(())
 }
 
-fn resolve_manifest(
-    fs: &DynRef<'_, dyn FileSystem>,
-) -> Result<Option<(BiomePath, String)>, WorkspaceError> {
+fn resolve_manifest(fs: &dyn FileSystem) -> Result<Option<(BiomePath, String)>, WorkspaceError> {
     let result = fs.auto_search(
         &fs.working_directory().unwrap_or_default(),
         &["package.json"],
@@ -682,7 +659,7 @@ fn get_files_to_process_with_cli_options(
     since: Option<&str>,
     changed: bool,
     staged: bool,
-    fs: &DynRef<'_, dyn FileSystem>,
+    fs: &dyn FileSystem,
     configuration: &PartialConfiguration,
 ) -> Result<Option<Vec<OsString>>, CliDiagnostic> {
     if since.is_some() {
@@ -708,8 +685,6 @@ fn get_files_to_process_with_cli_options(
 
 /// Holds the options to determine the fix file mode.
 pub(crate) struct FixFileModeOptions {
-    apply: bool,
-    apply_unsafe: bool,
     write: bool,
     suppress: bool,
     suppression_reason: Option<String>,
@@ -722,11 +697,8 @@ pub(crate) struct FixFileModeOptions {
 /// - [FixFileMode]: if safe or unsafe fixes are requested
 pub(crate) fn determine_fix_file_mode(
     options: FixFileModeOptions,
-    console: &mut dyn Console,
 ) -> Result<Option<FixFileMode>, CliDiagnostic> {
     let FixFileModeOptions {
-        apply,
-        apply_unsafe,
         write,
         fix,
         suppress,
@@ -734,22 +706,10 @@ pub(crate) fn determine_fix_file_mode(
         unsafe_,
     } = options;
 
-    if apply || apply_unsafe {
-        let (deprecated, alternative) = if apply {
-            ("--apply", "--write")
-        } else {
-            ("--apply-unsafe", "--write --unsafe")
-        };
-        let diagnostic = DeprecatedArgument::new(markup! {
-            "The argument "<Emphasis>{deprecated}</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>{alternative}</Emphasis>" instead."
-        });
-        console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
-    }
-
     check_fix_incompatible_arguments(options)?;
 
-    let safe_fixes = apply || write || fix;
-    let unsafe_fixes = apply_unsafe || ((write || safe_fixes) && unsafe_);
+    let safe_fixes = write || fix;
+    let unsafe_fixes = (write || safe_fixes) && unsafe_;
 
     if unsafe_fixes {
         Ok(Some(FixFileMode::SafeAndUnsafeFixes))
@@ -765,35 +725,13 @@ pub(crate) fn determine_fix_file_mode(
 /// Checks if the fix file options are incompatible.
 fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), CliDiagnostic> {
     let FixFileModeOptions {
-        apply,
-        apply_unsafe,
         write,
         suppress,
         suppression_reason,
         fix,
-        unsafe_,
+        ..
     } = options;
-    if apply && apply_unsafe {
-        return Err(CliDiagnostic::incompatible_arguments(
-            "--apply",
-            "--apply-unsafe",
-        ));
-    } else if apply_unsafe && unsafe_ {
-        return Err(CliDiagnostic::incompatible_arguments(
-            "--apply-unsafe",
-            "--unsafe",
-        ));
-    } else if apply && (fix || write) {
-        return Err(CliDiagnostic::incompatible_arguments(
-            "--apply",
-            if fix { "--fix" } else { "--write" },
-        ));
-    } else if apply_unsafe && (fix || write) {
-        return Err(CliDiagnostic::incompatible_arguments(
-            "--apply-unsafe",
-            if fix { "--fix" } else { "--write" },
-        ));
-    } else if write && fix {
+    if write && fix {
         return Err(CliDiagnostic::incompatible_arguments("--write", "--fix"));
     } else if suppress && write {
         return Err(CliDiagnostic::incompatible_arguments(
@@ -829,9 +767,9 @@ pub(crate) trait CommandRunner: Sized {
     /// The main command to use.
     fn run(&mut self, session: CliSession, cli_options: &CliOptions) -> Result<(), CliDiagnostic> {
         setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
-        let fs = &session.app.fs;
         let console = &mut *session.app.console;
         let workspace = &*session.app.workspace;
+        let fs = workspace.fs();
         self.check_incompatible_arguments()?;
         let (execution, paths) = self.configure_workspace(fs, console, workspace, cli_options)?;
         execute_mode(execution, session, cli_options, paths)
@@ -846,7 +784,7 @@ pub(crate) trait CommandRunner: Sized {
     /// - Updates the settings that belong to the project registered
     fn configure_workspace(
         &mut self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         console: &mut dyn Console,
         workspace: &dyn Workspace,
         cli_options: &CliOptions,
@@ -884,6 +822,17 @@ pub(crate) trait CommandRunner: Sized {
         })?;
 
         let execution = self.get_execution(cli_options, console, workspace)?;
+
+        if execution.traversal_mode().should_scan_project() {
+            let result = workspace.scan_current_project_folder(())?;
+            if cli_options.verbose && matches!(execution.report_mode(), ReportMode::Terminal { .. })
+            {
+                console.log(markup! {
+                    <Info>"Scanned project folder in "<Emphasis>{result.duration}</Emphasis>"."</Info>
+                });
+            }
+        }
+
         Ok((execution, paths))
     }
 
@@ -916,14 +865,14 @@ pub(crate) trait CommandRunner: Sized {
     fn merge_configuration(
         &mut self,
         loaded_configuration: LoadedConfiguration,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         console: &mut dyn Console,
     ) -> Result<PartialConfiguration, WorkspaceError>;
 
     /// It returns the paths that need to be handled/traversed.
     fn get_files_to_process(
         &self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         configuration: &PartialConfiguration,
     ) -> Result<Vec<OsString>, CliDiagnostic>;
 
@@ -965,7 +914,7 @@ pub trait LoadEditorConfig: CommandRunner {
         &self,
         configuration_path: Option<PathBuf>,
         fs_configuration: &PartialConfiguration,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         console: &mut dyn Console,
     ) -> Result<PartialConfiguration, WorkspaceError> {
         Ok(if self.should_load_editor_config(fs_configuration) {
@@ -989,56 +938,34 @@ pub trait LoadEditorConfig: CommandRunner {
 
 #[cfg(test)]
 mod tests {
-    use biome_console::BufferConsole;
-
     use super::*;
 
     #[test]
     fn incompatible_arguments() {
-        for (apply, apply_unsafe, write, suppress, suppression_reason, fix, unsafe_) in [
-            (true, true, false, false, None, false, false), // --apply --apply-unsafe
-            (true, false, true, false, None, false, false), // --apply --write
-            (true, false, false, false, None, true, false), // --apply --fix
-            (false, true, false, false, None, false, true), // --apply-unsafe --unsafe
-            (false, true, true, false, None, false, false), // --apply-unsafe --write
-            (false, true, false, false, None, true, false), // --apply-unsafe --fix
-            (false, false, true, false, None, true, false), // --write --fix
-        ] {
-            assert!(check_fix_incompatible_arguments(FixFileModeOptions {
-                apply,
-                apply_unsafe,
-                write,
-                suppress,
-                suppression_reason,
-                fix,
-                unsafe_
-            })
-            .is_err());
-        }
+        assert!(check_fix_incompatible_arguments(FixFileModeOptions {
+            write: true,
+            fix: true,
+            unsafe_: false,
+            suppress: false,
+            suppression_reason: None
+        })
+        .is_err());
     }
 
     #[test]
     fn safe_fixes() {
-        let mut console = BufferConsole::default();
-
-        for (apply, apply_unsafe, write, suppress, suppression_reason, fix, unsafe_) in [
-            (true, false, false, false, None, false, false), // --apply
-            (false, false, true, false, None, false, false), // --write
-            (false, false, false, false, None, true, false), // --fix
+        for (write, suppress, suppression_reason, fix, unsafe_) in [
+            (true, false, None, false, false), // --write
+            (false, false, None, true, false), // --fix
         ] {
             assert_eq!(
-                determine_fix_file_mode(
-                    FixFileModeOptions {
-                        apply,
-                        apply_unsafe,
-                        write,
-                        suppress,
-                        suppression_reason,
-                        fix,
-                        unsafe_
-                    },
-                    &mut console
-                )
+                determine_fix_file_mode(FixFileModeOptions {
+                    write,
+                    suppress,
+                    suppression_reason,
+                    fix,
+                    unsafe_
+                },)
                 .unwrap(),
                 Some(FixFileMode::SafeFixes)
             );
@@ -1047,26 +974,18 @@ mod tests {
 
     #[test]
     fn safe_and_unsafe_fixes() {
-        let mut console = BufferConsole::default();
-
-        for (apply, apply_unsafe, write, suppress, suppression_reason, fix, unsafe_) in [
-            (false, true, false, false, None, false, false), // --apply-unsafe
-            (false, false, true, false, None, false, true),  // --write --unsafe
-            (false, false, false, false, None, true, true),  // --fix --unsafe
+        for (write, fix, unsafe_, suppress, suppression_reason) in [
+            (true, false, true, false, None), // --write --unsafe
+            (false, true, true, false, None), // --fix --unsafe
         ] {
             assert_eq!(
-                determine_fix_file_mode(
-                    FixFileModeOptions {
-                        apply,
-                        apply_unsafe,
-                        write,
-                        suppress,
-                        suppression_reason,
-                        fix,
-                        unsafe_
-                    },
-                    &mut console
-                )
+                determine_fix_file_mode(FixFileModeOptions {
+                    write,
+                    suppress,
+                    suppression_reason,
+                    fix,
+                    unsafe_
+                },)
                 .unwrap(),
                 Some(FixFileMode::SafeAndUnsafeFixes)
             );
@@ -1075,23 +994,16 @@ mod tests {
 
     #[test]
     fn no_fix() {
-        let mut console = BufferConsole::default();
-
-        let (apply, apply_unsafe, write, suppress, suppression_reason, fix, unsafe_) =
-            (false, false, false, false, None, false, false);
+        let (write, suppress, suppression_reason, fix, unsafe_) =
+            (false, false, None, false, false);
         assert_eq!(
-            determine_fix_file_mode(
-                FixFileModeOptions {
-                    apply,
-                    apply_unsafe,
-                    write,
-                    suppress,
-                    suppression_reason,
-                    fix,
-                    unsafe_
-                },
-                &mut console
-            )
+            determine_fix_file_mode(FixFileModeOptions {
+                write,
+                suppress,
+                suppression_reason,
+                fix,
+                unsafe_
+            },)
             .unwrap(),
             None
         );

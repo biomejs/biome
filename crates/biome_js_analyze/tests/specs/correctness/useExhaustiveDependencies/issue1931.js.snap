@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue1931.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import { useEffect, useState } from 'library-reexporting-react';
 import * as ReactReexport from 'library-reexporting-react';
 

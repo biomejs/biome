@@ -20,18 +20,18 @@ describe("Workspace API", () => {
 		await workspace.openFile({
 			path: {
 				path: "test.js",
-				was_written: false,
-				kind: ["Handleable"],
+				wasWritten: false,
+				kind: ["handleable"],
 			},
-			content: "statement()",
+			content: { type: "fromClient", content: "statement()" },
 			version: 0,
 		});
 
 		const printed = await workspace.formatFile({
 			path: {
 				path: "test.js",
-				was_written: false,
-				kind: ["Handleable"],
+				wasWritten: false,
+				kind: ["handleable"],
 			},
 		});
 
@@ -40,8 +40,8 @@ describe("Workspace API", () => {
 		await workspace.closeFile({
 			path: {
 				path: "test.js",
-				was_written: false,
-				kind: ["Handleable"],
+				wasWritten: false,
+				kind: ["handleable"],
 			},
 		});
 

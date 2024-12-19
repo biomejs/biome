@@ -3,6 +3,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{self};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -60,6 +61,7 @@ declare_lint_rule! {
             RuleSource::Eslint("prefer-object-has-own")
         ],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
 }
@@ -239,7 +241,7 @@ fn has_left_hand_object(member_expr: &AnyJsMemberExpression) -> Option<bool> {
     };
 
     if let AnyJsExpression::JsIdentifierExpression(id_expr) = &node {
-        if id_expr.name().ok()?.text() == "Object" {
+        if id_expr.name().ok()?.syntax().text_trimmed() == "Object" {
             return Some(true);
         }
     }

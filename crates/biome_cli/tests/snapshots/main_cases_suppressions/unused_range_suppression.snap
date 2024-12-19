@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+snapshot_kind: text
+---
+## `file.js`
+
+```js
+
+// biome-ignore-all lint/suspicious/noDoubleEquals: single rule
+a == b;
+// biome-ignore-start lint/suspicious/noDoubleEquals: single rule
+a == b;
+a == b;
+// biome-ignore-end lint/suspicious/noDoubleEquals: single rule
+```
+
+# Emitted Messages
+
+```block
+file.js:4:1 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect because another suppression comment suppresses the same rule.
+  
+    2 │ // biome-ignore-all lint/suspicious/noDoubleEquals: single rule
+    3 │ a == b;
+  > 4 │ // biome-ignore-start lint/suspicious/noDoubleEquals: single rule
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ a == b;
+    6 │ a == b;
+  
+  i This is the suppression comment that was used.
+  
+  > 2 │ // biome-ignore-all lint/suspicious/noDoubleEquals: single rule
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ a == b;
+    4 │ // biome-ignore-start lint/suspicious/noDoubleEquals: single rule
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
+```

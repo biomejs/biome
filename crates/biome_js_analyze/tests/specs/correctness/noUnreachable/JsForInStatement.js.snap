@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsForInStatement.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function JsForInStatement1() {
     for (const key in value) {
         break;
@@ -68,5 +69,3 @@ JsForInStatement.js:11:9 lint/correctness/noUnreachable ━━━━━━━━
   
 
 ```
-
-

@@ -1,10 +1,11 @@
 ---
 source: crates/biome_js_parser/tests/spec_test.rs
 expression: snapshot
+snapshot_kind: text
 ---
 ## Input
 
-```jsx
+```js
 00, 012, 08, 091, 0789 // parser errors
 01n, 0_0, 01.2 // lexer errors
 "test

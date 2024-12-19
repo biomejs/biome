@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 config.newIsCap = config.newIsCap !== false;
 var a = x === 2 ? 'Yes' : 'No';
 var a = x === 2 ? true : 'No';
@@ -19,5 +20,3 @@ foo ? foo : bar;
 var a = foo ? 'Yes' : foo;
 
 ```
-
-

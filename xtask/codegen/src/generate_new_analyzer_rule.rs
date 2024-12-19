@@ -418,12 +418,12 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
         };
         let lint_start = match category {
             Category::Lint => "define_categories! {\n",
-            Category::Assist => "    // start assists rules\n",
+            Category::Assist => "    // start assist actions\n",
             Category::Syntax => "    // start syntax rules\n",
         };
         let lint_end = match category {
             Category::Lint => "\n    // end lint rules\n",
-            Category::Assist => "\n    // end assists rules\n",
+            Category::Assist => "\n    // end assist actions\n",
             Category::Syntax => "\n  ;  // end syntax rules\n",
         };
         debug_assert!(categories.contains(lint_start), "{}", lint_start);

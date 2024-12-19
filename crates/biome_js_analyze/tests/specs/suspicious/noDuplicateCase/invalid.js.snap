@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var a = 1;
 switch (a) {
 	case 1:
@@ -653,5 +654,3 @@ invalid.js:183:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
   
 
 ```
-
-

@@ -1,6 +1,5 @@
 use crate::cli_options::CliOptions;
 use crate::commands::{get_files_to_process_with_cli_options, CommandRunner, LoadEditorConfig};
-use crate::diagnostics::DeprecatedArgument;
 use crate::{CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::vcs::PartialVcsConfiguration;
 use biome_configuration::{
@@ -8,12 +7,11 @@ use biome_configuration::{
     PartialFormatterConfiguration, PartialGraphqlFormatter, PartialJavascriptFormatter,
     PartialJsonFormatter,
 };
-use biome_console::{markup, Console, ConsoleExt};
+use biome_console::Console;
 use biome_deserialize::Merge;
-use biome_diagnostics::PrintDiagnostic;
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
-use biome_service::{DynRef, Workspace, WorkspaceError};
+use biome_service::{Workspace, WorkspaceError};
 use std::ffi::OsString;
 
 pub(crate) struct FormatCommandPayload {
@@ -48,7 +46,7 @@ impl CommandRunner for FormatCommandPayload {
     fn merge_configuration(
         &mut self,
         loaded_configuration: LoadedConfiguration,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         console: &mut dyn Console,
     ) -> Result<PartialConfiguration, WorkspaceError> {
         let LoadedConfiguration {
@@ -62,65 +60,6 @@ impl CommandRunner for FormatCommandPayload {
         // this makes biome configuration take precedence over editorconfig configuration
         fs_configuration.merge_with(biome_configuration);
         let mut configuration = fs_configuration;
-
-        // TODO: remove in biome 2.0
-        if let Some(config) = self.formatter_configuration.as_mut() {
-            if let Some(indent_size) = config.indent_size {
-                let diagnostic = DeprecatedArgument::new(markup! {
-                    "The argument "<Emphasis>"--indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--indent-width"</Emphasis>" instead."
-                });
-                console.error(markup! {
-                    {PrintDiagnostic::simple(&diagnostic)}
-                });
-
-                if config.indent_width.is_none() {
-                    config.indent_width = Some(indent_size);
-                }
-            }
-        }
-        // TODO: remove in biome 2.0
-        if let Some(js_formatter) = self.javascript_formatter.as_mut() {
-            if let Some(indent_size) = js_formatter.indent_size {
-                let diagnostic = DeprecatedArgument::new(markup! {
-                    "The argument "<Emphasis>"--javascript-formatter-indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--javascript-formatter-indent-width"</Emphasis>" instead."
-                });
-                console.error(markup! {
-                    {PrintDiagnostic::simple(&diagnostic)}
-                });
-
-                if js_formatter.indent_width.is_none() {
-                    js_formatter.indent_width = Some(indent_size);
-                }
-            }
-
-            if let Some(trailing_comma) = js_formatter.trailing_comma {
-                let diagnostic = DeprecatedArgument::new(markup! {
-                    "The argument "<Emphasis>"--trailing-comma"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--trailing-commas"</Emphasis>" instead."
-                });
-                console.error(markup! {
-                    {PrintDiagnostic::simple(&diagnostic)}
-                });
-
-                if js_formatter.trailing_commas.is_none() {
-                    js_formatter.trailing_commas = Some(trailing_comma);
-                }
-            }
-        }
-        // TODO: remove in biome 2.0
-        if let Some(json_formatter) = self.json_formatter.as_mut() {
-            if let Some(indent_size) = json_formatter.indent_size {
-                let diagnostic = DeprecatedArgument::new(markup! {
-                    "The argument "<Emphasis>"--json-formatter-indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--json-formatter-indent-width"</Emphasis>" instead."
-                });
-                console.error(markup! {
-                    {PrintDiagnostic::simple(&diagnostic)}
-                });
-
-                if json_formatter.indent_width.is_none() {
-                    json_formatter.indent_width = Some(indent_size);
-                }
-            }
-        }
 
         // merge formatter options
         if !configuration
@@ -167,7 +106,7 @@ impl CommandRunner for FormatCommandPayload {
 
     fn get_files_to_process(
         &self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         configuration: &PartialConfiguration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
         let paths = get_files_to_process_with_cli_options(

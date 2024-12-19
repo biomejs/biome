@@ -15,25 +15,29 @@ use crate::{
     WorkspaceError,
 };
 use biome_analyze::{
-    AnalyzerDiagnostic, GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategories,
-    RuleCategory, RuleFilter, RuleGroup,
+    AnalyzerDiagnostic, AnalyzerOptions, AnalyzerSignal, ControlFlow, GroupCategory, Never,
+    Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
-use biome_configuration::analyzer::RuleSelector;
+use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
 use biome_configuration::Rules;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
+use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
-use biome_diagnostics::{Diagnostic, Severity};
+use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
+use biome_graphql_analyze::METADATA as graphql_metadata;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
-use biome_grit_patterns::{GritQuery, GritQueryResult, GritTargetFile};
+use biome_grit_patterns::{GritQuery, GritQueryEffect, GritTargetFile};
 use biome_grit_syntax::file_source::GritFileSource;
 use biome_html_syntax::HtmlFileSource;
+use biome_js_analyze::METADATA as js_metadata;
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{
     EmbeddingKind, JsFileSource, JsLanguage, Language, LanguageVariant, TextRange, TextSize,
 };
+use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
@@ -138,8 +142,7 @@ impl DocumentFileSource {
 
     /// Returns the document file source corresponding to this file name from well-known files
     pub fn from_well_known(path: &Path) -> Self {
-        Self::try_from_well_known(path)
-            .map_or(DocumentFileSource::Unknown, |file_source| file_source)
+        Self::try_from_well_known(path).unwrap_or(DocumentFileSource::Unknown)
     }
 
     #[instrument(level = "debug", fields(result))]
@@ -168,8 +171,7 @@ impl DocumentFileSource {
 
     /// Returns the document file source corresponding to this file extension
     pub fn from_extension(extension: impl AsRef<OsStr>) -> Self {
-        Self::try_from_extension(extension.as_ref())
-            .map_or(DocumentFileSource::Unknown, |file_source| file_source)
+        Self::try_from_extension(extension.as_ref()).unwrap_or(DocumentFileSource::Unknown)
     }
 
     #[instrument(level = "debug", fields(result))]
@@ -203,12 +205,11 @@ impl DocumentFileSource {
     /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
     /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
     pub fn from_language_id(language_id: &str) -> Self {
-        Self::try_from_language_id(language_id)
-            .map_or(DocumentFileSource::Unknown, |file_source| file_source)
+        Self::try_from_language_id(language_id).unwrap_or(DocumentFileSource::Unknown)
     }
 
     #[instrument(level = "debug", fields(result))]
-    fn try_from_path(path: &Path) -> Result<Self, FileSourceError> {
+    pub(crate) fn try_from_path(path: &Path) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = Self::try_from_well_known(path) {
             return Ok(file_source);
         }
@@ -247,7 +248,7 @@ impl DocumentFileSource {
 
     /// Returns the document file source corresponding to the file path
     pub fn from_path(path: &Path) -> Self {
-        Self::try_from_path(path).map_or(DocumentFileSource::Unknown, |file_source| file_source)
+        Self::try_from_path(path).unwrap_or(DocumentFileSource::Unknown)
     }
 
     /// Returns the document file source if it's not unknown, otherwise returns `other`.
@@ -391,7 +392,7 @@ impl biome_console::fmt::Display for DocumentFileSource {
 pub struct FixAllParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) fix_file_mode: FixFileMode,
-    pub(crate) workspace: WorkspaceSettingsHandle<'a>,
+    pub(crate) workspace: WorkspaceSettingsHandle,
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
@@ -450,7 +451,7 @@ pub struct DebugCapabilities {
 #[derive(Debug)]
 pub(crate) struct LintParams<'a> {
     pub(crate) parse: AnyParse,
-    pub(crate) workspace: &'a WorkspaceSettingsHandle<'a>,
+    pub(crate) workspace: &'a WorkspaceSettingsHandle,
     pub(crate) language: DocumentFileSource,
     pub(crate) max_diagnostics: u32,
     pub(crate) path: &'a BiomePath,
@@ -459,6 +460,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) categories: RuleCategories,
     pub(crate) manifest: Option<PackageJson>,
     pub(crate) suppression_reason: Option<String>,
+    pub(crate) enabled_rules: Vec<RuleSelector>,
 }
 
 pub(crate) struct LintResults {
@@ -467,16 +469,124 @@ pub(crate) struct LintResults {
     pub(crate) skipped_diagnostics: u32,
 }
 
+pub(crate) struct ProcessLint<'a> {
+    diagnostic_count: u32,
+    errors: usize,
+    diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
+    ignores_suppression_comment: bool,
+    rules: Option<Cow<'a, Rules>>,
+    max_diagnostics: u32,
+}
+
+impl<'a> ProcessLint<'a> {
+    pub(crate) fn new(params: &LintParams<'a>) -> Self {
+        Self {
+            diagnostic_count: params.parse.diagnostics().len() as u32,
+            errors: Default::default(),
+            diagnostics: Default::default(),
+            // Do not report unused suppression comment diagnostics if:
+            // - it is a syntax-only analyzer pass, or
+            // - if a single rule is run.
+            ignores_suppression_comment: !params.categories.contains(RuleCategory::Lint)
+                || !params.only.is_empty(),
+            rules: params
+                .workspace
+                .settings()
+                .as_ref()
+                .and_then(|settings| settings.as_linter_rules(params.path.as_path())),
+            max_diagnostics: params.max_diagnostics,
+        }
+    }
+
+    pub(crate) fn process_signal<L: biome_rowan::Language>(
+        &mut self,
+        signal: &dyn AnalyzerSignal<L>,
+    ) -> ControlFlow {
+        if let Some(mut diagnostic) = signal.diagnostic() {
+            if self.ignores_suppression_comment
+                && diagnostic.category() == Some(category!("suppressions/unused"))
+            {
+                return ControlFlow::<Never>::Continue(());
+            }
+
+            self.diagnostic_count += 1;
+
+            // We do now check if the severity of the diagnostics should be changed.
+            // The configuration allows to change the severity of the diagnostics emitted by rules.
+            let severity = diagnostic
+                .category()
+                .filter(|category| category.name().starts_with("lint/"))
+                .and_then(|category| {
+                    self.rules.as_ref().and_then(|rules| {
+                        rules.get_severity_from_category(category, diagnostic.severity())
+                    })
+                })
+                .or_else(|| Some(diagnostic.severity()))
+                .unwrap_or(Severity::Warning);
+
+            if severity >= Severity::Error {
+                self.errors += 1;
+            }
+
+            if self.diagnostic_count <= self.max_diagnostics {
+                for action in signal.actions() {
+                    if !action.is_suppression() {
+                        diagnostic = diagnostic.add_code_suggestion(action.into());
+                    }
+                }
+
+                let error = diagnostic.with_severity(severity);
+
+                self.diagnostics
+                    .push(biome_diagnostics::serde::Diagnostic::new(error));
+            }
+        }
+
+        ControlFlow::<Never>::Continue(())
+    }
+
+    pub(crate) fn into_result(
+        self,
+        parse_diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
+        analyzer_diagnostics: Vec<biome_diagnostics::Error>,
+    ) -> LintResults {
+        let mut diagnostics = parse_diagnostics;
+        let errors = diagnostics
+            .iter()
+            .filter(|diag| diag.severity() <= Severity::Error)
+            .count();
+
+        diagnostics.extend(self.diagnostics);
+
+        diagnostics.extend(
+            analyzer_diagnostics
+                .into_iter()
+                .map(biome_diagnostics::serde::Diagnostic::new)
+                .collect::<Vec<_>>(),
+        );
+        let skipped_diagnostics = self
+            .diagnostic_count
+            .saturating_sub(diagnostics.len() as u32);
+
+        LintResults {
+            errors,
+            skipped_diagnostics,
+            diagnostics,
+        }
+    }
+}
+
 pub(crate) struct CodeActionsParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) range: Option<TextRange>,
-    pub(crate) workspace: &'a WorkspaceSettingsHandle<'a>,
+    pub(crate) workspace: &'a WorkspaceSettingsHandle,
     pub(crate) path: &'a BiomePath,
     pub(crate) manifest: Option<PackageJson>,
     pub(crate) language: DocumentFileSource,
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
     pub(crate) suppression_reason: Option<String>,
+    pub(crate) enabled_rules: Vec<RuleSelector>,
 }
 
 type Lint = fn(LintParams) -> LintResults;
@@ -620,7 +730,9 @@ pub(crate) fn is_diagnostic_error(
             || diagnostic.severity(),
             |category| {
                 rules
-                    .and_then(|rules| rules.get_severity_from_code(category))
+                    .and_then(|rules| {
+                        rules.get_severity_from_category(category, diagnostic.severity())
+                    })
                     .unwrap_or(Severity::Warning)
             },
         );
@@ -687,7 +799,7 @@ pub(crate) fn search(
     query: &GritQuery,
     _settings: WorkspaceSettingsHandle,
 ) -> Result<Vec<TextRange>, WorkspaceError> {
-    let (query_result, _logs) = query
+    let result = query
         .execute(GritTargetFile {
             path: path.to_path_buf(),
             parse,
@@ -696,10 +808,11 @@ pub(crate) fn search(
             WorkspaceError::SearchError(SearchError::QueryError(QueryDiagnostic(err.to_string())))
         })?;
 
-    let matches = query_result
+    let matches = result
+        .effects
         .into_iter()
         .flat_map(|result| match result {
-            GritQueryResult::Match(m) => m.ranges,
+            GritQueryEffect::Match(m) => m.ranges,
             _ => Vec::new(),
         })
         .map(|range| TextRange::new(range.start_byte.into(), range.end_byte.into()))
@@ -829,18 +942,22 @@ struct LintVisitor<'a, 'b> {
     pub(crate) enabled_rules: FxHashSet<RuleFilter<'a>>,
     pub(crate) disabled_rules: FxHashSet<RuleFilter<'a>>,
     // lint_params: &'b LintParams<'a>,
-    only: &'b [RuleSelector],
-    skip: &'b [RuleSelector],
+    only: Option<&'b [RuleSelector]>,
+    skip: Option<&'b [RuleSelector]>,
     settings: Option<&'b Settings>,
-    path: &'b Path,
+    path: Option<&'b Path>,
+    manifest: Option<&'b PackageJson>,
+    analyzer_options: &'b mut AnalyzerOptions,
 }
 
 impl<'a, 'b> LintVisitor<'a, 'b> {
     pub(crate) fn new(
-        only: &'b [RuleSelector],
-        skip: &'b [RuleSelector],
+        only: Option<&'b [RuleSelector]>,
+        skip: Option<&'b [RuleSelector]>,
         settings: Option<&'b Settings>,
-        path: &'b Path,
+        path: Option<&'b Path>,
+        manifest: Option<&'b PackageJson>,
+        analyzer_options: &'b mut AnalyzerOptions,
     ) -> Self {
         Self {
             enabled_rules: Default::default(),
@@ -849,40 +966,164 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             skip,
             settings,
             path,
+            manifest,
+            analyzer_options,
+        }
+    }
+
+    /// It loops over the domains of the current rule, and check each domain specify
+    /// a dependency.
+    ///
+    /// Returns `true` if the rule was enabled, `false` otherwise
+    fn record_rule_from_manifest<R, L>(&mut self, rule_filter: RuleFilter<'static>)
+    where
+        L: biome_rowan::Language,
+        R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
+    {
+        let no_only = self.only.is_some_and(|only| only.is_empty());
+        let no_domains = self
+            .settings
+            .and_then(|settings| settings.as_linter_domains(self.path.expect("File path")))
+            .is_none_or(|d| d.is_empty());
+
+        if no_only && no_domains {
+            if let Some(manifest) = self.manifest {
+                for domain in R::METADATA.domains {
+                    self.analyzer_options
+                        .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
+
+                    for (dependency, range) in domain.manifest_dependencies() {
+                        if manifest.matches_dependency(dependency, range) {
+                            self.enabled_rules.insert(rule_filter);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// It inspects the [RuleDomain] of the configuration, and if the current rule belongs to at least a configured domain, it's enabled.
+    ///
+    /// As per business logic, rules that have domains can be recommended, however they shouldn't be enabled when `linter.rules.recommended` is `true`.
+    ///
+    /// This means that
+    fn record_rule_from_domains<R, L>(&mut self, rule_filter: RuleFilter<'static>)
+    where
+        L: biome_rowan::Language,
+        R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
+    {
+        let no_only = self.only.is_some_and(|only| only.is_empty());
+
+        if no_only {
+            let domains = self
+                .settings
+                .and_then(|settings| settings.as_linter_domains(self.path.expect("File path")));
+
+            // domains, no need to record the rule
+            if domains.as_ref().is_none_or(|d| d.is_empty()) {
+                return;
+            }
+
+            // If the rule is recommended, and it has some domains, it should be disabled, but only if the configuration doesn't enable some domains.
+            if R::METADATA.recommended
+                && !R::METADATA.domains.is_empty()
+                && domains.as_ref().is_none_or(|d| d.is_empty())
+            {
+                self.disabled_rules.insert(rule_filter);
+                return;
+            }
+
+            for rule_domain in R::METADATA.domains {
+                if let Some((configured_domain, configured_domain_value)) = domains
+                    .as_ref()
+                    .and_then(|domains| domains.get_key_value(rule_domain))
+                {
+                    match configured_domain_value {
+                        RuleDomainValue::All => {
+                            self.enabled_rules.insert(rule_filter);
+
+                            self.analyzer_options.push_globals(
+                                configured_domain
+                                    .globals()
+                                    .iter()
+                                    .map(|s| Box::from(*s))
+                                    .collect::<Vec<_>>(),
+                            );
+                        }
+                        RuleDomainValue::None => {
+                            self.disabled_rules.insert(rule_filter);
+                        }
+                        RuleDomainValue::Recommended => {
+                            if R::METADATA.recommended {
+                                self.enabled_rules.insert(rule_filter);
+
+                                self.analyzer_options.push_globals(
+                                    configured_domain
+                                        .globals()
+                                        .iter()
+                                        .map(|s| Box::from(*s))
+                                        .collect::<Vec<_>>(),
+                                );
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
     fn finish(mut self) -> (FxHashSet<RuleFilter<'a>>, FxHashSet<RuleFilter<'a>>) {
-        let has_only_filter = !self.only.is_empty();
+        let has_only_filter = self.only.map_or(true, |only| !only.is_empty());
+        let rules = self
+            .settings
+            .and_then(|settings| settings.as_linter_rules(self.path.expect("Path to be set")));
         if !has_only_filter {
-            let enabled_rules = self
-                .settings
-                .and_then(|settings| settings.as_linter_rules(self.path))
+            let enabled_rules = rules
                 .as_ref()
                 .map(|rules| rules.as_enabled_rules())
                 .unwrap_or_default();
             self.enabled_rules.extend(enabled_rules);
+            self.disabled_rules.extend(
+                rules
+                    .as_ref()
+                    .map(|rules| rules.as_disabled_rules())
+                    .unwrap_or_default(),
+            );
         }
         (self.enabled_rules, self.disabled_rules)
     }
 
-    fn push_rule<R, L>(&mut self)
+    fn push_rule<R, L>(&mut self, rule_filter: Option<RuleFilter<'static>>)
     where
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
+        L: biome_rowan::Language,
     {
+        if let Some(rule_filter) = rule_filter {
+            if rule_filter.match_rule::<R>() {
+                // first we want to register rules via "magic default"
+                self.record_rule_from_manifest::<R, L>(rule_filter);
+                // then we want to register rules
+                self.record_rule_from_domains::<R, L>(rule_filter);
+            }
+        };
+
         // Do not report unused suppression comment diagnostics if:
         // - it is a syntax-only analyzer pass, or
         // - if a single rule is run.
-        for selector in self.only {
-            let filter = RuleFilter::from(selector);
-            if filter.match_rule::<R>() {
-                self.enabled_rules.insert(filter);
+        if let Some(only) = self.only {
+            for selector in only {
+                let filter = RuleFilter::from(selector);
+                if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
+                    self.enabled_rules.insert(filter);
+                }
             }
         }
-        for selector in self.skip {
-            let filter = RuleFilter::from(selector);
-            if filter.match_rule::<R>() {
-                self.disabled_rules.insert(filter);
+        if let Some(skip) = self.skip {
+            for selector in skip {
+                let filter = RuleFilter::from(selector);
+                if filter.match_rule::<R>() && filter.match_group::<R::Group>() {
+                    self.disabled_rules.insert(filter);
+                }
             }
         }
     }
@@ -896,24 +1137,18 @@ impl<'a, 'b> RegistryVisitor<JsLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = JsLanguage>>(&mut self) {
-        for selector in self.only {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
-            }
-        }
-
-        for selector in self.skip {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
-            }
-        }
+        G::record_rules(self)
     }
 
     fn record_rule<R>(&mut self)
     where
         R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
     {
-        self.push_rule::<R, <R::Query as Queryable>::Language>()
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            js_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
     }
 }
 impl<'a, 'b> RegistryVisitor<JsonLanguage> for LintVisitor<'a, 'b> {
@@ -924,17 +1159,7 @@ impl<'a, 'b> RegistryVisitor<JsonLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = JsonLanguage>>(&mut self) {
-        for selector in self.only {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
-            }
-        }
-
-        for selector in self.skip {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
-            }
-        }
+        G::record_rules(self)
     }
 
     fn record_rule<R>(&mut self)
@@ -942,7 +1167,11 @@ impl<'a, 'b> RegistryVisitor<JsonLanguage> for LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
             + 'static,
     {
-        self.push_rule::<R, <R::Query as Queryable>::Language>()
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            json_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
     }
 }
 
@@ -954,17 +1183,7 @@ impl<'a, 'b> RegistryVisitor<CssLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = CssLanguage>>(&mut self) {
-        for selector in self.only {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
-            }
-        }
-
-        for selector in self.skip {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
-            }
-        }
+        G::record_rules(self)
     }
 
     fn record_rule<R>(&mut self)
@@ -972,7 +1191,11 @@ impl<'a, 'b> RegistryVisitor<CssLanguage> for LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
             + 'static,
     {
-        self.push_rule::<R, <R::Query as Queryable>::Language>()
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            css_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
     }
 }
 
@@ -984,17 +1207,7 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = GraphqlLanguage>>(&mut self) {
-        for selector in self.only {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
-            }
-        }
-
-        for selector in self.skip {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
-            }
-        }
+        G::record_rules(self)
     }
 
     fn record_rule<R>(&mut self)
@@ -1002,7 +1215,11 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for LintVisitor<'a, 'b> {
         R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
             + 'static,
     {
-        self.push_rule::<R, <R::Query as Queryable>::Language>()
+        self.push_rule::<R, <R::Query as Queryable>::Language>(
+            graphql_metadata
+                .find_rule(R::Group::NAME, R::METADATA.name)
+                .map(RuleFilter::from),
+        )
     }
 }
 
@@ -1011,17 +1228,17 @@ struct AssistsVisitor<'a, 'b> {
     enabled_rules: Vec<RuleFilter<'a>>,
     disabled_rules: Vec<RuleFilter<'a>>,
     import_sorting: RuleFilter<'a>,
-    path: &'b Path,
-    only: &'b Vec<RuleSelector>,
-    skip: &'b Vec<RuleSelector>,
+    only: Option<&'b [RuleSelector]>,
+    skip: Option<&'b [RuleSelector]>,
+    path: Option<&'b Path>,
 }
 
 impl<'a, 'b> AssistsVisitor<'a, 'b> {
     pub(crate) fn new(
-        only: &'b Vec<RuleSelector>,
-        skip: &'b Vec<RuleSelector>,
+        only: Option<&'b [RuleSelector]>,
+        skip: Option<&'b [RuleSelector]>,
         settings: Option<&'b Settings>,
-        path: &'b Path,
+        path: Option<&'b Path>,
     ) -> Self {
         Self {
             enabled_rules: vec![],
@@ -1047,22 +1264,28 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
             .settings
             .is_some_and(|settings| settings.organize_imports.enabled);
         if organize_imports_enabled && self.import_sorting.match_rule::<R>() {
-            self.enabled_rules.push(self.import_sorting);
+            // for now, we need to disable import sorting rule because we still have the top level organize import workspace action
+            self.disabled_rules.push(self.import_sorting);
             return;
         }
         // Do not report unused suppression comment diagnostics if:
         // - it is a syntax-only analyzer pass, or
         // - if a single rule is run.
-        for selector in self.only {
-            let filter = RuleFilter::from(selector);
-            if filter.match_rule::<R>() {
-                self.enabled_rules.push(filter)
+        if let Some(only) = self.only {
+            for selector in only {
+                let filter = RuleFilter::from(selector);
+                if filter.match_rule::<R>() {
+                    self.enabled_rules.push(filter)
+                }
             }
         }
-        for selector in self.skip {
-            let filter = RuleFilter::from(selector);
-            if filter.match_rule::<R>() {
-                self.disabled_rules.push(filter)
+
+        if let Some(skip) = self.skip {
+            for selector in skip {
+                let filter = RuleFilter::from(selector);
+                if filter.match_rule::<R>() {
+                    self.disabled_rules.push(filter)
+                }
             }
         }
     }
@@ -1070,7 +1293,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
     fn finish(mut self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
         let enabled_rules = self
             .settings
-            .and_then(|settings| settings.as_assists_rules(self.path))
+            .and_then(|settings| settings.as_assist_actions(self.path.expect("Path to be set")))
             .as_ref()
             .map(|rules| rules.as_enabled_rules())
             .unwrap_or_default()
@@ -1144,83 +1367,108 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'a, 'b> {
     }
 }
 
-pub(crate) struct AnalyzerVisitorBuilder<'a, 'b> {
-    syntax: Option<SyntaxVisitor<'a>>,
-    lint: Option<LintVisitor<'a, 'b>>,
-    assists: Option<AssistsVisitor<'a, 'b>>,
-    settings: Option<&'b Settings>,
+pub(crate) struct AnalyzerVisitorBuilder<'a> {
+    settings: Option<&'a Settings>,
+    only: Option<&'a [RuleSelector]>,
+    skip: Option<&'a [RuleSelector]>,
+    path: Option<&'a Path>,
+    enabled_rules: Option<&'a [RuleSelector]>,
+    manifest: Option<&'a PackageJson>,
+    analyzer_options: AnalyzerOptions,
 }
 
-impl<'a, 'b> AnalyzerVisitorBuilder<'a, 'b> {
-    pub(crate) fn new(settings: Option<&'b Settings>) -> Self {
+impl<'b> AnalyzerVisitorBuilder<'b> {
+    pub(crate) fn new(settings: Option<&'b Settings>, analyzer_options: AnalyzerOptions) -> Self {
         Self {
             settings,
-            syntax: None,
-            lint: None,
-            assists: None,
+            only: None,
+            skip: None,
+            path: None,
+            enabled_rules: None,
+            manifest: None,
+            analyzer_options,
         }
     }
 
     #[must_use]
-    pub(crate) fn with_syntax_rules(mut self) -> Self {
-        self.syntax = Some(SyntaxVisitor::default());
-        self
-    }
-    #[must_use]
-    pub(crate) fn with_linter_rules(
-        mut self,
-        only: &'b [RuleSelector],
-        skip: &'b [RuleSelector],
-        path: &'b Path,
-    ) -> Self {
-        self.lint = Some(LintVisitor::new(only, skip, self.settings, path));
+    pub(crate) fn with_only(mut self, only: &'b [RuleSelector]) -> Self {
+        self.only = Some(only);
         self
     }
 
     #[must_use]
-    pub(crate) fn with_assists_rules(
-        mut self,
-        only: &'b Vec<RuleSelector>,
-        skip: &'b Vec<RuleSelector>,
-        path: &'b Path,
-    ) -> Self {
-        self.assists = Some(AssistsVisitor::new(only, skip, self.settings, path));
+    pub(crate) fn with_skip(mut self, skip: &'b [RuleSelector]) -> Self {
+        self.skip = Some(skip);
         self
     }
 
     #[must_use]
-    pub(crate) fn finish(self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
+    pub(crate) fn with_path(mut self, path: &'b Path) -> Self {
+        self.path = Some(path);
+        self
+    }
+
+    #[must_use]
+    pub(crate) fn with_enabled_rules(mut self, enabled_rules: &'b [RuleSelector]) -> Self {
+        self.enabled_rules = Some(enabled_rules);
+        self
+    }
+
+    #[must_use]
+    pub(crate) fn with_manifest(mut self, manifest: Option<&'b PackageJson>) -> Self {
+        self.manifest = manifest;
+        self
+    }
+
+    #[must_use]
+    pub(crate) fn finish(self) -> (Vec<RuleFilter<'b>>, Vec<RuleFilter<'b>>, AnalyzerOptions) {
+        let mut analyzer_options = self.analyzer_options;
         let mut disabled_rules = vec![];
-        let mut enabled_rules = vec![];
-        if let Some(mut syntax) = self.syntax {
-            biome_js_analyze::visit_registry(&mut syntax);
-            biome_css_analyze::visit_registry(&mut syntax);
-            biome_json_analyze::visit_registry(&mut syntax);
-            biome_graphql_analyze::visit_registry(&mut syntax);
-            enabled_rules.extend(syntax.enabled_rules);
-        }
+        let mut enabled_rules: Vec<_> = self
+            .enabled_rules
+            .map(|enabled_rules| {
+                enabled_rules
+                    .iter()
+                    .map(RuleFilter::from)
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
+        let mut syntax = SyntaxVisitor::default();
 
-        if let Some(mut lint) = self.lint {
-            biome_js_analyze::visit_registry(&mut lint);
-            biome_css_analyze::visit_registry(&mut lint);
-            biome_json_analyze::visit_registry(&mut lint);
-            biome_graphql_analyze::visit_registry(&mut lint);
-            let (linter_enabled_rules, linter_disabled_rules) = lint.finish();
-            enabled_rules.extend(linter_enabled_rules);
-            disabled_rules.extend(linter_disabled_rules);
-        }
+        biome_js_analyze::visit_registry(&mut syntax);
+        biome_css_analyze::visit_registry(&mut syntax);
+        biome_json_analyze::visit_registry(&mut syntax);
+        biome_graphql_analyze::visit_registry(&mut syntax);
+        enabled_rules.extend(syntax.enabled_rules);
 
-        if let Some(mut assists) = self.assists {
-            biome_js_analyze::visit_registry(&mut assists);
-            biome_css_analyze::visit_registry(&mut assists);
-            biome_json_analyze::visit_registry(&mut assists);
-            biome_graphql_analyze::visit_registry(&mut assists);
-            let (assists_enabled_rules, assists_disabled_rules) = assists.finish();
-            enabled_rules.extend(assists_enabled_rules);
-            disabled_rules.extend(assists_disabled_rules);
-        }
+        let mut lint = LintVisitor::new(
+            self.only,
+            self.skip,
+            self.settings,
+            self.path,
+            self.manifest,
+            &mut analyzer_options,
+        );
 
-        (enabled_rules, disabled_rules)
+        biome_js_analyze::visit_registry(&mut lint);
+        biome_css_analyze::visit_registry(&mut lint);
+        biome_json_analyze::visit_registry(&mut lint);
+        biome_graphql_analyze::visit_registry(&mut lint);
+        let (linter_enabled_rules, linter_disabled_rules) = lint.finish();
+        enabled_rules.extend(linter_enabled_rules);
+        disabled_rules.extend(linter_disabled_rules);
+
+        let mut assist = AssistsVisitor::new(self.only, self.skip, self.settings, self.path);
+
+        biome_js_analyze::visit_registry(&mut assist);
+        biome_css_analyze::visit_registry(&mut assist);
+        biome_json_analyze::visit_registry(&mut assist);
+        biome_graphql_analyze::visit_registry(&mut assist);
+        let (assists_enabled_rules, assists_disabled_rules) = assist.finish();
+        enabled_rules.extend(assists_enabled_rules);
+        disabled_rules.extend(assists_disabled_rules);
+
+        (enabled_rules, disabled_rules, analyzer_options)
     }
 }
 

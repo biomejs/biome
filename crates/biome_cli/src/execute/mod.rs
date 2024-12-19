@@ -21,10 +21,11 @@ use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::adapters::SerdeJsonError;
 use biome_diagnostics::{category, Category};
 use biome_fs::BiomePath;
+use biome_grit_patterns::GritTargetLanguage;
 use biome_service::workspace::{
-    FeatureName, FeaturesBuilder, FixFileMode, FormatFileParams, OpenFileParams, PatternId,
+    FeatureName, FeaturesBuilder, FileContent, FixFileMode, FormatFileParams, OpenFileParams,
+    PatternId,
 };
-use std::borrow::Borrow;
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
@@ -71,7 +72,7 @@ impl Execution {
                 .with_organize_imports()
                 .with_formatter()
                 .with_linter()
-                .with_assists()
+                .with_assist()
                 .build(),
             TraversalMode::Migrate { .. } => FeatureName::empty(),
             TraversalMode::Search { .. } => FeaturesBuilder::new().with_search().build(),
@@ -199,6 +200,15 @@ pub enum TraversalMode {
         /// Note that the search command does not support rewrites.
         pattern: PatternId,
 
+        /// The language to query for.
+        ///
+        /// Grit queries are specific to the grammar of the language they
+        /// target, so we currently do not support writing queries that apply
+        /// to multiple languages at once.
+        ///
+        /// If none given, the default language is JavaScript.
+        language: Option<GritTargetLanguage>,
+
         /// An optional tuple.
         /// 1. The virtual path to the file
         /// 2. The content of the file
@@ -216,6 +226,16 @@ impl Display for TraversalMode {
             TraversalMode::Lint { .. } => write!(f, "lint"),
             TraversalMode::Search { .. } => write!(f, "search"),
         }
+    }
+}
+
+impl TraversalMode {
+    pub fn should_scan_project(&self) -> bool {
+        matches!(self, Self::CI { .. })
+            || matches!(
+                self,
+                Self::Check { stdin,.. } | Self::Lint { stdin, .. } if stdin.is_none()
+            )
     }
 }
 
@@ -520,10 +540,11 @@ pub fn execute_mode(
                     })?;
                     let report_file = BiomePath::new("_report_output.json");
                     session.app.workspace.open_file(OpenFileParams {
-                        content,
+                        content: FileContent::FromClient(content),
                         path: report_file.clone(),
                         version: 0,
                         document_file_source: None,
+                        persist_node_cache: false,
                     })?;
                     let code = session.app.workspace.format_file(FormatFileParams {
                         path: report_file.clone(),
@@ -559,7 +580,7 @@ pub fn execute_mode(
                 };
                 reporter.write(&mut GitLabReporterVisitor::new(
                     console,
-                    session.app.fs.borrow().working_directory(),
+                    session.app.workspace.fs().working_directory(),
                 ))?;
             }
             ReportMode::Junit => {

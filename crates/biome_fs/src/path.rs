@@ -20,7 +20,8 @@ use std::{fs::File, io, io::Write, ops::Deref, path::PathBuf};
 #[bitflags]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
 )]
 // NOTE: The order of the variants is important, the one on the top has the highest priority
 pub enum FileKind {
@@ -92,7 +93,8 @@ impl From<FileKind> for FileKinds {
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
 )]
 pub struct BiomePath {
     /// The path to the file
@@ -191,6 +193,10 @@ impl BiomePath {
     pub fn is_to_inspect(&self) -> bool {
         self.kind.contains(FileKind::Inspectable)
     }
+
+    pub fn to_path_buf(&self) -> PathBuf {
+        self.path.clone()
+    }
 }
 
 #[cfg(feature = "serde")]
@@ -209,6 +215,12 @@ impl Deref for BiomePath {
 
     fn deref(&self) -> &Self::Target {
         &self.path
+    }
+}
+
+impl From<BiomePath> for PathBuf {
+    fn from(path: BiomePath) -> Self {
+        path.path
     }
 }
 
@@ -400,7 +412,7 @@ mod test {
     #[test]
     #[cfg(feature = "serde")]
     fn deserialize_file_kind_from_str() {
-        let result = serde_json::from_str::<FileKinds>("[\"Config\"]");
+        let result = serde_json::from_str::<FileKinds>("[\"config\"]");
         assert!(result.is_ok());
         let file_kinds = result.unwrap();
         assert!(file_kinds.contains(FileKind::Config));
@@ -412,6 +424,6 @@ mod test {
         let file_kinds = FileKinds::from(FileKind::Config);
         let result = serde_json::to_string(&file_kinds);
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), "[\"Config\"]");
+        assert_eq!(result.unwrap(), "[\"config\"]");
     }
 }

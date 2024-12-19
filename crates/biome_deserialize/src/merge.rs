@@ -71,12 +71,14 @@ impl<K: Ord, V: Merge> Merge for std::collections::BTreeMap<K, V> {
     }
 }
 
+#[cfg(feature = "indexmap")]
 impl<T: Hash + Eq> Merge for indexmap::IndexSet<T> {
     fn merge_with(&mut self, other: Self) {
         self.extend(other);
     }
 }
 
+#[cfg(feature = "indexmap")]
 impl<K: Hash + Eq, V: Merge, S: Default + BuildHasher> Merge for indexmap::IndexMap<K, V, S> {
     fn merge_with(&mut self, other: Self) {
         for (k, v) in other {
@@ -121,3 +123,4 @@ overwrite_on_merge!(std::num::NonZeroU64);
 overwrite_on_merge!(std::num::NonZeroU8);
 overwrite_on_merge!(std::num::NonZeroUsize);
 overwrite_on_merge!(String);
+overwrite_on_merge!(Box<str>);

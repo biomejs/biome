@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsOptionalChainExpression,
     JsArrayAssignmentPatternElement, JsAssignmentExpression, JsAwaitExpression, JsCallExpression,
@@ -69,6 +70,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-unsafe-optional-chaining")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

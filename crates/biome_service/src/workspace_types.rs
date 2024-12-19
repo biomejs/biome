@@ -451,7 +451,7 @@ macro_rules! workspace_method {
 }
 
 /// Returns a list of signature for all the methods in the [Workspace] trait
-pub fn methods() -> [WorkspaceMethod; 19] {
+pub fn methods() -> [WorkspaceMethod; 23] {
     [
         workspace_method!(file_features),
         workspace_method!(update_settings),
@@ -461,6 +461,7 @@ pub fn methods() -> [WorkspaceMethod; 19] {
         workspace_method!(change_file),
         workspace_method!(close_file),
         workspace_method!(get_syntax_tree),
+        workspace_method!(check_file_size),
         workspace_method!(organize_imports),
         workspace_method!(get_file_content),
         workspace_method!(get_control_flow_graph),
@@ -472,5 +473,8 @@ pub fn methods() -> [WorkspaceMethod; 19] {
         workspace_method!(format_on_type),
         workspace_method!(fix_file),
         workspace_method!(rename),
+        workspace_method!(parse_pattern),
+        workspace_method!(search_pattern),
+        workspace_method!(drop_pattern),
     ]
 }

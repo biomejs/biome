@@ -3,6 +3,7 @@ use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     JsCallExpression, JsPropertyObjectMember, JsSyntaxNode, JsxAttribute, JsxElement,
@@ -40,6 +41,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("no-danger-with-children")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

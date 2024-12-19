@@ -11,7 +11,7 @@ use biome_rowan::{
 use std::collections::BTreeSet;
 
 pub(super) fn transform(root: JsSyntaxNode) -> (JsSyntaxNode, TransformSourceMap) {
-    let mut rewriter = JsFormatSyntaxRewriter::with_offset(root.text_range().start());
+    let mut rewriter = JsFormatSyntaxRewriter::with_offset(root.text_range_with_trivia().start());
     let transformed = rewriter.transform(root);
     (transformed, rewriter.finish())
 }
@@ -172,9 +172,9 @@ impl JsFormatSyntaxRewriter {
 
         let inner_trimmed_range = inner.text_trimmed_range();
         // Store away the inner offset because the new returned inner might be a detached node
-        let original_inner_offset = inner.text_range().start();
+        let original_inner_offset = inner.text_range_with_trivia().start();
         let inner = self.transform(inner);
-        let inner_offset = original_inner_offset - inner.text_range().start();
+        let inner_offset = original_inner_offset - inner.text_range_with_trivia().start();
 
         match inner.first_token() {
             // This can only happen if we have `()` which is highly unlikely to ever be the case.
@@ -484,7 +484,7 @@ mod tests {
         assert_ne!(&transformed, &root);
 
         // Removes parentheses
-        assert_eq!(&transformed.text().to_string(), "a && b && c");
+        assert_eq!(&transformed.text_with_trivia().to_string(), "a && b && c");
 
         let mut logical_expressions: Vec<_> = transformed
             .descendants()
@@ -497,10 +497,10 @@ mod tests {
         let top = logical_expressions.pop().unwrap();
 
         assert_eq!(top.left().unwrap().syntax(), left.syntax());
-        assert_eq!(&top.right().unwrap().text(), "c");
+        assert_eq!(&top.right().unwrap().to_trimmed_string(), "c");
 
-        assert_eq!(left.left().unwrap().text(), "a");
-        assert_eq!(left.right().unwrap().text(), "b");
+        assert_eq!(left.left().unwrap().to_trimmed_string(), "a");
+        assert_eq!(left.right().unwrap().to_trimmed_string(), "b");
     }
 
     #[test]
@@ -509,7 +509,7 @@ mod tests {
         let transformed = JsFormatSyntaxRewriter::default().transform(root);
 
         // Removes parentheses
-        assert_eq!(&transformed.text().to_string(), "a && b || c");
+        assert_eq!(&transformed.text_with_trivia().to_string(), "a && b || c");
 
         let logical_expressions: Vec<_> = transformed
             .descendants()
@@ -521,17 +521,17 @@ mod tests {
         let top = logical_expressions.first().unwrap();
         let right = logical_expressions.last().unwrap();
 
-        assert_eq!(top.left().unwrap().text(), "a");
+        assert_eq!(top.left().unwrap().to_trimmed_string(), "a");
         assert_eq!(top.right().unwrap().syntax(), right.syntax());
-        assert_eq!(right.left().unwrap().text(), "b");
-        assert_eq!(right.right().unwrap().text(), "c");
+        assert_eq!(right.left().unwrap().to_trimmed_string(), "b");
+        assert_eq!(right.right().unwrap().to_trimmed_string(), "c");
     }
 
     #[test]
     fn single_parentheses() {
         let (transformed, source_map) = source_map_test("(a)");
 
-        assert_eq!(&transformed.text(), "a");
+        assert_eq!(&transformed.text_with_trivia(), "a");
 
         let identifier = transformed
             .descendants()
@@ -545,7 +545,7 @@ mod tests {
     fn nested_parentheses() {
         let (transformed, source_map) = source_map_test("((a))");
 
-        assert_eq!(&transformed.text(), "a");
+        assert_eq!(&transformed.text_with_trivia(), "a");
 
         let identifier = transformed
             .descendants()
@@ -581,7 +581,7 @@ mod tests {
     fn adjacent_nodes() {
         let (transformed, source_map) = source_map_test("(a + b)");
 
-        assert_eq!(&transformed.text(), "a + b");
+        assert_eq!(&transformed.text_with_trivia(), "a + b");
 
         let identifiers: Vec<_> = transformed
             .descendants()
@@ -604,7 +604,7 @@ mod tests {
     fn intersecting_ranges() {
         let (transformed, source_map) = source_map_test("(interface, \"foo\");");
 
-        assert_eq!(&transformed.text(), "interface, \"foo\";");
+        assert_eq!(&transformed.text_with_trivia(), "interface, \"foo\";");
 
         let string_literal = transformed
             .descendants()
@@ -657,7 +657,7 @@ mod tests {
     fn enclosing_node() {
         let (transformed, source_map) = source_map_test("(a + b);");
 
-        assert_eq!(&transformed.text(), "a + b;");
+        assert_eq!(&transformed.text_with_trivia(), "a + b;");
 
         let expression_statement = transformed
             .descendants()
@@ -674,7 +674,7 @@ mod tests {
     fn trailing_whitespace() {
         let (transformed, source_map) = source_map_test("(a + b   );");
 
-        assert_eq!(&transformed.text(), "a + b   ;");
+        assert_eq!(&transformed.text_with_trivia(), "a + b   ;");
 
         let binary = transformed
             .descendants()
@@ -692,7 +692,7 @@ mod tests {
         let (transformed, _) = source_map_test("a;\n(\n a + b);");
 
         // Trims the leading whitespace in front of the expression's first token.
-        assert_eq!(&transformed.text(), "a;\na + b;");
+        assert_eq!(&transformed.text_with_trivia(), "a;\na + b;");
     }
 
     #[test]
@@ -700,7 +700,10 @@ mod tests {
         let (transformed, _) = source_map_test("a;(\n\n/* comment */\n a + b);");
 
         // Keeps at least one new line before a leading comment.
-        assert_eq!(&transformed.text(), "a;\n/* comment */\n a + b;");
+        assert_eq!(
+            &transformed.text_with_trivia(),
+            "a;\n/* comment */\n a + b;"
+        );
     }
 
     #[test]
@@ -709,7 +712,7 @@ mod tests {
             source_map_test("/* outer */ (/* left */ a + b /* right */) /* outer end */;");
 
         assert_eq!(
-            &transformed.text(),
+            &transformed.text_with_trivia(),
             "/* outer */ /* left */ a + b /* right */ /* outer end */;"
         );
 
@@ -762,7 +765,7 @@ mod tests {
         );
 
         assert_eq!(
-            source_map.source_range(unary_expressions[1].syntax().text_range()),
+            source_map.source_range(unary_expressions[1].syntax().text_range_with_trivia()),
             TextRange::new(TextSize::from(21), TextSize::from(36))
         );
 

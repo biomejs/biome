@@ -1,0 +1,6 @@
+`return new Promise($arg)` as $return where {
+    $return <: within `async function $fn($args) { $_ }` until or {
+        `function $_($_) { $_ }`,
+        `const $_ = ($_) => $_`,
+    }
+}

@@ -1,8 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: +val_id.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 
 ```

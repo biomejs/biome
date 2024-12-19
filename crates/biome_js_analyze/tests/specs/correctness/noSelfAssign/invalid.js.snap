@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 a = a;
 [a] = [a];
 [a, b] = [a, b];
@@ -889,5 +890,3 @@ invalid.js:26:10 lint/correctness/noSelfAssign ━━━━━━━━━━━
   
 
 ```
-
-

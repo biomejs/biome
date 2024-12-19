@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: recursiveComponents.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // issue: https://github.com/biomejs/biome/issues/3212
 
 import { useMemo } from "react";

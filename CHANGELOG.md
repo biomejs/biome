@@ -182,6 +182,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [noGlobalDirnameFilename](https://biomejs.dev/linter/rules/no-global-dirname-filename/). Contributed by @unvalley
 
+- Add [noUnwantedPolyfillio](https://biomejs.dev/linter/rules/no-unwanted-polyfillio/). Contributed by @unvalley
+
 - [noForEach](https://biomejs.dev/linter/rules/no-for-each/) now provides a new option `validIdentifiers` ([#3351](https://github.com/biomejs/biome/issues/3351)) to specify which variable names are allowed to call `forEach`.
 
   Identifiers containing dots (e.g., "lib._") or empty strings are not allowed. Invalid configurations will produce a diagnostic warning.

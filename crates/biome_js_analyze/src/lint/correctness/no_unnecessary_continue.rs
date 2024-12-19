@@ -1,5 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsContinueStatement, JsLabeledStatement, JsSyntaxKind, JsSyntaxNode};
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -73,6 +74,7 @@ declare_lint_rule! {
         name: "noUnnecessaryContinue",
         language: "js",
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 

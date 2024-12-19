@@ -17,3 +17,11 @@
 # `biome_js_parser`
 
 Biome's JavaScript parser implementation. Follow the [documentation](https://docs.rs/biome_js_parser/).
+
+## Testing
+
+To update the `.rast` snapshots, run:
+
+```bash
+UPDATE_EXPECT=1 cargo test -p biome_js_parser
+```

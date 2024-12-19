@@ -2,7 +2,6 @@ use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use crate::{run_cli, UNFORMATTED};
 use biome_console::{BufferConsole, LogLevel};
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::{Path, PathBuf};
 
@@ -35,13 +34,13 @@ fn logs_the_appropriate_messages_according_to_set_diagnostics_level() {
     let test = Path::new("test.js");
     fs.insert(test.into(), TEST_CONTENTS.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--diagnostic-level=error"),
+                "lint",
+                "--diagnostic-level=error",
                 test.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -82,10 +81,10 @@ fn max_diagnostics_no_verbose() {
     let file_path = PathBuf::from("src/file.js".to_string());
     fs.insert(file_path, UNFORMATTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (mut fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("ci"), ("--max-diagnostics"), ("10"), ("src")].as_slice()),
+        Args::from(["ci", "--max-diagnostics", "10", "src"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -116,10 +115,10 @@ fn max_diagnostics_verbose() {
     let file_path = PathBuf::from("src/file.js".to_string());
     fs.insert(file_path, UNFORMATTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (mut fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("ci"), ("--max-diagnostics=10"), "--verbose", ("src")].as_slice()),
+        Args::from(["ci", "--max-diagnostics=10", "--verbose", "src"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -168,10 +167,10 @@ import { FC, memo, useCallback } from "react";
 "#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("check"), ("--diagnostic-level=error"), ("src")].as_slice()),
+        Args::from(["check", "--diagnostic-level=error", "src"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -211,14 +210,14 @@ fn max_diagnostics_are_lifted() {
         "debugger;".repeat(u8::MAX as usize * 2).as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (mut fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("ci"),
-                ("--max-diagnostics"),
-                ("none"),
+                "ci",
+                "--max-diagnostics",
+                "none",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),

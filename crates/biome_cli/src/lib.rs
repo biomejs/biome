@@ -6,9 +6,8 @@
 //! to parse commands and arguments, redirect the execution of the commands and
 //! execute the traversal of directory and files, based on the command that were passed.
 
-use biome_console::{markup, ColorMode, Console, ConsoleExt};
-use biome_fs::OsFileSystem;
-use biome_service::{App, DynRef, Workspace, WorkspaceRef};
+use biome_console::{ColorMode, Console};
+use biome_service::{App, Workspace, WorkspaceRef};
 use commands::search::SearchCommandPayload;
 use std::env;
 
@@ -55,11 +54,7 @@ impl<'app> CliSession<'app> {
         console: &'app mut dyn Console,
     ) -> Result<Self, CliDiagnostic> {
         Ok(Self {
-            app: App::new(
-                DynRef::Owned(Box::<OsFileSystem>::default()),
-                console,
-                WorkspaceRef::Borrowed(workspace),
-            ),
+            app: App::new(console, WorkspaceRef::Borrowed(workspace)),
         })
     }
 
@@ -68,12 +63,6 @@ impl<'app> CliSession<'app> {
         let has_metrics = command.has_metrics();
         if has_metrics {
             crate::metrics::init_metrics();
-        }
-        // TODO: remove in Biome v2
-        if env::var_os("BIOME_LOG_DIR").is_some() {
-            self.app.console.log(markup! {
-                <Warn>"The use of BIOME_LOG_DIR is deprecated. Use BIOME_LOG_PATH instead."</Warn>
-            });
         }
 
         let result = match command {
@@ -89,8 +78,6 @@ impl<'app> CliSession<'app> {
             } => commands::daemon::start(self, config_path, Some(log_path), Some(log_prefix_name)),
             BiomeCommand::Stop => commands::daemon::stop(self),
             BiomeCommand::Check {
-                apply,
-                apply_unsafe,
                 write,
                 fix,
                 unsafe_,
@@ -101,7 +88,7 @@ impl<'app> CliSession<'app> {
                 linter_enabled,
                 organize_imports_enabled,
                 formatter_enabled,
-                assists_enabled,
+                assist_enabled,
                 staged,
                 changed,
                 since,
@@ -109,8 +96,6 @@ impl<'app> CliSession<'app> {
                 self,
                 &cli_options,
                 CheckCommandPayload {
-                    apply_unsafe,
-                    apply,
                     write,
                     fix,
                     unsafe_,
@@ -120,15 +105,13 @@ impl<'app> CliSession<'app> {
                     linter_enabled,
                     organize_imports_enabled,
                     formatter_enabled,
-                    assists_enabled,
+                    assist_enabled,
                     staged,
                     changed,
                     since,
                 },
             ),
             BiomeCommand::Lint {
-                apply,
-                apply_unsafe,
                 write,
                 suppress,
                 suppression_reason,
@@ -153,8 +136,6 @@ impl<'app> CliSession<'app> {
                 self,
                 &cli_options,
                 LintCommandPayload {
-                    apply_unsafe,
-                    apply,
                     write,
                     suppress,
                     suppression_reason,
@@ -180,7 +161,7 @@ impl<'app> CliSession<'app> {
                 linter_enabled,
                 formatter_enabled,
                 organize_imports_enabled,
-                assists_enabled,
+                assist_enabled,
                 configuration,
                 paths,
                 cli_options,
@@ -193,7 +174,7 @@ impl<'app> CliSession<'app> {
                     linter_enabled,
                     formatter_enabled,
                     organize_imports_enabled,
-                    assists_enabled,
+                    assist_enabled,
                     configuration,
                     paths,
                     changed,
@@ -265,6 +246,7 @@ impl<'app> CliSession<'app> {
                 files_configuration,
                 paths,
                 pattern,
+                language,
                 stdin_file_path,
                 vcs_configuration,
             } => run_command(
@@ -274,6 +256,7 @@ impl<'app> CliSession<'app> {
                     files_configuration,
                     paths,
                     pattern,
+                    language,
                     stdin_file_path,
                     vcs_configuration,
                 },

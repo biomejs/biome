@@ -1,15 +1,13 @@
-use crate::analyzers::indent_size::IndentSize;
 use crate::analyzers::nursery_rules::NurseryRules;
 use crate::analyzers::schema::Schema;
-use crate::analyzers::trailing_comma::TrailingComma;
 
+use crate::analyzers::all::RulesAll;
 use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
 use biome_json_syntax::JsonLanguage;
 
-mod indent_size;
+mod all;
 mod nursery_rules;
 mod schema;
-mod trailing_comma;
 
 pub(crate) struct MigrationGroup;
 pub(crate) struct MigrationCategory;
@@ -21,14 +19,12 @@ impl RuleGroup for MigrationGroup {
 
     fn record_rules<V: RegistryVisitor<Self::Language> + ?Sized>(registry: &mut V) {
         // Order here is important, rules should be added from the most old, to the most recent
-        // v1.3.0
-        registry.record_rule::<IndentSize>();
         // v1.5.0
         registry.record_rule::<Schema>();
         // v1.8.0
-        registry.record_rule::<TrailingComma>();
-        // v1.8.0
         registry.record_rule::<NurseryRules>();
+        // v2.0.0
+        registry.record_rule::<RulesAll>()
     }
 }
 

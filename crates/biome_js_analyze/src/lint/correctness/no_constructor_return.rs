@@ -2,6 +2,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::RuleSource;
 use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsConstructorClassMember, JsReturnStatement};
 use biome_rowan::AstNode;
 
@@ -58,6 +59,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-constructor-return")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

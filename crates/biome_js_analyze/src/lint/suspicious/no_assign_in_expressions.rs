@@ -1,6 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     JsAssignmentExpression, JsExpressionStatement, JsForStatement, JsParenthesizedExpression,
     JsSequenceExpression,
@@ -48,6 +49,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("no-cond-assign")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

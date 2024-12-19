@@ -133,7 +133,7 @@ impl Visitor for SemanticModelVisitor {
             WalkEvent::Leave(_) => return,
         };
 
-        let text_range = root.text_range();
+        let text_range = root.text_range_with_trivia();
         ctx.match_query(SemanticModelEvent(text_range));
     }
 }

@@ -1,0 +1,163 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+snapshot_kind: text
+---
+# Input
+```ts
+
+// @ts-ignore
+let found;
+
+/**
+ * @ts-ignore
+ * more comments
+ */
+let foo;
+
+
+// Some comment
+// @ts-ignore
+// Some other comment
+let bar;
+
+
+// Some comment
+// @ts-ignore Some other comment
+let someTextAfter;
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:4 lint/nursery/noTsIgnore  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe use of the @ts-ignore directive found in this comment.
+  
+  > 2 │ // @ts-ignore
+      │    ^^^^^^^^^^
+    3 │ let found;
+    4 │ 
+  
+  i The directive is applied to this line.
+  
+    2 │ // @ts-ignore
+  > 3 │ let found;
+      │ ^^^
+    4 │ 
+    5 │ /**
+  
+  i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
+  
+  i Safe fix: Use the @ts-expect-error directive instead.
+  
+     1  1 │   
+     2    │ - //·@ts-ignore
+        2 │ + //·@ts-expect-error
+     3  3 │   let found;
+     4  4 │   
+  
+
+```
+
+```
+invalid.ts:6:4 lint/nursery/noTsIgnore  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe use of the @ts-ignore directive found in this comment.
+  
+     5 │ /**
+   > 6 │  * @ts-ignore
+       │    ^^^^^^^^^^
+   > 7 │  * more comments
+   > 8 │  */
+       │  ^^
+     9 │ let foo;
+    10 │ 
+  
+  i The directive is applied to this line.
+  
+     7 │  * more comments
+     8 │  */
+   > 9 │ let foo;
+       │ ^^^
+    10 │ 
+  
+  i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
+  
+  i Safe fix: Use the @ts-expect-error directive instead.
+  
+     4  4 │   
+     5  5 │   /**
+     6    │ - ·*·@ts-ignore
+        6 │ + ·*·@ts-expect-error
+     7  7 │    * more comments
+     8  8 │    */
+  
+
+```
+
+```
+invalid.ts:13:4 lint/nursery/noTsIgnore  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe use of the @ts-ignore directive found in this comment.
+  
+    12 │ // Some comment
+  > 13 │ // @ts-ignore
+       │    ^^^^^^^^^^
+    14 │ // Some other comment
+    15 │ let bar;
+  
+  i The directive is applied to this line.
+  
+    13 │ // @ts-ignore
+    14 │ // Some other comment
+  > 15 │ let bar;
+       │ ^^^
+    16 │ 
+  
+  i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
+  
+  i Safe fix: Use the @ts-expect-error directive instead.
+  
+    11 11 │   
+    12 12 │   // Some comment
+    13    │ - //·@ts-ignore
+       13 │ + //·@ts-expect-error
+    14 14 │   // Some other comment
+    15 15 │   let bar;
+  
+
+```
+
+```
+invalid.ts:19:4 lint/nursery/noTsIgnore  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe use of the @ts-ignore directive found in this comment.
+  
+    18 │ // Some comment
+  > 19 │ // @ts-ignore Some other comment
+       │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ let someTextAfter;
+    21 │ 
+  
+  i The directive is applied to this line.
+  
+    18 │ // Some comment
+    19 │ // @ts-ignore Some other comment
+  > 20 │ let someTextAfter;
+       │ ^^^
+    21 │ 
+  
+  i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
+  
+  i Safe fix: Use the @ts-expect-error directive instead.
+  
+    17 17 │   
+    18 18 │   // Some comment
+    19    │ - //·@ts-ignore·Some·other·comment
+       19 │ + //·@ts-expect-error·Some·other·comment
+    20 20 │   let someTextAfter;
+    21 21 │   
+  
+
+```

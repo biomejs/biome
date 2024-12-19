@@ -16,8 +16,6 @@ use tracing::{error, info};
 mod memory;
 mod os;
 
-pub const ROME_JSON: &str = "rome.json";
-
 pub struct ConfigName;
 
 impl ConfigName {
@@ -47,12 +45,6 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// This method creates a new "traversal scope" that can be used to
     /// efficiently batch many filesystem read operations
     fn traversal<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>);
-
-    // TODO: remove once we remove `rome.json` support [2.0]
-    /// Returns the temporary configuration files that are supported
-    fn deprecated_config_name(&self) -> &str {
-        ROME_JSON
-    }
 
     /// Return the path to the working directory
     fn working_directory(&self) -> Option<PathBuf>;
@@ -147,7 +139,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// This method logs an error message and returns a `FileSystemDiagnostic` error in two scenarios:
     /// - If the file cannot be opened, possibly due to incorrect path or permission issues.
     /// - If the file is opened but its content cannot be read, potentially due to the file being damaged.
-    fn read_file_from_path(&self, file_path: &PathBuf) -> Result<String, FileSystemDiagnostic> {
+    fn read_file_from_path(&self, file_path: &Path) -> Result<String, FileSystemDiagnostic> {
         match self.open_with_options(file_path, OpenOptions::default().read(true)) {
             Ok(mut file) => {
                 let mut content = String::new();

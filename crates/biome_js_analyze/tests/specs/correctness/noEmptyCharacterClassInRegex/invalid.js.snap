@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 /^abc[]/;
 /foo[]bar/;
 if (foo.match(/^abc[]/)) {}
@@ -401,5 +402,3 @@ invalid.js:21:23 lint/correctness/noEmptyCharacterClassInRegex ━━━━━�
   
 
 ```
-
-

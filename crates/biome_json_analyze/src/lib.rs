@@ -1,4 +1,4 @@
-mod assists;
+mod assist;
 mod lint;
 
 pub mod options;
@@ -9,11 +9,12 @@ pub mod utils;
 pub use crate::registry::visit_registry;
 use crate::suppression_action::JsonSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
-    MetadataRegistry, RuleAction, RuleRegistry, SuppressionDiagnostic, SuppressionKind,
+    to_analyzer_suppressions, AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression,
+    ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
 };
 use biome_diagnostics::Error;
-use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_json_syntax::{JsonFileSource, JsonLanguage, TextRange};
+use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
 use std::ops::Deref;
 use std::sync::LazyLock;
 
@@ -62,9 +63,29 @@ where
     B: 'a,
 {
     fn parse_linter_suppression_comment(
-        _text: &str,
-    ) -> Vec<Result<SuppressionKind, SuppressionDiagnostic>> {
-        vec![]
+        text: &str,
+        piece_range: TextRange,
+    ) -> Vec<Result<AnalyzerSuppression, SuppressionDiagnostic>> {
+        let mut result = Vec::new();
+
+        for suppression in parse_suppression_comment(text) {
+            let suppression = match suppression {
+                Ok(suppression) => suppression,
+                Err(err) => {
+                    result.push(Err(err));
+                    continue;
+                }
+            };
+
+            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
+                .into_iter()
+                .map(Ok)
+                .collect();
+
+            result.extend(analyzer_suppressions)
+        }
+
+        result
     }
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);

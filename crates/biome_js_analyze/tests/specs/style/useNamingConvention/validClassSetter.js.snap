@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validClassSetter.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export default class {
     set p(x) {}
 
@@ -22,5 +23,3 @@ export default class {
     set "@"(x) {}
 }
 ```
-
-

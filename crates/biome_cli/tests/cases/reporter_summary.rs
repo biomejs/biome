@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -70,12 +69,12 @@ fn reports_diagnostics_summary_check_command() {
     let file_path3 = Path::new("index.css");
     fs.insert(file_path3.into(), MAIN_3.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
+                "check",
                 "--reporter=summary",
                 "--max-diagnostics=200",
                 file_path1.as_os_str().to_str().unwrap(),
@@ -111,12 +110,12 @@ fn reports_diagnostics_summary_ci_command() {
     let file_path3 = Path::new("index.css");
     fs.insert(file_path3.into(), MAIN_3.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("ci"),
+                "ci",
                 "--reporter=summary",
                 "--max-diagnostics=200",
                 file_path1.as_os_str().to_str().unwrap(),
@@ -152,12 +151,12 @@ fn reports_diagnostics_summary_lint_command() {
     let file_path3 = Path::new("index.css");
     fs.insert(file_path3.into(), MAIN_3.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--reporter=summary",
                 "--max-diagnostics=200",
                 file_path1.as_os_str().to_str().unwrap(),
@@ -193,12 +192,12 @@ fn reports_diagnostics_summary_format_command() {
     let file_path3 = Path::new("index.css");
     fs.insert(file_path3.into(), MAIN_3.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
+                "format",
                 "--reporter=summary",
                 "--max-diagnostics=200",
                 file_path1.as_os_str().to_str().unwrap(),

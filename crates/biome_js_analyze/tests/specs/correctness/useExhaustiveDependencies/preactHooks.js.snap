@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: preactHooks.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import { useCallback } from 'preact/compat';
 import { useState } from 'preact/hooks';
 

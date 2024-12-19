@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 for (var x in o) { if (x) { f(); continue; } g(); }
 for (var x in o) { if (x) { continue; f(); } g(); }
 for (var x in o) { if (x) { f(); } g(); }
