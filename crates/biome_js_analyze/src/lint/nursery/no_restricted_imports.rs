@@ -145,6 +145,8 @@ declare_lint_rule! {
     /// ```
     ///
     /// ## Options
+    /// 
+    /// **Since**: `v2`
     ///
     /// Use the options to specify the import paths and/or specific import names within them that you want to restrict in your source code.
     ///
@@ -288,7 +290,7 @@ declare_lint_rule! {
     /// import { Bar } from 'import-bar';
     /// ```
     pub NoRestrictedImports {
-        version: "2.0.0",
+        version: "1.6.0",
         name: "noRestrictedImports",
         language: "js",
         sources: &[
