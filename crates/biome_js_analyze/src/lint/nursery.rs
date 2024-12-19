@@ -42,6 +42,7 @@ pub mod use_exports_last;
 pub mod use_google_font_display;
 pub mod use_google_font_preconnect;
 pub mod use_guard_for_in;
+pub mod use_parse_int_radix;
 pub mod use_sorted_classes;
 pub mod use_strict_mode;
 pub mod use_trim_start_end;
@@ -91,6 +92,7 @@ declare_lint_group! {
             self :: use_google_font_display :: UseGoogleFontDisplay ,
             self :: use_google_font_preconnect :: UseGoogleFontPreconnect ,
             self :: use_guard_for_in :: UseGuardForIn ,
+            self :: use_parse_int_radix :: UseParseIntRadix ,
             self :: use_sorted_classes :: UseSortedClasses ,
             self :: use_strict_mode :: UseStrictMode ,
             self :: use_trim_start_end :: UseTrimStartEnd ,

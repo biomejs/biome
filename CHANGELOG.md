@@ -207,6 +207,27 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @lucasweng
 
+- [useSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes/) now supports wildcards in the `function` option.
+
+  ```json
+  {
+      "linter": {
+          "rules": {
+              "nursery": {
+                  "useSortedClasses": {
+                      "level": "warn",
+                      "options": {
+                          "functions": ["tw.*"]
+                      }
+                  }
+              }
+          }
+      }
+  }
+  ```
+
+  This allows the rule to handle class sorting for tagged template literals like `` tw.div`...` ``, used in libraries such as [twin.macro](https://github.com/ben-rogerson/twin.macro) and [react-twc](https://github.com/gregberge/twc).
+
 #### Enhancements
 
 - `useExportType` and `useImportType` now ignore TypeScript declaration files ([#4416](https://github.com/biomejs/biome/pull/4416)). Contributed by @Conaclos

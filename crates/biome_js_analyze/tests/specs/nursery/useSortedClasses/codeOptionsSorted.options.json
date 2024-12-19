@@ -7,7 +7,7 @@
 					"level": "error",
 					"options": {
 						"attributes": ["customClassAttribute"],
-						"functions": ["clsx", "tw"]
+						"functions": ["clsx", "tw", "tw.*"]
 					}
 				}
 			}

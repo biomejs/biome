@@ -1420,6 +1420,10 @@ export interface Nursery {
 	 */
 	useNamingConvention?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce the consistent use of the radix argument when using parseInt().
+	 */
+	useParseIntRadix?: RuleFixConfiguration_for_Null;
+	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UtilityClassSortingOptions;
@@ -3147,6 +3151,7 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
+	| "lint/nursery/useParseIntRadix"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useTrimStartEnd"
