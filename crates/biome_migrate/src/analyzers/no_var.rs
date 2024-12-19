@@ -5,7 +5,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::{category, Applicability};
-use biome_json_syntax::{JsonMember, JsonMemberList, T};
+use biome_json_syntax::JsonMember;
 use biome_rowan::AstNode;
 
 declare_migration! {
@@ -17,7 +17,7 @@ declare_migration! {
 
 impl Rule for NoVar {
     type Query = Version<JsonMember>;
-    type State = JsonMemberList;
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -33,7 +33,7 @@ impl Rule for NoVar {
         let text = name.inner_string_text().ok()?;
 
         if text.text() == "noVar" {
-            return node.syntax().parent().and_then(JsonMemberList::cast);
+            return Some(());
         }
 
         None
@@ -50,7 +50,7 @@ impl Rule for NoVar {
         ))
     }
 
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<MigrationAction> {
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<MigrationAction> {
         let root = ctx.root();
         let mut rule_mover = RuleMover::from_root(root.clone());
         rule_mover.move_rule("noVar", "style", "suspicious");

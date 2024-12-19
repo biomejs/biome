@@ -9,7 +9,7 @@ use biome_json_factory::make::{
     json_member, json_member_name, json_string_literal, json_string_value, token,
 };
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonRoot, T};
-use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind, WalkEvent};
+use biome_rowan::{AstNode, TriviaPieceKind, WalkEvent};
 use rustc_hash::FxHashSet;
 
 declare_migration! {

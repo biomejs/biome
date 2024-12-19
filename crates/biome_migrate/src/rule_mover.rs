@@ -12,7 +12,7 @@ use biome_rowan::{
 use rustc_hash::FxHashMap;
 use std::str::FromStr;
 
-const ALL_GROUPS: &'static [&'static str] = &[
+const ALL_GROUPS: &[&str] = &[
     "nursery",
     "suspicious",
     "a11y",
@@ -65,33 +65,6 @@ impl FromStr for Group {
             "performance" => Group::Performance,
             _ => return Err(()),
         })
-    }
-}
-
-#[derive(Debug)]
-pub(crate) enum MemberKind {
-    Groups {
-        groups: FxHashMap<Group, JsonMember>,
-    },
-    Rules(JsonMember),
-    Linter(JsonMember),
-    None,
-}
-
-impl MemberKind {
-    pub(crate) fn new_groups() -> Self {
-        Self::Groups {
-            groups: FxHashMap::default(),
-        }
-    }
-
-    pub(crate) fn push_group(&mut self, group: Group, member: JsonMember) {
-        match self {
-            MemberKind::Groups { groups } => {
-                groups.insert(group, member);
-            }
-            MemberKind::Rules(_) | MemberKind::Linter(_) | MemberKind::None => {}
-        }
     }
 }
 
@@ -226,15 +199,13 @@ impl RuleMover {
                     .and_then(|n| n.as_json_object_value().cloned())
                     .map(|n| n.json_member_list());
                 if let Some(list) = list {
-                    for item in list {
-                        if let Some(member) = item.ok() {
-                            let text = member.name().ok().and_then(|n| n.inner_string_text().ok());
+                    for member in list.iter().flatten() {
+                        let text = member.name().ok().and_then(|n| n.inner_string_text().ok());
 
-                            if let Some(text) = text {
-                                if text.text() == rule_name {
-                                    rule_member = Some(member);
-                                    break 'outer;
-                                }
+                        if let Some(text) = text {
+                            if text.text() == rule_name {
+                                rule_member = Some(member);
+                                break 'outer;
                             }
                         }
                     }
@@ -259,7 +230,7 @@ impl RuleMover {
         rule_name: &str,
         group: &Group,
     ) -> Option<()> {
-        if let Some(member) = groups.get_mut(&group) {
+        if let Some(member) = groups.get_mut(group) {
             let list = member
                 .value()
                 .ok()?
@@ -302,7 +273,7 @@ impl RuleMover {
         rule_member: JsonMember,
         group: &Group,
     ) -> Option<()> {
-        if let Some(member) = groups.get_mut(&group) {
+        if let Some(member) = groups.get_mut(group) {
             let list = member
                 .value()
                 .ok()?
@@ -333,11 +304,10 @@ impl RuleMover {
     pub(crate) fn run_queries(mut self) -> Option<BatchMutation<JsonLanguage>> {
         let mut mutation = self.root.clone().begin();
         for group in ALL_GROUPS {
-            let group_enum = Group::from_str(group).ok().expect("Group to be mapped");
-            if !self.groups.contains_key(&group_enum) {
-                self.groups
-                    .insert(group_enum, group_member(vec![], vec![], group));
-            }
+            let group_enum = Group::from_str(group).expect("Group to be mapped");
+            self.groups
+                .entry(group_enum)
+                .or_insert_with(|| group_member(vec![], vec![], group));
         }
 
         let mut groups = self.groups;
@@ -478,8 +448,7 @@ fn create_new_linter_member(
     separators: Vec<JsonSyntaxToken>,
 ) -> JsonMember {
     let rules = rules_member(members, separators, 4);
-    let linter = linter_member(vec![rules], vec![], 2);
-    linter
+    linter_member(vec![rules], vec![], 2)
 }
 
 #[cfg(test)]

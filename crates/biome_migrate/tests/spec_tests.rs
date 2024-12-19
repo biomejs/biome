@@ -72,7 +72,6 @@ pub(crate) fn analyze_and_snap(
         .map_or_else(|| "1.5.0".to_string(), |v| v.trim().to_string());
     let rule_name = directory_path.file_name().unwrap().to_str().unwrap();
     let rule_filter = RuleFilter::Rule("migrations", rule_name);
-    dbg!(&rule_filter);
     let filter = AnalysisFilter {
         enabled_rules: Some(slice::from_ref(&rule_filter)),
         ..Default::default()

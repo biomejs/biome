@@ -22,7 +22,6 @@ use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
 use biome_rowan::AstNode;
 use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
 use biome_service::workspace::DocumentFileSource;
-use log::error;
 use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
 use std::collections::BTreeMap;
 use std::fmt::{Display, Formatter, Write};
