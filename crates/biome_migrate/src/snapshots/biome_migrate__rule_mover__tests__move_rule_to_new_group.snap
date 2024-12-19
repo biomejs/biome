@@ -10,8 +10,7 @@ snapshot_kind: text
 	"linter": {
 		"rules": {
 			"style": {
-				"noVar": "error",
-				"noArguments": "error"
+				"noVar": "error"
 			}
 		}
 	}
@@ -25,11 +24,8 @@ snapshot_kind: text
 {
 	"linter": {
 		"rules": {
-			"style": {
-				"noArguments": "error"
-			},
 			"suspicious": {
-				"noArguments": "error"
+				"noVar": "error"
 			}
 		}
 	}

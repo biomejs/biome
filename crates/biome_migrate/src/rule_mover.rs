@@ -461,7 +461,7 @@ mod tests {
     use biome_test_utils::diagnostic_to_string;
     use insta::assert_snapshot;
 
-    fn assert_snapshot(source: JsonParse, mutation: BatchMutation<JsonLanguage>) {
+    fn assert_snapshot(source: JsonParse, mutation: BatchMutation<JsonLanguage>, name: &str) {
         let mut buffer = String::new();
 
         let result = format_node(JsonFormatOptions::default(), &source.syntax())
@@ -485,7 +485,7 @@ mod tests {
         buffer.push_str(result.as_code());
         buffer.push_str("\n```");
 
-        assert_snapshot!(buffer);
+        assert_snapshot!(name, buffer);
     }
 
     #[test]
@@ -515,7 +515,7 @@ mod tests {
 
         let mutation = rule_mover.run_queries().expect("To run queries");
 
-        assert_snapshot(parsed, mutation);
+        assert_snapshot(parsed, mutation, "move_rule_to_new_group");
     }
 
     #[test]
@@ -546,6 +546,6 @@ mod tests {
 
         let mutation = rule_mover.run_queries().expect("To run queries");
 
-        assert_snapshot(parsed, mutation);
+        assert_snapshot(parsed, mutation, "move_rule_with_existing_rules");
     }
 }
