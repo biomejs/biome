@@ -3979,13 +3979,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noConsoleLog": {
-					"description": "Disallow the use of console.log",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noConstEnum": {
 					"description": "Disallow TypeScript const enum",
 					"anyOf": [

@@ -283,7 +283,6 @@ define_categories! {
     "lint/suspicious/noConfusingLabels": "https://biomejs.dev/linter/rules/no-confusing-labels",
     "lint/suspicious/noConfusingVoidType": "https://biomejs.dev/linter/rules/no-confusing-void-type",
     "lint/suspicious/noConsole": "https://biomejs.dev/linter/rules/no-console",
-    "lint/suspicious/noConsoleLog": "https://biomejs.dev/linter/rules/no-console-log",
     "lint/suspicious/noConstEnum": "https://biomejs.dev/linter/rules/no-const-enum",
     "lint/suspicious/noControlCharactersInRegex": "https://biomejs.dev/linter/rules/no-control-characters-in-regex",
     "lint/suspicious/noDebugger": "https://biomejs.dev/linter/rules/no-debugger",

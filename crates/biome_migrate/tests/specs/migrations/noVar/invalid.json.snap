@@ -37,10 +37,7 @@ invalid.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━
      4    │ - ······"style":·{
         4 │ + ······"suspicious":·{
      5  5 │           "noVar": "error"
-     6    │ - ······}
-        6 │ + ········}
-     7  7 │       }
-     8  8 │     }
+     6  6 │         }
   
 
 ```

@@ -1,0 +1,115 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noConsoleLog": "error",
+        "useSingleCaseStatement": "error",
+        "useShorthandArrayType": "error"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rule noConsoleLog has been removed.
+  
+    3 │     "rules": {
+    4 │       "suspicious": {
+  > 5 │         "noConsoleLog": "error",
+      │         ^^^^^^^^^^^^^^
+    6 │         "useSingleCaseStatement": "error",
+    7 │         "useShorthandArrayType": "error"
+  
+  i Safe fix: Use the rule useConsole instead.
+  
+     3  3 │       "rules": {
+     4  4 │         "suspicious": {
+     5    │ - ········"noConsoleLog":·"error",
+     6    │ - ········"useSingleCaseStatement":·"error",
+     7    │ - ········"useShorthandArrayType":·"error"
+        5 │ + ········"useSingleCaseStatement":·"error",
+        6 │ + ········"useShorthandArrayType":·"error",
+        7 │ + ········"noConsole":·{
+        8 │ + ··········"level":·"error",
+        9 │ + ··········"options":·{
+       10 │ + ············"allow":·["log"]
+       11 │ + ··········}
+       12 │ + ········}
+     8 13 │         }
+     9 14 │       }
+  
+
+```
+
+```
+invalid.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rule noConsoleLog has been removed.
+  
+    4 │       "suspicious": {
+    5 │         "noConsoleLog": "error",
+  > 6 │         "useSingleCaseStatement": "error",
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │         "useShorthandArrayType": "error"
+    8 │       }
+  
+  i Safe fix: Use the rule useConsole instead.
+  
+     6  6 │           "useSingleCaseStatement": "error",
+     7  7 │           "useShorthandArrayType": "error"
+     8    │ - ······}
+        8 │ + ······},
+        9 │ + ······"correctness":·{
+       10 │ + ········"noSwitchDeclarations":·{
+       11 │ + ··········"level":·"error"
+       12 │ + ········}
+       13 │ + ······}
+     9 14 │       }
+    10 15 │     }
+  
+
+```
+
+```
+invalid.json:7:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rule noConsoleLog has been removed.
+  
+    5 │         "noConsoleLog": "error",
+    6 │         "useSingleCaseStatement": "error",
+  > 7 │         "useShorthandArrayType": "error"
+      │         ^^^^^^^^^^^^^^^^^^^^^^^
+    8 │       }
+    9 │     }
+  
+  i Safe fix: Use the rule useConsole instead.
+  
+     2  2 │     "linter": {
+     3  3 │       "rules": {
+     4    │ - ······"suspicious":·{
+        4 │ + ······"style":·{
+        5 │ + ········"useConsistentArrayType":·{
+        6 │ + ··········"level":·"error",
+        7 │ + ··········"options":·{
+        8 │ + ············"syntax":·"shorthand"
+        9 │ + ··········}
+       10 │ + ········}
+       11 │ + ······},
+       12 │ + ······"suspicious":·{
+     5 13 │           "noConsoleLog": "error",
+     6 14 │           "useSingleCaseStatement": "error",
+  
+
+```

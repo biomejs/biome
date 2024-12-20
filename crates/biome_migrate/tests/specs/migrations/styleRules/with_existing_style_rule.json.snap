@@ -56,7 +56,6 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
      9  8 │           "useShorthandFunctionType": "warn",
     10  9 │           "useExportType":  "warn",
     11    │ - ········"useDefaultParameterLast":·"warn"
-    12    │ - ······}
        10 │ + ········"useDefaultParameterLast":·"warn",
        11 │ + ········"noCommaOperator":"error",
        12 │ + ········"useSingleVarDeclarator":"error",
@@ -75,9 +74,8 @@ with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━�
        25 │ + ········"useNumericLiterals":"error",
        26 │ + ········"useTemplate":"error",
        27 │ + ········"useEnumInitializers":"error"
-       28 │ + ········}
+    12 28 │         }
     13 29 │       }
-    14 30 │     }
   
 
 ```

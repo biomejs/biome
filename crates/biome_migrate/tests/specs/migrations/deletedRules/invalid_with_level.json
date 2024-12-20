@@ -1,0 +1,17 @@
+{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noConsoleLog": {
+          "level": "warn"
+        },
+        "useSingleCaseStatement": {
+          "level": "error"
+        },
+        "useShorthandArrayType": {
+          "level": "error"
+        }
+      }
+    }
+  }
+}

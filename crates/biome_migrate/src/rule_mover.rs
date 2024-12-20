@@ -421,36 +421,28 @@ fn group_member(
     group_name: &str,
 ) -> JsonMember {
     let list = json_member_list(members, separators);
-    let object = create_object(list, 8);
+    let object = create_object(list, 6);
     create_member(group_name, AnyJsonValue::JsonObjectValue(object), 6)
 }
 
-fn rules_member(
-    members: Vec<JsonMember>,
-    separators: Vec<JsonSyntaxToken>,
-    indentation: usize,
-) -> JsonMember {
+fn rules_member(members: Vec<JsonMember>, separators: Vec<JsonSyntaxToken>) -> JsonMember {
     let list = json_member_list(members, separators);
-    let object = create_object(list, indentation);
+    let object = create_object(list, 4);
     create_member("rules", AnyJsonValue::JsonObjectValue(object), 4)
 }
 
-fn linter_member(
-    members: Vec<JsonMember>,
-    separators: Vec<JsonSyntaxToken>,
-    indentation: usize,
-) -> JsonMember {
+fn linter_member(members: Vec<JsonMember>, separators: Vec<JsonSyntaxToken>) -> JsonMember {
     let list = json_member_list(members, separators);
-    let object = create_object(list, indentation);
-    create_member("linter", AnyJsonValue::JsonObjectValue(object), indentation)
+    let object = create_object(list, 2);
+    create_member("linter", AnyJsonValue::JsonObjectValue(object), 2)
 }
 
 fn create_new_linter_member(
     members: Vec<JsonMember>,
     separators: Vec<JsonSyntaxToken>,
 ) -> JsonMember {
-    let rules = rules_member(members, separators, 4);
-    linter_member(vec![rules], vec![], 2)
+    let rules = rules_member(members, separators);
+    linter_member(vec![rules], vec![])
 }
 
 #[cfg(test)]

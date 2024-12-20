@@ -54,7 +54,7 @@ with_existing_linter.json:1:1 migrate  FIXABLE  ━━━━━━━━━━�
       25 │ + ········"useNumericLiterals":"error",
       26 │ + ········"useTemplate":"error",
       27 │ + ········"useEnumInitializers":"error"
-      28 │ + ········}
+      28 │ + ······}
       29 │ + ····}
       30 │ + ··}
     3 31 │   }
