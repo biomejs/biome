@@ -38,8 +38,6 @@ pub type NoConfusingLabels =
 pub type NoConfusingVoidType =
     <lint::suspicious::no_confusing_void_type::NoConfusingVoidType as biome_analyze::Rule>::Options;
 pub type NoConsole = <lint::suspicious::no_console::NoConsole as biome_analyze::Rule>::Options;
-pub type NoConsoleLog =
-    <lint::suspicious::no_console_log::NoConsoleLog as biome_analyze::Rule>::Options;
 pub type NoConstAssign =
     <lint::correctness::no_const_assign::NoConstAssign as biome_analyze::Rule>::Options;
 pub type NoConstEnum =

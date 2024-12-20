@@ -61,7 +61,7 @@ with_existing_rules.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━
       25 │ + ········"useNumericLiterals":"error",
       26 │ + ········"useTemplate":"error",
       27 │ + ········"useEnumInitializers":"error"
-      28 │ + ········}
+      28 │ + ······}
     5 29 │       }
     6 30 │     }
   

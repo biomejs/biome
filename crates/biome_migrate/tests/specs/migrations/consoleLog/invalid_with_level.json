@@ -1,0 +1,11 @@
+{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noConsoleLog": {
+          "level": "warn"
+        }
+      }
+    }
+  }
+}
