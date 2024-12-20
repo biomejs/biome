@@ -36,36 +36,37 @@ with_existing_styles.json:1:1 migrate  FIXABLE  ━━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
+    2  2 │     "linter": {
     3  3 │       "rules": {
-    4  4 │         "recommended": true,
+    4    │ - ······"recommended":·true,
     5    │ - ······"style":·{}
-       5 │ + ······"style":·{
-       6 │ + ········"useLiteralEnumMembers":"error",
-       7 │ + ········"noArguments":"error",
-       8 │ + ········"noParameterAssign":"error",
-       9 │ + ········"useShorthandFunctionType":"error",
-      10 │ + ········"useExportType":"error",
-      11 │ + ········"useDefaultParameterLast":"error",
-      12 │ + ········"noCommaOperator":"error",
-      13 │ + ········"useSingleVarDeclarator":"error",
-      14 │ + ········"noNonnullAssertion":"error",
-      15 │ + ········"useNodejsImportProtocol":"error",
-      16 │ + ········"useConst":"error",
-      17 │ + ········"noInferrableTypes":"error",
-      18 │ + ········"useExponentiationOperator":"error",
-      19 │ + ········"noUselessElse":"error",
-      20 │ + ········"useSelfClosingElements":"error",
-      21 │ + ········"useImportType":"error",
-      22 │ + ········"useNumberNamespace":"error",
-      23 │ + ········"useWhile":"error",
-      24 │ + ········"useAsConstAssertion":"error",
-      25 │ + ········"noUnusedTemplateLiteral":"error",
-      26 │ + ········"useNumericLiterals":"error",
-      27 │ + ········"useTemplate":"error",
-      28 │ + ········"useEnumInitializers":"error"
-      29 │ + ········}
-    6 30 │       }
-    7 31 │     }
+       4 │ + ······"style":·{
+       5 │ + ········"useLiteralEnumMembers":"error",
+       6 │ + ········"noArguments":"error",
+       7 │ + ········"noParameterAssign":"error",
+       8 │ + ········"useShorthandFunctionType":"error",
+       9 │ + ········"useExportType":"error",
+      10 │ + ········"useDefaultParameterLast":"error",
+      11 │ + ········"noCommaOperator":"error",
+      12 │ + ········"useSingleVarDeclarator":"error",
+      13 │ + ········"noNonnullAssertion":"error",
+      14 │ + ········"useNodejsImportProtocol":"error",
+      15 │ + ········"useConst":"error",
+      16 │ + ········"noInferrableTypes":"error",
+      17 │ + ········"useExponentiationOperator":"error",
+      18 │ + ········"noUselessElse":"error",
+      19 │ + ········"useSelfClosingElements":"error",
+      20 │ + ········"useImportType":"error",
+      21 │ + ········"useNumberNamespace":"error",
+      22 │ + ········"useWhile":"error",
+      23 │ + ········"useAsConstAssertion":"error",
+      24 │ + ········"noUnusedTemplateLiteral":"error",
+      25 │ + ········"useNumericLiterals":"error",
+      26 │ + ········"useTemplate":"error",
+      27 │ + ········"useEnumInitializers":"error"
+      28 │ + ········}
+    6 29 │       }
+    7 30 │     }
   
 
 ```

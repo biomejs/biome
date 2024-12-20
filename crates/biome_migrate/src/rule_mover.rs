@@ -384,7 +384,9 @@ impl RuleMover {
         let mut separators: Vec<_> = list.separators().filter_map(|el| el.ok()).collect();
 
         members.push(new_linter_member);
-        separators.push(token(T![,]));
+        if members.len() > 1 {
+            separators.push(token(T![,]));
+        }
         mutation.replace_node(list, json_member_list(members, separators));
 
         Some(mutation)
