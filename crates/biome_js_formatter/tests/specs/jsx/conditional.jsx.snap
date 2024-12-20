@@ -1,6 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: jsx/conditional.jsx
+snapshot_kind: text
 ---
 # Input
 
@@ -78,6 +79,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Space inside stuff: false
 -----
 
 ```jsx

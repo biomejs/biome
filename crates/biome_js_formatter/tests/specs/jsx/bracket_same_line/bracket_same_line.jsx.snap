@@ -1,7 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: jsx/bracket_same_line/bracket_same_line.jsx
+snapshot_kind: text
 ---
 # Input
 
@@ -63,6 +63,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Space inside stuff: false
 -----
 
 ```jsx
@@ -117,6 +118,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: true
 Attribute Position: Auto
+Space inside stuff: false
 -----
 
 ```jsx
