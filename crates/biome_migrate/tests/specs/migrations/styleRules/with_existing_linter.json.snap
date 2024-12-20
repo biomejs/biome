@@ -1,0 +1,63 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: with_existing_linter.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "linter": {}
+}
+```
+
+# Diagnostics
+```
+with_existing_linter.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rules aren't recommended anymore.
+  
+  > 1 │ {
+      │ ^
+  > 2 │   "linter": {}
+  > 3 │ }
+      │ ^
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    1  1 │   {
+    2    │ - ··"linter":·{}
+       2 │ + ··"linter":·{
+       3 │ + ····"rules":·{
+       4 │ + ······"style":·{
+       5 │ + ········"useLiteralEnumMembers":"error",
+       6 │ + ········"noArguments":"error",
+       7 │ + ········"noParameterAssign":"error",
+       8 │ + ········"useShorthandFunctionType":"error",
+       9 │ + ········"useExportType":"error",
+      10 │ + ········"useDefaultParameterLast":"error",
+      11 │ + ········"noCommaOperator":"error",
+      12 │ + ········"useSingleVarDeclarator":"error",
+      13 │ + ········"noNonnullAssertion":"error",
+      14 │ + ········"useNodejsImportProtocol":"error",
+      15 │ + ········"useConst":"error",
+      16 │ + ········"noInferrableTypes":"error",
+      17 │ + ········"useExponentiationOperator":"error",
+      18 │ + ········"noUselessElse":"error",
+      19 │ + ········"useSelfClosingElements":"error",
+      20 │ + ········"useImportType":"error",
+      21 │ + ········"useNumberNamespace":"error",
+      22 │ + ········"useWhile":"error",
+      23 │ + ········"useAsConstAssertion":"error",
+      24 │ + ········"noUnusedTemplateLiteral":"error",
+      25 │ + ········"useNumericLiterals":"error",
+      26 │ + ········"useTemplate":"error",
+      27 │ + ········"useEnumInitializers":"error"
+      28 │ + ········}
+      29 │ + ····}
+      30 │ + ··}
+    3 31 │   }
+  
+
+```

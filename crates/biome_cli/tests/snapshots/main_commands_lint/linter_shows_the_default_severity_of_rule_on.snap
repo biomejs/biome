@@ -26,9 +26,9 @@ var name = 'tobias'
 # Termination Message
 
 ```block
-lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Some errors were emitted while running checks.
+  × Biome exited because the configuration resulted in errors. Please fix them.
   
 
 
@@ -37,26 +37,69 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-file1.js:1:1 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Use let or const instead of var.
+  × Found an unknown key `noVar`.
   
-  > 1 │ var name = 'tobias'
-      │ ^^^^^^^^^^^^^^^^^^^
+    3 │         "rules": {
+    4 │             "style": {
+  > 5 │                 "noVar": "on"
+      │                 ^^^^^^^
+    6 │             }
+    7 │         }
   
-  i A variable declared with var is accessible in the whole module. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
+  i Known keys:
   
-  i See MDN web docs for more details.
-  
-  i Unsafe fix: Use 'const' instead.
-  
-  - var·name·=·'tobias'
-  + const·name·=·'tobias'
+  - recommended
+  - noArguments
+  - noCommaOperator
+  - noDefaultExport
+  - noDoneCallback
+  - noImplicitBoolean
+  - noInferrableTypes
+  - noNamespace
+  - noNamespaceImport
+  - noNegationElse
+  - noNonNullAssertion
+  - noParameterAssign
+  - noParameterProperties
+  - noRestrictedGlobals
+  - noShoutyConstants
+  - noUnusedTemplateLiteral
+  - noUselessElse
+  - noYodaExpression
+  - useAsConstAssertion
+  - useBlockStatements
+  - useCollapsedElseIf
+  - useConsistentArrayType
+  - useConsistentBuiltinInstantiation
+  - useConst
+  - useDefaultParameterLast
+  - useDefaultSwitchClause
+  - useEnumInitializers
+  - useExplicitLengthCheck
+  - useExponentiationOperator
+  - useExportType
+  - useFilenamingConvention
+  - useForOf
+  - useFragmentSyntax
+  - useImportType
+  - useLiteralEnumMembers
+  - useNamingConvention
+  - useNodeAssertStrict
+  - useNodejsImportProtocol
+  - useNumberNamespace
+  - useNumericLiterals
+  - useSelfClosingElements
+  - useShorthandArrayType
+  - useShorthandAssign
+  - useShorthandFunctionType
+  - useSingleCaseStatement
+  - useSingleVarDeclarator
+  - useTemplate
+  - useThrowNewError
+  - useThrowOnlyError
+  - useWhile
   
 
-```
-
-```block
-Checked 1 file in <TIME>. No fixes applied.
-Found 1 error.
 ```

@@ -1,0 +1,83 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: with_existing_style_rule.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": true,
+      "style": {
+        "useLiteralEnumMembers": "warn",
+        "noArguments": "warn",
+        "noParameterAssign":  "warn",
+        "useShorthandFunctionType": "warn",
+        "useExportType":  "warn",
+        "useDefaultParameterLast": "warn"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+with_existing_style_rule.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rules aren't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "recommended": true,
+        ...
+  > 13 │     }
+  > 14 │   }
+  > 15 │ }
+       │ ^
+    16 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     2  2 │     "linter": {
+     3  3 │       "rules": {
+     4    │ - ······"recommended":·true,
+     5    │ - ······"style":·{
+        4 │ + ······"style":·{
+     6  5 │           "useLiteralEnumMembers": "warn",
+     7  6 │           "noArguments": "warn",
+    ····· │ 
+     9  8 │           "useShorthandFunctionType": "warn",
+    10  9 │           "useExportType":  "warn",
+    11    │ - ········"useDefaultParameterLast":·"warn"
+    12    │ - ······}
+       10 │ + ········"useDefaultParameterLast":·"warn",
+       11 │ + ········"noCommaOperator":"error",
+       12 │ + ········"useSingleVarDeclarator":"error",
+       13 │ + ········"noNonnullAssertion":"error",
+       14 │ + ········"useNodejsImportProtocol":"error",
+       15 │ + ········"useConst":"error",
+       16 │ + ········"noInferrableTypes":"error",
+       17 │ + ········"useExponentiationOperator":"error",
+       18 │ + ········"noUselessElse":"error",
+       19 │ + ········"useSelfClosingElements":"error",
+       20 │ + ········"useImportType":"error",
+       21 │ + ········"useNumberNamespace":"error",
+       22 │ + ········"useWhile":"error",
+       23 │ + ········"useAsConstAssertion":"error",
+       24 │ + ········"noUnusedTemplateLiteral":"error",
+       25 │ + ········"useNumericLiterals":"error",
+       26 │ + ········"useTemplate":"error",
+       27 │ + ········"useEnumInitializers":"error"
+       28 │ + ········}
+    13 29 │       }
+    14 30 │     }
+  
+
+```

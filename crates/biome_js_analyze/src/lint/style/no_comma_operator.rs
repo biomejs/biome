@@ -43,7 +43,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-sequences")],
         recommended: false,
-        severity: Severity::Error,
+        severity: Severity::Warning,
     }
 }
 
