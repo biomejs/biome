@@ -65,7 +65,6 @@ Linter:
   CSS enabled:                  true
   GraphQL enabled:              false
   Recommended:                  false
-  All:                          false
   Enabled rules:
   complexity/noBannedTypes
   complexity/noEmptyTypeParameters

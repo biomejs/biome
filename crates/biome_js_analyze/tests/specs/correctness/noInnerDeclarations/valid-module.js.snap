@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-module.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export var x = 1;
 
 var y = 2;
@@ -15,5 +16,3 @@ export function bar() {}
 export default function baz() {}
 
 ```
-
-

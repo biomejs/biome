@@ -8,7 +8,7 @@ use crate::{
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
     WorkspaceError,
 };
-use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions};
+use biome_analyze::{AnalyzerOptions, QueryMatch};
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::BiomePath;
@@ -96,15 +96,13 @@ impl ServiceLanguage for GritLanguage {
         _linter: Option<&crate::settings::LinterSettings>,
         _overrides: Option<&crate::settings::OverrideSettings>,
         _language: Option<&Self::LinterSettings>,
-        path: &biome_fs::BiomePath,
-        _file_source: &super::DocumentFileSource,
-        suppression_reason: Option<String>,
-    ) -> biome_analyze::AnalyzerOptions {
-        AnalyzerOptions {
-            configuration: AnalyzerConfiguration::default(),
-            file_path: path.to_path_buf(),
-            suppression_reason,
-        }
+        path: &BiomePath,
+        _file_source: &DocumentFileSource,
+        suppression_reason: Option<&str>,
+    ) -> AnalyzerOptions {
+        AnalyzerOptions::default()
+            .with_file_path(path.as_path())
+            .with_suppression_reason(suppression_reason)
     }
 }
 

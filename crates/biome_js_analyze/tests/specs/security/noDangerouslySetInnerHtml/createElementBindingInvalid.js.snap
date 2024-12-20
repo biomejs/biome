@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: createElementBindingInvalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import React, { createElement } from "react";
 
 React.createElement('div', {
@@ -46,5 +47,3 @@ createElementBindingInvalid.js:8:5 lint/security/noDangerouslySetInnerHtml ‚îÅ‚î
   
 
 ```
-
-

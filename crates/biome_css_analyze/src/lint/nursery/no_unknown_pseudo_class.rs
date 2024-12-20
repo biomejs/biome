@@ -13,6 +13,7 @@ use biome_css_syntax::{
     CssPseudoClassFunctionSelector, CssPseudoClassFunctionSelectorList,
     CssPseudoClassFunctionValueList, CssPseudoClassIdentifier, CssPseudoElementSelector,
 };
+use biome_diagnostics::Severity;
 use biome_rowan::{declare_node_union, AstNode, TextRange};
 use biome_string_case::StrLikeExtension;
 
@@ -62,6 +63,7 @@ declare_lint_rule! {
         name: "noUnknownPseudoClass",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("selector-pseudo-class-no-unknown")],
     }
 }
@@ -85,7 +87,8 @@ fn is_webkit_pseudo_class(node: &AnyPseudoLike) -> bool {
     while let Some(prev) = &prev_element {
         let maybe_selector = CssPseudoElementSelector::cast_ref(prev);
         if let Some(selector) = maybe_selector.as_ref() {
-            return WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS.contains(&selector.text().trim_matches(':'));
+            return WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS
+                .contains(&selector.to_trimmed_string().trim_matches(':'));
         };
         prev_element = prev.prev_sibling();
     }
@@ -115,7 +118,9 @@ impl Rule for NoUnknownPseudoClass {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let pseudo_class = ctx.query();
         let (name, span) = match pseudo_class {
-            AnyPseudoLike::CssBogusPseudoClass(class) => Some((class.text(), class.range())),
+            AnyPseudoLike::CssBogusPseudoClass(class) => {
+                Some((class.to_trimmed_string(), class.range()))
+            }
             AnyPseudoLike::CssPseudoClassFunctionCompoundSelector(selector) => {
                 let name = selector.name().ok()?;
                 Some((name.text().to_string(), name.text_range()))
@@ -150,7 +155,7 @@ impl Rule for NoUnknownPseudoClass {
             }
             AnyPseudoLike::CssPseudoClassIdentifier(ident) => {
                 let name = ident.name().ok()?;
-                Some((name.text().to_string(), name.range()))
+                Some((name.to_trimmed_string().to_string(), name.range()))
             }
             AnyPseudoLike::CssPageSelectorPseudo(page_pseudo) => {
                 let name = page_pseudo.selector().ok()?;

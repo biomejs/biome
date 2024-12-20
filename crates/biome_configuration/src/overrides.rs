@@ -1,16 +1,18 @@
 use super::javascript::PartialJavascriptConfiguration;
 use super::json::PartialJsonConfiguration;
-use super::{PartialCssConfiguration, PartialGraphqlConfiguration};
+use super::{PartialCssConfiguration, PartialGraphqlConfiguration, Rules};
+use crate::analyzer::RuleDomainValue;
 use crate::{
     partial_css_configuration, partial_graphql_configuration, partial_javascript_configuration,
     partial_json_configuration,
 };
-use biome_deserialize::StringSet;
+use biome_analyze::RuleDomain;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
 };
 use bpaf::Bpaf;
+use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
@@ -38,14 +40,14 @@ pub struct OverridePattern {
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
-    pub ignore: Option<StringSet>,
+    #[bpaf(hide, pure(Default::default()))]
+    pub ignore: Option<Vec<Box<str>>>,
 
     /// A list of Unix shell style patterns. The formatter will include files/folders that will
     /// match these patterns.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
-    pub include: Option<StringSet>,
+    #[bpaf(hide, pure(Default::default()))]
+    pub include: Option<Vec<Box<str>>>,
 
     /// Specific configuration for the JavaScript language
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -113,12 +115,6 @@ pub struct OverrideFormatterConfiguration {
     #[bpaf(long("indent-style"), argument("tab|space"), optional)]
     pub indent_style: Option<IndentStyle>,
 
-    /// The size of the indentation, 2 by default (deprecated, use `indent-width`)
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[deserializable(deprecated(use_instead = "formatter.indentWidth"))]
-    #[bpaf(long("indent-size"), argument("NUMBER"), optional)]
-    pub indent_size: Option<IndentWidth>,
-
     /// The size of the indentation, 2 by default
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("indent-width"), argument("NUMBER"), optional)]
@@ -159,7 +155,12 @@ pub struct OverrideLinterConfiguration {
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(pure(crate::analyzer::linter::Rules::default()), optional, hide)]
-    pub rules: Option<crate::analyzer::linter::Rules>,
+    pub rules: Option<Rules>,
+
+    /// List of rules
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(pure(FxHashMap::default()), optional, hide)]
+    pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
 }
 
 #[derive(
@@ -187,6 +188,6 @@ pub struct OverrideAssistsConfiguration {
 
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(pure(crate::analyzer::assists::Actions::default()), optional, hide)]
-    pub rules: Option<crate::analyzer::assists::Actions>,
+    #[bpaf(pure(crate::analyzer::assist::Actions::default()), optional, hide)]
+    pub rules: Option<crate::analyzer::assist::Actions>,
 }

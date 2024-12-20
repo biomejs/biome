@@ -13,14 +13,14 @@ impl FormatNodeRule<JsImportAssertion> for FormatJsImportAssertion {
             l_curly_token,
             assertions,
             r_curly_token,
-            assertion_kind,
+            with_token,
         } = node.as_fields();
         if assertions.is_empty() {
             let has_dangling = f.comments().has_dangling_comments(node.syntax());
             write!(
                 f,
                 [
-                    format_removed(&assertion_kind?),
+                    format_removed(&with_token?),
                     format_removed(&l_curly_token?),
                     has_dangling.then_some(space()),
                     format_dangling_comments(node.syntax()).with_soft_block_indent(),
@@ -33,7 +33,7 @@ impl FormatNodeRule<JsImportAssertion> for FormatJsImportAssertion {
                 f,
                 [
                     space(),
-                    assertion_kind.format(),
+                    with_token.format(),
                     space(),
                     l_curly_token.format(),
                     group(&soft_block_indent_with_maybe_space(

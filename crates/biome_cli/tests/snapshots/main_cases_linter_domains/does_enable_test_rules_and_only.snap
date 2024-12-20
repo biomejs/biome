@@ -1,0 +1,78 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+snapshot_kind: text
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "domains": {
+      "test": "all"
+    }
+  }
+}
+```
+
+## `test1.js`
+
+```js
+
+        debugger;
+        describe.only("bar", () => {});
+
+```
+
+## `test2.js`
+
+```js
+
+describe("foo", () => {
+	beforeEach(() => {});
+    beforeEach(() => {});
+    test("bar", () => {
+        someFn();
+    });
+});
+    
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test1.js:2:9 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+  > 2 │         debugger;
+      │         ^^^^^^^^^
+    3 │         describe.only("bar", () => {});
+    4 │ 
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1   │ - 
+    2   │ - ········debugger;
+      1 │ + 
+    3 2 │           describe.only("bar", () => {});
+    4 3 │   
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 1 error.
+```

@@ -3,7 +3,7 @@ import { Biome, Distribution } from "../dist";
 
 describe("Biome WebAssembly lintContent", () => {
 	const inputCode = `
-	const a = "foo " + Date.now() + " bar";
+	debugger;
 	const b = /   /;
 	`;
 
@@ -24,7 +24,7 @@ describe("Biome WebAssembly lintContent", () => {
 				filePath: "example.js",
 			});
 			expect(result.diagnostics).toMatchObject([
-				{ category: "lint/style/useTemplate" },
+				{ category: "lint/suspicious/noDebugger" },
 				{
 					category:
 						"lint/complexity/noMultipleSpacesInRegularExpressionLiterals",
@@ -43,16 +43,16 @@ describe("Biome WebAssembly lintContent", () => {
 		it("should emit diagnotics", () => {
 			const result = biome.lintContent(inputCode, {
 				filePath: "example.js",
-				fixFileMode: "SafeFixes",
+				fixFileMode: "safeFixes",
 			});
 			expect(result.diagnostics).toMatchObject([
-				{ category: "lint/style/useTemplate" },
+				{ category: "lint/suspicious/noDebugger" },
 			]);
 		});
 		it("should fix the SafeFixes only", () => {
 			const result = biome.lintContent(inputCode, {
 				filePath: "example.js",
-				fixFileMode: "SafeFixes",
+				fixFileMode: "safeFixes",
 			});
 			expect(result.content).toMatchSnapshot();
 		});
@@ -62,14 +62,14 @@ describe("Biome WebAssembly lintContent", () => {
 		it("should emit diagnotics", () => {
 			const result = biome.lintContent(inputCode, {
 				filePath: "example.js",
-				fixFileMode: "SafeAndUnsafeFixes",
+				fixFileMode: "safeAndUnsafeFixes",
 			});
 			expect(result.diagnostics).toHaveLength(0);
 		});
 		it("should fix the code", () => {
 			const result = biome.lintContent(inputCode, {
 				filePath: "example.js",
-				fixFileMode: "SafeAndUnsafeFixes",
+				fixFileMode: "safeAndUnsafeFixes",
 			});
 			expect(result.content).toMatchSnapshot();
 		});

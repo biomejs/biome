@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClass, AnyJsClassMember, JsGetterClassMember, JsMethodClassMember, JsPropertyClassMember,
     JsSetterClassMember, TsGetterSignatureClassMember, TsIndexSignatureClassMember,
@@ -99,6 +100,7 @@ declare_lint_rule! {
             RuleSource::EslintUnicorn("no-static-only-class"),
         ],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

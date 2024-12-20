@@ -3,6 +3,7 @@ use std::{borrow::Cow, collections::hash_map::Entry};
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleList;
+use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
 use biome_string_case::StrOnlyExtension;
 use rustc_hash::FxHashMap;
@@ -39,6 +40,7 @@ declare_lint_rule! {
         name: "noDuplicateProperties",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("declaration-block-no-duplicate-properties")],
     }
 }

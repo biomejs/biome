@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{AnyCssPseudoElement, CssPseudoElementSelector};
+use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 use biome_string_case::StrLikeExtension;
 
@@ -54,6 +55,7 @@ declare_lint_rule! {
         name: "noUnknownPseudoElement",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("selector-pseudo-element-no-unknown")],
     }
 }
@@ -69,13 +71,15 @@ impl Rule for NoUnknownPseudoElement {
         let pseudo_element = node.element().ok()?;
 
         let pseudo_element_name = match &pseudo_element {
-            AnyCssPseudoElement::CssBogusPseudoElement(element) => element.text(),
+            AnyCssPseudoElement::CssBogusPseudoElement(element) => element.to_trimmed_string(),
             AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(ident) => {
                 ident.name().ok()?.text().to_string()
             }
-            AnyCssPseudoElement::CssPseudoElementFunctionSelector(selector) => selector.text(),
+            AnyCssPseudoElement::CssPseudoElementFunctionSelector(selector) => {
+                selector.to_trimmed_string()
+            }
             AnyCssPseudoElement::CssPseudoElementIdentifier(ident) => {
-                ident.name().ok()?.text().to_string()
+                ident.name().ok()?.to_trimmed_string().to_string()
             }
         };
 
@@ -95,7 +99,7 @@ impl Rule for NoUnknownPseudoElement {
                 rule_category!(),
                 span,
                 markup! {
-                    "Unexpected unknown pseudo-elements: "<Emphasis>{ element.text() }</Emphasis>
+                    "Unexpected unknown pseudo-elements: "<Emphasis>{ element.to_trimmed_string() }</Emphasis>
                 },
             )
             .note(markup! {

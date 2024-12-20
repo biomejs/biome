@@ -95,13 +95,13 @@ impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
     }
 }
 
-// ======= ASSISTS ======
+// ======= ASSIST ======
 #[derive(Default)]
-struct AssistsRulesVisitor {
+struct AssistActionsVisitor {
     groups: BTreeMap<&'static str, BTreeMap<&'static str, RuleMetadata>>,
 }
 
-impl RegistryVisitor<JsLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<JsLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -119,7 +119,7 @@ impl RegistryVisitor<JsLanguage> for AssistsRulesVisitor {
     }
 }
 
-impl RegistryVisitor<JsonLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<JsonLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -138,7 +138,7 @@ impl RegistryVisitor<JsonLanguage> for AssistsRulesVisitor {
     }
 }
 
-impl RegistryVisitor<CssLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<CssLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -157,7 +157,7 @@ impl RegistryVisitor<CssLanguage> for AssistsRulesVisitor {
     }
 }
 
-impl RegistryVisitor<GraphqlLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<GraphqlLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -178,20 +178,19 @@ impl RegistryVisitor<GraphqlLanguage> for AssistsRulesVisitor {
 
 pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let linter_config_root = project_root().join("crates/biome_configuration/src/analyzer/linter");
-    let assists_config_root =
-        project_root().join("crates/biome_configuration/src/analyzer/assists");
+    let assist_config_root = project_root().join("crates/biome_configuration/src/analyzer/assist");
     let push_rules_directory = project_root().join("crates/biome_configuration/src/generated");
 
     let mut lint_visitor = LintRulesVisitor::default();
-    let mut assists_visitor = AssistsRulesVisitor::default();
+    let mut assist_visitor = AssistActionsVisitor::default();
     biome_js_analyze::visit_registry(&mut lint_visitor);
-    biome_js_analyze::visit_registry(&mut assists_visitor);
+    biome_js_analyze::visit_registry(&mut assist_visitor);
     biome_json_analyze::visit_registry(&mut lint_visitor);
-    biome_json_analyze::visit_registry(&mut assists_visitor);
+    biome_json_analyze::visit_registry(&mut assist_visitor);
     biome_css_analyze::visit_registry(&mut lint_visitor);
-    biome_css_analyze::visit_registry(&mut assists_visitor);
+    biome_css_analyze::visit_registry(&mut assist_visitor);
     biome_graphql_analyze::visit_registry(&mut lint_visitor);
-    biome_graphql_analyze::visit_registry(&mut assists_visitor);
+    biome_graphql_analyze::visit_registry(&mut assist_visitor);
 
     // let LintRulesVisitor { groups } = lint_visitor;
 
@@ -203,8 +202,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         RuleCategory::Lint,
     )?;
     generate_for_groups(
-        assists_visitor.groups,
-        assists_config_root.as_path(),
+        assist_visitor.groups,
+        assist_config_root.as_path(),
         push_rules_directory.as_path(),
         &mode,
         RuleCategory::Action,
@@ -225,33 +224,25 @@ fn generate_for_groups(
     let mut group_idents = Vec::with_capacity(groups.len());
     let mut group_strings = Vec::with_capacity(groups.len());
     let mut group_as_default_rules = Vec::with_capacity(groups.len());
+    let mut group_as_disabled_rules = Vec::with_capacity(groups.len());
     for (group, rules) in groups {
         let group_pascal_ident = quote::format_ident!("{}", &Case::Pascal.convert(group));
         let group_ident = quote::format_ident!("{}", group);
 
-        let (global_all, global_recommended) = if group == "nursery" {
-            (
-                quote! { self.is_all_true() && biome_flags::is_unstable() },
-                quote! { !self.is_recommended_false() && biome_flags::is_unstable() },
-            )
+        let global_recommended = if group == "nursery" {
+            quote! { !self.is_recommended_false() && biome_flags::is_unstable() }
         } else {
-            (
-                quote! { self.is_all_true() },
-                quote! { !self.is_recommended_false() },
-            )
+            quote! { !self.is_recommended_false() }
         };
         group_as_default_rules.push(if kind == RuleCategory::Lint {
             quote! {
                 if let Some(group) = self.#group_ident.as_ref() {
                     group.collect_preset_rules(
-                        #global_all,
                         #global_recommended,
                         &mut enabled_rules,
                     );
                     enabled_rules.extend(&group.get_enabled_rules());
                     disabled_rules.extend(&group.get_disabled_rules());
-                } else if #global_all {
-                    enabled_rules.extend(#group_pascal_ident::all_rules_as_filters());
                 } else if #global_recommended {
                     enabled_rules.extend(#group_pascal_ident::recommended_rules_as_filters());
                 }
@@ -261,6 +252,12 @@ fn generate_for_groups(
                 if let Some(group) = self.#group_ident.as_ref() {
                     enabled_rules.extend(&group.get_enabled_rules());
                 }
+            }
+        });
+
+        group_as_disabled_rules.push(quote! {
+            if let Some(group) = self.#group_ident.as_ref() {
+                disabled_rules.extend(&group.get_disabled_rules());
             }
         });
 
@@ -278,11 +275,11 @@ fn generate_for_groups(
             /// [Severity::Error] for recommended rules and [Severity::Warning] for other rules.
             ///
             /// If not, the function returns [None].
-            pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
+            pub fn get_severity_from_category(&self, category: &Category) -> Option<Severity> {
                 let mut split_code = category.name().split('/');
 
                 let _lint = split_code.next();
-                debug_assert_eq!(_lint, Some("assists"));
+                debug_assert_eq!(_lint, Some("assist"));
 
                 let group = <RuleGroup as std::str::FromStr>::from_str(split_code.next()?).ok()?;
                 let rule_name = split_code.next()?;
@@ -309,7 +306,7 @@ fn generate_for_groups(
             /// [Severity::Error] for recommended rules and [Severity::Warning] for other rules.
             ///
             /// If not, the function returns [None].
-            pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
+            pub fn get_severity_from_category(&self, category: &Category, rule_severity: Severity) -> Option<Severity> {
                 let mut split_code = category.name().split('/');
 
                 let _lint = split_code.next();
@@ -318,23 +315,21 @@ fn generate_for_groups(
                 let group = <RuleGroup as std::str::FromStr>::from_str(split_code.next()?).ok()?;
                 let rule_name = split_code.next()?;
                 let rule_name = Self::has_rule(group, rule_name)?;
-                let severity = match group {
+                match group {
                     #(
                         RuleGroup::#group_pascal_idents => self
                             .#group_idents
                             .as_ref()
                             .and_then(|group| group.get_rule_configuration(rule_name))
-                            .filter(|(level, _)| !matches!(level, RulePlainConfiguration::Off))
-                            .map_or_else(|| {
-                                if #group_pascal_idents::is_recommended_rule(rule_name) {
-                                    Severity::Error
-                                } else {
-                                    Severity::Warning
-                                }
-                            }, |(level, _)| level.into()),
+                            .and_then(|(level, _)| match level {
+                                RulePlainConfiguration::Off => None,
+                                RulePlainConfiguration::On => Some(rule_severity),
+                                RulePlainConfiguration::Info
+                                | RulePlainConfiguration::Warn
+                                | RulePlainConfiguration::Error => Some(Severity::from(level)),
+                            }),
                     )*
-                };
-                Some(severity)
+                }
             }
 
         }
@@ -420,6 +415,13 @@ fn generate_for_groups(
                     #( #group_as_default_rules )*
                     enabled_rules
                 }
+
+                /// It returns the disabled rules by configuration
+                pub fn as_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+                    let mut disabled_rules = FxHashSet::default();
+                    #( #group_as_disabled_rules )*
+                    disabled_rules
+                }
             }
 
             #( #struct_groups )*
@@ -436,11 +438,8 @@ fn generate_for_groups(
     } else {
         quote! {
             #use_rule_configuration
-            use biome_console::markup;
-            use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
             use biome_deserialize_macros::{Deserializable, Merge};
             use biome_diagnostics::{Category, Severity};
-            use biome_rowan::TextRange;
             use rustc_hash::FxHashSet;
             use serde::{Deserialize, Serialize};
             #[cfg(feature = "schema")]
@@ -470,7 +469,6 @@ fn generate_for_groups(
             }
 
             #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
-            #[deserializable(with_validator)]
             #[cfg_attr(feature = "schema", derive(JsonSchema))]
             #[serde(rename_all = "camelCase", deny_unknown_fields)]
             pub struct Rules {
@@ -478,36 +476,11 @@ fn generate_for_groups(
                 #[serde(skip_serializing_if = "Option::is_none")]
                 pub recommended: Option<bool>,
 
-                /// It enables ALL rules. The rules that belong to `nursery` won't be enabled.
-                #[serde(skip_serializing_if = "Option::is_none")]
-                pub all: Option<bool>,
-
                 #(
                     #[deserializable(rename = #group_strings)]
                     #[serde(skip_serializing_if = "Option::is_none")]
                     pub #group_idents: Option<#group_pascal_idents>,
                 )*
-            }
-
-            impl DeserializableValidator for Rules {
-                fn validate(
-                    &mut self,
-                    _name: &str,
-                    range: TextRange,
-                    diagnostics: &mut Vec<DeserializationDiagnostic>,
-                ) -> bool {
-                    if self.recommended == Some(true) && self.all == Some(true) {
-                        diagnostics
-                            .push(DeserializationDiagnostic::new(markup!(
-                                <Emphasis>"'recommended'"</Emphasis>" and "<Emphasis>"'all'"</Emphasis>" can't be both "<Emphasis>"'true'"</Emphasis>". You should choose only one of them."
-                            ))
-                            .with_range(range)
-                            .with_note(markup!("Biome will fallback to its defaults for this section.")));
-                        return false;
-                    }
-
-                    true
-                }
             }
 
             impl Rules {
@@ -528,7 +501,7 @@ fn generate_for_groups(
 
                 /// Ensure that `recommended` is set to `true` or implied.
                 pub fn set_recommended(&mut self) {
-                    if self.all != Some(true) && self.recommended == Some(false) {
+                    if self.recommended == Some(false) {
                         self.recommended = Some(true)
                     }
                     #(
@@ -544,9 +517,6 @@ fn generate_for_groups(
                     matches!(self.recommended, Some(false))
                 }
 
-                pub(crate) const fn is_all_true(&self) -> bool {
-                    matches!(self.all, Some(true))
-                }
 
                 /// It returns the enabled rules by default.
                 ///
@@ -557,6 +527,13 @@ fn generate_for_groups(
                     #( #group_as_default_rules )*
 
                     enabled_rules.difference(&disabled_rules).copied().collect()
+                }
+
+                /// It returns the disabled rules by configuration
+                pub fn as_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+                    let mut disabled_rules = FxHashSet::default();
+                    #( #group_as_disabled_rules )*
+                    disabled_rules
                 }
             }
 
@@ -600,10 +577,10 @@ fn generate_for_groups(
         }
         RuleCategory::Action => {
             quote! {
-                use crate::analyzer::assists::*;
+                use crate::analyzer::assist::*;
                 use biome_analyze::{AnalyzerRules, MetadataRegistry};
 
-                pub fn push_to_analyzer_assists(
+                pub fn push_to_analyzer_assist(
                     rules: &Actions,
                     metadata: &MetadataRegistry,
                     analyzer_rules: &mut AnalyzerRules,
@@ -630,7 +607,7 @@ fn generate_for_groups(
 
     let file_name = match kind {
         RuleCategory::Lint => &push_directory.join("linter.rs"),
-        RuleCategory::Action => &push_directory.join("assists.rs"),
+        RuleCategory::Action => &push_directory.join("assist.rs"),
         RuleCategory::Syntax | RuleCategory::Transformation => unimplemented!(),
     };
 
@@ -838,6 +815,12 @@ fn generate_group_struct(
                    index_set
                 }
 
+                pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+                   let mut index_set = FxHashSet::default();
+                   #( #rule_disabled_check_line )*
+                   index_set
+                }
+
                 /// Checks if, given a rule name, matches one of the rules contained in this category
                 pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
                     Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
@@ -849,7 +832,6 @@ fn generate_group_struct(
     } else {
         quote! {
             #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
-            #[deserializable(with_validator)]
             #[cfg_attr(feature = "schema", derive(JsonSchema))]
             #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
             /// A list of rules that belong to this group
@@ -858,33 +840,9 @@ fn generate_group_struct(
                 #[serde(skip_serializing_if = "Option::is_none")]
                 pub recommended: Option<bool>,
 
-                /// It enables ALL rules for this group.
-                #[serde(skip_serializing_if = "Option::is_none")]
-                pub all: Option<bool>,
-
                 #( #schema_lines_rules ),*
             }
 
-            impl DeserializableValidator for #group_pascal_ident {
-                fn validate(
-                    &mut self,
-                    _name: &str,
-                    range: TextRange,
-                    diagnostics: &mut Vec<DeserializationDiagnostic>,
-                ) -> bool {
-                    if self.recommended == Some(true) && self.all == Some(true) {
-                        diagnostics
-                            .push(DeserializationDiagnostic::new(markup!(
-                                <Emphasis>"'recommended'"</Emphasis>" and "<Emphasis>"'all'"</Emphasis>" can't be both "<Emphasis>"'true'"</Emphasis>". You should choose only one of them."
-                            ))
-                            .with_range(range)
-                            .with_note(markup!("Biome will fallback to its defaults for this section.")));
-                        return false;
-                    }
-
-                    true
-                }
-            }
 
             impl #group_pascal_ident {
 
@@ -893,16 +851,8 @@ fn generate_group_struct(
                     #( #lines_rule ),*
                 ];
 
-                const RECOMMENDED_RULES: &'static [&'static str] = &[
-                    #( #lines_recommended_rule ),*
-                ];
-
                 const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
                     #( #lines_recommended_rule_as_filter ),*
-                ];
-
-                const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
-                    #( #lines_all_rule_as_filter ),*
                 ];
 
                 /// Retrieves the recommended rules
@@ -915,13 +865,6 @@ fn generate_group_struct(
                     self.recommended.is_none()
                 }
 
-                pub(crate) fn is_all_true(&self) -> bool {
-                    matches!(self.all, Some(true))
-                }
-
-                pub(crate) fn is_all_unset(&self) -> bool {
-                    self.all.is_none()
-                }
 
                 pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
                    let mut index_set = FxHashSet::default();
@@ -940,17 +883,8 @@ fn generate_group_struct(
                     Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
                 }
 
-                /// Checks if, given a rule name, it is marked as recommended
-                pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
-                     Self::RECOMMENDED_RULES.contains(&rule_name)
-                }
-
                 pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
                     Self::RECOMMENDED_RULES_AS_FILTERS
-                }
-
-                pub(crate) fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
-                    Self::ALL_RULES_AS_FILTERS
                 }
 
                 /// Select preset rules
@@ -958,14 +892,11 @@ fn generate_group_struct(
                 // because that will make specific rules cannot be enabled later.
                 pub(crate) fn collect_preset_rules(
                     &self,
-                    parent_is_all: bool,
                     parent_is_recommended: bool,
                     enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
                 ) {
                     // The order of the if-else branches MATTERS!
-                    if self.is_all_true() || self.is_all_unset() && parent_is_all {
-                        enabled_rules.extend(Self::all_rules_as_filters());
-                    } else if self.is_recommended_true() || self.is_recommended_unset() && self.is_all_unset() && parent_is_recommended {
+                    if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
                         enabled_rules.extend(Self::recommended_rules_as_filters());
                     }
                 }

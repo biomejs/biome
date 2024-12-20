@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue-3654.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function testFAIL() {
   try {
     return fn();
@@ -31,5 +32,3 @@ function fn() {
 function log() {}
 
 ```
-
-

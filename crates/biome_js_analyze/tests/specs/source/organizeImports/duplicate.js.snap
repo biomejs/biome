@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: duplicate.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import b from 'b';
 import a from 'a';
 import { A } from 'a';
@@ -19,5 +20,3 @@ import { A } from 'a';
 +import b from 'b';
 
 ```
-
-

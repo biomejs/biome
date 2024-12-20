@@ -161,6 +161,7 @@ define_categories! {
     "lint/nursery/noMissingVarFunction": "https://biomejs.dev/linter/rules/no-missing-var-function",
     "lint/nursery/noNestedTernary": "https://biomejs.dev/linter/rules/no-nested-ternary",
     "lint/nursery/noOctalEscape": "https://biomejs.dev/linter/rules/no-octal-escape",
+    "lint/nursery/noPackagePrivateImports": "https://biomejs.dev/linter/rules/no-package-private-imports",
     "lint/nursery/noProcessEnv": "https://biomejs.dev/linter/rules/no-process-env",
     "lint/nursery/noProcessGlobal": "https://biomejs.dev/linter/rules/no-process-global",
     "lint/nursery/noReactSpecificProps": "https://biomejs.dev/linter/rules/no-react-specific-props",
@@ -171,6 +172,7 @@ define_categories! {
     "lint/nursery/noStaticElementInteractions": "https://biomejs.dev/linter/rules/no-static-element-interactions",
     "lint/nursery/noSubstr": "https://biomejs.dev/linter/rules/no-substr",
     "lint/nursery/noTemplateCurlyInString": "https://biomejs.dev/linter/rules/no-template-curly-in-string",
+    "lint/nursery/noTsIgnore": "https://biomejs.dev/linter/rules/no-ts-ignore",
     "lint/nursery/noUndeclaredDependencies": "https://biomejs.dev/linter/rules/no-undeclared-dependencies",
     "lint/nursery/noUnknownAtRule": "https://biomejs.dev/linter/rules/no-unknown-at-rule",
     "lint/nursery/noUnknownFunction": "https://biomejs.dev/linter/rules/no-unknown-function",
@@ -184,6 +186,7 @@ define_categories! {
     "lint/nursery/noUnknownUnit": "https://biomejs.dev/linter/rules/no-unknown-unit",
     "lint/nursery/noUnmatchableAnbSelector": "https://biomejs.dev/linter/rules/no-unmatchable-anb-selector",
     "lint/nursery/noUnusedFunctionParameters": "https://biomejs.dev/linter/rules/no-unused-function-parameters",
+    "lint/nursery/noUnwantedPolyfillio": "https://biomejs.dev/linter/rules/no-unwanted-polyfillio",
     "lint/nursery/noUselessEscapeInRegex": "https://biomejs.dev/linter/rules/no-useless-escape-in-regex",
     "lint/nursery/noUselessStringRaw": "https://biomejs.dev/linter/rules/no-useless-string-raw",
     "lint/nursery/noUselessUndefined": "https://biomejs.dev/linter/rules/no-useless-undefined",
@@ -338,9 +341,9 @@ define_categories! {
     "lint/suspicious/useNumberToFixedDigitsArgument": "https://biomejs.dev/linter/rules/use-number-to-fixed-digits-argument",
     "lint/suspicious/useValidTypeof": "https://biomejs.dev/linter/rules/use-valid-typeof",
     // end lint rules
-    // start assists rules
-    "assists/source/useSortedKeys": "https://biomejs.dev/linter/actions/use-sorted-keys",
-    // end assists rules
+    // start assist actions
+    "assist/source/useSortedKeys": "https://biomejs.dev/linter/actions/use-sorted-keys",
+    // end assist actions
     ; // start syntax rules
     "syntax/correctness/noTypeOnlyImportAttributes",
     "syntax/correctness/noSuperWithoutExtends",
@@ -356,9 +359,10 @@ define_categories! {
     "stdin",
     "configuration",
     "organizeImports",
-    "assists",
+    "assist",
     "migrate",
     "deserialize",
+    "plugin",
     "project",
     "search",
     "internalError/io",
@@ -387,7 +391,7 @@ define_categories! {
     "suppressions/unknownGroup",
     "suppressions/unknownRule",
     "suppressions/unused",
-    "suppressions/deprecatedSuppressionComment",
+    "suppressions/incorrect",
 
     // Used in tests and examples
     "args/fileNotFound",

@@ -1,6 +1,7 @@
 use crate::{services::control_flow::AnyJsControlFlowRoot, services::semantic::SemanticServices};
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
     AnyJsExportNamedSpecifier, AnyJsIdentifierUsage,
@@ -66,6 +67,7 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("no-use-before-define"),
         ],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

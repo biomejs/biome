@@ -12,7 +12,7 @@ exports[`Biome WebAssembly formatContent > should not format and have diagnostic
       "path": {
         "file": "example.js",
       },
-      "source_code": null,
+      "sourceCode": null,
       "span": [
         11,
         12,
@@ -27,7 +27,7 @@ exports[`Biome WebAssembly formatContent > should not format and have diagnostic
     "severity": "error",
     "source": null,
     "tags": [],
-    "verbose_advices": {
+    "verboseAdvices": {
       "advices": [],
     },
   },

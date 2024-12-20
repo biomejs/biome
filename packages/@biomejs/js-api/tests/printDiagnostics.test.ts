@@ -42,7 +42,7 @@ if(expr()) {
 					],
 					severity: "error",
 					tags: [],
-					verbose_advices: {
+					verboseAdvices: {
 						advices: [],
 					},
 				},
@@ -66,7 +66,7 @@ if(expr()) {
 					],
 					severity: "error",
 					tags: [],
-					verbose_advices: {
+					verboseAdvices: {
 						advices: [],
 					},
 				},

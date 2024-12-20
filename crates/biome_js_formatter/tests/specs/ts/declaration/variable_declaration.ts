@@ -32,16 +32,16 @@ const {
 		bifornCringerMoshedPerplexSawder
 	);
 
-// rome-ignore format: test
+// biome-ignore format: test
 const {
 	id, static: isStatic, method: isMethod,
 	methodId, getId, setId,
 }:
-	// rome-ignore format: test
+	// biome-ignore format: test
 	Map<Function, Map<string | void, {
 		value: UnloadedDescriptor
 	}>> =
-	// rome-ignore format: test
+	// biome-ignore format: test
 	anodyneCondosMalateOverateRetinol.get(
 		bifornCringerMoshedPerplexSawder
 	);
@@ -49,11 +49,11 @@ const {
 //break after operator layout
 const loooooooooooooooooooooooooong1 = "looooooooooooooooooooooooooooooooooooooooooog"!;
 const loooooooooooooooooooooooooong2 = void void "looooooooooooooooooooooooooooooooooooooooooog"!;
-// rome-ignore format: test
+// biome-ignore format: test
 const   loooooooooooooooooooooooooong6    =
 	void    "looooooooooooooooooooooooooooooooooooooooooog"!;
 const loooooooooooooooooooooooooong7    =
-	// rome-ignore format: test
+	// biome-ignore format: test
 	!      "looooooooooooooooooooooooooooooooooooooooooog"!;
 
 //poorly breakable member or call chain (fluid layout layout)

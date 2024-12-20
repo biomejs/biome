@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: missingSuper.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // valid
 class A {
     constructor() {}
@@ -243,5 +244,3 @@ missingSuper.js:99:5 lint/correctness/noUnreachableSuper ━━━━━━━�
   
 
 ```
-
-

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 for (let i = 0; i < 16; ++i) {}
 
 let i = 0;
@@ -29,5 +30,3 @@ while(k < 10) {
 }
 
 ```
-
-

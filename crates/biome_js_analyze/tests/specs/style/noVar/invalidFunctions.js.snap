@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidFunctions.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export function f(x) {
     if(x) {
         // assign 'y'
@@ -43,5 +44,3 @@ invalidFunctions.js:4:9 lint/style/noVar  FIXABLE  ━━━━━━━━━�
   
 
 ```
-
-

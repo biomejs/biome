@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -53,13 +52,13 @@ fn does_handle_included_file_and_disable_formatter() {
     let test2 = Path::new("special/test2.js");
     fs.insert(test2.into(), UNFORMATTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
+                "format",
+                "--write",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -102,13 +101,13 @@ fn does_include_file_with_different_formatting() {
     let test2 = Path::new("special/test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
+                "format",
+                "--write",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -154,13 +153,13 @@ fn does_include_file_with_different_formatting_and_all_of_them() {
     let test2 = Path::new("special/test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
+                "format",
+                "--write",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -206,13 +205,13 @@ fn does_include_file_with_different_overrides() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
+                "format",
+                "--write",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -276,13 +275,13 @@ fn complex_enable_disable_overrides() {
     let unformatted = Path::new("dirty.js");
     fs.insert(unformatted.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
+                "format",
+                "--write",
                 formatted.as_os_str().to_str().unwrap(),
                 unformatted.as_os_str().to_str().unwrap(),
             ]
@@ -328,13 +327,13 @@ fn does_include_file_with_different_languages() {
     let test_css = Path::new("test.css");
     fs.insert(test_css.into(), CSS_UNFORMATTED_QUOTES.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
+                "format",
+                "--write",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
                 test_css.as_os_str().to_str().unwrap(),
@@ -399,13 +398,13 @@ fn does_include_file_with_different_languages_and_files() {
     let css_file = Path::new("test4.css");
     fs.insert(css_file.into(), UNFORMATTED_CSS.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
+                "format",
+                "--write",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
                 json_file.as_os_str().to_str().unwrap(),
@@ -455,13 +454,13 @@ fn does_not_change_formatting_settings() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
+                "format",
+                "--write",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -507,13 +506,13 @@ fn does_not_change_formatting_language_settings() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
+                "format",
+                "--write",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -559,13 +558,13 @@ fn does_not_change_formatting_language_settings_2() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
+                "format",
+                "--write",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -610,8 +609,8 @@ fn does_not_conceal_previous_overrides() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -656,8 +655,8 @@ fn takes_last_formatter_enabled_into_account() {
     let test = Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["format", test.as_os_str().to_str().unwrap()].as_slice()),
     );
@@ -708,8 +707,8 @@ fn does_not_override_well_known_special_files_when_config_override_is_present() 
 }"#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -783,8 +782,8 @@ fn allow_trailing_commas_on_well_known_files() {
 }"#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -839,8 +838,8 @@ fn disallow_comments_on_well_known_files() {
 }"#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["check", tsconfig.as_os_str().to_str().unwrap()].as_slice()),
     );

@@ -1,8 +1,5 @@
 mod formatter;
 
-use std::str::FromStr;
-
-use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
 pub use formatter::{
@@ -29,45 +26,56 @@ pub struct JavascriptConfiguration {
     pub assists: JavascriptAssists,
 
     /// Parsing options
-    #[partial(type, bpaf(external(partial_javascript_parser), optional))]
+    #[partial(type, bpaf(pure(Default::default()), optional))]
     pub parser: JavascriptParser,
 
     /// A list of global bindings that should be ignored by the analyzers
     ///
     /// If defined here, they should not emit diagnostics.
-    #[partial(bpaf(hide))]
-    pub globals: StringSet,
+    #[partial(bpaf(pure(Default::default()), hide))]
+    pub globals: rustc_hash::FxHashSet<Box<str>>,
 
     /// Indicates the type of runtime or transformation used for interpreting JSX.
-    #[partial(bpaf(hide))]
+    #[partial(bpaf(pure(Default::default()), hide))]
     pub jsx_runtime: JsxRuntime,
 
-    #[partial(type, bpaf(external(partial_javascript_organize_imports), optional))]
+    #[partial(type, bpaf(pure(Default::default()), optional))]
     pub organize_imports: JavascriptOrganizeImports,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
+#[partial(derive(Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(default, deny_unknown_fields))]
 pub struct JavascriptOrganizeImports {}
 
 /// Options that changes how the JavaScript parser behaves
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[partial(derive(Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct JavascriptParser {
     /// It enables the experimental and unsafe parsing of parameter decorators
     ///
     /// These decorators belong to an old proposal, and they are subject to change.
-    #[partial(bpaf(hide))]
     pub unsafe_parameter_decorators_enabled: bool,
 
     /// Enables parsing of Grit metavariables.
     /// Defaults to `false`.
-    #[partial(bpaf(hide))]
     pub grit_metavariables: bool,
+
+    /// When enabled, files like `.js`/`.ts` can contain JSX syntax. Defaults to `true`.
+    pub jsx_everywhere: bool,
+}
+
+impl Default for JavascriptParser {
+    fn default() -> Self {
+        Self {
+            jsx_everywhere: true,
+            grit_metavariables: false,
+            unsafe_parameter_decorators_enabled: false,
+        }
+    }
 }
 
 /// Indicates the type of runtime or transformation used for interpreting JSX.
@@ -92,17 +100,6 @@ pub enum JsxRuntime {
     /// the old vs. new JSX runtime, please see:
     /// <https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html>
     ReactClassic,
-}
-
-impl FromStr for JsxRuntime {
-    type Err = String;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "transparent" => Ok(Self::Transparent),
-            "react-classic" | "reactClassic" => Ok(Self::ReactClassic),
-            _ => Err("Unexpected value".to_string()),
-        }
-    }
 }
 
 /// Linter options specific to the JavaScript linter

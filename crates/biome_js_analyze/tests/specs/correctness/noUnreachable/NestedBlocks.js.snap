@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: NestedBlocks.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function Outer() {
     label: {
         function Inner() {
@@ -15,5 +16,3 @@ function Outer() {
 }
 
 ```
-
-

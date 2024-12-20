@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidModule.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var x = 1;
 export const y = x;
 ```
@@ -30,5 +31,3 @@ invalidModule.js:1:1 lint/style/noVar  FIXABLE  ━━━━━━━━━━�
   
 
 ```
-
-

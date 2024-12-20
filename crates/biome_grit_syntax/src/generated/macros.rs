@@ -198,11 +198,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritPatternContains::new_unchecked(node) };
                     $body
                 }
-                $crate::GritSyntaxKind::GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE => {
-                    let $pattern =
-                        unsafe { $crate::GritPatternContainsUntilClause::new_unchecked(node) };
-                    $body
-                }
                 $crate::GritSyntaxKind::GRIT_PATTERN_DEFINITION => {
                     let $pattern = unsafe { $crate::GritPatternDefinition::new_unchecked(node) };
                     $body
@@ -242,6 +237,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::GritSyntaxKind::GRIT_PATTERN_OR_ELSE => {
                     let $pattern = unsafe { $crate::GritPatternOrElse::new_unchecked(node) };
+                    $body
+                }
+                $crate::GritSyntaxKind::GRIT_PATTERN_UNTIL_CLAUSE => {
+                    let $pattern = unsafe { $crate::GritPatternUntilClause::new_unchecked(node) };
                     $body
                 }
                 $crate::GritSyntaxKind::GRIT_PATTERN_WHERE => {

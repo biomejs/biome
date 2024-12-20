@@ -75,7 +75,7 @@ impl Rule for UseGoogleFontPreconnect {
         if href.starts_with("https://fonts.gstatic.com")
             && !matches!(rel.as_deref(), Some("preconnect"))
         {
-            return Some(node.syntax().text_range());
+            return Some(node.syntax().text_trimmed_range());
         }
 
         None

@@ -23,6 +23,10 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+Scanned project folder in <TIME>.
+```
+
+```block
 check.txt files/missingHandler  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Biome could not determine the language for the file extension txt

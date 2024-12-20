@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validObjectSetter.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export default {
     set p(x) {},
 
@@ -22,5 +23,3 @@ export default {
     set "@"(x) {},
 }
 ```
-
-

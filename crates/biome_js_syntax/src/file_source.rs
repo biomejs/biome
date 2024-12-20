@@ -8,6 +8,7 @@ use std::{borrow::Cow, ffi::OsStr, path::Path};
 /// Defaults to the latest stable ECMAScript standard.
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum LanguageVersion {
     ES2022,
 
@@ -34,6 +35,7 @@ impl Default for LanguageVersion {
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 pub enum ModuleKind {
     /// An ECMAScript [Script](https://tc39.es/ecma262/multipage/ecmascript-language-scripts-and-modules.html#sec-scripts)
     Script,
@@ -56,6 +58,7 @@ impl ModuleKind {
 #[derive(
     Debug, Copy, Clone, Eq, PartialEq, Hash, Default, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 pub enum LanguageVariant {
     /// Standard JavaScript or TypeScript syntax without any extensions
     #[default]
@@ -84,6 +87,7 @@ impl LanguageVariant {
 #[derive(
     Debug, Copy, Clone, Eq, PartialEq, Default, Hash, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 pub enum Language {
     #[default]
     JavaScript,
@@ -218,6 +222,10 @@ impl JsFileSource {
         self.module_kind = kind;
     }
 
+    pub fn set_variant(&mut self, variant: LanguageVariant) {
+        self.variant = variant;
+    }
+
     pub const fn with_version(mut self, version: LanguageVersion) -> Self {
         self.version = version;
         self
@@ -306,7 +314,8 @@ impl JsFileSource {
     pub fn try_from_extension(extension: &OsStr) -> Result<Self, FileSourceError> {
         // We assume the file extension is normalized to lowercase
         match extension.as_encoded_bytes() {
-            b"js" | b"mjs" | b"jsx" => Ok(Self::jsx()),
+            b"js" | b"mjs" => Ok(Self::js_module()),
+            b"jsx" => Ok(Self::jsx()),
             b"cjs" => Ok(Self::js_script()),
             b"ts" => Ok(Self::ts()),
             b"mts" | b"cts" => Ok(Self::ts_restricted()),

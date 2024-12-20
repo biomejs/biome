@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-non-ascii-café.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 
 ```
 
@@ -18,5 +19,3 @@ invalid-non-ascii-café.js lint/style/useFilenamingConvention ━━━━━━
   
 
 ```
-
-

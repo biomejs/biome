@@ -127,6 +127,8 @@
 //! ```
 //!
 
+use biome_deserialize::{DeserializableValue, DeserializationContext};
+
 /// A Biome glob pattern.
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -228,11 +230,11 @@ impl TryFrom<String> for Glob {
 #[cfg(feature = "biome_deserialize")]
 impl biome_deserialize::Deserializable for Glob {
     fn deserialize(
-        value: &impl biome_deserialize::DeserializableValue,
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let glob = String::deserialize(value, name, diagnostics)?;
+        let glob = String::deserialize(ctx, value, name)?;
         match glob.parse() {
             Ok(glob) => Some(glob),
             Err(error) => {
@@ -243,7 +245,7 @@ impl biome_deserialize::Deserializable for Glob {
                         1u32.into(),
                     )
                 });
-                diagnostics.push(
+                ctx.report(
                     biome_deserialize::DeserializationDiagnostic::new(format_args!("{error}"))
                         .with_range(range),
                 );

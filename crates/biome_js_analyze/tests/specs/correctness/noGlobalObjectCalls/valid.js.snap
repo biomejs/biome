@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var x = Math;
 var x = Math.random();
 var x = Math.PI;
@@ -51,5 +52,3 @@ if (foo) { const Intl = 1; Intl(); }
 if (foo) { const Intl = 1; new Intl(); }
 
 ```
-
-

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 123 == NaN;
 123 === NaN;
 NaN === "abc";
@@ -1337,5 +1338,3 @@ invalid.js:62:27 lint/correctness/useIsNan ━━━━━━━━━━━━�
   
 
 ```
-
-

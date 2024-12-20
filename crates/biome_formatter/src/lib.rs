@@ -58,7 +58,8 @@ use crate::trivia::{format_skipped_token_trivia, format_trimmed_token};
 pub use arguments::{Argument, Arguments};
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, TextNumber,
+    Deserializable, DeserializableValue, DeserializationContext, DeserializationDiagnostic,
+    TextNumber,
 };
 use biome_deserialize_macros::Deserializable;
 use biome_deserialize_macros::Merge;
@@ -225,15 +226,15 @@ impl Default for IndentWidth {
 
 impl Deserializable for IndentWidth {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -326,15 +327,15 @@ impl Default for LineWidth {
 
 impl Deserializable for LineWidth {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -526,8 +527,8 @@ impl FromStr for QuoteStyle {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "double" | "Double" => Ok(Self::Double),
-            "single" | "Single" => Ok(Self::Single),
+            "double" => Ok(Self::Double),
+            "single" => Ok(Self::Single),
             // TODO: replace this error with a diagnostic
             _ => Err("Value not supported for QuoteStyle"),
         }
@@ -626,8 +627,8 @@ impl FromStr for AttributePosition {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "multiline" | "Multiline" => Ok(Self::Multiline),
-            "auto" | "Auto" => Ok(Self::Auto),
+            "multiline" => Ok(Self::Multiline),
+            "auto" => Ok(Self::Auto),
             _ => Err("Value not supported for attribute_position. Supported values are 'auto' and 'multiline'."),
         }
     }
@@ -836,7 +837,8 @@ pub type PrintResult<T> = Result<T, PrintError>;
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
 )]
 pub struct Printed {
     code: String,
@@ -1364,72 +1366,71 @@ pub fn format_node<L: FormatLanguage>(
     root: &SyntaxNode<L::SyntaxLanguage>,
     language: L,
 ) -> FormatResult<Formatted<L::Context>> {
-    tracing::trace_span!("format_node").in_scope(move || {
-        let (root, source_map) = match language.transform(&root.clone()) {
-            Some((transformed, source_map)) => {
-                // we don't need to insert the node back if it has the same offset
-                if &transformed == root {
-                    (transformed, Some(source_map))
-                } else {
-                    match root
-                        .ancestors()
-                        // ancestors() always returns self as the first element of the iterator.
-                        .skip(1)
-                        .last()
-                    {
-                        // current root node is the topmost node we don't need to insert the transformed node back
-                        None => (transformed, Some(source_map)),
-                        Some(top_root) => {
-                            // we have to return transformed node back into subtree
-                            let transformed_range = transformed.text_range();
-                            let root_range = root.text_range();
+    let _ = tracing::trace_span!("format_node").entered();
+    let (root, source_map) = match language.transform(&root.clone()) {
+        Some((transformed, source_map)) => {
+            // we don't need to insert the node back if it has the same offset
+            if &transformed == root {
+                (transformed, Some(source_map))
+            } else {
+                match root
+                    .ancestors()
+                    // ancestors() always returns self as the first element of the iterator.
+                    .skip(1)
+                    .last()
+                {
+                    // current root node is the topmost node we don't need to insert the transformed node back
+                    None => (transformed, Some(source_map)),
+                    Some(top_root) => {
+                        // we have to return transformed node back into subtree
+                        let transformed_range = transformed.text_range_with_trivia();
+                        let root_range = root.text_range_with_trivia();
 
-                            let transformed_root = top_root
-                                .replace_child(root.clone().into(), transformed.into())
-                                // SAFETY: Calling `unwrap` is safe because we know that `root` is part of the `top_root` subtree.
-                                .unwrap();
-                            let transformed = transformed_root.covering_element(TextRange::new(
-                                root_range.start(),
-                                root_range.start() + transformed_range.len(),
-                            ));
+                        let transformed_root = top_root
+                            .replace_child(root.clone().into(), transformed.into())
+                            // SAFETY: Calling `unwrap` is safe because we know that `root` is part of the `top_root` subtree.
+                            .unwrap();
+                        let transformed = transformed_root.covering_element(TextRange::new(
+                            root_range.start(),
+                            root_range.start() + transformed_range.len(),
+                        ));
 
-                            let node = match transformed {
-                                NodeOrToken::Node(node) => node,
-                                NodeOrToken::Token(token) => {
-                                    // if we get a token we need to get the parent node
-                                    token.parent().unwrap_or(transformed_root)
-                                }
-                            };
+                        let node = match transformed {
+                            NodeOrToken::Node(node) => node,
+                            NodeOrToken::Token(token) => {
+                                // if we get a token we need to get the parent node
+                                token.parent().unwrap_or(transformed_root)
+                            }
+                        };
 
-                            (node, Some(source_map))
-                        }
+                        (node, Some(source_map))
                     }
                 }
             }
-            None => (root.clone(), None),
-        };
+        }
+        None => (root.clone(), None),
+    };
 
-        let context = language.create_context(&root, source_map);
-        let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
+    let context = language.create_context(&root, source_map);
+    let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
 
-        let mut state = FormatState::new(context);
-        let mut buffer = VecBuffer::new(&mut state);
+    let mut state = FormatState::new(context);
+    let mut buffer = VecBuffer::new(&mut state);
 
-        write!(buffer, [format_node])?;
+    write!(buffer, [format_node])?;
 
-        let mut document = Document::from(buffer.into_vec());
-        document.propagate_expand();
+    let mut document = Document::from(buffer.into_vec());
+    document.propagate_expand();
 
-        state.assert_formatted_all_tokens(&root);
+    state.assert_formatted_all_tokens(&root);
 
-        let context = state.into_context();
-        let comments = context.comments();
+    let context = state.into_context();
+    let comments = context.comments();
 
-        comments.assert_checked_all_suppressions(&root);
-        comments.assert_formatted_all_comments();
+    comments.assert_checked_all_suppressions(&root);
+    comments.assert_formatted_all_comments();
 
-        Ok(Formatted::new(document, context))
-    })
+    Ok(Formatted::new(document, context))
 }
 
 /// Returns the [TextRange] for this [SyntaxElement] with the leading and
@@ -1495,7 +1496,7 @@ pub fn format_range<Language: FormatLanguage>(
         ));
     }
 
-    let root_range = root.text_range();
+    let root_range = root.text_range_with_trivia();
     if range.start() < root_range.start() || range.end() > root_range.end() {
         return Err(FormatError::RangeError {
             input: range,
@@ -1591,18 +1592,20 @@ pub fn format_range<Language: FormatLanguage>(
         // from the ancestors of the start and end nodes (this is roughly the
         // same algorithm as the findSiblingAncestors function in Prettier, see
         // https://github.com/prettier/prettier/blob/cae195187f524dd74e60849e0a4392654423415b/src/main/range-util.js#L36)
-        let start_node_start = start_node.text_range().start();
-        let end_node_end = end_node.text_range().end();
+        let start_node_start = start_node.text_range_with_trivia().start();
+        let end_node_end = end_node.text_range_with_trivia().end();
 
         let result_end_node = end_node
             .ancestors()
-            .take_while(|end_parent| end_parent.text_range().start() >= start_node_start)
+            .take_while(|end_parent| {
+                end_parent.text_range_with_trivia().start() >= start_node_start
+            })
             .last()
             .unwrap_or(end_node);
 
         let result_start_node = start_node
             .ancestors()
-            .take_while(|start_parent| start_parent.text_range().end() <= end_node_end)
+            .take_while(|start_parent| start_parent.text_range_with_trivia().end() <= end_node_end)
             .last()
             .unwrap_or(start_node);
 
@@ -1708,12 +1711,15 @@ pub fn format_range<Language: FormatLanguage>(
     // the start/end marker default to the start/end of the input
     let (start_source, start_dest) = match range_start {
         Some(start_marker) => (start_marker.source, start_marker.dest),
-        None => (common_root.text_range().start(), TextSize::from(0)),
+        None => (
+            common_root.text_range_with_trivia().start(),
+            TextSize::from(0),
+        ),
     };
     let (end_source, end_dest) = match range_end {
         Some(end_marker) => (end_marker.source, end_marker.dest),
         None => (
-            common_root.text_range().end(),
+            common_root.text_range_with_trivia().end(),
             TextSize::try_from(printed.as_code().len()).expect("code length out of bounds"),
         ),
     };
@@ -1801,7 +1807,7 @@ pub fn format_sub_tree<L: FormatLanguage>(
 
     Ok(Printed::new(
         printed.into_code(),
-        Some(root.text_range()),
+        Some(root.text_range_with_trivia()),
         sourcemap,
         verbatim_ranges,
     ))

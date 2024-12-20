@@ -31,10 +31,10 @@ pub(crate) struct CIOrganizeImportsDiffDiagnostic {
 }
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
-    category = "assists",
-    message = "Applied assists differs from the output"
+    category = "assist",
+    message = "Applied actions differs from the output"
 )]
-pub(crate) struct CIAssistsDiffDiagnostic {
+pub(crate) struct CIAssistDiffDiagnostic {
     #[location(resource)]
     pub(crate) file_name: String,
     #[advice]
@@ -69,11 +69,11 @@ pub(crate) struct OrganizeImportsDiffDiagnostic {
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
-    category = "assists",
+    category = "assist",
     severity = Error,
-    message = "Not all assists were applied:"
+    message = "Not all actions were applied:"
 )]
-pub(crate) struct AssistsDiffDiagnostic {
+pub(crate) struct AssistDiffDiagnostic {
     #[location(resource)]
     pub(crate) file_name: String,
     #[advice]

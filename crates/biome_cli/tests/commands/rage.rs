@@ -2,8 +2,7 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, CliSnapshot, SnapshotPayload};
 use biome_cli::CliDiagnostic;
 use biome_console::{BufferConsole, Console};
-use biome_fs::{FileSystem, MemoryFileSystem};
-use biome_service::DynRef;
+use biome_fs::MemoryFileSystem;
 use bpaf::Args;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard};
@@ -11,14 +10,10 @@ use std::{env, fs};
 
 #[test]
 fn rage_help() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("rage"), "--help"].as_slice()),
-    );
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["rage", "--help"].as_slice()));
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -33,14 +28,10 @@ fn rage_help() {
 
 #[test]
 fn ok() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let result = run_rage(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("rage")].as_slice()),
-    );
+    let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -66,11 +57,7 @@ fn with_configuration() {
 }"#,
     );
 
-    let result = run_rage(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("rage")].as_slice()),
-    );
+    let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -97,11 +84,7 @@ fn with_jsonc_configuration() {
 }"#,
     );
 
-    let result = run_rage(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("rage")].as_slice()),
-    );
+    let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -127,11 +110,7 @@ fn with_malformed_configuration() {
 }"#,
     );
 
-    let result = run_rage(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("rage")].as_slice()),
-    );
+    let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -146,10 +125,10 @@ fn with_malformed_configuration() {
 
 #[test]
 fn with_server_logs() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let result = {
+    let (fs, result) = {
         let log_dir = TestLogDir::new("biome-test-logs");
         fs::create_dir_all(&log_dir.path).expect("Failed to create test log directory");
 
@@ -195,9 +174,9 @@ Not most recent log file
         .expect("Failed to write configuration file");
 
         run_cli(
-            DynRef::Borrowed(&mut fs),
+            fs,
             &mut console,
-            Args::from([("rage"), "--daemon-logs"].as_slice()),
+            Args::from(["rage", "--daemon-logs"].as_slice()),
         )
     };
 
@@ -262,10 +241,10 @@ fn with_formatter_configuration() {
 }"#,
     );
 
-    let result = run_rage(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_rage(
+        fs,
         &mut console,
-        Args::from([("rage"), "--formatter"].as_slice()),
+        Args::from(["rage", "--formatter"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -310,10 +289,10 @@ fn with_linter_configuration() {
 }"#,
     );
 
-    let result = run_rage(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_rage(
+        fs,
         &mut console,
-        Args::from([("rage"), "--linter"].as_slice()),
+        Args::from(["rage", "--linter"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -328,11 +307,11 @@ fn with_linter_configuration() {
 }
 
 /// Runs the `rage` command mocking out the log directory.
-fn run_rage<'app>(
-    fs: DynRef<'app, dyn FileSystem>,
-    console: &'app mut dyn Console,
+fn run_rage(
+    fs: MemoryFileSystem,
+    console: &mut dyn Console,
     args: Args,
-) -> Result<(), CliDiagnostic> {
+) -> (MemoryFileSystem, Result<(), CliDiagnostic>) {
     let _test_dir = TestLogDir::new("biome-rage-test");
     run_cli(fs, console, args)
 }
@@ -349,8 +328,8 @@ fn assert_rage_snapshot(payload: SnapshotPayload<'_>) {
             .lines()
             .map(|line| match line.trim_start().split_once(':') {
                 Some((
-                    "CPU Architecture" | "OS" | "NO_COLOR" | "TERM" | "BIOME_LOG_DIR"
-                    | "BIOME_LOG_PATH" | "Color support",
+                    "CPU Architecture" | "OS" | "NO_COLOR" | "TERM" | "BIOME_LOG_PATH"
+                    | "Color support",
                     value,
                 )) => line.replace(value.trim_start(), "**PLACEHOLDER**"),
                 _ => line.to_string(),

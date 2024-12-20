@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -20,7 +21,6 @@ expression: content
 {
   "linter": {
     "rules": {
-      "all": false,
       "suspicious": {
         "noDebugger": "warn"
       }

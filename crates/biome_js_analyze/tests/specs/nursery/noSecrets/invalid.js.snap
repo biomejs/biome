@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 const JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
 const JWT_BASE64 = "ZXlKaGJHY2lPaUpJVXpJMU5pSXNJbXRwWkNJNkltRmtaVzUwYVdGc0lpd2laR1ZtYjNkellUWXpJaXdpYVdGMElqb3hPREF3T0RNeE9UZzFPVGs1TkN3aWZRPT0"
 const slackToken = "xoxb-not-a-real-token-this-will-not-work";

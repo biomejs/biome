@@ -14,7 +14,9 @@ use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::{JsonFileSource, JsonRoot};
 use biome_migrate::{migrate_configuration, ControlFlow};
 use biome_rowan::{AstNode, NodeCache};
-use biome_service::workspace::{ChangeFileParams, FixAction, FormatFileParams, OpenFileParams};
+use biome_service::workspace::{
+    ChangeFileParams, FileContent, FixAction, FormatFileParams, OpenFileParams,
+};
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::PathBuf;
@@ -49,9 +51,9 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         sub_command,
     } = migrate_payload;
     let mut cache = NodeCache::default();
-    let fs = &session.app.fs;
     let console = session.app.console;
     let workspace = session.app.workspace;
+    let fs = workspace.fs();
 
     let open_options = if write {
         OpenOptions::default().read(true).write(true)
@@ -66,9 +68,10 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     let biome_path = BiomePath::new(configuration_file_path.as_path());
     workspace.open_file(OpenFileParams {
         path: biome_path.clone(),
-        content: biome_config_content.to_string(),
+        content: FileContent::FromClient(biome_config_content.to_string()),
         version: 0,
         document_file_source: Some(JsonFileSource::json().into()),
+        persist_node_cache: false,
     })?;
     let parsed = parse_json_with_cache(
         &biome_config_content,

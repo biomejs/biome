@@ -150,11 +150,10 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     let mut output = Cow::Borrowed(input);
 
     // There are some logs that print the timing, and we can't snapshot that message
-    // otherwise at each run we invalid the previous snapshot.
+    // otherwise at each run we invalidate the previous snapshot.
     //
     // This is a workaround, and it might not work for all cases.
-    let the_match = TIME_REGEX.find(output.as_ref()).map(|f| f.start()..f.end());
-    if let Some(found) = the_match {
+    while let Some(found) = TIME_REGEX.find(&output).map(|f| f.start()..f.end()) {
         output.to_mut().replace_range(found, " <TIME>.");
     }
 
@@ -339,18 +338,16 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
             }
         }
 
-        let files: Vec<_> = fs
-            .files()
+        cli_snapshot.files = fs
+            .files
+            .read()
+            .iter()
             .map(|(file, entry)| {
                 let content = entry.lock();
                 let content = std::str::from_utf8(content.as_slice()).unwrap();
                 (file.to_str().unwrap().to_string(), String::from(content))
             })
             .collect();
-
-        for (file, content) in files {
-            cli_snapshot.files.insert(file, content);
-        }
 
         let in_buffer = &console.in_buffer;
         for (index, message) in in_buffer.iter().enumerate() {

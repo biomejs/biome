@@ -1,6 +1,7 @@
 use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     inner_string_text, AnyJsArrayAssignmentPatternElement, AnyJsArrayElement, AnyJsAssignment,
     AnyJsAssignmentPattern, AnyJsExpression, AnyJsLiteralExpression, AnyJsName,
@@ -72,6 +73,7 @@ declare_lint_rule! {
             RuleSource::Clippy("self_assignment"),
         ],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

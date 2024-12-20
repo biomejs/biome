@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsVariableStatement.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function JsVariableStatement1() {
     return;
     var variable;
@@ -131,5 +132,3 @@ JsVariableStatement.js:28:5 lint/correctness/noUnreachable ━━━━━━━
   
 
 ```
-
-

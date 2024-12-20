@@ -15,12 +15,10 @@ use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
-use biome_service::{DynRef, Workspace, WorkspaceError};
+use biome_service::{Workspace, WorkspaceError};
 use std::ffi::OsString;
 
 pub(crate) struct LintCommandPayload {
-    pub(crate) apply: bool,
-    pub(crate) apply_unsafe: bool,
     pub(crate) write: bool,
     pub(crate) fix: bool,
     pub(crate) unsafe_: bool,
@@ -48,7 +46,7 @@ impl CommandRunner for LintCommandPayload {
     fn merge_configuration(
         &mut self,
         loaded_configuration: LoadedConfiguration,
-        _fs: &DynRef<'_, dyn FileSystem>,
+        _fs: &dyn FileSystem,
         _console: &mut dyn Console,
     ) -> Result<PartialConfiguration, WorkspaceError> {
         let LoadedConfiguration {
@@ -102,7 +100,7 @@ impl CommandRunner for LintCommandPayload {
 
     fn get_files_to_process(
         &self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         configuration: &PartialConfiguration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
         let paths = get_files_to_process_with_cli_options(
@@ -131,18 +129,13 @@ impl CommandRunner for LintCommandPayload {
         console: &mut dyn Console,
         _workspace: &dyn Workspace,
     ) -> Result<Execution, CliDiagnostic> {
-        let fix_file_mode = determine_fix_file_mode(
-            FixFileModeOptions {
-                apply: self.apply,
-                apply_unsafe: self.apply_unsafe,
-                write: self.write,
-                fix: self.fix,
-                unsafe_: self.unsafe_,
-                suppress: self.suppress,
-                suppression_reason: self.suppression_reason.clone(),
-            },
-            console,
-        )?;
+        let fix_file_mode = determine_fix_file_mode(FixFileModeOptions {
+            write: self.write,
+            fix: self.fix,
+            unsafe_: self.unsafe_,
+            suppress: self.suppress,
+            suppression_reason: self.suppression_reason.clone(),
+        })?;
         Ok(Execution::new(TraversalMode::Lint {
             fix_file_mode,
             stdin: self.get_stdin(console)?,

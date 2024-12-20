@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsRegexLiteralExpression, JsSyntaxKind, JsSyntaxToken, TextRange, TextSize};
 use biome_rowan::BatchMutationExt;
 use std::{fmt::Write, ops::Range};
@@ -50,6 +51,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-regex-spaces")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
 }

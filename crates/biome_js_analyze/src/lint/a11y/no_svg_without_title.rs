@@ -1,5 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxAttribute, JsxChildList, JsxElement};
 use biome_rowan::{AstNode, AstNodeList};
 use biome_string_case::StrLikeExtension;
@@ -102,6 +103,7 @@ declare_lint_rule! {
         name: "noSvgWithoutTitle",
         language: "jsx",
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

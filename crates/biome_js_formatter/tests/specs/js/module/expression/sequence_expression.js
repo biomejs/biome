@@ -22,7 +22,7 @@ const object ={
 }
 
 a,
-	// rome-ignore format: Test suppression comments
+	// biome-ignore format: Test suppression comments
 	[
 		0,    1, 2
 	], d;

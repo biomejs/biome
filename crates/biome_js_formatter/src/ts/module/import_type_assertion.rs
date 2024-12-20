@@ -8,11 +8,11 @@ pub(crate) struct FormatTsImportTypeAssertion;
 impl FormatNodeRule<TsImportTypeAssertion> for FormatTsImportTypeAssertion {
     fn fmt_fields(&self, node: &TsImportTypeAssertion, f: &mut JsFormatter) -> FormatResult<()> {
         let TsImportTypeAssertionFields {
-            assertion_kind,
             colon_token,
             l_curly_token,
             assertions,
             r_curly_token,
+            with_token,
         } = node.as_fields();
 
         if assertions.is_empty() {
@@ -20,7 +20,7 @@ impl FormatNodeRule<TsImportTypeAssertion> for FormatTsImportTypeAssertion {
             write!(
                 f,
                 [
-                    format_removed(&assertion_kind?),
+                    format_removed(&with_token?),
                     format_removed(&colon_token?),
                     format_removed(&l_curly_token?),
                     has_dangling.then_some(space()),
@@ -34,7 +34,7 @@ impl FormatNodeRule<TsImportTypeAssertion> for FormatTsImportTypeAssertion {
                 f,
                 [
                     space(),
-                    assertion_kind.format(),
+                    with_token.format(),
                     colon_token.format(),
                     space(),
                     l_curly_token.format(),

@@ -4,6 +4,7 @@ use biome_analyze::{
     RuleDiagnostic, RuleSource, Visitor,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, JsLanguage, JsSyntaxKind, JsxAttribute};
 use biome_rowan::{AstNode, BatchMutationExt, WalkEvent};
 use biome_string_case::StrOnlyExtension;
@@ -76,6 +77,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("no-autofocus")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }

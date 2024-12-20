@@ -32,12 +32,12 @@ biome_json_analyze       = { workspace = true }
 biome_json_formatter     = { workspace = true, features = ["serde"] }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
+biome_project            = { workspace = true }
 biome_rowan              = { workspace = true, features = ["serde"] }
 bpaf                     = { workspace = true }
-indexmap                 = { workspace = true, features = ["serde"] }
 oxc_resolver             = { workspace = true }
 rustc-hash               = { workspace = true }
-schemars                 = { workspace = true, features = ["indexmap1"], optional = true }
+schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 serde_ini                = { workspace = true }
 serde_json               = { workspace = true, features = ["raw_value"] }
@@ -52,10 +52,12 @@ schema = [
   "biome_css_syntax/schema",
   "biome_graphql_syntax/schema",
   "biome_html_syntax/schema",
+  "biome_analyze/serde",
 ]
 
 [dev-dependencies]
-insta = { workspace = true }
+insta        = { workspace = true }
+tests_macros = { workspace = true }
 
 [lints]
 workspace = true

@@ -1,0 +1,9 @@
+language css;
+
+`color: $color` where {
+    not $color == lowercase($color),
+    register_diagnostic(
+        span = $color,
+        message = "Prefer lowercase colors"
+    )
+}
