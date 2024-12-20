@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_4208.jsx
+snapshot_kind: text
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<A b=<></> />
+```
