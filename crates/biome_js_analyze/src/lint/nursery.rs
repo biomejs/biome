@@ -17,6 +17,7 @@ pub mod no_irregular_whitespace;
 pub mod no_nested_ternary;
 pub mod no_octal_escape;
 pub mod no_process_env;
+pub mod no_process_global;
 pub mod no_restricted_imports;
 pub mod no_restricted_types;
 pub mod no_secrets;
@@ -39,6 +40,7 @@ pub mod use_google_font_display;
 pub mod use_google_font_preconnect;
 pub mod use_guard_for_in;
 pub mod use_import_restrictions;
+pub mod use_parse_int_radix;
 pub mod use_sorted_classes;
 pub mod use_strict_mode;
 pub mod use_trim_start_end;
@@ -63,6 +65,7 @@ declare_lint_group! {
             self :: no_nested_ternary :: NoNestedTernary ,
             self :: no_octal_escape :: NoOctalEscape ,
             self :: no_process_env :: NoProcessEnv ,
+            self :: no_process_global :: NoProcessGlobal ,
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_restricted_types :: NoRestrictedTypes ,
             self :: no_secrets :: NoSecrets ,
@@ -85,6 +88,7 @@ declare_lint_group! {
             self :: use_google_font_preconnect :: UseGoogleFontPreconnect ,
             self :: use_guard_for_in :: UseGuardForIn ,
             self :: use_import_restrictions :: UseImportRestrictions ,
+            self :: use_parse_int_radix :: UseParseIntRadix ,
             self :: use_sorted_classes :: UseSortedClasses ,
             self :: use_strict_mode :: UseStrictMode ,
             self :: use_trim_start_end :: UseTrimStartEnd ,

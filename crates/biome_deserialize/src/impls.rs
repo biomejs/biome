@@ -534,7 +534,11 @@ impl<T: Deserializable> Deserializable for Option<T> {
         name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        T::deserialize(value, name, diagnostics).map(Option::Some)
+        if value.visitable_type() == Some(crate::DeserializableType::Null) {
+            None
+        } else {
+            T::deserialize(value, name, diagnostics).map(Option::Some)
+        }
     }
 }
 

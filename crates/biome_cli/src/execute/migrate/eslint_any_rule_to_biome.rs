@@ -443,6 +443,14 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "deno-lint/no-process-global" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_process_global.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "dot-notation" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.use_literal_keys.get_or_insert(Default::default());
@@ -1385,6 +1393,14 @@ pub(crate) fn migrate_eslint_any_rule(
         "prefer-template" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.use_template.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "radix" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_parse_int_radix.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "react-hooks/exhaustive-deps" => {

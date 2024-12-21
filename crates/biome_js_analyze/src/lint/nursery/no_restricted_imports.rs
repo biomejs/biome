@@ -24,7 +24,22 @@ declare_lint_rule! {
     /// Disallow specified modules when loaded by import or require.
     ///
     /// ## Examples
+    /// 
+    /// ```json
+    /// {
+    ///     "noRestrictedImports": {
+    ///         "options": {
+    ///             "paths": {
+    ///                 "lodash": "Using lodash is not encouraged",
+    ///                 "underscore": "Using underscore is not encouraged"
+    ///             }
+    ///         }
+    ///     }
+    /// }
+    /// ```
     ///
+    /// **Since**: `v2`
+    /// 
     /// ```json,options
     /// {
     ///     "options": {
@@ -145,6 +160,21 @@ declare_lint_rule! {
     /// ```
     ///
     /// ## Options
+    /// 
+    /// ```json
+    /// {
+    ///     "noRestrictedImports": {
+    ///         "options": {
+    ///             "paths": {
+    ///                 "lodash": "Using lodash is not encouraged",
+    ///                 "underscore": "Using underscore is not encouraged"
+    ///             }
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    /// 
+    /// **Since**: `v2`
     ///
     /// Use the options to specify the import paths and/or specific import names within them that you want to restrict in your source code.
     ///
