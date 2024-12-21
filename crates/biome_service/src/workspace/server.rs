@@ -20,6 +20,7 @@ use crate::workspace::{
     OrganizeImportsResult, RageEntry, RageParams, RageResult, ServerInfo,
 };
 use crate::{file_handlers::Features, Workspace, WorkspaceError};
+use append_only_vec::AppendOnlyVec;
 use biome_diagnostics::{
     serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
 };
@@ -32,7 +33,6 @@ use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
 use biome_project::{NodeJsProject, PackageJson, PackageType, Project};
 use biome_rowan::NodeCache;
-use indexmap::IndexSet;
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::ffi::OsStr;
@@ -56,7 +56,7 @@ pub(super) struct WorkspaceServer {
     current_project_path: RwLock<Option<BiomePath>>,
 
     /// Stores the document sources used across the workspace
-    file_sources: RwLock<IndexSet<DocumentFileSource>>,
+    file_sources: AppendOnlyVec<DocumentFileSource>,
 
     /// Stores patterns to search for.
     patterns: HashMap<PatternId, GritQuery, FxBuildHasher>,
@@ -126,7 +126,7 @@ impl WorkspaceServer {
             settings: Default::default(),
             documents: Default::default(),
             current_project_path: RwLock::default(),
-            file_sources: RwLock::default(),
+            file_sources: AppendOnlyVec::default(),
             patterns: Default::default(),
             node_cache: Default::default(),
             fs,
@@ -181,17 +181,28 @@ impl WorkspaceServer {
         Ok(self.settings.get_current_manifest())
     }
 
+    /// Returns a previously inserted file source by index.
+    ///
+    /// File sources can be inserted using `insert_source()`.
     #[tracing::instrument(level = "trace", skip(self), fields(return))]
     fn get_source(&self, index: usize) -> Option<DocumentFileSource> {
-        let file_sources = self.file_sources.read().unwrap();
-        file_sources.get_index(index).copied()
+        if index < self.file_sources.len() {
+            Some(self.file_sources[index])
+        } else {
+            None
+        }
     }
 
+    /// Inserts a file source so that it can be retrieved by index later.
+    ///
+    /// Returns the index at which the file source can be retrieved using
+    /// `get_source()`.
     #[tracing::instrument(level = "trace", skip(self), fields(return))]
-    fn set_source(&self, document_file_source: DocumentFileSource) -> usize {
-        let mut file_sources = self.file_sources.write().unwrap();
-        let (index, _) = file_sources.insert_full(document_file_source);
-        index
+    fn insert_source(&self, document_file_source: DocumentFileSource) -> usize {
+        self.file_sources
+            .iter()
+            .position(|file_source| *file_source == document_file_source)
+            .unwrap_or_else(|| self.file_sources.push(document_file_source))
     }
 
     /// Retrieves the current project path
@@ -259,7 +270,7 @@ impl WorkspaceServer {
             FileContent::FromServer => self.fs.read_file_from_path(&params.path)?,
         };
 
-        let mut index = self.set_source(source);
+        let mut index = self.insert_source(source);
 
         let size = content.as_bytes().len();
         let limit = self.settings.get_max_file_size();
@@ -281,7 +292,7 @@ impl WorkspaceServer {
         let parsed = self.parse(&params.path, &content, index, &mut node_cache)?;
 
         if let Some(language) = parsed.language {
-            index = self.set_source(language);
+            index = self.insert_source(language);
         }
 
         if params.persist_node_cache {
@@ -551,7 +562,7 @@ impl Workspace for WorkspaceServer {
         &self,
         params: SetManifestForProjectParams,
     ) -> Result<(), WorkspaceError> {
-        let index = self.set_source(JsonFileSource::json().into());
+        let index = self.insert_source(JsonFileSource::json().into());
 
         let parsed = parse_json(params.content.as_str(), JsonParserOptions::default());
 

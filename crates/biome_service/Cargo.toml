@@ -14,6 +14,7 @@ version              = "0.0.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+append-only-vec          = "0.1.7"
 biome_analyze            = { workspace = true, features = ["serde"] }
 biome_configuration      = { workspace = true, features = ["schema"] }
 biome_console            = { workspace = true }
