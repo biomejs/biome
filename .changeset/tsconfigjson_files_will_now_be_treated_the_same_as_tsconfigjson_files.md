@@ -1,4 +1,5 @@
 ---
+cli: patch
 biome_json_syntax: patch
 ---
 
