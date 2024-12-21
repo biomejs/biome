@@ -200,6 +200,14 @@ impl JsonFileSource {
     }
 
     pub fn is_well_known_json_allow_comments_and_trailing_commas_file(filename: &OsStr) -> bool {
+        // handle all `tsconfig.*.json` files
+        // this is a common naming convention for projects that have multiple tsconfig files
+        if filename.as_encoded_bytes().starts_with(b"tsconfig.")
+            && filename.as_encoded_bytes().ends_with(b".json")
+        {
+            return true;
+        }
+
         Self::WELL_KNOWN_JSON_ALLOW_COMMENTS_AND_TRAILING_COMMAS_FILES
             .binary_search(&filename.as_encoded_bytes())
             .is_ok()
