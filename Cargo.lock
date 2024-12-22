@@ -1078,6 +1078,7 @@ dependencies = [
  "biome_diagnostics",
  "biome_json_analyze",
  "biome_json_factory",
+ "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
  "biome_rowan",
@@ -3340,6 +3341,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "biome_service",
+ "log",
  "pulldown-cmark",
 ]
 

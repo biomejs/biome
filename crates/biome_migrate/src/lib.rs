@@ -1,6 +1,7 @@
 mod analyzers;
 mod macros;
 mod registry;
+mod rule_mover;
 mod version_services;
 
 use crate::registry::visit_migration_registry;
@@ -34,6 +35,7 @@ static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 /// processed by the lint rules registry
 pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     root: &LanguageRoot<JsonLanguage>,
+    filter: AnalysisFilter,
     configuration_file_path: &'a Path,
     version: String,
     inspect_matcher: V,
@@ -44,7 +46,6 @@ where
     F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    let filter = AnalysisFilter::default();
     let options = AnalyzerOptions::default().with_file_path(configuration_file_path);
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_migration_registry(&mut registry);
@@ -111,6 +112,7 @@ where
 
 pub fn migrate_configuration<'a, F, B>(
     root: &LanguageRoot<JsonLanguage>,
+    filter: AnalysisFilter,
     configuration_file_path: &'a Path,
     version: String,
     emit_signal: F,
@@ -119,7 +121,14 @@ where
     F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    analyze_with_inspect_matcher(root, configuration_file_path, version, |_| {}, emit_signal)
+    analyze_with_inspect_matcher(
+        root,
+        filter,
+        configuration_file_path,
+        version,
+        |_| {},
+        emit_signal,
+    )
 }
 
 pub(crate) type MigrationAction = RuleAction<JsonLanguage>;
@@ -127,7 +136,7 @@ pub(crate) type MigrationAction = RuleAction<JsonLanguage>;
 #[cfg(test)]
 mod test {
     use crate::migrate_configuration;
-    use biome_analyze::{ControlFlow, Never};
+    use biome_analyze::{AnalysisFilter, ControlFlow, Never};
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{markup, Markup};
     use biome_diagnostics::termcolor::NoColor;
@@ -173,6 +182,7 @@ mod test {
 
         migrate_configuration(
             &parsed.tree(),
+            AnalysisFilter::default(),
             Path::new(""),
             "1.5.0".to_string(),
             |signal| {

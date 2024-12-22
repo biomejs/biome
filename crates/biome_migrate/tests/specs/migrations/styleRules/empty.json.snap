@@ -1,0 +1,67 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: empty.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "formatter": {},
+  "javascript": {}
+}
+```
+
+# Diagnostics
+```
+empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rules aren't recommended anymore.
+  
+  > 1 │ {
+      │ ^
+  > 2 │   "formatter": {},
+  > 3 │   "javascript": {}
+  > 4 │ }
+      │ ^
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    1  1 │   {
+    2  2 │     "formatter": {},
+    3    │ - ··"javascript":·{}
+       3 │ + ··"javascript":·{},
+       4 │ + ··"linter":·{
+       5 │ + ····"rules":·{
+       6 │ + ······"style":·{
+       7 │ + ········"useLiteralEnumMembers":"error",
+       8 │ + ········"noArguments":"error",
+       9 │ + ········"noParameterAssign":"error",
+      10 │ + ········"useShorthandFunctionType":"error",
+      11 │ + ········"useExportType":"error",
+      12 │ + ········"useDefaultParameterLast":"error",
+      13 │ + ········"noCommaOperator":"error",
+      14 │ + ········"useSingleVarDeclarator":"error",
+      15 │ + ········"noNonnullAssertion":"error",
+      16 │ + ········"useNodejsImportProtocol":"error",
+      17 │ + ········"useConst":"error",
+      18 │ + ········"noInferrableTypes":"error",
+      19 │ + ········"useExponentiationOperator":"error",
+      20 │ + ········"noUselessElse":"error",
+      21 │ + ········"useSelfClosingElements":"error",
+      22 │ + ········"useImportType":"error",
+      23 │ + ········"useNumberNamespace":"error",
+      24 │ + ········"useWhile":"error",
+      25 │ + ········"useAsConstAssertion":"error",
+      26 │ + ········"noUnusedTemplateLiteral":"error",
+      27 │ + ········"useNumericLiterals":"error",
+      28 │ + ········"useTemplate":"error",
+      29 │ + ········"useEnumInitializers":"error"
+      30 │ + ········}
+      31 │ + ····}
+      32 │ + ··}
+    4 33 │   }
+  
+
+```

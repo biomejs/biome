@@ -1339,7 +1339,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule.level().max(rule_severity.into()));
         }
         "no-var" => {
-            let group = rules.style.get_or_insert_with(Default::default);
+            let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group.no_var.get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
