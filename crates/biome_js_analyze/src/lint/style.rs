@@ -50,7 +50,6 @@ pub mod use_single_var_declarator;
 pub mod use_template;
 pub mod use_throw_new_error;
 pub mod use_throw_only_error;
-pub mod use_while;
 
 declare_lint_group! {
     pub Style {
@@ -104,7 +103,6 @@ declare_lint_group! {
             self :: use_template :: UseTemplate ,
             self :: use_throw_new_error :: UseThrowNewError ,
             self :: use_throw_only_error :: UseThrowOnlyError ,
-            self :: use_while :: UseWhile ,
         ]
      }
 }

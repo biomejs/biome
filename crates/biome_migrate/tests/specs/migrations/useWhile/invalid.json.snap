@@ -9,7 +9,7 @@ snapshot_kind: text
   "linter": {
     "rules": {
       "style": {
-        "noVar": "error"
+        "useWhile": "error"
       }
     }
   }
@@ -21,12 +21,12 @@ snapshot_kind: text
 ```
 invalid.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The rule style/noVar has ben moved to the suspicious group.
+  ! The rule useWhile has ben moved to the complexity group.
   
     3 │     "rules": {
     4 │       "style": {
-  > 5 │         "noVar": "error"
-      │         ^^^^^^^
+  > 5 │         "useWhile": "error"
+      │         ^^^^^^^^^^
     6 │       }
     7 │     }
   
@@ -35,8 +35,8 @@ invalid.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━
      2  2 │     "linter": {
      3  3 │       "rules": {
      4    │ - ······"style":·{
-        4 │ + ······"suspicious":·{
-     5  5 │           "noVar": "error"
+        4 │ + ······"complexity":·{
+     5  5 │           "useWhile": "error"
      6  6 │         }
   
 

@@ -21,7 +21,7 @@ for /*a*/ ( /*init*/; /*test before*/ true /*test after*/; /*update*/ ) /*b*/ {
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/complexity/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a while loop instead of a for loop.
   
@@ -43,7 +43,7 @@ invalid.js:1:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:4:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:1 lint/complexity/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a while loop instead of a for loop.
   
@@ -68,7 +68,7 @@ invalid.js:4:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:9:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:1 lint/complexity/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a while loop instead of a for loop.
   

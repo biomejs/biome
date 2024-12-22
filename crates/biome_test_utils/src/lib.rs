@@ -200,8 +200,8 @@ pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerActi
 /// The test runner for the analyzer is currently designed to have a
 /// one-to-one mapping between test case and analyzer rules.
 /// So each testing file will be run through the analyzer with only the rule
-/// corresponding to the directory name. E.g., `style/useWhile/test.js`
-/// will be analyzed with just the `style/useWhile` rule.
+/// corresponding to the directory name. E.g., `complexity/useWhile/test.js`
+/// will be analyzed with just the `complexity/useWhile` rule.
 pub fn parse_test_path(file: &Path) -> (&str, &str) {
     let mut group_name = "";
     let mut rule_name = "";

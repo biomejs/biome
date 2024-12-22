@@ -99,7 +99,6 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useTemplate
   - useThrowNewError
   - useThrowOnlyError
-  - useWhile
   
 
 ```

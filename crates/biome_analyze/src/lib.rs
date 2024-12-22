@@ -590,10 +590,10 @@ fn range_match(filter: Option<TextRange>, range: TextRange) -> bool {
 ///
 /// - `// biome-ignore format` -> `vec![]`
 /// - `// biome-ignore lint` -> `vec![Everything]`
-/// - `// biome-ignore lint/style/useWhile` -> `vec![Rule("style/useWhile")]`
-/// - `// biome-ignore lint/style/useWhile(foo)` -> `vec![RuleWithValue("style/useWhile", "foo")]`
-/// - `// biome-ignore lint/style/useWhile lint/nursery/noUnreachable` -> `vec![Rule("style/useWhile"), Rule("nursery/noUnreachable")]`
-/// - `/** biome-ignore lint/style/useWhile */` if the comment is top-level -> `vec![TopLevel("style/useWhile")]`
+/// - `// biome-ignore lint/complexity/useWhile` -> `vec![Rule("complexity/useWhile")]`
+/// - `// biome-ignore lint/complexity/useWhile(foo)` -> `vec![RuleWithValue("complexity/useWhile", "foo")]`
+/// - `// biome-ignore lint/complexity/useWhile lint/nursery/noUnreachable` -> `vec![Rule("complexity/useWhile"), Rule("nursery/noUnreachable")]`
+/// - `/** biome-ignore lint/complexity/useWhile */` if the comment is top-level -> `vec![TopLevel("complexity/useWhile")]`
 type SuppressionParser<D> =
     for<'a> fn(&'a str, TextRange) -> Vec<Result<AnalyzerSuppression<'a>, D>>;
 
@@ -673,7 +673,7 @@ impl<'a> AnalyzerSuppression<'a> {
 pub enum AnalyzerSuppressionKind<'a> {
     /// A suppression disabling all lints eg. `// biome-ignore lint`
     Everything,
-    /// A suppression disabling a specific rule eg. `// biome-ignore lint/style/useWhile`
+    /// A suppression disabling a specific rule eg. `// biome-ignore lint/complexity/useWhile`
     Rule(&'a str),
     /// A suppression to be evaluated by a specific rule eg. `// biome-ignore lint/correctness/useExhaustiveDependencies(foo)`
     RuleInstance(&'a str, &'a str),

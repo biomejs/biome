@@ -4,6 +4,7 @@ use crate::analyzers::no_var::NoVar;
 use crate::analyzers::nursery_rules::NurseryRules;
 use crate::analyzers::schema::Schema;
 use crate::analyzers::style_rules::StyleRules;
+use crate::analyzers::use_while::UseWhile;
 use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
 use biome_json_syntax::JsonLanguage;
 
@@ -13,6 +14,7 @@ mod no_var;
 mod nursery_rules;
 mod schema;
 mod style_rules;
+mod use_while;
 
 pub(crate) struct MigrationGroup;
 pub(crate) struct MigrationCategory;
@@ -33,6 +35,7 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<StyleRules>();
         registry.record_rule::<NoVar>();
         registry.record_rule::<DeletedRules>();
+        registry.record_rule::<UseWhile>();
     }
 }
 

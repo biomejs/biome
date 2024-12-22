@@ -429,5 +429,5 @@ pub type UseValidForDirection = < lint :: correctness :: use_valid_for_direction
 pub type UseValidLang = <lint::a11y::use_valid_lang::UseValidLang as biome_analyze::Rule>::Options;
 pub type UseValidTypeof =
     <lint::suspicious::use_valid_typeof::UseValidTypeof as biome_analyze::Rule>::Options;
-pub type UseWhile = <lint::style::use_while::UseWhile as biome_analyze::Rule>::Options;
+pub type UseWhile = <lint::complexity::use_while::UseWhile as biome_analyze::Rule>::Options;
 pub type UseYield = <lint::correctness::use_yield::UseYield as biome_analyze::Rule>::Options;
