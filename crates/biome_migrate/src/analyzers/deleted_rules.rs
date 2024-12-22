@@ -21,7 +21,7 @@ declare_migration! {
     }
 }
 
-const REMOVED_RULES: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::new(|| {
+static REMOVED_RULES: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::new(|| {
     HashMap::from([
         ("noConsoleLog", "noConsole"),
         ("useSingleCaseStatement", "noSwitchDeclarations"),
@@ -99,13 +99,11 @@ impl Rule for DeletedRules {
             AnyJsonValue::JsonObjectValue(json_object_value) => {
                 let list = json_object_value.json_member_list();
                 let mut value = None;
-                for item in list {
-                    if let Ok(item) = item {
-                        let text = item.name().ok().and_then(|n| n.inner_string_text().ok());
-                        if let Some(text) = text {
-                            if text.text() == "level" {
-                                value = item.value().ok()?.as_json_string_value().cloned();
-                            }
+                for item in list.into_iter().flatten() {
+                    let text = item.name().ok().and_then(|n| n.inner_string_text().ok());
+                    if let Some(text) = text {
+                        if text.text() == "level" {
+                            value = item.value().ok()?.as_json_string_value().cloned();
                         }
                     }
                 }
