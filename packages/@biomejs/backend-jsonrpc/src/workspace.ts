@@ -1744,10 +1744,6 @@ export interface Suspicious {
 	 */
 	noConsole?: RuleFixConfiguration_for_NoConsoleOptions;
 	/**
-	 * Disallow the use of console.log
-	 */
-	noConsoleLog?: RuleFixConfiguration_for_Null;
-	/**
 	 * Disallow TypeScript const enum
 	 */
 	noConstEnum?: RuleFixConfiguration_for_Null;
@@ -3224,7 +3220,6 @@ export type Category =
 	| "lint/suspicious/noConfusingLabels"
 	| "lint/suspicious/noConfusingVoidType"
 	| "lint/suspicious/noConsole"
-	| "lint/suspicious/noConsoleLog"
 	| "lint/suspicious/noConstEnum"
 	| "lint/suspicious/noControlCharactersInRegex"
 	| "lint/suspicious/noDebugger"
