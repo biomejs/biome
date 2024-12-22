@@ -26,6 +26,7 @@ const REMOVED_RULES: LazyLock<HashMap<&'static str, &'static str>> = LazyLock::n
         ("noConsoleLog", "noConsole"),
         ("useSingleCaseStatement", "noSwitchDeclarations"),
         ("useShorthandArrayType", "useConsistentArrayType"),
+        ("noNewSymbol", "noInvalidBuiltinInstantiation"),
     ])
 });
 
@@ -119,6 +120,9 @@ impl Rule for DeletedRules {
                 "noConsoleLog" => (create_console_log_member(value), "suspicious"),
                 "useSingleCaseStatement" => (create_no_switch_declarations(value), "correctness"),
                 "useShorthandArrayType" => (create_consistent_array_type(value), "style"),
+                "noNewSymbol" | "noInvalidNewBuiltin" => {
+                    (create_no_invalid_builtin(value), "correctness")
+                }
                 _ => return None,
             };
             rule_mover.replace_rule(state.rule_name.as_ref(), member, group);
@@ -281,6 +285,38 @@ fn create_consistent_array_type(value: Option<JsonStringValue>) -> JsonMember {
         AnyJsonValue::JsonObjectValue(json_object_value(
             token(T!['{']),
             json_member_list(vec![level_option, rule_options], vec![token(T![,])]),
+            token(T!['}']).with_leading_trivia(vec![
+                (TriviaPieceKind::Newline, "\n"),
+                (TriviaPieceKind::Whitespace, " ".repeat(8).as_str()),
+            ]),
+        )),
+    )
+}
+
+/// Creates the member for `noInvalidBuiltinInstantiation`
+fn create_no_invalid_builtin(value: Option<JsonStringValue>) -> JsonMember {
+    let level_option = json_member(
+        json_member_name(json_string_literal("level").with_leading_trivia(vec![
+            (TriviaPieceKind::Newline, "\n"),
+            (TriviaPieceKind::Whitespace, " ".repeat(10).as_str()),
+        ])),
+        token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+        AnyJsonValue::JsonStringValue(
+            value.unwrap_or(json_string_value(json_string_literal("warn"))),
+        ),
+    );
+
+    json_member(
+        json_member_name(
+            json_string_literal("noInvalidBuiltinInstantiation").with_leading_trivia(vec![
+                (TriviaPieceKind::Newline, "\n"),
+                (TriviaPieceKind::Whitespace, " ".repeat(8).as_str()),
+            ]),
+        ),
+        token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+        AnyJsonValue::JsonObjectValue(json_object_value(
+            token(T!['{']),
+            json_member_list(vec![level_option], vec![]),
             token(T!['}']).with_leading_trivia(vec![
                 (TriviaPieceKind::Newline, "\n"),
                 (TriviaPieceKind::Whitespace, " ".repeat(8).as_str()),
