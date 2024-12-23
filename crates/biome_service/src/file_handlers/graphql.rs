@@ -166,7 +166,6 @@ impl ExtensionHandler for GraphqlFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
-                organize_imports: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),

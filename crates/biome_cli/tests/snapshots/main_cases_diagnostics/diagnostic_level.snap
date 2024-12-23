@@ -10,7 +10,7 @@ snapshot_kind: text
   "formatter": {
     "enabled": true
   },
-  "organizeImports": {
+  "assist": {
     "enabled": true
   },
   "linter": {
@@ -41,9 +41,9 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-src/index.js organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+src/index.js assist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Import statements could be sorted:
+  × Not all actions were applied:
   
     1   │ - import·{·graphql,·useFragment,·useMutation·}·from·"react-relay";
     2   │ - import·{·FC,·memo,·useCallback·}·from·"react";

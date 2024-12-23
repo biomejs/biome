@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 # Emitted Messages
 
@@ -8,9 +9,8 @@ expression: content
 Command to use in CI environments. Runs formatter, linter and import sorting to the requested files.
 Files won't be modified, the command is a read-only operation.
 
-Usage: ci [--formatter-enabled=<true|false>] [--linter-enabled=<true|false>] [
---organize-imports-enabled=<true|false>] [--assist-enabled=<true|false>] [--changed] [--since=REF] [
-PATH]...
+Usage: ci [--formatter-enabled=<true|false>] [--linter-enabled=<true|false>] [--assist-enabled=
+<true|false>] [--changed] [--since=REF] [PATH]...
 
 The configuration that is contained inside the file `biome.json`
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
@@ -153,7 +153,6 @@ Available positional items:
 Available options:
         --formatter-enabled=<true|false>  Allow to enable or disable the formatter check.
         --linter-enabled=<true|false>  Allow to enable or disable the linter check.
-        --organize-imports-enabled=<true|false>  Allow to enable or disable the organize imports.
         --assist-enabled=<true|false>  Allow to enable or disable the assist.
         --changed             When set to true, only the files that have been changed compared to
                               your `defaultBranch` configuration will be linted.

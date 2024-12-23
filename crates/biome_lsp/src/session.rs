@@ -306,18 +306,11 @@ impl Session {
                     .await;
         }
         let file_features = self.workspace.file_features(SupportsFeatureParams {
-            features: FeaturesBuilder::new()
-                .with_linter()
-                .with_assist()
-                .with_organize_imports()
-                .build(),
+            features: FeaturesBuilder::new().with_linter().with_assist().build(),
             path: biome_path.clone(),
         })?;
 
-        if !file_features.supports_lint()
-            && !file_features.supports_organize_imports()
-            && !file_features.supports_assist()
-        {
+        if !file_features.supports_lint() && !file_features.supports_assist() {
             self.client
                 .publish_diagnostics(url, vec![], Some(doc.version))
                 .await;
@@ -330,7 +323,7 @@ impl Session {
                 if file_features.supports_lint() {
                     categories = categories.with_lint();
                 }
-                if file_features.supports_organize_imports() {
+                if file_features.supports_assist() {
                     categories = categories.with_assist();
                 }
             }

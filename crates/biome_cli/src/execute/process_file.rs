@@ -2,7 +2,6 @@ mod assist;
 mod check;
 mod format;
 mod lint;
-mod organize_imports;
 mod search;
 pub(crate) mod workspace_file;
 
@@ -73,7 +72,6 @@ impl Message {
 #[derive(Debug)]
 pub(crate) enum DiffKind {
     Format,
-    OrganizeImports,
     Assist,
 }
 
@@ -174,7 +172,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
             )
             .and(
                 file_features
-                    .support_kind_for(&FeatureKind::OrganizeImports)
+                    .support_kind_for(&FeatureKind::Assist)
                     .and_then(|support_kind| {
                         if support_kind.is_not_enabled() {
                             Some(support_kind)

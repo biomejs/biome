@@ -128,14 +128,6 @@ pub enum BiomeCommand {
         /// Allow to enable or disable the linter check.
         #[bpaf(long("linter-enabled"), argument("true|false"), optional, hide_usage)]
         linter_enabled: Option<bool>,
-        /// Allow to enable or disable the organize imports.
-        #[bpaf(
-            long("organize-imports-enabled"),
-            argument("true|false"),
-            optional,
-            hide_usage
-        )]
-        organize_imports_enabled: Option<bool>,
 
         /// Allow to enable or disable the assist.
         #[bpaf(long("assist-enabled"), argument("true|false"), optional)]
@@ -329,9 +321,6 @@ pub enum BiomeCommand {
         /// Allow to enable or disable the linter check.
         #[bpaf(long("linter-enabled"), argument("true|false"), optional)]
         linter_enabled: Option<bool>,
-        /// Allow to enable or disable the organize imports.
-        #[bpaf(long("organize-imports-enabled"), argument("true|false"), optional)]
-        organize_imports_enabled: Option<bool>,
 
         /// Allow to enable or disable the assist.
         #[bpaf(long("assist-enabled"), argument("true|false"), optional)]

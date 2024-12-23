@@ -16,8 +16,8 @@ use crate::file_handlers::{
 use crate::is_dir;
 use crate::settings::WorkspaceSettings;
 use crate::workspace::{
-    FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
-    OrganizeImportsResult, RageEntry, RageParams, RageResult, ServerInfo,
+    FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, RageEntry, RageParams,
+    RageResult, ServerInfo,
 };
 use crate::{file_handlers::Features, Workspace, WorkspaceError};
 use append_only_vec::AppendOnlyVec;
@@ -1048,22 +1048,6 @@ impl Workspace for WorkspaceServer {
 
     fn server_info(&self) -> Option<&ServerInfo> {
         None
-    }
-
-    fn organize_imports(
-        &self,
-        params: OrganizeImportsParams,
-    ) -> Result<OrganizeImportsResult, WorkspaceError> {
-        let capabilities = self.get_file_capabilities(&params.path);
-        let organize_imports = capabilities
-            .analyzer
-            .organize_imports
-            .ok_or_else(self.build_capability_error(&params.path))?;
-
-        let parse = self.get_parse(&params.path)?;
-        let result = organize_imports(parse)?;
-
-        Ok(result)
     }
 }
 

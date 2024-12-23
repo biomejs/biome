@@ -29,6 +29,16 @@ pub struct AssistConfiguration {
     pub include: Vec<Box<str>>,
 }
 
+impl PartialAssistConfiguration {
+    pub const fn is_disabled(&self) -> bool {
+        matches!(self.enabled, Some(false))
+    }
+
+    pub fn get_actions(&self) -> Actions {
+        self.actions.clone().unwrap_or_default()
+    }
+}
+
 impl Default for AssistConfiguration {
     fn default() -> Self {
         Self {

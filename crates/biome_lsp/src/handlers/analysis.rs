@@ -48,17 +48,10 @@ pub(crate) fn code_actions(
 
     let file_features = &session.workspace.file_features(SupportsFeatureParams {
         path: biome_path.clone(),
-        features: FeaturesBuilder::new()
-            .with_linter()
-            .with_assist()
-            .with_organize_imports()
-            .build(),
+        features: FeaturesBuilder::new().with_linter().with_assist().build(),
     })?;
 
-    if !file_features.supports_lint()
-        && !file_features.supports_organize_imports()
-        && !file_features.supports_assist()
-    {
+    if !file_features.supports_lint() && !file_features.supports_assist() {
         info!("Linter, assist and organize imports are disabled");
         return Ok(Some(Vec::new()));
     }
@@ -172,9 +165,9 @@ pub(crate) fn code_actions(
             if has_quick_fix && action.suggestion.applicability == Applicability::MaybeIncorrect {
                 return None;
             }
-            // Filter out source.organizeImports.biome action when organize imports is not supported.
+            // Filter out source.organizeImports.biome action when assist is not supported.
             if action.category.matches("source.organizeImports.biome")
-                && !file_features.supports_organize_imports()
+                && !file_features.supports_assist()
             {
                 return None;
             }

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `index.ts`
 
@@ -68,7 +69,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-::error title=organizeImports,file=index.ts,line=1,endLine=1,col=2,endColumn=2::Import statements differs from the output
+::error title=assist,file=index.ts,line=1,endLine=1,col=2,endColumn=2::Applied actions differs from the output
 ```
 
 ```block
@@ -100,7 +101,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-::error title=organizeImports,file=main.ts,line=1,endLine=1,col=2,endColumn=2::Import statements differs from the output
+::error title=assist,file=main.ts,line=1,endLine=1,col=2,endColumn=2::Applied actions differs from the output
 ```
 
 ```block

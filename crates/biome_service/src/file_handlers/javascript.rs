@@ -7,7 +7,7 @@ use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
 use crate::file_handlers::{is_diagnostic_error, FixAllParams};
 use crate::settings::{LinterSettings, OverrideSettings, Settings};
-use crate::workspace::{DocumentFileSource, OrganizeImportsResult};
+use crate::workspace::DocumentFileSource;
 use crate::{
     settings::{
         FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage,
@@ -304,7 +304,6 @@ impl ExtensionHandler for JsFileHandler {
                 code_actions: Some(code_actions),
                 fix_all: Some(fix_all),
                 rename: Some(rename),
-                organize_imports: Some(organize_imports),
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -815,57 +814,5 @@ fn rename(
         Err(WorkspaceError::RenameError(
             RenameError::CannotFindDeclaration(new_name),
         ))
-    }
-}
-
-pub(crate) fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceError> {
-    let mut tree: AnyJsRoot = parse.tree();
-
-    let filter = AnalysisFilter {
-        enabled_rules: Some(&[RuleFilter::Rule("source", "organizeImports")]),
-        categories: RuleCategoriesBuilder::default().with_assist().build(),
-        ..AnalysisFilter::default()
-    };
-
-    let (action, _) = analyze(
-        &tree,
-        filter,
-        &AnalyzerOptions::default(),
-        Vec::new(),
-        JsFileSource::default(),
-        None,
-        |signal| {
-            for action in signal.actions() {
-                if action.is_suppression() {
-                    continue;
-                }
-
-                return ControlFlow::Break(action);
-            }
-            ControlFlow::Continue(())
-        },
-    );
-
-    if let Some(action) = action {
-        tree = match AnyJsRoot::cast(action.mutation.commit()) {
-            Some(tree) => tree,
-            None => {
-                return Err(WorkspaceError::RuleError(
-                    RuleError::ReplacedRootWithNonRootError {
-                        rule_name: action
-                            .rule_name
-                            .map(|(group, rule)| (Cow::Borrowed(group), Cow::Borrowed(rule))),
-                    },
-                ));
-            }
-        };
-
-        Ok(OrganizeImportsResult {
-            code: tree.syntax().to_string(),
-        })
-    } else {
-        Ok(OrganizeImportsResult {
-            code: tree.syntax().to_string(),
-        })
     }
 }

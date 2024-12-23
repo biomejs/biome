@@ -40,8 +40,8 @@ declare_source_rule! {
         version: "1.0.0",
         name: "organizeImports",
         language: "js",
-        recommended: false,
-        fix_kind: FixKind::Unsafe,
+        recommended: true,
+        fix_kind: FixKind::Safe,
     }
 }
 

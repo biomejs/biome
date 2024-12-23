@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.jsonc`
 
@@ -20,9 +21,6 @@ expression: content
     "enabled": true,
     "indentStyle": "tab"
   },
-  "organizeImports": {
-    "enabled": true
-  },
   "linter": {
     "enabled": true,
     "rules": {
@@ -32,6 +30,14 @@ expression: content
   "javascript": {
     "formatter": {
       "quoteStyle": "double"
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
     }
   }
 }

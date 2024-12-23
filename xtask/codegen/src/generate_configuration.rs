@@ -234,24 +234,16 @@ fn generate_for_groups(
         } else {
             quote! { !self.is_recommended_false() }
         };
-        group_as_default_rules.push(if kind == RuleCategory::Lint {
-            quote! {
-                if let Some(group) = self.#group_ident.as_ref() {
-                    group.collect_preset_rules(
-                        #global_recommended,
-                        &mut enabled_rules,
-                    );
-                    enabled_rules.extend(&group.get_enabled_rules());
-                    disabled_rules.extend(&group.get_disabled_rules());
-                } else if #global_recommended {
-                    enabled_rules.extend(#group_pascal_ident::recommended_rules_as_filters());
-                }
-            }
-        } else {
-            quote! {
-                if let Some(group) = self.#group_ident.as_ref() {
-                    enabled_rules.extend(&group.get_enabled_rules());
-                }
+        group_as_default_rules.push(quote! {
+            if let Some(group) = self.#group_ident.as_ref() {
+                group.collect_preset_rules(
+                    #global_recommended,
+                    &mut enabled_rules,
+                );
+                enabled_rules.extend(&group.get_enabled_rules());
+                disabled_rules.extend(&group.get_disabled_rules());
+            } else if #global_recommended {
+                enabled_rules.extend(#group_pascal_ident::recommended_rules_as_filters());
             }
         });
 
@@ -384,6 +376,10 @@ fn generate_for_groups(
             #[cfg_attr(feature = "schema", derive(JsonSchema))]
             #[serde(rename_all = "camelCase", deny_unknown_fields)]
             pub struct Actions {
+                /// It enables the assist actions recommended by Biome. `true` by default.
+                #[serde(skip_serializing_if = "Option::is_none")]
+                pub recommended: Option<bool>,
+
                 #(
                     #[deserializable(rename = #group_strings)]
                     #[serde(skip_serializing_if = "Option::is_none")]
@@ -407,13 +403,22 @@ fn generate_for_groups(
 
                 #severity_fn
 
+                // Note: In top level, it is only considered _not_ recommended
+                // when the recommended option is false
+                pub(crate) const fn is_recommended_false(&self) -> bool {
+                    matches!(self.recommended, Some(false))
+                }
+
+
                 /// It returns the enabled rules by default.
                 ///
                 /// The enabled rules are calculated from the difference with the disabled rules.
                 pub fn as_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
                     let mut enabled_rules = FxHashSet::default();
+                    let mut disabled_rules = FxHashSet::default();
                     #( #group_as_default_rules )*
-                    enabled_rules
+
+                    enabled_rules.difference(&disabled_rules).copied().collect()
                 }
 
                 /// It returns the disabled rules by configuration
@@ -798,6 +803,9 @@ fn generate_group_struct(
             #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
             /// A list of rules that belong to this group
             pub struct #group_pascal_ident {
+                /// It enables the recommended rules for this group
+                #[serde(skip_serializing_if = "Option::is_none")]
+                pub recommended: Option<bool>,
 
                 #( #schema_lines_rules ),*
             }
@@ -808,6 +816,24 @@ fn generate_group_struct(
                 pub(crate) const GROUP_RULES: &'static [&'static str] = &[
                     #( #lines_rule ),*
                 ];
+
+                const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
+                    #( #lines_recommended_rule_as_filter ),*
+                ];
+
+                pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
+                    Self::RECOMMENDED_RULES_AS_FILTERS
+                }
+
+                /// Retrieves the recommended rules
+                pub(crate) fn is_recommended_true(&self) -> bool {
+                    // we should inject recommended rules only when they are set to "true"
+                    matches!(self.recommended, Some(true))
+                }
+
+                pub(crate) fn is_recommended_unset(&self) -> bool {
+                    self.recommended.is_none()
+                }
 
                 pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
                    let mut index_set = FxHashSet::default();
@@ -824,6 +850,20 @@ fn generate_group_struct(
                 /// Checks if, given a rule name, matches one of the rules contained in this category
                 pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
                     Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
+                }
+
+                /// Select preset rules
+                // Preset rules shouldn't populate disabled rules
+                // because that will make specific rules cannot be enabled later.
+                pub(crate) fn collect_preset_rules(
+                    &self,
+                    parent_is_recommended: bool,
+                    enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
+                ) {
+                    // The order of the if-else branches MATTERS!
+                    if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
+                        enabled_rules.extend(Self::recommended_rules_as_filters());
+                    }
                 }
 
                 #get_configuration_function

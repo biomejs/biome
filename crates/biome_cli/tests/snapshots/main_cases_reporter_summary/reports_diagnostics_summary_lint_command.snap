@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `index.css`
 
@@ -84,9 +85,9 @@ reporter/parse ━━━━━━━━━━━━━━━━━━━━━�
   
   - index.css
   
-reporter/analyzer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+reporter/linter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Some analyzer rules were triggered
+  i Some lint rules were triggered
   
   Rule Name                                        Diagnostics
   

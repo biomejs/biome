@@ -19,13 +19,7 @@ export interface BiomePath {
 	 */
 	wasWritten: boolean;
 }
-export type FeatureKind =
-	| "format"
-	| "lint"
-	| "organizeImports"
-	| "search"
-	| "assist"
-	| "debug";
+export type FeatureKind = "format" | "lint" | "search" | "assist" | "debug";
 export type FileKind = FileKind2[];
 /**
  * The priority of the file
@@ -89,10 +83,6 @@ export interface PartialConfiguration {
 	 * The configuration for the linter
 	 */
 	linter?: PartialLinterConfiguration;
-	/**
-	 * The configuration of the import sorting
-	 */
-	organizeImports?: PartialOrganizeImports;
 	/**
 	 * A list of granular patterns that should be applied only to a sub set of files
 	 */
@@ -296,20 +286,6 @@ export interface PartialLinterConfiguration {
 	 * List of rules
 	 */
 	rules?: Rules;
-}
-export interface PartialOrganizeImports {
-	/**
-	 * Enables the organization of imports
-	 */
-	enabled?: boolean;
-	/**
-	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
-	 */
-	ignore?: string[];
-	/**
-	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
-	 */
-	include?: string[];
 }
 export type Overrides = OverridePattern[];
 export type Plugins = PluginConfiguration[];
@@ -632,11 +608,15 @@ export interface Rules {
 }
 export interface OverridePattern {
 	/**
+	 * Override specific linter configuration
+	 */
+	assist?: OverrideAssistConfiguration;
+	/**
 	 * Specific configuration for the Css language
 	 */
 	css?: PartialCssConfiguration;
 	/**
-	 * Specific configuration for the Json language
+	 * Override specific formatter configuration
 	 */
 	formatter?: OverrideFormatterConfiguration;
 	/**
@@ -660,13 +640,9 @@ export interface OverridePattern {
 	 */
 	json?: PartialJsonConfiguration;
 	/**
-	 * Specific configuration for the Json language
+	 * Override specific linter configuration
 	 */
 	linter?: OverrideLinterConfiguration;
-	/**
-	 * Specific configuration for the Json language
-	 */
-	organizeImports?: OverrideOrganizeImportsConfiguration;
 }
 export type PluginConfiguration = string;
 export type VcsClientKind = "git";
@@ -1972,6 +1948,16 @@ export interface Suspicious {
 	 */
 	useValidTypeof?: RuleFixConfiguration_for_Null;
 }
+export interface OverrideAssistConfiguration {
+	/**
+	 * List of actions
+	 */
+	actions?: Actions;
+	/**
+	 * if `false`, it disables the feature and the assist won't be executed. `true` by default
+	 */
+	enabled?: boolean;
+}
 export interface OverrideFormatterConfiguration {
 	/**
 	 * The attribute position style.
@@ -2016,12 +2002,6 @@ export interface OverrideLinterConfiguration {
 	 * List of rules
 	 */
 	rules?: Rules;
-}
-export interface OverrideOrganizeImportsConfiguration {
-	/**
-	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
-	 */
-	enabled?: boolean;
 }
 export type RuleAssistConfiguration_for_Options =
 	| RuleAssistPlainConfiguration
@@ -2893,12 +2873,6 @@ export interface CheckFileSizeResult {
 	fileSize: number;
 	limit: number;
 }
-export interface OrganizeImportsParams {
-	path: BiomePath;
-}
-export interface OrganizeImportsResult {
-	code: string;
-}
 export interface GetFileContentParams {
 	path: BiomePath;
 }
@@ -3287,7 +3261,6 @@ export type Category =
 	| "ci"
 	| "stdin"
 	| "configuration"
-	| "organizeImports"
 	| "assist"
 	| "migrate"
 	| "deserialize"
@@ -3300,7 +3273,6 @@ export type Category =
 	| "reporter/parse"
 	| "reporter/format"
 	| "reporter/analyzer"
-	| "reporter/organizeImports"
 	| "parse"
 	| "lint"
 	| "lint/a11y"
@@ -3598,9 +3570,6 @@ export interface Workspace {
 	closeFile(params: CloseFileParams): Promise<void>;
 	getSyntaxTree(params: GetSyntaxTreeParams): Promise<GetSyntaxTreeResult>;
 	checkFileSize(params: CheckFileSizeParams): Promise<CheckFileSizeResult>;
-	organizeImports(
-		params: OrganizeImportsParams,
-	): Promise<OrganizeImportsResult>;
 	getFileContent(params: GetFileContentParams): Promise<string>;
 	getControlFlowGraph(params: GetControlFlowGraphParams): Promise<string>;
 	getFormatterIr(params: GetFormatterIRParams): Promise<string>;
@@ -3646,9 +3615,6 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		checkFileSize(params) {
 			return transport.request("biome/check_file_size", params);
-		},
-		organizeImports(params) {
-			return transport.request("biome/organize_imports", params);
 		},
 		getFileContent(params) {
 			return transport.request("biome/get_file_content", params);
