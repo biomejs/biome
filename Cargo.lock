@@ -1797,12 +1797,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9bda8e21c04aca2ae33ffc2fd8c23134f3cac46db123ba97bd9d3f3b8a4a85e1"
 
 [[package]]
-name = "dunce"
-version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56ce8c6da7551ec6c462cbaf3bfbc75131ebbfa1c944aeaa9dab51ca1c5f0c3b"
-
-[[package]]
 name = "dyn-clone"
 version = "1.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2797,13 +2791,12 @@ checksum = "c1b04fb49957986fdce4d6ee7a65027d55d4b6d2265e5848bbb507b58ccfdb6f"
 
 [[package]]
 name = "oxc_resolver"
-version = "1.12.0"
+version = "3.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c20bb345f290c46058ba650fef7ca2b579612cf2786b927ebad7b8bec0845a7"
+checksum = "bed381b6ab4bbfebfc7a011ad43b110ace8d201d02a39c0e09855f16b8f3f741"
 dependencies = [
  "cfg-if",
  "dashmap 6.1.0",
- "dunce",
  "indexmap 2.7.0",
  "json-strip-comments",
  "once_cell",
