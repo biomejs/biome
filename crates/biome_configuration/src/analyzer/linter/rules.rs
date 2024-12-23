@@ -1204,6 +1204,9 @@ pub struct Complexity {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_simplified_logic_expression:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseSimplifiedLogicExpression>>,
+    #[doc = "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_while: Option<RuleFixConfiguration<biome_js_analyze::options::UseWhile>>,
 }
 impl Complexity {
     const GROUP_NAME: &'static str = "complexity";
@@ -1240,6 +1243,7 @@ impl Complexity {
         "useRegexLiterals",
         "useSimpleNumberKeys",
         "useSimplifiedLogicExpression",
+        "useWhile",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -1441,6 +1445,11 @@ impl Complexity {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
+        if let Some(rule) = self.use_while.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
+            }
+        }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
@@ -1608,6 +1617,11 @@ impl Complexity {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]));
             }
         }
+        if let Some(rule) = self.use_while.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]));
+            }
+        }
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
@@ -1758,6 +1772,10 @@ impl Complexity {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useSimplifiedLogicExpression" => self
                 .use_simplified_logic_expression
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useWhile" => self
+                .use_while
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
@@ -4460,9 +4478,6 @@ pub struct Style {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_throw_only_error:
         Option<RuleConfiguration<biome_js_analyze::options::UseThrowOnlyError>>,
-    #[doc = "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_while: Option<RuleFixConfiguration<biome_js_analyze::options::UseWhile>>,
 }
 impl Style {
     const GROUP_NAME: &'static str = "style";
@@ -4515,7 +4530,6 @@ impl Style {
         "useTemplate",
         "useThrowNewError",
         "useThrowOnlyError",
-        "useWhile",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[];
     #[doc = r" Retrieves the recommended rules"]
@@ -4767,11 +4781,6 @@ impl Style {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
-        if let Some(rule) = self.use_while.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
-            }
-        }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
@@ -5016,11 +5025,6 @@ impl Style {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
-        if let Some(rule) = self.use_while.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
-            }
-        }
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
@@ -5235,10 +5239,6 @@ impl Style {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useThrowOnlyError" => self
                 .use_throw_only_error
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useWhile" => self
-                .use_while
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,

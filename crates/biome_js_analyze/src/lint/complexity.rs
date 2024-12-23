@@ -34,6 +34,7 @@ pub mod use_optional_chain;
 pub mod use_regex_literals;
 pub mod use_simple_number_keys;
 pub mod use_simplified_logic_expression;
+pub mod use_while;
 
 declare_lint_group! {
     pub Complexity {
@@ -71,6 +72,7 @@ declare_lint_group! {
             self :: use_regex_literals :: UseRegexLiterals ,
             self :: use_simple_number_keys :: UseSimpleNumberKeys ,
             self :: use_simplified_logic_expression :: UseSimplifiedLogicExpression ,
+            self :: use_while :: UseWhile ,
         ]
      }
 }

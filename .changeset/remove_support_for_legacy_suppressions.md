@@ -7,7 +7,7 @@ cli: major
 Biome used to support "legacy suppressions" that looked like this:
 
 ```js
-// biome-ignore lint(style/useWhile): reason
+// biome-ignore lint(complexity/useWhile): reason
 ```
 
 This format is no longer supported.

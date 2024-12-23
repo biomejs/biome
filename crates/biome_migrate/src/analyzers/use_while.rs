@@ -9,13 +9,13 @@ use biome_json_syntax::JsonMember;
 use biome_rowan::{AstNode, TextRange};
 
 declare_migration! {
-    pub(crate) NoVar {
+    pub(crate) UseWhile {
         version: "2.0.0",
-        name: "noVar",
+        name: "useWhile",
     }
 }
 
-impl Rule for NoVar {
+impl Rule for UseWhile {
     type Query = Version<JsonMember>;
     type State = TextRange;
     type Signals = Option<Self::State>;
@@ -37,7 +37,7 @@ impl Rule for NoVar {
                 for item in object.json_member_list().into_iter().flatten() {
                     let name = item.name().ok()?;
                     let text = name.inner_string_text().ok()?;
-                    if text.text() == "noVar" {
+                    if text.text() == "useWhile" {
                         return Some(name.range());
                     }
                 }
@@ -52,7 +52,7 @@ impl Rule for NoVar {
             category!("migrate"),
             state,
             markup! {
-                "The rule "<Emphasis>"style/noVar"</Emphasis>" has ben moved to the "<Emphasis>"suspicious"</Emphasis>" group."
+                "The rule "<Emphasis>"useWhile"</Emphasis>" has ben moved to the "<Emphasis>"complexity"</Emphasis>" group."
             }
                 .to_owned(),
         ))
@@ -61,7 +61,7 @@ impl Rule for NoVar {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<MigrationAction> {
         let root = ctx.root();
         let mut rule_mover = RuleMover::from_root(root.clone());
-        rule_mover.move_rule("noVar", "style", "suspicious");
+        rule_mover.move_rule("useWhile", "style", "complexity");
         let mutation = rule_mover.run_queries()?;
 
         // mutation.replace_node(state.clone(), new_list);

@@ -282,9 +282,9 @@ let bar = 33;
                 p == f;
                 // biome-ignore lint/suspicious/noDoubleEquals: single rule
                 j == k;
-                /* biome-ignore lint/style/useWhile: multiple block comments */ /* biome-ignore lint/suspicious/noDoubleEquals: multiple block comments */
+                /* biome-ignore lint/complexity/useWhile: multiple block comments */ /* biome-ignore lint/suspicious/noDoubleEquals: multiple block comments */
                 o == m;
-                // biome-ignore lint/style/useWhile: multiple line comments
+                // biome-ignore lint/complexity/useWhile: multiple line comments
                 // biome-ignore lint/suspicious/noDoubleEquals: multiple line comments
                 d == x;
                 z == v;
@@ -301,9 +301,9 @@ let bar = 33;
                 a == b;
                 // biome-ignore lint/suspicious/noDoubleEquals: single rule
                 a == b;
-                /* biome-ignore lint/style/useWhile: multiple block comments */ /* biome-ignore lint(suspicious/noDoubleEquals): multiple block comments */
+                /* biome-ignore lint/complexity/useWhile: multiple block comments */ /* biome-ignore lint(suspicious/noDoubleEquals): multiple block comments */
                 a == b;
-                // biome-ignore lint/style/useWhile: multiple line comments
+                // biome-ignore lint/complexity/useWhile: multiple line comments
                 // biome-ignore lint/suspicious/noDoubleEquals: multiple line comments
                 a == b;
                 a == b;
@@ -366,21 +366,21 @@ let bar = 33;
             lint_ranges.as_slice(),
             &[
                 TextRange::new(TextSize::from(67), TextSize::from(69)),
-                TextRange::new(TextSize::from(641), TextSize::from(643)),
-                TextRange::new(TextSize::from(835), TextSize::from(837)),
-                TextRange::new(TextSize::from(922), TextSize::from(924)),
-                TextRange::new(TextSize::from(1498), TextSize::from(1500)),
-                TextRange::new(TextSize::from(1693), TextSize::from(1695)),
+                TextRange::new(TextSize::from(651), TextSize::from(653)),
+                TextRange::new(TextSize::from(845), TextSize::from(847)),
+                TextRange::new(TextSize::from(932), TextSize::from(934)),
+                TextRange::new(TextSize::from(1518), TextSize::from(1520)),
+                TextRange::new(TextSize::from(1713), TextSize::from(1715)),
             ]
         );
 
         assert_eq!(
             parse_ranges.as_slice(),
             &[
-                TextRange::new(TextSize::from(1797), TextSize::from(1808)),
-                TextRange::new(TextSize::from(1848), TextSize::from(1849)),
-                TextRange::new(TextSize::from(1882), TextSize::from(1883)),
-                TextRange::new(TextSize::from(1935), TextSize::from(1942)),
+                TextRange::new(TextSize::from(1817), TextSize::from(1828)),
+                TextRange::new(TextSize::from(1868), TextSize::from(1869)),
+                TextRange::new(TextSize::from(1902), TextSize::from(1903)),
+                TextRange::new(TextSize::from(1955), TextSize::from(1962)),
             ]
         );
     }

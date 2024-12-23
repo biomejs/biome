@@ -977,6 +977,10 @@ export interface Complexity {
 	 * Discard redundant terms from logical expressions.
 	 */
 	useSimplifiedLogicExpression?: RuleFixConfiguration_for_Null;
+	/**
+	 * Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed.
+	 */
+	useWhile?: RuleFixConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -1690,10 +1694,6 @@ export interface Style {
 	 * Disallow throwing non-Error values.
 	 */
 	useThrowOnlyError?: RuleConfiguration_for_Null;
-	/**
-	 * Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed.
-	 */
-	useWhile?: RuleFixConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -3016,6 +3016,7 @@ export type Category =
 	| "lint/complexity/useRegexLiterals"
 	| "lint/complexity/useSimpleNumberKeys"
 	| "lint/complexity/useSimplifiedLogicExpression"
+	| "lint/complexity/useWhile"
 	| "lint/correctness/noChildrenProp"
 	| "lint/correctness/noConstAssign"
 	| "lint/correctness/noConstantCondition"
@@ -3208,7 +3209,6 @@ export type Category =
 	| "lint/style/useTemplate"
 	| "lint/style/useThrowNewError"
 	| "lint/style/useThrowOnlyError"
-	| "lint/style/useWhile"
 	| "lint/suspicious/noApproximativeNumericConstant"
 	| "lint/suspicious/noArrayIndexKey"
 	| "lint/suspicious/noAssignInExpressions"

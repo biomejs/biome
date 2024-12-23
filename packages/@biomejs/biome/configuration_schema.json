@@ -628,6 +628,13 @@
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useWhile": {
+					"description": "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -3869,13 +3876,6 @@
 					"description": "Disallow throwing non-Error values.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useWhile": {
-					"description": "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				}
