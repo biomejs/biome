@@ -1,6 +1,7 @@
 ---
 source: crates/biome_migrate/tests/spec_tests.rs
 expression: invalid.json
+snapshot_kind: text
 ---
 # Input
 ```json
@@ -28,11 +29,9 @@ invalid.json:2:13 migrate  FIXABLE  ━━━━━━━━━━━━━━�
   
     1 1 │   {
     2   │ - → "$schema":·"https://biomejs.dev/schemas/1.0.0/schema.json"
-      2 │ + → "$schema":·"https://biomejs.dev/schemas/1.5.0/schema.json"
+      2 │ + → "$schema":·"https://biomejs.dev/schemas/2.0.0/schema.json"
     3 3 │   }
     4 4 │   
   
 
 ```
-
-

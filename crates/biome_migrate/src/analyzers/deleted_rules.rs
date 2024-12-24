@@ -1,4 +1,4 @@
-use crate::rule_mover::RuleMover;
+use crate::rule_mover::AnalyzerMover;
 use crate::version_services::Version;
 use crate::{declare_migration, MigrationAction};
 use biome_analyze::context::RuleContext;
@@ -43,9 +43,8 @@ impl Rule for DeletedRules {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let version = ctx.version();
 
-        if version != "2.0.0" {
+        if !ctx.satisfies(">=2.0.0") {
             return vec![];
         }
         let mut rules = vec![];
@@ -90,7 +89,7 @@ impl Rule for DeletedRules {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<MigrationAction> {
-        let mut rule_mover = RuleMover::from_root(ctx.root());
+        let mut rule_mover = AnalyzerMover::from_root(ctx.root());
         let member = &state.rule_member;
 
         let value = member.value().ok()?;
