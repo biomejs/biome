@@ -4,8 +4,9 @@ use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
-    AttributePosition, BracketSpacing, CstFormatContext, FormatContext, FormatElement,
-    FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TransformSourceMap,
+    AttributePosition, BracketSameLine, BracketSpacing, CstFormatContext, FormatContext,
+    FormatElement, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
+    TransformSourceMap,
 };
 use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
 use std::fmt;
@@ -376,6 +377,10 @@ impl FormatOptions for JsFormatOptions {
         self.attribute_position
     }
 
+    fn bracket_same_line(&self) -> biome_formatter::BracketSameLine {
+        self.bracket_same_line
+    }
+
     fn bracket_spacing(&self) -> BracketSpacing {
         self.bracket_spacing
     }
@@ -521,26 +526,5 @@ impl fmt::Display for ArrowParentheses {
             ArrowParentheses::AsNeeded => write!(f, "As needed"),
             ArrowParentheses::Always => write!(f, "Always"),
         }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Merge, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
-    serde(rename_all = "camelCase")
-)]
-pub struct BracketSameLine(bool);
-
-impl BracketSameLine {
-    /// Return the boolean value for this [BracketSameLine]
-    pub fn value(&self) -> bool {
-        self.0
-    }
-}
-
-impl From<bool> for BracketSameLine {
-    fn from(value: bool) -> Self {
-        Self(value)
     }
 }

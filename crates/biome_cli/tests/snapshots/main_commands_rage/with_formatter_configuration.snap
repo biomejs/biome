@@ -97,7 +97,7 @@ JavaScript Formatter:
   Semicolons:                   Always
   Arrow parentheses:            Always
   Bracket spacing:              unset
-  Bracket same line:            false
+  Bracket same line:            None
   Quote style:                  Double
   Indent style:                 Tab
   Indent width:                 2

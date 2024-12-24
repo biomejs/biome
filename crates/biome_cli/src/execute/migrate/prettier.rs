@@ -202,6 +202,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
             line_width: Some(line_width),
             indent_style: Some(indent_style),
             line_ending: Some(value.end_of_line.into()),
+            bracket_same_line: Some(value.bracket_line.into()),
             attribute_position: Some(AttributePosition::default()),
             format_with_errors: Some(false),
             ignore: None,
@@ -236,7 +237,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
             line_ending: None,
             enabled: None,
             // js ones
-            bracket_same_line: Some(value.bracket_line),
+            bracket_same_line: Some(value.bracket_line.into()),
             arrow_parentheses: Some(value.arrow_parens.into()),
             semicolons: Some(semicolons),
             trailing_commas: Some(value.trailing_comma.into()),
@@ -337,7 +338,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
             }
         });
         let js_formatter = biome_configuration::PartialJavascriptFormatter {
-            bracket_same_line: options.bracket_line,
+            bracket_same_line: options.bracket_line.map(Into::into),
             arrow_parentheses: options.arrow_parens.map(|arrow_parens| arrow_parens.into()),
             semicolons,
             trailing_commas: options

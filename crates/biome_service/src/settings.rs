@@ -17,7 +17,8 @@ use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::Merge;
 use biome_formatter::{
-    AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
+    AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
+    LineWidth,
 };
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
@@ -477,6 +478,7 @@ pub struct FormatSettings {
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
     pub attribute_position: Option<AttributePosition>,
+    pub bracket_same_line: Option<BracketSameLine>,
     pub bracket_spacing: Option<BracketSpacing>,
     /// List of ignore paths/files
     pub ignored_files: Matcher,
@@ -494,6 +496,7 @@ impl Default for FormatSettings {
             line_ending: Some(LineEnding::default()),
             line_width: Some(LineWidth::default()),
             attribute_position: Some(AttributePosition::default()),
+            bracket_same_line: Some(BracketSameLine::default()),
             bracket_spacing: Some(BracketSpacing::default()),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
@@ -514,6 +517,7 @@ pub struct OverrideFormatSettings {
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
     pub bracket_spacing: Option<BracketSpacing>,
+    pub bracket_same_line: Option<BracketSameLine>,
     pub attribute_position: Option<AttributePosition>,
 }
 
@@ -650,7 +654,7 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         language_setting.formatter.trailing_commas = Some(formatter.trailing_commas);
         language_setting.formatter.semicolons = Some(formatter.semicolons);
         language_setting.formatter.arrow_parentheses = Some(formatter.arrow_parentheses);
-        language_setting.formatter.bracket_same_line = Some(formatter.bracket_same_line.into());
+        language_setting.formatter.bracket_same_line = formatter.bracket_same_line;
         language_setting.formatter.enabled = Some(formatter.enabled);
         language_setting.formatter.line_width = formatter.line_width;
         language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
@@ -1446,6 +1450,7 @@ pub fn to_override_settings(
                 line_ending: formatter.line_ending,
                 line_width: formatter.line_width,
                 bracket_spacing: formatter.bracket_spacing,
+                bracket_same_line: formatter.bracket_same_line,
                 attribute_position: formatter.attribute_position,
             })
             .unwrap_or_default();
@@ -1614,6 +1619,7 @@ pub fn to_format_settings(
         line_width: Some(conf.line_width),
         format_with_errors: conf.format_with_errors,
         attribute_position: Some(conf.attribute_position),
+        bracket_same_line: Some(conf.bracket_same_line),
         bracket_spacing: Some(conf.bracket_spacing),
         ignored_files: Matcher::from_globs(
             working_directory.clone(),
@@ -1641,6 +1647,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             line_ending: conf.line_ending,
             line_width: conf.line_width,
             attribute_position: Some(AttributePosition::default()),
+            bracket_same_line: conf.bracket_same_line,
             bracket_spacing: Some(BracketSpacing::default()),
             format_with_errors: conf.format_with_errors.unwrap_or_default(),
             ignored_files: Matcher::empty(),
