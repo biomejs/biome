@@ -1,7 +1,7 @@
 use super::{determine_fix_file_mode, FixFileModeOptions, LoadEditorConfig};
 use crate::cli_options::CliOptions;
 use crate::commands::{get_files_to_process_with_cli_options, CommandRunner};
-use crate::{CliDiagnostic, Execution, TraversalMode};
+use crate::{check_schema_version, CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::analyzer::assists::PartialAssistsConfiguration;
 use biome_configuration::{
     organize_imports::PartialOrganizeImports, PartialConfiguration, PartialFormatterConfiguration,
@@ -58,6 +58,8 @@ impl CommandRunner for CheckCommandPayload {
             self.load_editor_config(editorconfig_search_path, &biome_configuration, fs, console)?;
         // this makes biome configuration take precedence over editorconfig configuration
         fs_configuration.merge_with(biome_configuration);
+
+        check_schema_version(&fs_configuration, console);
 
         let formatter = fs_configuration
             .formatter

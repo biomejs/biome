@@ -1,7 +1,7 @@
 use super::{determine_fix_file_mode, FixFileModeOptions};
 use crate::cli_options::CliOptions;
 use crate::commands::{get_files_to_process_with_cli_options, CommandRunner};
-use crate::{CliDiagnostic, Execution, TraversalMode};
+use crate::{check_schema_version, CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::css::PartialCssLinter;
 use biome_configuration::javascript::PartialJavascriptLinter;
@@ -49,7 +49,7 @@ impl CommandRunner for LintCommandPayload {
         &mut self,
         loaded_configuration: LoadedConfiguration,
         _fs: &DynRef<'_, dyn FileSystem>,
-        _console: &mut dyn Console,
+        console: &mut dyn Console,
     ) -> Result<PartialConfiguration, WorkspaceError> {
         let LoadedConfiguration {
             configuration: mut fs_configuration,
@@ -74,6 +74,8 @@ impl CommandRunner for LintCommandPayload {
             vcs: self.vcs_configuration.clone(),
             ..Default::default()
         });
+
+        check_schema_version(&fs_configuration, console);
 
         if self.css_linter.is_some() {
             let css = fs_configuration.css.get_or_insert_with(Default::default);
