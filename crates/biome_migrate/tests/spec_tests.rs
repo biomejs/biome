@@ -53,6 +53,7 @@ fn run_test(input: &'static str, _: &str, directory_path: &str, _: &str) {
     if input_code.contains("/* should not generate diagnostics */") && quantity_diagnostics > 0 {
         panic!("This test should not generate diagnostics");
     }
+    env::set_var("BIOME_VERSION", "0.0.0");
 }
 
 pub(crate) fn analyze_and_snap(

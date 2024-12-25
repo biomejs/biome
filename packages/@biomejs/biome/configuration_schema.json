@@ -343,6 +343,10 @@
 		"Actions": {
 			"type": "object",
 			"properties": {
+				"recommended": {
+					"description": "It enables the assist actions recommended by Biome. `true` by default.",
+					"type": ["boolean", "null"]
+				},
 				"source": {
 					"anyOf": [{ "$ref": "#/definitions/Source" }, { "type": "null" }]
 				}
@@ -3478,6 +3482,10 @@
 						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Options" },
 						{ "type": "null" }
 					]
+				},
+				"recommended": {
+					"description": "It enables the recommended rules for this group",
+					"type": ["boolean", "null"]
 				},
 				"useSortedAttributes": {
 					"description": "Enforce attribute sorting in JSX elements.",

@@ -317,6 +317,10 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	useIgnoreFile?: boolean;
 }
 export interface Actions {
+	/**
+	 * It enables the assist actions recommended by Biome. `true` by default.
+	 */
+	recommended?: boolean;
 	source?: Source;
 }
 /**
@@ -654,6 +658,10 @@ export interface Source {
 	 * Provides a whole-source code action to sort the imports in the file using import groups and natural ordering.
 	 */
 	organizeImports?: RuleAssistConfiguration_for_Options;
+	/**
+	 * It enables the recommended rules for this group
+	 */
+	recommended?: boolean;
 	/**
 	 * Enforce attribute sorting in JSX elements.
 	 */
@@ -3272,7 +3280,8 @@ export type Category =
 	| "internalError/panic"
 	| "reporter/parse"
 	| "reporter/format"
-	| "reporter/analyzer"
+	| "reporter/assist"
+	| "reporter/linter"
 	| "parse"
 	| "lint"
 	| "lint/a11y"
