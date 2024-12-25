@@ -2,11 +2,11 @@ use super::compilation_context::NodeCompilationContext;
 use crate::util::TextRangeGritExt;
 use biome_grit_syntax::GritVariable;
 use biome_rowan::AstNode;
+use camino::Utf8Path;
 use grit_pattern_matcher::constants::GLOBAL_VARS_SCOPE_INDEX;
 use grit_pattern_matcher::pattern::{Variable, VariableSource};
 use grit_util::ByteRange;
 use std::collections::BTreeSet;
-use std::path::Path;
 
 pub(crate) struct VariableCompiler;
 
@@ -101,9 +101,7 @@ impl<'a> NodeCompilationContext<'a> {
 
         scope.push(VariableSource::Compiled {
             name,
-            file: path
-                .map(|p| p.to_string_lossy().to_string())
-                .unwrap_or_default(),
+            file: path.map(|p| p.to_string()).unwrap_or_default(),
             locations,
         });
         Variable::new(scope_index, index)
@@ -111,6 +109,6 @@ impl<'a> NodeCompilationContext<'a> {
 }
 
 pub struct FileLocation<'a> {
-    path: Option<&'a Path>,
+    path: Option<&'a Utf8Path>,
     range: ByteRange,
 }

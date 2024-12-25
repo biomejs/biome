@@ -2,9 +2,9 @@ use biome_grit_patterns::{
     compile_pattern_with_options, CompilePatternOptions, GritTargetFile, GritTargetLanguage,
     JsTargetLanguage,
 };
+use camino::Utf8Path;
 use criterion::measurement::WallTime;
 use std::collections::HashMap;
-use std::path::Path;
 use xtask_bench::TestCase;
 
 #[cfg(not(feature = "codspeed"))]
@@ -53,7 +53,7 @@ pub fn bench_search_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestC
 
     let query = compile_pattern_with_options(
         "`getEntityNameForExtendingInterface(errorLocation)`",
-        CompilePatternOptions::default().with_path(Path::new("bench.grit")),
+        CompilePatternOptions::default().with_path(Utf8Path::new("bench.grit")),
     )
     .unwrap();
 

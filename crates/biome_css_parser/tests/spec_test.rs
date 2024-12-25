@@ -10,6 +10,7 @@ use biome_fs::BiomePath;
 use biome_rowan::SyntaxKind;
 use biome_service::settings::Settings;
 use biome_test_utils::has_bogus_nodes_or_empty_slots;
+use camino::Utf8Path;
 use std::fmt::Write;
 use std::fs;
 use std::path::Path;
@@ -45,7 +46,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         // TODO: find a way to make it configurable
         .allow_metavariables();
 
-    let options_path = Path::new(test_directory).join("options.json");
+    let options_path = Utf8Path::new(test_directory).join("options.json");
 
     if options_path.exists() {
         let mut options_path = BiomePath::new(&options_path);

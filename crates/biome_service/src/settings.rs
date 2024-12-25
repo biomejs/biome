@@ -34,13 +34,13 @@ use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_project::{NodeJsProject, PackageJson};
+use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::borrow::Cow;
 use std::num::NonZeroU64;
 use std::ops::Deref;
-use std::path::{Path, PathBuf};
 use std::sync::RwLock;
 use tracing::trace;
 
@@ -119,7 +119,7 @@ impl WorkspaceSettings {
     }
 
     /// Inserts a new project using its folder.
-    pub fn insert_project(&self, workspace_path: impl Into<PathBuf>) -> ProjectKey {
+    pub fn insert_project(&self, workspace_path: impl Into<Utf8PathBuf>) -> ProjectKey {
         let path = BiomePath::new(workspace_path.into());
         trace!("Insert workspace folder: {:?}", path);
         let key = ProjectKey::new();
@@ -151,7 +151,7 @@ impl WorkspaceSettings {
     }
 
     /// Remove a project using its folder.
-    pub fn remove_project(&self, project_path: &Path) {
+    pub fn remove_project(&self, project_path: &Utf8Path) {
         let data = self.data.pin();
         for (key, project_data) in data.iter() {
             if project_data.path.as_path() == project_path {
@@ -194,7 +194,7 @@ impl WorkspaceSettings {
     pub fn path_belongs_only_to_project_with_path(
         &self,
         path: &BiomePath,
-        project_path: &Path,
+        project_path: &Utf8Path,
     ) -> bool {
         let mut belongs_to_project = false;
         let mut belongs_to_other = false;
@@ -223,7 +223,7 @@ impl WorkspaceSettings {
     }
 
     /// Check whether a file is ignored in the feature `ignore`/`include`
-    pub fn is_ignored_by_feature_config(&self, path: &Path, feature: FeatureKind) -> bool {
+    pub fn is_ignored_by_feature_config(&self, path: &Utf8Path, feature: FeatureKind) -> bool {
         let data = self.data.pin();
         let Some(project_data) = data.get(&self.get_current_project_key()) else {
             return false;
@@ -286,8 +286,8 @@ impl Settings {
     pub fn merge_with_configuration(
         &mut self,
         configuration: PartialConfiguration,
-        working_directory: Option<PathBuf>,
-        vcs_path: Option<PathBuf>,
+        working_directory: Option<Utf8PathBuf>,
+        vcs_path: Option<Utf8PathBuf>,
         gitignore_matches: &[String],
     ) -> Result<(), WorkspaceError> {
         // formatter part
@@ -411,7 +411,7 @@ impl Settings {
     }
 
     /// Returns linter rules taking overrides into account.
-    pub fn as_linter_rules(&self, path: &Path) -> Option<Cow<Rules>> {
+    pub fn as_linter_rules(&self, path: &Utf8Path) -> Option<Cow<Rules>> {
         let mut result = self.linter.rules.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
@@ -434,7 +434,7 @@ impl Settings {
     /// Extract the domains applied to the given `path`, by looking that the base `domains`, and the once applied by `overrides`
     pub fn as_linter_domains(
         &self,
-        path: &Path,
+        path: &Utf8Path,
     ) -> Option<Cow<FxHashMap<RuleDomain, RuleDomainValue>>> {
         let mut result = self.linter.domains.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
@@ -457,7 +457,7 @@ impl Settings {
     }
 
     /// Returns assists rules taking overrides into account.
-    pub fn as_assist_actions(&self, path: &Path) -> Option<Cow<Actions>> {
+    pub fn as_assist_actions(&self, path: &Utf8Path) -> Option<Cow<Actions>> {
         let mut result = self.assist.actions.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
@@ -857,9 +857,9 @@ impl Default for FilesSettings {
 }
 
 fn to_file_settings(
-    working_directory: Option<PathBuf>,
+    working_directory: Option<Utf8PathBuf>,
     config: Option<FilesConfiguration>,
-    vcs_config_path: Option<PathBuf>,
+    vcs_config_path: Option<Utf8PathBuf>,
     gitignore_matches: &[String],
 ) -> Result<Option<FilesSettings>, WorkspaceError> {
     let config = if let Some(config) = config {
@@ -963,7 +963,7 @@ pub struct OverrideSettings {
 
 impl OverrideSettings {
     /// Checks whether at least one override excludes the provided `path`
-    pub fn is_path_excluded(&self, path: &Path) -> Option<bool> {
+    pub fn is_path_excluded(&self, path: &Utf8Path) -> Option<bool> {
         for pattern in &self.patterns {
             if pattern.exclude.matches_path(path) {
                 return Some(true);
@@ -972,7 +972,7 @@ impl OverrideSettings {
         None
     }
     /// Checks whether at least one override include the provided `path`
-    pub fn is_path_included(&self, path: &Path) -> Option<bool> {
+    pub fn is_path_included(&self, path: &Utf8Path) -> Option<bool> {
         for pattern in &self.patterns {
             if pattern.include.matches_path(path) {
                 return Some(true);
@@ -984,7 +984,7 @@ impl OverrideSettings {
     /// It scans the current override rules and return the formatting options that of the first override is matched
     pub fn override_js_format_options(
         &self,
-        path: &Path,
+        path: &Utf8Path,
         mut options: JsFormatOptions,
     ) -> JsFormatOptions {
         for pattern in self.patterns.iter() {
@@ -1036,7 +1036,7 @@ impl OverrideSettings {
     /// It scans the current override rules and return the json format that of the first override is matched
     pub fn to_override_json_format_options(
         &self,
-        path: &Path,
+        path: &Utf8Path,
         mut options: JsonFormatOptions,
     ) -> JsonFormatOptions {
         for pattern in self.patterns.iter() {
@@ -1050,7 +1050,7 @@ impl OverrideSettings {
     /// It scans the current override rules and return the formatting options that of the first override is matched
     pub fn to_override_css_format_options(
         &self,
-        path: &Path,
+        path: &Utf8Path,
         mut options: CssFormatOptions,
     ) -> CssFormatOptions {
         for pattern in self.patterns.iter() {
@@ -1064,7 +1064,7 @@ impl OverrideSettings {
     /// It scans the current override rules and return the formatting options that of the first override is matched
     pub fn to_override_graphql_format_options(
         &self,
-        path: &Path,
+        path: &Utf8Path,
         mut options: GraphqlFormatOptions,
     ) -> GraphqlFormatOptions {
         for pattern in self.patterns.iter() {
@@ -1077,7 +1077,7 @@ impl OverrideSettings {
 
     pub fn to_override_grit_format_options(
         &self,
-        path: &Path,
+        path: &Utf8Path,
         mut options: GritFormatOptions,
     ) -> GritFormatOptions {
         for pattern in self.patterns.iter() {
@@ -1090,7 +1090,7 @@ impl OverrideSettings {
 
     pub fn to_override_html_format_options(
         &self,
-        path: &Path,
+        path: &Utf8Path,
         mut options: HtmlFormatOptions,
     ) -> HtmlFormatOptions {
         for pattern in self.patterns.iter() {
@@ -1103,7 +1103,7 @@ impl OverrideSettings {
 
     pub fn to_override_js_parser_options(
         &self,
-        path: &Path,
+        path: &Utf8Path,
         mut options: JsParserOptions,
     ) -> JsParserOptions {
         for pattern in self.patterns.iter() {
@@ -1116,7 +1116,7 @@ impl OverrideSettings {
 
     pub fn to_override_json_parser_options(
         &self,
-        path: &Path,
+        path: &Utf8Path,
         mut options: JsonParserOptions,
     ) -> JsonParserOptions {
         for pattern in self.patterns.iter() {
@@ -1130,7 +1130,7 @@ impl OverrideSettings {
     /// It scans the current override rules and return the parser options that of the first override is matched
     pub fn to_override_css_parser_options(
         &self,
-        path: &Path,
+        path: &Utf8Path,
         mut options: CssParserOptions,
     ) -> CssParserOptions {
         for pattern in self.patterns.iter() {
@@ -1144,7 +1144,7 @@ impl OverrideSettings {
     /// Retrieves the options of lint rules that have been overridden
     pub fn override_analyzer_rules(
         &self,
-        path: &Path,
+        path: &Utf8Path,
         mut analyzer_rules: AnalyzerRules,
     ) -> AnalyzerRules {
         for pattern in self.patterns.iter() {
@@ -1177,7 +1177,7 @@ impl OverrideSettings {
     }
 
     /// Scans the overrides and checks if there's an override that disable the formatter for `path`
-    pub fn formatter_disabled(&self, path: &Path) -> Option<bool> {
+    pub fn formatter_disabled(&self, path: &Utf8Path) -> Option<bool> {
         // Reverse the traversal as only the last override takes effect
         self.patterns.iter().rev().find_map(|pattern| {
             if let Some(enabled) = pattern.formatter.enabled {
@@ -1190,7 +1190,7 @@ impl OverrideSettings {
     }
 
     /// Scans the overrides and checks if there's an override that disable the linter for `path`
-    pub fn linter_disabled(&self, path: &Path) -> Option<bool> {
+    pub fn linter_disabled(&self, path: &Utf8Path) -> Option<bool> {
         // Reverse the traversal as only the last override takes effect
         self.patterns.iter().rev().find_map(|pattern| {
             if let Some(enabled) = pattern.linter.enabled {
@@ -1203,7 +1203,7 @@ impl OverrideSettings {
     }
 
     /// Scans the overrides and checks if there's an override that disable the organize imports for `path`
-    pub fn organize_imports_disabled(&self, path: &Path) -> Option<bool> {
+    pub fn organize_imports_disabled(&self, path: &Utf8Path) -> Option<bool> {
         // Reverse the traversal as only the last override takes effect
         self.patterns.iter().rev().find_map(|pattern| {
             if let Some(enabled) = pattern.organize_imports.enabled {
@@ -1216,7 +1216,7 @@ impl OverrideSettings {
     }
 
     /// Scans the overrides and checks if there's an override that disable the assist for `path`
-    pub fn assist_disabled(&self, path: &Path) -> Option<bool> {
+    pub fn assist_disabled(&self, path: &Utf8Path) -> Option<bool> {
         // Reverse the traversal as only the last override takes effect
         self.patterns.iter().rev().find_map(|pattern| {
             if let Some(enabled) = pattern.assist.enabled {
@@ -1432,30 +1432,30 @@ impl OverrideSettingPattern {
     fn analyzer_rules_mut(&self, _analyzer_rules: &mut AnalyzerRules) {}
 }
 
-fn to_git_ignore(path: PathBuf, matches: &[String]) -> Result<Gitignore, WorkspaceError> {
+fn to_git_ignore(path: Utf8PathBuf, matches: &[String]) -> Result<Gitignore, WorkspaceError> {
     let mut gitignore_builder = GitignoreBuilder::new(path.clone());
 
     for the_match in matches {
         gitignore_builder
-            .add_line(Some(path.clone()), the_match)
+            .add_line(Some(path.clone().into_std_path_buf()), the_match)
             .map_err(|err| {
                 BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
                     message: err.to_string(),
-                    file_path: path.to_str().map(|s| s.to_string()),
+                    file_path: Some(path.to_string()),
                 })
             })?;
     }
     let gitignore = gitignore_builder.build().map_err(|err| {
         BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
             message: err.to_string(),
-            file_path: path.to_str().map(|s| s.to_string()),
+            file_path: Some(path.to_string()),
         })
     })?;
     Ok(gitignore)
 }
 
 pub fn to_organize_imports_settings(
-    working_directory: Option<PathBuf>,
+    working_directory: Option<Utf8PathBuf>,
     organize_imports: OrganizeImports,
 ) -> Result<OrganizeImportsSettings, WorkspaceError> {
     Ok(OrganizeImportsSettings {
@@ -1486,7 +1486,7 @@ impl TryFrom<OverrideOrganizeImportsConfiguration> for OrganizeImportsSettings {
 }
 
 pub fn to_override_settings(
-    working_directory: Option<PathBuf>,
+    working_directory: Option<Utf8PathBuf>,
     overrides: Overrides,
     current_settings: &Settings,
 ) -> Result<OverrideSettings, WorkspaceError> {
@@ -1656,7 +1656,7 @@ fn to_graphql_language_settings(
 }
 
 pub fn to_format_settings(
-    working_directory: Option<PathBuf>,
+    working_directory: Option<Utf8PathBuf>,
     conf: FormatterConfiguration,
 ) -> Result<FormatSettings, WorkspaceError> {
     let indent_style = conf.indent_style;
@@ -1706,7 +1706,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
 }
 
 pub fn to_linter_settings(
-    working_directory: Option<PathBuf>,
+    working_directory: Option<Utf8PathBuf>,
     conf: LinterConfiguration,
 ) -> Result<LinterSettings, WorkspaceError> {
     Ok(LinterSettings {
@@ -1739,7 +1739,7 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
 }
 
 pub fn to_assist_settings(
-    working_directory: Option<PathBuf>,
+    working_directory: Option<Utf8PathBuf>,
     conf: AssistConfiguration,
 ) -> Result<AssistSettings, WorkspaceError> {
     Ok(AssistSettings {

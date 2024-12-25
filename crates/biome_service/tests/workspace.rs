@@ -1,8 +1,5 @@
 #[cfg(test)]
 mod test {
-    use std::num::NonZero;
-    use std::path::PathBuf;
-
     use biome_analyze::RuleCategories;
     use biome_configuration::analyzer::{RuleGroup, RuleSelector};
     use biome_configuration::{PartialConfiguration, PartialFilesConfiguration};
@@ -15,6 +12,8 @@ mod test {
         UpdateSettingsParams,
     };
     use biome_service::{Workspace, WorkspaceError};
+    use camino::Utf8PathBuf;
+    use std::num::NonZero;
 
     fn create_server() -> Box<dyn Workspace> {
         let workspace = server(Box::new(MemoryFileSystem::default()));
@@ -306,14 +305,14 @@ type User {
         const FILE_B_CONTENT: &[u8] = b"import { foo } from './a.ts';\nfunction bar() {}";
 
         let mut fs = MemoryFileSystem::default();
-        fs.insert(PathBuf::from("/project/a.ts"), FILE_A_CONTENT);
-        fs.insert(PathBuf::from("/project/b.ts"), FILE_B_CONTENT);
+        fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_A_CONTENT);
+        fs.insert(Utf8PathBuf::from("/project/b.ts"), FILE_B_CONTENT);
 
         let workspace = server(Box::new(fs));
         workspace
             .register_project_folder(RegisterProjectFolderParams {
                 set_as_current_workspace: true,
-                path: Some(PathBuf::from("/project")),
+                path: Some(Utf8PathBuf::from("/project").into()),
             })
             .unwrap();
 
@@ -356,7 +355,7 @@ type User {
 
         workspace
             .unregister_project_folder(UnregisterProjectFolderParams {
-                path: PathBuf::from("/project"),
+                path: Utf8PathBuf::from("/project").into(),
             })
             .unwrap();
 
@@ -372,13 +371,13 @@ type User {
         const FILE_CONTENT: &[u8] = b"console.log(`I'm YUUUGE!`);";
 
         let mut fs = MemoryFileSystem::default();
-        fs.insert(PathBuf::from("/project/a.ts"), FILE_CONTENT);
+        fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
 
         let workspace = server(Box::new(fs));
         workspace
             .register_project_folder(RegisterProjectFolderParams {
                 set_as_current_workspace: true,
-                path: Some(PathBuf::from("/project")),
+                path: Some(Utf8PathBuf::from("/project").into()),
             })
             .unwrap();
 

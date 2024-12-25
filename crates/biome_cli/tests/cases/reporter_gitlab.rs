@@ -3,7 +3,7 @@ use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 const MAIN_1: &str = r#"import { z} from "z"
 import { z, b , a} from "lodash"
@@ -50,10 +50,10 @@ fn reports_diagnostics_gitlab_check_command() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path1 = Path::new("main.ts");
+    let file_path1 = Utf8Path::new("main.ts");
     fs.insert(file_path1.into(), MAIN_1.as_bytes());
 
-    let file_path2 = Path::new("index.ts");
+    let file_path2 = Utf8Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
     let (fs, result) = run_cli(
@@ -87,10 +87,10 @@ fn reports_diagnostics_gitlab_ci_command() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path1 = Path::new("main.ts");
+    let file_path1 = Utf8Path::new("main.ts");
     fs.insert(file_path1.into(), MAIN_1.as_bytes());
 
-    let file_path2 = Path::new("index.ts");
+    let file_path2 = Utf8Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
     let (fs, result) = run_cli(
@@ -124,10 +124,10 @@ fn reports_diagnostics_gitlab_lint_command() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path1 = Path::new("main.ts");
+    let file_path1 = Utf8Path::new("main.ts");
     fs.insert(file_path1.into(), MAIN_1.as_bytes());
 
-    let file_path2 = Path::new("index.ts");
+    let file_path2 = Utf8Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
     let (fs, result) = run_cli(
@@ -161,10 +161,10 @@ fn reports_diagnostics_gitlab_format_command() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path1 = Path::new("main.ts");
+    let file_path1 = Utf8Path::new("main.ts");
     fs.insert(file_path1.into(), MAIN_1.as_bytes());
 
-    let file_path2 = Path::new("index.ts");
+    let file_path2 = Utf8Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
     let (fs, result) = run_cli(

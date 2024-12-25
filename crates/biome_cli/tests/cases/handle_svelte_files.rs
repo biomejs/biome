@@ -3,7 +3,7 @@ use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayloa
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 const SVELTE_FILE_IMPORTS_BEFORE: &str = r#"<script lang="ts">
 import Button from "./components/Button.svelte";
@@ -51,7 +51,7 @@ fn sorts_imports_check() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let svelte_file_path = Path::new("file.svelte");
+    let svelte_file_path = Utf8Path::new("file.svelte");
     fs.insert(
         svelte_file_path.into(),
         SVELTE_FILE_IMPORTS_BEFORE.as_bytes(),
@@ -89,7 +89,7 @@ fn sorts_imports_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let svelte_file_path = Path::new("file.svelte");
+    let svelte_file_path = Utf8Path::new("file.svelte");
     fs.insert(
         svelte_file_path.into(),
         SVELTE_FILE_IMPORTS_BEFORE.as_bytes(),
@@ -128,7 +128,7 @@ fn format_svelte_ts_context_module_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let svelte_file_path = Path::new("file.svelte");
+    let svelte_file_path = Utf8Path::new("file.svelte");
     fs.insert(
         svelte_file_path.into(),
         SVELTE_TS_CONTEXT_MODULE_FILE_UNFORMATTED.as_bytes(),
@@ -162,7 +162,7 @@ fn format_svelte_ts_context_module_files_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let svelte_file_path = Path::new("file.svelte");
+    let svelte_file_path = Utf8Path::new("file.svelte");
     fs.insert(
         svelte_file_path.into(),
         SVELTE_TS_CONTEXT_MODULE_FILE_UNFORMATTED.as_bytes(),
@@ -203,7 +203,7 @@ fn format_svelte_carriage_return_line_feed_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let svelte_file_path = Path::new("file.svelte");
+    let svelte_file_path = Utf8Path::new("file.svelte");
     fs.insert(
         svelte_file_path.into(),
         SVELTE_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED.as_bytes(),

@@ -11,9 +11,9 @@ pub mod dome;
 #[cfg(feature = "schema")]
 pub mod workspace_types;
 
-use std::{fs, ops::Deref, path::Path};
-
+use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
+use std::ops::Deref;
 
 use biome_console::Console;
 use biome_fs::{FileSystem, OsFileSystem};
@@ -71,6 +71,6 @@ impl<'app> Deref for WorkspaceRef<'app> {
 
 /// Returns `true` if `path` is a directory or
 /// if it is a symlink that resolves to a directory.
-fn is_dir(path: &Path) -> bool {
-    path.is_dir() || (path.is_symlink() && fs::read_link(path).is_ok_and(|path| path.is_dir()))
+fn is_dir(path: &Utf8Path) -> bool {
+    path.is_dir() || (path.is_symlink() && path.read_link_utf8().is_ok_and(|path| path.is_dir()))
 }

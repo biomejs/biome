@@ -13,12 +13,11 @@ use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
 use biome_grit_patterns::CompileError;
 use biome_js_analyze::utils::rename::RenameError;
+use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
-use std::ffi::OsStr;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
-use std::path::Path;
 use std::process::{ExitCode, Termination};
 
 /// Generic errors thrown during biome operations
@@ -165,6 +164,7 @@ impl From<CantLoadExtendFile> for WorkspaceError {
         WorkspaceError::Configuration(BiomeDiagnostic::CantLoadExtendFile(value).into())
     }
 }
+
 impl From<WorkspaceError> for biome_diagnostics::serde::Diagnostic {
     fn from(error: WorkspaceError) -> Self {
         biome_diagnostics::serde::Diagnostic::new(error)
@@ -194,22 +194,22 @@ impl From<Panic> for biome_diagnostics::serde::Diagnostic {
 }
 
 impl Panic {
-    pub fn with_file(path: &Path) -> Self {
+    pub fn with_file(path: &Utf8Path) -> Self {
         Self {
             message: MessageAndDescription::from(
                 markup! {
-                    "A task panicked while processing "<Emphasis>{path.display().to_string()}</Emphasis>
+                    "A task panicked while processing "<Emphasis>{path.to_string()}</Emphasis>
                 }
                 .to_owned(),
             ),
         }
     }
 
-    pub fn with_file_and_message(path: &Path, message: impl Into<String>) -> Self {
+    pub fn with_file_and_message(path: &Utf8Path, message: impl Into<String>) -> Self {
         Self {
             message: MessageAndDescription::from(
                 markup! {
-                    "A task panicked while processing "<Emphasis>{path.display().to_string()}</Emphasis>": "{message.into()}
+                    "A task panicked while processing "<Emphasis>{path.to_string()}</Emphasis>": "{message.into()}
                 }
                 .to_owned(),
             ),
@@ -406,11 +406,8 @@ pub fn extension_error(path: &BiomePath) -> WorkspaceError {
     let file_source = DocumentFileSource::from_path(path);
     WorkspaceError::source_file_not_supported(
         file_source,
-        path.clone().display().to_string(),
-        path.clone()
-            .extension()
-            .and_then(OsStr::to_str)
-            .map(str::to_string),
+        path.clone().to_string(),
+        path.clone().extension().map(|p| p.to_string()),
     )
 }
 
@@ -557,7 +554,6 @@ mod test {
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
     use biome_formatter::FormatError;
     use biome_fs::BiomePath;
-    use std::ffi::OsStr;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
         let content = print_diagnostic_to_string(&diagnostic);
@@ -612,8 +608,8 @@ mod test {
             "source_file_not_supported",
             WorkspaceError::SourceFileNotSupported(SourceFileNotSupported {
                 file_source: DocumentFileSource::Unknown,
-                path: path.display().to_string(),
-                extension: path.extension().and_then(OsStr::to_str).map(str::to_string),
+                path: path.to_string(),
+                extension: path.extension().map(str::to_string),
             })
             .with_file_path("not_supported.toml"),
         )

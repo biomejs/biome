@@ -5,13 +5,13 @@ use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 #[test]
 fn enables_react_rules_via_dependencies() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("package.json");
+    let file_path = Utf8Path::new("package.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -33,7 +33,7 @@ function Component2() {
     }, [local, local]);
 }
     "#;
-    let test = Path::new("test.jsx");
+    let test = Utf8Path::new("test.jsx");
     fs.insert(test.into(), content.as_bytes());
 
     let (fs, result) = run_cli(
@@ -57,7 +57,7 @@ function Component2() {
 fn enables_test_globals_via_dependencies() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("package.json");
+    let file_path = Utf8Path::new("package.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -80,7 +80,7 @@ describe("foo", () => {
 	});
 });
     "#;
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), content.as_bytes());
 
     let (fs, result) = run_cli(
@@ -104,7 +104,7 @@ describe("foo", () => {
 fn enables_rules_via_dependencies_but_disable_rule_from_config() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("package.json");
+    let file_path = Utf8Path::new("package.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -126,10 +126,10 @@ function Component2() {
     }, [local, local]);
 }
     "#;
-    let test = Path::new("test.jsx");
+    let test = Utf8Path::new("test.jsx");
     fs.insert(test.into(), content.as_bytes());
 
-    let config = Path::new("biome.json");
+    let config = Utf8Path::new("biome.json");
     fs.insert(
         config.into(),
         r#"{

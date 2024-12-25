@@ -40,6 +40,7 @@ biome_rowan              = { workspace = true }
 biome_service            = { workspace = true }
 biome_text_edit          = { workspace = true }
 bpaf                     = { workspace = true, features = ["bright-color"] }
+camino                   = { workspace = true }
 crossbeam                = { workspace = true }
 dashmap                  = { workspace = true }
 hdrhistogram             = { version = "7.5.4", default-features = false }

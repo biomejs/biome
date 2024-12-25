@@ -3,17 +3,17 @@ use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 #[test]
 fn set_config_path_to_directory() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("src/index.js");
+    let file_path = Utf8Path::new("src/index.js");
     fs.insert(file_path.into(), "a['b']  =  42;".as_bytes());
 
-    let config_path = Path::new("config/biome.jsonc");
+    let config_path = Utf8Path::new("config/biome.jsonc");
     fs.insert(
         config_path.into(),
         r#"{
@@ -57,10 +57,10 @@ fn set_config_path_to_file() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("src/index.js");
+    let file_path = Utf8Path::new("src/index.js");
     fs.insert(file_path.into(), "a['b']  =  42;".as_bytes());
 
-    let config_path = Path::new("config/a.jsonc");
+    let config_path = Utf8Path::new("config/a.jsonc");
     fs.insert(
         config_path.into(),
         r#"{

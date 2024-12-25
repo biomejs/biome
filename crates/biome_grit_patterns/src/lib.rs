@@ -35,7 +35,7 @@ pub use grit_target_language::{GritTargetLanguage, JsTargetLanguage};
 pub use grit_target_node::{GritTargetLanguageNode, GritTargetNode, GritTargetSyntaxKind};
 
 use biome_grit_parser::parse_grit;
-use std::path::Path;
+use camino::Utf8Path;
 
 /// Compiles a Grit pattern from the given source string with default options.
 pub fn compile_pattern(source: &str) -> Result<GritQuery, CompileError> {
@@ -75,7 +75,7 @@ pub fn compile_pattern_with_options(
 pub struct CompilePatternOptions<'a> {
     default_language: GritTargetLanguage,
     extra_built_ins: Vec<BuiltInFunction>,
-    path: Option<&'a Path>,
+    path: Option<&'a Utf8Path>,
 }
 
 impl<'a> CompilePatternOptions<'a> {
@@ -89,7 +89,7 @@ impl<'a> CompilePatternOptions<'a> {
         self
     }
 
-    pub fn with_path(mut self, path: &'a Path) -> Self {
+    pub fn with_path(mut self, path: &'a Utf8Path) -> Self {
         self.path = Some(path);
         self
     }

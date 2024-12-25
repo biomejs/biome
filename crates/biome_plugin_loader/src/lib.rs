@@ -2,8 +2,6 @@ mod analyzer_grit_plugin;
 mod diagnostics;
 mod plugin_manifest;
 
-use std::path::Path;
-
 pub use analyzer_grit_plugin::AnalyzerGritPlugin;
 use biome_analyze::AnalyzerPlugin;
 use biome_console::markup;
@@ -11,6 +9,7 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_diagnostics::adapters::ResolveError;
 use biome_fs::FileSystem;
 use biome_json_parser::JsonParserOptions;
+use camino::{Utf8Path, Utf8PathBuf};
 use diagnostics::PluginDiagnostic;
 use plugin_manifest::PluginManifest;
 
@@ -26,22 +25,25 @@ impl BiomePlugin {
     pub fn load(
         fs: &dyn FileSystem,
         plugin_path: &str,
-        relative_resolution_base_path: &Path,
-        external_resolution_base_path: &Path,
+        relative_resolution_base_path: &Utf8Path,
+        external_resolution_base_path: &Utf8Path,
     ) -> Result<Self, PluginDiagnostic> {
         let plugin_path = if let Some(plugin_path) = plugin_path.strip_prefix("./") {
             relative_resolution_base_path.join(plugin_path)
         } else if plugin_path.starts_with('.') {
             relative_resolution_base_path.join(plugin_path)
         } else {
-            fs.resolve_configuration(plugin_path, external_resolution_base_path)
-                .map_err(|error| {
-                    PluginDiagnostic::cant_resolve(
-                        external_resolution_base_path.display().to_string(),
-                        Some(ResolveError::from(error)),
-                    )
-                })?
-                .into_path_buf()
+            Utf8PathBuf::from_path_buf(
+                fs.resolve_configuration(plugin_path, external_resolution_base_path)
+                    .map_err(|error| {
+                        PluginDiagnostic::cant_resolve(
+                            external_resolution_base_path.to_string(),
+                            Some(ResolveError::from(error)),
+                        )
+                    })?
+                    .into_path_buf(),
+            )
+            .expect("Valid UTF-8 path")
         };
 
         // If the plugin path references a `.grit` file directly, treat it as
@@ -60,7 +62,7 @@ impl BiomePlugin {
         let manifest_path = plugin_path.join("biome-manifest.jsonc");
         if !fs.path_is_file(&manifest_path) {
             return Err(PluginDiagnostic::cant_resolve(
-                manifest_path.display().to_string(),
+                manifest_path.to_string(),
                 None,
             ));
         }
@@ -75,7 +77,7 @@ impl BiomePlugin {
 
         let Some(manifest) = manifest else {
             return Err(PluginDiagnostic::invalid_manifest(
-                markup!("Cannot load plugin manifest "<Emphasis>{manifest_path.display().to_string()}</Emphasis>),
+                markup!("Cannot load plugin manifest "<Emphasis>{manifest_path.to_string()}</Emphasis>),
                 errors.into_iter().next(),
             ));
         };
@@ -84,6 +86,7 @@ impl BiomePlugin {
             analyzer_plugins: manifest
                 .rules
                 .into_iter()
+                .map(|rule| Utf8PathBuf::from_path_buf(rule).unwrap())
                 .map(|rule| {
                     if rule.as_os_str().as_encoded_bytes().ends_with(b".grit") {
                         let plugin = AnalyzerGritPlugin::load(fs, &plugin_path.join(rule))?;
@@ -91,7 +94,7 @@ impl BiomePlugin {
                     } else {
                         Err(PluginDiagnostic::unsupported_rule_format(markup!(
                             "Unsupported rule format for plugin rule "
-                            <Emphasis>{rule.display().to_string()}</Emphasis>
+                            <Emphasis>{rule.to_string()}</Emphasis>
                         )))
                     }
                 })
@@ -135,7 +138,7 @@ mod test {
 
         fs.insert("/my-plugin/rules/1.grit".into(), r#"`hello`"#);
 
-        let plugin = BiomePlugin::load(&fs, "./my-plugin", Path::new("/"), Path::new("/"))
+        let plugin = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"), Utf8Path::new("/"))
             .expect("Couldn't load plugin");
         assert_eq!(plugin.analyzer_plugins.len(), 1);
     }
@@ -145,7 +148,7 @@ mod test {
         let mut fs = MemoryFileSystem::default();
         fs.insert("/my-plugin/rules/1.grit".into(), r#"`hello`"#);
 
-        let error = BiomePlugin::load(&fs, "./my-plugin", Path::new("/"), Path::new("/"))
+        let error = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"), Utf8Path::new("/"))
             .expect_err("Plugin loading should've failed");
         snap_diagnostic("load_plugin_without_manifest", error.into());
     }
@@ -161,7 +164,7 @@ mod test {
 }"#,
         );
 
-        let error = BiomePlugin::load(&fs, "./my-plugin", Path::new("/"), Path::new("/"))
+        let error = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"), Utf8Path::new("/"))
             .expect_err("Plugin loading should've failed");
         snap_diagnostic("load_plugin_with_wrong_version", error.into());
     }
@@ -177,7 +180,7 @@ mod test {
 }"#,
         );
 
-        let error = BiomePlugin::load(&fs, "./my-plugin", Path::new("/"), Path::new("/"))
+        let error = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"), Utf8Path::new("/"))
             .expect_err("Plugin loading should've failed");
         snap_diagnostic("load_plugin_with_wrong_rule_extension", error.into());
     }
@@ -187,8 +190,13 @@ mod test {
         let mut fs = MemoryFileSystem::default();
         fs.insert("/my-plugin.grit".into(), r#"`hello`"#);
 
-        let plugin = BiomePlugin::load(&fs, "./my-plugin.grit", Path::new("/"), Path::new("/"))
-            .expect("Couldn't load plugin");
+        let plugin = BiomePlugin::load(
+            &fs,
+            "./my-plugin.grit",
+            Utf8Path::new("/"),
+            Utf8Path::new("/"),
+        )
+        .expect("Couldn't load plugin");
         assert_eq!(plugin.analyzer_plugins.len(), 1);
     }
 }

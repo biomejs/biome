@@ -1,6 +1,6 @@
-use std::{io, path::Path};
-
 use biome_fs::{FileSystem, OpenOptions};
+use camino::Utf8Path;
+use std::io;
 
 /// Read an ignore file that follows gitignore pattern syntax,
 /// and turn them into a list of UNIX glob patterns.
@@ -9,7 +9,7 @@ pub(crate) fn read_ignore_file(
     ignore_filename: &str,
 ) -> io::Result<IgnorePatterns> {
     let mut file = fs.open_with_options(
-        Path::new(ignore_filename),
+        Utf8Path::new(ignore_filename),
         OpenOptions::default().read(true),
     )?;
     let mut content = String::new();
@@ -89,7 +89,7 @@ mod tests {
         const IGNORE_FILE_CONTENT: &str = r#"
 # Comment 1
 # folloed by a blank line
-    
+
 # Comment 2
 # folloed by a blank line (trailing space are ignored)
 

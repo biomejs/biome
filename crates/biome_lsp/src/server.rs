@@ -13,12 +13,12 @@ use biome_service::workspace::{
     RageEntry, RageParams, RageResult, RegisterProjectFolderParams, UnregisterProjectFolderParams,
 };
 use biome_service::{workspace, Workspace};
+use camino::Utf8PathBuf;
 use futures::future::ready;
 use futures::FutureExt;
 use rustc_hash::FxHashMap;
 use serde_json::json;
 use std::panic::RefUnwindSafe;
-use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use tokio::io::{AsyncRead, AsyncWrite};
@@ -139,21 +139,21 @@ impl LSPServer {
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::String(format!(
                                 "{}/biome.json",
-                                base_path.display()
+                                base_path.as_str()
                             )),
                             kind: Some(WatchKind::all()),
                         },
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::String(format!(
                                 "{}/biome.jsonc",
-                                base_path.display()
+                                base_path.as_str()
                             )),
                             kind: Some(WatchKind::all()),
                         },
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::String(format!(
                                 "{}/.editorconfig",
-                                base_path.display()
+                                base_path.as_str()
                             )),
                             kind: Some(WatchKind::all()),
                         }
@@ -372,9 +372,7 @@ impl LanguageServer for LSPServer {
                 let result = self
                     .session
                     .workspace
-                    .unregister_project_folder(UnregisterProjectFolderParams {
-                        path: project_path.into(),
-                    })
+                    .unregister_project_folder(UnregisterProjectFolderParams { path: project_path })
                     .map_err(into_lsp_error);
 
                 if let Err(err) = result {
@@ -393,7 +391,7 @@ impl LanguageServer for LSPServer {
                     .session
                     .workspace
                     .register_project_folder(RegisterProjectFolderParams {
-                        path: Some(project_path.to_path_buf()),
+                        path: Some(project_path),
                         set_as_current_workspace: true,
                     })
                     .map_err(into_lsp_error);
@@ -560,14 +558,14 @@ impl ServerFactory {
         }
     }
 
-    pub fn create(&self, config_path: Option<PathBuf>) -> ServerConnection {
+    pub fn create(&self, config_path: Option<Utf8PathBuf>) -> ServerConnection {
         self.create_with_fs(config_path, Box::new(OsFileSystem::default()))
     }
 
     /// Create a new [ServerConnection] from this factory
     pub fn create_with_fs(
         &self,
-        config_path: Option<PathBuf>,
+        config_path: Option<Utf8PathBuf>,
         fs: Box<dyn FileSystem>,
     ) -> ServerConnection {
         let workspace = self

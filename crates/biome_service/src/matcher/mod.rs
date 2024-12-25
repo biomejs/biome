@@ -1,17 +1,14 @@
 pub mod pattern;
 
+use crate::WorkspaceError;
 use biome_configuration::BiomeDiagnostic;
 use biome_console::markup;
 use biome_diagnostics::Diagnostic;
+use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 pub use pattern::{MatchOptions, Pattern, PatternError};
 use rustc_hash::FxBuildHasher;
-use std::{
-    path::{Path, PathBuf},
-    sync::Arc,
-};
-
-use crate::WorkspaceError;
+use std::sync::Arc;
 
 /// A data structure to use when there's need to match a string or a path a against
 /// a unix shell style patterns
@@ -29,7 +26,7 @@ impl Matcher {
     ///
     /// It can raise an error if the patterns aren't valid
     pub fn from_globs(
-        working_directory: Option<PathBuf>,
+        working_directory: Option<Utf8PathBuf>,
         globs: Option<&[Box<str>]>,
     ) -> Result<Matcher, WorkspaceError> {
         let mut matcher = Inner::default();
@@ -63,14 +60,14 @@ impl Matcher {
     /// Matches the given path against the stored patterns.
     ///
     /// Returns [true] if there's at least one match.
-    pub fn matches_path(&self, source: &Path) -> bool {
+    pub fn matches_path(&self, source: &Utf8Path) -> bool {
         self.0.matches_path(source)
     }
 }
 
 #[derive(Clone, Debug, Default)]
 struct Inner {
-    root: Option<PathBuf>,
+    root: Option<Utf8PathBuf>,
     patterns: Vec<Pattern>,
     /// Check [glob website](https://docs.rs/glob/latest/glob/struct.MatchOptions.html) for [MatchOptions]
     options: MatchOptions,
@@ -90,7 +87,7 @@ impl Inner {
         }
     }
 
-    fn set_root(&mut self, root: PathBuf) {
+    fn set_root(&mut self, root: Utf8PathBuf) {
         self.root = Some(root);
     }
 
@@ -126,27 +123,23 @@ impl Inner {
     /// It matches the given path against the stored patterns
     ///
     /// It returns [true] if there's at least one match
-    fn matches_path(&self, source: &Path) -> bool {
+    fn matches_path(&self, source: &Utf8Path) -> bool {
         if self.is_empty() {
             return false;
         }
         let already_checked = self.already_checked.pin();
-        let source_as_string = source.to_str();
-        if let Some(source_as_string) = source_as_string {
-            if let Some(matches) = already_checked.get(source_as_string) {
-                return *matches;
-            }
+        let source_as_string = source.as_str();
+        if let Some(matches) = already_checked.get(source_as_string) {
+            return *matches;
         }
         let matches = self.run_match(source);
 
-        if let Some(source_as_string) = source_as_string {
-            already_checked.insert(source_as_string.to_string(), matches);
-        }
+        already_checked.insert(source_as_string.to_string(), matches);
 
         matches
     }
 
-    fn run_match(&self, source: &Path) -> bool {
+    fn run_match(&self, source: &Utf8Path) -> bool {
         for pattern in &self.patterns {
             let matches = if pattern.matches_path_with(source, self.options) {
                 true
@@ -187,6 +180,7 @@ impl Diagnostic for PatternError {
 mod test {
     use crate::matcher::pattern::MatchOptions;
     use crate::matcher::Inner;
+    use camino::Utf8PathBuf;
     use std::env;
 
     #[test]
@@ -207,7 +201,9 @@ mod test {
         let dir = format!("{}/**/*.rs", current.display());
         let mut ignore = Inner::new(MatchOptions::default());
         ignore.add_pattern(&dir).unwrap();
-        let path = env::current_dir().unwrap().join("src/workspace.rs");
+        let path = Utf8PathBuf::from_path_buf(env::current_dir().unwrap())
+            .unwrap()
+            .join("src/workspace.rs");
         let result = ignore.matches_path(path.as_path());
 
         assert!(result);
@@ -220,13 +216,18 @@ mod test {
         let mut ignore = Inner::new(MatchOptions::default());
         ignore.add_pattern(dir).unwrap();
         ignore.add_pattern(valid_test_dir).unwrap();
-
-        let path = env::current_dir().unwrap().join("tests").join("invalid");
+        let path = Utf8PathBuf::from_path_buf(env::current_dir().unwrap())
+            .unwrap()
+            .join("tests")
+            .join("invalid");
         let result = ignore.matches_path(path.as_path());
 
         assert!(!result);
 
-        let path = env::current_dir().unwrap().join("tests").join("valid");
+        let path = Utf8PathBuf::from_path_buf(env::current_dir().unwrap())
+            .unwrap()
+            .join("tests")
+            .join("valid");
         let result = ignore.matches_path(path.as_path());
 
         assert!(result);

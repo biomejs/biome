@@ -1,34 +1,35 @@
 [package]
-authors.workspace    = true
+authors.workspace = true
 categories.workspace = true
-description          = "Biome's GraphQL linter"
-edition.workspace    = true
-homepage.workspace   = true
-keywords.workspace   = true
-license.workspace    = true
-name                 = "biome_graphql_analyze"
+description = "Biome's GraphQL linter"
+edition.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+license.workspace = true
+name = "biome_graphql_analyze"
 repository.workspace = true
-version              = "0.0.1"
+version = "0.0.1"
 
 [dependencies]
-biome_analyze            = { workspace = true }
-biome_console            = { workspace = true }
-biome_deserialize        = { workspace = true }
+biome_analyze = { workspace = true }
+biome_console = { workspace = true }
+biome_deserialize = { workspace = true }
 biome_deserialize_macros = { workspace = true }
-biome_diagnostics        = { workspace = true }
-biome_graphql_factory    = { workspace = true }
-biome_graphql_syntax     = { workspace = true }
-biome_rowan              = { workspace = true }
-biome_string_case        = { workspace = true }
-biome_suppression        = { workspace = true }
-schemars                 = { workspace = true, optional = true }
-serde                    = { workspace = true, features = ["derive"] }
+biome_diagnostics = { workspace = true }
+biome_graphql_factory = { workspace = true }
+biome_graphql_syntax = { workspace = true }
+biome_rowan = { workspace = true }
+biome_string_case = { workspace = true }
+biome_suppression = { workspace = true }
+schemars = { workspace = true, optional = true }
+serde = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
 biome_graphql_parser = { path = "../biome_graphql_parser" }
-biome_test_utils     = { path = "../biome_test_utils" }
-insta                = { workspace = true, features = ["glob"] }
-tests_macros         = { path = "../tests_macros" }
+biome_test_utils = { path = "../biome_test_utils" }
+insta = { workspace = true, features = ["glob"] }
+tests_macros = { path = "../tests_macros" }
+camino = { workspace = true }
 
 [features]
 schema = ["schemars"]

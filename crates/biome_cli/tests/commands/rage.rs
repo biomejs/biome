@@ -4,7 +4,7 @@ use biome_cli::CliDiagnostic;
 use biome_console::{BufferConsole, Console};
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::{Path, PathBuf};
+use camino::{Utf8Path, Utf8PathBuf};
 use std::sync::{Mutex, MutexGuard};
 use std::{env, fs};
 
@@ -49,7 +49,7 @@ fn with_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     fs.insert(
-        Path::new("biome.json").to_path_buf(),
+        Utf8Path::new("biome.json").to_path_buf(),
         r#"{
   "formatter": {
     "enabled": false
@@ -75,7 +75,7 @@ fn with_jsonc_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     fs.insert(
-        Path::new("biome.jsonc").to_path_buf(),
+        Utf8Path::new("biome.jsonc").to_path_buf(),
         r#"{
   "formatter": {
     // disable formatter
@@ -102,7 +102,7 @@ fn with_malformed_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     fs.insert(
-        Path::new("biome.json").to_path_buf(),
+        Utf8Path::new("biome.json").to_path_buf(),
         r#"{
   "formatter": {
     "enabled":
@@ -196,7 +196,7 @@ fn with_formatter_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     fs.insert(
-        Path::new("biome.json").to_path_buf(),
+        Utf8Path::new("biome.json").to_path_buf(),
         r#"{
   "formatter": {
     "attributePosition": "multiline",
@@ -263,7 +263,7 @@ fn with_linter_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
     fs.insert(
-        Path::new("biome.json").to_path_buf(),
+        Utf8Path::new("biome.json").to_path_buf(),
         r#"{
   "linter": {
     "enabled": true,
@@ -341,7 +341,7 @@ fn assert_rage_snapshot(payload: SnapshotPayload<'_>) {
     let content = snapshot.emit_content_snapshot();
 
     let module_path = module_path.replace("::", "_");
-    let snapshot_path = PathBuf::from("../snapshots").join(module_path);
+    let snapshot_path = Utf8PathBuf::from("../snapshots").join(module_path);
 
     insta::with_settings!({
         prepend_module_to_snapshot => false,
@@ -359,7 +359,7 @@ static RAGE_GUARD: Mutex<()> = Mutex::new(());
 /// Mocks out the directory from which `rage` reads the server logs. Ensures that the test directory
 /// gets removed at the end of the test.
 struct TestLogDir {
-    path: PathBuf,
+    path: Utf8PathBuf,
     _guard: MutexGuard<'static, ()>,
 }
 
@@ -371,7 +371,7 @@ impl TestLogDir {
         env::set_var("BIOME_LOG_PATH", &path);
 
         Self {
-            path,
+            path: Utf8PathBuf::from_path_buf(path).unwrap(),
             _guard: guard,
         }
     }

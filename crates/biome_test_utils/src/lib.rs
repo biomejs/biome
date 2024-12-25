@@ -10,14 +10,14 @@ use biome_project::PackageJson;
 use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
 use biome_service::settings::{ServiceLanguage, Settings};
+use camino::Utf8Path;
 use json_comments::StripComments;
-use similar::TextDiff;
-use std::ffi::{c_int, OsStr};
+use similar::{DiffableStr, TextDiff};
+use std::ffi::c_int;
 use std::fmt::Write;
-use std::path::Path;
 use std::sync::Once;
 
-pub fn scripts_from_json(extension: &OsStr, input_code: &str) -> Option<Vec<String>> {
+pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String>> {
     if extension == "json" || extension == "jsonc" {
         let input_code = StripComments::new(input_code.as_bytes());
         let scripts: Vec<String> = serde_json::from_reader(input_code).ok()?;
@@ -28,7 +28,7 @@ pub fn scripts_from_json(extension: &OsStr, input_code: &str) -> Option<Vec<Stri
 }
 
 pub fn create_analyzer_options(
-    input_file: &Path,
+    input_file: &Utf8Path,
     diagnostics: &mut Vec<String>,
 ) -> AnalyzerOptions {
     let options = AnalyzerOptions::default().with_file_path(input_file.to_path_buf());
@@ -51,11 +51,7 @@ pub fn create_analyzer_options(
                     .into_diagnostics()
                     .into_iter()
                     .map(|diagnostic| {
-                        diagnostic_to_string(
-                            options_file.file_stem().unwrap().to_str().unwrap(),
-                            &json,
-                            diagnostic,
-                        )
+                        diagnostic_to_string(options_file.file_stem().unwrap(), &json, diagnostic)
                     })
                     .collect::<Vec<_>>(),
             );
@@ -115,7 +111,7 @@ pub fn create_analyzer_options(
     options.with_configuration(analyzer_configuration)
 }
 
-pub fn load_manifest(input_file: &Path, diagnostics: &mut Vec<String>) -> Option<PackageJson> {
+pub fn load_manifest(input_file: &Utf8Path, diagnostics: &mut Vec<String>) -> Option<PackageJson> {
     let options_file = input_file.with_extension("package.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
         let deserialized = biome_deserialize::json::deserialize_from_json_str::<PackageJson>(
@@ -129,11 +125,7 @@ pub fn load_manifest(input_file: &Path, diagnostics: &mut Vec<String>) -> Option
                     .into_diagnostics()
                     .into_iter()
                     .map(|diagnostic| {
-                        diagnostic_to_string(
-                            options_file.file_stem().unwrap().to_str().unwrap(),
-                            &json,
-                            diagnostic,
-                        )
+                        diagnostic_to_string(options_file.file_stem().unwrap(), &json, diagnostic)
                     })
                     .collect::<Vec<_>>(),
             );
@@ -202,7 +194,7 @@ pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerActi
 /// So each testing file will be run through the analyzer with only the rule
 /// corresponding to the directory name. E.g., `complexity/useWhile/test.js`
 /// will be analyzed with just the `complexity/useWhile` rule.
-pub fn parse_test_path(file: &Path) -> (&str, &str) {
+pub fn parse_test_path(file: &Utf8Path) -> (&str, &str) {
     let mut group_name = "";
     let mut rule_name = "";
 
@@ -212,7 +204,7 @@ pub fn parse_test_path(file: &Path) -> (&str, &str) {
         }
 
         rule_name = group_name;
-        group_name = component.to_str().unwrap_or_default();
+        group_name = component.as_str().unwrap_or_default();
     }
 
     (group_name, rule_name)
@@ -244,7 +236,7 @@ pub fn has_bogus_nodes_or_empty_slots<L: biome_rowan::Language>(node: &SyntaxNod
 pub fn assert_errors_are_absent<L: ServiceLanguage>(
     program: &SyntaxNode<L>,
     diagnostics: &[ParseDiagnostic],
-    path: &Path,
+    path: &Utf8Path,
 ) {
     let debug_tree = format!("{program:?}");
     let has_missing_children = debug_tree.contains("missing (required)");
@@ -257,7 +249,7 @@ pub fn assert_errors_are_absent<L: ServiceLanguage>(
     for diagnostic in diagnostics {
         let error = diagnostic
             .clone()
-            .with_file_path(path.to_str().unwrap())
+            .with_file_path(path.as_str())
             .with_file_source_code(program.to_string());
         Formatter::new(&mut Termcolor(&mut buffer))
             .write_markup(markup! {
@@ -267,7 +259,7 @@ pub fn assert_errors_are_absent<L: ServiceLanguage>(
     }
 
     panic!("There should be no errors in the file {:?} but the following errors where present:\n{}\n\nParsed tree:\n{:#?}\nPrinted tree:\n{}",
-           path.display(),
+           path,
            std::str::from_utf8(buffer.as_slice()).unwrap(),
            &program,
            &program.to_string()

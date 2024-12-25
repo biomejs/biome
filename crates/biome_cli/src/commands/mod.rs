@@ -31,8 +31,8 @@ use biome_service::documentation::Doc;
 use biome_service::workspace::{FixFileMode, RegisterProjectFolderParams, UpdateSettingsParams};
 use biome_service::{Workspace, WorkspaceError};
 use bpaf::Bpaf;
+use camino::Utf8PathBuf;
 use std::ffi::OsString;
-use std::path::PathBuf;
 
 pub(crate) mod check;
 pub(crate) mod ci;
@@ -91,11 +91,11 @@ pub enum BiomeCommand {
             hide_usage,
             fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
         )]
-        log_path: PathBuf,
+        log_path: Utf8PathBuf,
         /// Allows to set a custom file path to the configuration file,
         /// or a custom directory path to find `biome.json` or `biome.jsonc`
         #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        config_path: Option<PathBuf>,
+        config_path: Option<Utf8PathBuf>,
     },
 
     /// Stops the Biome daemon server process.
@@ -385,11 +385,11 @@ pub enum BiomeCommand {
             hide_usage,
             fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
         )]
-        log_path: PathBuf,
+        log_path: Utf8PathBuf,
         /// Allows to set a custom file path to the configuration file,
         /// or a custom directory path to find `biome.json` or `biome.jsonc`
         #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        config_path: Option<PathBuf>,
+        config_path: Option<Utf8PathBuf>,
         /// Bogus argument to make the command work with vscode-languageclient
         #[bpaf(long("stdio"), hide, hide_usage, switch)]
         stdio: bool,
@@ -506,16 +506,18 @@ pub enum BiomeCommand {
             long("log-path"),
             argument("PATH"),
             hide_usage,
-            fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
+            fallback(
+                biome_fs::ensure_cache_dir().join("biome-logs")
+            ),
         )]
-        log_path: PathBuf,
+        log_path: Utf8PathBuf,
 
         #[bpaf(long("stop-on-disconnect"), hide_usage)]
         stop_on_disconnect: bool,
         /// Allows to set a custom file path to the configuration file,
         /// or a custom directory path to find `biome.json` or `biome.jsonc`
         #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        config_path: Option<PathBuf>,
+        config_path: Option<Utf8PathBuf>,
     },
     #[bpaf(command("__print_socket"), hide)]
     PrintSocket,
@@ -805,7 +807,7 @@ pub(crate) trait CommandRunner: Sized {
             configuration.retrieve_gitignore_matches(fs, vcs_base_path.as_deref())?;
         let paths = self.get_files_to_process(fs, &configuration)?;
         workspace.register_project_folder(RegisterProjectFolderParams {
-            path: fs.working_directory(),
+            path: fs.working_directory().map(BiomePath::from),
             set_as_current_workspace: true,
         })?;
 
@@ -815,9 +817,9 @@ pub(crate) trait CommandRunner: Sized {
             workspace.set_manifest_for_project(manifest_data.into())?;
         }
         workspace.update_settings(UpdateSettingsParams {
-            workspace_directory: fs.working_directory(),
+            workspace_directory: fs.working_directory().map(BiomePath::from),
             configuration,
-            vcs_base_path,
+            vcs_base_path: vcs_base_path.map(BiomePath::from),
             gitignore_matches,
         })?;
 
@@ -844,7 +846,7 @@ pub(crate) trait CommandRunner: Sized {
         let stdin = if let Some(stdin_file_path) = self.get_stdin_file_path() {
             let input_code = console.read();
             if let Some(input_code) = input_code {
-                let path = PathBuf::from(stdin_file_path);
+                let path = Utf8PathBuf::from(stdin_file_path);
                 Some((path, input_code).into())
             } else {
                 // we provided the argument without a piped stdin, we bail
@@ -912,7 +914,7 @@ pub trait LoadEditorConfig: CommandRunner {
     /// It loads the `.editorconfig` from the file system, parses it and deserialize it into a [PartialConfiguration]
     fn load_editor_config(
         &self,
-        configuration_path: Option<PathBuf>,
+        configuration_path: Option<Utf8PathBuf>,
         fs_configuration: &PartialConfiguration,
         fs: &dyn FileSystem,
         console: &mut dyn Console,

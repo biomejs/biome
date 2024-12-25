@@ -235,8 +235,8 @@ impl ServiceLanguage for JsLanguage {
             );
         }
 
-        if let Some(filename) = path.file_name().map(|filename| filename.as_encoded_bytes()) {
-            if filename.ends_with(b".vue") {
+        if let Some(filename) = path.file_name() {
+            if filename.ends_with(".vue") {
                 globals.extend(
                     [
                         "defineEmits",
@@ -249,11 +249,11 @@ impl ServiceLanguage for JsLanguage {
                     ]
                     .map(Into::into),
                 );
-            } else if filename.ends_with(b".astro") {
+            } else if filename.ends_with(".astro") {
                 globals.extend(["Astro"].map(Into::into));
-            } else if filename.ends_with(b".svelte")
-                || filename.ends_with(b".svelte.js")
-                || filename.ends_with(b".svelte.ts")
+            } else if filename.ends_with(".svelte")
+                || filename.ends_with(".svelte.js")
+                || filename.ends_with(".svelte.ts")
             {
                 // Svelte 5 runes
                 globals.extend(
@@ -461,7 +461,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         range: None,
     };
 
-    info!("Analyze file {}", params.path.display());
+    info!("Analyze file {}", params.path.as_str());
     let mut process_lint = ProcessLint::new(&params);
     let (_, analyze_diagnostics) = analyze(
         &tree,
@@ -713,12 +713,12 @@ pub(crate) fn format(
     debug!("Options used for format: \n{}", options);
 
     let tree = parse.syntax();
-    info!("Format file {}", biome_path.display());
+    info!("Format file {}", biome_path.as_str());
     let formatted = format_node(options, &tree)?;
     match formatted.print() {
         Ok(printed) => Ok(printed),
         Err(error) => {
-            error!("The file {} couldn't be formatted", biome_path.display());
+            error!("The file {} couldn't be formatted", biome_path.as_str());
             Err(WorkspaceError::FormatError(error.into()))
         }
     }

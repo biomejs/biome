@@ -1,6 +1,7 @@
 use crate::{BiomePath, PathInterner};
 use biome_diagnostics::{console, Advices, Diagnostic, LogCategory, Visit};
 use biome_diagnostics::{Error, Severity};
+use camino::{Utf8Path, Utf8PathBuf};
 pub use memory::{ErrorEntry, MemoryFileSystem};
 pub use os::OsFileSystem;
 use oxc_resolver::{Resolution, ResolveError};
@@ -8,7 +9,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::fmt::{Debug, Display, Formatter};
 use std::panic::RefUnwindSafe;
-use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::{fmt, io};
 use tracing::{error, info};
@@ -38,7 +38,8 @@ type AutoSearchResultAlias = Result<Option<AutoSearchResult>, FileSystemDiagnost
 
 pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// It opens a file with the given set of options
-    fn open_with_options(&self, path: &Path, options: OpenOptions) -> io::Result<Box<dyn File>>;
+    fn open_with_options(&self, path: &Utf8Path, options: OpenOptions)
+        -> io::Result<Box<dyn File>>;
 
     /// Initiate a traversal of the filesystem
     ///
@@ -47,19 +48,19 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     fn traversal<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>);
 
     /// Return the path to the working directory
-    fn working_directory(&self) -> Option<PathBuf>;
+    fn working_directory(&self) -> Option<Utf8PathBuf>;
 
     /// Checks if the given path exists in the file system
-    fn path_exists(&self, path: &Path) -> bool;
+    fn path_exists(&self, path: &Utf8Path) -> bool;
 
     /// Checks if the given path is a regular file
-    fn path_is_file(&self, path: &Path) -> bool;
+    fn path_is_file(&self, path: &Utf8Path) -> bool;
 
     /// Checks if the given path is a directory
-    fn path_is_dir(&self, path: &Path) -> bool;
+    fn path_is_dir(&self, path: &Utf8Path) -> bool;
 
     /// Checks if the given path is a symlink
-    fn path_is_symlink(&self, path: &Path) -> bool;
+    fn path_is_symlink(&self, path: &Utf8Path) -> bool;
 
     /// This method accepts a directory path (`search_dir`) and a list of filenames (`file_names`),
     /// It looks for the files in the specified directory in the order they appear in the list.
@@ -81,7 +82,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     ///
     fn auto_search(
         &self,
-        search_dir: &Path,
+        search_dir: &Utf8Path,
         file_names: &[&str],
         should_error_if_file_not_found: bool,
     ) -> AutoSearchResultAlias {
@@ -98,7 +99,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                         if is_searching_in_parent_dir {
                             info!(
                                 "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
-                                curret_search_dir.display()
+                                curret_search_dir
                             );
                         }
                         return Ok(Some(AutoSearchResult { content, file_path }));
@@ -121,7 +122,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
             }
 
             if let Some(parent_search_dir) = curret_search_dir.parent() {
-                curret_search_dir = PathBuf::from(parent_search_dir);
+                curret_search_dir = Utf8PathBuf::from(parent_search_dir);
                 is_searching_in_parent_dir = true;
             } else {
                 break;
@@ -139,7 +140,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// This method logs an error message and returns a `FileSystemDiagnostic` error in two scenarios:
     /// - If the file cannot be opened, possibly due to incorrect path or permission issues.
     /// - If the file is opened but its content cannot be read, potentially due to the file being damaged.
-    fn read_file_from_path(&self, file_path: &Path) -> Result<String, FileSystemDiagnostic> {
+    fn read_file_from_path(&self, file_path: &Utf8Path) -> Result<String, FileSystemDiagnostic> {
         match self.open_with_options(file_path, OpenOptions::default().read(true)) {
             Ok(mut file) => {
                 let mut content = String::new();
@@ -151,9 +152,10 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                             file_path, err
                         );
                         Err(FileSystemDiagnostic {
-                            path: file_path.display().to_string(),
+                            path: file_path.to_string(),
                             severity: Severity::Error,
-                            error_kind: ErrorKind::CantReadFile(file_path.display().to_string()),
+                            error_kind: FsErrorKind::CantReadFile(file_path.to_string()),
+                            source: None,
                         })
                     }
                 }
@@ -164,9 +166,10 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                     file_path, err
                 );
                 Err(FileSystemDiagnostic {
-                    path: file_path.display().to_string(),
+                    path: file_path.to_string(),
                     severity: Severity::Error,
-                    error_kind: ErrorKind::CantReadFile(file_path.display().to_string()),
+                    error_kind: FsErrorKind::CantReadFile(file_path.to_string()),
+                    source: None,
                 })
             }
         }
@@ -179,7 +182,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     fn resolve_configuration(
         &self,
         specifier: &str,
-        path: &Path,
+        path: &Utf8Path,
     ) -> Result<Resolution, ResolveError>;
 }
 
@@ -189,7 +192,7 @@ pub struct AutoSearchResult {
     /// The content of the file
     pub content: String,
     /// The path of the file found
-    pub file_path: PathBuf,
+    pub file_path: Utf8PathBuf,
 }
 
 pub trait File {
@@ -254,14 +257,14 @@ pub trait FileSystemExt: FileSystem {
     /// Open a file with the `read` option
     ///
     /// Equivalent to [std::fs::File::open]
-    fn open(&self, path: &Path) -> io::Result<Box<dyn File>> {
+    fn open(&self, path: &Utf8Path) -> io::Result<Box<dyn File>> {
         self.open_with_options(path, OpenOptions::default().read(true))
     }
 
     /// Open a file with the `write` and `create` options
     ///
     /// Equivalent to [std::fs::File::create]
-    fn create(&self, path: &Path) -> io::Result<Box<dyn File>> {
+    fn create(&self, path: &Utf8Path) -> io::Result<Box<dyn File>> {
         self.open_with_options(
             path,
             OpenOptions::default()
@@ -274,7 +277,7 @@ pub trait FileSystemExt: FileSystem {
     /// Opens a file with the `read`, `write` and `create_new` options
     ///
     /// Equivalent to [std::fs::File::create_new]
-    fn create_new(&self, path: &Path) -> io::Result<Box<dyn File>> {
+    fn create_new(&self, path: &Utf8Path) -> io::Result<Box<dyn File>> {
         self.open_with_options(
             path,
             OpenOptions::default()
@@ -297,14 +300,14 @@ pub trait TraversalScope<'scope> {
     /// directory, it will be recursively traversed and all the files the
     /// [TraversalContext::can_handle] method of the context
     /// returns true for will be handled as well
-    fn evaluate(&self, context: &'scope dyn TraversalContext, path: PathBuf);
+    fn evaluate(&self, context: &'scope dyn TraversalContext, path: Utf8PathBuf);
 
     /// Spawn a new filesystem read task.
     ///
     /// It's assumed that the provided already exist and was already evaluated via [TraversalContext::can_handle].
     ///
     /// This method will call [TraversalContext::handle_path].
-    fn handle(&self, context: &'scope dyn TraversalContext, path: PathBuf);
+    fn handle(&self, context: &'scope dyn TraversalContext, path: Utf8PathBuf);
 }
 
 pub trait TraversalContext: Sync {
@@ -337,7 +340,11 @@ impl<T> FileSystem for Arc<T>
 where
     T: FileSystem + Send,
 {
-    fn open_with_options(&self, path: &Path, options: OpenOptions) -> io::Result<Box<dyn File>> {
+    fn open_with_options(
+        &self,
+        path: &Utf8Path,
+        options: OpenOptions,
+    ) -> io::Result<Box<dyn File>> {
         T::open_with_options(self, path, options)
     }
 
@@ -345,23 +352,23 @@ where
         T::traversal(self, func)
     }
 
-    fn working_directory(&self) -> Option<PathBuf> {
+    fn working_directory(&self) -> Option<Utf8PathBuf> {
         T::working_directory(self)
     }
 
-    fn path_exists(&self, path: &Path) -> bool {
+    fn path_exists(&self, path: &Utf8Path) -> bool {
         T::path_exists(self, path)
     }
 
-    fn path_is_file(&self, path: &Path) -> bool {
+    fn path_is_file(&self, path: &Utf8Path) -> bool {
         T::path_is_file(self, path)
     }
 
-    fn path_is_dir(&self, path: &Path) -> bool {
+    fn path_is_dir(&self, path: &Utf8Path) -> bool {
         T::path_is_dir(self, path)
     }
 
-    fn path_is_symlink(&self, path: &Path) -> bool {
+    fn path_is_symlink(&self, path: &Utf8Path) -> bool {
         T::path_is_symlink(self, path)
     }
 
@@ -376,7 +383,7 @@ where
     fn resolve_configuration(
         &self,
         specifier: &str,
-        path: &Path,
+        path: &Utf8Path,
     ) -> Result<Resolution, ResolveError> {
         T::resolve_configuration(self, specifier, path)
     }
@@ -392,7 +399,11 @@ pub struct FileSystemDiagnostic {
     #[message]
     #[description]
     #[advice]
-    pub error_kind: ErrorKind,
+    pub error_kind: FsErrorKind,
+
+    #[source]
+    #[serde(skip)]
+    pub source: Option<Error>,
 }
 
 impl Display for FileSystemDiagnostic {
@@ -402,7 +413,7 @@ impl Display for FileSystemDiagnostic {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub enum ErrorKind {
+pub enum FsErrorKind {
     /// File not found
     CantReadFile(String),
     /// Unknown file type
@@ -413,49 +424,49 @@ pub enum ErrorKind {
     DeeplyNestedSymlinkExpansion(String),
 }
 
-impl console::fmt::Display for ErrorKind {
+impl console::fmt::Display for FsErrorKind {
     fn fmt(&self, fmt: &mut console::fmt::Formatter) -> io::Result<()> {
         match self {
-            ErrorKind::CantReadFile(_) => fmt.write_str("Cannot read file"),
-            ErrorKind::UnknownFileType => fmt.write_str("Unknown file type"),
-            ErrorKind::DereferencedSymlink(_) => fmt.write_str("Dereferenced symlink"),
-            ErrorKind::DeeplyNestedSymlinkExpansion(_) => {
+            FsErrorKind::CantReadFile(_) => fmt.write_str("Cannot read file"),
+            FsErrorKind::UnknownFileType => fmt.write_str("Unknown file type"),
+            FsErrorKind::DereferencedSymlink(_) => fmt.write_str("Dereferenced symlink"),
+            FsErrorKind::DeeplyNestedSymlinkExpansion(_) => {
                 fmt.write_str("Deeply nested symlink expansion")
             }
         }
     }
 }
 
-impl std::fmt::Display for ErrorKind {
+impl std::fmt::Display for FsErrorKind {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ErrorKind::CantReadFile(_) => fmt.write_str("Cannot read file"),
-            ErrorKind::UnknownFileType => write!(fmt, "Unknown file type"),
-            ErrorKind::DereferencedSymlink(_) => write!(fmt, "Dereferenced symlink"),
-            ErrorKind::DeeplyNestedSymlinkExpansion(_) => {
+            FsErrorKind::CantReadFile(_) => fmt.write_str("Cannot read file"),
+            FsErrorKind::UnknownFileType => write!(fmt, "Unknown file type"),
+            FsErrorKind::DereferencedSymlink(_) => write!(fmt, "Dereferenced symlink"),
+            FsErrorKind::DeeplyNestedSymlinkExpansion(_) => {
                 write!(fmt, "Deeply nested symlink expansion")
             }
         }
     }
 }
 
-impl Advices for ErrorKind {
+impl Advices for FsErrorKind {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         match self {
-			ErrorKind::CantReadFile(path) => visitor.record_log(
+			FsErrorKind::CantReadFile(path) => visitor.record_log(
 		        LogCategory::Error,
 			    &format!("Biome can't read the following file, maybe for permissions reasons or it doesn't exist: {path}")
 			),
 
-            ErrorKind::UnknownFileType => visitor.record_log(
+            FsErrorKind::UnknownFileType => visitor.record_log(
                 LogCategory::Info,
                 &"Biome encountered a file system entry that's neither a file, directory or symbolic link",
             ),
-            ErrorKind::DereferencedSymlink(path) => visitor.record_log(
+            FsErrorKind::DereferencedSymlink(path) => visitor.record_log(
                 LogCategory::Info,
                 &format!("Biome encountered a file system entry that is a broken symbolic link: {path}"),
             ),
-            ErrorKind::DeeplyNestedSymlinkExpansion(path) => visitor.record_log(
+            FsErrorKind::DeeplyNestedSymlinkExpansion(path) => visitor.record_log(
                 LogCategory::Error,
                 &format!("Biome encountered a file system entry with too many nested symbolic links, possibly forming an infinite cycle: {path}"),
             ),

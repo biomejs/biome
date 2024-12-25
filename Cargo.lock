@@ -189,6 +189,7 @@ dependencies = [
  "biome_service",
  "biome_text_edit",
  "bpaf",
+ "camino",
  "crossbeam",
  "dashmap 6.1.0",
  "hdrhistogram",
@@ -229,21 +230,19 @@ dependencies = [
  "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_formatter",
- "biome_js_syntax",
  "biome_json_analyze",
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
- "biome_project",
  "biome_rowan",
  "bpaf",
+ "camino",
  "insta",
  "oxc_resolver",
  "rustc-hash 2.1.0",
  "schemars",
  "serde",
  "serde_ini",
- "serde_json",
  "tests_macros",
 ]
 
@@ -287,6 +286,7 @@ dependencies = [
  "biome_string_case",
  "biome_suppression",
  "biome_test_utils",
+ "camino",
  "insta",
  "regex",
  "rustc-hash 2.1.0",
@@ -319,6 +319,7 @@ dependencies = [
  "biome_service",
  "biome_string_case",
  "biome_suppression",
+ "camino",
  "countme",
  "serde",
  "serde_json",
@@ -341,6 +342,7 @@ dependencies = [
  "biome_service",
  "biome_test_utils",
  "biome_unicode_table",
+ "camino",
  "insta",
  "quickcheck",
  "quickcheck_macros",
@@ -364,6 +366,7 @@ version = "0.5.7"
 dependencies = [
  "biome_rowan",
  "biome_string_case",
+ "camino",
  "schemars",
  "serde",
 ]
@@ -378,6 +381,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_rowan",
+ "camino",
  "enumflags2",
  "indexmap",
  "serde",
@@ -408,6 +412,7 @@ dependencies = [
  "biome_text_edit",
  "biome_text_size",
  "bpaf",
+ "camino",
  "enumflags2",
  "insta",
  "oxc_resolver",
@@ -458,6 +463,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_rowan",
  "biome_string_case",
+ "camino",
  "cfg-if",
  "countme",
  "drop_bomb",
@@ -483,6 +489,7 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_service",
+ "camino",
  "insta",
  "serde",
  "serde_json",
@@ -495,6 +502,7 @@ name = "biome_fs"
 version = "0.5.7"
 dependencies = [
  "biome_diagnostics",
+ "camino",
  "crossbeam",
  "directories",
  "enumflags2",
@@ -537,6 +545,7 @@ dependencies = [
  "biome_string_case",
  "biome_suppression",
  "biome_test_utils",
+ "camino",
  "insta",
  "schemars",
  "serde",
@@ -566,6 +575,7 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_suppression",
+ "camino",
  "countme",
  "serde",
  "serde_json",
@@ -607,6 +617,7 @@ version = "0.1.0"
 dependencies = [
  "biome_rowan",
  "biome_string_case",
+ "camino",
  "schemars",
  "serde",
 ]
@@ -633,6 +644,7 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_service",
+ "camino",
  "countme",
  "serde",
  "serde_json",
@@ -678,6 +690,7 @@ dependencies = [
  "biome_rowan",
  "biome_string_case",
  "biome_test_utils",
+ "camino",
  "grit-pattern-matcher",
  "grit-util",
  "insta",
@@ -697,6 +710,7 @@ version = "0.5.7"
 dependencies = [
  "biome_rowan",
  "biome_string_case",
+ "camino",
  "schemars",
  "serde",
 ]
@@ -723,6 +737,7 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_suppression",
+ "camino",
  "countme",
  "tests_macros",
 ]
@@ -752,6 +767,7 @@ version = "0.5.7"
 dependencies = [
  "biome_rowan",
  "biome_string_case",
+ "camino",
  "schemars",
  "serde",
 ]
@@ -782,6 +798,7 @@ dependencies = [
  "biome_test_utils",
  "biome_unicode_table",
  "bitvec",
+ "camino",
  "enumflags2",
  "globset",
  "insta",
@@ -823,6 +840,7 @@ dependencies = [
  "biome_suppression",
  "biome_text_size",
  "biome_unicode_table",
+ "camino",
  "countme",
  "quickcheck",
  "schemars",
@@ -849,6 +867,7 @@ dependencies = [
  "biome_service",
  "biome_test_utils",
  "biome_unicode_table",
+ "camino",
  "drop_bomb",
  "enumflags2",
  "indexmap",
@@ -887,6 +906,7 @@ dependencies = [
  "biome_js_parser",
  "biome_rowan",
  "biome_string_case",
+ "camino",
  "enumflags2",
  "schemars",
  "serde",
@@ -904,6 +924,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_rowan",
  "biome_test_utils",
+ "camino",
  "insta",
  "tests_macros",
 ]
@@ -921,6 +942,7 @@ dependencies = [
  "biome_rowan",
  "biome_suppression",
  "biome_test_utils",
+ "camino",
  "insta",
  "natord",
  "rustc-hash 2.1.0",
@@ -951,6 +973,7 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_suppression",
+ "camino",
  "countme",
  "schemars",
  "serde",
@@ -983,6 +1006,7 @@ version = "0.5.7"
 dependencies = [
  "biome_rowan",
  "biome_string_case",
+ "camino",
  "schemars",
  "serde",
 ]
@@ -1002,6 +1026,7 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_text_edit",
+ "camino",
  "futures",
  "rustc-hash 2.1.0",
  "serde",
@@ -1083,6 +1108,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "biome_test_utils",
+ "camino",
  "insta",
  "rustc-hash 2.1.0",
  "tests_macros",
@@ -1115,6 +1141,7 @@ dependencies = [
  "biome_json_parser",
  "biome_parser",
  "biome_rowan",
+ "camino",
  "grit-pattern-matcher",
  "grit-util",
  "insta",
@@ -1171,9 +1198,7 @@ dependencies = [
  "biome_css_parser",
  "biome_css_syntax",
  "biome_deserialize",
- "biome_deserialize_macros",
  "biome_diagnostics",
- "biome_flags",
  "biome_formatter",
  "biome_fs",
  "biome_graphql_analyze",
@@ -1202,14 +1227,11 @@ dependencies = [
  "biome_rowan",
  "biome_string_case",
  "biome_text_edit",
- "bpaf",
+ "camino",
  "crossbeam",
  "enumflags2",
- "getrandom 0.2.15",
  "ignore",
- "indexmap",
  "insta",
- "oxc_resolver",
  "papaya",
  "rayon",
  "regex",
@@ -1259,6 +1281,7 @@ dependencies = [
  "biome_project",
  "biome_rowan",
  "biome_service",
+ "camino",
  "countme",
  "json_comments",
  "serde_json",
@@ -1340,6 +1363,8 @@ name = "biome_yaml_syntax"
 version = "0.0.1"
 dependencies = [
  "biome_rowan",
+ "biome_string_case",
+ "camino",
  "schemars",
  "serde",
 ]
@@ -1430,6 +1455,15 @@ name = "bytes"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "89b2fd2a0dcf38d7971e2194b6b6eebab45ae01067456a7fd93d5547a61b70be"
+
+[[package]]
+name = "camino"
+version = "1.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b96ec4966b5813e2c0507c1f86115c8c5abaadc3980879c3424042a02fd1ad3"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "case"
@@ -2110,10 +2144,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4567c8db10ae91089c99af84c68c38da3ec2f087c3f82960bcdbf3656b6f4d7"
 dependencies = [
  "cfg-if",
- "js-sys",
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
- "wasm-bindgen",
 ]
 
 [[package]]
@@ -3341,7 +3373,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "biome_service",
- "log",
+ "camino",
  "pulldown-cmark",
 ]
 
@@ -4727,6 +4759,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_parser",
  "biome_rowan",
+ "camino",
  "codspeed-criterion-compat",
  "criterion",
  "mimalloc",
@@ -4788,6 +4821,7 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_string_case",
+ "camino",
  "colored",
  "indicatif",
  "pico-args",

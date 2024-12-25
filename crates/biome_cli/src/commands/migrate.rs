@@ -10,15 +10,15 @@ use biome_console::{markup, Console, ConsoleExt};
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
 use biome_service::{Workspace, WorkspaceError};
+use camino::Utf8PathBuf;
 use std::ffi::OsString;
-use std::path::PathBuf;
 
 pub(crate) struct MigrateCommandPayload {
     pub(crate) write: bool,
     pub(crate) fix: bool,
     pub(crate) sub_command: Option<MigrateSubCommand>,
-    pub(crate) configuration_file_path: Option<PathBuf>,
-    pub(crate) configuration_directory_path: Option<PathBuf>,
+    pub(crate) configuration_file_path: Option<Utf8PathBuf>,
+    pub(crate) configuration_directory_path: Option<Utf8PathBuf>,
 }
 
 impl CommandRunner for MigrateCommandPayload {

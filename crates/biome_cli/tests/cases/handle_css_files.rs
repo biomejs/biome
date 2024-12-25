@@ -3,7 +3,7 @@ use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 #[test]
 fn should_not_format_files_by_default() {
@@ -11,7 +11,7 @@ fn should_not_format_files_by_default() {
     let mut console = BufferConsole::default();
 
     let css_file_content = r#"html {}"#;
-    let css_file = Path::new("input.css");
+    let css_file = Utf8Path::new("input.css");
     fs.insert(css_file.into(), css_file_content.as_bytes());
 
     let (fs, result) = run_cli(
@@ -38,7 +38,7 @@ fn should_format_files_by_when_opt_in() {
     let mut console = BufferConsole::default();
 
     let css_file_content = r#"html {}"#;
-    let css_file = Path::new("input.css");
+    let css_file = Utf8Path::new("input.css");
     fs.insert(css_file.into(), css_file_content.as_bytes());
 
     let (fs, result) = run_cli(
@@ -72,7 +72,7 @@ fn should_format_write_files_by_when_opt_in() {
     let mut console = BufferConsole::default();
 
     let css_file_content = r#"html {}"#;
-    let css_file = Path::new("input.css");
+    let css_file = Utf8Path::new("input.css");
     fs.insert(css_file.into(), css_file_content.as_bytes());
 
     let (fs, result) = run_cli(

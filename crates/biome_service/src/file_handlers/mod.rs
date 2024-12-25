@@ -44,13 +44,12 @@ use biome_project::PackageJson;
 use biome_rowan::{FileSourceError, NodeCache};
 use biome_string_case::StrLikeExtension;
 
+use camino::Utf8Path;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
 use rustc_hash::FxHashSet;
 use std::borrow::Cow;
-use std::ffi::OsStr;
-use std::path::Path;
 use tracing::instrument;
 
 mod astro;
@@ -115,15 +114,15 @@ impl From<GritFileSource> for DocumentFileSource {
     }
 }
 
-impl From<&Path> for DocumentFileSource {
-    fn from(path: &Path) -> Self {
+impl From<&Utf8Path> for DocumentFileSource {
+    fn from(path: &Utf8Path) -> Self {
         Self::from_path(path)
     }
 }
 
 impl DocumentFileSource {
     #[instrument(level = "debug", fields(result))]
-    fn try_from_well_known(path: &Path) -> Result<Self, FileSourceError> {
+    fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = JsonFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
@@ -141,12 +140,12 @@ impl DocumentFileSource {
     }
 
     /// Returns the document file source corresponding to this file name from well-known files
-    pub fn from_well_known(path: &Path) -> Self {
+    pub fn from_well_known(path: &Utf8Path) -> Self {
         Self::try_from_well_known(path).unwrap_or(DocumentFileSource::Unknown)
     }
 
     #[instrument(level = "debug", fields(result))]
-    fn try_from_extension(extension: &OsStr) -> Result<Self, FileSourceError> {
+    fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
@@ -170,8 +169,8 @@ impl DocumentFileSource {
     }
 
     /// Returns the document file source corresponding to this file extension
-    pub fn from_extension(extension: impl AsRef<OsStr>) -> Self {
-        Self::try_from_extension(extension.as_ref()).unwrap_or(DocumentFileSource::Unknown)
+    pub fn from_extension(extension: &str) -> Self {
+        Self::try_from_extension(extension).unwrap_or(DocumentFileSource::Unknown)
     }
 
     #[instrument(level = "debug", fields(result))]
@@ -209,7 +208,7 @@ impl DocumentFileSource {
     }
 
     #[instrument(level = "debug", fields(result))]
-    pub(crate) fn try_from_path(path: &Path) -> Result<Self, FileSourceError> {
+    pub(crate) fn try_from_path(path: &Utf8Path) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = Self::try_from_well_known(path) {
             return Ok(file_source);
         }
@@ -226,15 +225,9 @@ impl DocumentFileSource {
         // because the same logic is also used in JsFileSource::try_from
         // and we may support more and more extensions with more than one dots.
         let extension = &match filename {
-            Some(filename) if filename.as_encoded_bytes().ends_with(b".d.ts") => {
-                Cow::Borrowed("d.ts".as_ref())
-            }
-            Some(filename) if filename.as_encoded_bytes().ends_with(b".d.mts") => {
-                Cow::Borrowed("d.mts".as_ref())
-            }
-            Some(filename) if filename.as_encoded_bytes().ends_with(b".d.cts") => {
-                Cow::Borrowed("d.cts".as_ref())
-            }
+            Some(filename) if filename.ends_with(".d.ts") => Cow::Borrowed("d.ts"),
+            Some(filename) if filename.ends_with(".d.mts") => Cow::Borrowed("d.mts"),
+            Some(filename) if filename.ends_with(".d.cts") => Cow::Borrowed("d.cts"),
             _ => path
                 .extension()
                 // We assume the file extensions are case-insensitive.
@@ -243,11 +236,11 @@ impl DocumentFileSource {
                 .ok_or(FileSourceError::MissingFileExtension)?,
         };
 
-        Self::try_from_extension(extension)
+        Self::try_from_extension(extension.as_ref())
     }
 
     /// Returns the document file source corresponding to the file path
-    pub fn from_path(path: &Path) -> Self {
+    pub fn from_path(path: &Utf8Path) -> Self {
         Self::try_from_path(path).unwrap_or(DocumentFileSource::Unknown)
     }
 
@@ -337,7 +330,7 @@ impl DocumentFileSource {
         }
     }
 
-    pub fn can_parse(path: &Path, content: &str) -> bool {
+    pub fn can_parse(path: &Utf8Path, content: &str) -> bool {
         let file_source = DocumentFileSource::from(path);
         match file_source {
             DocumentFileSource::Js(js) => match js.as_embedding_kind() {
@@ -801,7 +794,7 @@ pub(crate) fn search(
 ) -> Result<Vec<TextRange>, WorkspaceError> {
     let result = query
         .execute(GritTargetFile {
-            path: path.to_path_buf(),
+            path: path.as_std_path().to_path_buf(),
             parse,
         })
         .map_err(|err| {
@@ -945,7 +938,7 @@ struct LintVisitor<'a, 'b> {
     only: Option<&'b [RuleSelector]>,
     skip: Option<&'b [RuleSelector]>,
     settings: Option<&'b Settings>,
-    path: Option<&'b Path>,
+    path: Option<&'b Utf8Path>,
     manifest: Option<&'b PackageJson>,
     analyzer_options: &'b mut AnalyzerOptions,
 }
@@ -955,7 +948,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         only: Option<&'b [RuleSelector]>,
         skip: Option<&'b [RuleSelector]>,
         settings: Option<&'b Settings>,
-        path: Option<&'b Path>,
+        path: Option<&'b Utf8Path>,
         manifest: Option<&'b PackageJson>,
         analyzer_options: &'b mut AnalyzerOptions,
     ) -> Self {
@@ -1230,7 +1223,7 @@ struct AssistsVisitor<'a, 'b> {
     import_sorting: RuleFilter<'a>,
     only: Option<&'b [RuleSelector]>,
     skip: Option<&'b [RuleSelector]>,
-    path: Option<&'b Path>,
+    path: Option<&'b Utf8Path>,
 }
 
 impl<'a, 'b> AssistsVisitor<'a, 'b> {
@@ -1238,7 +1231,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         only: Option<&'b [RuleSelector]>,
         skip: Option<&'b [RuleSelector]>,
         settings: Option<&'b Settings>,
-        path: Option<&'b Path>,
+        path: Option<&'b Utf8Path>,
     ) -> Self {
         Self {
             enabled_rules: vec![],
@@ -1371,7 +1364,7 @@ pub(crate) struct AnalyzerVisitorBuilder<'a> {
     settings: Option<&'a Settings>,
     only: Option<&'a [RuleSelector]>,
     skip: Option<&'a [RuleSelector]>,
-    path: Option<&'a Path>,
+    path: Option<&'a Utf8Path>,
     enabled_rules: Option<&'a [RuleSelector]>,
     manifest: Option<&'a PackageJson>,
     analyzer_options: AnalyzerOptions,
@@ -1403,7 +1396,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     }
 
     #[must_use]
-    pub(crate) fn with_path(mut self, path: &'b Path) -> Self {
+    pub(crate) fn with_path(mut self, path: &'b Utf8Path) -> Self {
         self.path = Some(path);
         self
     }

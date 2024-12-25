@@ -1,4 +1,3 @@
-
 [package]
 authors.workspace    = true
 categories.workspace = true
@@ -22,6 +21,7 @@ biome_grit_patterns      = { workspace = true }
 biome_json_parser        = { workspace = true }
 biome_parser             = { workspace = true }
 biome_rowan              = { workspace = true }
+camino                   = { workspace = true }
 grit-pattern-matcher     = { workspace = true }
 grit-util                = { workspace = true }
 serde                    = { workspace = true }

@@ -22,7 +22,7 @@ pub(crate) fn explain(session: CliSession, doc: Doc) -> Result<(), CliDiagnostic
             let cache_dir = biome_env()
                 .biome_log_path
                 .value()
-                .unwrap_or(default_biome_log_path().display().to_string());
+                .unwrap_or(default_biome_log_path().to_string());
             session.app.console.error(markup! {
                 <Info>"The daemon logs are available in the directory: \n"</Info>
             });

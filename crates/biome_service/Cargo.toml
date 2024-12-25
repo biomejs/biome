@@ -14,62 +14,57 @@ version              = "0.0.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-append-only-vec          = "0.1.7"
-biome_analyze            = { workspace = true, features = ["serde"] }
-biome_configuration      = { workspace = true, features = ["schema"] }
-biome_console            = { workspace = true }
-biome_css_analyze        = { workspace = true }
-biome_css_formatter      = { workspace = true }
-biome_css_parser         = { workspace = true }
-biome_css_syntax         = { workspace = true }
-biome_deserialize        = { workspace = true }
-biome_deserialize_macros = { workspace = true }
-biome_diagnostics        = { workspace = true }
-biome_flags              = { workspace = true }
-biome_formatter          = { workspace = true, features = ["serde"] }
-biome_fs                 = { workspace = true, features = ["serde"] }
-biome_graphql_analyze    = { workspace = true }
-biome_graphql_formatter  = { workspace = true }
-biome_graphql_parser     = { workspace = true }
-biome_graphql_syntax     = { workspace = true }
-biome_grit_formatter     = { workspace = true }
-biome_grit_parser        = { workspace = true }
-biome_grit_patterns      = { workspace = true, features = ["schema"] }
-biome_grit_syntax        = { workspace = true }
-biome_html_formatter     = { workspace = true }
-biome_html_parser        = { workspace = true }
-biome_html_syntax        = { workspace = true }
-biome_js_analyze         = { workspace = true }
-biome_js_factory         = { workspace = true, optional = true }
-biome_js_formatter       = { workspace = true, features = ["serde"] }
-biome_js_parser          = { workspace = true }
-biome_js_semantic        = { workspace = true }
-biome_js_syntax          = { workspace = true, features = ["schema"] }
-biome_json_analyze       = { workspace = true }
-biome_json_formatter     = { workspace = true, features = ["serde"] }
-biome_json_parser        = { workspace = true }
-biome_json_syntax        = { workspace = true }
-biome_parser             = { workspace = true }
-biome_project            = { workspace = true }
-biome_rowan              = { workspace = true, features = ["serde"] }
-biome_string_case        = { workspace = true }
-biome_text_edit          = { workspace = true }
-bpaf                     = { workspace = true }
-crossbeam                = { workspace = true }
-enumflags2               = { workspace = true, features = ["serde"] }
-getrandom                = { workspace = true, features = ["js"] }
-ignore                   = { workspace = true }
-indexmap                 = { workspace = true, features = ["serde"] }
-oxc_resolver             = { workspace = true }
-papaya                   = { workspace = true }
-rayon                    = { workspace = true }
-regex                    = { workspace = true }
-rustc-hash               = { workspace = true }
-schemars                 = { workspace = true, optional = true }
-serde                    = { workspace = true, features = ["derive"] }
-serde_json               = { workspace = true, features = ["raw_value"] }
-smallvec                 = { workspace = true, features = ["serde"] }
-tracing                  = { workspace = true, features = ["attributes", "log"] }
+append-only-vec         = "0.1.7"
+biome_analyze           = { workspace = true, features = ["serde"] }
+biome_configuration     = { workspace = true }
+biome_console           = { workspace = true }
+biome_css_analyze       = { workspace = true }
+biome_css_formatter     = { workspace = true }
+biome_css_parser        = { workspace = true }
+biome_css_syntax        = { workspace = true }
+biome_deserialize       = { workspace = true }
+biome_diagnostics       = { workspace = true }
+biome_formatter         = { workspace = true, features = ["serde"] }
+biome_fs                = { workspace = true, features = ["serde"] }
+biome_graphql_analyze   = { workspace = true }
+biome_graphql_formatter = { workspace = true }
+biome_graphql_parser    = { workspace = true }
+biome_graphql_syntax    = { workspace = true }
+biome_grit_formatter    = { workspace = true }
+biome_grit_parser       = { workspace = true }
+biome_grit_patterns     = { workspace = true }
+biome_grit_syntax       = { workspace = true }
+biome_html_formatter    = { workspace = true }
+biome_html_parser       = { workspace = true }
+biome_html_syntax       = { workspace = true }
+biome_js_analyze        = { workspace = true }
+biome_js_factory        = { workspace = true, optional = true }
+biome_js_formatter      = { workspace = true, features = ["serde"] }
+biome_js_parser         = { workspace = true }
+biome_js_semantic       = { workspace = true }
+biome_js_syntax         = { workspace = true }
+biome_json_analyze      = { workspace = true }
+biome_json_formatter    = { workspace = true, features = ["serde"] }
+biome_json_parser       = { workspace = true }
+biome_json_syntax       = { workspace = true }
+biome_parser            = { workspace = true }
+biome_project           = { workspace = true }
+biome_rowan             = { workspace = true, features = ["serde"] }
+biome_string_case       = { workspace = true }
+biome_text_edit         = { workspace = true }
+camino                  = { workspace = true }
+crossbeam               = { workspace = true }
+enumflags2              = { workspace = true, features = ["serde"] }
+ignore                  = { workspace = true }
+papaya                  = { workspace = true }
+rayon                   = { workspace = true }
+regex                   = { workspace = true }
+rustc-hash              = { workspace = true }
+schemars                = { workspace = true, optional = true }
+serde                   = { workspace = true, features = ["derive"] }
+serde_json              = { workspace = true, features = ["raw_value"] }
+smallvec                = { workspace = true, features = ["serde"] }
+tracing                 = { workspace = true, features = ["attributes", "log"] }
 
 [dev-dependencies]
 insta = { workspace = true }
@@ -79,15 +74,19 @@ experimental-html = []
 
 schema = [
   "dep:schemars",
+  "biome_configuration/schema",
   "biome_js_analyze/schema",
-  "biome_formatter/serde",
+  "biome_formatter/schema",
   "biome_js_factory",
+  "biome_js_syntax/schema",
   "biome_text_edit/schemars",
   "biome_json_syntax/schema",
   "biome_css_syntax/schema",
   "biome_graphql_syntax/schema",
   "biome_grit_syntax/schema",
+  "biome_grit_patterns/schema",
 ]
+
 
 [lints]
 workspace = true

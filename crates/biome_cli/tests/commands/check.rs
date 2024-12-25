@@ -1,13 +1,3 @@
-use bpaf::Args;
-use std::env::temp_dir;
-use std::fs::{create_dir, create_dir_all, remove_dir_all, File};
-use std::io::Write;
-#[cfg(target_family = "unix")]
-use std::os::unix::fs::symlink;
-#[cfg(target_os = "windows")]
-use std::os::windows::fs::{symlink_dir, symlink_file};
-use std::path::{Path, PathBuf};
-
 use crate::configs::{
     CONFIG_FILE_SIZE_LIMIT, CONFIG_IGNORE_SYMLINK, CONFIG_LINTER_DISABLED,
     CONFIG_LINTER_DISABLED_JSONC, CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC, CONFIG_LINTER_IGNORED_FILES,
@@ -20,6 +10,15 @@ use crate::{
 };
 use biome_console::{markup, BufferConsole, LogLevel, MarkupBuf};
 use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
+use bpaf::Args;
+use camino::{Utf8Path, Utf8PathBuf};
+use std::env::temp_dir;
+use std::fs::{create_dir, create_dir_all, remove_dir_all, File};
+use std::io::Write;
+#[cfg(target_family = "unix")]
+use std::os::unix::fs::symlink;
+#[cfg(target_os = "windows")]
+use std::os::windows::fs::{symlink_dir, symlink_file};
 
 const ERRORS: &str = r#"
 for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -80,7 +79,7 @@ fn ok() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), FORMATTED.as_bytes());
 
     let (_, result) = run_cli(
@@ -97,7 +96,7 @@ fn ok_read_only() {
     let mut fs = MemoryFileSystem::new_read_only();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), FORMATTED.as_bytes());
 
     let (_, result) = run_cli(
@@ -114,7 +113,7 @@ fn parse_error() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), PARSE_ERROR.as_bytes());
 
     let (fs, result) = run_cli(
@@ -138,7 +137,7 @@ fn lint_error() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
 
     let (fs, result) = run_cli(
@@ -162,7 +161,7 @@ fn lint_error() {
 fn maximum_diagnostics() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), ERRORS.as_bytes());
 
     let (fs, result) = run_cli(
@@ -207,7 +206,7 @@ fn apply_ok() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -240,7 +239,7 @@ fn apply_noop() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), FIX_AFTER.as_bytes());
 
     let (fs, result) = run_cli(
@@ -265,7 +264,7 @@ fn apply_suggested_error() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), APPLY_SUGGESTED_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -298,7 +297,7 @@ fn apply_suggested() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), APPLY_SUGGESTED_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -351,10 +350,10 @@ console.log(a);
 function f() {\n\targuments;\n}
 ";
 
-    let test1 = Path::new("test1.js");
+    let test1 = Utf8Path::new("test1.js");
     fs.insert(test1.into(), source.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), source.as_bytes());
 
     let (fs, result) = run_cli(
@@ -391,10 +390,10 @@ fn no_lint_if_linter_is_disabled_when_run_apply() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
 
-    let config_path = Path::new("biome.json");
+    let config_path = Utf8Path::new("biome.json");
     fs.insert(config_path.into(), CONFIG_LINTER_DISABLED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -427,10 +426,10 @@ fn no_lint_if_linter_is_disabled_when_run_apply_biome_jsonc() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
 
-    let config_path = Path::new("biome.jsonc");
+    let config_path = Utf8Path::new("biome.jsonc");
     fs.insert(config_path.into(), CONFIG_LINTER_DISABLED_JSONC.as_bytes());
 
     let (fs, result) = run_cli(
@@ -463,10 +462,10 @@ fn no_lint_if_linter_is_disabled() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
 
-    let config_path = Path::new("biome.json");
+    let config_path = Utf8Path::new("biome.json");
     fs.insert(config_path.into(), CONFIG_LINTER_DISABLED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -499,10 +498,10 @@ fn should_disable_a_rule() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), NO_DEBUGGER_BEFORE.as_bytes());
 
-    let config_path = Path::new("biome.json");
+    let config_path = Utf8Path::new("biome.json");
     fs.insert(config_path.into(), CONFIG_LINTER_SUPPRESSED_RULE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -535,10 +534,10 @@ fn should_disable_a_rule_group() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
 
-    let config_path = Path::new("biome.json");
+    let config_path = Utf8Path::new("biome.json");
     fs.insert(
         config_path.into(),
         CONFIG_LINTER_SUPPRESSED_GROUP.as_bytes(),
@@ -573,13 +572,13 @@ fn should_disable_a_rule_group() {
 fn downgrade_severity() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC.as_bytes(),
     );
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), NO_DEBUGGER.as_bytes());
 
     let (fs, result) = run_cli(
@@ -617,13 +616,13 @@ fn downgrade_severity() {
 fn upgrade_severity() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         CONFIG_LINTER_UPGRADE_DIAGNOSTIC.as_bytes(),
     );
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), UPGRADE_SEVERITY_CODE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -665,10 +664,10 @@ fn no_lint_when_file_is_ignored() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_LINTER_IGNORED_FILES.as_bytes());
 
-    let file_path = Path::new("test.js");
+    let file_path = Utf8Path::new("test.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -701,7 +700,7 @@ fn no_lint_if_files_are_listed_in_ignore_option() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -716,10 +715,10 @@ fn no_lint_if_files_are_listed_in_ignore_option() {
         .as_bytes(),
     );
 
-    let file_path_test1 = Path::new("test1.js");
+    let file_path_test1 = Utf8Path::new("test1.js");
     fs.insert(file_path_test1.into(), FIX_BEFORE.as_bytes());
 
-    let file_path_test2 = Path::new("test2.js");
+    let file_path_test2 = Utf8Path::new("test2.js");
     fs.insert(file_path_test2.into(), FIX_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -770,7 +769,9 @@ fn fs_error_dereferenced_symlink() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let root_path = temp_dir().join("check_rome_test_broken_symlink");
+    let root_path = Utf8PathBuf::from_path_buf(temp_dir())
+        .unwrap()
+        .join("check_rome_test_broken_symlink");
     let subdir_path = root_path.join("prefix");
 
     let _ = remove_dir_all(&root_path);
@@ -792,7 +793,7 @@ fn fs_error_dereferenced_symlink() {
     let result = run_cli_with_dyn_fs(
         Box::new(OsFileSystem::new(root_path.clone())),
         &mut console,
-        Args::from(["check", &root_path.display().to_string()].as_slice()),
+        Args::from(["check", root_path.as_ref()].as_slice()),
     );
 
     remove_dir_all(root_path).unwrap();
@@ -813,7 +814,9 @@ fn fs_error_infinite_symlink_expansion_to_dirs() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let root_path = temp_dir().join("check_rome_test_infinite_symlink_expansion_to_dirs");
+    let root_path = Utf8PathBuf::from_path_buf(temp_dir())
+        .unwrap()
+        .join("check_rome_test_infinite_symlink_expansion_to_dirs");
     let subdir1_path = root_path.join("prefix");
     let subdir2_path = root_path.join("foo").join("bar");
 
@@ -836,7 +839,7 @@ fn fs_error_infinite_symlink_expansion_to_dirs() {
     let result = run_cli_with_dyn_fs(
         Box::new(OsFileSystem::new(root_path.clone())),
         &mut console,
-        Args::from(["check", &root_path.display().to_string()].as_slice()),
+        Args::from(["check", root_path.as_ref()].as_slice()),
     );
 
     remove_dir_all(root_path).unwrap();
@@ -856,7 +859,9 @@ fn fs_error_infinite_symlink_expansion_to_dirs() {
 fn fs_error_infinite_symlink_expansion_to_files() {
     let mut console = BufferConsole::default();
 
-    let root_path = temp_dir().join("check_rome_test_infinite_symlink_expansion_to_files");
+    let root_path = Utf8PathBuf::from_path_buf(temp_dir())
+        .unwrap()
+        .join("check_rome_test_infinite_symlink_expansion_to_files");
     let subdir1_path = root_path.join("prefix");
     let subdir2_path = root_path.join("foo").join("bar");
 
@@ -882,7 +887,7 @@ fn fs_error_infinite_symlink_expansion_to_files() {
     let result = run_cli_with_dyn_fs(
         Box::new(OsFileSystem::new(root_path.clone())),
         &mut console,
-        Args::from(["check", &root_path.display().to_string()].as_slice()),
+        Args::from(["check", root_path.as_ref()].as_slice()),
     );
 
     remove_dir_all(root_path).unwrap();
@@ -900,12 +905,12 @@ fn fs_error_infinite_symlink_expansion_to_files() {
         .out_buffer
         .iter()
         .flat_map(|msg| msg.content.0.iter())
-        .any(|node| node.content.contains(&symlink1_path.display().to_string())));
+        .any(|node| node.content.contains(&symlink1_path.to_string())));
     assert!(console
         .out_buffer
         .iter()
         .flat_map(|msg| msg.content.0.iter())
-        .any(|node| node.content.contains(&symlink2_path.display().to_string())));
+        .any(|node| node.content.contains(&symlink2_path.to_string())));
 }
 
 #[test]
@@ -913,7 +918,7 @@ fn fs_error_read_only() {
     let mut fs = MemoryFileSystem::new_read_only();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("test.js");
+    let file_path = Utf8Path::new("test.js");
     fs.insert(file_path.into(), *b"content");
 
     let (mut fs, result) = run_cli(
@@ -941,7 +946,10 @@ fn fs_error_unknown() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    fs.insert_error(PathBuf::from("prefix/ci.js"), ErrorEntry::UnknownFileType);
+    fs.insert_error(
+        Utf8PathBuf::from("prefix/ci.js"),
+        ErrorEntry::UnknownFileType,
+    );
 
     let (fs, result) = run_cli(fs, &mut console, Args::from(["check", "prefix"].as_slice()));
 
@@ -980,7 +988,9 @@ fn fs_files_ignore_symlink() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let root_path = temp_dir().join("check_rome_test_files_ignore_symlink");
+    let root_path = Utf8PathBuf::from_path_buf(temp_dir())
+        .unwrap()
+        .join("check_rome_test_files_ignore_symlink");
     let src_path = root_path.join("src");
 
     let testcase1_path = root_path.join("hidden_testcase1");
@@ -1036,7 +1046,7 @@ fn fs_files_ignore_symlink() {
         .write_all(CONFIG_IGNORE_SYMLINK.as_bytes())
         .unwrap();
 
-    let files: [PathBuf; 4] = [
+    let files: [Utf8PathBuf; 4] = [
         testcase1_sub_path.join("test.js"), // ok
         testcase2_path.join("test.js"),     // ok
         testcase2_path.join("test1.ts"),    // ignored
@@ -1055,10 +1065,10 @@ fn fs_files_ignore_symlink() {
             [
                 "check",
                 "--config-path",
-                &root_path.display().to_string(),
+                root_path.as_ref(),
                 "--write",
                 "--unsafe",
-                &src_path.display().to_string(),
+                src_path.as_ref(),
             ]
             .as_slice(),
         ),
@@ -1082,7 +1092,7 @@ fn file_too_large() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), "statement();\n".repeat(80660).as_bytes());
 
     let (mut fs, result) = run_cli(
@@ -1110,9 +1120,9 @@ fn file_too_large_config_limit() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    fs.insert(PathBuf::from("biome.json"), CONFIG_FILE_SIZE_LIMIT);
+    fs.insert(Utf8PathBuf::from("biome.json"), CONFIG_FILE_SIZE_LIMIT);
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), "statement1();\nstatement2();");
 
     let (fs, result) = run_cli(
@@ -1137,7 +1147,7 @@ fn file_too_large_cli_limit() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), "statement1();\nstatement2();");
 
     let (fs, result) = run_cli(
@@ -1169,7 +1179,7 @@ fn files_max_size_parse_error() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), "statement1();\nstatement2();");
 
     let (fs, result) = run_cli(
@@ -1203,7 +1213,7 @@ fn max_diagnostics_default() {
 
     // Creates 40 diagnostics.
     for i in 0..40 {
-        let file_path = PathBuf::from(format!("src/file_{i}.js"));
+        let file_path = Utf8PathBuf::from(format!("src/file_{i}.js"));
         fs.insert(file_path, LINT_ERROR.as_bytes());
     }
 
@@ -1243,7 +1253,7 @@ fn max_diagnostics() {
     let mut console = BufferConsole::default();
 
     for i in 0..20 {
-        let file_path = PathBuf::from(format!("src/file_{i}.js"));
+        let file_path = Utf8PathBuf::from(format!("src/file_{i}.js"));
         fs.insert(file_path, LINT_ERROR.as_bytes());
     }
 
@@ -1255,7 +1265,7 @@ fn max_diagnostics() {
                 "check",
                 "--max-diagnostics",
                 "10",
-                Path::new("src").as_os_str().to_str().unwrap(),
+                Utf8Path::new("src").as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
         ),
@@ -1311,7 +1321,7 @@ fn print_verbose() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1343,7 +1353,7 @@ fn print_verbose_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1376,7 +1386,7 @@ fn unsupported_file() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.txt");
+    let file_path = Utf8Path::new("check.txt");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1400,7 +1410,7 @@ fn unsupported_file_verbose() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.txt");
+    let file_path = Utf8Path::new("check.txt");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1431,7 +1441,7 @@ fn suppression_syntax_error() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), *b"// biome-ignore(:\n");
 
     let (fs, result) = run_cli(
@@ -1456,10 +1466,10 @@ fn config_recommended_group() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_RECOMMENDED_GROUP.as_bytes());
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), NEW_SYMBOL.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1482,7 +1492,7 @@ fn nursery_unstable() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), NURSERY_UNSTABLE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1508,10 +1518,10 @@ fn applies_organize_imports() {
     let mut console = BufferConsole::default();
 
     let config = r#"{ "organizeImports": { "enabled": true } }"#;
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config.as_bytes());
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     let content = r#"import * as something from "../something";
 import { lorem, foom, bar } from "foo";
 "#;
@@ -1556,10 +1566,10 @@ fn applies_organize_imports_bug_4552() {
                 }
         }
 }"#;
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config.as_bytes());
 
-    let file_path = Path::new("index.ts");
+    let file_path = Utf8Path::new("index.ts");
     let content = r#"import { secondFunction, firstFunction } from "./import";
 "#;
     fs.insert(file_path.into(), content.as_bytes());
@@ -1586,7 +1596,7 @@ fn shows_organize_imports_diff_on_check() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     let content = r#"import { lorem, foom, bar } from "foo";
 import * as something from "../something";
 "#;
@@ -1616,7 +1626,7 @@ fn should_organize_imports_diff_on_check() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     let content = r#"import { lorem, foom, bar } from "foo";
 import * as something from "../something";
 "#;
@@ -1651,10 +1661,10 @@ fn dont_applies_organize_imports_for_ignored_file() {
 
     let rome_json = r#"{ "organizeImports": { "enabled": true, "ignore": ["check.js"] } }"#;
 
-    let config_path = Path::new("biome.json");
+    let config_path = Utf8Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     let content = r#"import { lorem, foom, bar } from "foo";
 import * as something from "../something";
 "#;
@@ -1692,7 +1702,7 @@ fn applies_organize_imports_from_cli() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     let content = r#"import * as something from "../something";
 import { lorem, foom, bar } from "foo";
 "#;
@@ -1745,10 +1755,10 @@ fn ignore_configured_globals() {
     // style/useSingleVarDeclarator
     let code = r#"foo.call(); bar.call();"#;
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), code.as_bytes());
 
-    let config_path = Path::new("biome.json");
+    let config_path = Utf8Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1789,17 +1799,17 @@ file2.js
     let code1 = r#"array.map(sentence => sentence.split(' ')).flat();"#;
 
     // ignored files
-    let file_path1 = Path::new("file1.js");
+    let file_path1 = Utf8Path::new("file1.js");
     fs.insert(file_path1.into(), code1.as_bytes());
-    let file_path2 = Path::new("file2.js");
+    let file_path2 = Utf8Path::new("file2.js");
     fs.insert(file_path2.into(), code2.as_bytes());
 
     // configuration
-    let config_path = Path::new("biome.json");
+    let config_path = Utf8Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
     // git ignore file
-    let ignore_file = Path::new(".gitignore");
+    let ignore_file = Utf8Path::new(".gitignore");
     fs.insert(ignore_file.into(), git_ignore.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1839,17 +1849,17 @@ ignored/**
     let code2 = r#"foo.call(); bar.call();"#;
 
     // ignored files
-    let file_path1 = Path::new("ignored/file1.js");
+    let file_path1 = Utf8Path::new("ignored/file1.js");
     fs.insert(file_path1.into(), code1.as_bytes());
-    let file_path2 = Path::new("ignored/file2.js");
+    let file_path2 = Utf8Path::new("ignored/file2.js");
     fs.insert(file_path2.into(), code2.as_bytes());
 
     // git folder
-    let git_folder = Path::new("./.git");
+    let git_folder = Utf8Path::new("./.git");
     fs.insert(git_folder.into(), "".as_bytes());
 
     // git ignore file
-    let ignore_file = Path::new("./.gitignore");
+    let ignore_file = Utf8Path::new("./.gitignore");
     fs.insert(ignore_file.into(), git_ignore.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1904,21 +1914,21 @@ fn ignore_vcs_os_independent_parse() {
     let code2 = r#"foo.call(); bar.call();"#;
     let code1 = r#"blah.call();"#;
 
-    let file_path1 = Path::new("file1.js");
+    let file_path1 = Utf8Path::new("file1.js");
     fs.insert(file_path1.into(), code1.as_bytes());
 
     // ignored files
-    let file_path2 = Path::new("file2.js");
+    let file_path2 = Utf8Path::new("file2.js");
     fs.insert(file_path2.into(), code2.as_bytes());
-    let file_path3 = Path::new("file3.js");
+    let file_path3 = Utf8Path::new("file3.js");
     fs.insert(file_path3.into(), code3.as_bytes());
 
     // configuration
-    let config_path = Path::new("biome.json");
+    let config_path = Utf8Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
     // git ignore file
-    let ignore_file = Path::new(".gitignore");
+    let ignore_file = Utf8Path::new(".gitignore");
     fs.insert(ignore_file.into(), git_ignore.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1959,17 +1969,17 @@ file2.js
     let code1 = r#"array.map(sentence => sentence.split(' ')).flat();"#;
 
     // ignored files
-    let file_path1 = Path::new("file1.js");
+    let file_path1 = Utf8Path::new("file1.js");
     fs.insert(file_path1.into(), code1.as_bytes());
-    let file_path2 = Path::new("file2.js");
+    let file_path2 = Utf8Path::new("file2.js");
     fs.insert(file_path2.into(), code2.as_bytes());
 
     // git folder
-    let git_folder = Path::new("./.git");
+    let git_folder = Utf8Path::new("./.git");
     fs.insert(git_folder.into(), "".as_bytes());
 
     // git ignore file
-    let ignore_file = Path::new("./.gitignore");
+    let ignore_file = Utf8Path::new("./.gitignore");
     fs.insert(ignore_file.into(), git_ignore.as_bytes());
 
     let (fs, result) = run_cli(
@@ -2237,13 +2247,13 @@ fn should_apply_correct_file_source() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.ts");
+    let file_path = Utf8Path::new("file.ts");
     fs.insert(
         file_path.into(),
         "type A = { a: string }; type B = Partial<A>".as_bytes(),
     );
 
-    let config_path = Path::new("biome.json");
+    let config_path = Utf8Path::new("biome.json");
     fs.insert(
         config_path.into(),
         r#"{
@@ -2306,10 +2316,10 @@ fn should_not_enable_all_recommended_rules() {
 	}
 	}"#;
 
-    let configuration_path = Path::new("biome.json");
+    let configuration_path = Utf8Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(
         file_path.into(),
         r#"
@@ -2359,10 +2369,10 @@ fn should_not_disable_recommended_rules_for_a_group() {
   }
 }"#;
 
-    let configuration_path = Path::new("biome.json");
+    let configuration_path = Utf8Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(
         file_path.into(),
         r#"const array = ["split", "the text", "into words"];
@@ -2393,7 +2403,7 @@ fn apply_bogus_argument() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(
         file_path.into(),
         "function _13_1_3_fun(arguments) { }".as_bytes(),
@@ -2429,10 +2439,10 @@ fn ignores_unknown_file() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path1 = Path::new("test.txt");
+    let file_path1 = Utf8Path::new("test.txt");
     fs.insert(file_path1.into(), *b"content");
 
-    let file_path2 = Path::new("test.js");
+    let file_path2 = Utf8Path::new("test.js");
     fs.insert(file_path2.into(), *b"console.log('bar');\n");
 
     let (fs, result) = run_cli(
@@ -2463,13 +2473,13 @@ fn check_json_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path1 = Path::new("test.json");
+    let file_path1 = Utf8Path::new("test.json");
     fs.insert(
         file_path1.into(),
         r#"{ "foo": true, "foo": true }"#.as_bytes(),
     );
 
-    let configuration = Path::new("biome.json");
+    let configuration = Utf8Path::new("biome.json");
     fs.insert(
         configuration.into(),
         r#"{
@@ -2528,7 +2538,7 @@ fn should_pass_if_there_are_only_warnings() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"
@@ -2546,7 +2556,7 @@ fn should_pass_if_there_are_only_warnings() {
         .as_bytes(),
     );
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(
         file_path.into(),
         r#"class A {};
@@ -2585,7 +2595,7 @@ fn does_error_with_only_warnings() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"
@@ -2603,7 +2613,7 @@ fn does_error_with_only_warnings() {
         .as_bytes(),
     );
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(
         file_path.into(),
         r#"class A {};
@@ -2643,7 +2653,7 @@ fn use_literal_keys_should_emit_correct_ast_issue_266() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(
         file_path.into(),
         r#"
@@ -2681,7 +2691,7 @@ fn should_show_formatter_diagnostics_for_files_ignored_by_linter() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("build/file.js");
+    let file_path = Utf8Path::new("build/file.js");
     fs.insert(
         file_path.into(),
         r#"
@@ -2689,7 +2699,7 @@ fn should_show_formatter_diagnostics_for_files_ignored_by_linter() {
 		"#,
     );
 
-    let biome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
         biome_json.into(),
         r#"{
@@ -2730,7 +2740,7 @@ fn print_json() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), APPLY_SUGGESTED_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -2764,7 +2774,7 @@ fn print_json_pretty() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), APPLY_SUGGESTED_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -2798,7 +2808,7 @@ fn lint_error_without_file_paths() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
 
     let (fs, result) = run_cli(fs, &mut console, Args::from(["check", ""].as_slice()));
@@ -2818,7 +2828,7 @@ fn lint_error_without_file_paths() {
 fn fix_ok() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
     let (fs, result) = run_cli(
         fs,
@@ -2846,7 +2856,7 @@ fn fix_ok() {
 fn fix_unsafe_ok() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -2886,7 +2896,7 @@ fn fix_noop() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), FIX_AFTER.as_bytes());
 
     let (fs, result) = run_cli(
@@ -2909,7 +2919,7 @@ fn fix_noop() {
 fn fix_suggested_error() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), APPLY_SUGGESTED_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -2952,9 +2962,9 @@ console.log(a);
 function f() {\n\targuments;\n}
 ";
 
-    let test1 = Path::new("test1.js");
+    let test1 = Utf8Path::new("test1.js");
     fs.insert(test1.into(), source.as_bytes());
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), source.as_bytes());
     let (fs, result) = run_cli(
         fs,
@@ -2988,7 +2998,7 @@ function f() {\n\targuments;\n}
 fn write_ok() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
     let (fs, result) = run_cli(
         fs,
@@ -3016,7 +3026,7 @@ fn write_ok() {
 fn write_unsafe_ok() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -3056,7 +3066,7 @@ fn write_noop() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), FIX_AFTER.as_bytes());
 
     let (fs, result) = run_cli(
@@ -3079,7 +3089,7 @@ fn write_noop() {
 fn write_suggested_error() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), APPLY_SUGGESTED_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -3122,9 +3132,9 @@ console.log(a);
 function f() {\n\targuments;\n}
 ";
 
-    let test1 = Path::new("test1.js");
+    let test1 = Utf8Path::new("test1.js");
     fs.insert(test1.into(), source.as_bytes());
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), source.as_bytes());
     let (fs, result) = run_cli(
         fs,
@@ -3160,7 +3170,7 @@ fn should_error_if_unstaged_files_only_with_staged_flag() {
     let mut fs = MemoryFileSystem::default();
     // Unstaged
     fs.insert(
-        Path::new("file1.js").into(),
+        Utf8Path::new("file1.js").into(),
         r#"console.log('file1');"#.as_bytes(),
     );
     let (fs, result) = run_cli(
@@ -3185,7 +3195,7 @@ fn should_error_if_unchanged_files_only_with_changed_flag() {
     let mut fs = MemoryFileSystem::default();
     // Unchanged
     fs.insert(
-        Path::new("file1.js").into(),
+        Utf8Path::new("file1.js").into(),
         r#"console.log('file1');"#.as_bytes(),
     );
     let (fs, result) = run_cli(

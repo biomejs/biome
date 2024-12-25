@@ -1,15 +1,16 @@
 use crate::err_to_string;
 use ansi_rgb::{red, Foreground};
+use camino::{Utf8Path, Utf8PathBuf};
 use std::env;
 use std::hash::{DefaultHasher, Hash, Hasher};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::str::FromStr;
 
 #[derive(Hash)]
 pub struct TestCase {
     code: String,
     id: String,
-    path: PathBuf,
+    path: Utf8PathBuf,
 }
 
 fn calculate_hash<T: Hash>(t: &T) -> u64 {
@@ -41,7 +42,7 @@ impl TestCase {
                 format!("{file_stem}_{}.{file_extension}", calculate_hash(&file_url))
             })?;
 
-        let path = Path::new(
+        let path = Utf8Path::new(
             &env::var("CARGO_MANIFEST_DIR")
                 .unwrap_or_else(|_| env!("CARGO_MANIFEST_DIR").to_owned()),
         )
@@ -54,12 +55,7 @@ impl TestCase {
         let content = std::fs::read_to_string(&path)
             .map_err(err_to_string)
             .or_else(|_| {
-                println!(
-                    "[{}] - Downloading [{}] to [{}]",
-                    filename,
-                    file_url,
-                    path.display()
-                );
+                println!("[{}] - Downloading [{}] to [{}]", filename, file_url, path);
                 match ureq::get(file_url).call() {
                     Ok(response) => {
                         let mut reader = response.into_reader();
@@ -77,11 +73,7 @@ impl TestCase {
             });
 
         content.map(|code| {
-            println!(
-                "[{}] - using [{}]",
-                filename.clone().fg(red()),
-                path.display()
-            );
+            println!("[{}] - using [{}]", filename.clone().fg(red()), path);
             TestCase {
                 id: filename.to_string(),
                 code,
@@ -94,7 +86,7 @@ impl TestCase {
         &self.id
     }
 
-    pub fn path(&self) -> &Path {
+    pub fn path(&self) -> &Utf8Path {
         self.path.as_path()
     }
 
@@ -106,8 +98,6 @@ impl TestCase {
         self.path
             .extension()
             .expect("Expected test case to have extension")
-            .to_str()
-            .expect("Expected extension to be valid UTF8")
     }
 }
 

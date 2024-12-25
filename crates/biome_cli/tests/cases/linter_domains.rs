@@ -5,13 +5,13 @@ use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 #[test]
 fn does_enable_test_rules() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let config = Path::new("biome.json");
+    let config = Utf8Path::new("biome.json");
     fs.insert(
         config.into(),
         r#"{
@@ -24,7 +24,7 @@ fn does_enable_test_rules() {
 "#
         .as_bytes(),
     );
-    let test1 = Path::new("test1.js");
+    let test1 = Utf8Path::new("test1.js");
     fs.insert(
         test1.into(),
         r#"describe.only("bar", () => {});
@@ -41,7 +41,7 @@ describe("foo", () => {
     });
 });
     "#;
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), content.as_bytes());
 
     let (fs, result) = run_cli(
@@ -72,7 +72,7 @@ describe("foo", () => {
 fn does_disable_test_rules() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let config = Path::new("biome.json");
+    let config = Utf8Path::new("biome.json");
     fs.insert(
         config.into(),
         r#"{
@@ -85,7 +85,7 @@ fn does_disable_test_rules() {
 "#
         .as_bytes(),
     );
-    let test1 = Path::new("test1.js");
+    let test1 = Utf8Path::new("test1.js");
     fs.insert(
         test1.into(),
         r#"describe.only("bar", () => {});
@@ -102,7 +102,7 @@ describe("foo", () => {
     });
 });
     "#;
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), content.as_bytes());
 
     let (fs, result) = run_cli(
@@ -133,7 +133,7 @@ describe("foo", () => {
 fn enable_test_rules_via_overrides() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let config = Path::new("biome.json");
+    let config = Utf8Path::new("biome.json");
     fs.insert(
         config.into(),
         r#"{
@@ -149,12 +149,12 @@ fn enable_test_rules_via_overrides() {
                 "test": "all"
             }
         }
-    }] 
+    }]
 }
 "#
         .as_bytes(),
     );
-    let test1 = Path::new("test1.js");
+    let test1 = Utf8Path::new("test1.js");
     fs.insert(
         test1.into(),
         r#"describe.only("bar", () => {});
@@ -171,7 +171,7 @@ describe("foo", () => {
     });
 });
     "#;
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), content.as_bytes());
 
     let (fs, result) = run_cli(
@@ -202,7 +202,7 @@ describe("foo", () => {
 fn does_enable_test_rules_and_skip() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let config = Path::new("biome.json");
+    let config = Utf8Path::new("biome.json");
     fs.insert(
         config.into(),
         r#"{
@@ -215,7 +215,7 @@ fn does_enable_test_rules_and_skip() {
 "#
         .as_bytes(),
     );
-    let test1 = Path::new("test1.js");
+    let test1 = Utf8Path::new("test1.js");
     fs.insert(
         test1.into(),
         r#"describe.only("bar", () => {});
@@ -232,7 +232,7 @@ describe("foo", () => {
     });
 });
     "#;
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), content.as_bytes());
 
     let (fs, result) = run_cli(
@@ -264,7 +264,7 @@ describe("foo", () => {
 fn does_enable_test_rules_and_only() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let config = Path::new("biome.json");
+    let config = Utf8Path::new("biome.json");
     fs.insert(
         config.into(),
         r#"{
@@ -277,7 +277,7 @@ fn does_enable_test_rules_and_only() {
 "#
         .as_bytes(),
     );
-    let test1 = Path::new("test1.js");
+    let test1 = Utf8Path::new("test1.js");
     fs.insert(
         test1.into(),
         r#"
@@ -296,7 +296,7 @@ describe("foo", () => {
     });
 });
     "#;
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), content.as_bytes());
 
     let (fs, result) = run_cli(

@@ -3,7 +3,7 @@ use crate::snap_test::{assert_cli_snapshot, markup_to_string, SnapshotPayload};
 use biome_console::{markup, BufferConsole};
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 const ASTRO_FILE_UNFORMATTED: &str = r#"---
 import {    something } from "file.astro";
@@ -76,7 +76,7 @@ fn format_astro_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let astro_file_path = Path::new("file.astro");
+    let astro_file_path = Utf8Path::new("file.astro");
     fs.insert(astro_file_path.into(), ASTRO_FILE_UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -101,7 +101,7 @@ fn format_astro_files_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let astro_file_path = Path::new("file.astro");
+    let astro_file_path = Utf8Path::new("file.astro");
     fs.insert(astro_file_path.into(), ASTRO_FILE_UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -133,7 +133,7 @@ fn format_empty_astro_files_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let astro_file_path = Path::new("file.astro");
+    let astro_file_path = Utf8Path::new("file.astro");
     fs.insert(astro_file_path.into(), "<div></div>".as_bytes());
 
     let (fs, result) = run_cli(
@@ -165,7 +165,7 @@ fn format_astro_carriage_return_line_feed_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let astro_file_path = Path::new("file.astro");
+    let astro_file_path = Utf8Path::new("file.astro");
     fs.insert(
         astro_file_path.into(),
         ASTRO_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED.as_bytes(),
@@ -193,7 +193,7 @@ fn lint_astro_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let astro_file_path = Path::new("file.astro");
+    let astro_file_path = Utf8Path::new("file.astro");
     fs.insert(
         astro_file_path.into(),
         ASTRO_FILE_DEBUGGER_BEFORE.as_bytes(),
@@ -221,7 +221,7 @@ fn lint_and_fix_astro_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let astro_file_path = Path::new("file.astro");
+    let astro_file_path = Utf8Path::new("file.astro");
     fs.insert(
         astro_file_path.into(),
         ASTRO_FILE_DEBUGGER_BEFORE.as_bytes(),
@@ -257,7 +257,7 @@ fn sorts_imports_check() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let astro_file_path = Path::new("file.astro");
+    let astro_file_path = Utf8Path::new("file.astro");
     fs.insert(astro_file_path.into(), ASTRO_FILE_IMPORTS_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -290,7 +290,7 @@ fn sorts_imports_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let astro_file_path = Path::new("file.astro");
+    let astro_file_path = Utf8Path::new("file.astro");
     fs.insert(astro_file_path.into(), ASTRO_FILE_IMPORTS_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -324,7 +324,7 @@ fn does_not_throw_parse_error_for_return() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let astro_file_path = Path::new("file.astro");
+    let astro_file_path = Utf8Path::new("file.astro");
     fs.insert(astro_file_path.into(), ASTRO_RETURN.as_bytes());
 
     let (fs, result) = run_cli(
@@ -631,7 +631,7 @@ fn astro_global_object() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let astro_file_path = Path::new("file.astro");
+    let astro_file_path = Utf8Path::new("file.astro");
     fs.insert(
         astro_file_path.into(),
         ASTRO_FILE_ASTRO_GLOBAL_OBJECT.as_bytes(),

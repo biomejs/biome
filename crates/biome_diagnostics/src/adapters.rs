@@ -194,3 +194,38 @@ impl From<serde_ini::de::Error> for IniError {
         Self { error }
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct CaminoError {
+    error: camino::FromPathBufError,
+}
+
+impl Diagnostic for CaminoError {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("internalError/fs"))
+    }
+
+    fn severity(&self) -> crate::Severity {
+        crate::Severity::Error
+    }
+
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(fmt, "{}", self.error)
+    }
+
+    fn message(&self, fmt: &mut fmt::Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_markup(markup!({ AsConsoleDisplay(&self.error) }))
+    }
+}
+
+impl Display for CaminoError {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> std::io::Result<()> {
+        write!(fmt, "{:?}", self.error)
+    }
+}
+
+impl From<camino::FromPathBufError> for CaminoError {
+    fn from(error: camino::FromPathBufError) -> Self {
+        Self { error }
+    }
+}

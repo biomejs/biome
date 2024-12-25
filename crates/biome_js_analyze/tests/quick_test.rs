@@ -7,15 +7,16 @@ use biome_test_utils::{
     code_fix_to_string, create_analyzer_options, diagnostic_to_string, load_manifest,
     parse_test_path, scripts_from_json,
 };
+use camino::Utf8Path;
 use std::ops::Deref;
-use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
+use std::{fs::read_to_string, slice};
 
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
 #[ignore]
 #[test]
 fn quick_test() {
-    let input_file = Path::new("tests/specs/complexity/noUselessFragments/issue_4553.jsx");
-    let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
+    let input_file = Utf8Path::new("tests/specs/complexity/noUselessFragments/issue_4553.jsx");
+    let file_name = input_file.file_name().unwrap();
 
     let (group, rule) = parse_test_path(input_file);
     if rule == "specs" || rule == "suppression" {
@@ -62,7 +63,7 @@ fn analyze(
     source_type: JsFileSource,
     filter: AnalysisFilter,
     file_name: &str,
-    input_file: &Path,
+    input_file: &Utf8Path,
 ) {
     let parsed = parse(input_code, source_type, JsParserOptions::default());
     let root = parsed.tree();

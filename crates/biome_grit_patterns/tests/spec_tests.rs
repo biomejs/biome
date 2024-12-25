@@ -5,6 +5,7 @@ use biome_grit_patterns::{
     OutputFile,
 };
 use biome_test_utils::register_leak_checker;
+use camino::Utf8Path;
 use grit_util::Range;
 use std::{fs::read_to_string, path::Path};
 
@@ -54,7 +55,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let target_file = {
         let target_path = format!("tests/specs/{target_lang_ext}/{test_name}.{target_lang_ext}");
-        let target_path = Path::new(&target_path);
+        let target_path = Utf8Path::new(&target_path);
         let target_code = read_to_string(target_path)
             .unwrap_or_else(|err| panic!("failed to read code from {target_path:?}: {err:?}"));
 

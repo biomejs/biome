@@ -15,6 +15,7 @@ use crate::variables::{VarRegistry, VariableLocations};
 use crate::{BuiltInFunction, CompileError};
 use biome_analyze::RuleDiagnostic;
 use biome_grit_syntax::{GritRoot, GritRootExt};
+use camino::Utf8Path;
 use grit_pattern_matcher::constants::{
     ABSOLUTE_PATH_INDEX, FILENAME_INDEX, NEW_FILES_INDEX, PROGRAM_INDEX,
 };
@@ -25,7 +26,6 @@ use grit_pattern_matcher::pattern::{
 use grit_util::error::{GritPatternError, GritResult};
 use grit_util::{AnalysisLogs, Ast, ByteRange, InputRanges, Range, VariableMatch};
 use std::collections::{BTreeMap, BTreeSet};
-use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
@@ -110,7 +110,7 @@ impl GritQuery {
 
     pub fn from_node(
         root: GritRoot,
-        source_path: Option<&Path>,
+        source_path: Option<&Utf8Path>,
         lang: GritTargetLanguage,
         extra_built_ins: Vec<BuiltInFunction>,
     ) -> Result<Self, CompileError> {
@@ -139,7 +139,7 @@ impl GritQuery {
             .map(|global_var| VariableSource::Compiled {
                 name: global_var.0.to_string(),
                 file: source_path
-                    .map(Path::to_string_lossy)
+                    .map(Utf8Path::to_path_buf)
                     .map_or_else(|| "unnamed".to_owned(), |p| p.to_string()),
                 locations: BTreeSet::new(),
             })
@@ -179,9 +179,8 @@ impl GritQuery {
         )?;
 
         let name = source_path
-            .and_then(Path::file_stem)
-            .map(OsStr::to_string_lossy)
-            .map(|stem| stem.into_owned());
+            .and_then(Utf8Path::file_stem)
+            .map(|stem| stem.to_string());
         let language = context.lang;
         let variable_locations = VariableLocations::new(vars_array);
 

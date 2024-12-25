@@ -11,7 +11,6 @@ use biome_service::workspace::{
     FormatRangeParams, GetFileContentParams, SupportsFeatureParams,
 };
 use biome_service::{extension_error, WorkspaceError};
-use std::ffi::OsStr;
 use std::ops::Sub;
 use tower_lsp::lsp_types::*;
 
@@ -49,14 +48,14 @@ pub(crate) fn format(
         if output.is_empty() {
             return Ok(None);
         }
-        match biome_path.extension().map(OsStr::as_encoded_bytes) {
-            Some(b"astro") => {
+        match biome_path.extension() {
+            Some("astro") => {
                 output = AstroFileHandler::output(input.as_str(), output.as_str());
             }
-            Some(b"vue") => {
+            Some("vue") => {
                 output = VueFileHandler::output(input.as_str(), output.as_str());
             }
-            Some(b"svelte") => {
+            Some("svelte") => {
                 output = SvelteFileHandler::output(input.as_str(), output.as_str());
             }
             _ => {}
@@ -109,10 +108,10 @@ pub(crate) fn format_range(
         let content = session.workspace.get_file_content(GetFileContentParams {
             path: biome_path.clone(),
         })?;
-        let offset = match biome_path.extension().map(OsStr::as_encoded_bytes) {
-            Some(b"vue") => VueFileHandler::start(content.as_str()),
-            Some(b"astro") => AstroFileHandler::start(content.as_str()),
-            Some(b"svelte") => SvelteFileHandler::start(content.as_str()),
+        let offset = match biome_path.extension() {
+            Some("vue") => VueFileHandler::start(content.as_str()),
+            Some("astro") => AstroFileHandler::start(content.as_str()),
+            Some("svelte") => SvelteFileHandler::start(content.as_str()),
             _ => None,
         };
         let format_range = if let Some(offset) = offset {
@@ -205,9 +204,9 @@ pub(crate) fn format_on_type(
 
 fn notify_user<T>(file_features: FileFeaturesResult, biome_path: BiomePath) -> Result<T, LspError> {
     let error = if file_features.is_ignored() {
-        WorkspaceError::file_ignored(biome_path.display().to_string())
+        WorkspaceError::file_ignored(biome_path.to_string())
     } else if file_features.is_protected() {
-        WorkspaceError::protected_file(biome_path.display().to_string())
+        WorkspaceError::protected_file(biome_path.to_string())
     } else {
         extension_error(&biome_path)
     };

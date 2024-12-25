@@ -1,10 +1,3 @@
-use std::{
-    borrow::Cow,
-    fmt::Debug,
-    path::{Path, PathBuf},
-    rc::Rc,
-};
-
 use biome_analyze::RuleDiagnostic;
 use biome_console::markup;
 use biome_diagnostics::category;
@@ -16,8 +9,10 @@ use biome_grit_patterns::{
 };
 use biome_parser::AnyParse;
 use biome_rowan::TextRange;
+use camino::Utf8Path;
 use grit_pattern_matcher::{binding::Binding, pattern::ResolvedPattern};
 use grit_util::{error::GritPatternError, AnalysisLogs};
+use std::{borrow::Cow, fmt::Debug, path::PathBuf, rc::Rc};
 
 use crate::{AnalyzerPlugin, PluginDiagnostic};
 
@@ -28,7 +23,7 @@ pub struct AnalyzerGritPlugin {
 }
 
 impl AnalyzerGritPlugin {
-    pub fn load(fs: &dyn FileSystem, path: &Path) -> Result<Self, PluginDiagnostic> {
+    pub fn load(fs: &dyn FileSystem, path: &Utf8Path) -> Result<Self, PluginDiagnostic> {
         let source = fs.read_file_from_path(path)?;
         let options = CompilePatternOptions::default()
             .with_extra_built_ins(vec![BuiltInFunction::new(

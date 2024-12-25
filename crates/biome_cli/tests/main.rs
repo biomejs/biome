@@ -156,13 +156,13 @@ mod configuration {
     use biome_console::BufferConsole;
     use biome_fs::MemoryFileSystem;
     use bpaf::Args;
-    use std::path::Path;
+    use camino::Utf8Path;
 
     #[test]
     fn correct_root() {
         let mut fs = MemoryFileSystem::default();
         let mut console = BufferConsole::default();
-        let file_path = Path::new("biome.json");
+        let file_path = Utf8Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_ALL_FIELDS.as_bytes());
 
         let (fs, result) = run_cli(
@@ -187,7 +187,7 @@ mod configuration {
         let mut fs = MemoryFileSystem::default();
         let mut console = BufferConsole::default();
 
-        let file_path = Path::new("biome.json");
+        let file_path = Utf8Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_BAD_LINE_WIDTH.as_bytes());
 
         let (fs, result) = run_cli(
@@ -212,7 +212,7 @@ mod configuration {
         let mut fs = MemoryFileSystem::default();
         let mut console = BufferConsole::default();
 
-        let file_path = Path::new("biome.json");
+        let file_path = Utf8Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_LINTER_WRONG_RULE.as_bytes());
 
         let (fs, result) = run_cli(
@@ -237,7 +237,7 @@ mod configuration {
         let mut fs = MemoryFileSystem::default();
         let mut console = BufferConsole::default();
 
-        let file_path = Path::new("biome.json");
+        let file_path = Utf8Path::new("biome.json");
         fs.insert(file_path.into(), CONFIG_INCORRECT_GLOBALS.as_bytes());
 
         let (fs, result) = run_cli(
@@ -263,10 +263,10 @@ mod configuration {
         let mut console = BufferConsole::default();
 
         fs.insert(
-            Path::new("biome.json").into(),
+            Utf8Path::new("biome.json").into(),
             CONFIG_INCORRECT_GLOBALS_V2.as_bytes(),
         );
-        fs.insert(Path::new("file.js").into(), UNFORMATTED.as_bytes());
+        fs.insert(Utf8Path::new("file.js").into(), UNFORMATTED.as_bytes());
 
         let (_, result) = run_cli(fs, &mut console, Args::from(&["check", "file.js"]));
 
@@ -279,7 +279,7 @@ mod configuration {
         let mut console = BufferConsole::default();
 
         fs.insert(
-            Path::new("biome.json").into(),
+            Utf8Path::new("biome.json").into(),
             r#"{
                 "linter": {
                     "enabled": true,
@@ -302,7 +302,7 @@ mod configuration {
             .as_bytes(),
         );
         fs.insert(
-            Path::new("tests/test.js").into(),
+            Utf8Path::new("tests/test.js").into(),
             r#"test("globals", () => {
     it("uses React", () => {
         React.useMemo();

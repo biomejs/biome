@@ -3,7 +3,7 @@ use crate::{assert_cli_snapshot, run_cli, FORMATTED};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 const SUPPRESS_BEFORE: &str = "(1 >= -0)";
 const SUPPRESS_AFTER: &str =
@@ -17,7 +17,7 @@ fn ok() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), FORMATTED.as_bytes());
 
     let (_, result) = run_cli(
@@ -41,7 +41,7 @@ fn err_when_both_write_and_suppress_are_passed() {
     let mut fs = MemoryFileSystem::new_read_only();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("check.js");
+    let file_path = Utf8Path::new("check.js");
     fs.insert(file_path.into(), FORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -73,7 +73,7 @@ fn suppress_ok() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), SUPPRESS_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -113,7 +113,7 @@ fn suppress_multiple_ok() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(
         file_path.into(),
         [SUPPRESS_BEFORE, SUPPRESS_BEFORE].join("\n").as_bytes(),
@@ -156,7 +156,7 @@ fn suppress_only_ok() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), SUPPRESS_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -197,7 +197,7 @@ fn suppress_skip_ok() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), SUPPRESS_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -238,7 +238,7 @@ fn err_when_only_reason() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), SUPPRESS_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -271,7 +271,7 @@ fn custom_explanation_with_reason() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), SUPPRESS_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -312,7 +312,7 @@ fn unused_suppression_after_top_level() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(
         file_path.into(),
         *b"/**
@@ -349,7 +349,7 @@ fn misplaced_top_level_suppression() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(
         file_path.into(),
         *b"
@@ -384,7 +384,7 @@ fn unused_range_suppression() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(
         file_path.into(),
         *b"

@@ -72,13 +72,13 @@ use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
+use camino::Utf8Path;
 use core::str;
 use enumflags2::{bitflags, BitFlags};
 #[cfg(feature = "schema")]
 use schemars::{gen::SchemaGenerator, schema::Schema};
 use smallvec::SmallVec;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
@@ -107,21 +107,21 @@ pub struct FileFeaturesResult {
 impl FileFeaturesResult {
     /// Sorted array of files that should not be processed no matter the cases.
     /// These files are handled by other tools.
-    const PROTECTED_FILES: &'static [&'static [u8]] = &[
+    const PROTECTED_FILES: &'static [&'static str] = &[
         // Composer
-        b"composer.lock",
+        "composer.lock",
         // NPM
-        b"npm-shrinkwrap.json",
-        b"package-lock.json",
+        "npm-shrinkwrap.json",
+        "package-lock.json",
         // Yarn
-        b"yarn.lock",
+        "yarn.lock",
     ];
 
     /// Checks whether this file is protected.
     /// A protected file is handled by a specific tool and should be ignored.
-    pub(crate) fn is_protected_file(path: &Path) -> bool {
+    pub(crate) fn is_protected_file(path: &Utf8Path) -> bool {
         path.file_name()
-            .is_some_and(|filename| Self::PROTECTED_FILES.contains(&filename.as_encoded_bytes()))
+            .is_some_and(|filename| Self::PROTECTED_FILES.contains(&filename))
     }
 
     /// By default, all features are not supported by a file.
@@ -180,7 +180,7 @@ impl FileFeaturesResult {
         mut self,
         settings: &Settings,
         file_source: &DocumentFileSource,
-        path: &Path,
+        path: &Utf8Path,
     ) -> Self {
         let formatter_disabled =
             if let Some(disabled) = settings.override_settings.formatter_disabled(path) {
@@ -242,7 +242,7 @@ impl FileFeaturesResult {
 
         debug!(
             "The file {} has the following feature sets: \n{:?}",
-            path.display().to_string(),
+            path.to_string(),
             &self.features_supported
         );
 
@@ -517,10 +517,10 @@ impl FeaturesBuilder {
 pub struct UpdateSettingsParams {
     pub configuration: PartialConfiguration,
     // @ematipico TODO: have a better data structure for this
-    pub vcs_base_path: Option<PathBuf>,
+    pub vcs_base_path: Option<BiomePath>,
     // @ematipico TODO: have a better data structure for this
     pub gitignore_matches: Vec<String>,
-    pub workspace_directory: Option<PathBuf>,
+    pub workspace_directory: Option<BiomePath>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -967,7 +967,7 @@ pub struct IsPathIgnoredParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct RegisterProjectFolderParams {
-    pub path: Option<PathBuf>,
+    pub path: Option<BiomePath>,
     pub set_as_current_workspace: bool,
 }
 
@@ -975,7 +975,7 @@ pub struct RegisterProjectFolderParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct UnregisterProjectFolderParams {
-    pub path: PathBuf,
+    pub path: BiomePath,
 }
 
 pub trait Workspace: Send + Sync + RefUnwindSafe {
@@ -1323,11 +1323,6 @@ impl ProjectKey {
 #[test]
 fn test_order() {
     for items in FileFeaturesResult::PROTECTED_FILES.windows(2) {
-        assert!(
-            items[0] < items[1],
-            "{} < {}",
-            str::from_utf8(items[0]).unwrap(),
-            str::from_utf8(items[1]).unwrap()
-        );
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }
