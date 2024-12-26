@@ -13,7 +13,7 @@ use crate::settings::{
 };
 use crate::workspace::{
     CodeAction, DocumentFileSource, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
-    OrganizeImportsResult, PullActionsResult,
+    PullActionsResult,
 };
 use crate::WorkspaceError;
 use biome_analyze::options::PreferredQuote;
@@ -173,7 +173,6 @@ impl ExtensionHandler for CssFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
-                organize_imports: Some(organize_imports),
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -345,12 +344,6 @@ fn lint(params: LintParams) -> LintResults {
         });
 
     process_lint.into_result(params.parse.into_diagnostics(), analyze_diagnostics)
-}
-
-fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceError> {
-    Ok(OrganizeImportsResult {
-        code: parse.syntax::<CssLanguage>().to_string(),
-    })
 }
 
 #[tracing::instrument(level = "debug", skip(params))]

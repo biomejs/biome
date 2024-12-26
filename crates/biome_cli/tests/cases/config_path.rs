@@ -17,7 +17,7 @@ fn set_config_path_to_directory() {
     fs.insert(
         config_path.into(),
         r#"{
-  "organizeImports": {
+  "assist": {
     "enabled": true
   },
   "linter": {
@@ -64,7 +64,7 @@ fn set_config_path_to_file() {
     fs.insert(
         config_path.into(),
         r#"{
-  "organizeImports": {
+  "assist": {
     "enabled": true
   },
   "linter": {

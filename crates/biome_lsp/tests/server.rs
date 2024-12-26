@@ -1647,7 +1647,6 @@ async fn no_code_actions_for_ignored_json_files() -> Result<()> {
 }
 
 #[tokio::test]
-#[ignore = "To enable when import sorting will be part of the actions"]
 async fn pull_code_actions_with_import_sorting() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create(None).into_inner();
@@ -1834,7 +1833,7 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
     let mut fs = MemoryFileSystem::default();
     let config = r#"{
     "$schema": "https://biomejs.dev/schemas/1.7.3/schema.json",
-    "organizeImports": { "enabled": false },
+    "assist": { "enabled": false },
     "linter": {
         "enabled": true,
         "rules": {

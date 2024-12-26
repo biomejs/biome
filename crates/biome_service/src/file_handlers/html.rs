@@ -123,7 +123,6 @@ impl ExtensionHandler for HtmlFileHandler {
                 code_actions: None,
                 rename: None,
                 fix_all: None,
-                organize_imports: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),

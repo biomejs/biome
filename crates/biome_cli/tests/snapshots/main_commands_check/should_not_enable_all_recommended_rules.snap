@@ -1,12 +1,13 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
 ```json
 {
-  "organizeImports": {
+  "assist": {
     "enabled": false
   },
   "linter": {

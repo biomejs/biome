@@ -6,7 +6,7 @@ snapshot_kind: text
 ## `biome.json`
 
 ```json
-{ "organizeImports": { "enabled": true, "ignore": ["check.js"] } }
+{ "assist": { "enabled": true, "ignore": ["check.js"] } }
 ```
 
 ## `check.js`

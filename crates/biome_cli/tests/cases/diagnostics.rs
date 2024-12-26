@@ -149,7 +149,7 @@ fn diagnostic_level() {
     "formatter": {
         "enabled": true
     },
-    "organizeImports": {
+    "assist": {
         "enabled": true
     },
     "linter": {
@@ -182,7 +182,7 @@ import { FC, memo, useCallback } from "react";
         .filter(|m| m.level == LogLevel::Error)
         .any(|m| {
             let content = format!("{:?}", m.content);
-            content.contains("organizeImports")
+            content.contains("assist")
         }));
 
     assert_cli_snapshot(SnapshotPayload::new(

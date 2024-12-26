@@ -172,7 +172,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
             )
             .and(
                 file_features
-                    .support_kind_for(&FeatureKind::OrganizeImports)
+                    .support_kind_for(&FeatureKind::Assist)
                     .and_then(|support_kind| {
                         if support_kind.is_not_enabled() {
                             Some(support_kind)

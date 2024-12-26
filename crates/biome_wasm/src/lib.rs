@@ -5,8 +5,8 @@ use biome_fs::MemoryFileSystem;
 use biome_service::workspace::{
     self, ChangeFileParams, CloseFileParams, FixFileParams, FormatFileParams, FormatOnTypeParams,
     FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams, GetFormatterIRParams,
-    GetSyntaxTreeParams, OrganizeImportsParams, PullActionsParams, PullDiagnosticsParams,
-    RegisterProjectFolderParams, RenameParams, UpdateSettingsParams,
+    GetSyntaxTreeParams, PullActionsParams, PullDiagnosticsParams, RegisterProjectFolderParams,
+    RenameParams, UpdateSettingsParams,
 };
 use biome_service::workspace::{OpenFileParams, SupportsFeatureParams};
 
@@ -186,19 +186,6 @@ impl Workspace {
         let result = self.inner.fix_file(params).map_err(into_error)?;
         to_value(&result)
             .map(IFixFileResult::from)
-            .map_err(into_error)
-    }
-
-    #[wasm_bindgen(js_name = organizeImports)]
-    pub fn organize_imports(
-        &self,
-        params: IOrganizeImportsParams,
-    ) -> Result<IOrganizeImportsResult, Error> {
-        let params: OrganizeImportsParams =
-            serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
-        let result = self.inner.organize_imports(params).map_err(into_error)?;
-        to_value(&result)
-            .map(IOrganizeImportsResult::from)
             .map_err(into_error)
     }
 

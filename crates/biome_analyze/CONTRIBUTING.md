@@ -1191,7 +1191,7 @@ declare_lint_rule! {
 For simplicity, use `just` to run all the commands with:
 
 ```shell
-just gen-lint
+just gen-analyzer
 ```
 
 ### Commiting your work

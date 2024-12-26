@@ -346,7 +346,7 @@ mod tests {
         assert!(biome_config.files.is_none());
         assert!(biome_config.overrides.is_none());
         assert!(biome_config.formatter.is_none());
-        assert!(biome_config.organize_imports.is_none());
+        assert!(biome_config.assist.is_none());
         let linter = biome_config.linter.unwrap();
         assert_eq!(linter.include.unwrap(), ["*.js".into()],);
         assert_eq!(linter.ignore.unwrap(), ["*.test.js".into()],);
@@ -393,7 +393,7 @@ mod tests {
 
         assert!(biome_config.files.is_none());
         assert!(biome_config.formatter.is_none());
-        assert!(biome_config.organize_imports.is_none());
+        assert!(biome_config.assist.is_none());
         let linter = biome_config.linter.unwrap();
         assert!(linter.include.is_none());
         assert_eq!(

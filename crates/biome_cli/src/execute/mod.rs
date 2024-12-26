@@ -69,7 +69,6 @@ impl Execution {
             TraversalMode::Format { .. } => FeaturesBuilder::new().with_formatter().build(),
             TraversalMode::Lint { .. } => FeaturesBuilder::new().with_linter().build(),
             TraversalMode::Check { .. } | TraversalMode::CI { .. } => FeaturesBuilder::new()
-                .with_organize_imports()
                 .with_formatter()
                 .with_linter()
                 .with_assist()

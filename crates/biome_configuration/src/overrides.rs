@@ -69,20 +69,20 @@ pub struct OverridePattern {
     #[bpaf(external(partial_graphql_configuration), optional, hide)]
     pub graphql: Option<PartialGraphqlConfiguration>,
 
-    /// Specific configuration for the Json language
+    /// Override specific formatter configuration
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(external(override_formatter_configuration), optional, hide)]
     pub formatter: Option<OverrideFormatterConfiguration>,
 
-    /// Specific configuration for the Json language
+    /// Override specific linter configuration
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(external(override_linter_configuration), optional, hide)]
     pub linter: Option<OverrideLinterConfiguration>,
 
-    /// Specific configuration for the Json language
+    /// Override specific linter configuration
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(override_organize_imports_configuration), optional, hide)]
-    pub organize_imports: Option<OverrideOrganizeImportsConfiguration>,
+    #[bpaf(external(override_assist_configuration), optional, hide)]
+    pub assist: Option<OverrideAssistConfiguration>,
 }
 
 impl FromStr for OverridePattern {
@@ -168,26 +168,14 @@ pub struct OverrideLinterConfiguration {
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
-pub struct OverrideOrganizeImportsConfiguration {
-    /// if `false`, it disables the feature and the linter won't be executed. `true` by default
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
-    pub enabled: Option<bool>,
-}
-
-#[derive(
-    Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
-pub struct OverrideAssistsConfiguration {
-    /// if `false`, it disables the feature and the linter won't be executed. `true` by default
+pub struct OverrideAssistConfiguration {
+    /// if `false`, it disables the feature and the assist won't be executed. `true` by default
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
     pub enabled: Option<bool>,
 
-    /// List of rules
+    /// List of actions
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(pure(crate::analyzer::assist::Actions::default()), optional, hide)]
-    pub rules: Option<crate::analyzer::assist::Actions>,
+    pub actions: Option<crate::analyzer::assist::Actions>,
 }

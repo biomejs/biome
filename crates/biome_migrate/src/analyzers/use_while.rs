@@ -1,4 +1,4 @@
-use crate::rule_mover::RuleMover;
+use crate::rule_mover::AnalyzerMover;
 use crate::version_services::Version;
 use crate::{declare_migration, MigrationAction};
 use biome_analyze::context::RuleContext;
@@ -23,9 +23,8 @@ impl Rule for UseWhile {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let version = ctx.version();
 
-        if version != "2.0.0" {
+        if !ctx.satisfies(">=2.0.0") {
             return None;
         }
 
@@ -60,7 +59,7 @@ impl Rule for UseWhile {
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<MigrationAction> {
         let root = ctx.root();
-        let mut rule_mover = RuleMover::from_root(root.clone());
+        let mut rule_mover = AnalyzerMover::from_root(root.clone());
         rule_mover.move_rule("useWhile", "style", "complexity");
         let mutation = rule_mover.run_queries()?;
 

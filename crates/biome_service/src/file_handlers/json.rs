@@ -15,8 +15,7 @@ use crate::settings::{
     ServiceLanguage, Settings, WorkspaceSettingsHandle,
 };
 use crate::workspace::{
-    CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, OrganizeImportsResult,
-    PullActionsResult,
+    CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
 };
 use crate::{extension_error, WorkspaceError};
 use biome_analyze::options::PreferredQuote;
@@ -161,7 +160,6 @@ impl ExtensionHandler for JsonFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
-                organize_imports: Some(organize_imports),
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -579,10 +577,4 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
             }
         }
     }
-}
-
-fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceError> {
-    Ok(OrganizeImportsResult {
-        code: parse.syntax::<JsonLanguage>().to_string(),
-    })
 }

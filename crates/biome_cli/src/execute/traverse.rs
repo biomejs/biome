@@ -444,7 +444,6 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             .with_file_source_code(old.clone()),
                                     );
                                 }
-
                                 DiffKind::Assist => {
                                     let diag = CIAssistDiffDiagnostic {
                                         file_name: file_name.clone(),
@@ -474,7 +473,6 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             .with_file_source_code(old.clone()),
                                     )
                                 }
-
                                 DiffKind::Assist => {
                                     let diag = AssistDiffDiagnostic {
                                         file_name: file_name.clone(),
@@ -629,7 +627,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
             TraversalMode::Check { .. } | TraversalMode::CI { .. } => {
                 file_features.supports_lint()
                     || file_features.supports_format()
-                    || file_features.supports_organize_imports()
+                    || file_features.supports_assist()
             }
             TraversalMode::Format { .. } => file_features.supports_format(),
             TraversalMode::Lint { .. } => file_features.supports_lint(),

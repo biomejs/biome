@@ -4,8 +4,7 @@ use crate::commands::{get_files_to_process_with_cli_options, CommandRunner};
 use crate::{CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::analyzer::assist::PartialAssistConfiguration;
 use biome_configuration::{
-    organize_imports::PartialOrganizeImports, PartialConfiguration, PartialFormatterConfiguration,
-    PartialLinterConfiguration,
+    PartialConfiguration, PartialFormatterConfiguration, PartialLinterConfiguration,
 };
 use biome_console::Console;
 use biome_deserialize::Merge;
@@ -22,7 +21,6 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) formatter_enabled: Option<bool>,
     pub(crate) linter_enabled: Option<bool>,
-    pub(crate) organize_imports_enabled: Option<bool>,
     pub(crate) assist_enabled: Option<bool>,
     pub(crate) staged: bool,
     pub(crate) changed: bool,
@@ -71,14 +69,6 @@ impl CommandRunner for CheckCommandPayload {
 
         if self.linter_enabled.is_some() {
             linter.enabled = self.linter_enabled;
-        }
-
-        let organize_imports = fs_configuration
-            .organize_imports
-            .get_or_insert_with(PartialOrganizeImports::default);
-
-        if self.organize_imports_enabled.is_some() {
-            organize_imports.enabled = self.organize_imports_enabled;
         }
 
         let assist = fs_configuration

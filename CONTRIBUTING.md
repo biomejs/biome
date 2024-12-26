@@ -249,7 +249,7 @@ things you would need to run and check:
 - `just f` (alias for `just format`), formats Rust and TOML files.
 - `just l` (alias for `just lint`), run the linter for the whole project.
 - Code generation. The code generation of the repository is spread in the different parts of the code base. Sometimes is needed and sometime it isn't:
-  - run `just gen-lint` when you're working on the **linter**;
+  - run `just gen-analyzer` when you're working on the **linter**;
   - run `just gen-bindings` in case you worked around the **workspace**.
 
 > [!NOTE]

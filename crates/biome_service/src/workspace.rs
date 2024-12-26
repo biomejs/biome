@@ -125,10 +125,9 @@ impl FileFeaturesResult {
     }
 
     /// By default, all features are not supported by a file.
-    const WORKSPACE_FEATURES: [(FeatureKind, SupportKind); 6] = [
+    const WORKSPACE_FEATURES: [(FeatureKind, SupportKind); 5] = [
         (FeatureKind::Lint, SupportKind::FileNotSupported),
         (FeatureKind::Format, SupportKind::FileNotSupported),
-        (FeatureKind::OrganizeImports, SupportKind::FileNotSupported),
         (FeatureKind::Search, SupportKind::FileNotSupported),
         (FeatureKind::Assist, SupportKind::FileNotSupported),
         (FeatureKind::Debug, SupportKind::FileNotSupported),
@@ -148,10 +147,6 @@ impl FileFeaturesResult {
         if capabilities.analyzer.lint.is_some() {
             self.features_supported
                 .insert(FeatureKind::Lint, SupportKind::Supported);
-        }
-        if capabilities.analyzer.organize_imports.is_some() {
-            self.features_supported
-                .insert(FeatureKind::OrganizeImports, SupportKind::Supported);
         }
 
         if capabilities.analyzer.code_actions.is_some() {
@@ -218,17 +213,6 @@ impl FileFeaturesResult {
                 .insert(FeatureKind::Lint, SupportKind::FeatureNotEnabled);
         }
 
-        // organize imports
-        if let Some(disabled) = settings.override_settings.organize_imports_disabled(path) {
-            if disabled {
-                self.features_supported
-                    .insert(FeatureKind::OrganizeImports, SupportKind::FeatureNotEnabled);
-            }
-        } else if !settings.organize_imports().enabled {
-            self.features_supported
-                .insert(FeatureKind::OrganizeImports, SupportKind::FeatureNotEnabled);
-        }
-
         // assists
         if let Some(disabled) = settings.override_settings.assist_disabled(path) {
             if disabled {
@@ -281,10 +265,6 @@ impl FileFeaturesResult {
 
     pub fn supports_format(&self) -> bool {
         self.supports_for(&FeatureKind::Format)
-    }
-
-    pub fn supports_organize_imports(&self) -> bool {
-        self.supports_for(&FeatureKind::OrganizeImports)
     }
 
     pub fn supports_assist(&self) -> bool {
@@ -418,7 +398,6 @@ impl SupportKind {
 pub enum FeatureKind {
     Format,
     Lint,
-    OrganizeImports,
     Search,
     Assist,
     Debug,
@@ -488,11 +467,6 @@ impl FeaturesBuilder {
 
     pub fn with_linter(mut self) -> Self {
         self.0.insert(FeatureKind::Lint);
-        self
-    }
-
-    pub fn with_organize_imports(mut self) -> Self {
-        self.0.insert(FeatureKind::OrganizeImports);
         self
     }
 
@@ -853,20 +827,6 @@ pub enum RageEntry {
     Markup(MarkupBuf),
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase")]
-pub struct OrganizeImportsParams {
-    pub path: BiomePath,
-}
-
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase")]
-pub struct OrganizeImportsResult {
-    pub code: String,
-}
-
 impl RageEntry {
     pub fn section(name: &str) -> Self {
         Self::Section(name.to_string())
@@ -1127,12 +1087,6 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Returns information about the server this workspace is connected to or `None` if the workspace isn't connected to a server.
     fn server_info(&self) -> Option<&ServerInfo>;
-
-    /// Applies import sorting
-    fn organize_imports(
-        &self,
-        params: OrganizeImportsParams,
-    ) -> Result<OrganizeImportsResult, WorkspaceError>;
 }
 
 /// Convenience function for constructing a server instance of [Workspace]
@@ -1278,12 +1232,6 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             rule_categories,
             suppression_reason,
             enabled_rules: vec![],
-        })
-    }
-
-    pub fn organize_imports(&self) -> Result<OrganizeImportsResult, WorkspaceError> {
-        self.workspace.organize_imports(OrganizeImportsParams {
-            path: self.path.clone(),
         })
     }
 

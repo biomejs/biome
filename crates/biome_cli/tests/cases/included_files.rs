@@ -222,7 +222,7 @@ fn does_not_handle_included_files_if_overridden_by_organize_imports() {
         r#"{
   "formatter": { "enabled": false },
   "linter": { "enabled": false },
-  "organizeImports": { "include": ["test.js", "test2.js"], "ignore": ["test.js"] }
+  "assist": { "include": ["test.js", "test2.js"], "ignore": ["test.js"] }
 }
 "#
         .as_bytes(),

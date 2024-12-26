@@ -337,7 +337,7 @@ import * as something from "../something";
         Args::from(
             [
                 "ci",
-                "--organize-imports-enabled=false",
+                "--assist-enabled=false",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -376,7 +376,7 @@ fn ci_errors_for_all_disabled_checks() {
                 "ci",
                 "--linter-enabled=false",
                 "--formatter-enabled=false",
-                "--organize-imports-enabled=false",
+                "--assist-enabled=false",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -687,7 +687,7 @@ fn ci_formatter_linter_organize_imports() {
             "recommended": true
         }
     },
-    "organizeImports": {
+    "assist": {
         "enabled": true
     }
 }"#;

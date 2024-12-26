@@ -1517,7 +1517,7 @@ fn applies_organize_imports() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let config = r#"{ "organizeImports": { "enabled": true } }"#;
+    let config = r#"{ "assist": { "enabled": true } }"#;
     let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config.as_bytes());
 
@@ -1555,7 +1555,7 @@ fn applies_organize_imports_bug_4552() {
     let mut console = BufferConsole::default();
 
     let config = r#"{
-        "organizeImports": {
+        "assist": {
                 "enabled": true,
                 "ignore": ["index.ts"]
         },
@@ -1659,7 +1659,7 @@ fn dont_applies_organize_imports_for_ignored_file() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = r#"{ "organizeImports": { "enabled": true, "ignore": ["check.js"] } }"#;
+    let rome_json = r#"{ "assist": { "enabled": true, "ignore": ["check.js"] } }"#;
 
     let config_path = Utf8Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
@@ -1721,7 +1721,7 @@ import * as something from "../something";
                 "--write",
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
-                "--organize-imports-enabled=true",
+                "--assist-enabled=true",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -2066,7 +2066,7 @@ fn check_stdin_write_unsafe_successfully() {
         Args::from(
             [
                 "check",
-                "--organize-imports-enabled=true",
+                "--assist-enabled=true",
                 "--write",
                 "--unsafe",
                 "--stdin-file-path",
@@ -2117,7 +2117,7 @@ fn check_stdin_write_unsafe_only_organize_imports() {
         Args::from(
             [
                 "check",
-                "--organize-imports-enabled=true",
+                "--assist-enabled=true",
                 "--linter-enabled=false",
                 "--formatter-enabled=false",
                 "--write",
@@ -2167,7 +2167,7 @@ fn check_stdin_returns_text_if_content_is_not_changed() {
         Args::from(
             [
                 "check",
-                "--organize-imports-enabled=true",
+                "--assist-enabled=true",
                 "--write",
                 "--unsafe",
                 "--stdin-file-path",
@@ -2212,7 +2212,7 @@ fn check_stdin_returns_content_when_not_write() {
         Args::from(
             [
                 "check",
-                "--organize-imports-enabled=true",
+                "--assist-enabled=true",
                 "--stdin-file-path",
                 "mock.js",
             ]
@@ -2298,7 +2298,7 @@ fn should_not_enable_all_recommended_rules() {
     let mut console = BufferConsole::default();
 
     let configuration = r#"	{
-		"organizeImports": {
+		"assist": {
 		"enabled": false
 	},
 		"linter": {
@@ -2355,7 +2355,7 @@ fn should_not_disable_recommended_rules_for_a_group() {
     let mut console = BufferConsole::default();
 
     let configuration = r#"	{
-  "organizeImports": {
+  "assist": {
     "enabled": false
   },
   "linter": {
@@ -2704,7 +2704,7 @@ fn should_show_formatter_diagnostics_for_files_ignored_by_linter() {
         biome_json.into(),
         r#"{
     "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
-    "organizeImports": {
+    "assist": {
         "enabled": true
     },
     "linter": {

@@ -8,7 +8,7 @@ use crate::file_handlers::graphql::GraphqlFileHandler;
 pub use crate::file_handlers::svelte::{SvelteFileHandler, SVELTE_FENCE};
 pub use crate::file_handlers::vue::{VueFileHandler, VUE_FENCE};
 use crate::settings::Settings;
-use crate::workspace::{FixFileMode, OrganizeImportsResult};
+use crate::workspace::FixFileMode;
 use crate::{
     settings::WorkspaceSettingsHandle,
     workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
@@ -586,7 +586,6 @@ type Lint = fn(LintParams) -> LintResults;
 type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
 type Rename = fn(&BiomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
-type OrganizeImports = fn(AnyParse) -> Result<OrganizeImportsResult, WorkspaceError>;
 
 #[derive(Default)]
 pub struct AnalyzerCapabilities {
@@ -598,8 +597,6 @@ pub struct AnalyzerCapabilities {
     pub(crate) fix_all: Option<FixAll>,
     /// It renames a binding inside a file
     pub(crate) rename: Option<Rename>,
-    /// It organizes imports
-    pub(crate) organize_imports: Option<OrganizeImports>,
 }
 
 type Format = fn(
@@ -718,7 +715,9 @@ pub(crate) fn is_diagnostic_error(
 ) -> bool {
     let severity = diagnostic
         .category()
-        .filter(|category| category.name().starts_with("lint/"))
+        .filter(|category| {
+            category.name().starts_with("lint/") || category.name().starts_with("assist/")
+        })
         .map_or_else(
             || diagnostic.severity(),
             |category| {
@@ -1220,7 +1219,6 @@ struct AssistsVisitor<'a, 'b> {
     settings: Option<&'b Settings>,
     enabled_rules: Vec<RuleFilter<'a>>,
     disabled_rules: Vec<RuleFilter<'a>>,
-    import_sorting: RuleFilter<'a>,
     only: Option<&'b [RuleSelector]>,
     skip: Option<&'b [RuleSelector]>,
     path: Option<&'b Utf8Path>,
@@ -1237,7 +1235,6 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
             enabled_rules: vec![],
             disabled_rules: vec![],
             settings,
-            import_sorting: RuleFilter::Rule("source", "organizeImports"),
             path,
             only,
             skip,
@@ -1253,14 +1250,6 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
             return;
         }
 
-        let organize_imports_enabled = self
-            .settings
-            .is_some_and(|settings| settings.organize_imports.enabled);
-        if organize_imports_enabled && self.import_sorting.match_rule::<R>() {
-            // for now, we need to disable import sorting rule because we still have the top level organize import workspace action
-            self.disabled_rules.push(self.import_sorting);
-            return;
-        }
         // Do not report unused suppression comment diagnostics if:
         // - it is a syntax-only analyzer pass, or
         // - if a single rule is run.
@@ -1284,15 +1273,23 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
     }
 
     fn finish(mut self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
-        let enabled_rules = self
+        let has_only_filter = self.only.map_or(true, |only| !only.is_empty());
+        let rules = self
             .settings
-            .and_then(|settings| settings.as_assist_actions(self.path.expect("Path to be set")))
-            .as_ref()
-            .map(|rules| rules.as_enabled_rules())
-            .unwrap_or_default()
-            .into_iter()
-            .collect::<Vec<_>>();
-        self.enabled_rules.extend(enabled_rules);
+            .and_then(|settings| settings.as_assist_actions(self.path.expect("Path to be set")));
+        if !has_only_filter {
+            let enabled_rules = rules
+                .as_ref()
+                .map(|rules| rules.as_enabled_rules())
+                .unwrap_or_default();
+            self.enabled_rules.extend(enabled_rules);
+            self.disabled_rules.extend(
+                rules
+                    .as_ref()
+                    .map(|rules| rules.as_disabled_rules())
+                    .unwrap_or_default(),
+            );
+        }
         (self.enabled_rules, self.disabled_rules)
     }
 }

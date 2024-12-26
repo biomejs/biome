@@ -56,7 +56,7 @@ Biome Configuration:
   Status:                       Loaded successfully
   Formatter disabled:           false
   Linter disabled:              false
-  Organize imports disabled:    false
+  Assist disabled:              false
   VCS disabled:                 true
 
 Linter:
