@@ -357,7 +357,6 @@ define_categories! {
     "ci",
     "stdin",
     "configuration",
-    "organizeImports",
     "assist",
     "migrate",
     "deserialize",
@@ -369,8 +368,8 @@ define_categories! {
     "internalError/panic",
     "reporter/parse",
     "reporter/format",
-    "reporter/analyzer",
-    "reporter/organizeImports",
+    "reporter/assist",
+    "reporter/linter",
     // parse categories
     "parse",
 

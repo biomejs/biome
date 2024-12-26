@@ -97,7 +97,7 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
-    services.insert_service(Arc::new(TheVersion(version)));
+    services.insert_service(Arc::new(TheVersion::new(version.as_str())));
 
     (
         analyzer.run(AnalyzerContext {

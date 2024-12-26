@@ -1,7 +1,6 @@
 use crate::execute::process_file::assist::assist_with_guard;
 use crate::execute::process_file::format::format_with_guard;
 use crate::execute::process_file::lint::lint_with_guard;
-use crate::execute::process_file::organize_imports::organize_imports_with_guard;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
 use biome_diagnostics::{category, DiagnosticExt};
@@ -31,27 +30,6 @@ pub(crate) fn check_file<'ctx>(
     if file_features.supports_lint() {
         let lint_result = lint_with_guard(ctx, &mut workspace_file, false, None);
         match lint_result {
-            Ok(status) => {
-                if status.is_changed() {
-                    changed = true
-                }
-                if let FileStatus::Message(msg) = status {
-                    if msg.is_failure() {
-                        has_failures = true;
-                    }
-                    ctx.push_message(msg);
-                }
-            }
-            Err(err) => {
-                ctx.push_message(err);
-                has_failures = true;
-            }
-        }
-    }
-
-    if file_features.supports_organize_imports() {
-        let organize_imports_result = organize_imports_with_guard(ctx, &mut workspace_file);
-        match organize_imports_result {
             Ok(status) => {
                 if status.is_changed() {
                     changed = true

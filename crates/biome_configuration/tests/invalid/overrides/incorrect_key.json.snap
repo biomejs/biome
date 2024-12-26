@@ -1,6 +1,7 @@
 ---
-source: crates/biome_service/tests/spec_tests.rs
+source: crates/biome_configuration/tests/spec_tests.rs
 expression: incorrect_key.json
+snapshot_kind: text
 ---
 incorrect_key.json:4:4 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -23,4 +24,4 @@ incorrect_key.json:4:4 deserialize ━━━━━━━━━━━━━━━
   - graphql
   - formatter
   - linter
-  - organizeImports
+  - assist

@@ -47,6 +47,9 @@ impl std::str::FromStr for RuleGroup {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Actions {
+    #[doc = r" It enables the assist actions recommended by Biome. `true` by default."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recommended: Option<bool>,
     #[deserializable(rename = "source")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub source: Option<Source>,
@@ -81,15 +84,23 @@ impl Actions {
                 .map(|(level, _)| level.into()),
         }
     }
+    pub(crate) const fn is_recommended_false(&self) -> bool {
+        matches!(self.recommended, Some(false))
+    }
     #[doc = r" It returns the enabled rules by default."]
     #[doc = r""]
     #[doc = r" The enabled rules are calculated from the difference with the disabled rules."]
     pub fn as_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut enabled_rules = FxHashSet::default();
+        let mut disabled_rules = FxHashSet::default();
         if let Some(group) = self.source.as_ref() {
+            group.collect_preset_rules(!self.is_recommended_false(), &mut enabled_rules);
             enabled_rules.extend(&group.get_enabled_rules());
+            disabled_rules.extend(&group.get_disabled_rules());
+        } else if !self.is_recommended_false() {
+            enabled_rules.extend(Source::recommended_rules_as_filters());
         }
-        enabled_rules
+        enabled_rules.difference(&disabled_rules).copied().collect()
     }
     #[doc = r" It returns the disabled rules by configuration"]
     pub fn as_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
@@ -105,6 +116,9 @@ impl Actions {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Source {
+    #[doc = r" It enables the recommended rules for this group"]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recommended: Option<bool>,
     #[doc = "Provides a whole-source code action to sort the imports in the file using import groups and natural ordering."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub organize_imports:
@@ -122,6 +136,18 @@ impl Source {
     const GROUP_NAME: &'static str = "source";
     pub(crate) const GROUP_RULES: &'static [&'static str] =
         &["organizeImports", "useSortedAttributes", "useSortedKeys"];
+    const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] =
+        &[RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0])];
+    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
+        Self::RECOMMENDED_RULES_AS_FILTERS
+    }
+    #[doc = r" Retrieves the recommended rules"]
+    pub(crate) fn is_recommended_true(&self) -> bool {
+        matches!(self.recommended, Some(true))
+    }
+    pub(crate) fn is_recommended_unset(&self) -> bool {
+        self.recommended.is_none()
+    }
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.organize_imports.as_ref() {
@@ -163,6 +189,16 @@ impl Source {
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
     pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
+    }
+    #[doc = r" Select preset rules"]
+    pub(crate) fn collect_preset_rules(
+        &self,
+        parent_is_recommended: bool,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
+    ) {
+        if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
+            enabled_rules.extend(Self::recommended_rules_as_filters());
+        }
     }
     pub(crate) fn get_rule_configuration(
         &self,

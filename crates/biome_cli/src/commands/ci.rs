@@ -3,7 +3,7 @@ use crate::cli_options::CliOptions;
 use crate::commands::{CommandRunner, LoadEditorConfig};
 use crate::{CliDiagnostic, Execution};
 use biome_configuration::analyzer::assist::PartialAssistConfiguration;
-use biome_configuration::{organize_imports::PartialOrganizeImports, PartialConfiguration};
+use biome_configuration::PartialConfiguration;
 use biome_configuration::{PartialFormatterConfiguration, PartialLinterConfiguration};
 use biome_console::Console;
 use biome_deserialize::Merge;
@@ -15,7 +15,6 @@ use std::ffi::OsString;
 pub(crate) struct CiCommandPayload {
     pub(crate) formatter_enabled: Option<bool>,
     pub(crate) linter_enabled: Option<bool>,
-    pub(crate) organize_imports_enabled: Option<bool>,
     pub(crate) assist_enabled: Option<bool>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) configuration: Option<PartialConfiguration>,
@@ -66,14 +65,6 @@ impl CommandRunner for CiCommandPayload {
 
         if self.linter_enabled.is_some() {
             linter.enabled = self.linter_enabled;
-        }
-
-        let organize_imports = fs_configuration
-            .organize_imports
-            .get_or_insert_with(PartialOrganizeImports::default);
-
-        if self.organize_imports_enabled.is_some() {
-            organize_imports.enabled = self.organize_imports_enabled;
         }
 
         let assist = fs_configuration
@@ -130,9 +121,9 @@ impl CommandRunner for CiCommandPayload {
     fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
         if matches!(self.formatter_enabled, Some(false))
             && matches!(self.linter_enabled, Some(false))
-            && matches!(self.organize_imports_enabled, Some(false))
+            && matches!(self.assist_enabled, Some(false))
         {
-            return Err(CliDiagnostic::incompatible_end_configuration("Formatter, linter and organize imports are disabled, can't perform the command. At least one feature needs to be enabled. This is probably and error."));
+            return Err(CliDiagnostic::incompatible_end_configuration("Formatter, linter and assist are disabled, can't perform the command. At least one feature needs to be enabled. This is probably and error."));
         }
         if self.since.is_some() && !self.changed {
             return Err(CliDiagnostic::incompatible_arguments("since", "changed"));

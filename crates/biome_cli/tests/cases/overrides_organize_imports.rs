@@ -21,7 +21,7 @@ fn does_handle_included_file_and_disable_organize_imports() {
   "files": {
     "include": ["test.js", "special/**"]
   },
-  "overrides": [{ "include": ["special/**"], "organizeImports": { "enabled": false } }]
+  "overrides": [{ "include": ["special/**"], "assist": { "enabled": false } }]
 }
 
 "#

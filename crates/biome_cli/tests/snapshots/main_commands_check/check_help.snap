@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 # Emitted Messages
 
@@ -154,7 +155,6 @@ Available options:
         --fix                 Alias for `--write`, writes safe fixes, formatting and import sorting
         --formatter-enabled=<true|false>  Allow to enable or disable the formatter check.
         --linter-enabled=<true|false>  Allow to enable or disable the linter check.
-        --organize-imports-enabled=<true|false>  Allow to enable or disable the organize imports.
         --assist-enabled=<true|false>  Allow to enable or disable the assist.
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.

@@ -1,5 +1,5 @@
 ---
-source: crates/biome_service/tests/spec_tests.rs
+source: crates/biome_configuration/tests/spec_tests.rs
 expression: top_level_extraneous_field.json
 snapshot_kind: text
 ---
@@ -20,7 +20,6 @@ top_level_extraneous_field.json:2:2 deserialize ━━━━━━━━━━�
   - vcs
   - files
   - formatter
-  - organizeImports
   - linter
   - javascript
   - json

@@ -7,7 +7,7 @@ snapshot_kind: text
 
 ```json
 {
-  "organizeImports": {
+  "assist": {
     "enabled": true,
     "ignore": ["index.ts"]
   },

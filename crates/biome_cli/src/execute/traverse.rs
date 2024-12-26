@@ -2,9 +2,8 @@ use super::process_file::{process_file, DiffKind, FileStatus, Message};
 use super::{Execution, TraversalMode};
 use crate::cli_options::CliOptions;
 use crate::execute::diagnostics::{
-    AssistDiffDiagnostic, CIAssistDiffDiagnostic, CIFormatDiffDiagnostic,
-    CIOrganizeImportsDiffDiagnostic, ContentDiffAdvice, FormatDiffDiagnostic,
-    OrganizeImportsDiffDiagnostic, PanicDiagnostic,
+    AssistDiffDiagnostic, CIAssistDiffDiagnostic, CIFormatDiffDiagnostic, ContentDiffAdvice,
+    FormatDiffDiagnostic, PanicDiagnostic,
 };
 use crate::reporter::TraversalSummary;
 use crate::{CliDiagnostic, CliSession};
@@ -441,19 +440,6 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                             .with_file_source_code(old.clone()),
                                     );
                                 }
-                                DiffKind::OrganizeImports => {
-                                    let diag = CIOrganizeImportsDiffDiagnostic {
-                                        file_name: file_name.clone(),
-                                        diff: ContentDiffAdvice {
-                                            old: old.clone(),
-                                            new: new.clone(),
-                                        },
-                                    };
-                                    diagnostics_to_print.push(
-                                        diag.with_severity(severity)
-                                            .with_file_source_code(old.clone()),
-                                    );
-                                }
                                 DiffKind::Assist => {
                                     let diag = CIAssistDiffDiagnostic {
                                         file_name: file_name.clone(),
@@ -472,19 +458,6 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                             match diff_kind {
                                 DiffKind::Format => {
                                     let diag = FormatDiffDiagnostic {
-                                        file_name: file_name.clone(),
-                                        diff: ContentDiffAdvice {
-                                            old: old.clone(),
-                                            new: new.clone(),
-                                        },
-                                    };
-                                    diagnostics_to_print.push(
-                                        diag.with_severity(severity)
-                                            .with_file_source_code(old.clone()),
-                                    )
-                                }
-                                DiffKind::OrganizeImports => {
-                                    let diag = OrganizeImportsDiffDiagnostic {
                                         file_name: file_name.clone(),
                                         diff: ContentDiffAdvice {
                                             old: old.clone(),
@@ -652,7 +625,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
             TraversalMode::Check { .. } | TraversalMode::CI { .. } => {
                 file_features.supports_lint()
                     || file_features.supports_format()
-                    || file_features.supports_organize_imports()
+                    || file_features.supports_assist()
             }
             TraversalMode::Format { .. } => file_features.supports_format(),
             TraversalMode::Lint { .. } => file_features.supports_lint(),

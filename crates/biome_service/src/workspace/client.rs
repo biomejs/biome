@@ -1,8 +1,7 @@
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, FileFeaturesResult, GetFileContentParams,
-    IsPathIgnoredParams, OrganizeImportsParams, OrganizeImportsResult, ProjectKey, RageParams,
-    RageResult, RegisterProjectFolderParams, ServerInfo, SetManifestForProjectParams,
-    UnregisterProjectFolderParams,
+    IsPathIgnoredParams, ProjectKey, RageParams, RageResult, RegisterProjectFolderParams,
+    ServerInfo, SetManifestForProjectParams, UnregisterProjectFolderParams,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -244,12 +243,5 @@ where
 
     fn server_info(&self) -> Option<&ServerInfo> {
         self.server_info.as_ref()
-    }
-
-    fn organize_imports(
-        &self,
-        params: OrganizeImportsParams,
-    ) -> Result<OrganizeImportsResult, WorkspaceError> {
-        self.request("biome/organize_imports", params)
     }
 }

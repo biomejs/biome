@@ -21,10 +21,40 @@ const ALL_GROUPS: &[&str] = &[
     "style",
     "correctness",
     "performance",
+    "source",
 ];
 
 #[derive(Debug, Eq, Hash, PartialEq)]
-pub(crate) enum Group {
+pub(crate) enum Category {
+    Linter(LinterGroup),
+    Assist(AssistGroup),
+}
+
+impl FromStr for Category {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Ok(group) = LinterGroup::from_str(s) {
+            Ok(Category::Linter(group))
+        } else if let Ok(group) = AssistGroup::from_str(s) {
+            Ok(Category::Assist(group))
+        } else {
+            Err(())
+        }
+    }
+}
+
+impl Category {
+    pub(crate) fn as_str<'a>(&self) -> &'a str {
+        match self {
+            Category::Linter(g) => g.as_str(),
+            Category::Assist(g) => g.as_str(),
+        }
+    }
+}
+
+#[derive(Debug, Eq, Hash, PartialEq)]
+pub(crate) enum LinterGroup {
     Style,
     Suspicious,
     Nursery,
@@ -35,43 +65,68 @@ pub(crate) enum Group {
     Performance,
 }
 
-impl Group {
+impl LinterGroup {
     pub(crate) fn as_str<'a>(&self) -> &'a str {
         match self {
-            Group::Style => "style",
-            Group::Suspicious => "suspicious",
-            Group::Nursery => "nursery",
-            Group::A11y => "a11y",
-            Group::Security => "security",
-            Group::Complexity => "complexity",
-            Group::Correctness => "correctness",
-            Group::Performance => "performance",
+            LinterGroup::Style => "style",
+            LinterGroup::Suspicious => "suspicious",
+            LinterGroup::Nursery => "nursery",
+            LinterGroup::A11y => "a11y",
+            LinterGroup::Security => "security",
+            LinterGroup::Complexity => "complexity",
+            LinterGroup::Correctness => "correctness",
+            LinterGroup::Performance => "performance",
         }
     }
 }
 
-impl FromStr for Group {
+impl FromStr for LinterGroup {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(match s {
-            "style" => Group::Style,
-            "suspicious" => Group::Suspicious,
-            "nursery" => Group::Nursery,
-            "a11y" => Group::A11y,
-            "security" => Group::Security,
-            "complexity" => Group::Complexity,
-            "correctness" => Group::Correctness,
-            "performance" => Group::Performance,
+            "style" => LinterGroup::Style,
+            "suspicious" => LinterGroup::Suspicious,
+            "nursery" => LinterGroup::Nursery,
+            "a11y" => LinterGroup::A11y,
+            "security" => LinterGroup::Security,
+            "complexity" => LinterGroup::Complexity,
+            "correctness" => LinterGroup::Correctness,
+            "performance" => LinterGroup::Performance,
             _ => return Err(()),
         })
     }
 }
 
-pub(crate) struct RuleMover {
-    groups: FxHashMap<Group, JsonMember>,
+#[derive(Debug, Eq, Hash, PartialEq)]
+pub(crate) enum AssistGroup {
+    Source,
+}
+
+impl AssistGroup {
+    pub(crate) fn as_str<'a>(&self) -> &'a str {
+        match self {
+            AssistGroup::Source => "source",
+        }
+    }
+}
+
+impl FromStr for AssistGroup {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(match s {
+            "source" => AssistGroup::Source,
+            _ => return Err(()),
+        })
+    }
+}
+
+pub(crate) struct AnalyzerMover {
+    groups: FxHashMap<Category, JsonMember>,
     root: JsonRoot,
     queries: Vec<Query>,
+    filters: Vec<Box<str>>,
 }
 
 pub(crate) struct Query {
@@ -81,13 +136,13 @@ pub(crate) struct Query {
 }
 
 enum QueryKind {
-    Move(Group, Group),
-    Replace(Group),
-    Remove(Group),
-    Insert(Group),
+    Move(Category, Category),
+    Replace(Category),
+    Remove(Category),
+    Insert(Category),
 }
 
-impl RuleMover {
+impl AnalyzerMover {
     /// Attempts to find  `linter`, `linter.rules` or `linter.rules.<group>`
     pub(crate) fn from_root(root: JsonRoot) -> Self {
         let events = root.syntax().preorder();
@@ -103,7 +158,7 @@ impl RuleMover {
                             continue;
                         };
 
-                        if let Ok(group) = Group::from_str(name.text()) {
+                        if let Ok(group) = Category::from_str(name.text()) {
                             groups.insert(group, member);
                         }
                     }
@@ -116,6 +171,7 @@ impl RuleMover {
             root,
             groups,
             queries: vec![],
+            filters: vec![],
         }
     }
 
@@ -131,11 +187,11 @@ impl RuleMover {
         rule_member: JsonMember,
         group: &str,
     ) {
-        let group = Group::from_str(group).expect("to be a valid group");
+        let category = Category::from_str(group).expect("to be a valid group");
 
         self.queries.push(Query {
             rule_name: rule_name.to_string(),
-            kind: QueryKind::Insert(group),
+            kind: QueryKind::Insert(category),
             rule_member: Some(rule_member),
         })
     }
@@ -152,11 +208,11 @@ impl RuleMover {
         rule_member: JsonMember,
         group: &str,
     ) {
-        let group = Group::from_str(group).expect("to be a valid group");
+        let category = Category::from_str(group).expect("to be a valid group");
 
         self.queries.push(Query {
             rule_name: rule_name.to_string(),
-            kind: QueryKind::Remove(group),
+            kind: QueryKind::Remove(category),
             rule_member: Some(rule_member),
         })
     }
@@ -172,11 +228,11 @@ impl RuleMover {
         rule_member: JsonMember,
         group: &str,
     ) {
-        let group = Group::from_str(group).expect("to be a valid group");
+        let category = Category::from_str(group).expect("to be a valid group");
 
         self.queries.push(Query {
             rule_name: rule_name.to_string(),
-            kind: QueryKind::Replace(group),
+            kind: QueryKind::Replace(category),
             rule_member: Some(rule_member),
         })
     }
@@ -187,8 +243,8 @@ impl RuleMover {
     ///
     /// It panics if the group doesn't exist. This usually means that the developer must add the new group
     pub(crate) fn move_rule(&mut self, rule_name: &str, from: &str, to: &str) {
-        let from_group = Group::from_str(from).expect("to be a valid group");
-        let to_group = Group::from_str(to).expect("to be a valid group");
+        let from_group = Category::from_str(from).expect("to be a valid group");
+        let to_group = Category::from_str(to).expect("to be a valid group");
 
         let mut rule_member = None;
         'outer: for (group, member) in self.groups.iter() {
@@ -226,9 +282,9 @@ impl RuleMover {
     ///
     /// It panics if the group doesn't exist. This usually means that the developer must add the new group
     fn remove_rule_from_group(
-        groups: &mut FxHashMap<Group, JsonMember>,
+        groups: &mut FxHashMap<Category, JsonMember>,
         rule_name: &str,
-        group: &Group,
+        group: &Category,
     ) -> Option<()> {
         if let Some(member) = groups.get_mut(group) {
             let list = member
@@ -269,9 +325,9 @@ impl RuleMover {
     ///
     /// It panics if the group doesn't exist. This usually means that the developer must add the new group
     fn add_rule_to_group(
-        groups: &mut FxHashMap<Group, JsonMember>,
+        groups: &mut FxHashMap<Category, JsonMember>,
         rule_member: JsonMember,
-        group: &Group,
+        group: &Category,
     ) -> Option<()> {
         if let Some(member) = groups.get_mut(group) {
             let list = member
@@ -301,10 +357,14 @@ impl RuleMover {
         Some(())
     }
 
+    pub(crate) fn add_filters(&mut self, filters: &[&str]) {
+        self.filters = filters.iter().map(|s| Box::from(*s)).collect();
+    }
+
     pub(crate) fn run_queries(mut self) -> Option<BatchMutation<JsonLanguage>> {
         let mut mutation = self.root.clone().begin();
         for group in ALL_GROUPS {
-            let group_enum = Group::from_str(group).expect("Group to be mapped");
+            let group_enum = Category::from_str(group).expect("Group to be mapped");
             self.groups
                 .entry(group_enum)
                 .or_insert_with(|| group_member(vec![], vec![], group));
@@ -328,40 +388,45 @@ impl RuleMover {
             };
             match kind {
                 QueryKind::Move(from, to) => {
-                    RuleMover::remove_rule_from_group(&mut groups, rule_name.as_str(), &from)?;
-                    RuleMover::add_rule_to_group(&mut groups, rule_member, &to)?
+                    AnalyzerMover::remove_rule_from_group(&mut groups, rule_name.as_str(), &from)?;
+                    AnalyzerMover::add_rule_to_group(&mut groups, rule_member, &to)?
                 }
                 QueryKind::Replace(group) => {
-                    RuleMover::remove_rule_from_group(&mut groups, rule_name.as_str(), &group)?;
-                    RuleMover::add_rule_to_group(&mut groups, rule_member, &group)?
+                    AnalyzerMover::remove_rule_from_group(&mut groups, rule_name.as_str(), &group)?;
+                    AnalyzerMover::add_rule_to_group(&mut groups, rule_member, &group)?
                 }
                 QueryKind::Remove(group) => {
-                    RuleMover::remove_rule_from_group(&mut groups, rule_name.as_str(), &group)?;
+                    AnalyzerMover::remove_rule_from_group(&mut groups, rule_name.as_str(), &group)?;
                 }
                 QueryKind::Insert(group) => {
-                    RuleMover::add_rule_to_group(&mut groups, rule_member, &group)?
+                    AnalyzerMover::add_rule_to_group(&mut groups, rule_member, &group)?
                 }
             }
         }
 
-        let mut members = vec![];
-        let mut separators = vec![];
+        let mut linter_members = vec![];
+        let mut linter_separators = vec![];
 
-        for member in groups.into_values() {
+        let mut assist_members = vec![];
+        let mut assist_separators = vec![];
+
+        for (category, member) in groups {
             let list = member
                 .value()
                 .ok()?
                 .as_json_object_value()?
                 .json_member_list();
             if !list.is_empty() {
-                members.push(member);
+                match category {
+                    Category::Linter(_) => {
+                        linter_members.push(member);
+                    }
+                    Category::Assist(_) => {
+                        assist_members.push(member);
+                    }
+                }
             }
         }
-        for _ in 0..members.len() - 1 {
-            separators.push(token(T![,]))
-        }
-
-        let new_linter_member = create_new_linter_member(members, separators);
 
         let list = self
             .root
@@ -374,7 +439,11 @@ impl RuleMover {
             .iter()
             .filter_map(|el| {
                 let el = el.ok()?;
-                if el.name().ok()?.inner_string_text().ok()?.text() == "linter" {
+                let token_text = el.name().ok()?.inner_string_text().ok()?;
+                if token_text.text() == "linter"
+                    || token_text.text() == "assist"
+                    || self.filters.iter().any(|s| s.as_ref() == token_text.text())
+                {
                     None
                 } else {
                     Some(el)
@@ -383,10 +452,31 @@ impl RuleMover {
             .collect();
         let mut separators: Vec<_> = list.separators().filter_map(|el| el.ok()).collect();
 
-        members.push(new_linter_member);
-        if members.len() > 1 {
-            separators.push(token(T![,]));
+        if !linter_members.is_empty() {
+            for _ in 0..linter_members.len() - 1 {
+                linter_separators.push(token(T![,]))
+            }
+
+            let new_linter_member = create_new_linter_member(linter_members, linter_separators);
+            members.push(new_linter_member);
+            if members.len() > 1 {
+                separators.push(token(T![,]));
+            }
         }
+
+        if !assist_members.is_empty() {
+            for _ in 0..assist_members.len() - 1 {
+                assist_separators.push(token(T![,]))
+            }
+
+            let new_assist_member = create_new_assist_member(assist_members, assist_separators);
+
+            members.push(new_assist_member);
+            if members.len() > 1 {
+                separators.push(token(T![,]));
+            }
+        }
+
         mutation.replace_node(list, json_member_list(members, separators));
 
         Some(mutation)
@@ -431,10 +521,22 @@ fn rules_member(members: Vec<JsonMember>, separators: Vec<JsonSyntaxToken>) -> J
     create_member("rules", AnyJsonValue::JsonObjectValue(object), 4)
 }
 
+fn actions_member(members: Vec<JsonMember>, separators: Vec<JsonSyntaxToken>) -> JsonMember {
+    let list = json_member_list(members, separators);
+    let object = create_object(list, 4);
+    create_member("actions", AnyJsonValue::JsonObjectValue(object), 4)
+}
+
 fn linter_member(members: Vec<JsonMember>, separators: Vec<JsonSyntaxToken>) -> JsonMember {
     let list = json_member_list(members, separators);
     let object = create_object(list, 2);
     create_member("linter", AnyJsonValue::JsonObjectValue(object), 2)
+}
+
+fn assist_member(members: Vec<JsonMember>, separators: Vec<JsonSyntaxToken>) -> JsonMember {
+    let list = json_member_list(members, separators);
+    let object = create_object(list, 2);
+    create_member("assist", AnyJsonValue::JsonObjectValue(object), 2)
 }
 
 fn create_new_linter_member(
@@ -443,6 +545,14 @@ fn create_new_linter_member(
 ) -> JsonMember {
     let rules = rules_member(members, separators);
     linter_member(vec![rules], vec![])
+}
+
+fn create_new_assist_member(
+    members: Vec<JsonMember>,
+    separators: Vec<JsonSyntaxToken>,
+) -> JsonMember {
+    let actions = actions_member(members, separators);
+    assist_member(vec![actions], vec![])
 }
 
 #[cfg(test)]
@@ -504,7 +614,7 @@ mod tests {
             panic!("Source has errors");
         }
         let root = parsed.tree();
-        let mut rule_mover = RuleMover::from_root(root);
+        let mut rule_mover = AnalyzerMover::from_root(root);
         rule_mover.move_rule("noVar", "style", "suspicious");
 
         let mutation = rule_mover.run_queries().expect("To run queries");
@@ -535,7 +645,7 @@ mod tests {
             panic!("Source has errors");
         }
         let root = parsed.tree();
-        let mut rule_mover = RuleMover::from_root(root);
+        let mut rule_mover = AnalyzerMover::from_root(root);
         rule_mover.move_rule("noVar", "style", "suspicious");
 
         let mutation = rule_mover.run_queries().expect("To run queries");

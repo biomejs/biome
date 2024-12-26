@@ -11,21 +11,20 @@ pub mod generated;
 pub mod graphql;
 pub mod javascript;
 pub mod json;
-pub mod organize_imports;
 mod overrides;
 pub mod plugins;
 pub mod vcs;
 
 use crate::analyzer::assist::{
-    partial_assist_configuration, AssistConfiguration, PartialAssistConfiguration,
+    partial_assist_configuration, Actions, AssistConfiguration, PartialAssistConfiguration, Source,
 };
+use crate::analyzer::RuleAssistConfiguration;
 use crate::css::CssLinter;
 pub use crate::diagnostics::BiomeDiagnostic;
 pub use crate::diagnostics::CantLoadExtendFile;
 pub use crate::generated::{push_to_analyzer_assist, push_to_analyzer_rules};
 use crate::javascript::JavascriptLinter;
 use crate::json::JsonLinter;
-use crate::organize_imports::{partial_organize_imports, OrganizeImports, PartialOrganizeImports};
 use crate::vcs::{partial_vcs_configuration, PartialVcsConfiguration, VcsConfiguration};
 pub use analyzer::{
     partial_linter_configuration, LinterConfiguration, PartialLinterConfiguration,
@@ -56,8 +55,8 @@ pub use json::{
     PartialJsonFormatter,
 };
 pub use overrides::{
-    OverrideAssistsConfiguration, OverrideFormatterConfiguration, OverrideLinterConfiguration,
-    OverrideOrganizeImportsConfiguration, OverridePattern, Overrides,
+    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideLinterConfiguration,
+    OverridePattern, Overrides,
 };
 use plugins::Plugins;
 use serde::{Deserialize, Serialize};
@@ -105,10 +104,6 @@ pub struct Configuration {
     /// The configuration of the formatter
     #[partial(type, bpaf(external(partial_formatter_configuration), optional))]
     pub formatter: FormatterConfiguration,
-
-    /// The configuration of the import sorting
-    #[partial(type, bpaf(external(partial_organize_imports), optional))]
-    pub organize_imports: OrganizeImports,
 
     /// The configuration for the linter
     #[partial(type, bpaf(external(partial_linter_configuration), optional))]
@@ -164,14 +159,23 @@ impl PartialConfiguration {
                 indent_style: Some(IndentStyle::Tab),
                 ..Default::default()
             }),
-            organize_imports: Some(PartialOrganizeImports {
-                enabled: Some(true),
-                ..Default::default()
-            }),
             linter: Some(PartialLinterConfiguration {
                 enabled: Some(true),
                 rules: Some(Rules {
                     recommended: Some(true),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            assist: Some(PartialAssistConfiguration {
+                enabled: Some(true),
+                actions: Some(Actions {
+                    source: Some(Source {
+                        organize_imports: Some(RuleAssistConfiguration::Plain(
+                            crate::analyzer::RuleAssistPlainConfiguration::On,
+                        )),
+                        ..Default::default()
+                    }),
                     ..Default::default()
                 }),
                 ..Default::default()
@@ -297,6 +301,10 @@ impl PartialConfiguration {
         self.linter.as_ref().map_or(false, |f| f.is_disabled())
     }
 
+    pub fn is_assist_disabled(&self) -> bool {
+        self.assist.as_ref().map_or(false, |f| f.is_disabled())
+    }
+
     pub fn get_linter_rules(&self) -> Rules {
         self.linter
             .as_ref()
@@ -304,10 +312,11 @@ impl PartialConfiguration {
             .unwrap_or_default()
     }
 
-    pub fn is_organize_imports_disabled(&self) -> bool {
-        self.organize_imports
+    pub fn get_assist_actions(&self) -> Actions {
+        self.assist
             .as_ref()
-            .map_or(false, |f| f.is_disabled())
+            .map(|f| f.get_actions())
+            .unwrap_or_default()
     }
 
     pub fn is_vcs_disabled(&self) -> bool {

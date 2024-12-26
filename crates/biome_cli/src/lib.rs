@@ -86,7 +86,6 @@ impl<'app> CliSession<'app> {
                 paths,
                 stdin_file_path,
                 linter_enabled,
-                organize_imports_enabled,
                 formatter_enabled,
                 assist_enabled,
                 staged,
@@ -103,7 +102,6 @@ impl<'app> CliSession<'app> {
                     paths,
                     stdin_file_path,
                     linter_enabled,
-                    organize_imports_enabled,
                     formatter_enabled,
                     assist_enabled,
                     staged,
@@ -160,7 +158,6 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Ci {
                 linter_enabled,
                 formatter_enabled,
-                organize_imports_enabled,
                 assist_enabled,
                 configuration,
                 paths,
@@ -173,7 +170,6 @@ impl<'app> CliSession<'app> {
                 CiCommandPayload {
                     linter_enabled,
                     formatter_enabled,
-                    organize_imports_enabled,
                     assist_enabled,
                     configuration,
                     paths,

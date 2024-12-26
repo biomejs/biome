@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/commands/rage.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -38,7 +39,7 @@ Biome Configuration:
   Status:                       Loaded with errors
   Formatter disabled:           false
   Linter disabled:              false
-  Organize imports disabled:    false
+  Assist disabled:              false
   VCS disabled:                 true
 
 Server:

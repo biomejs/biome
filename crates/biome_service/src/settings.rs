@@ -5,13 +5,12 @@ use biome_configuration::analyzer::assist::{Actions, AssistConfiguration};
 use biome_configuration::analyzer::RuleDomainValue;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::javascript::JsxRuntime;
-use biome_configuration::organize_imports::OrganizeImports;
 use biome_configuration::{
     push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, FormatterConfiguration,
-    JavascriptConfiguration, LinterConfiguration, OverrideAssistsConfiguration,
-    OverrideFormatterConfiguration, OverrideLinterConfiguration,
-    OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
-    PartialGraphqlConfiguration, PartialJavascriptConfiguration, PartialJsonConfiguration, Rules,
+    JavascriptConfiguration, LinterConfiguration, OverrideAssistConfiguration,
+    OverrideFormatterConfiguration, OverrideLinterConfiguration, Overrides, PartialConfiguration,
+    PartialCssConfiguration, PartialGraphqlConfiguration, PartialJavascriptConfiguration,
+    PartialJsonConfiguration, Rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -239,13 +238,7 @@ impl WorkspaceSettings {
                 let linter = &settings.linter;
                 (&linter.included_files, &linter.ignored_files)
             }
-            FeatureKind::OrganizeImports => {
-                let organize_imports = &settings.organize_imports;
-                (
-                    &organize_imports.included_files,
-                    &organize_imports.ignored_files,
-                )
-            }
+
             FeatureKind::Assist => {
                 let assists = &settings.assist;
                 (&assists.included_files, &assists.ignored_files)
@@ -318,13 +311,6 @@ impl Settings {
             gitignore_matches,
         )? {
             self.files = files;
-        }
-
-        if let Some(organize_imports) = configuration.organize_imports {
-            self.organize_imports = to_organize_imports_settings(
-                working_directory.clone(),
-                OrganizeImports::from(organize_imports),
-            )?;
         }
 
         // javascript settings
@@ -625,7 +611,7 @@ impl Default for AssistSettings {
     fn default() -> Self {
         Self {
             enabled: true,
-            actions: Default::default(),
+            actions: Some(Actions::default()),
             included_files: Matcher::empty(),
             ignored_files: Matcher::empty(),
         }
@@ -1202,19 +1188,6 @@ impl OverrideSettings {
         })
     }
 
-    /// Scans the overrides and checks if there's an override that disable the organize imports for `path`
-    pub fn organize_imports_disabled(&self, path: &Path) -> Option<bool> {
-        // Reverse the traversal as only the last override takes effect
-        self.patterns.iter().rev().find_map(|pattern| {
-            if let Some(enabled) = pattern.organize_imports.enabled {
-                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
-                    return Some(!enabled);
-                }
-            }
-            None
-        })
-    }
-
     /// Scans the overrides and checks if there's an override that disable the assist for `path`
     pub fn assist_disabled(&self, path: &Path) -> Option<bool> {
         // Reverse the traversal as only the last override takes effect
@@ -1454,37 +1427,6 @@ fn to_git_ignore(path: PathBuf, matches: &[String]) -> Result<Gitignore, Workspa
     Ok(gitignore)
 }
 
-pub fn to_organize_imports_settings(
-    working_directory: Option<PathBuf>,
-    organize_imports: OrganizeImports,
-) -> Result<OrganizeImportsSettings, WorkspaceError> {
-    Ok(OrganizeImportsSettings {
-        enabled: organize_imports.enabled,
-        ignored_files: Matcher::from_globs(
-            working_directory.clone(),
-            Some(organize_imports.ignore.as_slice()),
-        )?,
-        included_files: Matcher::from_globs(
-            working_directory,
-            Some(organize_imports.include.as_slice()),
-        )?,
-    })
-}
-
-impl TryFrom<OverrideOrganizeImportsConfiguration> for OrganizeImportsSettings {
-    type Error = WorkspaceError;
-
-    fn try_from(
-        organize_imports: OverrideOrganizeImportsConfiguration,
-    ) -> Result<Self, Self::Error> {
-        Ok(Self {
-            enabled: organize_imports.enabled.unwrap_or_default(),
-            ignored_files: Matcher::empty(),
-            included_files: Matcher::empty(),
-        })
-    }
-}
-
 pub fn to_override_settings(
     working_directory: Option<PathBuf>,
     overrides: Overrides,
@@ -1515,11 +1457,13 @@ pub fn to_override_settings(
                 domains: linter.domains,
             })
             .unwrap_or_default();
-        let organize_imports = OverrideOrganizeImportsSettings {
-            enabled: pattern
-                .organize_imports
-                .and_then(|organize_imports| organize_imports.enabled),
-        };
+        let assist = pattern
+            .assist
+            .map(|assist| OverrideAssistSettings {
+                enabled: assist.enabled,
+                actions: assist.actions,
+            })
+            .unwrap_or_default();
 
         let mut languages = LanguageListSettings::default();
         let javascript = pattern.javascript.take().unwrap_or_default();
@@ -1539,7 +1483,7 @@ pub fn to_override_settings(
             exclude: Matcher::from_globs(working_directory.clone(), pattern.ignore.as_deref())?,
             formatter,
             linter,
-            organize_imports,
+            assist,
             languages,
             ..OverrideSettingPattern::default()
         };
@@ -1756,13 +1700,13 @@ pub fn to_assist_settings(
     })
 }
 
-impl TryFrom<OverrideAssistsConfiguration> for AssistSettings {
+impl TryFrom<OverrideAssistConfiguration> for AssistSettings {
     type Error = WorkspaceError;
 
-    fn try_from(conf: OverrideAssistsConfiguration) -> Result<Self, Self::Error> {
+    fn try_from(conf: OverrideAssistConfiguration) -> Result<Self, Self::Error> {
         Ok(Self {
             enabled: conf.enabled.unwrap_or_default(),
-            actions: conf.rules,
+            actions: conf.actions,
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
         })

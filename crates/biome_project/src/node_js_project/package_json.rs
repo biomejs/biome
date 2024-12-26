@@ -40,11 +40,8 @@ impl PackageJson {
             .iter()
             .chain(self.dev_dependencies.iter())
             .chain(self.peer_dependencies.iter());
-        let Ok(range) = Range::from_str(range) else {
-            return false;
-        };
         for (dependency_name, dependency_version) in iter {
-            if dependency_name == specifier && dependency_version.satisfies(&range) {
+            if dependency_name == specifier && dependency_version.satisfies(range) {
                 return true;
             }
         }
@@ -93,10 +90,15 @@ pub enum Version {
 }
 
 impl Version {
-    pub fn satisfies(&self, other_range: &Range) -> bool {
-        match self {
-            Version::SemVer(range) => range.allows_any(other_range),
-            Version::Literal(_) => false,
+    pub fn satisfies(&self, other_range: &str) -> bool {
+        let range = Range::from_str(other_range);
+        if let Ok(other_range) = range {
+            match self {
+                Version::SemVer(range) => range.allows_any(&other_range),
+                Version::Literal(_) => false,
+            }
+        } else {
+            false
         }
     }
 }

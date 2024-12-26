@@ -2074,7 +2074,7 @@ fn should_not_enable_all_recommended_rules() {
     let mut console = BufferConsole::default();
 
     let configuration = r#"	{
-		"organizeImports": {
+		"assist": {
 		"enabled": false
 	},
 		"linter": {
@@ -2131,7 +2131,7 @@ fn should_not_disable_recommended_rules_for_a_group() {
     let mut console = BufferConsole::default();
 
     let configuration = r#"	{
-  "organizeImports": {
+  "assist": {
     "enabled": false
   },
   "linter": {
@@ -3953,7 +3953,7 @@ fn linter_shows_the_default_severity_of_rule_on() {
                 "noVar": "on"
             }
         }
-    }        
+    }
 }"#
         .as_bytes(),
     );

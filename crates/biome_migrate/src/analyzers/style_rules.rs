@@ -1,4 +1,4 @@
-use crate::rule_mover::RuleMover;
+use crate::rule_mover::AnalyzerMover;
 use crate::version_services::Version;
 use crate::{declare_migration, MigrationAction};
 use biome_analyze::context::RuleContext;
@@ -53,9 +53,8 @@ impl Rule for StyleRules {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let version = ctx.version();
 
-        if version != ctx.metadata().version {
+        if !ctx.satisfies(">=2.0.0") {
             return None;
         }
         let mut nodes = FxHashSet::default();
@@ -120,7 +119,7 @@ impl Rule for StyleRules {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<MigrationAction> {
-        let mut rule_mover = RuleMover::from_root(ctx.root());
+        let mut rule_mover = AnalyzerMover::from_root(ctx.root());
 
         for rule_to_move in state {
             let member = json_member(
