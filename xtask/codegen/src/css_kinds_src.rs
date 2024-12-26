@@ -241,6 +241,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "value",
         "as",
         "composes",
+        "position-try",
+        "view-transition",
         //
         "font-face",
         // Don't add to the end of this list, add new keywords above the "HERE"
@@ -442,6 +444,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_PAGE_SELECTOR_PSEUDO",
         "CSS_PAGE_AT_RULE_BLOCK",
         "CSS_PAGE_AT_RULE_ITEM_LIST",
+        "CSS_POSITION_TRY_AT_RULE",
         "CSS_MARGIN_AT_RULE",
         "CSS_LAYER_AT_RULE",
         "CSS_LAYER_REFERENCE",
@@ -478,6 +481,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_VALUE_AT_RULE_DECLARATION_CLAUSE",
         "CSS_VALUE_AT_RULE_GENERIC_PROPERTY",
         "CSS_VALUE_AT_RULE_GENERIC_VALUE",
+        "CSS_VIEW_TRANSITION_AT_RULE",
         "CSS_UNKNOWN_BLOCK_AT_RULE",
         "CSS_UNKNOWN_VALUE_AT_RULE",
         "CSS_UNKNOWN_AT_RULE_COMPONENT_LIST",

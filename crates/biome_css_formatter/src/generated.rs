@@ -3466,6 +3466,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPercentage {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssPositionTryAtRule>
+    for crate::css::statements::position_try_at_rule::FormatCssPositionTryAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssPositionTryAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssPositionTryAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssPositionTryAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssPositionTryAtRule,
+        crate::css::statements::position_try_at_rule::FormatCssPositionTryAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::statements::position_try_at_rule::FormatCssPositionTryAtRule::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPositionTryAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssPositionTryAtRule,
+        crate::css::statements::position_try_at_rule::FormatCssPositionTryAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::statements::position_try_at_rule::FormatCssPositionTryAtRule::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssPropertyAtRule>
     for crate::css::statements::property_at_rule::FormatCssPropertyAtRule
 {
@@ -5668,6 +5708,48 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssValueAtRuleNamedImpor
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: value_at_rule_named_import_specifier :: FormatCssValueAtRuleNamedImportSpecifier :: default ())
+    }
+}
+impl FormatRule<biome_css_syntax::CssViewTransitionAtRule>
+    for crate::css::statements::view_transition_at_rule::FormatCssViewTransitionAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssViewTransitionAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssViewTransitionAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssViewTransitionAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssViewTransitionAtRule,
+        crate::css::statements::view_transition_at_rule::FormatCssViewTransitionAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::statements::view_transition_at_rule::FormatCssViewTransitionAtRule::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssViewTransitionAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssViewTransitionAtRule,
+        crate::css::statements::view_transition_at_rule::FormatCssViewTransitionAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::statements::view_transition_at_rule::FormatCssViewTransitionAtRule::default(
+            ),
+        )
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssBracketedValueList {

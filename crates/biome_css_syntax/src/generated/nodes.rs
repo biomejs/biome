@@ -3904,6 +3904,51 @@ pub struct CssPercentageFields {
     pub percent_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssPositionTryAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssPositionTryAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssPositionTryAtRuleFields {
+        CssPositionTryAtRuleFields {
+            position_try_token: self.position_try_token(),
+            name: self.name(),
+            block: self.block(),
+        }
+    }
+    pub fn position_try_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<CssDashedIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for CssPositionTryAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssPositionTryAtRuleFields {
+    pub position_try_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<CssDashedIdentifier>,
+    pub block: SyntaxResult<AnyCssDeclarationBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPropertyAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -6650,6 +6695,46 @@ pub struct CssValueAtRuleNamedImportSpecifierFields {
     pub as_token: SyntaxResult<SyntaxToken>,
     pub local_name: SyntaxResult<CssIdentifier>,
 }
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssViewTransitionAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssViewTransitionAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssViewTransitionAtRuleFields {
+        CssViewTransitionAtRuleFields {
+            view_transition_token: self.view_transition_token(),
+            block: self.block(),
+        }
+    }
+    pub fn view_transition_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for CssViewTransitionAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssViewTransitionAtRuleFields {
+    pub view_transition_token: SyntaxResult<SyntaxToken>,
+    pub block: SyntaxResult<AnyCssDeclarationBlock>,
+}
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssAtRule {
     CssBogusAtRule(CssBogusAtRule),
@@ -6667,6 +6752,7 @@ pub enum AnyCssAtRule {
     CssMediaAtRule(CssMediaAtRule),
     CssNamespaceAtRule(CssNamespaceAtRule),
     CssPageAtRule(CssPageAtRule),
+    CssPositionTryAtRule(CssPositionTryAtRule),
     CssPropertyAtRule(CssPropertyAtRule),
     CssScopeAtRule(CssScopeAtRule),
     CssStartingStyleAtRule(CssStartingStyleAtRule),
@@ -6674,6 +6760,7 @@ pub enum AnyCssAtRule {
     CssUnknownBlockAtRule(CssUnknownBlockAtRule),
     CssUnknownValueAtRule(CssUnknownValueAtRule),
     CssValueAtRule(CssValueAtRule),
+    CssViewTransitionAtRule(CssViewTransitionAtRule),
 }
 impl AnyCssAtRule {
     pub fn as_css_bogus_at_rule(&self) -> Option<&CssBogusAtRule> {
@@ -6766,6 +6853,12 @@ impl AnyCssAtRule {
             _ => None,
         }
     }
+    pub fn as_css_position_try_at_rule(&self) -> Option<&CssPositionTryAtRule> {
+        match &self {
+            AnyCssAtRule::CssPositionTryAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_property_at_rule(&self) -> Option<&CssPropertyAtRule> {
         match &self {
             AnyCssAtRule::CssPropertyAtRule(item) => Some(item),
@@ -6805,6 +6898,12 @@ impl AnyCssAtRule {
     pub fn as_css_value_at_rule(&self) -> Option<&CssValueAtRule> {
         match &self {
             AnyCssAtRule::CssValueAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_view_transition_at_rule(&self) -> Option<&CssViewTransitionAtRule> {
+        match &self {
+            AnyCssAtRule::CssViewTransitionAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -12694,6 +12793,49 @@ impl From<CssPercentage> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssPositionTryAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_POSITION_TRY_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_POSITION_TRY_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssPositionTryAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssPositionTryAtRule")
+            .field(
+                "position_try_token",
+                &support::DebugSyntaxResult(self.position_try_token()),
+            )
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field("block", &support::DebugSyntaxResult(self.block()))
+            .finish()
+    }
+}
+impl From<CssPositionTryAtRule> for SyntaxNode {
+    fn from(n: CssPositionTryAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssPositionTryAtRule> for SyntaxElement {
+    fn from(n: CssPositionTryAtRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssPropertyAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -15423,6 +15565,48 @@ impl From<CssValueAtRuleNamedImportSpecifier> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssViewTransitionAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_VIEW_TRANSITION_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_VIEW_TRANSITION_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssViewTransitionAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssViewTransitionAtRule")
+            .field(
+                "view_transition_token",
+                &support::DebugSyntaxResult(self.view_transition_token()),
+            )
+            .field("block", &support::DebugSyntaxResult(self.block()))
+            .finish()
+    }
+}
+impl From<CssViewTransitionAtRule> for SyntaxNode {
+    fn from(n: CssViewTransitionAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssViewTransitionAtRule> for SyntaxElement {
+    fn from(n: CssViewTransitionAtRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl From<CssBogusAtRule> for AnyCssAtRule {
     fn from(node: CssBogusAtRule) -> AnyCssAtRule {
         AnyCssAtRule::CssBogusAtRule(node)
@@ -15498,6 +15682,11 @@ impl From<CssPageAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssPageAtRule(node)
     }
 }
+impl From<CssPositionTryAtRule> for AnyCssAtRule {
+    fn from(node: CssPositionTryAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssPositionTryAtRule(node)
+    }
+}
 impl From<CssPropertyAtRule> for AnyCssAtRule {
     fn from(node: CssPropertyAtRule) -> AnyCssAtRule {
         AnyCssAtRule::CssPropertyAtRule(node)
@@ -15533,6 +15722,11 @@ impl From<CssValueAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssValueAtRule(node)
     }
 }
+impl From<CssViewTransitionAtRule> for AnyCssAtRule {
+    fn from(node: CssViewTransitionAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssViewTransitionAtRule(node)
+    }
+}
 impl AstNode for AnyCssAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusAtRule::KIND_SET
@@ -15550,13 +15744,15 @@ impl AstNode for AnyCssAtRule {
         .union(CssMediaAtRule::KIND_SET)
         .union(CssNamespaceAtRule::KIND_SET)
         .union(CssPageAtRule::KIND_SET)
+        .union(CssPositionTryAtRule::KIND_SET)
         .union(CssPropertyAtRule::KIND_SET)
         .union(CssScopeAtRule::KIND_SET)
         .union(CssStartingStyleAtRule::KIND_SET)
         .union(CssSupportsAtRule::KIND_SET)
         .union(CssUnknownBlockAtRule::KIND_SET)
         .union(CssUnknownValueAtRule::KIND_SET)
-        .union(CssValueAtRule::KIND_SET);
+        .union(CssValueAtRule::KIND_SET)
+        .union(CssViewTransitionAtRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
@@ -15575,6 +15771,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_MEDIA_AT_RULE
                 | CSS_NAMESPACE_AT_RULE
                 | CSS_PAGE_AT_RULE
+                | CSS_POSITION_TRY_AT_RULE
                 | CSS_PROPERTY_AT_RULE
                 | CSS_SCOPE_AT_RULE
                 | CSS_STARTING_STYLE_AT_RULE
@@ -15582,6 +15779,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_UNKNOWN_BLOCK_AT_RULE
                 | CSS_UNKNOWN_VALUE_AT_RULE
                 | CSS_VALUE_AT_RULE
+                | CSS_VIEW_TRANSITION_AT_RULE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -15615,6 +15813,9 @@ impl AstNode for AnyCssAtRule {
                 AnyCssAtRule::CssNamespaceAtRule(CssNamespaceAtRule { syntax })
             }
             CSS_PAGE_AT_RULE => AnyCssAtRule::CssPageAtRule(CssPageAtRule { syntax }),
+            CSS_POSITION_TRY_AT_RULE => {
+                AnyCssAtRule::CssPositionTryAtRule(CssPositionTryAtRule { syntax })
+            }
             CSS_PROPERTY_AT_RULE => AnyCssAtRule::CssPropertyAtRule(CssPropertyAtRule { syntax }),
             CSS_SCOPE_AT_RULE => AnyCssAtRule::CssScopeAtRule(CssScopeAtRule { syntax }),
             CSS_STARTING_STYLE_AT_RULE => {
@@ -15628,6 +15829,9 @@ impl AstNode for AnyCssAtRule {
                 AnyCssAtRule::CssUnknownValueAtRule(CssUnknownValueAtRule { syntax })
             }
             CSS_VALUE_AT_RULE => AnyCssAtRule::CssValueAtRule(CssValueAtRule { syntax }),
+            CSS_VIEW_TRANSITION_AT_RULE => {
+                AnyCssAtRule::CssViewTransitionAtRule(CssViewTransitionAtRule { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -15649,6 +15853,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssMediaAtRule(it) => &it.syntax,
             AnyCssAtRule::CssNamespaceAtRule(it) => &it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssPositionTryAtRule(it) => &it.syntax,
             AnyCssAtRule::CssPropertyAtRule(it) => &it.syntax,
             AnyCssAtRule::CssScopeAtRule(it) => &it.syntax,
             AnyCssAtRule::CssStartingStyleAtRule(it) => &it.syntax,
@@ -15656,6 +15861,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssUnknownBlockAtRule(it) => &it.syntax,
             AnyCssAtRule::CssUnknownValueAtRule(it) => &it.syntax,
             AnyCssAtRule::CssValueAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssViewTransitionAtRule(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -15675,6 +15881,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssMediaAtRule(it) => it.syntax,
             AnyCssAtRule::CssNamespaceAtRule(it) => it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => it.syntax,
+            AnyCssAtRule::CssPositionTryAtRule(it) => it.syntax,
             AnyCssAtRule::CssPropertyAtRule(it) => it.syntax,
             AnyCssAtRule::CssScopeAtRule(it) => it.syntax,
             AnyCssAtRule::CssStartingStyleAtRule(it) => it.syntax,
@@ -15682,6 +15889,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssUnknownBlockAtRule(it) => it.syntax,
             AnyCssAtRule::CssUnknownValueAtRule(it) => it.syntax,
             AnyCssAtRule::CssValueAtRule(it) => it.syntax,
+            AnyCssAtRule::CssViewTransitionAtRule(it) => it.syntax,
         }
     }
 }
@@ -15703,6 +15911,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             AnyCssAtRule::CssMediaAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssNamespaceAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssPageAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssPositionTryAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssPropertyAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssScopeAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssStartingStyleAtRule(it) => std::fmt::Debug::fmt(it, f),
@@ -15710,6 +15919,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             AnyCssAtRule::CssUnknownBlockAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssUnknownValueAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssValueAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssViewTransitionAtRule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -15731,6 +15941,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssMediaAtRule(it) => it.into(),
             AnyCssAtRule::CssNamespaceAtRule(it) => it.into(),
             AnyCssAtRule::CssPageAtRule(it) => it.into(),
+            AnyCssAtRule::CssPositionTryAtRule(it) => it.into(),
             AnyCssAtRule::CssPropertyAtRule(it) => it.into(),
             AnyCssAtRule::CssScopeAtRule(it) => it.into(),
             AnyCssAtRule::CssStartingStyleAtRule(it) => it.into(),
@@ -15738,6 +15949,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssUnknownBlockAtRule(it) => it.into(),
             AnyCssAtRule::CssUnknownValueAtRule(it) => it.into(),
             AnyCssAtRule::CssValueAtRule(it) => it.into(),
+            AnyCssAtRule::CssViewTransitionAtRule(it) => it.into(),
         }
     }
 }
@@ -22763,6 +22975,11 @@ impl std::fmt::Display for CssPercentage {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssPositionTryAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssPropertyAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -23079,6 +23296,11 @@ impl std::fmt::Display for CssValueAtRuleImportSpecifier {
     }
 }
 impl std::fmt::Display for CssValueAtRuleNamedImportSpecifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssViewTransitionAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
