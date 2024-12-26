@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: valid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -110,11 +111,11 @@ url-prefix(http: //www.w3.org/Style/), domain(mozilla.org), regexp('https:.*')
         background: white;
     }
 }
-/* TODO: the parser not supported yet */
-/* @position-try --foo {}
+
+@position-try --foo {}
 @view-transition {
     navigation: auto;
-} */
+}
 
 /* These at-rules have already been removed from the draft. Support will be provided if there's strong demand*/
 /* @scroll-timeline foo {}

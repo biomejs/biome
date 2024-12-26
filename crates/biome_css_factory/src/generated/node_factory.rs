@@ -1365,6 +1365,20 @@ pub fn css_percentage(value_token: SyntaxToken, percent_token: SyntaxToken) -> C
         ],
     ))
 }
+pub fn css_position_try_at_rule(
+    position_try_token: SyntaxToken,
+    name: CssDashedIdentifier,
+    block: AnyCssDeclarationBlock,
+) -> CssPositionTryAtRule {
+    CssPositionTryAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_POSITION_TRY_AT_RULE,
+        [
+            Some(SyntaxElement::Token(position_try_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_property_at_rule(
     property_token: SyntaxToken,
     name: CssDashedIdentifier,
@@ -2304,6 +2318,18 @@ pub fn css_value_at_rule_named_import_specifier(
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(as_token)),
             Some(SyntaxElement::Node(local_name.into_syntax())),
+        ],
+    ))
+}
+pub fn css_view_transition_at_rule(
+    view_transition_token: SyntaxToken,
+    block: AnyCssDeclarationBlock,
+) -> CssViewTransitionAtRule {
+    CssViewTransitionAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VIEW_TRANSITION_AT_RULE,
+        [
+            Some(SyntaxElement::Token(view_transition_token)),
+            Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }

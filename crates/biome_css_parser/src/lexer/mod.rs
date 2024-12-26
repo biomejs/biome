@@ -922,6 +922,8 @@ impl<'src> CssLexer<'src> {
             b"value" => VALUE_KW,
             b"as" => AS_KW,
             b"composes" => COMPOSES_KW,
+            b"position-try" => POSITION_TRY_KW,
+            b"view-transition" => VIEW_TRANSITION_KW,
             _ => IDENT,
         }
     }
