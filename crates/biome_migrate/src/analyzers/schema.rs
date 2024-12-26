@@ -35,7 +35,7 @@ impl Rule for Schema {
                 .strip_prefix("https://biomejs.dev/schemas/")?
                 .strip_suffix("/schema.json");
 
-            if let Some(version) = env::var("BIOME_VERSION").ok() {
+            if let Ok(version) = env::var("BIOME_VERSION") {
                 if let Some(current_version) = value {
                     if current_version != version {
                         return Some(string_value.range());
