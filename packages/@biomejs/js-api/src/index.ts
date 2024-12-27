@@ -156,23 +156,17 @@ export class Biome {
 		func: (path: BiomePath) => T,
 	): T {
 		return this.tryCatchWrapper(() => {
-			const biomePath: BiomePath = {
-				path,
-				wasWritten: false,
-				kind: ["handleable"],
-			};
-
 			this.workspace.openFile({
 				content: { type: "fromClient", content },
 				version: 0,
-				path: biomePath,
+				path,
 			});
 
 			try {
-				return func(biomePath);
+				return func(path);
 			} finally {
 				this.workspace.closeFile({
-					path: biomePath,
+					path,
 				});
 			}
 		});

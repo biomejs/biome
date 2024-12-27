@@ -5,39 +5,16 @@ export interface SupportsFeatureParams {
 	path: BiomePath;
 }
 export type FeatureName = FeatureKind[];
-export interface BiomePath {
-	/**
-	 * Determines the kind of the file inside Biome. Some files are considered as configuration files, others as manifest files, and others as files to handle
-	 */
-	kind: FileKind;
-	/**
-	 * The path to the file
-	 */
-	path: string;
-	/**
-	 * Whether this path (usually a file) was fixed as a result of a format/lint/check command with the `--write` filag.
-	 */
-	wasWritten: boolean;
-}
+export type BiomePath = string;
 export type FeatureKind = "format" | "lint" | "search" | "assist" | "debug";
-export type FileKind = FileKind2[];
-/**
- * The priority of the file
- */
-export type FileKind2 =
-	| "config"
-	| "manifest"
-	| "ignore"
-	| "inspectable"
-	| "handleable";
 export interface FileFeaturesResult {
 	featuresSupported: {};
 }
 export interface UpdateSettingsParams {
 	configuration: PartialConfiguration;
 	gitignoreMatches: string[];
-	vcsBasePath?: string;
-	workspaceDirectory?: string;
+	vcsBasePath?: BiomePath;
+	workspaceDirectory?: BiomePath;
 }
 /**
  * The configuration that is contained inside the file `biome.json`
@@ -2774,7 +2751,7 @@ export type RestrictedModifier =
 	| "readonly"
 	| "static";
 export interface RegisterProjectFolderParams {
-	path?: string;
+	path?: BiomePath;
 	setAsCurrentWorkspace: boolean;
 }
 export type ProjectKey = number;

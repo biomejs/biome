@@ -55,6 +55,7 @@ biome_text_edit         = { workspace = true }
 camino                  = { workspace = true }
 crossbeam               = { workspace = true }
 enumflags2              = { workspace = true, features = ["serde"] }
+getrandom               = { workspace = true, features = ["js"] }
 ignore                  = { workspace = true }
 papaya                  = { workspace = true }
 rayon                   = { workspace = true }
