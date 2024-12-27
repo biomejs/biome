@@ -2880,7 +2880,7 @@ fn should_show_formatter_diagnostics_for_files_ignored_by_linter() {
     fs.insert(
         biome_json.into(),
         r#"{
-    "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+    "$schema": "https://biomejs.dev/schemas/0.0.0/schema.json",
     "organizeImports": {
         "enabled": true
     },

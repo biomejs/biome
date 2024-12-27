@@ -3565,7 +3565,7 @@ fn should_format_files_in_folders_ignored_by_linter() {
     fs.insert(
         biome_json.into(),
         r#"{
-    "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+    "$schema": "https://biomejs.dev/schemas/0.0.0/schema.json",
     "organizeImports": {
         "enabled": true
     },
