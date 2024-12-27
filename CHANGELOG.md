@@ -41,6 +41,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - `biome migrate eslint` now correctly handles ESLint configuration with `null` values in file lists ([#4740](https://github.com/biomejs/biome/issues/4740)).
   Contributed by @Conaclos
 
+#### New features
+
+- Command `check`, `format` and `lint` now check the schema and CLI versions, and report a warning in case of a schema version mismatch. ([#4147](https://github.com/biomejs/biome/issues/4147)).
+  Contributed by @MaxtuneLee
+
 ### Configuration
 
 ### Editors
