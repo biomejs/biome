@@ -1,8 +1,8 @@
 use biome_console::markup;
-use biome_diagnostics::adapters::{BpafError, IoError, SerdeJsonError};
 use biome_diagnostics::{
     Advices, Category, Diagnostic, Error, LogCategory, MessageAndDescription, Severity, Visit,
 };
+use biome_diagnostics::{BpafError, IoError, SerdeJsonError};
 use biome_service::WorkspaceError;
 use std::process::{ExitCode, Termination};
 use std::{env::current_exe, fmt::Debug};

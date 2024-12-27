@@ -5,7 +5,7 @@ use crate::{
     fs::{TraversalContext, TraversalScope},
     BiomePath, FileSystem,
 };
-use biome_diagnostics::{adapters::IoError, DiagnosticExt, Error, Severity};
+use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
 use camino::{Utf8DirEntry, Utf8Path, Utf8PathBuf};
 use oxc_resolver::{Resolution, ResolveError, ResolveOptions, Resolver};
 use rayon::{scope, Scope};

@@ -12,7 +12,7 @@ use biome_console::markup;
 use biome_css_analyze::METADATA as css_lint_metadata;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
-use biome_diagnostics::adapters::CaminoError;
+use biome_diagnostics::CaminoError;
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{
     AutoSearchResult, ConfigName, FileSystem, FileSystemDiagnostic, FsErrorKind, OpenOptions,

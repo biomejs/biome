@@ -1,7 +1,7 @@
-use biome_diagnostics::adapters::{IoError, StdError};
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticExt, DiagnosticTags, Error, Visit,
 };
+use biome_diagnostics::{IoError, StdError};
 use biome_text_edit::TextEdit;
 use std::io;
 

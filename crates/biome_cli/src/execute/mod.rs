@@ -18,7 +18,7 @@ use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{CliDiagnostic, CliSession, DiagnosticsPayload, Reporter};
 use biome_configuration::analyzer::RuleSelector;
 use biome_console::{markup, ConsoleExt};
-use biome_diagnostics::adapters::SerdeJsonError;
+use biome_diagnostics::SerdeJsonError;
 use biome_diagnostics::{category, Category};
 use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;

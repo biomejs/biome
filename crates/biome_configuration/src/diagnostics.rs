@@ -1,7 +1,7 @@
 use biome_console::fmt::Display;
 use biome_console::{markup, MarkupBuf};
 use biome_deserialize::DeserializationDiagnostic;
-use biome_diagnostics::adapters::ResolveError;
+use biome_diagnostics::ResolveError;
 use biome_diagnostics::{Advices, Diagnostic, Error, LogCategory, MessageAndDescription, Visit};
 use biome_rowan::SyntaxError;
 use serde::{Deserialize, Serialize};

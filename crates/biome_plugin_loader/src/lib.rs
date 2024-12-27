@@ -6,7 +6,7 @@ pub use analyzer_grit_plugin::AnalyzerGritPlugin;
 use biome_analyze::AnalyzerPlugin;
 use biome_console::markup;
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_diagnostics::adapters::ResolveError;
+use biome_diagnostics::ResolveError;
 use biome_fs::FileSystem;
 use biome_json_parser::JsonParserOptions;
 use camino::{Utf8Path, Utf8PathBuf};
