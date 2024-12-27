@@ -54,12 +54,12 @@
       "recommended": true,
       "style": {
         "noNonNullAssertion": "off",
+        "useNodejsImportProtocol": "error"
+      },
+      "suspicious": {
         "noVar": "on"
       }
     }
-  },
-  "organizeImports": {
-    "enabled": true
   },
   "vcs": {
     "clientKind": "git",
