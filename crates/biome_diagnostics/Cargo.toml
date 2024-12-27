@@ -35,7 +35,7 @@ biome_rowan                  = { workspace = true }
 biome_text_edit              = { workspace = true }
 biome_text_size              = { workspace = true }
 bpaf                         = { workspace = true }
-camino                       = { workspace = true, optional = true }
+camino                       = { workspace = true }
 enumflags2                   = { workspace = true }
 oxc_resolver                 = { workspace = true }
 schemars                     = { workspace = true, optional = true }

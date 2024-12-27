@@ -11,7 +11,7 @@ snapshot_kind: text
 .brokenStyle { color: f( }
 
 .style {
-                color: 
+                color:
                 fakeFunction()
 }
 

@@ -1,33 +1,33 @@
 [package]
-authors.workspace = true
+authors.workspace    = true
 categories.workspace = true
-description = "Biome's JavaScript transpiler"
-edition.workspace = true
-homepage.workspace = true
-keywords.workspace = true
-license.workspace = true
-name = "biome_js_transform"
+description          = "Biome's JavaScript transpiler"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_js_transform"
 repository.workspace = true
-version = "0.5.7"
+version              = "0.5.7"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-biome_analyze = { workspace = true }
+biome_analyze     = { workspace = true }
 biome_diagnostics = { workspace = true }
-biome_js_factory = { workspace = true }
-biome_js_syntax = { workspace = true }
-biome_rowan = { workspace = true }
+biome_js_factory  = { workspace = true }
+biome_js_syntax   = { workspace = true }
+biome_rowan       = { workspace = true }
 
 
 [dev-dependencies]
-biome_analyze = { path = "../biome_analyze" }
+biome_analyze      = { path = "../biome_analyze" }
 biome_js_formatter = { path = "../biome_js_formatter" }
-biome_js_parser = { path = "../biome_js_parser" }
-biome_test_utils = { path = "../biome_test_utils" }
-insta = { workspace = true }
-tests_macros = { path = "../tests_macros" }
-camino = { workspace = true }
+biome_js_parser    = { path = "../biome_js_parser" }
+biome_test_utils   = { path = "../biome_test_utils" }
+camino             = { workspace = true }
+insta              = { workspace = true }
+tests_macros       = { path = "../tests_macros" }
 
 [lints]
 workspace = true
