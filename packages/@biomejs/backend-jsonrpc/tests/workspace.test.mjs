@@ -18,31 +18,19 @@ describe("Workspace API", () => {
 			setAsCurrentWorkspace: true,
 		});
 		await workspace.openFile({
-			path: {
-				path: "test.js",
-				wasWritten: false,
-				kind: ["handleable"],
-			},
+			path: "test.js",
 			content: { type: "fromClient", content: "statement()" },
 			version: 0,
 		});
 
 		const printed = await workspace.formatFile({
-			path: {
-				path: "test.js",
-				wasWritten: false,
-				kind: ["handleable"],
-			},
+			path: "test.js"
 		});
 
 		expect(printed.code).toBe("statement();\n");
 
 		await workspace.closeFile({
-			path: {
-				path: "test.js",
-				wasWritten: false,
-				kind: ["handleable"],
-			},
+			path:  "test.js"
 		});
 
 		workspace.destroy();
