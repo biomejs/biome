@@ -32,8 +32,7 @@ pub(crate) fn run<'a>(
             features: FeaturesBuilder::new().with_formatter().build(),
         })?;
         if file_features.is_protected() {
-            let protected_diagnostic =
-                WorkspaceError::protected_file(biome_path.display().to_string());
+            let protected_diagnostic = WorkspaceError::protected_file(biome_path.to_string());
             if protected_diagnostic.tags().is_verbose() {
                 if verbose {
                     console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
@@ -57,10 +56,10 @@ pub(crate) fn run<'a>(
             })?;
 
             let code = printed.into_code();
-            let output = match biome_path.extension().map(|ext| ext.as_encoded_bytes()) {
-                Some(b"astro") => AstroFileHandler::output(content, code.as_str()),
-                Some(b"vue") => VueFileHandler::output(content, code.as_str()),
-                Some(b"svelte") => SvelteFileHandler::output(content, code.as_str()),
+            let output = match biome_path.extension() {
+                Some("astro") => AstroFileHandler::output(content, code.as_str()),
+                Some("vue") => VueFileHandler::output(content, code.as_str()),
+                Some("svelte") => SvelteFileHandler::output(content, code.as_str()),
                 _ => code,
             };
             console.append(markup! {
@@ -96,8 +95,7 @@ pub(crate) fn run<'a>(
         })?;
 
         if file_features.is_protected() {
-            let protected_diagnostic =
-                WorkspaceError::protected_file(biome_path.display().to_string());
+            let protected_diagnostic = WorkspaceError::protected_file(biome_path.to_string());
             if protected_diagnostic.tags().is_verbose() {
                 if verbose {
                     console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
@@ -138,10 +136,10 @@ pub(crate) fn run<'a>(
                     rule_categories: rule_categories.build(),
                 })?;
                 let code = fix_file_result.code;
-                let output = match biome_path.extension().map(|ext| ext.as_encoded_bytes()) {
-                    Some(b"astro") => AstroFileHandler::output(&new_content, code.as_str()),
-                    Some(b"vue") => VueFileHandler::output(&new_content, code.as_str()),
-                    Some(b"svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
+                let output = match biome_path.extension() {
+                    Some("astro") => AstroFileHandler::output(&new_content, code.as_str()),
+                    Some("vue") => VueFileHandler::output(&new_content, code.as_str()),
+                    Some("svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
                     _ => code,
                 };
                 if output != new_content {
@@ -161,10 +159,10 @@ pub(crate) fn run<'a>(
                 path: biome_path.clone(),
             })?;
             let code = printed.into_code();
-            let output = match biome_path.extension().map(|ext| ext.as_encoded_bytes()) {
-                Some(b"astro") => AstroFileHandler::output(&new_content, code.as_str()),
-                Some(b"vue") => VueFileHandler::output(&new_content, code.as_str()),
-                Some(b"svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
+            let output = match biome_path.extension() {
+                Some("astro") => AstroFileHandler::output(&new_content, code.as_str()),
+                Some("vue") => VueFileHandler::output(&new_content, code.as_str()),
+                Some("svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
                 _ => code,
             };
             if (mode.is_check_apply() || mode.is_check_apply_unsafe()) && output != new_content {

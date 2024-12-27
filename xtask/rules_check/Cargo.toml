@@ -28,7 +28,7 @@ biome_json_parser     = { workspace = true }
 biome_json_syntax     = { workspace = true }
 biome_rowan           = { workspace = true }
 biome_service         = { workspace = true }
-log                   = "0.4.20"
+camino                = { workspace = true }
 pulldown-cmark        = "0.12.2"
 
 

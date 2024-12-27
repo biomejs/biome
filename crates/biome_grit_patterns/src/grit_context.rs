@@ -9,6 +9,7 @@ use crate::grit_target_node::GritTargetNode;
 use crate::grit_tree::GritTargetTree;
 use biome_analyze::RuleDiagnostic;
 use biome_parser::AnyParse;
+use camino::Utf8PathBuf;
 use grit_pattern_matcher::constants::{GLOBAL_VARS_SCOPE_INDEX, NEW_FILES_INDEX};
 use grit_pattern_matcher::context::{ExecContext, QueryContext};
 use grit_pattern_matcher::file_owners::{FileOwner, FileOwners};
@@ -318,10 +319,13 @@ pub struct GritTargetFile {
 }
 
 impl GritTargetFile {
-    pub fn parse(source: &str, path: PathBuf, target_language: GritTargetLanguage) -> Self {
+    pub fn parse(source: &str, path: Utf8PathBuf, target_language: GritTargetLanguage) -> Self {
         let parser = target_language.get_parser();
         let parse = parser.parse_with_path(source, &path);
 
-        Self { parse, path }
+        Self {
+            parse,
+            path: path.into(),
+        }
     }
 }

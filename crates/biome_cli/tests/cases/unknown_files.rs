@@ -3,17 +3,17 @@ use crate::{run_cli, UNFORMATTED};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 #[test]
 fn should_print_a_diagnostic_unknown_file() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path1 = Path::new("format.yml");
+    let file_path1 = Utf8Path::new("format.yml");
     fs.insert(file_path1.into(), "".as_bytes());
 
-    let file_path2 = Path::new("format.js");
+    let file_path2 = Utf8Path::new("format.js");
     fs.insert(file_path2.into(), UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -45,16 +45,16 @@ fn should_not_print_a_diagnostic_unknown_file_because_ignored() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path1 = Path::new("biome.json");
+    let file_path1 = Utf8Path::new("biome.json");
     fs.insert(
         file_path1.into(),
         r#"{ "files": { "ignoreUnknown": true } }"#.as_bytes(),
     );
 
-    let file_path1 = Path::new("format.yml");
+    let file_path1 = Utf8Path::new("format.yml");
     fs.insert(file_path1.into(), "".as_bytes());
 
-    let file_path2 = Path::new("format.js");
+    let file_path2 = Utf8Path::new("format.js");
     fs.insert(file_path2.into(), UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(

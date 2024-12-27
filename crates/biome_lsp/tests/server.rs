@@ -8,6 +8,7 @@ use biome_lsp::ServerFactory;
 use biome_lsp::WorkspaceSettings;
 use biome_service::workspace::GetSyntaxTreeResult;
 use biome_service::workspace::{GetFileContentParams, GetSyntaxTreeParams};
+use camino::Utf8PathBuf;
 use futures::channel::mpsc::{channel, Sender};
 use futures::Sink;
 use futures::SinkExt;
@@ -495,7 +496,7 @@ async fn document_lifecycle() -> Result<()> {
             "biome/get_syntax_tree",
             "get_syntax_tree",
             GetSyntaxTreeParams {
-                path: BiomePath::new(url!("document.js").to_file_path().unwrap()),
+                path: BiomePath::try_from(url!("document.js").to_file_path().unwrap()).unwrap(),
             },
         )
         .await?
@@ -1489,7 +1490,10 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
         }
     }"#;
 
-    fs.insert(url!("biome.json").to_file_path().unwrap(), config);
+    fs.insert(
+        Utf8PathBuf::from_path_buf(url!("biome.json").to_file_path().unwrap()).unwrap(),
+        config,
+    );
     let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
 
     let (stream, sink) = client.split();
@@ -1853,7 +1857,10 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
     ]
 }"#;
 
-    fs.insert(url!("biome.json").to_file_path().unwrap(), config);
+    fs.insert(
+        Utf8PathBuf::from_path_buf(url!("biome.json").to_file_path().unwrap()).unwrap(),
+        config,
+    );
     let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -2186,7 +2193,10 @@ isSpreadAssignment;
             "biome/get_file_content",
             "get_file_content",
             GetFileContentParams {
-                path: BiomePath::new(url!("document.js").to_file_path().unwrap()),
+                path: BiomePath::new(
+                    Utf8PathBuf::from_path_buf(url!("document.js").to_file_path().unwrap())
+                        .unwrap(),
+                ),
             },
         )
         .await?
@@ -2329,7 +2339,10 @@ async fn does_not_format_ignored_files() -> Result<()> {
         }
     }"#;
 
-    fs.insert(url!("biome.json").to_file_path().unwrap(), config);
+    fs.insert(
+        Utf8PathBuf::from_path_buf(url!("biome.json").to_file_path().unwrap()).unwrap(),
+        config,
+    );
     let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -2649,7 +2662,10 @@ async fn pull_source_assist_action() -> Result<()> {
         }
     }"#;
 
-    fs.insert(url!("biome.json").to_file_path().unwrap(), config);
+    fs.insert(
+        Utf8PathBuf::from_path_buf(url!("biome.json").to_file_path().unwrap()).unwrap(),
+        config,
+    );
     let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);

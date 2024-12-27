@@ -134,7 +134,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
             features: ctx.execution.to_feature(),
         })
         .with_file_path_and_code_and_tags(
-            biome_path.display().to_string(),
+            biome_path.to_string(),
             category!("files/missingHandler"),
             DiagnosticTags::VERBOSE,
         )?;
@@ -144,7 +144,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
         return Ok(FileStatus::Ignored);
     } else if file_features.is_not_supported() {
         return Err(Message::from(
-            UnhandledDiagnostic.with_file_path(biome_path.display().to_string()),
+            UnhandledDiagnostic.with_file_path(biome_path.to_string()),
         ));
     }
 
@@ -191,14 +191,14 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
         match reason {
             SupportKind::FileNotSupported => {
                 return Err(Message::from(
-                    UnhandledDiagnostic.with_file_path(biome_path.display().to_string()),
+                    UnhandledDiagnostic.with_file_path(biome_path.to_string()),
                 ));
             }
             SupportKind::FeatureNotEnabled | SupportKind::Ignored => {
                 return Ok(FileStatus::Ignored);
             }
             SupportKind::Protected => {
-                return Ok(FileStatus::Protected(biome_path.display().to_string()));
+                return Ok(FileStatus::Protected(biome_path.to_string()));
             }
             SupportKind::Supported => {}
         };
@@ -215,24 +215,24 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
             // the unsupported case should be handled already at this point
             lint(
                 shared_context,
-                biome_path,
+                biome_path.clone(),
                 suppress,
                 suppression_reason.as_deref(),
             )
         }
         TraversalMode::Format { .. } => {
             // the unsupported case should be handled already at this point
-            format(shared_context, biome_path)
+            format(shared_context, biome_path.clone())
         }
         TraversalMode::Check { .. } | TraversalMode::CI { .. } => {
-            check_file(shared_context, biome_path, &file_features)
+            check_file(shared_context, biome_path.clone(), &file_features)
         }
         TraversalMode::Migrate { .. } => {
             unreachable!("The migration should not be called for this file")
         }
         TraversalMode::Search { ref pattern, .. } => {
             // the unsupported case should be handled already at this point
-            search(shared_context, biome_path, pattern)
+            search(shared_context, biome_path.clone(), pattern)
         }
     }
 }

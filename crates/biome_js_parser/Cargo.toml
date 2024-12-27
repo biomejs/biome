@@ -34,6 +34,7 @@ biome_deserialize   = { workspace = true }
 biome_fs            = { workspace = true }
 biome_service       = { workspace = true }
 biome_test_utils    = { workspace = true }
+camino              = { workspace = true }
 insta               = { workspace = true }
 quickcheck          = { workspace = true }
 quickcheck_macros   = { workspace = true }

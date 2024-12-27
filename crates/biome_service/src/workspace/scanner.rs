@@ -1,12 +1,11 @@
+use camino::Utf8Path;
+use crossbeam::channel::{unbounded, Receiver, Sender};
+use rayon::ThreadPoolBuilder;
 use std::collections::BTreeSet;
 use std::panic::catch_unwind;
-use std::path::Path;
 use std::sync::{Once, RwLock};
 use std::thread;
 use std::time::{Duration, Instant};
-
-use crossbeam::channel::{unbounded, Receiver, Sender};
-use rayon::ThreadPoolBuilder;
 
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, Error, Severity};
@@ -28,7 +27,7 @@ pub(crate) struct ScanResult {
 
 pub(crate) fn scan(
     workspace: &WorkspaceServer,
-    folder: &Path,
+    folder: &Utf8Path,
 ) -> Result<ScanResult, WorkspaceError> {
     init_thread_pool();
 
@@ -83,7 +82,7 @@ fn init_thread_pool() {
 /// Initiates the filesystem traversal tasks from the provided path and runs it to completion.
 ///
 /// Returns the duration of the process and the evaluated paths.
-fn scan_folder(folder: &Path, ctx: &ScanContext) -> (Duration, BTreeSet<BiomePath>) {
+fn scan_folder(folder: &Utf8Path, ctx: &ScanContext) -> (Duration, BTreeSet<BiomePath>) {
     let start = Instant::now();
     let fs = ctx.workspace.fs();
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {

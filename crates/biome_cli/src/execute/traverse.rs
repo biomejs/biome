@@ -14,6 +14,7 @@ use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::dome::Dome;
 use biome_service::workspace::{DropPatternParams, IsPathIgnoredParams};
 use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
+use camino::Utf8PathBuf;
 use crossbeam::channel::{unbounded, Receiver, Sender};
 use rustc_hash::FxHashSet;
 use std::collections::BTreeSet;
@@ -159,7 +160,10 @@ fn traverse_inputs(
     let start = Instant::now();
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
         for input in inputs {
-            scope.evaluate(ctx, PathBuf::from(input));
+            scope.evaluate(
+                ctx,
+                Utf8PathBuf::from_path_buf(PathBuf::from(input)).expect("Valid UTF-8 path"),
+            );
         }
     }));
 
@@ -288,7 +292,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
         should_print
     }
 
-    fn run(&self, receiver: Receiver<Message>, interner: Receiver<PathBuf>) -> Vec<Error> {
+    fn run(&self, receiver: Receiver<Message>, interner: Receiver<Utf8PathBuf>) -> Vec<Error> {
         let mut paths: FxHashSet<String> = FxHashSet::default();
 
         let mut diagnostics_to_print = vec![];
@@ -324,9 +328,9 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                             None => loop {
                                 match interner.recv() {
                                     Ok(path) => {
-                                        paths.insert(path.display().to_string());
-                                        if path.display().to_string() == *file_path {
-                                            break paths.get(&path.display().to_string());
+                                        paths.insert(path.to_string());
+                                        if path.as_str() == *file_path {
+                                            break paths.get(&path.to_string());
                                         }
                                     }
                                     // In case the channel disconnected without sending
@@ -544,15 +548,13 @@ impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
     pub(crate) fn miss_handler_err(&self, err: WorkspaceError, biome_path: &BiomePath) {
         self.push_diagnostic(
             err.with_category(category!("files/missingHandler"))
-                .with_file_path(biome_path.display().to_string())
+                .with_file_path(biome_path.to_string())
                 .with_tags(DiagnosticTags::VERBOSE),
         );
     }
 
     pub(crate) fn protected_file(&self, biome_path: &BiomePath) {
-        self.push_diagnostic(
-            WorkspaceError::protected_file(biome_path.display().to_string()).into(),
-        )
+        self.push_diagnostic(WorkspaceError::protected_file(biome_path.to_string()).into())
     }
 }
 
@@ -686,9 +688,7 @@ fn handle_file(ctx: &TraversalOptions, path: &BiomePath) {
                 },
             };
 
-            ctx.push_message(
-                PanicDiagnostic { message }.with_file_path(path.display().to_string()),
-            );
+            ctx.push_message(PanicDiagnostic { message }.with_file_path(path.to_string()));
         }
     }
 }

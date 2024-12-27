@@ -3,7 +3,7 @@ use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayloa
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 const VUE_IMPLICIT_JS_FILE_UNFORMATTED: &str = r#"<script>
 import {    something } from "file.vue";
@@ -111,7 +111,7 @@ fn format_vue_implicit_js_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let vue_file_path = Path::new("file.vue");
+    let vue_file_path = Utf8Path::new("file.vue");
     fs.insert(
         vue_file_path.into(),
         VUE_IMPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
@@ -141,7 +141,7 @@ fn format_vue_implicit_js_files_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let vue_file_path = Path::new("file.vue");
+    let vue_file_path = Utf8Path::new("file.vue");
     fs.insert(
         vue_file_path.into(),
         VUE_IMPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
@@ -178,7 +178,7 @@ fn format_vue_explicit_js_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let vue_file_path = Path::new("file.vue");
+    let vue_file_path = Utf8Path::new("file.vue");
     fs.insert(
         vue_file_path.into(),
         VUE_EXPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
@@ -208,7 +208,7 @@ fn format_vue_explicit_js_files_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let vue_file_path = Path::new("file.vue");
+    let vue_file_path = Utf8Path::new("file.vue");
     fs.insert(
         vue_file_path.into(),
         VUE_EXPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
@@ -245,7 +245,7 @@ fn format_empty_vue_js_files_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let vue_file_path = Path::new("file.vue");
+    let vue_file_path = Utf8Path::new("file.vue");
     fs.insert(vue_file_path.into(), "<template></template>".as_bytes());
 
     let (fs, result) = run_cli(
@@ -279,7 +279,7 @@ fn format_vue_ts_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let vue_file_path = Path::new("file.vue");
+    let vue_file_path = Utf8Path::new("file.vue");
     fs.insert(vue_file_path.into(), VUE_TS_FILE_UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -306,7 +306,7 @@ fn format_vue_ts_files_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let vue_file_path = Path::new("file.vue");
+    let vue_file_path = Utf8Path::new("file.vue");
     fs.insert(vue_file_path.into(), VUE_TS_FILE_UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -340,7 +340,7 @@ fn format_empty_vue_ts_files_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let vue_file_path = Path::new("file.vue");
+    let vue_file_path = Utf8Path::new("file.vue");
     fs.insert(vue_file_path.into(), "<template></template>".as_bytes());
 
     let (fs, result) = run_cli(
@@ -374,7 +374,7 @@ fn format_vue_carriage_return_line_feed_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let vue_file_path = Path::new("file.vue");
+    let vue_file_path = Utf8Path::new("file.vue");
     fs.insert(
         vue_file_path.into(),
         VUE_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED.as_bytes(),
@@ -408,7 +408,7 @@ fn format_vue_generic_component_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let vue_file_path = Path::new("file.vue");
+    let vue_file_path = Utf8Path::new("file.vue");
     fs.insert(
         vue_file_path.into(),
         VUE_GENERIC_COMPONENT_FILE_UNFORMATTED.as_bytes(),
@@ -438,7 +438,7 @@ fn lint_vue_js_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let vue_file_path = Path::new("file.vue");
+    let vue_file_path = Utf8Path::new("file.vue");
     fs.insert(vue_file_path.into(), VUE_JS_FILE_NOT_LINTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -463,7 +463,7 @@ fn lint_vue_ts_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let vue_file_path = Path::new("file.vue");
+    let vue_file_path = Utf8Path::new("file.vue");
     fs.insert(vue_file_path.into(), VUE_TS_FILE_NOT_LINTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -488,7 +488,7 @@ fn sorts_imports_check() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let vue_file_path = Path::new("file.vue");
+    let vue_file_path = Utf8Path::new("file.vue");
     fs.insert(vue_file_path.into(), VUE_FILE_IMPORTS_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -523,7 +523,7 @@ fn sorts_imports_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let vue_file_path = Path::new("file.vue");
+    let vue_file_path = Utf8Path::new("file.vue");
     fs.insert(vue_file_path.into(), VUE_FILE_IMPORTS_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -769,7 +769,7 @@ fn vue_compiler_macros_as_globals() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let vue_file_path = Path::new("file.vue");
+    let vue_file_path = Utf8Path::new("file.vue");
     fs.insert(vue_file_path.into(), VUE_TS_FILE_SETUP_GLOBALS.as_bytes());
 
     let (fs, result) = run_cli(

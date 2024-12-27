@@ -11,7 +11,7 @@
 
 use std::{collections::HashMap, str::FromStr};
 
-use biome_diagnostics::{adapters::IniError, Error};
+use biome_diagnostics::{Error, IniError};
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
 use serde::{Deserialize, Deserializer};
 

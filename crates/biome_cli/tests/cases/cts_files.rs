@@ -3,14 +3,14 @@ use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 #[test]
 fn should_allow_using_export_statements() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("a.cts");
+    let file_path = Utf8Path::new("a.cts");
     fs.insert(
         file_path.into(),
         r#"export default { cjs: true };"#.as_bytes(),

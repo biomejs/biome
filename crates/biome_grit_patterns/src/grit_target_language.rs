@@ -4,12 +4,12 @@ mod js_target_language;
 pub use css_target_language::CssTargetLanguage;
 pub use js_target_language::JsTargetLanguage;
 
+use camino::Utf8Path;
+use grit_util::{AnalysisLogs, Ast, CodeRange, EffectRange, Language, Parser, SnippetTree};
+use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::path::Path;
 use std::str::FromStr;
-
-use grit_util::{AnalysisLogs, Ast, CodeRange, EffectRange, Language, Parser, SnippetTree};
-use serde::{Deserialize, Serialize};
 
 use biome_grit_syntax::{GritLanguageDeclaration, GritSyntaxKind};
 use biome_parser::AnyParse;
@@ -422,7 +422,7 @@ pub trait GritTargetParser: Parser<Tree = GritTargetTree> {
         logs: &mut AnalysisLogs,
     ) -> Option<GritTargetTree>;
 
-    fn parse_with_path(&self, source: &str, path: &Path) -> AnyParse;
+    fn parse_with_path(&self, source: &str, path: &Utf8Path) -> AnyParse;
 }
 
 #[derive(Clone, Debug)]

@@ -314,7 +314,7 @@ fn lint(params: LintParams) -> LintResults {
         range: None,
     };
 
-    info!("Analyze file {}", params.path.display());
+    info!("Analyze file {}", params.path.as_str());
     let mut process_lint = ProcessLint::new(&params);
 
     let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, |signal| {

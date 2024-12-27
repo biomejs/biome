@@ -4,14 +4,13 @@ use crate::execute::process_file::lint::lint_with_guard;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
 use biome_diagnostics::{category, DiagnosticExt};
-use biome_fs::TraversalContext;
+use biome_fs::{BiomePath, TraversalContext};
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::workspace::FileFeaturesResult;
-use std::path::Path;
 
 pub(crate) fn check_file<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
-    path: &Path,
+    path: BiomePath,
     file_features: &'ctx FileFeaturesResult,
 ) -> FileResult {
     let mut has_failures = false;
@@ -20,13 +19,13 @@ pub(crate) fn check_file<'ctx>(
     if result.is_too_large() {
         ctx.push_diagnostic(
             FileTooLarge::from(result)
-                .with_file_path(path.display().to_string())
+                .with_file_path(workspace_file.path.to_string())
                 .with_category(category!("check")),
         );
         return Ok(FileStatus::Ignored);
     }
     let mut changed = false;
-    let _ = tracing::info_span!("Check ", path =? workspace_file.path.display()).entered();
+    let _ = tracing::info_span!("Check ", path =? workspace_file.path).entered();
     if file_features.supports_lint() {
         let lint_result = lint_with_guard(ctx, &mut workspace_file, false, None);
         match lint_result {

@@ -3,7 +3,7 @@ use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayloa
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 const FIX_BEFORE: &str = "(1 >= -0)";
 const FIX_AFTER: &str = "(1 >= 0)";
@@ -18,7 +18,7 @@ const SIMPLE_NUMBERS_AFTER: &str = "({ 1: 1 });";
 fn does_handle_included_file_and_disable_linter() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -32,10 +32,10 @@ fn does_handle_included_file_and_disable_linter() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), FIX_BEFORE.as_bytes());
 
-    let test2 = Path::new("special/test2.js");
+    let test2 = Utf8Path::new("special/test2.js");
     fs.insert(test2.into(), FIX_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -70,7 +70,7 @@ fn does_handle_included_file_and_disable_linter() {
 fn does_include_file_with_different_rules() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -83,10 +83,10 @@ fn does_include_file_with_different_rules() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let test2 = Path::new("special/test2.js");
+    let test2 = Utf8Path::new("special/test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -122,7 +122,7 @@ fn does_include_file_with_different_rules() {
 fn does_include_file_with_different_linting_and_applies_all_of_them() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -158,10 +158,10 @@ fn does_include_file_with_different_linting_and_applies_all_of_them() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let test2 = Path::new("special/test2.js");
+    let test2 = Utf8Path::new("special/test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -197,7 +197,7 @@ fn does_include_file_with_different_linting_and_applies_all_of_them() {
 fn does_include_file_with_different_overrides() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -233,10 +233,10 @@ fn does_include_file_with_different_overrides() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), SIMPLE_NUMBERS_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -272,7 +272,7 @@ fn does_include_file_with_different_overrides() {
 fn does_override_the_rules() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -296,10 +296,10 @@ fn does_override_the_rules() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -335,7 +335,7 @@ fn does_override_the_rules() {
 fn does_not_change_linting_settings() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -355,10 +355,10 @@ fn does_not_change_linting_settings() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -394,7 +394,7 @@ fn does_not_change_linting_settings() {
 fn does_override_recommended() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -417,10 +417,10 @@ fn does_override_recommended() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -446,7 +446,7 @@ fn does_override_recommended() {
 fn does_override_groupe_recommended() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -473,10 +473,10 @@ fn does_override_groupe_recommended() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -502,7 +502,7 @@ fn does_override_groupe_recommended() {
 fn does_preserve_group_recommended_when_override_global_recommened() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -527,10 +527,10 @@ fn does_preserve_group_recommended_when_override_global_recommened() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -556,7 +556,7 @@ fn does_preserve_group_recommended_when_override_global_recommened() {
 fn does_preserve_individually_diabled_rules_in_overrides() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -581,10 +581,10 @@ fn does_preserve_individually_diabled_rules_in_overrides() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -610,7 +610,7 @@ fn does_preserve_individually_diabled_rules_in_overrides() {
 fn does_merge_all_overrides() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -648,11 +648,11 @@ fn does_merge_all_overrides() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
-    let test3 = Path::new("test3.js");
+    let test3 = Utf8Path::new("test3.js");
     fs.insert(test3.into(), DEBUGGER_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", "."].as_slice()));
@@ -671,7 +671,7 @@ fn does_merge_all_overrides() {
 fn does_not_conceal_overrides_globals() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -694,7 +694,7 @@ fn does_not_conceal_overrides_globals() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), "export { GLOBAL_VAR };".as_bytes());
 
     let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", "."].as_slice()));
@@ -712,7 +712,7 @@ fn does_not_conceal_overrides_globals() {
 fn takes_last_linter_enabled_into_account() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -736,7 +736,7 @@ fn takes_last_linter_enabled_into_account() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), "export { GLOBAL_VAR };".as_bytes());
 
     let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", "."].as_slice()));

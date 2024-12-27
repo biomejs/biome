@@ -1,7 +1,7 @@
 use biome_console::fmt::Display;
 use biome_console::{markup, MarkupBuf};
 use biome_deserialize::DeserializationDiagnostic;
-use biome_diagnostics::adapters::ResolveError;
+use biome_diagnostics::ResolveError;
 use biome_diagnostics::{Advices, Diagnostic, Error, LogCategory, MessageAndDescription, Visit};
 use biome_rowan::SyntaxError;
 use serde::{Deserialize, Serialize};
@@ -90,14 +90,14 @@ impl BiomeDiagnostic {
     pub fn new_invalid_ignore_pattern_with_path(
         pattern: impl std::fmt::Display,
         reason: impl std::fmt::Display,
-        file_path: Option<impl Into<String>>,
+        file_path: impl Into<String>,
     ) -> Self {
         Self::InvalidIgnorePattern(InvalidIgnorePattern {
             message: format!(
                 "Couldn't parse the pattern \"{}\". Reason: {}",
                 pattern, reason,
             ),
-            file_path: file_path.map(|f| f.into()),
+            file_path: Some(file_path.into()),
         })
     }
 

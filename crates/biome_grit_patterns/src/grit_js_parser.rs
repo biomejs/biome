@@ -5,6 +5,7 @@ use crate::{
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_parser::AnyParse;
+use camino::Utf8Path;
 use grit_util::{AnalysisLogs, FileOrigin, Parser, SnippetTree};
 use std::path::Path;
 
@@ -24,8 +25,8 @@ impl GritTargetParser for GritJsParser {
         Some(GritTargetTree::new(parse.syntax::<JsLanguage>().into()))
     }
 
-    fn parse_with_path(&self, source: &str, path: &Path) -> AnyParse {
-        let source_type = match path.extension().and_then(|ext| ext.to_str()) {
+    fn parse_with_path(&self, source: &str, path: &Utf8Path) -> AnyParse {
+        let source_type = match path.extension() {
             Some("d.ts") => JsFileSource::d_ts(),
             Some("js") => JsFileSource::js_module(),
             Some("jsx") => JsFileSource::jsx(),

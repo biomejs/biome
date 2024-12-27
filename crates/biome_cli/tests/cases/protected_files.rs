@@ -3,7 +3,7 @@ use crate::snap_test::{assert_cli_snapshot, markup_to_string, SnapshotPayload};
 use biome_console::{markup, BufferConsole};
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 #[test]
 fn not_process_file_from_stdin_format() {
@@ -106,7 +106,7 @@ fn not_process_file_from_cli() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("package-lock.json");
+    let file_path = Utf8Path::new("package-lock.json");
     fs.insert(file_path.into(), r#"{ "name": "test" }"#.as_bytes());
 
     let (fs, result) = run_cli(
@@ -131,7 +131,7 @@ fn not_process_file_from_cli_verbose() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("package-lock.json");
+    let file_path = Utf8Path::new("package-lock.json");
     fs.insert(file_path.into(), r#"{ "name": "test" }"#.as_bytes());
 
     let (fs, result) = run_cli(
@@ -163,13 +163,13 @@ fn not_process_ignored_file_from_cli_verbose() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("package.json");
+    let file_path = Utf8Path::new("package.json");
     fs.insert(file_path.into(), r#"{ "name": "test" }"#.as_bytes());
 
-    let file_path = Path::new("other.json");
+    let file_path = Utf8Path::new("other.json");
     fs.insert(file_path.into(), r#"{}"#.as_bytes());
 
-    let file_path1 = Path::new("biome.json");
+    let file_path1 = Utf8Path::new("biome.json");
     fs.insert(
         file_path1.into(),
         r#"{ "files": { "ignore": ["package.json"] } }"#.as_bytes(),
@@ -204,13 +204,13 @@ fn not_process_file_linter_disabled_from_cli_verbose() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("package.json");
+    let file_path = Utf8Path::new("package.json");
     fs.insert(file_path.into(), r#"{ "name": "test" }"#.as_bytes());
 
-    let file_path = Path::new("other.json");
+    let file_path = Utf8Path::new("other.json");
     fs.insert(file_path.into(), r#"{}"#.as_bytes());
 
-    let file_path1 = Path::new("biome.json");
+    let file_path1 = Utf8Path::new("biome.json");
     fs.insert(
         file_path1.into(),
         r#"{ "linter": { "enabled": false } }"#.as_bytes(),

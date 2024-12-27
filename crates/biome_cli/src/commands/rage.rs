@@ -11,7 +11,7 @@ use biome_fs::{FileSystem, OsFileSystem};
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{client, RageEntry, RageParams};
 use biome_service::Workspace;
-use std::path::PathBuf;
+use camino::Utf8PathBuf;
 use std::{env, io, ops::Deref};
 use tokio::runtime::Runtime;
 
@@ -362,7 +362,7 @@ struct BiomeServerLog;
 impl Display for BiomeServerLog {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         if let Ok(Some(log)) = read_most_recent_log_file(
-            biome_env().biome_log_path.value().map(PathBuf::from),
+            biome_env().biome_log_path.value().map(Utf8PathBuf::from),
             biome_env()
                 .biome_log_prefix
                 .value()

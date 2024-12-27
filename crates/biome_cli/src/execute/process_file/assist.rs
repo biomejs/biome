@@ -1,5 +1,3 @@
-use std::ffi::OsStr;
-
 use crate::execute::diagnostics::ResultExt;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{
@@ -15,7 +13,7 @@ pub(crate) fn assist_with_guard<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     workspace_file: &mut WorkspaceFile,
 ) -> FileResult {
-    let _ = tracing::info_span!("Process assist", path =? workspace_file.path.display()).entered();
+    let _ = tracing::info_span!("Process assist", path =? workspace_file.path).entered();
     let input = workspace_file.input()?;
 
     let only = Vec::new();
@@ -30,10 +28,7 @@ pub(crate) fn assist_with_guard<'ctx>(
             skip.clone(),
             None,
         )
-        .with_file_path_and_code(
-            workspace_file.path.display().to_string(),
-            category!("assist"),
-        )?;
+        .with_file_path_and_code(workspace_file.path.to_string(), category!("assist"))?;
 
     ctx.push_message(Message::SkippedFixes {
         skipped_suggested_fixes: fix_result.skipped_suggested_fixes,
@@ -41,26 +36,26 @@ pub(crate) fn assist_with_guard<'ctx>(
 
     let mut output = fix_result.code;
 
-    match workspace_file.as_extension().map(OsStr::as_encoded_bytes) {
-        Some(b"astro") => {
+    match workspace_file.as_extension() {
+        Some("astro") => {
             output = AstroFileHandler::output(input.as_str(), output.as_str());
         }
-        Some(b"vue") => {
+        Some("vue") => {
             output = VueFileHandler::output(input.as_str(), output.as_str());
         }
-        Some(b"svelte") => {
+        Some("svelte") => {
             output = SvelteFileHandler::output(input.as_str(), output.as_str());
         }
         _ => {}
     }
     if input != output {
         if ctx.execution.as_fix_file_mode().is_none() {
-            return Ok(FileStatus::Message(Message::Diff {
-                file_name: workspace_file.path.display().to_string(),
+            Ok(FileStatus::Message(Message::Diff {
+                file_name: workspace_file.path.to_string(),
                 old: input,
                 new: output,
                 diff_kind: DiffKind::Assist,
-            }));
+            }))
         } else {
             if output != input && ctx.execution.as_fix_file_mode().is_some() {
                 workspace_file.update_file(output)?;

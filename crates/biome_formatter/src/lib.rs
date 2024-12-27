@@ -83,9 +83,10 @@ use token::string::Quote;
 #[derive(Debug, Default, Clone, Copy, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum IndentStyle {
     /// Tab
     #[default]
@@ -133,9 +134,10 @@ impl Display for IndentStyle {
 #[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(Default)]
 pub enum LineEnding {
     ///  Line Feed only (\n), common on Linux and macOS as well as inside git repos
@@ -202,9 +204,10 @@ impl std::fmt::Display for LineEnding {
 #[derive(Clone, Copy, Eq, Merge, Hash, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, schemars::JsonSchema),
+    derive(serde::Serialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct IndentWidth(u8);
 
 impl IndentWidth {
@@ -302,9 +305,10 @@ impl Debug for IndentWidth {
 #[derive(Clone, Copy, Eq, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, schemars::JsonSchema),
+    derive(serde::Serialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct LineWidth(u16);
 
 impl LineWidth {
@@ -480,9 +484,10 @@ impl From<LineWidth> for u16 {
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum QuoteStyle {
     #[default]
     Double,
@@ -556,9 +561,10 @@ impl From<QuoteStyle> for Quote {
 #[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct BracketSpacing(bool);
 
 impl BracketSpacing {
@@ -604,9 +610,10 @@ impl FromStr for BracketSpacing {
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum AttributePosition {
     #[default]
     Auto,
@@ -765,10 +772,8 @@ impl Display for SimpleFormatOptions {
 
 /// Lightweight sourcemap marker between source and output tokens
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
-)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct SourceMarker {
     /// Position of the marker in the original source
     pub source: TextSize,
@@ -837,9 +842,10 @@ pub type PrintResult<T> = Result<T, PrintError>;
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Printed {
     code: String,
     range: Option<TextRange>,

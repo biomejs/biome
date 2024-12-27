@@ -10,7 +10,7 @@ use crate::{
 use biome_console::{markup, BufferConsole, MarkupBuf};
 use biome_fs::{FileSystemExt, MemoryFileSystem};
 use bpaf::Args;
-use std::path::{Path, PathBuf};
+use camino::{Utf8Path, Utf8PathBuf};
 
 // six spaces
 const CUSTOM_FORMAT_AFTER: &str = r#"function f() {
@@ -231,7 +231,7 @@ fn print() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("format.js");
+    let file_path = Utf8Path::new("format.js");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -258,7 +258,7 @@ fn write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("format.js");
+    let file_path = Utf8Path::new("format.js");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -287,7 +287,7 @@ fn format_shows_parse_diagnostics() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("format.js");
+    let file_path = Utf8Path::new("format.js");
     fs.insert(file_path.into(), "while ) {}".as_bytes());
 
     let (fs, result) = run_cli(
@@ -312,13 +312,13 @@ fn write_only_files_in_correct_base() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_to_format = Path::new("src/format.js");
+    let file_to_format = Utf8Path::new("src/format.js");
     fs.insert(
         file_to_format.into(),
         <&str>::clone(&UNFORMATTED).as_bytes(),
     );
 
-    let file_to_not_format = Path::new("scripts/format.js");
+    let file_to_not_format = Utf8Path::new("scripts/format.js");
     fs.insert(file_to_not_format.into(), UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -348,7 +348,7 @@ fn lint_warning() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("format.js");
+    let file_path = Utf8Path::new("format.js");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
 
     let (fs, result) = run_cli(
@@ -387,13 +387,13 @@ fn custom_config_file_path() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let config_path = Path::new("/test/biome.json");
+    let config_path = Utf8Path::new("/test/biome.json");
     fs.insert(config_path.into(), CONFIG_FORMAT.as_bytes());
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), DEFAULT_CONFIGURATION_BEFORE.as_bytes());
 
-    let mut config_path = PathBuf::from(config_path);
+    let mut config_path = Utf8PathBuf::from(config_path);
     config_path.pop();
 
     let (fs, result) = run_cli(
@@ -402,11 +402,7 @@ fn custom_config_file_path() {
         Args::from(
             [
                 "format",
-                format!(
-                    "--config-path={}",
-                    config_path.display().to_string().as_str()
-                )
-                .as_str(),
+                format!("--config-path={}", config_path.to_string().as_str()).as_str(),
                 "--write",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -435,8 +431,8 @@ fn invalid_config_file_path() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let config_path = Path::new("test");
-    let file_path = Path::new("file.js");
+    let config_path = Utf8Path::new("test");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), *b"content");
 
     let (fs, result) = run_cli(
@@ -446,7 +442,7 @@ fn invalid_config_file_path() {
             [
                 "format",
                 "--config-path",
-                (config_path.display().to_string().as_str()),
+                (config_path.to_string().as_str()),
                 "--write",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -470,7 +466,7 @@ fn applies_custom_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), CUSTOM_CONFIGURATION_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -510,10 +506,10 @@ fn applies_custom_configuration_over_config_file() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_FORMAT.as_bytes());
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), CUSTOM_CONFIGURATION_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -553,10 +549,10 @@ fn applies_custom_configuration_over_config_file_issue_3175_v1() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_ISSUE_3175_1.as_bytes());
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), "import React from 'react';\n".as_bytes());
 
     let (fs, result) = run_cli(
@@ -596,10 +592,10 @@ fn applies_custom_configuration_over_config_file_issue_3175_v2() {
 }
 "#;
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_ISSUE_3175_2.as_bytes());
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), source.as_bytes());
 
     let (fs, result) = run_cli(
@@ -634,7 +630,7 @@ fn applies_custom_jsx_quote_style() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.jsx");
+    let file_path = Utf8Path::new("file.jsx");
     fs.insert(file_path.into(), APPLY_JSX_QUOTE_STYLE_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -672,7 +668,7 @@ fn applies_custom_quote_style() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), APPLY_QUOTE_STYLE_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -711,7 +707,7 @@ fn applies_custom_css_quote_style() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let css_file_path = Path::new("file.css");
+    let css_file_path = Utf8Path::new("file.css");
     fs.insert(
         css_file_path.into(),
         APPLY_CSS_QUOTE_STYLE_BEFORE.as_bytes(),
@@ -750,7 +746,7 @@ fn applies_custom_trailing_commas() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), APPLY_TRAILING_COMMAS_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -786,7 +782,7 @@ fn applies_custom_attribute_position() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), APPLY_ATTRIBUTE_POSITION_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -822,7 +818,7 @@ fn applies_custom_arrow_parentheses() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), APPLY_ARROW_PARENTHESES_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -858,7 +854,7 @@ fn applies_custom_bracket_spacing() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), APPLY_BRACKET_SPACING_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -894,7 +890,7 @@ fn applies_custom_bracket_same_line() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.jsx");
+    let file_path = Utf8Path::new("file.jsx");
     fs.insert(file_path.into(), APPLY_BRACKET_SAME_LINE_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -952,7 +948,7 @@ fn with_semicolons_options() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1139,10 +1135,10 @@ fn quote_properties_parse_errors_letter_case() {
 fn format_with_configuration() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_FORMAT.as_bytes());
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), CUSTOM_FORMAT_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1168,10 +1164,10 @@ fn format_with_configuration() {
 fn format_is_disabled() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_DISABLED_FORMATTER.as_bytes());
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), CUSTOM_FORMAT_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1257,7 +1253,7 @@ fn does_not_format_if_disabled() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_DISABLED_FORMATTER.as_bytes());
 
     console
@@ -1296,10 +1292,10 @@ fn does_not_format_if_disabled() {
 fn does_not_format_ignored_files() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_FORMATTER_IGNORED_FILES.as_bytes());
 
-    let file_path = Path::new("test.js");
+    let file_path = Utf8Path::new("test.js");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1326,16 +1322,16 @@ fn does_not_format_if_files_are_listed_in_ignore_option() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         CONFIG_FORMATTER_AND_FILES_IGNORE.as_bytes(),
     );
 
-    let file_path_test1 = Path::new("test1.js");
+    let file_path_test1 = Utf8Path::new("test1.js");
     fs.insert(file_path_test1.into(), UNFORMATTED.as_bytes());
 
-    let file_path_test2 = Path::new("test2.js");
+    let file_path_test2 = Utf8Path::new("test2.js");
     fs.insert(file_path_test2.into(), UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1384,7 +1380,7 @@ fn does_not_format_ignored_directories() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         CONFIG_FORMATTER_IGNORED_DIRECTORIES.as_bytes(),
@@ -1403,7 +1399,7 @@ fn does_not_format_ignored_directories() {
     ];
 
     for (file_path, _) in FILES {
-        let file_path = Path::new(file_path);
+        let file_path = Utf8Path::new(file_path);
         fs.insert(file_path.into(), UNFORMATTED.as_bytes());
     }
 
@@ -1421,7 +1417,7 @@ fn does_not_format_ignored_directories() {
         } else {
             UNFORMATTED
         };
-        assert_file_contents(&fs, Path::new(file_path), expected);
+        assert_file_contents(&fs, Utf8Path::new(file_path), expected);
     }
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -1445,10 +1441,10 @@ fn does_not_format_ignored_file_in_included_directory() {
 
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config);
     for (file_path, _) in files {
-        let file_path = Path::new(file_path);
+        let file_path = Utf8Path::new(file_path);
         fs.insert(file_path.into(), UNFORMATTED.as_bytes());
     }
 
@@ -1465,7 +1461,7 @@ fn does_not_format_ignored_file_in_included_directory() {
         } else {
             UNFORMATTED
         };
-        assert_file_contents(&fs, Path::new(file_path), expected);
+        assert_file_contents(&fs, Utf8Path::new(file_path), expected);
     }
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -1502,10 +1498,10 @@ fn include_ignore_cascade() {
 
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config);
     for (file_path, _) in files {
-        let file_path = Path::new(file_path);
+        let file_path = Utf8Path::new(file_path);
         fs.insert(file_path.into(), UNFORMATTED.as_bytes());
     }
 
@@ -1522,7 +1518,7 @@ fn include_ignore_cascade() {
         } else {
             UNFORMATTED
         };
-        assert_file_contents(&fs, Path::new(file_path), expected);
+        assert_file_contents(&fs, Utf8Path::new(file_path), expected);
     }
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -1539,7 +1535,7 @@ fn fs_error_read_only() {
     let mut fs = MemoryFileSystem::new_read_only();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("test.js");
+    let file_path = Utf8Path::new("test.js");
     fs.insert(file_path.into(), *b"content");
 
     let (mut fs, result) = run_cli(
@@ -1567,7 +1563,7 @@ fn file_too_large() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("format.js");
+    let file_path = Utf8Path::new("format.js");
     fs.insert(file_path.into(), "statement();\n".repeat(80660).as_bytes());
 
     let (mut fs, result) = run_cli(
@@ -1595,9 +1591,9 @@ fn file_too_large_config_limit() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    fs.insert(PathBuf::from("biome.json"), CONFIG_FILE_SIZE_LIMIT);
+    fs.insert(Utf8PathBuf::from("biome.json"), CONFIG_FILE_SIZE_LIMIT);
 
-    let file_path = Path::new("format.js");
+    let file_path = Utf8Path::new("format.js");
     fs.insert(file_path.into(), "statement1();\nstatement2();");
 
     let (fs, result) = run_cli(
@@ -1622,7 +1618,7 @@ fn file_too_large_cli_limit() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("format.js");
+    let file_path = Utf8Path::new("format.js");
     fs.insert(file_path.into(), "statement1();\nstatement2();");
 
     let (fs, result) = run_cli(
@@ -1654,7 +1650,7 @@ fn files_max_size_parse_error() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("format.js");
+    let file_path = Utf8Path::new("format.js");
     fs.insert(file_path.into(), "statement1();\nstatement2();");
 
     let (fs, result) = run_cli(
@@ -1687,7 +1683,7 @@ fn max_diagnostics_default() {
     let mut console = BufferConsole::default();
 
     for i in 0..60 {
-        let file_path = PathBuf::from(format!("src/file_{i}.js"));
+        let file_path = Utf8PathBuf::from(format!("src/file_{i}.js"));
         fs.insert(file_path, UNFORMATTED.as_bytes());
     }
 
@@ -1716,7 +1712,7 @@ fn max_diagnostics_default() {
 
     for i in 0..60 {
         let file_path = format!("src/file_{i}.js");
-        fs.remove(Path::new(&file_path));
+        fs.remove(Utf8Path::new(&file_path));
     }
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -1736,7 +1732,7 @@ fn max_diagnostics() {
     let mut console = BufferConsole::default();
 
     for i in 0..60 {
-        let file_path = PathBuf::from(format!("src/file_{i}.js"));
+        let file_path = Utf8PathBuf::from(format!("src/file_{i}.js"));
         fs.insert(file_path, UNFORMATTED.as_bytes());
     }
 
@@ -1769,7 +1765,7 @@ fn max_diagnostics() {
 
     for i in 0..60 {
         let file_path = format!("src/file_{i}.js");
-        fs.remove(Path::new(&file_path));
+        fs.remove(Utf8Path::new(&file_path));
     }
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -1806,7 +1802,7 @@ fn print_verbose() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("format.js");
+    let file_path = Utf8Path::new("format.js");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1860,17 +1856,17 @@ file2.js
 	sentence.split(' ')).flat();"#;
 
     // ignored files
-    let file_path1 = Path::new("file1.js");
+    let file_path1 = Utf8Path::new("file1.js");
     fs.insert(file_path1.into(), code1.as_bytes());
-    let file_path2 = Path::new("file2.js");
+    let file_path2 = Utf8Path::new("file2.js");
     fs.insert(file_path2.into(), code2.as_bytes());
 
     // configuration
-    let config_path = Path::new("biome.json");
+    let config_path = Utf8Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
     // git ignore file
-    let ignore_file = Path::new(".gitignore");
+    let ignore_file = Utf8Path::new(".gitignore");
     fs.insert(ignore_file.into(), git_ignore.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1917,17 +1913,17 @@ file2.js
 	sentence.split(' ')).flat();"#;
 
     // ignored files
-    let file_path1 = Path::new("file1.js");
+    let file_path1 = Utf8Path::new("file1.js");
     fs.insert(file_path1.into(), code1.as_bytes());
-    let file_path2 = Path::new("file2.js");
+    let file_path2 = Utf8Path::new("file2.js");
     fs.insert(file_path2.into(), code2.as_bytes());
 
     // git folder
-    let git_folder = Path::new("./.git");
+    let git_folder = Utf8Path::new("./.git");
     fs.insert(git_folder.into(), "".as_bytes());
 
     // git ignore file
-    let ignore_file = Path::new("./.gitignore");
+    let ignore_file = Utf8Path::new("./.gitignore");
     fs.insert(ignore_file.into(), git_ignore.as_bytes());
 
     let (fs, result) = run_cli(
@@ -1989,12 +1985,12 @@ fn include_vcs_ignore_cascade() {
 
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let gitignore_file = Path::new(".gitignore");
+    let gitignore_file = Utf8Path::new(".gitignore");
     fs.insert(gitignore_file.into(), git_ignore.as_bytes());
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config);
     for (file_path, _) in files {
-        let file_path = Path::new(file_path);
+        let file_path = Utf8Path::new(file_path);
         fs.insert(file_path.into(), UNFORMATTED.as_bytes());
     }
 
@@ -2011,7 +2007,7 @@ fn include_vcs_ignore_cascade() {
         } else {
             UNFORMATTED
         };
-        assert_file_contents(&fs, Path::new(file_path), expected);
+        assert_file_contents(&fs, Utf8Path::new(file_path), expected);
     }
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -2037,12 +2033,12 @@ fn vcs_absolute_path() {
 
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let gitignore_file = Path::new(".gitignore");
+    let gitignore_file = Utf8Path::new(".gitignore");
     fs.insert(gitignore_file.into(), git_ignore.as_bytes());
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config);
     for (file_path, _) in files {
-        let file_path = Path::new(file_path);
+        let file_path = Utf8Path::new(file_path);
         fs.insert(file_path.into(), UNFORMATTED.as_bytes());
     }
 
@@ -2059,7 +2055,7 @@ fn vcs_absolute_path() {
         } else {
             UNFORMATTED
         };
-        assert_file_contents(&fs, Path::new(file_path), expected);
+        assert_file_contents(&fs, Utf8Path::new(file_path), expected);
     }
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -2076,10 +2072,10 @@ fn ignores_unknown_file() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path1 = Path::new("test.txt");
+    let file_path1 = Utf8Path::new("test.txt");
     fs.insert(file_path1.into(), *b"content");
 
-    let file_path2 = Path::new("test.js");
+    let file_path2 = Utf8Path::new("test.js");
     fs.insert(file_path2.into(), *b"console.log('bar');\n");
 
     let (fs, result) = run_cli(
@@ -2143,7 +2139,7 @@ fn ignore_comments_error_when_allow_comments() {
     let code = r#"
 /*test*/ [1, 2, 3]
 	"#;
-    let file_path = Path::new("somefile.json");
+    let file_path = Utf8Path::new("somefile.json");
     fs.insert(file_path.into(), code.as_bytes());
     fs.insert(biome_config.into(), config_json);
 
@@ -2174,7 +2170,7 @@ fn format_jsonc_files() {
 
 /* some other comment*/1, 2, 3]
 	"#;
-    let file_path = Path::new("file.jsonc");
+    let file_path = Utf8Path::new("file.jsonc");
     fs.insert(file_path.into(), code.as_bytes());
 
     let (fs, result) = run_cli(
@@ -2210,7 +2206,7 @@ fn format_json_when_allow_trailing_commas() {
         1,
     ],
 }"#;
-    let file_path = Path::new("file.json");
+    let file_path = Utf8Path::new("file.json");
     fs.insert(file_path.into(), code.as_bytes());
     fs.insert(biome_config.into(), config_json);
 
@@ -2244,7 +2240,7 @@ fn format_json_when_allow_trailing_commas_write() {
     let biome_config = "biome.json";
     let code = r#"{   "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar",
 }"#;
-    let file_path = Path::new("file.json");
+    let file_path = Utf8Path::new("file.json");
     fs.insert(file_path.into(), code.as_bytes());
     fs.insert(biome_config.into(), config_json);
 
@@ -2256,7 +2252,7 @@ fn format_json_when_allow_trailing_commas_write() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n");
+    assert_file_contents(&fs, Utf8Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -2281,7 +2277,7 @@ fn format_json_trailing_commas_none() {
     let biome_config = "biome.json";
     let code = r#"{   "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar",
 }"#;
-    let file_path = Path::new("file.json");
+    let file_path = Utf8Path::new("file.json");
     fs.insert(file_path.into(), code.as_bytes());
     fs.insert(biome_config.into(), config_json);
 
@@ -2293,7 +2289,7 @@ fn format_json_trailing_commas_none() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n");
+    assert_file_contents(&fs, Utf8Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -2318,7 +2314,7 @@ fn format_json_trailing_commas_all() {
     let biome_config = "biome.json";
     let code = r#"{   "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar",
 }"#;
-    let file_path = Path::new("file.json");
+    let file_path = Utf8Path::new("file.json");
     fs.insert(file_path.into(), code.as_bytes());
     fs.insert(biome_config.into(), config_json);
 
@@ -2330,7 +2326,7 @@ fn format_json_trailing_commas_all() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n}\n");
+    assert_file_contents(&fs, Utf8Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n}\n");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -2361,7 +2357,7 @@ fn format_json_trailing_commas_overrides_all() {
     let biome_config = "biome.json";
     let code = r#"{   "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar",
 }"#;
-    let file_path = Path::new("file.json");
+    let file_path = Utf8Path::new("file.json");
     fs.insert(file_path.into(), code.as_bytes());
     fs.insert(biome_config.into(), config_json);
 
@@ -2373,7 +2369,7 @@ fn format_json_trailing_commas_overrides_all() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n}\n");
+    assert_file_contents(&fs, Utf8Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n}\n");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -2404,7 +2400,7 @@ fn format_json_trailing_commas_overrides_none() {
     let biome_config = "biome.json";
     let code = r#"{   "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar", "loreum_ipsum_lorem_ipsum":   "bar",
 }"#;
-    let file_path = Path::new("file.json");
+    let file_path = Utf8Path::new("file.json");
     fs.insert(file_path.into(), code.as_bytes());
     fs.insert(biome_config.into(), config_json);
 
@@ -2416,7 +2412,7 @@ fn format_json_trailing_commas_overrides_none() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n");
+    assert_file_contents(&fs, Utf8Path::new(file_path), "{\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\",\n\t\"loreum_ipsum_lorem_ipsum\": \"bar\"\n}\n");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -2437,11 +2433,11 @@ fn treat_known_json_files_as_jsonc_files() {
 
 /* some other comment*/1, 2, 3]
 	"#;
-    let eslint = Path::new("files/.eslintrc.json");
+    let eslint = Utf8Path::new("files/.eslintrc.json");
     fs.insert(eslint.into(), code.as_bytes());
-    let jshint = Path::new("files/.jshintrc");
+    let jshint = Utf8Path::new("files/.jshintrc");
     fs.insert(jshint.into(), code.as_bytes());
-    let babel = Path::new("files/.babelrc");
+    let babel = Utf8Path::new("files/.babelrc");
     fs.insert(babel.into(), code.as_bytes());
 
     let (fs, result) = run_cli(
@@ -2474,7 +2470,7 @@ fn should_apply_different_formatting() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let biome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
         biome_json.into(),
         r#"{
@@ -2507,10 +2503,10 @@ fn should_apply_different_formatting() {
     "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
 }
 	"#;
-    let json_file = Path::new("input.json");
+    let json_file = Utf8Path::new("input.json");
     fs.insert(json_file.into(), code.as_bytes());
     let code = r#"html {}"#;
-    let css_file = Path::new("input.css");
+    let css_file = Utf8Path::new("input.css");
     fs.insert(css_file.into(), code.as_bytes());
 
     let code = r#"
@@ -2518,7 +2514,7 @@ const a = {
     "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
 }
 	"#;
-    let js_file = Path::new("input.js");
+    let js_file = Utf8Path::new("input.js");
     fs.insert(js_file.into(), code.as_bytes());
 
     let (fs, result) = run_cli(
@@ -2552,7 +2548,7 @@ fn should_apply_different_formatting_with_cli() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let biome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
         biome_json.into(),
         r#"{
@@ -2567,11 +2563,11 @@ fn should_apply_different_formatting_with_cli() {
     "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
 }
 	"#;
-    let json_file = Path::new("input.json");
+    let json_file = Utf8Path::new("input.json");
     fs.insert(json_file.into(), json_file_content.as_bytes());
 
     let css_file_content = r#"html {}"#;
-    let css_file = Path::new("input.css");
+    let css_file = Utf8Path::new("input.css");
     fs.insert(css_file.into(), css_file_content.as_bytes());
 
     let js_file_content = r#"
@@ -2579,7 +2575,7 @@ const a = {
     "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
 }
 	"#;
-    let js_file = Path::new("input.js");
+    let js_file = Utf8Path::new("input.js");
     fs.insert(js_file.into(), js_file_content.as_bytes());
 
     let (fs, result) = run_cli(
@@ -2620,7 +2616,7 @@ fn should_not_format_json_files_if_disabled() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let biome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
         biome_json.into(),
         r#"{
@@ -2646,7 +2642,7 @@ fn should_not_format_json_files_if_disabled() {
     "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
 }
 	"#;
-    let json_file = Path::new("input.json");
+    let json_file = Utf8Path::new("input.json");
     fs.insert(json_file.into(), json_file_content.as_bytes());
 
     let js_file_content = r#"
@@ -2654,7 +2650,7 @@ const a = {
     "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
 }
 	"#;
-    let js_file = Path::new("input.js");
+    let js_file = Utf8Path::new("input.js");
     fs.insert(js_file.into(), js_file_content.as_bytes());
 
     let (fs, result) = run_cli(
@@ -2689,7 +2685,7 @@ fn should_not_format_js_files_if_disabled() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let biome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
         biome_json.into(),
         r#"{
@@ -2715,7 +2711,7 @@ fn should_not_format_js_files_if_disabled() {
     "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
 }
 	"#;
-    let json_file = Path::new("input.json");
+    let json_file = Utf8Path::new("input.json");
     fs.insert(json_file.into(), json_file_content.as_bytes());
 
     let js_file_content = r#"
@@ -2723,7 +2719,7 @@ const a = {
     "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
 }
 	"#;
-    let js_file = Path::new("input.js");
+    let js_file = Utf8Path::new("input.js");
     fs.insert(js_file.into(), js_file_content.as_bytes());
 
     let (fs, result) = run_cli(
@@ -2758,7 +2754,7 @@ fn should_not_format_css_files_if_disabled() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let biome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
         biome_json.into(),
         r#"{
@@ -2783,7 +2779,7 @@ fn should_not_format_css_files_if_disabled() {
 
     }
     "#;
-    let css_file = Path::new("input.css");
+    let css_file = Utf8Path::new("input.css");
     fs.insert(css_file.into(), css_file_content.as_bytes());
 
     let js_file_content = r#"
@@ -2791,7 +2787,7 @@ const a = {
     "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
 }
 	"#;
-    let js_file = Path::new("input.js");
+    let js_file = Utf8Path::new("input.js");
     fs.insert(js_file.into(), js_file_content.as_bytes());
 
     let (fs, result) = run_cli(
@@ -2826,7 +2822,7 @@ fn should_apply_different_indent_style() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let biome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
         biome_json.into(),
         r#"{
@@ -2855,7 +2851,7 @@ fn should_apply_different_indent_style() {
     "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
 }
 	"#;
-    let json_file = Path::new("input.json");
+    let json_file = Utf8Path::new("input.json");
     fs.insert(json_file.into(), json_file_content.as_bytes());
 
     let js_file_content = r#"
@@ -2863,7 +2859,7 @@ const a = {
     "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
 }
 	"#;
-    let js_file = Path::new("input.js");
+    let js_file = Utf8Path::new("input.js");
     fs.insert(js_file.into(), js_file_content.as_bytes());
 
     let (fs, result) = run_cli(
@@ -2926,10 +2922,10 @@ fn override_don_t_affect_ignored_files() {
 
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config);
     for (file_path, _) in files {
-        let file_path = Path::new(file_path);
+        let file_path = Utf8Path::new(file_path);
         fs.insert(file_path.into(), UNFORMATTED.as_bytes());
     }
 
@@ -2946,7 +2942,7 @@ fn override_don_t_affect_ignored_files() {
         } else {
             UNFORMATTED
         };
-        assert_file_contents(&fs, Path::new(file_path), expected);
+        assert_file_contents(&fs, Utf8Path::new(file_path), expected);
     }
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -2971,13 +2967,13 @@ fn format_with_configured_line_ending() {
     }"#;
     let code_json = r#"{ "name": "mike", "surname": "ross" }"#;
     let code_js = r#"const b = { "name": "mike", "surname": "ross" }"#;
-    let json_file = Path::new("input.json");
+    let json_file = Utf8Path::new("input.json");
     fs.insert(json_file.into(), code_json.as_bytes());
 
-    let js_file = Path::new("input.js");
+    let js_file = Utf8Path::new("input.js");
     fs.insert(js_file.into(), code_js.as_bytes());
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config);
 
     let (fs, result) = run_cli(fs, &mut console, Args::from(&["format", ".", "--write"]));
@@ -3007,10 +3003,10 @@ fn don_t_format_ignored_known_jsonc_files() {
 
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config);
     for (file_path, _) in files {
-        let file_path = Path::new(file_path);
+        let file_path = Utf8Path::new(file_path);
         fs.insert(file_path.into(), UNFORMATTED.as_bytes());
     }
 
@@ -3027,7 +3023,7 @@ fn don_t_format_ignored_known_jsonc_files() {
         } else {
             UNFORMATTED
         };
-        assert_file_contents(&fs, Path::new(file_path), expected);
+        assert_file_contents(&fs, Utf8Path::new(file_path), expected);
     }
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -3044,10 +3040,10 @@ fn applies_configuration_from_biome_jsonc() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("biome.jsonc");
+    let file_path = Utf8Path::new("biome.jsonc");
     fs.insert(file_path.into(), CONFIG_FORMAT_JSONC.as_bytes());
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), CUSTOM_CONFIGURATION_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -3074,7 +3070,7 @@ fn format_package_json() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("package.json");
+    let file_path = Utf8Path::new("package.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -3126,7 +3122,7 @@ fn format_svelte_implicit_js_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let svelte_file_path = Path::new("file.svelte");
+    let svelte_file_path = Utf8Path::new("file.svelte");
     fs.insert(
         svelte_file_path.into(),
         SVELTE_IMPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
@@ -3156,7 +3152,7 @@ fn format_svelte_implicit_js_files_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let svelte_file_path = Path::new("file.svelte");
+    let svelte_file_path = Utf8Path::new("file.svelte");
     fs.insert(
         svelte_file_path.into(),
         SVELTE_IMPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
@@ -3193,7 +3189,7 @@ fn format_svelte_explicit_js_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let svelte_file_path = Path::new("file.svelte");
+    let svelte_file_path = Utf8Path::new("file.svelte");
     fs.insert(
         svelte_file_path.into(),
         SVELTE_EXPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
@@ -3223,7 +3219,7 @@ fn format_svelte_explicit_js_files_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let svelte_file_path = Path::new("file.svelte");
+    let svelte_file_path = Utf8Path::new("file.svelte");
     fs.insert(
         svelte_file_path.into(),
         SVELTE_EXPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
@@ -3260,7 +3256,7 @@ fn format_empty_svelte_js_files_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let svelte_file_path = Path::new("file.svelte");
+    let svelte_file_path = Utf8Path::new("file.svelte");
     fs.insert(svelte_file_path.into(), "<div></div>".as_bytes());
 
     let (fs, result) = run_cli(
@@ -3294,7 +3290,7 @@ fn format_svelte_ts_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let svelte_file_path = Path::new("file.svelte");
+    let svelte_file_path = Utf8Path::new("file.svelte");
     fs.insert(
         svelte_file_path.into(),
         SVELTE_TS_FILE_UNFORMATTED.as_bytes(),
@@ -3324,7 +3320,7 @@ fn format_svelte_ts_files_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let svelte_file_path = Path::new("file.svelte");
+    let svelte_file_path = Utf8Path::new("file.svelte");
     fs.insert(
         svelte_file_path.into(),
         SVELTE_TS_FILE_UNFORMATTED.as_bytes(),
@@ -3361,7 +3357,7 @@ fn format_empty_svelte_ts_files_write() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let svelte_file_path = Path::new("file.svelte");
+    let svelte_file_path = Utf8Path::new("file.svelte");
     fs.insert(svelte_file_path.into(), "<div></div>".as_bytes());
 
     let (fs, result) = run_cli(
@@ -3395,7 +3391,7 @@ fn should_format_files_in_folders_ignored_by_linter() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("build/file.js");
+    let file_path = Utf8Path::new("build/file.js");
     fs.insert(
         file_path.into(),
         r#"
@@ -3403,7 +3399,7 @@ fn should_format_files_in_folders_ignored_by_linter() {
 		"#,
     );
 
-    let biome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
         biome_json.into(),
         r#"{
@@ -3444,7 +3440,7 @@ fn print_json() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("format.js");
+    let file_path = Utf8Path::new("format.js");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -3478,7 +3474,7 @@ fn print_json_pretty() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("format.js");
+    let file_path = Utf8Path::new("format.js");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -3512,7 +3508,7 @@ fn format_without_file_paths() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("format.js");
+    let file_path = Utf8Path::new("format.js");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(fs, &mut console, Args::from(["format", ""].as_slice()));
@@ -3534,7 +3530,7 @@ fn format_without_file_paths() {
 fn fix() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let file_path = Path::new("format.js");
+    let file_path = Utf8Path::new("format.js");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
     let (fs, result) = run_cli(
         fs,
@@ -3560,7 +3556,7 @@ fn should_error_if_unstaged_files_only_with_staged_flag() {
     let mut fs = MemoryFileSystem::default();
     // Unstaged
     fs.insert(
-        Path::new("file1.js").into(),
+        Utf8Path::new("file1.js").into(),
         r#"console.log('file1');"#.as_bytes(),
     );
     let (fs, result) = run_cli(
@@ -3585,7 +3581,7 @@ fn should_error_if_unchanged_files_only_with_changed_flag() {
     let mut fs = MemoryFileSystem::default();
     // Unchanged
     fs.insert(
-        Path::new("file1.js").into(),
+        Utf8Path::new("file1.js").into(),
         r#"console.log('file1');"#.as_bytes(),
     );
     let (fs, result) = run_cli(
@@ -3608,7 +3604,7 @@ fn applies_custom_bracket_spacing_for_graphql() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.graphql");
+    let file_path = Utf8Path::new("file.graphql");
     fs.insert(
         file_path.into(),
         APPLY_BRACKET_SPACING_BEFORE_GRAPHQL.as_bytes(),

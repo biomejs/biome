@@ -1,7 +1,7 @@
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 use crate::{
     run_cli,
@@ -23,7 +23,7 @@ fn search_css_pattern() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.css");
+    let file_path = Utf8Path::new("file.css");
     fs.insert(file_path.into(), CSS_FILE_CONTENT.as_bytes());
 
     let (fs, result) = run_cli(
@@ -56,7 +56,7 @@ fn search_css_pattern_shorthand() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.css");
+    let file_path = Utf8Path::new("file.css");
     fs.insert(file_path.into(), CSS_FILE_CONTENT.as_bytes());
 
     let (fs, result) = run_cli(
@@ -89,7 +89,7 @@ fn search_js_pattern() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), JS_FILE_CONTENT.as_bytes());
 
     let (fs, result) = run_cli(

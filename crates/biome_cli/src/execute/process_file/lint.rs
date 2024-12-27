@@ -4,18 +4,16 @@ use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraver
 use crate::TraversalMode;
 use biome_analyze::RuleCategoriesBuilder;
 use biome_diagnostics::{category, DiagnosticExt, Error};
-use biome_fs::TraversalContext;
+use biome_fs::{BiomePath, TraversalContext};
 use biome_rowan::TextSize;
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
-use std::ffi::OsStr;
-use std::path::Path;
 use std::sync::atomic::Ordering;
 
 /// Lints a single file and returns a [FileResult]
 pub(crate) fn lint<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
-    path: &Path,
+    path: BiomePath,
     suppress: bool,
     suppression_reason: Option<&str>,
 ) -> FileResult {
@@ -24,7 +22,7 @@ pub(crate) fn lint<'ctx>(
     if result.is_too_large() {
         ctx.push_diagnostic(
             FileTooLarge::from(result)
-                .with_file_path(path.display().to_string())
+                .with_file_path(workspace_file.path.to_string())
                 .with_category(category!("lint")),
         );
         Ok(FileStatus::Ignored)
@@ -39,7 +37,7 @@ pub(crate) fn lint_with_guard<'ctx>(
     suppress: bool,
     suppression_reason: Option<&str>,
 ) -> FileResult {
-    let _ = tracing::info_span!("Lint ", path =? workspace_file.path.display()).entered();
+    let _ = tracing::info_span!("Lint ", path =? workspace_file.path).entered();
 
     let mut input = workspace_file.input()?;
     let mut changed = false;
@@ -69,10 +67,7 @@ pub(crate) fn lint_with_guard<'ctx>(
                 skip.clone(),
                 Some(suppression_explanation.to_string()),
             )
-            .with_file_path_and_code(
-                workspace_file.path.display().to_string(),
-                category!("lint"),
-            )?;
+            .with_file_path_and_code(workspace_file.path.to_string(), category!("lint"))?;
 
         ctx.push_message(Message::SkippedFixes {
             skipped_suggested_fixes: fix_result.skipped_suggested_fixes,
@@ -80,14 +75,14 @@ pub(crate) fn lint_with_guard<'ctx>(
 
         let mut output = fix_result.code;
 
-        match workspace_file.as_extension().map(OsStr::as_encoded_bytes) {
-            Some(b"astro") => {
+        match workspace_file.as_extension() {
+            Some("astro") => {
                 output = AstroFileHandler::output(input.as_str(), output.as_str());
             }
-            Some(b"vue") => {
+            Some("vue") => {
                 output = VueFileHandler::output(input.as_str(), output.as_str());
             }
-            Some(b"svelte") => {
+            Some("svelte") => {
                 output = SvelteFileHandler::output(input.as_str(), output.as_str());
             }
             _ => {}
@@ -111,21 +106,21 @@ pub(crate) fn lint_with_guard<'ctx>(
             only,
             skip,
         )
-        .with_file_path_and_code(workspace_file.path.display().to_string(), category!("lint"))?;
+        .with_file_path_and_code(workspace_file.path.to_string(), category!("lint"))?;
 
     let no_diagnostics = pull_diagnostics_result.diagnostics.is_empty()
         && pull_diagnostics_result.skipped_diagnostics == 0;
 
     if !no_diagnostics {
-        let offset = match workspace_file.as_extension().map(OsStr::as_encoded_bytes) {
-            Some(b"vue") => VueFileHandler::start(input.as_str()),
-            Some(b"astro") => AstroFileHandler::start(input.as_str()),
-            Some(b"svelte") => SvelteFileHandler::start(input.as_str()),
+        let offset = match workspace_file.as_extension() {
+            Some("vue") => VueFileHandler::start(input.as_str()),
+            Some("astro") => AstroFileHandler::start(input.as_str()),
+            Some("svelte") => SvelteFileHandler::start(input.as_str()),
             _ => None,
         };
 
         ctx.push_message(Message::Diagnostics {
-            name: workspace_file.path.display().to_string(),
+            name: workspace_file.path.to_string(),
             content: input,
             diagnostics: pull_diagnostics_result
                 .diagnostics

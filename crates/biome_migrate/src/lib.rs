@@ -15,9 +15,9 @@ use biome_analyze::{
 use biome_diagnostics::Error;
 use biome_json_syntax::JsonLanguage;
 use biome_rowan::{BatchMutation, SyntaxToken};
+use camino::Utf8Path;
 use std::convert::Infallible;
 use std::ops::Deref;
-use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
 /// Return the static [MetadataRegistry] for the JS analyzer rules
@@ -36,7 +36,7 @@ static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     root: &LanguageRoot<JsonLanguage>,
     filter: AnalysisFilter,
-    configuration_file_path: &'a Path,
+    configuration_file_path: &'a Utf8Path,
     version: String,
     inspect_matcher: V,
     mut emit_signal: F,
@@ -113,7 +113,7 @@ where
 pub fn migrate_configuration<'a, F, B>(
     root: &LanguageRoot<JsonLanguage>,
     filter: AnalysisFilter,
-    configuration_file_path: &'a Path,
+    configuration_file_path: &'a Utf8Path,
     version: String,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
@@ -142,7 +142,7 @@ mod test {
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, Severity};
     use biome_json_parser::{parse_json, JsonParserOptions};
-    use std::path::Path;
+    use camino::Utf8Path;
 
     fn markup_to_string(markup: Markup) -> String {
         let mut buffer = Vec::new();
@@ -183,7 +183,7 @@ mod test {
         migrate_configuration(
             &parsed.tree(),
             AnalysisFilter::default(),
-            Path::new(""),
+            Utf8Path::new(""),
             "1.5.0".to_string(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {

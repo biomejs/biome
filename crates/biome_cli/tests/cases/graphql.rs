@@ -3,7 +3,7 @@ use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayloa
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 const UNFORMATTED: &str = r#"type Query {
             me: User
@@ -25,7 +25,7 @@ fn format_graphql_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.graphql");
+    let file_path = Utf8Path::new("file.graphql");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -52,7 +52,7 @@ fn format_and_write_graphql_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.graphql");
+    let file_path = Utf8Path::new("file.graphql");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -79,7 +79,7 @@ fn lint_single_rule() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.graphql");
+    let file_path = Utf8Path::new("file.graphql");
     fs.insert(file_path.into(), MISSING_REASON.as_bytes());
 
     let (fs, result) = run_cli(

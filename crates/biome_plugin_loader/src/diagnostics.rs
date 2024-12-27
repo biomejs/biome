@@ -1,7 +1,7 @@
 use biome_console::fmt::Display;
 use biome_console::markup;
 use biome_deserialize::DeserializationDiagnostic;
-use biome_diagnostics::adapters::ResolveError;
+use biome_diagnostics::ResolveError;
 use biome_diagnostics::{Diagnostic, Error, MessageAndDescription};
 use biome_fs::FileSystemDiagnostic;
 use biome_grit_patterns::CompileError;

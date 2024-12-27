@@ -1,15 +1,14 @@
+use crate::diagnostics::MigrationDiagnostic;
+use crate::CliDiagnostic;
 use biome_console::{markup, Console, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Merge;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_fs::{FileSystem, OpenOptions};
 use biome_json_parser::JsonParserOptions;
+use camino::Utf8Path;
 use std::borrow::Cow;
-use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
-
-use crate::diagnostics::MigrationDiagnostic;
-use crate::CliDiagnostic;
 
 use super::eslint_eslint;
 use super::node;
@@ -78,7 +77,7 @@ pub(crate) fn read_eslint_config(
     console: &mut dyn Console,
 ) -> Result<Config, CliDiagnostic> {
     for config_path_str in FLAT_CONFIG_FILES {
-        let path = Path::new(config_path_str);
+        let path = Utf8Path::new(config_path_str);
         if fs.path_exists(path) {
             return load_flat_config_data(path, console).map(|data| Config {
                 path: config_path_str,
@@ -87,7 +86,7 @@ pub(crate) fn read_eslint_config(
         }
     }
     for config_path_str in LEGACY_CONFIG_FILES {
-        let path = Path::new(config_path_str);
+        let path = Utf8Path::new(config_path_str);
         if fs.path_exists(path) {
             return load_legacy_config_data(fs, path, console).map(|data| Config {
                 path: config_path_str,
@@ -96,7 +95,7 @@ pub(crate) fn read_eslint_config(
         }
     }
     // We don't report an error if ESLint config is not embedded in `PACKAGE_JSON`.
-    if let Ok(data) = load_legacy_config_data(fs, Path::new(PACKAGE_JSON), console) {
+    if let Ok(data) = load_legacy_config_data(fs, Utf8Path::new(PACKAGE_JSON), console) {
         return Ok(Config {
             path: PACKAGE_JSON,
             data: data.into(),
@@ -116,17 +115,17 @@ pub(crate) struct Config {
 /// Load an ESlint Flat config
 /// See https://eslint.org/docs/latest/use/configure/configuration-files-new
 fn load_flat_config_data(
-    path: &Path,
+    path: &Utf8Path,
     console: &mut dyn Console,
 ) -> Result<eslint_eslint::FlatConfigData, CliDiagnostic> {
-    let node::Resolution { content, .. } = node::load_config(&path.to_string_lossy())?;
+    let node::Resolution { content, .. } = node::load_config(path.as_ref())?;
     let (deserialized, diagnostics) = deserialize_from_json_str::<eslint_eslint::FlatConfigData>(
         &content,
         JsonParserOptions::default(),
         "",
     )
     .consume();
-    let path_str = path.to_string_lossy();
+    let path_str = path.to_string();
     for diagnostic in diagnostics.into_iter().filter(|diag| {
         matches!(
             diag.severity(),
@@ -151,10 +150,10 @@ fn load_flat_config_data(
 /// See https://eslint.org/docs/latest/use/configure/configuration-files
 fn load_legacy_config_data(
     fs: &dyn FileSystem,
-    path: &Path,
+    path: &Utf8Path,
     console: &mut dyn Console,
 ) -> Result<eslint_eslint::LegacyConfigData, CliDiagnostic> {
-    let (deserialized, diagnostics) = match path.extension().and_then(OsStr::to_str) {
+    let (deserialized, diagnostics) = match path.extension() {
         None | Some("json") => {
             let mut file = fs.open_with_options(path, OpenOptions::default().read(true))?;
             let mut content = String::new();
@@ -192,7 +191,7 @@ fn load_legacy_config_data(
             }
         }
         Some("js" | "cjs") => {
-            let node::Resolution { content, .. } = node::load_config(&path.to_string_lossy())?;
+            let node::Resolution { content, .. } = node::load_config(path.as_ref())?;
             deserialize_from_json_str::<eslint_eslint::LegacyConfigData>(
                 &content,
                 JsonParserOptions::default(),
@@ -208,7 +207,7 @@ fn load_legacy_config_data(
             }))
         }
     };
-    let path_str = path.to_string_lossy();
+    let path_str = path.to_string();
     for diagnostic in diagnostics.into_iter().filter(|diag| {
         matches!(
             diag.severity(),

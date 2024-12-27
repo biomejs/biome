@@ -33,11 +33,10 @@ use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
 use biome_project::{NodeJsProject, PackageJson, PackageType, Project};
 use biome_rowan::NodeCache;
+use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use std::ffi::OsStr;
 use std::panic::RefUnwindSafe;
-use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Mutex, RwLock};
 use tracing::{debug, info, info_span};
@@ -79,7 +78,7 @@ pub(super) struct WorkspaceServer {
     /// anticipated. For other documents, the performance degradation due to
     /// lock contention would not be worth the potential of faster reparsing
     /// that may never actually happen.
-    node_cache: Mutex<FxHashMap<PathBuf, NodeCache>>,
+    node_cache: Mutex<FxHashMap<Utf8PathBuf, NodeCache>>,
 
     /// File system implementation.
     fs: Box<dyn FileSystem>,
@@ -163,10 +162,8 @@ impl WorkspaceServer {
             let language = DocumentFileSource::from_path(path).or(file_source);
             WorkspaceError::source_file_not_supported(
                 language,
-                path.display().to_string(),
-                path.extension()
-                    .and_then(OsStr::to_str)
-                    .map(|s| s.to_string()),
+                path.to_string(),
+                path.extension().map(|s| s.to_string()),
             )
         }
     }
@@ -217,7 +214,7 @@ impl WorkspaceServer {
     }
 
     /// Registers a new project in the current workspace.
-    fn register_project(&self, path: PathBuf) -> ProjectKey {
+    fn register_project(&self, path: Utf8PathBuf) -> ProjectKey {
         self.settings.insert_project(path)
     }
 
@@ -381,9 +378,7 @@ impl WorkspaceServer {
 
         match syntax {
             Ok(syntax) => Ok(syntax.clone()),
-            Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(
-                biome_path.to_string_lossy().to_string(),
-            )),
+            Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(biome_path.to_string())),
         }
     }
 
@@ -416,8 +411,8 @@ impl WorkspaceServer {
 
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
     /// or in the feature `ignore`/`include`
-    fn is_ignored(&self, path: &Path, features: FeatureName) -> bool {
-        let file_name = path.file_name().and_then(|s| s.to_str());
+    fn is_ignored(&self, path: &Utf8Path, features: FeatureName) -> bool {
+        let file_name = path.file_name();
         let ignored_by_features = {
             let mut ignored = false;
 
@@ -436,7 +431,7 @@ impl WorkspaceServer {
     }
 
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
-    fn is_ignored_by_top_level_config(&self, path: &Path) -> bool {
+    fn is_ignored_by_top_level_config(&self, path: &Utf8Path) -> bool {
         let Some(files_settings) = self.settings.get_current_files_settings() else {
             return false;
         };
@@ -492,7 +487,7 @@ impl Workspace for WorkspaceServer {
         let settings = self.settings.get_current_settings();
         let mut file_features = FileFeaturesResult::new();
 
-        let file_name = path.file_name().and_then(OsStr::to_str);
+        let file_name = path.file_name();
         file_features = file_features.with_capabilities(&capabilities);
         let Some(settings) = settings else {
             return Ok(file_features);
@@ -544,8 +539,8 @@ impl Workspace for WorkspaceServer {
 
         settings.merge_with_configuration(
             params.configuration,
-            params.workspace_directory,
-            params.vcs_base_path,
+            params.workspace_directory.map(|p| p.to_path_buf()),
+            params.vcs_base_path.map(|p| p.to_path_buf()),
             params.gitignore_matches.as_slice(),
         )?;
 
@@ -592,17 +587,17 @@ impl Workspace for WorkspaceServer {
             "Compare the current project with the new one {:?} {:?} {:?}",
             current_project_path.as_deref(),
             params.path.as_ref(),
-            current_project_path.as_deref() != params.path.as_ref()
+            current_project_path.as_deref() != params.path.as_deref()
         );
 
-        let is_new_path = match (current_project_path.as_deref(), params.path.as_ref()) {
+        let is_new_path = match (current_project_path.as_deref(), params.path.as_deref()) {
             (Some(current_project_path), Some(params_path)) => current_project_path != params_path,
             _ => true,
         };
 
         if is_new_path {
             let path = params.path.unwrap_or_default();
-            let key = self.register_project(path.clone());
+            let key = self.register_project(path.to_path_buf());
             if params.set_as_current_workspace {
                 self.set_current_project(key);
                 self.set_current_project_path(BiomePath::new(path));
@@ -842,7 +837,7 @@ impl Workspace for WorkspaceServer {
             diagnostics: diagnostics
                 .into_iter()
                 .map(|diag| {
-                    let diag = diag.with_file_path(params.path.as_path().display().to_string());
+                    let diag = diag.with_file_path(params.path.to_string());
                     SerdeDiagnostic::new(diag)
                 })
                 .collect(),

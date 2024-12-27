@@ -35,6 +35,7 @@ use biome_deserialize::Deserialized;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{IndentStyle, QuoteStyle};
 use bpaf::Bpaf;
+use camino::Utf8PathBuf;
 pub use css::{
     partial_css_configuration, CssConfiguration, CssFormatter, PartialCssConfiguration,
     PartialCssFormatter,
@@ -62,7 +63,6 @@ use plugins::Plugins;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::num::NonZeroU64;
-use std::path::PathBuf;
 use vcs::VcsClientKind;
 
 pub const VERSION: &str = match option_env!("BIOME_VERSION") {
@@ -374,9 +374,9 @@ pub struct ConfigurationPayload {
     /// The result of the deserialization
     pub deserialized: Deserialized<PartialConfiguration>,
     /// The path of where the `biome.json` or `biome.jsonc` file was found. This contains the file name.
-    pub configuration_file_path: PathBuf,
+    pub configuration_file_path: Utf8PathBuf,
     /// The base path where the external configuration in a package should be resolved from
-    pub external_resolution_base_path: PathBuf,
+    pub external_resolution_base_path: Utf8PathBuf,
 }
 
 #[derive(Debug, Default, PartialEq, Clone)]
@@ -389,15 +389,15 @@ pub enum ConfigurationPathHint {
     /// Very similar to [ConfigurationPathHint::None]. However, the path provided by this variant
     /// will be used as **working directory**, which means that all globs defined in the configuration
     /// will use **this path** as base path.
-    FromWorkspace(PathBuf),
+    FromWorkspace(Utf8PathBuf),
 
     /// The configuration path provided by the LSP, not having a configuration file is not an error.
     /// The path will always be a directory path.
-    FromLsp(PathBuf),
+    FromLsp(Utf8PathBuf),
     /// The configuration path provided by the user, not having a configuration file is an error.
     /// The path can either be a directory path or a file path.
     /// Throws any kind of I/O errors.
-    FromUser(PathBuf),
+    FromUser(Utf8PathBuf),
 }
 
 impl ConfigurationPathHint {

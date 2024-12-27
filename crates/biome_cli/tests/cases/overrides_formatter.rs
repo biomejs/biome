@@ -3,7 +3,7 @@ use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayloa
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 const UNFORMATTED: &str = "  statement(  )  ";
 const UNFORMATTED_JSON: &str = r#"{ "asta": ["lorem", "ipsum", "first", "second"] }"#;
@@ -32,7 +32,7 @@ const CSS_FORMATTED_SINGLE_QUOTES_AND_SPACES: &str =
 fn does_handle_included_file_and_disable_formatter() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -46,10 +46,10 @@ fn does_handle_included_file_and_disable_formatter() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED.as_bytes());
 
-    let test2 = Path::new("special/test2.js");
+    let test2 = Utf8Path::new("special/test2.js");
     fs.insert(test2.into(), UNFORMATTED.as_bytes());
 
     let (fs, result) = run_cli(
@@ -84,7 +84,7 @@ fn does_handle_included_file_and_disable_formatter() {
 fn does_include_file_with_different_formatting() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -95,10 +95,10 @@ fn does_include_file_with_different_formatting() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("special/test2.js");
+    let test2 = Utf8Path::new("special/test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
     let (fs, result) = run_cli(
@@ -133,7 +133,7 @@ fn does_include_file_with_different_formatting() {
 fn does_include_file_with_different_formatting_and_all_of_them() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -147,10 +147,10 @@ fn does_include_file_with_different_formatting_and_all_of_them() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("special/test2.js");
+    let test2 = Utf8Path::new("special/test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
     let (fs, result) = run_cli(
@@ -185,7 +185,7 @@ fn does_include_file_with_different_formatting_and_all_of_them() {
 fn does_include_file_with_different_overrides() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -199,10 +199,10 @@ fn does_include_file_with_different_overrides() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
     let (fs, result) = run_cli(
@@ -238,7 +238,7 @@ fn does_include_file_with_different_overrides() {
 fn complex_enable_disable_overrides() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -269,10 +269,10 @@ fn complex_enable_disable_overrides() {
         .as_bytes(),
     );
 
-    let formatted = Path::new("formatted.js");
+    let formatted = Utf8Path::new("formatted.js");
     fs.insert(formatted.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let unformatted = Path::new("dirty.js");
+    let unformatted = Utf8Path::new("dirty.js");
     fs.insert(unformatted.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
     let (fs, result) = run_cli(
@@ -305,7 +305,7 @@ fn complex_enable_disable_overrides() {
 fn does_include_file_with_different_languages() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -319,12 +319,12 @@ fn does_include_file_with_different_languages() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
-    let test_css = Path::new("test.css");
+    let test_css = Utf8Path::new("test.css");
     fs.insert(test_css.into(), CSS_UNFORMATTED_QUOTES.as_bytes());
 
     let (fs, result) = run_cli(
@@ -362,7 +362,7 @@ fn does_include_file_with_different_languages() {
 fn does_include_file_with_different_languages_and_files() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -386,16 +386,16 @@ fn does_include_file_with_different_languages_and_files() {
             .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let json_file = Path::new("test3.json");
+    let json_file = Utf8Path::new("test3.json");
     fs.insert(json_file.into(), UNFORMATTED_JSON.as_bytes());
 
-    let css_file = Path::new("test4.css");
+    let css_file = Utf8Path::new("test4.css");
     fs.insert(css_file.into(), UNFORMATTED_CSS.as_bytes());
 
     let (fs, result) = run_cli(
@@ -434,7 +434,7 @@ fn does_include_file_with_different_languages_and_files() {
 fn does_not_change_formatting_settings() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -448,10 +448,10 @@ fn does_not_change_formatting_settings() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
     let (fs, result) = run_cli(
@@ -486,7 +486,7 @@ fn does_not_change_formatting_settings() {
 fn does_not_change_formatting_language_settings() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -500,10 +500,10 @@ fn does_not_change_formatting_language_settings() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
     let (fs, result) = run_cli(
@@ -538,7 +538,7 @@ fn does_not_change_formatting_language_settings() {
 fn does_not_change_formatting_language_settings_2() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -552,10 +552,10 @@ fn does_not_change_formatting_language_settings_2() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
     let (fs, result) = run_cli(
@@ -590,7 +590,7 @@ fn does_not_change_formatting_language_settings_2() {
 fn does_not_conceal_previous_overrides() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -603,10 +603,10 @@ fn does_not_conceal_previous_overrides() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
     let (fs, result) = run_cli(
@@ -635,7 +635,7 @@ fn does_not_conceal_previous_overrides() {
 fn takes_last_formatter_enabled_into_account() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -652,7 +652,7 @@ fn takes_last_formatter_enabled_into_account() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
     let (fs, result) = run_cli(
@@ -674,7 +674,7 @@ fn takes_last_formatter_enabled_into_account() {
 fn does_not_override_well_known_special_files_when_config_override_is_present() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -690,7 +690,7 @@ fn does_not_override_well_known_special_files_when_config_override_is_present() 
         .as_bytes(),
     );
 
-    let tsconfig = Path::new("tsconfig.json");
+    let tsconfig = Utf8Path::new("tsconfig.json");
     fs.insert(
         tsconfig.into(),
         r#"{
@@ -699,7 +699,7 @@ fn does_not_override_well_known_special_files_when_config_override_is_present() 
 }"#,
     );
 
-    let other_json = Path::new("other.json");
+    let other_json = Utf8Path::new("other.json");
     fs.insert(
         other_json.into(),
         r#"{
@@ -733,7 +733,7 @@ fn does_not_override_well_known_special_files_when_config_override_is_present() 
 fn allow_trailing_commas_on_well_known_files() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -753,7 +753,7 @@ fn allow_trailing_commas_on_well_known_files() {
         .as_bytes(),
     );
 
-    let tsconfig = Path::new("tsconfig.json");
+    let tsconfig = Utf8Path::new("tsconfig.json");
     fs.insert(
         tsconfig.into(),
         r#"{
@@ -762,7 +762,7 @@ fn allow_trailing_commas_on_well_known_files() {
 }"#,
     );
 
-    let vscode_settings = Path::new(".vscode/settings.json");
+    let vscode_settings = Utf8Path::new(".vscode/settings.json");
     fs.insert(
         vscode_settings.into(),
         r#"{
@@ -771,10 +771,10 @@ fn allow_trailing_commas_on_well_known_files() {
 }"#,
     );
 
-    let vscode_text_file = Path::new(".vscode/any.text");
+    let vscode_text_file = Utf8Path::new(".vscode/any.text");
     fs.insert(vscode_text_file.into(), "any text");
 
-    let other_json = Path::new("other.json");
+    let other_json = Utf8Path::new("other.json");
     fs.insert(
         other_json.into(),
         r#"{
@@ -809,7 +809,7 @@ fn allow_trailing_commas_on_well_known_files() {
 fn disallow_comments_on_well_known_files() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -829,7 +829,7 @@ fn disallow_comments_on_well_known_files() {
         .as_bytes(),
     );
 
-    let tsconfig = Path::new("tsconfig.json");
+    let tsconfig = Utf8Path::new("tsconfig.json");
     fs.insert(
         tsconfig.into(),
         r#"{

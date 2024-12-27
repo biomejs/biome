@@ -1,7 +1,7 @@
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_js_formatter::{context::JsFormatOptions, JsFormatLanguage};
 use biome_js_syntax::{JsFileSource, LanguageVariant, ModuleKind};
-use std::path::Path;
+use camino::Utf8Path;
 
 mod language {
     include!("language.rs");
@@ -25,7 +25,7 @@ mod language {
 /// * `json/null` -> input: `tests/specs/json/null.json`, expected output: `tests/specs/json/null.json.snap`
 /// * `null` -> input: `tests/specs/null.json`, expected output: `tests/specs/null.json.snap`
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, file_type: &str) {
-    let root_path = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
+    let root_path = Utf8Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
 
     let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path, None) else {
         return;

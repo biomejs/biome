@@ -1,5 +1,4 @@
 use std::borrow::Cow;
-use std::ffi::OsStr;
 
 use super::{
     is_diagnostic_error, AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource,
@@ -101,10 +100,7 @@ impl ServiceLanguage for JsonLanguage {
             .unwrap_or_default();
 
         // ensure it never formats biome.json into a form it can't parse
-        let trailing_commas = if matches!(
-            path.file_name().map(OsStr::as_encoded_bytes),
-            Some(b"biome.json")
-        ) {
+        let trailing_commas = if matches!(path.file_name(), Some("biome.json")) {
             TrailingCommas::None
         } else {
             language.and_then(|l| l.trailing_commas).unwrap_or_default()

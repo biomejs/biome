@@ -22,10 +22,10 @@ use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
 use biome_rowan::AstNode;
 use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
 use biome_service::workspace::DocumentFileSource;
+use camino::Utf8PathBuf;
 use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
 use std::collections::BTreeMap;
 use std::fmt::{Display, Formatter, Write};
-use std::path::PathBuf;
 use std::slice;
 use std::str::FromStr;
 
@@ -323,7 +323,7 @@ fn create_analyzer_options<L>(
 where
     L: ServiceLanguage,
 {
-    let path = BiomePath::new(PathBuf::from(&file_path));
+    let path = BiomePath::new(Utf8PathBuf::from(&file_path));
     let file_source = &test.document_file_source();
     let supression_reason = None;
 
@@ -368,7 +368,7 @@ fn assert_lint(
 
     // Create a synthetic workspace configuration
     let workspace_settings = WorkspaceSettings::default();
-    let key = workspace_settings.insert_project(PathBuf::new());
+    let key = workspace_settings.insert_project(Utf8PathBuf::new());
     workspace_settings.set_current_project(key);
 
     // Load settings from the preceding `json,options` block if requested

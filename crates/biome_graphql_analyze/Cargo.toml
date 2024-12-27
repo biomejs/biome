@@ -27,6 +27,7 @@ serde                    = { workspace = true, features = ["derive"] }
 [dev-dependencies]
 biome_graphql_parser = { path = "../biome_graphql_parser" }
 biome_test_utils     = { path = "../biome_test_utils" }
+camino               = { workspace = true }
 insta                = { workspace = true, features = ["glob"] }
 tests_macros         = { path = "../tests_macros" }
 

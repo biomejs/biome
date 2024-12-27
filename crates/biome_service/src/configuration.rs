@@ -12,19 +12,23 @@ use biome_console::markup;
 use biome_css_analyze::METADATA as css_lint_metadata;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
+use biome_diagnostics::CaminoError;
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
-use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
+use biome_fs::{
+    AutoSearchResult, ConfigName, FileSystem, FileSystemDiagnostic, FsErrorKind, OpenOptions,
+};
 use biome_graphql_analyze::METADATA as graphql_lint_metadata;
 use biome_js_analyze::METADATA as js_lint_metadata;
 use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
+use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
 use std::ops::Deref;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 /// Information regarding the configuration that was found.
 ///
@@ -33,9 +37,9 @@ use std::path::{Path, PathBuf};
 #[derive(Default, Debug)]
 pub struct LoadedConfiguration {
     /// If present, the path of the directory where it was found
-    pub directory_path: Option<PathBuf>,
+    pub directory_path: Option<Utf8PathBuf>,
     /// If present, the path of the file where it was found
-    pub file_path: Option<PathBuf>,
+    pub file_path: Option<Utf8PathBuf>,
     /// The Deserialized configuration
     pub configuration: PartialConfiguration,
     /// All diagnostics that were emitted during parsing and deserialization
@@ -44,12 +48,12 @@ pub struct LoadedConfiguration {
 
 impl LoadedConfiguration {
     /// Return the path of the **directory** where the configuration is
-    pub fn directory_path(&self) -> Option<&Path> {
+    pub fn directory_path(&self) -> Option<&Utf8Path> {
         self.directory_path.as_deref()
     }
 
     /// Return the path of the **file** where the configuration is
-    pub fn file_path(&self) -> Option<&Path> {
+    pub fn file_path(&self) -> Option<&Utf8Path> {
         self.file_path.as_deref()
     }
 
@@ -60,7 +64,7 @@ impl LoadedConfiguration {
             .any(|diagnostic| diagnostic.severity() >= Severity::Error)
     }
 
-    /// It return an iterator over the diagnostics emitted during the resolution of the configuration file
+    /// It returns an iterator over the diagnostics emitted during the resolution of the configuration file
     pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter {
         ConfigurationDiagnosticsIter::new(self.diagnostics.as_slice())
     }
@@ -130,11 +134,9 @@ impl LoadedConfiguration {
             },
             diagnostics: diagnostics
                 .into_iter()
-                .map(|diagnostic| {
-                    diagnostic.with_file_path(configuration_file_path.display().to_string())
-                })
+                .map(|diagnostic| diagnostic.with_file_path(configuration_file_path.to_string()))
                 .collect(),
-            directory_path: configuration_file_path.parent().map(PathBuf::from),
+            directory_path: configuration_file_path.parent().map(Utf8PathBuf::from),
             file_path: Some(configuration_file_path),
         })
     }
@@ -179,7 +181,7 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
         // So we use the working directory (CWD) as the resolution base path
         ConfigurationPathHint::FromUser(_) | ConfigurationPathHint::None => fs
             .working_directory()
-            .map_or(PathBuf::new(), |working_directory| working_directory),
+            .map_or(Utf8PathBuf::new(), |working_directory| working_directory),
     };
 
     // If the configuration path hint is from user and is a file path,
@@ -187,8 +189,8 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
     if let ConfigurationPathHint::FromUser(ref config_file_path) = base_path {
         if fs.path_is_file(config_file_path) {
             let content = fs.read_file_from_path(config_file_path)?;
-            let parser_options = match config_file_path.extension().map(OsStr::as_encoded_bytes) {
-                Some(b"json") => JsonParserOptions::default(),
+            let parser_options = match config_file_path.extension() {
+                Some("json") => JsonParserOptions::default(),
                 _ => JsonParserOptions::default()
                     .with_allow_comments()
                     .with_allow_trailing_commas(),
@@ -197,7 +199,7 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
                 deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
             return Ok(Some(ConfigurationPayload {
                 deserialized,
-                configuration_file_path: PathBuf::from(config_file_path),
+                configuration_file_path: config_file_path.to_path_buf(),
                 external_resolution_base_path,
             }));
         }
@@ -221,8 +223,8 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
     )? {
         let AutoSearchResult { content, file_path } = auto_search_result;
 
-        let parser_options = match file_path.extension().map(OsStr::as_encoded_bytes) {
-            Some(b"json") => JsonParserOptions::default(),
+        let parser_options = match file_path.extension() {
+            Some("json") => JsonParserOptions::default(),
             _ => JsonParserOptions::default()
                 .with_allow_comments()
                 .with_allow_trailing_commas(),
@@ -243,7 +245,7 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
 
 pub fn load_editorconfig(
     fs: &dyn FileSystem,
-    workspace_root: PathBuf,
+    workspace_root: Utf8PathBuf,
 ) -> Result<(Option<PartialConfiguration>, Vec<EditorConfigDiagnostic>), WorkspaceError> {
     // How .editorconfig is supposed to be resolved: https://editorconfig.org/#file-location
     // We currently don't support the `root` property, so we just search for the file like we do for biome.json
@@ -269,7 +271,7 @@ pub fn load_editorconfig(
                             return Err(BiomeDiagnostic::new_invalid_ignore_pattern_with_path(
                                 pattern,
                                 err.to_string(),
-                                path.to_str(),
+                                path.as_str(),
                             )
                             .into());
                         }
@@ -296,8 +298,8 @@ pub fn create_config(
     mut configuration: PartialConfiguration,
     emit_jsonc: bool,
 ) -> Result<(), WorkspaceError> {
-    let json_path = PathBuf::from(ConfigName::biome_json());
-    let jsonc_path = PathBuf::from(ConfigName::biome_jsonc());
+    let json_path = Utf8PathBuf::from(ConfigName::biome_json());
+    let jsonc_path = Utf8PathBuf::from(ConfigName::biome_jsonc());
 
     if fs.path_exists(&json_path) || fs.path_exists(&jsonc_path) {
         return Err(BiomeDiagnostic::new_already_exists().into());
@@ -311,16 +313,16 @@ pub fn create_config(
         if err.kind() == ErrorKind::AlreadyExists {
             BiomeDiagnostic::new_already_exists().into()
         } else {
-            WorkspaceError::cant_read_file(format!("{}", path.display()))
+            WorkspaceError::cant_read_file(path.to_string())
         }
     })?;
 
     // we now check if biome is installed inside `node_modules` and if so, we
     if VERSION == "0.0.0" {
-        let schema_path = Path::new("./node_modules/@biomejs/biome/configuration_schema.json");
+        let schema_path = Utf8Path::new("./node_modules/@biomejs/biome/configuration_schema.json");
         let options = OpenOptions::default().read(true);
         if fs.open_with_options(schema_path, options).is_ok() {
-            configuration.schema = schema_path.to_str().map(Into::into);
+            configuration.schema = Some(Box::from(schema_path.as_str()));
         }
     } else {
         configuration.schema =
@@ -338,13 +340,13 @@ pub fn create_config(
 
     config_file
         .set_content(formatted.as_code().as_bytes())
-        .map_err(|_| WorkspaceError::cant_read_file(format!("{}", path.display())))?;
+        .map_err(|_| WorkspaceError::cant_read_file(format!("{}", path)))?;
 
     Ok(())
 }
 
 /// Returns the rules applied to a specific [Path], given the [Settings]
-pub fn to_analyzer_rules(settings: &Settings, path: &Path) -> AnalyzerRules {
+pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules {
     let mut analyzer_rules = AnalyzerRules::default();
     if let Some(rules) = settings.linter.rules.as_ref() {
         push_to_analyzer_rules(rules, js_lint_metadata.deref(), &mut analyzer_rules);
@@ -366,16 +368,16 @@ pub trait PartialConfigurationExt {
     fn apply_extends(
         &mut self,
         fs: &dyn FileSystem,
-        file_path: &Path,
-        external_resolution_base_path: &Path,
+        file_path: &Utf8Path,
+        external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
     ) -> Result<(), WorkspaceError>;
 
     fn deserialize_extends(
         &mut self,
         fs: &dyn FileSystem,
-        relative_resolution_base_path: &Path,
-        external_resolution_base_path: &Path,
+        relative_resolution_base_path: &Utf8Path,
+        external_resolution_base_path: &Utf8Path,
     ) -> Result<Vec<Deserialized<PartialConfiguration>>, WorkspaceError>;
 
     fn migrate_deprecated_fields(&mut self);
@@ -383,8 +385,8 @@ pub trait PartialConfigurationExt {
     fn retrieve_gitignore_matches(
         &self,
         fs: &dyn FileSystem,
-        vcs_base_path: Option<&Path>,
-    ) -> Result<(Option<PathBuf>, Vec<String>), WorkspaceError>;
+        vcs_base_path: Option<&Utf8Path>,
+    ) -> Result<(Option<Utf8PathBuf>, Vec<String>), WorkspaceError>;
 }
 
 impl PartialConfigurationExt for PartialConfiguration {
@@ -397,8 +399,8 @@ impl PartialConfigurationExt for PartialConfiguration {
     fn apply_extends(
         &mut self,
         fs: &dyn FileSystem,
-        file_path: &Path,
-        external_resolution_base_path: &Path,
+        file_path: &Utf8Path,
+        external_resolution_base_path: &Utf8Path,
         diagnostics: &mut Vec<Error>,
     ) -> Result<(), WorkspaceError> {
         let deserialized = self.deserialize_extends(
@@ -428,7 +430,7 @@ impl PartialConfigurationExt for PartialConfiguration {
             errors
                 .into_iter()
                 .flatten()
-                .map(|diagnostic| diagnostic.with_file_path(file_path.display().to_string()))
+                .map(|diagnostic| diagnostic.with_file_path(file_path.to_string()))
                 .collect::<Vec<_>>(),
         );
 
@@ -439,8 +441,8 @@ impl PartialConfigurationExt for PartialConfiguration {
     fn deserialize_extends(
         &mut self,
         fs: &dyn FileSystem,
-        relative_resolution_base_path: &Path,
-        external_resolution_base_path: &Path,
+        relative_resolution_base_path: &Utf8Path,
+        external_resolution_base_path: &Utf8Path,
     ) -> Result<Vec<Deserialized<PartialConfiguration>>, WorkspaceError> {
         let Some(extends) = &self.extends else {
             return Ok(Vec::new());
@@ -458,14 +460,24 @@ impl PartialConfigurationExt for PartialConfiguration {
                 ) {
                 relative_resolution_base_path.join(extend_entry.as_ref())
             } else {
-                fs.resolve_configuration(extend_entry.as_ref(), external_resolution_base_path)
-                    .map_err(|error| {
-                        BiomeDiagnostic::cant_resolve(
-                            external_resolution_base_path.display().to_string(),
-                            error,
-                        )
-                    })?
-                    .into_path_buf()
+                Utf8PathBuf::try_from(
+                    fs.resolve_configuration(extend_entry.as_ref(), external_resolution_base_path)
+                        .map_err(|error| {
+                            BiomeDiagnostic::cant_resolve(
+                                external_resolution_base_path.to_string(),
+                                error,
+                            )
+                        })?
+                        .into_path_buf(),
+                )
+                .map_err(|err| FileSystemDiagnostic {
+                    path: external_resolution_base_path.to_string(),
+                    severity: Severity::Error,
+                    error_kind: FsErrorKind::CantReadFile(
+                        external_resolution_base_path.to_string(),
+                    ),
+                    source: Some(Error::from(CaminoError::from(err))),
+                })?
             };
 
             let mut file = fs
@@ -475,21 +487,21 @@ impl PartialConfigurationExt for PartialConfiguration {
                 )
                 .map_err(|err| {
                     CantLoadExtendFile::new(
-                        extend_configuration_file_path.display().to_string(),
+                        extend_configuration_file_path.to_string(),
                         err.to_string(),
                     )
                     .with_verbose_advice(markup! {
                         "Biome tried to load the configuration file \""<Emphasis>{
-                            extend_configuration_file_path.display().to_string()
+                            extend_configuration_file_path.to_string()
                         }</Emphasis>"\" in \"extends\" using \""<Emphasis>{
-                            external_resolution_base_path.display().to_string()
+                            external_resolution_base_path.to_string()
                         }</Emphasis>"\" as the base path."
                     })
                 })?;
 
             let mut content = String::new();
             file.read_to_string(&mut content).map_err(|err| {
-                CantLoadExtendFile::new(extend_configuration_file_path.display().to_string(), err.to_string()).with_verbose_advice(
+                CantLoadExtendFile::new(extend_configuration_file_path.to_string(), err.to_string()).with_verbose_advice(
                     markup!{
                         "It's possible that the file was created with a different user/group. Make sure you have the rights to read the file."
                     }
@@ -498,11 +510,8 @@ impl PartialConfigurationExt for PartialConfiguration {
             })?;
             let deserialized = deserialize_from_json_str::<PartialConfiguration>(
                 content.as_str(),
-                match extend_configuration_file_path
-                    .extension()
-                    .map(OsStr::as_encoded_bytes)
-                {
-                    Some(b"json") => JsonParserOptions::default(),
+                match extend_configuration_file_path.extension() {
+                    Some("json") => JsonParserOptions::default(),
                     _ => JsonParserOptions::default()
                         .with_allow_comments()
                         .with_allow_trailing_commas(),
@@ -527,16 +536,16 @@ impl PartialConfigurationExt for PartialConfiguration {
     fn retrieve_gitignore_matches(
         &self,
         fs: &dyn FileSystem,
-        vcs_base_path: Option<&Path>,
-    ) -> Result<(Option<PathBuf>, Vec<String>), WorkspaceError> {
+        vcs_base_path: Option<&Utf8Path>,
+    ) -> Result<(Option<Utf8PathBuf>, Vec<String>), WorkspaceError> {
         let Some(vcs) = &self.vcs else {
             return Ok((None, vec![]));
         };
         if vcs.is_enabled() {
             let vcs_base_path = match (vcs_base_path, &vcs.root) {
                 (Some(vcs_base_path), Some(root)) => vcs_base_path.join(root),
-                (None, Some(root)) => PathBuf::from(root),
-                (Some(vcs_base_path), None) => PathBuf::from(vcs_base_path),
+                (None, Some(root)) => Utf8PathBuf::from(root),
+                (Some(vcs_base_path), None) => Utf8PathBuf::from(vcs_base_path),
                 (None, None) => return Err(WorkspaceError::vcs_disabled()),
             };
             if let Some(client_kind) = &vcs.client_kind {
@@ -547,7 +556,7 @@ impl PartialConfigurationExt for PartialConfiguration {
 
                     if let Some(result) = result {
                         return Ok((
-                            result.file_path.parent().map(PathBuf::from),
+                            result.file_path.parent().map(Utf8PathBuf::from),
                             result
                                 .content
                                 .lines()

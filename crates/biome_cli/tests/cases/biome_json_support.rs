@@ -4,7 +4,7 @@ use crate::{run_cli, UNFORMATTED};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
 use bpaf::Args;
-use std::path::{Path, PathBuf};
+use camino::{Utf8Path, Utf8PathBuf};
 
 const CUSTOM_CONFIGURATION_BEFORE: &str = r#"function f() {
   return { a, b }
@@ -23,10 +23,10 @@ fn formatter_biome_json() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_FORMAT.as_bytes());
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), CUSTOM_CONFIGURATION_BEFORE.as_bytes());
 
     let (fs, result) = run_cli(
@@ -65,10 +65,10 @@ fn linter_biome_json() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), "debugger;\n".as_bytes());
 
-    let config_path = Path::new("biome.json");
+    let config_path = Utf8Path::new("biome.json");
     fs.insert(
         config_path.into(),
         r#"{
@@ -114,10 +114,10 @@ fn check_biome_json() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), "debugger".as_bytes());
 
-    let config_path = Path::new("biome.json");
+    let config_path = Utf8Path::new("biome.json");
     fs.insert(
         config_path.into(),
         r#"{
@@ -164,7 +164,7 @@ fn ci_biome_json() {
     let mut console = BufferConsole::default();
 
     fs.insert(
-        PathBuf::from("biome.json"),
+        Utf8PathBuf::from("biome.json"),
         r#"{
   "formatter": {
     "enabled": false
@@ -174,7 +174,7 @@ fn ci_biome_json() {
         .as_bytes(),
     );
 
-    let input_file = Path::new("file.js");
+    let input_file = Utf8Path::new("file.js");
 
     fs.insert(input_file.into(), "  statement(  )  ".as_bytes());
 
@@ -203,7 +203,7 @@ fn biome_json_is_not_ignored() {
     let mut console = BufferConsole::default();
 
     fs.insert(
-        PathBuf::from("biome.json"),
+        Utf8PathBuf::from("biome.json"),
         r#"{
         "files": { "ignore": ["*.json"] },
   "formatter": {
@@ -214,11 +214,11 @@ fn biome_json_is_not_ignored() {
         .as_bytes(),
     );
 
-    let input_file = Path::new("file.js");
+    let input_file = Utf8Path::new("file.js");
 
     fs.insert(input_file.into(), "  statement(  )  ".as_bytes());
 
-    let input_file = Path::new("file.json");
+    let input_file = Utf8Path::new("file.json");
 
     fs.insert(input_file.into(), "  statement(  )  ".as_bytes());
 
@@ -240,7 +240,7 @@ fn always_disable_trailing_commas_biome_json() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     let config = r#"{
     "formatter": {
         "indentStyle": "space",

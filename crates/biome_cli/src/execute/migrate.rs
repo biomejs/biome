@@ -18,9 +18,8 @@ use biome_rowan::{AstNode, NodeCache};
 use biome_service::workspace::{
     ChangeFileParams, FileContent, FixAction, FormatFileParams, OpenFileParams,
 };
+use camino::Utf8PathBuf;
 use std::borrow::Cow;
-use std::ffi::OsStr;
-use std::path::PathBuf;
 
 mod eslint;
 mod eslint_any_rule_to_biome;
@@ -36,8 +35,8 @@ mod prettier;
 pub(crate) struct MigratePayload<'a> {
     pub(crate) session: CliSession<'a>,
     pub(crate) write: bool,
-    pub(crate) configuration_file_path: PathBuf,
-    pub(crate) configuration_directory_path: PathBuf,
+    pub(crate) configuration_file_path: Utf8PathBuf,
+    pub(crate) configuration_directory_path: Utf8PathBuf,
     pub(crate) verbose: bool,
     pub(crate) sub_command: Option<MigrateSubCommand>,
 }
@@ -143,7 +142,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                         <Info><Emphasis>{prettier_path}</Emphasis>" has been successfully migrated."</Info>
                     });
                 } else {
-                    let file_name = configuration_file_path.display().to_string();
+                    let file_name = configuration_file_path.to_string();
                     let diagnostic = MigrateDiffDiagnostic {
                         file_name,
                         diff: ContentDiffAdvice {
@@ -220,7 +219,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                         <Info><Emphasis>{eslint_path}</Emphasis>" has been successfully migrated."</Info>
                     });
                 } else {
-                    let file_name = configuration_file_path.display().to_string();
+                    let file_name = configuration_file_path.to_string();
                     let diagnostic = MigrateDiffDiagnostic {
                         file_name,
                         diff: ContentDiffAdvice {
@@ -242,7 +241,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         }
         None => {
             let has_deprecated_configuration =
-                configuration_file_path.file_name() == Some(OsStr::new("rome.json"));
+                configuration_file_path.file_name() == Some("rome.json");
 
             let mut errors = 0;
             let mut tree = parsed.tree();
@@ -301,26 +300,16 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     };
                     configuration_file.set_content(tree.to_string().as_bytes())?;
                     console.log(markup!{
-                            <Info>"The configuration "<Emphasis>{{configuration_file_path.display().to_string()}}</Emphasis>" has been successfully migrated."</Info>
+                            <Info>"The configuration "<Emphasis>{{configuration_file_path.to_string()}}</Emphasis>" has been successfully migrated."</Info>
                         })
                 } else {
-                    let file_name = configuration_file_path.display().to_string();
-                    let diagnostic = if has_deprecated_configuration {
-                        MigrateDiffDiagnostic {
-                            file_name,
-                            diff: ContentDiffAdvice {
-                                old: "rome.json".to_string(),
-                                new: "biome.json".to_string(),
-                            },
-                        }
-                    } else {
-                        MigrateDiffDiagnostic {
-                            file_name,
-                            diff: ContentDiffAdvice {
-                                old: biome_config_content,
-                                new: new_configuration_content,
-                            },
-                        }
+                    let file_name = configuration_file_path.to_string();
+                    let diagnostic = MigrateDiffDiagnostic {
+                        file_name,
+                        diff: ContentDiffAdvice {
+                            old: biome_config_content,
+                            new: new_configuration_content,
+                        },
                     };
                     if diagnostic.tags().is_verbose() {
                         if verbose {

@@ -1,3 +1,4 @@
+use super::{eslint_eslint::ShorthandVec, node};
 use crate::diagnostics::MigrationDiagnostic;
 use crate::CliDiagnostic;
 use biome_console::{markup, Console, ConsoleExt};
@@ -11,9 +12,7 @@ use biome_formatter::{
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
 use biome_json_parser::JsonParserOptions;
-use std::{ffi::OsStr, path::Path};
-
-use super::{eslint_eslint::ShorthandVec, node};
+use camino::Utf8Path;
 
 #[derive(Debug, Default, Deserializable)]
 #[deserializable(unknown_fields = "allow")]
@@ -383,14 +382,14 @@ pub(crate) fn read_config_file(
     console: &mut dyn Console,
 ) -> Result<Config, CliDiagnostic> {
     // We don't report an error if Prettier config is not embedded in `PACKAGE_JSON`.
-    if let Ok(data) = load_config(fs, Path::new(PACKAGE_JSON), console) {
+    if let Ok(data) = load_config(fs, Utf8Path::new(PACKAGE_JSON), console) {
         return Ok(Config {
             path: PACKAGE_JSON,
             data,
         });
     }
     for config_name in CONFIG_FILES {
-        let path = Path::new(config_name);
+        let path = Utf8Path::new(config_name);
         if fs.path_exists(path) {
             return Ok(Config {
                 path: config_name,
@@ -405,10 +404,10 @@ pub(crate) fn read_config_file(
 
 fn load_config(
     fs: &dyn FileSystem,
-    path: &Path,
+    path: &Utf8Path,
     console: &mut dyn Console,
 ) -> Result<PrettierConfiguration, CliDiagnostic> {
-    let (deserialized, diagnostics) = match path.extension().and_then(OsStr::to_str) {
+    let (deserialized, diagnostics) = match path.extension() {
         None | Some("json") => {
             let mut file = fs.open_with_options(path, OpenOptions::default().read(true))?;
             let mut content = String::new();
@@ -438,7 +437,7 @@ fn load_config(
             }
         }
         Some("js" | "mjs" | "cjs") => {
-            let node::Resolution { content, .. } = node::load_config(&path.to_string_lossy())?;
+            let node::Resolution { content, .. } = node::load_config(path.as_ref())?;
             deserialize_from_json_str::<PrettierConfiguration>(
                 &content,
                 JsonParserOptions::default(),
@@ -454,7 +453,7 @@ fn load_config(
             }))
         }
     };
-    let path_str = path.to_string_lossy();
+    let path_str = path.to_string();
     // Heuristic: the Prettier config file is considered a YAML file if:
     // - desrialization failed
     // - there are at least 3 diagnostics

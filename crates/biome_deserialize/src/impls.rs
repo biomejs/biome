@@ -805,3 +805,15 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
         value.deserialize(ctx, Visitor(PhantomData), name)
     }
 }
+
+#[cfg(feature = "camino")]
+impl Deserializable for camino::Utf8PathBuf {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        let path = String::deserialize(ctx, value, name).map(Self::from)?;
+        Some(camino::Utf8PathBuf::from(path))
+    }
+}

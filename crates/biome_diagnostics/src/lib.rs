@@ -2,7 +2,7 @@
 
 use ::serde::{Deserialize, Serialize};
 
-pub mod adapters;
+mod adapters;
 pub mod advice;
 pub mod context;
 pub mod diagnostic;
@@ -13,8 +13,24 @@ pub mod location;
 pub mod panic;
 pub mod serde;
 
+#[cfg(feature = "camino")]
+pub use adapters::CaminoError;
+
+#[cfg(feature = "serde_ini")]
+pub use adapters::IniError;
+
+#[cfg(feature = "oxc_resolver")]
+pub use adapters::ResolveError;
+
+#[cfg(feature = "bpaf")]
+pub use adapters::BpafError;
+
+#[cfg(feature = "std")]
+pub use adapters::{IoError, StdError};
+
 mod suggestion;
 
+pub use self::adapters::SerdeJsonError;
 pub use self::suggestion::{Applicability, CodeSuggestion};
 pub use termcolor;
 

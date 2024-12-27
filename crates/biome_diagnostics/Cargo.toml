@@ -34,18 +34,24 @@ biome_diagnostics_macros     = { workspace = true }
 biome_rowan                  = { workspace = true }
 biome_text_edit              = { workspace = true }
 biome_text_size              = { workspace = true }
-bpaf                         = { workspace = true }
+bpaf                         = { workspace = true, optional = true }
+camino                       = { workspace = true, optional = true }
 enumflags2                   = { workspace = true }
-oxc_resolver                 = { workspace = true }
+oxc_resolver                 = { workspace = true, optional = true }
 schemars                     = { workspace = true, optional = true }
 serde                        = { workspace = true, features = ["derive"] }
-serde_ini                    = { workspace = true }
+serde_ini                    = { workspace = true, optional = true }
 serde_json                   = { workspace = true }
 termcolor                    = { workspace = true }
 unicode-width                = { workspace = true }
 
 [features]
-schema = ["schemars", "biome_text_edit/schemars", "biome_diagnostics_categories/schemars"]
+bpaf         = ["dep:bpaf"]
+camino       = ["dep:camino"]
+oxc_resolver = ["dep:oxc_resolver"]
+schema       = ["schemars", "biome_text_edit/schemars", "biome_diagnostics_categories/schemars"]
+serde_ini    = ["dep:serde_ini"]
+std          = []
 
 [dev-dependencies]
 insta      = { workspace = true }

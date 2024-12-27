@@ -3,7 +3,7 @@ use crate::{run_cli, UNFORMATTED};
 use biome_console::{BufferConsole, LogLevel};
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::{Path, PathBuf};
+use camino::{Utf8Path, Utf8PathBuf};
 
 const TEST_CONTENTS: &str = "debugger;";
 
@@ -11,7 +11,7 @@ const TEST_CONTENTS: &str = "debugger;";
 fn logs_the_appropriate_messages_according_to_set_diagnostics_level() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -31,7 +31,7 @@ fn logs_the_appropriate_messages_according_to_set_diagnostics_level() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), TEST_CONTENTS.as_bytes());
 
     let (fs, result) = run_cli(
@@ -75,10 +75,10 @@ fn max_diagnostics_no_verbose() {
     let mut console = BufferConsole::default();
 
     for i in 0..10 {
-        let file_path = PathBuf::from(format!("src/folder_{i}/package-lock.json"));
+        let file_path = Utf8PathBuf::from(format!("src/folder_{i}/package-lock.json"));
         fs.insert(file_path, "{}".as_bytes());
     }
-    let file_path = PathBuf::from("src/file.js".to_string());
+    let file_path = Utf8PathBuf::from("src/file.js".to_string());
     fs.insert(file_path, UNFORMATTED.as_bytes());
 
     let (mut fs, result) = run_cli(
@@ -90,8 +90,8 @@ fn max_diagnostics_no_verbose() {
     assert!(result.is_err(), "run_cli returned {result:?}");
 
     for i in 0..10 {
-        let file_path = PathBuf::from(format!("src/folder_{i}/package-lock.json"));
-        fs.remove(Path::new(&file_path));
+        let file_path = Utf8PathBuf::from(format!("src/folder_{i}/package-lock.json"));
+        fs.remove(Utf8Path::new(&file_path));
     }
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -109,10 +109,10 @@ fn max_diagnostics_verbose() {
     let mut console = BufferConsole::default();
 
     for i in 0..8 {
-        let file_path = PathBuf::from(format!("src/folder_{i}/package-lock.json"));
+        let file_path = Utf8PathBuf::from(format!("src/folder_{i}/package-lock.json"));
         fs.insert(file_path, "{}".as_bytes());
     }
-    let file_path = PathBuf::from("src/file.js".to_string());
+    let file_path = Utf8PathBuf::from("src/file.js".to_string());
     fs.insert(file_path, UNFORMATTED.as_bytes());
 
     let (mut fs, result) = run_cli(
@@ -124,8 +124,8 @@ fn max_diagnostics_verbose() {
     assert!(result.is_err(), "run_cli returned {result:?}");
 
     for i in 0..8 {
-        let file_path = PathBuf::from(format!("src/folder_{i}/package-lock.json"));
-        fs.remove(Path::new(&file_path));
+        let file_path = Utf8PathBuf::from(format!("src/folder_{i}/package-lock.json"));
+        fs.remove(Utf8Path::new(&file_path));
     }
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -142,7 +142,7 @@ fn diagnostic_level() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -159,7 +159,7 @@ fn diagnostic_level() {
 "#,
     );
 
-    let file_path = PathBuf::from("src/index.js".to_string());
+    let file_path = Utf8PathBuf::from("src/index.js".to_string());
     fs.insert(
         file_path,
         r#"import { graphql, useFragment, useMutation } from "react-relay";
@@ -200,11 +200,11 @@ fn max_diagnostics_are_lifted() {
     let mut console = BufferConsole::default();
 
     for i in 0..u8::MAX {
-        let file_path = PathBuf::from(format!("src/file_{i}.js"));
+        let file_path = Utf8PathBuf::from(format!("src/file_{i}.js"));
         fs.insert(file_path, UNFORMATTED.as_bytes());
     }
 
-    let file_path = PathBuf::from("file.js".to_string());
+    let file_path = Utf8PathBuf::from("file.js".to_string());
     fs.insert(
         file_path.clone(),
         "debugger;".repeat(u8::MAX as usize * 2).as_bytes(),
@@ -227,7 +227,7 @@ fn max_diagnostics_are_lifted() {
     assert!(result.is_err(), "run_cli returned {result:?}");
 
     for i in 0..u8::MAX {
-        let file_path = PathBuf::from(format!("src/file_{i}.js"));
+        let file_path = Utf8PathBuf::from(format!("src/file_{i}.js"));
         fs.remove(&file_path);
     }
 

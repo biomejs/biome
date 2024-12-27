@@ -3,14 +3,14 @@ use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayloa
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 #[test]
 fn should_use_editorconfig() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
@@ -19,7 +19,7 @@ max_line_length = 300
 "#,
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
 "#;
     fs.insert(test_file.into(), contents);
@@ -55,7 +55,7 @@ fn should_use_editorconfig_enabled_from_biome_conf() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
@@ -64,7 +64,7 @@ max_line_length = 300
 "#,
     );
 
-    let biomeconfig = Path::new("biome.json");
+    let biomeconfig = Utf8Path::new("biome.json");
     fs.insert(
         biomeconfig.into(),
         r#"{
@@ -75,7 +75,7 @@ max_line_length = 300
 "#,
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
 "#;
     fs.insert(test_file.into(), contents);
@@ -103,7 +103,7 @@ fn should_use_editorconfig_check() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
@@ -112,7 +112,7 @@ max_line_length = 300
 "#,
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
 "#;
     fs.insert(test_file.into(), contents);
@@ -147,7 +147,7 @@ fn should_use_editorconfig_check_enabled_from_biome_conf() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
@@ -156,7 +156,7 @@ max_line_length = 300
 "#,
     );
 
-    let biomeconfig = Path::new("biome.json");
+    let biomeconfig = Utf8Path::new("biome.json");
     fs.insert(
         biomeconfig.into(),
         r#"{
@@ -167,7 +167,7 @@ max_line_length = 300
 "#,
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
 "#;
     fs.insert(test_file.into(), contents);
@@ -195,7 +195,7 @@ fn should_have_biome_override_editorconfig() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
@@ -204,7 +204,7 @@ max_line_length = 100
 indent_style = tab
 "#,
     );
-    let biomeconfig = Path::new("biome.json");
+    let biomeconfig = Utf8Path::new("biome.json");
     fs.insert(
         biomeconfig.into(),
         r#"
@@ -216,7 +216,7 @@ indent_style = tab
 "#,
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     let contents = r#"console.log(
 	"really long string that should break if the line width is <=90, but not at 100",
 );
@@ -254,7 +254,7 @@ fn should_have_cli_override_editorconfig() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
@@ -263,7 +263,7 @@ max_line_length = 90
 "#,
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     fs.insert(test_file.into(), r#"console.log("really long string that should break if the line width is <=90, but not at 100");
 "#);
 
@@ -297,7 +297,7 @@ fn should_apply_path_overrides() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
@@ -309,7 +309,7 @@ indent_style = space
 "#,
     );
 
-    let test_file = Path::new("tabs.js");
+    let test_file = Utf8Path::new("tabs.js");
     fs.insert(
         test_file.into(),
         r#"
@@ -318,7 +318,7 @@ indent_style = space
     }
     "#,
     );
-    let test_file2 = Path::new("foo/spaces.js");
+    let test_file2 = Utf8Path::new("foo/spaces.js");
     fs.insert(
         test_file.into(),
         r#"
@@ -358,7 +358,7 @@ fn should_use_editorconfig_ci() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
@@ -367,7 +367,7 @@ max_line_length = 300
 "#,
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
 "#;
     fs.insert(test_file.into(), contents);
@@ -402,7 +402,7 @@ fn should_use_editorconfig_ci_enabled_from_biome_conf() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
@@ -411,7 +411,7 @@ max_line_length = 300
 "#,
     );
 
-    let biomeconfig = Path::new("biome.json");
+    let biomeconfig = Utf8Path::new("biome.json");
     fs.insert(
         biomeconfig.into(),
         r#"{
@@ -422,7 +422,7 @@ max_line_length = 300
 "#,
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
 "#;
     fs.insert(test_file.into(), contents);
@@ -450,7 +450,7 @@ fn should_emit_diagnostics() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let editorconfig = Path::new(".editorconfig");
+    let editorconfig = Utf8Path::new(".editorconfig");
     fs.insert(
         editorconfig.into(),
         r#"
@@ -459,7 +459,7 @@ insert_final_newline = false
 "#,
     );
 
-    let test_file = Path::new("test.js");
+    let test_file = Utf8Path::new("test.js");
     let contents = r#"console.log("foo");
 "#;
     fs.insert(test_file.into(), contents);

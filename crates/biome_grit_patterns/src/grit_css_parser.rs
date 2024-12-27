@@ -5,6 +5,7 @@ use crate::{
 use biome_css_parser::{parse_css, CssParserOptions};
 use biome_css_syntax::CssLanguage;
 use biome_parser::AnyParse;
+use camino::Utf8Path;
 use grit_util::{AnalysisLogs, FileOrigin, Parser, SnippetTree};
 use std::path::Path;
 
@@ -24,7 +25,7 @@ impl GritTargetParser for GritCssParser {
         Some(GritTargetTree::new(parse.syntax::<CssLanguage>().into()))
     }
 
-    fn parse_with_path(&self, source: &str, _path: &Path) -> AnyParse {
+    fn parse_with_path(&self, source: &str, _path: &Utf8Path) -> AnyParse {
         parse_css(source, CssParserOptions::default()).into()
     }
 }

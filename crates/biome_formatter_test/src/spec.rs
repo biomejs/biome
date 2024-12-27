@@ -16,13 +16,13 @@ use biome_service::workspace::{
     UpdateSettingsParams,
 };
 use biome_service::App;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::ops::Range;
-use std::path::{Path, PathBuf};
 
 #[derive(Debug)]
 pub struct SpecTestFile<'a> {
     input_file: BiomePath,
-    root_path: &'a Path,
+    root_path: &'a Utf8Path,
 
     input_code: String,
 
@@ -33,18 +33,18 @@ pub struct SpecTestFile<'a> {
 impl<'a> SpecTestFile<'a> {
     pub fn try_from_file(
         input_file: &'a str,
-        root_path: &'a Path,
+        root_path: &'a Utf8Path,
         settings: Option<UpdateSettingsParams>,
     ) -> Option<SpecTestFile<'a>> {
         let mut console = EnvConsole::default();
         let app = App::with_console(&mut console);
         let file_path = &input_file;
-        let spec_input_file = Path::new(input_file);
+        let spec_input_file = Utf8Path::new(input_file);
 
         assert!(
             spec_input_file.is_file(),
             "The input '{}' must exist and be a file.",
-            spec_input_file.display()
+            spec_input_file
         );
 
         app.workspace
@@ -90,7 +90,7 @@ impl<'a> SpecTestFile<'a> {
     }
 
     pub fn file_name(&self) -> &str {
-        self.input_file.file_name().unwrap().to_str().unwrap()
+        self.input_file.file_name().unwrap()
     }
 
     pub fn input_file(&self) -> &BiomePath {
@@ -106,8 +106,7 @@ impl<'a> SpecTestFile<'a> {
                     self.root_path, self.input_file
                 )
             })
-            .to_str()
-            .expect("failed to get relative file name")
+            .as_str()
     }
 
     fn range(&self) -> (Option<usize>, Option<usize>) {
@@ -120,7 +119,7 @@ where
     L: TestFormatLanguage,
 {
     test_file: SpecTestFile<'a>,
-    test_directory: PathBuf,
+    test_directory: Utf8PathBuf,
     language: L,
     format_language: L::FormatLanguage,
 }
@@ -135,7 +134,7 @@ where
         language: L,
         format_language: L::FormatLanguage,
     ) -> Self {
-        let test_directory = PathBuf::from(test_directory);
+        let test_directory = Utf8PathBuf::from(test_directory);
 
         SpecSnapshot {
             test_file,

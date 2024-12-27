@@ -22,12 +22,11 @@ use biome_service::workspace::{
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::Workspace;
 use biome_service::WorkspaceError;
+use camino::Utf8PathBuf;
 use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
 use rustc_hash::FxHashMap;
 use serde_json::Value;
-use std::ffi::OsStr;
-use std::path::PathBuf;
 use std::sync::atomic::Ordering;
 use std::sync::atomic::{AtomicBool, AtomicU8};
 use std::sync::Arc;
@@ -78,8 +77,8 @@ pub(crate) struct Session {
 
     pub(crate) cancellation: Arc<Notify>,
 
-    pub(crate) config_path: Option<PathBuf>,
-    pub(crate) manifest_path: Option<PathBuf>,
+    pub(crate) config_path: Option<Utf8PathBuf>,
+    pub(crate) manifest_path: Option<Utf8PathBuf>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -180,7 +179,7 @@ impl Session {
         }
     }
 
-    pub(crate) fn set_config_path(&mut self, path: PathBuf) {
+    pub(crate) fn set_config_path(&mut self, path: Utf8PathBuf) {
         self.config_path = Some(path);
     }
 
@@ -284,9 +283,9 @@ impl Session {
             Err(_) => {
                 // If we can't create a path, it's probably because the file doesn't exist.
                 // It can be a newly created file that it's not on disk
-                PathBuf::from(url.path())
+                Utf8PathBuf::from(url.path())
             }
-            Ok(path) => path,
+            Ok(path) => Utf8PathBuf::from_path_buf(path).expect("To to have a UTF-8 path"),
         };
 
         Ok(BiomePath::new(path_to_file))
@@ -340,10 +339,10 @@ impl Session {
             let content = self.workspace.get_file_content(GetFileContentParams {
                 path: biome_path.clone(),
             })?;
-            let offset = match biome_path.extension().map(OsStr::as_encoded_bytes) {
-                Some(b"vue") => VueFileHandler::start(content.as_str()),
-                Some(b"astro") => AstroFileHandler::start(content.as_str()),
-                Some(b"svelte") => SvelteFileHandler::start(content.as_str()),
+            let offset = match biome_path.extension() {
+                Some("vue") => VueFileHandler::start(content.as_str()),
+                Some("astro") => AstroFileHandler::start(content.as_str()),
+                Some("svelte") => SvelteFileHandler::start(content.as_str()),
                 _ => None,
             };
 
@@ -412,12 +411,14 @@ impl Session {
     }
 
     /// Returns the base path of the workspace on the filesystem if it has one
-    pub(crate) fn base_path(&self) -> Option<PathBuf> {
+    pub(crate) fn base_path(&self) -> Option<Utf8PathBuf> {
         let initialize_params = self.initialize_params.get()?;
 
         let root_uri = initialize_params.root_uri.as_ref()?;
         match root_uri.to_file_path() {
-            Ok(base_path) => Some(base_path),
+            Ok(base_path) => {
+                Some(Utf8PathBuf::from_path_buf(base_path).expect("To have a UTF-8 path"))
+            }
             Err(()) => {
                 error!(
                     "The Workspace root URI {root_uri:?} could not be parsed as a filesystem path"
@@ -446,7 +447,10 @@ impl Session {
             self.set_configuration_status(ConfigurationStatus::Loading);
             for folder in folders {
                 info!("Attempt to load the configuration file in {:?}", folder.uri);
-                let base_path = folder.uri.to_file_path();
+                let base_path = folder
+                    .uri
+                    .to_file_path()
+                    .map(|p| Utf8PathBuf::from_path_buf(p).expect("To have a valid UTF-8 path"));
                 match base_path {
                     Ok(base_path) => {
                         let status = self
@@ -537,7 +541,7 @@ impl Session {
                                     // We don't need the key
                                     self.workspace
                                         .register_project_folder(RegisterProjectFolderParams {
-                                            path: Some(path.clone()),
+                                            path: Some(path.as_path().into()),
                                             // This is naive, but we don't know if the user has a file already open or not, so we register every project as the current one.
                                             // The correct one is actually set when the LSP calls `textDocument/didOpen`
                                             set_as_current_workspace: true,
@@ -546,7 +550,7 @@ impl Session {
                                 } else {
                                     self.workspace
                                         .register_project_folder(RegisterProjectFolderParams {
-                                            path: fs.working_directory(),
+                                            path: fs.working_directory().map(BiomePath::from),
                                             set_as_current_workspace: true,
                                         })
                                         .err()
@@ -557,9 +561,9 @@ impl Session {
                                 return ConfigurationStatus::Error;
                             }
                             let result = self.workspace.update_settings(UpdateSettingsParams {
-                                workspace_directory: fs.working_directory(),
+                                workspace_directory: fs.working_directory().map(BiomePath::from),
                                 configuration,
-                                vcs_base_path,
+                                vcs_base_path: vcs_base_path.map(BiomePath::from),
                                 gitignore_matches,
                             });
 
@@ -593,7 +597,7 @@ impl Session {
         let base_path = self
             .manifest_path
             .as_deref()
-            .map(PathBuf::from)
+            .map(Utf8PathBuf::from)
             .or(self.base_path());
         if let Some(base_path) = base_path {
             let fs = self.workspace.fs();

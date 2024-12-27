@@ -169,13 +169,14 @@ biome_flags          = { path = "./crates/biome_flags" }
 biome_formatter_test = { path = "./crates/biome_formatter_test" }
 biome_lsp            = { path = "./crates/biome_lsp" }
 biome_migrate        = { path = "./crates/biome_migrate" }
-biome_service        = { path = "./crates/biome_service" }
+biome_service        = { path = "./crates/biome_service", default-features = false }
 biome_test_utils     = { path = "./crates/biome_test_utils" }
 tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
 anyhow               = "1.0.94"
 bpaf                 = { version = "0.9.15", features = ["derive"] }
+camino               = "1.1.9"
 countme              = "3.0.1"
 crossbeam            = "0.8.4"
 dashmap              = "6.1.0"
