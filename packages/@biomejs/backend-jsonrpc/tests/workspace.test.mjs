@@ -24,13 +24,13 @@ describe("Workspace API", () => {
 		});
 
 		const printed = await workspace.formatFile({
-			path: "test.js"
+			path: "test.js",
 		});
 
 		expect(printed.code).toBe("statement();\n");
 
 		await workspace.closeFile({
-			path:  "test.js"
+			path: "test.js",
 		});
 
 		workspace.destroy();
