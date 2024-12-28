@@ -33,7 +33,8 @@ serde_json = { workspace = true }
 
 
 [features]
-serde = ["schemars", "camino/serde1", "biome_diagnostics/schema"]
+schema = ["dep:schemars", "serde", "biome_diagnostics/schema"]
+serde  = ["camino/serde1"]
 
 [lints]
 workspace = true

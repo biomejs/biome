@@ -6,7 +6,6 @@ pub use js_target_language::JsTargetLanguage;
 
 use camino::Utf8Path;
 use grit_util::{AnalysisLogs, Ast, CodeRange, EffectRange, Language, Parser, SnippetTree};
-use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::path::Path;
 use std::str::FromStr;
@@ -41,18 +40,20 @@ macro_rules! generate_target_language {
             }
         })+
 
-        impl Serialize for GritTargetLanguage {
+        #[cfg(feature = "serde")]
+        impl serde::Serialize for GritTargetLanguage {
             fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
             where
                 S: serde::Serializer,
             {
                 match self {
-                    $(Self::$language(_) => Serialize::serialize($name, serializer)),+
+                    $(Self::$language(_) => serde::Serialize::serialize($name, serializer)),+
                 }
             }
         }
 
-        impl<'de> Deserialize<'de> for GritTargetLanguage {
+        #[cfg(feature = "serde")]
+        impl<'de> serde::Deserialize<'de> for GritTargetLanguage {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: serde::Deserializer<'de>,

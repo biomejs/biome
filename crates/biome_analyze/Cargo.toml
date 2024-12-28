@@ -29,7 +29,8 @@ tracing                  = { workspace = true }
 
 
 [features]
-serde = ["dep:serde", "dep:schemars", "dep:biome_deserialize", "dep:biome_deserialize_macros"]
+schema = ["dep:schemars", "biome_console/schema", "serde"]
+serde  = ["dep:serde", "dep:biome_deserialize", "dep:biome_deserialize_macros"]
 
 [lints]
 workspace = true
