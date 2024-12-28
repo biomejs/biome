@@ -739,6 +739,8 @@ dependencies = [
  "biome_suppression",
  "camino",
  "countme",
+ "schemars",
+ "serde",
  "tests_macros",
 ]
 

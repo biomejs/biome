@@ -1,6 +1,7 @@
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{
-    AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
+    AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
+    LineWidth, QuoteStyle,
 };
 use biome_js_formatter::context::{
     trailing_commas::TrailingCommas, ArrowParentheses, QuoteProperties, Semicolons,
@@ -33,10 +34,6 @@ pub struct JavascriptFormatter {
     /// Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
     #[partial(bpaf(long("arrow-parentheses"), argument("always|as-needed"), optional))]
     pub arrow_parentheses: ArrowParentheses,
-
-    /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
-    #[partial(bpaf(long("bracket-same-line"), argument("true|false"), optional))]
-    pub bracket_same_line: bool,
 
     /// Control the formatter for JavaScript (and its super languages) files.
     #[partial(bpaf(long("javascript-formatter-enabled"), argument("true|false"), optional))]
@@ -85,6 +82,10 @@ pub struct JavascriptFormatter {
     ))]
     pub attribute_position: Option<AttributePosition>,
 
+    /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+    #[partial(bpaf(long("javascript-bracket-same-line"), argument("true|false"), optional))]
+    pub bracket_same_line: Option<BracketSameLine>,
+
     // it's also a top-level configurable property.
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
     #[partial(bpaf(long("bracket-spacing"), argument("true|false"), optional))]
@@ -101,7 +102,7 @@ impl PartialJavascriptFormatter {
             semicolons: self.semicolons.unwrap_or_default(),
             arrow_parentheses: self.arrow_parentheses.unwrap_or_default(),
             bracket_spacing: self.bracket_spacing,
-            bracket_same_line: self.bracket_same_line.unwrap_or_default(),
+            bracket_same_line: self.bracket_same_line,
             indent_style: self.indent_style,
             indent_width: self.indent_width,
             line_ending: self.line_ending,

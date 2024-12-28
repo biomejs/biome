@@ -142,6 +142,10 @@ export interface PartialFormatterConfiguration {
 	 */
 	attributePosition?: AttributePosition;
 	/**
+	 * Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+	 */
+	bracketSameLine?: BracketSameLine;
+	/**
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
@@ -361,6 +365,10 @@ export interface PartialCssParser {
 	cssModules?: boolean;
 }
 export type AttributePosition = "auto" | "multiline";
+/**
+ * Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+ */
+export type BracketSameLine = boolean;
 export type BracketSpacing = boolean;
 export type IndentStyle = "tab" | "space";
 export type IndentWidth = number;
@@ -437,7 +445,7 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
 	 */
-	bracketSameLine?: boolean;
+	bracketSameLine?: BracketSameLine;
 	/**
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
@@ -1948,6 +1956,10 @@ export interface OverrideFormatterConfiguration {
 	 * The attribute position style.
 	 */
 	attributePosition?: AttributePosition;
+	/**
+	 * Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+	 */
+	bracketSameLine?: BracketSameLine;
 	/**
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */

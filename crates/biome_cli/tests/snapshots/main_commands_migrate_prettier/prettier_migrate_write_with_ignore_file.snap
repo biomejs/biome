@@ -15,6 +15,7 @@ expression: content
     "lineEnding": "lf",
     "lineWidth": 80,
     "attributePosition": "auto",
+    "bracketSameLine": false,
     "bracketSpacing": true,
     "ignore": ["dist/**", "node_modules/**", "generated/*.spec.js"]
   },
@@ -26,9 +27,9 @@ expression: content
       "trailingCommas": "all",
       "semicolons": "always",
       "arrowParentheses": "always",
-      "bracketSameLine": false,
       "quoteStyle": "single",
       "attributePosition": "auto",
+      "bracketSameLine": false,
       "bracketSpacing": true
     }
   }
