@@ -106,7 +106,7 @@ declare_lint_rule! {
     /// ## Caveats
     ///
     /// If you are using TypeScript, TypeScript version 5.0 and later is required, also make sure to enable
-    /// [expectImportingTsExtensions=true](https://typescriptlang.org/tsconfig#allowImportingTsExtensions) in your `tsconfig.json`.
+    /// [allowImportingTsExtensions=true](https://typescriptlang.org/tsconfig#allowImportingTsExtensions) in your `tsconfig.json`.
     ///
     /// Rule does not yet check filesystem for file type. It tries to guess which extension
     /// it should add based on the file extension of the current file and the import path.
