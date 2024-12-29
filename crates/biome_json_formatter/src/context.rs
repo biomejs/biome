@@ -7,7 +7,7 @@ use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TransformSourceMap,
 };
-use biome_json_syntax::JsonLanguage;
+use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use std::default::Default;
 use std::fmt;
 use std::rc::Rc;
@@ -67,6 +67,9 @@ pub struct JsonFormatOptions {
     attribute_position: AttributePosition,
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
     trailing_commas: TrailingCommas,
+
+    /// The kind of file
+    file_source: JsonFileSource,
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
@@ -106,8 +109,9 @@ impl fmt::Display for TrailingCommas {
 }
 
 impl JsonFormatOptions {
-    pub fn new() -> Self {
+    pub fn new(file_source: JsonFileSource) -> Self {
         Self {
+            file_source,
             ..Default::default()
         }
     }
@@ -162,6 +166,10 @@ impl JsonFormatOptions {
             TrailingCommas::None => TrailingSeparator::Omit,
             TrailingCommas::All => TrailingSeparator::Allowed,
         }
+    }
+
+    pub(crate) fn file_source(&self) -> &JsonFileSource {
+        &self.file_source
     }
 }
 

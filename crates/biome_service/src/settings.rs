@@ -755,7 +755,7 @@ pub trait ServiceLanguage: biome_rowan::Language {
     type OrganizeImportsSettings: Default;
 
     /// Fully resolved formatter options type for this language
-    type FormatOptions: biome_formatter::FormatOptions + Clone + std::fmt::Display;
+    type FormatOptions: biome_formatter::FormatOptions + Clone + std::fmt::Display + Default;
 
     /// Settings that belong to the parser
     type ParserSettings: Default;
@@ -896,13 +896,21 @@ impl From<Option<Settings>> for WorkspaceSettingsHandle {
     }
 }
 
+impl From<Settings> for WorkspaceSettingsHandle {
+    fn from(settings: Settings) -> Self {
+        Self {
+            settings: Some(settings),
+        }
+    }
+}
+
 impl WorkspaceSettingsHandle {
-    pub(crate) fn settings(&self) -> Option<&Settings> {
+    pub fn settings(&self) -> Option<&Settings> {
         self.settings.as_ref()
     }
 
     /// Resolve the formatting context for the given language
-    pub(crate) fn format_options<L>(
+    pub fn format_options<L>(
         &self,
         path: &BiomePath,
         file_source: &DocumentFileSource,
@@ -919,7 +927,7 @@ impl WorkspaceSettingsHandle {
         L::resolve_format_options(formatter, overrides, editor_settings, path, file_source)
     }
 
-    pub(crate) fn analyzer_options<L>(
+    pub fn analyzer_options<L>(
         &self,
         path: &BiomePath,
         file_source: &DocumentFileSource,

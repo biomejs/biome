@@ -79,7 +79,7 @@ impl ServiceLanguage for JsonLanguage {
         overrides: Option<&OverrideSettings>,
         language: Option<&JsonFormatterSettings>,
         path: &BiomePath,
-        _document_file_source: &DocumentFileSource,
+        document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         let indent_style = language
             .and_then(|l| l.indent_style)
@@ -106,7 +106,11 @@ impl ServiceLanguage for JsonLanguage {
             language.and_then(|l| l.trailing_commas).unwrap_or_default()
         };
 
-        let options = JsonFormatOptions::new()
+        let file_source = document_file_source
+            .to_json_file_source()
+            .unwrap_or_default();
+
+        let options = JsonFormatOptions::new(file_source)
             .with_line_ending(line_ending)
             .with_indent_style(indent_style)
             .with_indent_width(indent_width)
