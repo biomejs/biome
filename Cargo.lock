@@ -1182,6 +1182,7 @@ dependencies = [
  "quickcheck",
  "quickcheck_macros",
  "rustc-hash 2.1.0",
+ "schemars",
  "serde",
  "serde_json",
  "tracing",

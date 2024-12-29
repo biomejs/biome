@@ -411,9 +411,10 @@ impl fmt::Display for JsFormatOptions {
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum QuoteProperties {
     #[default]
     AsNeeded,
@@ -445,9 +446,10 @@ impl fmt::Display for QuoteProperties {
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum Semicolons {
     #[default]
     Always,
@@ -488,9 +490,10 @@ impl fmt::Display for Semicolons {
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum ArrowParentheses {
     #[default]
     Always,

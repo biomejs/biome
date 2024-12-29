@@ -54,9 +54,10 @@ impl Format<JsFormatContext> for FormatTrailingCommas {
 #[derive(Clone, Copy, Default, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum TrailingCommas {
     /// Trailing commas wherever possible (including function parameters and calls).
     #[default]

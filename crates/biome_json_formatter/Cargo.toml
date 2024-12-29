@@ -39,7 +39,8 @@ tests_macros         = { path = "../tests_macros" }
 independent = true
 
 [features]
-serde = ["dep:serde", "schemars"]
+schema = ["dep:schemars", "serde"]
+serde  = ["dep:serde"]
 
 [lints]
 workspace = true

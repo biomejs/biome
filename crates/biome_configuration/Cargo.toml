@@ -45,12 +45,14 @@ schema = [
   "dep:schemars",
   "biome_js_analyze/schema",
   "biome_css_analyze/schema",
-  "biome_formatter/serde",
+  "biome_formatter/schema",
   "biome_json_syntax/schema",
   "biome_css_syntax/schema",
   "biome_graphql_syntax/schema",
   "biome_html_syntax/schema",
-  "biome_analyze/serde",
+  "biome_analyze/schema",
+  "biome_json_formatter/schema",
+  "biome_js_formatter/schema",
 ]
 
 [dev-dependencies]

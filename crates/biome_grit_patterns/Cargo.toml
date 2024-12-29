@@ -32,7 +32,7 @@ rand                 = { version = "0.8.5" }
 regex                = { workspace = true }
 rustc-hash           = { workspace = true }
 schemars             = { workspace = true, optional = true }
-serde                = { workspace = true, features = ["derive"] }
+serde                = { workspace = true, features = ["derive"], optional = true }
 serde_json           = { workspace = true, optional = true }
 
 [dev-dependencies]
@@ -41,7 +41,8 @@ insta            = { workspace = true }
 tests_macros     = { path = "../tests_macros" }
 
 [features]
-schema = ["dep:schemars", "dep:serde_json"]
+schema = ["dep:schemars", "serde", "biome_js_parser/schema"]
+serde  = ["dep:serde", "dep:serde_json"]
 
 [lints]
 workspace = true

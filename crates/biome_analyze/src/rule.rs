@@ -201,12 +201,12 @@ impl Display for DisplayDomains {
     feature = "serde",
     derive(
         biome_deserialize_macros::Deserializable,
-        schemars::JsonSchema,
         serde::Deserialize,
         serde::Serialize
     )
 )]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 /// Used to identify the kind of code action emitted by a rule
 pub enum FixKind {
     /// The rule doesn't emit code actions.
@@ -241,7 +241,8 @@ impl TryFrom<FixKind> for Applicability {
 }
 
 #[derive(Debug, Clone, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, schemars::JsonSchema))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum RuleSource {
     /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
@@ -460,8 +461,9 @@ impl RuleSource {
 }
 
 #[derive(Debug, Default, Clone, Copy)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, schemars::JsonSchema))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum RuleSourceKind {
     /// The rule implements the same logic of the source
     #[default]
@@ -481,13 +483,13 @@ impl RuleSourceKind {
 #[cfg_attr(
     feature = "serde",
     derive(
-        schemars::JsonSchema,
         serde::Deserialize,
         serde::Serialize,
         biome_deserialize_macros::Deserializable
     )
 )]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum RuleDomain {
     /// React library rules
     React,

@@ -254,7 +254,7 @@ impl biome_deserialize::Deserializable for Glob {
         }
     }
 }
-#[cfg(feature = "schemars")]
+#[cfg(feature = "schema")]
 impl schemars::JsonSchema for Glob {
     fn schema_name() -> String {
         "Regex".to_string()

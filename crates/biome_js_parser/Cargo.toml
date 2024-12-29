@@ -23,7 +23,7 @@ enumflags2          = { workspace = true }
 indexmap            = { workspace = true }
 rustc-hash          = { workspace = true }
 schemars            = { workspace = true, optional = true }
-serde               = { workspace = true, features = ["derive"] }
+serde               = { workspace = true, features = ["derive"], optional = true }
 serde_json          = { workspace = true }
 smallvec            = { workspace = true }
 tracing             = { workspace = true }
@@ -42,9 +42,9 @@ tests_macros        = { path = "../tests_macros" }
 
 
 [features]
-schemars = ["dep:schemars"]
-serde    = ["biome_js_syntax/schema"]
-tests    = []
+schema = ["dep:schemars", "serde"]
+serde  = ["dep:serde", "biome_js_syntax/schema"]
+tests  = []
 
 # cargo-workspaces metadata
 [package.metadata.workspaces]

@@ -20,9 +20,10 @@ use std::{fs::File, io, io::Write, ops::Deref};
 #[bitflags]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 // NOTE: The order of the variants is important, the one on the top has the highest priority
 pub enum FileKind {
     /// A configuration file has the highest priority. It's usually `biome.json` and `biome.jsonc`
@@ -124,7 +125,7 @@ impl<'de> serde::Deserialize<'de> for BiomePath {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "schema")]
 impl schemars::JsonSchema for BiomePath {
     fn schema_name() -> String {
         "BiomePath".to_string()
@@ -244,7 +245,7 @@ impl TryFrom<PathBuf> for BiomePath {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "schema")]
 impl schemars::JsonSchema for FileKinds {
     fn schema_name() -> String {
         String::from("FileKind")
