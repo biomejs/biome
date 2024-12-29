@@ -702,7 +702,7 @@ fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> {
         }
     }
 
-    // elemnsts are inserted in reverse, thus we have to reverse the iteration.
+    // Elements are inserted in reverse, thus we have to reverse the iteration.
     vec.into_iter().rev()
 }
 
