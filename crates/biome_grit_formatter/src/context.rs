@@ -149,6 +149,10 @@ impl FormatOptions for GritFormatOptions {
         self.attribute_position
     }
 
+    fn bracket_same_line(&self) -> biome_formatter::BracketSameLine {
+        biome_formatter::BracketSameLine::default()
+    }
+
     fn bracket_spacing(&self) -> biome_formatter::BracketSpacing {
         BracketSpacing::default()
     }

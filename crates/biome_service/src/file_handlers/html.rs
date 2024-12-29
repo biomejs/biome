@@ -1,7 +1,10 @@
 use biome_analyze::AnalyzerOptions;
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
+use biome_formatter::{BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::BiomePath;
-use biome_html_formatter::{format_node, HtmlFormatOptions};
+use biome_html_formatter::{
+    context::{IndentScriptAndStyle, WhitespaceSensitivity},
+    format_node, HtmlFormatOptions,
+};
 use biome_html_parser::parse_html_with_cache;
 use biome_html_syntax::{HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 use biome_parser::AnyParse;
@@ -21,11 +24,14 @@ use super::{
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct HtmlFormatterSettings {
+    pub enabled: Option<bool>,
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
-    pub enabled: Option<bool>,
+    pub bracket_same_line: Option<BracketSameLine>,
+    pub whitespace_sensitivity: Option<WhitespaceSensitivity>,
+    pub indent_script_and_style: Option<IndentScriptAndStyle>,
 }
 
 impl Default for HtmlFormatterSettings {
@@ -36,6 +42,9 @@ impl Default for HtmlFormatterSettings {
             indent_width: Default::default(),
             line_ending: Default::default(),
             line_width: Default::default(),
+            bracket_same_line: Default::default(),
+            whitespace_sensitivity: Default::default(),
+            indent_script_and_style: Default::default(),
         }
     }
 }
@@ -73,17 +82,29 @@ impl ServiceLanguage for HtmlLanguage {
             .and_then(|l| l.indent_width)
             .or(global.and_then(|g| g.indent_width))
             .unwrap_or_default();
-
         let line_ending = language
             .and_then(|l| l.line_ending)
             .or(global.and_then(|g| g.line_ending))
+            .unwrap_or_default();
+        let bracket_same_line = language
+            .and_then(|l| l.bracket_same_line)
+            .or(global.and_then(|g| g.bracket_same_line))
+            .unwrap_or_default();
+        let whitespace_sensitivity = language
+            .and_then(|l| l.whitespace_sensitivity)
+            .unwrap_or_default();
+        let indent_script_and_style = language
+            .and_then(|l| l.indent_script_and_style)
             .unwrap_or_default();
 
         let options = HtmlFormatOptions::new(file_source.to_html_file_source().unwrap_or_default())
             .with_indent_style(indent_style)
             .with_indent_width(indent_width)
             .with_line_width(line_width)
-            .with_line_ending(line_ending);
+            .with_line_ending(line_ending)
+            .with_bracket_same_line(bracket_same_line)
+            .with_whitespace_sensitivity(whitespace_sensitivity)
+            .with_indent_script_and_style(indent_script_and_style);
         if let Some(overrides) = overrides {
             overrides.to_override_html_format_options(path, options)
         } else {

@@ -641,6 +641,48 @@ impl FromStr for AttributePosition {
     }
 }
 
+/// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct BracketSameLine(bool);
+
+impl BracketSameLine {
+    /// Return the boolean value for this [BracketSameLine]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl From<bool> for BracketSameLine {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
+impl std::fmt::Display for BracketSameLine {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::write!(f, "{}", self.value())
+    }
+}
+
+impl FromStr for BracketSameLine {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match bool::from_str(s) {
+            Ok(value) => Ok(Self(value)),
+            Err(_) => Err(
+                "Value not supported for BracketSameLine. Supported values are 'true' and 'false'.",
+            ),
+        }
+    }
+}
+
 /// Context object storing data relevant when formatting an object.
 pub trait FormatContext {
     type Options: FormatOptions;
@@ -672,6 +714,9 @@ pub trait FormatOptions {
 
     /// The attribute position.
     fn attribute_position(&self) -> AttributePosition;
+
+    /// Whether to put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+    fn bracket_same_line(&self) -> BracketSameLine;
 
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
     fn bracket_spacing(&self) -> BracketSpacing;
@@ -725,6 +770,7 @@ pub struct SimpleFormatOptions {
     pub line_width: LineWidth,
     pub line_ending: LineEnding,
     pub attribute_position: AttributePosition,
+    pub bracket_same_line: BracketSameLine,
     pub bracket_spacing: BracketSpacing,
 }
 
@@ -747,6 +793,10 @@ impl FormatOptions for SimpleFormatOptions {
 
     fn attribute_position(&self) -> AttributePosition {
         self.attribute_position
+    }
+
+    fn bracket_same_line(&self) -> BracketSameLine {
+        self.bracket_same_line
     }
 
     fn bracket_spacing(&self) -> BracketSpacing {

@@ -396,6 +396,10 @@
 			"additionalProperties": false
 		},
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
+		"BracketSameLine": {
+			"description": "Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
+			"type": "boolean"
+		},
 		"BracketSpacing": { "type": "boolean" },
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
@@ -1398,6 +1402,13 @@
 						{ "type": "null" }
 					]
 				},
+				"bracketSameLine": {
+					"description": "Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSameLine" },
+						{ "type": "null" }
+					]
+				},
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [
@@ -1640,7 +1651,10 @@
 				},
 				"bracketSameLine": {
 					"description": "Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.",
-					"type": ["boolean", "null"]
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSameLine" },
+						{ "type": "null" }
+					]
 				},
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
@@ -2636,6 +2650,13 @@
 					"description": "The attribute position style.",
 					"anyOf": [
 						{ "$ref": "#/definitions/AttributePosition" },
+						{ "type": "null" }
+					]
+				},
+				"bracketSameLine": {
+					"description": "Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSameLine" },
 						{ "type": "null" }
 					]
 				},

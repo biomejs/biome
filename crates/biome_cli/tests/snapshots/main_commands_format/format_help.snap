@@ -19,6 +19,9 @@ Generic options applied to all files
         --line-width=NUMBER   What's the max width of a line. Defaults to 80.
         --attribute-position=<multiline|auto>  The attribute position style in HTMLish languages. By
                               default auto.
+        --bracket-same-line=<true|false>  Put the `>` of a multi-line HTML or JSX element at the end
+                              of the last line instead of being alone on the next line (does not
+                              apply to self closing elements).
         --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
                               Defaults to true.
 
@@ -32,9 +35,6 @@ Formatting options specific to the JavaScript files
                               or only in for statements where it is necessary because of ASI.
         --arrow-parentheses=<always|as-needed>  Whether to add non-necessary parentheses to arrow
                               functions. Defaults to "always".
-        --bracket-same-line=<true|false>  Whether to hug the closing bracket of multiline HTML/JSX
-                              tags to the end of the last line, rather than being alone on the
-                              following line. Defaults to false.
         --javascript-formatter-enabled=<true|false>  Control the formatter for JavaScript (and its
                               super languages) files.
         --javascript-formatter-indent-style=<tab|space>  The indent style applied to JavaScript (and
@@ -49,6 +49,9 @@ Formatting options specific to the JavaScript files
                               double.
         --javascript-attribute-position=<multiline|auto>  The attribute position style in jsx
                               elements. Defaults to auto.
+        --javascript-bracket-same-line=<true|false>  Whether to hug the closing bracket of multiline
+                              HTML/JSX tags to the end of the last line, rather than being alone on
+                              the following line. Defaults to false.
         --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
                               Defaults to true.
 

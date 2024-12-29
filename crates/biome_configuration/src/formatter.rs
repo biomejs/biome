@@ -1,6 +1,7 @@
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{
-    AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
+    AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
+    LineWidth,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -45,6 +46,10 @@ pub struct FormatterConfiguration {
     #[partial(bpaf(long("attribute-position"), argument("multiline|auto"), optional))]
     pub attribute_position: AttributePosition,
 
+    /// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+    #[partial(bpaf(long("bracket-same-line"), argument("true|false"), optional))]
+    pub bracket_same_line: BracketSameLine,
+
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
     #[partial(bpaf(long("bracket-spacing"), argument("true|false"), optional))]
     pub bracket_spacing: BracketSpacing,
@@ -74,6 +79,7 @@ impl PartialFormatterConfiguration {
             line_ending: self.line_ending.unwrap_or_default(),
             line_width: self.line_width.unwrap_or_default(),
             attribute_position: self.attribute_position.unwrap_or_default(),
+            bracket_same_line: self.bracket_same_line.unwrap_or_default(),
             bracket_spacing: self.bracket_spacing.unwrap_or_default(),
             ignore: self.ignore.clone().unwrap_or_default(),
             include: self.include.clone().unwrap_or_default(),
@@ -92,6 +98,7 @@ impl Default for FormatterConfiguration {
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             attribute_position: AttributePosition::default(),
+            bracket_same_line: BracketSameLine::default(),
             bracket_spacing: Default::default(),
             ignore: Default::default(),
             include: Default::default(),

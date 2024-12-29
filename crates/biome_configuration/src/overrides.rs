@@ -9,7 +9,8 @@ use crate::{
 use biome_analyze::RuleDomain;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
+    AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
+    LineWidth,
 };
 use bpaf::Bpaf;
 use rustc_hash::FxHashMap;
@@ -134,6 +135,11 @@ pub struct OverrideFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("attribute-position"), argument("multiline|auto"), optional)]
     pub attribute_position: Option<AttributePosition>,
+
+    /// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("bracket-same-line"), argument("true|false"), optional, hide)]
+    pub bracket_same_line: Option<BracketSameLine>,
 
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
     #[serde(skip_serializing_if = "Option::is_none")]
