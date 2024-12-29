@@ -1,4 +1,4 @@
-#![allow(clippy::mutable_key_type)]
+#![expect(clippy::mutable_key_type)]
 use super::tag::Tag;
 use crate::format_element::tag::DedentMode;
 use crate::prelude::tag::GroupMode;

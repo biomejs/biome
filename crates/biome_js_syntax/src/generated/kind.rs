@@ -1,6 +1,5 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-#![allow(clippy::all)]
 #![allow(bad_style, missing_docs, unreachable_pub)]
 #[doc = r" The kind of syntax node, e.g. `IDENT`, `FUNCTION_KW`, or `FOR_STMT`."]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -523,68 +522,124 @@ pub enum JsSyntaxKind {
 use self::JsSyntaxKind::*;
 impl JsSyntaxKind {
     pub const fn is_punct(self) -> bool {
-        match self {
-            SEMICOLON | COMMA | L_PAREN | R_PAREN | L_CURLY | R_CURLY | L_BRACK | R_BRACK
-            | L_ANGLE | R_ANGLE | TILDE | QUESTION | QUESTION2 | QUESTIONDOT | AMP | PIPE
-            | PLUS | PLUS2 | STAR | STAR2 | SLASH | CARET | PERCENT | DOT | DOT3 | COLON | EQ
-            | EQ2 | EQ3 | FAT_ARROW | BANG | NEQ | NEQ2 | MINUS | MINUS2 | LTEQ | GTEQ | PLUSEQ
-            | MINUSEQ | PIPEEQ | AMPEQ | CARETEQ | SLASHEQ | STAREQ | PERCENTEQ | AMP2 | PIPE2
-            | SHL | SHR | USHR | SHLEQ | SHREQ | USHREQ | AMP2EQ | PIPE2EQ | STAR2EQ
-            | QUESTION2EQ | AT | BACKTICK => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            SEMICOLON
+                | COMMA
+                | L_PAREN
+                | R_PAREN
+                | L_CURLY
+                | R_CURLY
+                | L_BRACK
+                | R_BRACK
+                | L_ANGLE
+                | R_ANGLE
+                | TILDE
+                | QUESTION
+                | QUESTION2
+                | QUESTIONDOT
+                | AMP
+                | PIPE
+                | PLUS
+                | PLUS2
+                | STAR
+                | STAR2
+                | SLASH
+                | CARET
+                | PERCENT
+                | DOT
+                | DOT3
+                | COLON
+                | EQ
+                | EQ2
+                | EQ3
+                | FAT_ARROW
+                | BANG
+                | NEQ
+                | NEQ2
+                | MINUS
+                | MINUS2
+                | LTEQ
+                | GTEQ
+                | PLUSEQ
+                | MINUSEQ
+                | PIPEEQ
+                | AMPEQ
+                | CARETEQ
+                | SLASHEQ
+                | STAREQ
+                | PERCENTEQ
+                | AMP2
+                | PIPE2
+                | SHL
+                | SHR
+                | USHR
+                | SHLEQ
+                | SHREQ
+                | USHREQ
+                | AMP2EQ
+                | PIPE2EQ
+                | STAR2EQ
+                | QUESTION2EQ
+                | AT
+                | BACKTICK
+        )
     }
     pub const fn is_literal(self) -> bool {
-        match self {
-            JS_NUMBER_LITERAL | JS_BIGINT_LITERAL | JS_STRING_LITERAL | JS_REGEX_LITERAL
-            | JSX_TEXT_LITERAL | JSX_STRING_LITERAL => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            JS_NUMBER_LITERAL
+                | JS_BIGINT_LITERAL
+                | JS_STRING_LITERAL
+                | JS_REGEX_LITERAL
+                | JSX_TEXT_LITERAL
+                | JSX_STRING_LITERAL
+        )
     }
     pub const fn is_list(self) -> bool {
-        match self {
+        matches!(
+            self,
             JS_MODULE_ITEM_LIST
-            | JS_DIRECTIVE_LIST
-            | JS_STATEMENT_LIST
-            | JS_VARIABLE_DECLARATOR_LIST
-            | JS_SWITCH_CASE_LIST
-            | JS_PARAMETER_LIST
-            | TS_PROPERTY_PARAMETER_MODIFIER_LIST
-            | JS_ARRAY_ELEMENT_LIST
-            | JS_OBJECT_MEMBER_LIST
-            | JS_CALL_ARGUMENT_LIST
-            | JS_TEMPLATE_ELEMENT_LIST
-            | JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
-            | JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST
-            | JS_CLASS_MEMBER_LIST
-            | JS_CONSTRUCTOR_MODIFIER_LIST
-            | JS_CONSTRUCTOR_PARAMETER_LIST
-            | JS_PROPERTY_MODIFIER_LIST
-            | JS_METHOD_MODIFIER_LIST
-            | JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST
-            | JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST
-            | JS_NAMED_IMPORT_SPECIFIER_LIST
-            | JS_IMPORT_ASSERTION_ENTRY_LIST
-            | JS_EXPORT_NAMED_SPECIFIER_LIST
-            | JS_EXPORT_NAMED_FROM_SPECIFIER_LIST
-            | JS_DECORATOR_LIST
-            | TS_UNION_TYPE_VARIANT_LIST
-            | TS_INTERSECTION_TYPE_ELEMENT_LIST
-            | TS_TYPE_MEMBER_LIST
-            | TS_TUPLE_TYPE_ELEMENT_LIST
-            | TS_TYPE_PARAMETER_LIST
-            | TS_TYPE_PARAMETER_MODIFIER_LIST
-            | TS_TEMPLATE_ELEMENT_LIST
-            | TS_TYPE_ARGUMENT_LIST
-            | TS_TYPE_LIST
-            | TS_ENUM_MEMBER_LIST
-            | TS_PROPERTY_SIGNATURE_MODIFIER_LIST
-            | TS_METHOD_SIGNATURE_MODIFIER_LIST
-            | TS_INDEX_SIGNATURE_MODIFIER_LIST
-            | JSX_ATTRIBUTE_LIST
-            | JSX_CHILD_LIST => true,
-            _ => false,
-        }
+                | JS_DIRECTIVE_LIST
+                | JS_STATEMENT_LIST
+                | JS_VARIABLE_DECLARATOR_LIST
+                | JS_SWITCH_CASE_LIST
+                | JS_PARAMETER_LIST
+                | TS_PROPERTY_PARAMETER_MODIFIER_LIST
+                | JS_ARRAY_ELEMENT_LIST
+                | JS_OBJECT_MEMBER_LIST
+                | JS_CALL_ARGUMENT_LIST
+                | JS_TEMPLATE_ELEMENT_LIST
+                | JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST
+                | JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST
+                | JS_CLASS_MEMBER_LIST
+                | JS_CONSTRUCTOR_MODIFIER_LIST
+                | JS_CONSTRUCTOR_PARAMETER_LIST
+                | JS_PROPERTY_MODIFIER_LIST
+                | JS_METHOD_MODIFIER_LIST
+                | JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST
+                | JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST
+                | JS_NAMED_IMPORT_SPECIFIER_LIST
+                | JS_IMPORT_ASSERTION_ENTRY_LIST
+                | JS_EXPORT_NAMED_SPECIFIER_LIST
+                | JS_EXPORT_NAMED_FROM_SPECIFIER_LIST
+                | JS_DECORATOR_LIST
+                | TS_UNION_TYPE_VARIANT_LIST
+                | TS_INTERSECTION_TYPE_ELEMENT_LIST
+                | TS_TYPE_MEMBER_LIST
+                | TS_TUPLE_TYPE_ELEMENT_LIST
+                | TS_TYPE_PARAMETER_LIST
+                | TS_TYPE_PARAMETER_MODIFIER_LIST
+                | TS_TEMPLATE_ELEMENT_LIST
+                | TS_TYPE_ARGUMENT_LIST
+                | TS_TYPE_LIST
+                | TS_ENUM_MEMBER_LIST
+                | TS_PROPERTY_SIGNATURE_MODIFIER_LIST
+                | TS_METHOD_SIGNATURE_MODIFIER_LIST
+                | TS_INDEX_SIGNATURE_MODIFIER_LIST
+                | JSX_ATTRIBUTE_LIST
+                | JSX_CHILD_LIST
+        )
     }
     pub fn from_keyword(ident: &str) -> Option<JsSyntaxKind> {
         let kw = match ident {

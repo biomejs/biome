@@ -8,7 +8,6 @@ pub struct DebugGroupId {
 }
 
 impl DebugGroupId {
-    #[allow(unused)]
     fn new(value: NonZeroU32, debug_name: &'static str) -> Self {
         Self {
             value,
@@ -34,7 +33,7 @@ pub struct ReleaseGroupId {
 
 impl ReleaseGroupId {
     /// Creates a new unique group id with the given debug name (only stored in debug builds)
-    #[allow(unused)]
+    #[expect(unused)]
     fn new(value: NonZeroU32, _: &'static str) -> Self {
         Self { value }
     }

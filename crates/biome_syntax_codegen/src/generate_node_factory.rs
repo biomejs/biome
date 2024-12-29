@@ -212,8 +212,8 @@ where
     });
 
     let output = quote! {
-        #![allow(clippy::redundant_closure)]
-        #![allow(clippy::too_many_arguments)]
+        #![expect(clippy::redundant_closure)]
+        #![expect(clippy::too_many_arguments)]
         use #syntax_crate::{*, #syntax_token as SyntaxToken, #syntax_node as SyntaxNode, #syntax_element as SyntaxElement};
         use biome_rowan::AstNode;
 

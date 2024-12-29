@@ -20,7 +20,7 @@ pub(crate) struct SingleTokenParseRecovery {
     bogus_node_kind: JsSyntaxKind,
 }
 
-#[allow(deprecated)]
+#[expect(deprecated)]
 impl SingleTokenParseRecovery {
     pub fn new(recovery: TokenSet<JsSyntaxKind>, bogus_node_kind: JsSyntaxKind) -> Self {
         Self {

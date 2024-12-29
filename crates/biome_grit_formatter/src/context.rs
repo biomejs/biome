@@ -9,7 +9,6 @@ use biome_grit_syntax::GritLanguage;
 use std::fmt::Display;
 use std::rc::Rc;
 
-#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct GritFormatContext {
     options: GritFormatOptions,

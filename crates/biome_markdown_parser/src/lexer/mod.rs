@@ -28,7 +28,7 @@ impl LexContext for MarkdownLexContext {
 /// Context in which the [MarkdownLexContext]'s current should be re-lexed.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum MarkdownReLexContext {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     Regular,
     // UnicodeRange,
 }
@@ -190,7 +190,7 @@ impl<'src> MarkdownLexer<'src> {
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     fn eat_byte(&mut self, tok: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
         self.advance(1);
         tok

@@ -55,7 +55,7 @@ impl LexContext for CssLexContext {
 /// Context in which the [CssLexContext]'s current should be re-lexed.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum CssReLexContext {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     Regular,
     /// See [CssLexContext::UnicodeRange]
     UnicodeRange,

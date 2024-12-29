@@ -13,6 +13,7 @@ unused_lifetimes                       = "warn"
 unused_macro_rules                     = "warn"
 
 [workspace.lints.clippy]
+allow_attributes        = "deny"
 cargo_common_metadata   = "allow"
 empty_docs              = "allow" # there are some false positives inside biome_wasm
 multiple_crate_versions = "allow"

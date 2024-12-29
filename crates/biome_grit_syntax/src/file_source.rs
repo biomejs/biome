@@ -6,7 +6,6 @@ use std::{ffi::OsStr, path::Path};
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
 pub struct GritFileSource {
-    #[allow(unused)]
     variant: GritVariant,
 }
 

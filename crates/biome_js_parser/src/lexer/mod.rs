@@ -13,8 +13,6 @@
 //! `>>` and `>>>` are not emitted as single tokens, they are emitted as multiple `>` tokens. This is because of
 //! TypeScript parsing and productions such as `T<U<N>>`
 
-#![allow(clippy::or_fun_call)]
-
 mod tests;
 
 use std::ops::{BitOr, BitOrAssign};
@@ -1448,7 +1446,6 @@ impl<'src> JsLexer<'src> {
         )
     }
     #[inline]
-    #[allow(clippy::many_single_char_names)]
     fn read_regex(&mut self) -> JsSyntaxKind {
         #[derive(Copy, Clone)]
         #[bitflags]

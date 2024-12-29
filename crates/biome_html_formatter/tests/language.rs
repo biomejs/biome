@@ -11,7 +11,7 @@ use biome_service::{
 };
 
 pub struct HtmlTestFormatLanguage {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     source_type: HtmlFileSource,
 }
 

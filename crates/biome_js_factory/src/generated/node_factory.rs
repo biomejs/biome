@@ -1,7 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 #![allow(clippy::redundant_closure)]
-#![allow(clippy::too_many_arguments)]
 use biome_js_syntax::{
     JsSyntaxElement as SyntaxElement, JsSyntaxNode as SyntaxNode, JsSyntaxToken as SyntaxToken, *,
 };

@@ -65,7 +65,7 @@ macro_rules! declare_node_union {
 
     ( $( #[$attr:meta] )* $vis:vis $name:ident = $( $variant:ident )|* ) => {
         $( #[$attr] )*
-        #[allow(clippy::enum_variant_names)]
+        #[expect(clippy::enum_variant_names)]
         #[derive(Clone, PartialEq, Eq, Hash)]
         $vis enum $name {
             $( $variant($variant), )*
