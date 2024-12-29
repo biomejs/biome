@@ -1,7 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 #![allow(clippy::redundant_closure)]
-#![allow(clippy::too_many_arguments)]
 use biome_grit_syntax::{
     GritSyntaxElement as SyntaxElement, GritSyntaxNode as SyntaxNode,
     GritSyntaxToken as SyntaxToken, *,

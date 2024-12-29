@@ -1,5 +1,5 @@
 #![cfg(test)]
-#![allow(unused_mut, unused_variables, unused_assignments)]
+#![expect(unused_mut, unused_variables)]
 
 use super::{JsLexContext, JsLexer, TextRange, TextSize};
 use crate::span::Span;

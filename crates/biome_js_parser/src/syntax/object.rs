@@ -1,4 +1,4 @@
-#[allow(deprecated)]
+#[expect(deprecated)]
 use crate::parser::single_token_parse_recovery::SingleTokenParseRecovery;
 use crate::parser::ParsedSyntax::{Absent, Present};
 use crate::parser::{ParsedSyntax, RecoveryResult};
@@ -231,7 +231,7 @@ fn parse_object_member(p: &mut JsParser) -> ParsedSyntax {
                 // test_err js object_expr_non_ident_literal_prop
                 // let d = {5}
 
-                #[allow(deprecated)]
+                #[expect(deprecated)]
                 SingleTokenParseRecovery::new(token_set![T![:], T![,]], JS_BOGUS).recover(p);
 
                 if p.eat(T![:]) {

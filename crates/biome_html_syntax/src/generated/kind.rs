@@ -1,6 +1,5 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-#![allow(clippy::all)]
 #![allow(bad_style, missing_docs, unreachable_pub)]
 #[doc = r" The kind of syntax node, e.g. `IDENT`, `FUNCTION_KW`, or `FOR_STMT`."]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -57,22 +56,16 @@ pub enum HtmlSyntaxKind {
 use self::HtmlSyntaxKind::*;
 impl HtmlSyntaxKind {
     pub const fn is_punct(self) -> bool {
-        match self {
-            L_ANGLE | R_ANGLE | SLASH | EQ | BANG | MINUS | COMMENT_START | COMMENT_END => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            L_ANGLE | R_ANGLE | SLASH | EQ | BANG | MINUS | COMMENT_START | COMMENT_END
+        )
     }
     pub const fn is_literal(self) -> bool {
-        match self {
-            HTML_STRING_LITERAL | HTML_LITERAL => true,
-            _ => false,
-        }
+        matches!(self, HTML_STRING_LITERAL | HTML_LITERAL)
     }
     pub const fn is_list(self) -> bool {
-        match self {
-            HTML_ELEMENT_LIST | HTML_ATTRIBUTE_LIST => true,
-            _ => false,
-        }
+        matches!(self, HTML_ELEMENT_LIST | HTML_ATTRIBUTE_LIST)
     }
     pub fn from_keyword(ident: &str) -> Option<HtmlSyntaxKind> {
         let kw = match ident {

@@ -157,7 +157,6 @@ where
         self
     }
 
-    #[allow(unused)]
     pub fn with_group_id(mut self, group_id: Option<GroupId>) -> Self {
         self.options.group_id = group_id;
         self

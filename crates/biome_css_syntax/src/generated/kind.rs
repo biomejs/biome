@@ -1,6 +1,5 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-#![allow(clippy::all)]
 #![allow(bad_style, missing_docs, unreachable_pub)]
 #[doc = r" The kind of syntax node, e.g. `IDENT`, `FUNCTION_KW`, or `FOR_STMT`."]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -489,72 +488,109 @@ pub enum CssSyntaxKind {
 use self::CssSyntaxKind::*;
 impl CssSyntaxKind {
     pub const fn is_punct(self) -> bool {
-        match self {
-            SEMICOLON | COMMA | L_PAREN | R_PAREN | L_CURLY | R_CURLY | L_BRACK | R_BRACK
-            | L_ANGLE | R_ANGLE | TILDE | HASH | AMP | PIPE | PIPE2 | PLUS | STAR | SLASH
-            | CARET | PERCENT | DOT | COLON | COLON2 | EQ | BANG | NEQ | MINUS | LTEQ | GTEQ
-            | PLUSEQ | PIPEEQ | AMPEQ | CARETEQ | SLASHEQ | STAREQ | PERCENTEQ | AT | DOLLAR_EQ
-            | TILDE_EQ | CDC | CDO | UNICODE => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            SEMICOLON
+                | COMMA
+                | L_PAREN
+                | R_PAREN
+                | L_CURLY
+                | R_CURLY
+                | L_BRACK
+                | R_BRACK
+                | L_ANGLE
+                | R_ANGLE
+                | TILDE
+                | HASH
+                | AMP
+                | PIPE
+                | PIPE2
+                | PLUS
+                | STAR
+                | SLASH
+                | CARET
+                | PERCENT
+                | DOT
+                | COLON
+                | COLON2
+                | EQ
+                | BANG
+                | NEQ
+                | MINUS
+                | LTEQ
+                | GTEQ
+                | PLUSEQ
+                | PIPEEQ
+                | AMPEQ
+                | CARETEQ
+                | SLASHEQ
+                | STAREQ
+                | PERCENTEQ
+                | AT
+                | DOLLAR_EQ
+                | TILDE_EQ
+                | CDC
+                | CDO
+                | UNICODE
+        )
     }
     pub const fn is_literal(self) -> bool {
-        match self {
+        matches!(
+            self,
             CSS_STRING_LITERAL
-            | CSS_NUMBER_LITERAL
-            | CSS_DASHED_IDENTIFIER
-            | CSS_CUSTOM_IDENTIFIER
-            | CSS_SPACE_LITERAL
-            | CSS_URL_VALUE_RAW_LITERAL
-            | CSS_COLOR_LITERAL
-            | CSS_DIMENSION_VALUE
-            | CSS_PERCENTAGE_VALUE
-            | CSS_UNICODE_CODEPOINT_LITERAL
-            | CSS_UNICODE_RANGE_WILDCARD_LITERAL => true,
-            _ => false,
-        }
+                | CSS_NUMBER_LITERAL
+                | CSS_DASHED_IDENTIFIER
+                | CSS_CUSTOM_IDENTIFIER
+                | CSS_SPACE_LITERAL
+                | CSS_URL_VALUE_RAW_LITERAL
+                | CSS_COLOR_LITERAL
+                | CSS_DIMENSION_VALUE
+                | CSS_PERCENTAGE_VALUE
+                | CSS_UNICODE_CODEPOINT_LITERAL
+                | CSS_UNICODE_RANGE_WILDCARD_LITERAL
+        )
     }
     pub const fn is_list(self) -> bool {
-        match self {
+        matches!(
+            self,
             CSS_RULE_LIST
-            | CSS_SELECTOR_LIST
-            | CSS_DECLARATION_OR_RULE_LIST
-            | CSS_DECLARATION_OR_AT_RULE_LIST
-            | CSS_ATTRIBUTE_LIST
-            | CSS_DECLARATION_LIST
-            | CSS_COMPONENT_VALUE_LIST
-            | CSS_GENERIC_COMPONENT_VALUE_LIST
-            | CSS_COMPOSES_CLASS_LIST
-            | CSS_PARAMETER_LIST
-            | CSS_ANY_SELECTOR_LIST
-            | CSS_SUB_SELECTOR_LIST
-            | CSS_NESTED_SELECTOR_LIST
-            | CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST
-            | CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST
-            | CSS_COMPOUND_SELECTOR_LIST
-            | CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST
-            | CSS_RELATIVE_SELECTOR_LIST
-            | CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST
-            | CSS_PSEUDO_VALUE_LIST
-            | CSS_URL_MODIFIER_LIST
-            | CSS_BRACKETED_VALUE_LIST
-            | CSS_FONT_FAMILY_NAME_LIST
-            | CSS_CUSTOM_IDENTIFIER_LIST
-            | CSS_FONT_FEATURE_VALUES_ITEM_LIST
-            | CSS_MEDIA_QUERY_LIST
-            | CSS_KEYFRAMES_ITEM_LIST
-            | CSS_KEYFRAMES_SELECTOR_LIST
-            | CSS_PAGE_SELECTOR_LIST
-            | CSS_PAGE_SELECTOR_PSEUDO_LIST
-            | CSS_PAGE_AT_RULE_ITEM_LIST
-            | CSS_LAYER_REFERENCE_LIST
-            | CSS_LAYER_NAME_LIST
-            | CSS_DOCUMENT_MATCHER_LIST
-            | CSS_VALUE_AT_RULE_PROPERTY_LIST
-            | CSS_VALUE_AT_RULE_IMPORT_SPECIFIER_LIST
-            | CSS_UNKNOWN_AT_RULE_COMPONENT_LIST => true,
-            _ => false,
-        }
+                | CSS_SELECTOR_LIST
+                | CSS_DECLARATION_OR_RULE_LIST
+                | CSS_DECLARATION_OR_AT_RULE_LIST
+                | CSS_ATTRIBUTE_LIST
+                | CSS_DECLARATION_LIST
+                | CSS_COMPONENT_VALUE_LIST
+                | CSS_GENERIC_COMPONENT_VALUE_LIST
+                | CSS_COMPOSES_CLASS_LIST
+                | CSS_PARAMETER_LIST
+                | CSS_ANY_SELECTOR_LIST
+                | CSS_SUB_SELECTOR_LIST
+                | CSS_NESTED_SELECTOR_LIST
+                | CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST
+                | CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST
+                | CSS_COMPOUND_SELECTOR_LIST
+                | CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST
+                | CSS_RELATIVE_SELECTOR_LIST
+                | CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST
+                | CSS_PSEUDO_VALUE_LIST
+                | CSS_URL_MODIFIER_LIST
+                | CSS_BRACKETED_VALUE_LIST
+                | CSS_FONT_FAMILY_NAME_LIST
+                | CSS_CUSTOM_IDENTIFIER_LIST
+                | CSS_FONT_FEATURE_VALUES_ITEM_LIST
+                | CSS_MEDIA_QUERY_LIST
+                | CSS_KEYFRAMES_ITEM_LIST
+                | CSS_KEYFRAMES_SELECTOR_LIST
+                | CSS_PAGE_SELECTOR_LIST
+                | CSS_PAGE_SELECTOR_PSEUDO_LIST
+                | CSS_PAGE_AT_RULE_ITEM_LIST
+                | CSS_LAYER_REFERENCE_LIST
+                | CSS_LAYER_NAME_LIST
+                | CSS_DOCUMENT_MATCHER_LIST
+                | CSS_VALUE_AT_RULE_PROPERTY_LIST
+                | CSS_VALUE_AT_RULE_IMPORT_SPECIFIER_LIST
+                | CSS_UNKNOWN_AT_RULE_COMPONENT_LIST
+        )
     }
     pub fn from_keyword(ident: &str) -> Option<CssSyntaxKind> {
         let kw = match ident {

@@ -236,7 +236,6 @@ enum AriaAttributeType {
 
 #[derive(Debug, Default, biome_deserialize_macros::Merge, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
-#[allow(dead_code)]
 struct ValueDefinition {
     description: String,
     is_default: bool,
