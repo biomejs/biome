@@ -220,14 +220,14 @@ impl TestSuite for SymbolsMicrosoftTestSuite {
 }
 
 #[derive(Debug)]
-#[allow(dead_code)]
+#[expect(dead_code)]
 struct Decl {
     file: String,
     row_start: Option<usize>,
     col_start: Option<usize>,
 }
 
-#[allow(dead_code)]
+#[expect(dead_code)]
 #[derive(Debug)]
 struct Symbol {
     name: String,
