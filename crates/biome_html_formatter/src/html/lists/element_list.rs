@@ -9,14 +9,39 @@ use crate::{
         html_split_children, is_meaningful_html_text, HtmlChild, HtmlChildrenIterator, HtmlSpace,
     },
 };
-use biome_formatter::{best_fitting, prelude::*, CstFormatContext};
+use biome_formatter::{best_fitting, prelude::*, CstFormatContext, FormatRuleWithOptions};
 use biome_formatter::{format_args, write, VecBuffer};
-use biome_html_syntax::{AnyHtmlElement, HtmlElementList, HtmlRoot};
+use biome_html_syntax::{
+    AnyHtmlElement, HtmlClosingElement, HtmlClosingElementFields, HtmlElementList, HtmlRoot,
+    HtmlSyntaxToken,
+};
 use tag::GroupMode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElementList {
     layout: HtmlChildListLayout,
+
+    borrowed_tokens: BorrowedTokens,
 }
+
+pub(crate) struct FormatHtmlElementListOptions {
+    pub layout: HtmlChildListLayout,
+    pub borrowed_r_angle: Option<HtmlSyntaxToken>,
+    pub borrowed_closing_tag: Option<HtmlClosingElement>,
+}
+
+impl FormatRuleWithOptions<HtmlElementList> for FormatHtmlElementList {
+    type Options = FormatHtmlElementListOptions;
+
+    fn with_options(mut self, options: Self::Options) -> Self {
+        self.layout = options.layout;
+        self.borrowed_tokens = BorrowedTokens {
+            borrowed_opening_r_angle: options.borrowed_r_angle,
+            borrowed_closing_tag: options.borrowed_closing_tag,
+        };
+        self
+    }
+}
+
 impl FormatRule<HtmlElementList> for FormatHtmlElementList {
     type Context = HtmlFormatContext;
     fn fmt(&self, node: &HtmlElementList, f: &mut HtmlFormatter) -> FormatResult<()> {
@@ -36,6 +61,16 @@ impl FormatRule<HtmlElementList> for FormatHtmlElementList {
             }
         }
     }
+}
+
+/// Borrowed tokens from sibling opening and closing tags. Used to help deal with whitespace sensitivity.
+#[derive(Debug, Clone, Default)]
+pub(crate) struct BorrowedTokens {
+    /// The opening tag's r_angle token. If present, it must be printed first before the children.
+    borrowed_opening_r_angle: Option<HtmlSyntaxToken>,
+
+    /// The closing tag. If present, it must be printed last after the children.
+    borrowed_closing_tag: Option<HtmlClosingElement>,
 }
 
 /// The result of formatting the children of an [HtmlElementList]. This is ultimately determined by [FormatHtmlElementList::layout].
@@ -68,6 +103,19 @@ impl FormatHtmlElementList {
         f: &mut HtmlFormatter,
     ) -> FormatResult<FormatChildrenResult> {
         self.disarm_debug_assertions(list, f);
+
+        let borrowed_opening_r_angle = self
+            .borrowed_tokens
+            .borrowed_opening_r_angle
+            .as_ref()
+            .map(|token| format_with(|f| token.format().fmt(f)))
+            .memoized();
+        let borrowed_closing_tag = self
+            .borrowed_tokens
+            .borrowed_closing_tag
+            .as_ref()
+            .map(|tag| format_with(|f| format_partial_closing_tag(f, tag)))
+            .memoized();
 
         let children_meta = self.children_meta(list, f.context().comments());
         let layout = self.layout(children_meta);
@@ -102,6 +150,9 @@ impl FormatHtmlElementList {
         if let Some(HtmlChild::Newline | HtmlChild::EmptyLine) = children_iter.peek() {
             children_iter.next();
         }
+
+        flat.write(&borrowed_opening_r_angle, f);
+        multiline.write_prefix(&borrowed_opening_r_angle, f);
 
         while let Some(child) = children_iter.next() {
             let mut child_breaks = false;
@@ -291,6 +342,9 @@ impl FormatHtmlElementList {
 
             last = Some(child);
         }
+
+        flat.write(&borrowed_closing_tag, f);
+        multiline.write_content(&borrowed_closing_tag, f);
 
         if force_multiline {
             Ok(FormatChildrenResult::ForceMultiline(multiline.finish()?))
@@ -492,7 +546,10 @@ enum MultilineLayout {
 struct MultilineBuilder {
     layout: MultilineLayout,
     is_root: bool,
+    /// The elements that should be written as the main content. An alternating sequence of `[element, separator, element, separator, ...]`.
     result: FormatResult<Vec<FormatElement>>,
+    /// Elements to be written before the main content.
+    prefix: FormatResult<Vec<FormatElement>>,
 }
 
 impl MultilineBuilder {
@@ -501,6 +558,7 @@ impl MultilineBuilder {
             layout,
             is_root,
             result: Ok(Vec::new()),
+            prefix: Ok(Vec::new()),
         }
     }
 
@@ -567,11 +625,26 @@ impl MultilineBuilder {
         })
     }
 
+    /// Write elements that should be prepended before the main content.
+    fn write_prefix(&mut self, content: &dyn Format<HtmlFormatContext>, f: &mut HtmlFormatter) {
+        let prefix = std::mem::replace(&mut self.prefix, Ok(Vec::new()));
+
+        self.prefix = prefix.and_then(|elements| {
+            let elements = {
+                let mut buffer = VecBuffer::new_with_vec(f.state_mut(), elements);
+                write!(buffer, [content])?;
+                buffer.into_vec()
+            };
+            Ok(elements)
+        })
+    }
+
     fn finish(self) -> FormatResult<FormatMultilineChildren> {
         Ok(FormatMultilineChildren {
             layout: self.layout,
             is_root: self.is_root,
             elements: RefCell::new(self.result?),
+            elements_prefix: RefCell::new(self.prefix?),
         })
     }
 }
@@ -581,25 +654,35 @@ pub(crate) struct FormatMultilineChildren {
     layout: MultilineLayout,
     is_root: bool,
     elements: RefCell<Vec<FormatElement>>,
+    elements_prefix: RefCell<Vec<FormatElement>>,
 }
 
 impl Format<HtmlFormatContext> for FormatMultilineChildren {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
         let format_inner = format_once(|f| {
+            let prefix = f.intern_vec(self.elements_prefix.take());
+
             if let Some(elements) = f.intern_vec(self.elements.take()) {
                 match self.layout {
-                    MultilineLayout::Fill => f.write_elements([
-                        FormatElement::Tag(Tag::StartFill),
-                        elements,
-                        FormatElement::Tag(Tag::EndFill),
-                    ])?,
-                    MultilineLayout::NoFill => f.write_elements([
-                        FormatElement::Tag(Tag::StartGroup(
+                    MultilineLayout::Fill => {
+                        if let Some(prefix) = prefix {
+                            f.write_elements([prefix])?;
+                        }
+                        f.write_elements([
+                            FormatElement::Tag(Tag::StartFill),
+                            elements,
+                            FormatElement::Tag(Tag::EndFill),
+                        ])?;
+                    }
+                    MultilineLayout::NoFill => {
+                        f.write_elements([FormatElement::Tag(Tag::StartGroup(
                             tag::Group::new().with_mode(GroupMode::Expand),
-                        )),
-                        elements,
-                        FormatElement::Tag(Tag::EndGroup),
-                    ])?,
+                        ))])?;
+                        if let Some(prefix) = prefix {
+                            f.write_elements([prefix])?;
+                        }
+                        f.write_elements([elements, FormatElement::Tag(Tag::EndGroup)])?;
+                    }
                 };
             }
 
@@ -691,4 +774,21 @@ impl Format<HtmlFormatContext> for FormatFlatChildren {
         }
         Ok(())
     }
+}
+
+fn format_partial_closing_tag(
+    f: &mut Formatter<HtmlFormatContext>,
+    closing_tag: &HtmlClosingElement,
+) -> FormatResult<()> {
+    let HtmlClosingElementFields {
+        l_angle_token,
+        name,
+        slash_token,
+        r_angle_token: _,
+    } = closing_tag.as_fields();
+
+    write!(
+        f,
+        [l_angle_token.format(), slash_token.format(), name.format(),]
+    )
 }
