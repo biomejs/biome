@@ -588,7 +588,13 @@ impl From<bool> for BracketSpacing {
 
 impl std::fmt::Display for BracketSpacing {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::write!(f, "{}", self.value())
+        std::write!(f, "{:?}", self.value())
+    }
+}
+
+impl biome_console::fmt::Display for BracketSpacing {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        fmt.write_str(&self.0.to_string())
     }
 }
 

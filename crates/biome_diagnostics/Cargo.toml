@@ -43,6 +43,7 @@ serde                        = { workspace = true, features = ["derive"] }
 serde_ini                    = { workspace = true, optional = true }
 serde_json                   = { workspace = true }
 termcolor                    = { workspace = true }
+terminal_size                = { workspace = true }
 unicode-width                = { workspace = true }
 
 [features]
