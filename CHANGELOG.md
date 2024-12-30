@@ -87,6 +87,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   </Suspense>;
   ```
 
+- `noDuplicateProperties` now throws lint errors properly when we use `@supports` (fix [#4756](https://github.com/biomejs/biome/issues/4756)) Contributed by @mehm8128
+
 ### JavaScript APIs
 
 ### Linter
