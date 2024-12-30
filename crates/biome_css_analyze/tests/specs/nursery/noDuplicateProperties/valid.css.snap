@@ -27,6 +27,15 @@ a {
     }
 }
 
+a {
+    @supports (color: pink) {
+        color: pink;
+        &:hover {
+            color: orange;
+        }
+    }
+}
+
 /* TODO */
 /* @fontface {
     src: url(font.eof);
