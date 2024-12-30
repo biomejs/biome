@@ -13,6 +13,7 @@ use biome_service::workspace::{client, RageEntry, RageParams};
 use biome_service::Workspace;
 use camino::Utf8PathBuf;
 use std::{env, io, ops::Deref};
+use terminal_size::terminal_size;
 use tokio::runtime::Runtime;
 
 use crate::commands::daemon::read_most_recent_log_file;
@@ -63,7 +64,7 @@ pub(crate) fn rage(
                     .app
                     .console
                     .log(markup!("Discovering running Biome servers..."));
-                session.app.console.log(markup!({ RunningRomeServer }));
+                session.app.console.log(markup!({ RunningBiomeServer }));
             }
         }
     }
@@ -105,9 +106,9 @@ impl Display for WorkspaceRage<'_> {
 }
 
 /// Prints information about other running biome server instances.
-struct RunningRomeServer;
+struct RunningBiomeServer;
 
-impl Display for RunningRomeServer {
+impl Display for RunningBiomeServer {
     fn fmt(&self, f: &mut Formatter) -> io::Result<()> {
         let versions = match enumerate_pipes() {
             Ok(iter) => iter,
@@ -117,7 +118,7 @@ impl Display for RunningRomeServer {
             }
         };
 
-        for version in versions {
+        for (version, path) in versions {
             if version == biome_configuration::VERSION {
                 let runtime = Runtime::new()?;
                 match service::open_transport(runtime) {
@@ -130,7 +131,17 @@ impl Display for RunningRomeServer {
                         continue;
                     }
                     Ok(Some(transport)) => {
-                        markup!("\n"<Emphasis>"Running Biome Server:"</Emphasis>" "{HorizontalLine::new(78)}"
+                        let header = "Running Biome Server: ";
+                        let width = {
+                            if cfg!(debug_assertions) {
+                                78
+                            } else {
+                                terminal_size().map_or(78, |(width, _)| width.0 as usize)
+                            }
+                        };
+                        let width = width.saturating_sub(header.len());
+
+                        markup!("\n"<Emphasis>{header}</Emphasis>{HorizontalLine::new(width)}"
 
 "<Info>"\u{2139} The client isn't connected to any server but rage discovered this running Biome server."</Info>"
 ")
@@ -152,7 +163,16 @@ impl Display for RunningRomeServer {
 
                 BiomeServerLog.fmt(f)?;
             } else {
-                markup!("\n"<Emphasis>"Incompatible Biome Server:"</Emphasis>" "{HorizontalLine::new(78)}"
+                let header = "Incompatible Biome Server: ";
+                let width = {
+                    if cfg!(debug_assertions) {
+                        78
+                    } else {
+                        terminal_size().map_or(78, |(width, _)| width.0 as usize)
+                    }
+                };
+                let width = width.saturating_sub(header.len());
+                markup!("\n"<Emphasis>{header}</Emphasis>{HorizontalLine::new(width)}"
 
 "<Info>"\u{2139} Rage discovered this running server using an incompatible version of Biome."</Info>"
 ")
@@ -161,6 +181,7 @@ impl Display for RunningRomeServer {
                 markup!(
                     {Section("Server")}
                     {KeyValuePair("Version", markup!({version.as_str()}))}
+                    {KeyValuePair("Path", markup!({path.as_str()}))}
                 )
                 .fmt(f)?;
             }
@@ -215,6 +236,18 @@ impl Display for RageConfiguration<'_> {
                     // Print formatter configuration if --formatter option is true
                     if self.formatter {
                         let formatter_configuration = configuration.get_formatter_configuration();
+                        let ignore = formatter_configuration
+                            .ignore
+                            .iter()
+                            .map(|s| s.to_string())
+                            .collect::<Vec<_>>()
+                            .join(", ");
+                        let include = formatter_configuration
+                            .include
+                            .iter()
+                            .map(|s| s.to_string())
+                            .collect::<Vec<_>>()
+                            .join(", ");
                         markup! (
                             {Section("Formatter")}
                             {KeyValuePair("Format with errors", markup!({DebugDisplay(configuration.get_formatter_configuration().format_with_errors)}))}
@@ -224,8 +257,8 @@ impl Display for RageConfiguration<'_> {
                             {KeyValuePair("Line width", markup!({DebugDisplay(formatter_configuration.line_width.value())}))}
                             {KeyValuePair("Attribute position", markup!({DebugDisplay(formatter_configuration.attribute_position)}))}
                             {KeyValuePair("Bracket spacing", markup!({DebugDisplay(formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Ignore", markup!({DebugDisplay(formatter_configuration.ignore.iter().collect::<Vec<_>>())}))}
-                            {KeyValuePair("Include", markup!({DebugDisplay(formatter_configuration.include.iter().collect::<Vec<_>>())}))}
+                            {KeyValuePair("Ignore", markup!({DebugDisplay(ignore)}))}
+                            {KeyValuePair("Include", markup!({DebugDisplay(include)}))}
                         ).fmt(fmt)?;
 
                         let javascript_formatter_configuration =
@@ -239,7 +272,7 @@ impl Display for RageConfiguration<'_> {
                             {KeyValuePair("Semicolons", markup!({DebugDisplay(javascript_formatter_configuration.semicolons)}))}
                             {KeyValuePair("Arrow parentheses", markup!({DebugDisplay(javascript_formatter_configuration.arrow_parentheses)}))}
                             {KeyValuePair("Bracket spacing", markup!({DebugDisplayOption(javascript_formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Bracket same line", markup!({DebugDisplay(javascript_formatter_configuration.bracket_same_line)}))}
+                            {KeyValuePair("Bracket same line", markup!({DebugDisplayOption(javascript_formatter_configuration.bracket_same_line)}))}
                             {KeyValuePair("Quote style", markup!({DebugDisplay(javascript_formatter_configuration.quote_style)}))}
                             {KeyValuePair("Indent style", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_style)}))}
                             {KeyValuePair("Indent width", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_width)}))}
@@ -324,12 +357,13 @@ impl Display for RageConfigurationLintRules<'_> {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> io::Result<()> {
         let rules_str = self.0;
         let padding = Padding::new(2);
+        let padding_rules = Padding::new(4);
         fmt.write_markup(markup! {{padding}{rules_str}":"})?;
         fmt.write_markup(markup! {{SOFT_LINE}})?;
         let rules = self.1.as_enabled_rules();
         let rules = rules.iter().collect::<std::collections::BTreeSet<_>>();
         for rule in rules {
-            fmt.write_markup(markup! {{padding}{rule}})?;
+            fmt.write_markup(markup! {{padding_rules}{rule}})?;
             fmt.write_markup(markup! {{SOFT_LINE}})?;
         }
 
@@ -344,7 +378,9 @@ impl fmt::Display for EnvVarOs {
         let name = self.0;
         match env::var_os(name) {
             None => KeyValuePair(name, markup! { <Dim>"unset"</Dim> }).fmt(fmt),
-            Some(value) => KeyValuePair(name, markup! {{DebugDisplay(value)}}).fmt(fmt),
+            Some(value) => {
+                KeyValuePair(name, markup! {{DebugDisplayOption(value.to_str())}}).fmt(fmt)
+            }
         }
     }
 }

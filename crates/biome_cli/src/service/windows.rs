@@ -26,18 +26,17 @@ fn get_pipe_name() -> String {
     format!(r"\\.\pipe\biome-service-{}", biome_configuration::VERSION)
 }
 
-pub(crate) fn enumerate_pipes() -> io::Result<impl Iterator<Item = String>> {
+pub(crate) fn enumerate_pipes() -> io::Result<impl Iterator<Item = (String, Utf8PathBuf)>> {
     read_dir(r"\\.\pipe").map(|iter| {
         iter.filter_map(|entry| {
-            let entry = entry.ok()?.path();
+            let entry = Utf8PathBuf::from_path_buf(entry.ok()?.path()).ok()?;
             let file_name = entry.file_name()?;
-            let file_name = file_name.to_str()?;
 
             let version = file_name.strip_prefix("rome-service")?;
             if version.is_empty() {
-                Some(String::new())
+                Some((String::new(), entry))
             } else {
-                Some(version.strip_prefix('-')?.to_string())
+                Some((version.strip_prefix('-')?.to_string(), entry))
             }
         })
     })
