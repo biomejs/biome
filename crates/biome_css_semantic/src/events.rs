@@ -65,7 +65,8 @@ impl SemanticEventExtractor {
             // allowing for proper scoping and inheritance of styles.
             kind if kind == CSS_QUALIFIED_RULE
                 || kind == CSS_NESTED_QUALIFIED_RULE
-                || kind == CSS_MEDIA_AT_RULE =>
+                || kind == CSS_MEDIA_AT_RULE
+                || kind == CSS_SUPPORTS_AT_RULE =>
             {
                 let range = node.text_range();
                 self.stash.push_back(SemanticEvent::RuleStart(range));
@@ -95,6 +96,10 @@ impl SemanticEventExtractor {
                     .for_each(|s| self.process_selector(s));
             }
             CSS_DECLARATION => {
+                if matches!(node.parent().kind(), Some(CSS_SUPPORTS_FEATURE_DECLARATION)) {
+                    return;
+                }
+
                 if let Some(property_name) = node.first_child().and_then(|p| p.first_child()) {
                     if let Some(value) = property_name.next_sibling() {
                         self.stash.push_back(SemanticEvent::PropertyDeclaration {
