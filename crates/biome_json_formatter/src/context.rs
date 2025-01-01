@@ -175,8 +175,8 @@ impl JsonFormatOptions {
         self
     }
 
-    pub fn with_expand_literals(mut self, trailing_commas: TrailingCommas) -> Self {
-        self.trailing_commas = trailing_commas;
+    pub fn with_expand_lists(mut self, expand_lists: ExpandLists) -> Self {
+        self.expand_lists = expand_lists;
         self
     }
 

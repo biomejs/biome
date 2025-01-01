@@ -688,6 +688,7 @@ impl From<PartialJsonConfiguration> for LanguageSettings<JsonLanguage> {
             language_setting.formatter.line_width = formatter.line_width;
             language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
             language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+            language_setting.formatter.expand_lists = formatter.expand_lists;
         }
         if let Some(linter) = json.linter {
             language_setting.linter.enabled = linter.enabled;
@@ -1561,6 +1562,7 @@ fn to_json_language_settings(
     language_setting.formatter.indent_width = formatter.indent_width;
     language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
     language_setting.formatter.trailing_commas = formatter.trailing_commas;
+    language_setting.formatter.expand_lists = formatter.expand_lists;
 
     let parser = conf.parser.take().unwrap_or_default();
     let parent_parser = &parent_settings.parser;

@@ -72,7 +72,7 @@ pub struct JsonFormatter {
     pub trailing_commas: Option<TrailingCommas>,
 
     /// Whether to expand lists (arrays and objects) on multiple lines. When set to `always`, lists are formatted on multiple lines,
-    /// regardless of length of the list.  Defaults to "followSource".
+    /// regardless of length of the list. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "followSource".
     #[partial(bpaf(
         long("json-formatter-expand-lists"),
         argument("always|follow-source"),

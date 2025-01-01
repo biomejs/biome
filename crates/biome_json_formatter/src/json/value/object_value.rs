@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{format_args, write};
+use biome_formatter::{format_args, write, FormatContext};
 use biome_json_syntax::JsonObjectValue;
 use biome_rowan::AstNode;
 
@@ -9,7 +9,8 @@ pub(crate) struct FormatJsonObjectValue;
 impl FormatNodeRule<JsonObjectValue> for FormatJsonObjectValue {
     fn fmt_fields(&self, node: &JsonObjectValue, f: &mut JsonFormatter) -> FormatResult<()> {
         let should_expand = node.json_member_list().syntax().has_leading_newline()
-            || f.comments().has_dangling_comments(node.syntax());
+            || f.comments().has_dangling_comments(node.syntax())
+            || f.context().options().expand_lists();
 
         let list = format_with(|f| {
             write!(
