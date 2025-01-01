@@ -574,6 +574,10 @@ export interface PartialJsonFormatter {
 	 */
 	enabled?: boolean;
 	/**
+	 * Whether to expand lists (arrays and objects) on multiple lines. When set to `always`, lists are formatted on multiple lines, regardless of length of the list.  Defaults to "followSource".
+	 */
+	expandLists?: ExpandLists;
+	/**
 	 * The indent style applied to JSON (and its super languages) files.
 	 */
 	indentStyle?: IndentStyle;
@@ -703,6 +707,7 @@ export type Semicolons = "always" | "asNeeded";
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
  */
 export type TrailingCommas = "all" | "es5" | "none";
+export type ExpandLists = "always" | "followSource";
 export type TrailingCommas2 = "none" | "all";
 /**
  * A list of rules that belong to this group

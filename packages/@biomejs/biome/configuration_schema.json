@@ -1281,6 +1281,7 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"ExpandLists": { "type": "string", "enum": ["always", "followSource"] },
 		"FilenameCase": {
 			"description": "Supported cases for file names.",
 			"oneOf": [
@@ -1836,6 +1837,10 @@
 				"enabled": {
 					"description": "Control the formatter for JSON (and its super languages) files.",
 					"type": ["boolean", "null"]
+				},
+				"expandLists": {
+					"description": "Whether to expand lists (arrays and objects) on multiple lines. When set to `always`, lists are formatted on multiple lines, regardless of length of the list.  Defaults to \"followSource\".",
+					"anyOf": [{ "$ref": "#/definitions/ExpandLists" }, { "type": "null" }]
 				},
 				"indentStyle": {
 					"description": "The indent style applied to JSON (and its super languages) files.",

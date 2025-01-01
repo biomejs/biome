@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::separated::FormatAstSeparatedListExtension;
 use biome_formatter::separated::TrailingSeparator;
-use biome_formatter::write;
+use biome_formatter::{write, FormatContext};
 use biome_json_syntax::{AnyJsonValue, JsonArrayElementList, JsonFileVariant};
 use biome_rowan::{AstNode, AstSeparatedList};
 
@@ -11,7 +11,10 @@ pub(crate) struct FormatJsonArrayElementList;
 impl FormatRule<JsonArrayElementList> for FormatJsonArrayElementList {
     type Context = JsonFormatContext;
     fn fmt(&self, node: &JsonArrayElementList, f: &mut JsonFormatter) -> FormatResult<()> {
-        let layout = if can_concisely_print_array_list(node) {
+        let expand_lists = f.context().options().expand_lists();
+        let layout = if expand_lists {
+            ArrayLayout::OnePerLine
+        } else if can_concisely_print_array_list(node) {
             ArrayLayout::Fill
         } else {
             ArrayLayout::OnePerLine
