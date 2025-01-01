@@ -2,6 +2,7 @@ use biome_rowan::FileSourceError;
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
 use core::str;
+use std::str::FromStr;
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
@@ -11,6 +12,30 @@ use core::str;
 pub struct JsonFileSource {
     allow_trailing_commas: bool,
     allow_comments: bool,
+    variant: JsonFileVariant,
+}
+
+/// It represents the extension of the file
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
+#[serde(rename_all = "camelCase")]
+pub enum JsonFileVariant {
+    #[default]
+    Standard,
+    Jsonc,
+}
+
+impl FromStr for JsonFileVariant {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "json" => Ok(JsonFileVariant::Standard),
+            "jsonc" => Ok(JsonFileVariant::Jsonc),
+            _ => Err(()),
+        }
+    }
 }
 
 impl JsonFileSource {
@@ -141,20 +166,23 @@ impl JsonFileSource {
         Self {
             allow_comments: false,
             allow_trailing_commas: false,
+            variant: JsonFileVariant::Standard,
         }
     }
 
-    pub fn json_allow_comments() -> Self {
+    pub fn json_allow_comments(extension: &str) -> Self {
         Self {
             allow_comments: true,
             allow_trailing_commas: false,
+            variant: JsonFileVariant::from_str(extension).unwrap_or_default(),
         }
     }
 
-    pub fn json_allow_comments_and_trailing_commas() -> Self {
+    pub fn json_allow_comments_and_trailing_commas(extension: &str) -> Self {
         Self {
             allow_comments: true,
             allow_trailing_commas: true,
+            variant: JsonFileVariant::from_str(extension).unwrap_or_default(),
         }
     }
 
@@ -177,6 +205,10 @@ impl JsonFileSource {
 
     pub fn allow_comments(&self) -> bool {
         self.allow_comments
+    }
+
+    pub fn variant(&self) -> JsonFileVariant {
+        self.variant
     }
 
     pub fn is_well_known_json_file(file_name: &str) -> bool {
@@ -211,17 +243,20 @@ impl JsonFileSource {
     /// Try to return the JSON file source corresponding to this file name from well-known files
     pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
         let file_name = path.file_name().ok_or(FileSourceError::MissingFileName)?;
+        let Some(extension) = path.extension() else {
+            return Err(FileSourceError::MissingFileExtension);
+        };
         if Self::is_well_known_json_allow_comments_and_trailing_commas_file(file_name) {
-            return Ok(Self::json_allow_comments_and_trailing_commas());
+            return Ok(Self::json_allow_comments_and_trailing_commas(extension));
         }
         if Self::is_well_known_json_allow_comments_file(file_name) {
-            return Ok(Self::json_allow_comments());
+            return Ok(Self::json_allow_comments(extension));
         }
         if let Some(camino::Utf8Component::Normal(parent_dir)) = path.components().rev().nth(1) {
             if Self::is_well_known_json_allow_comments_directory(parent_dir)
                 && file_name.ends_with(".json")
             {
-                return Ok(Self::json_allow_comments());
+                return Ok(Self::json_allow_comments(extension));
             }
         }
         if Self::is_well_known_json_file(file_name) {
@@ -253,7 +288,7 @@ impl JsonFileSource {
             | "sublime-theme"
             | "sublime-workspace"
             | "sublime_metrics"
-            | "sublime_session" => Ok(Self::json_allow_comments_and_trailing_commas()),
+            | "sublime_session" => Ok(Self::json_allow_comments_and_trailing_commas(extension)),
             _ => Err(FileSourceError::UnknownExtension),
         }
     }
@@ -270,7 +305,7 @@ impl JsonFileSource {
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
             "json" => Ok(Self::json()),
-            "jsonc" | "snippets" => Ok(Self::json_allow_comments_and_trailing_commas()),
+            "jsonc" | "snippets" => Ok(Self::json_allow_comments_and_trailing_commas(language_id)),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
     }

@@ -1,5 +1,7 @@
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
-use biome_json_formatter::{context::JsonFormatOptions, JsonFormatLanguage};
+use biome_json_formatter::JsonFormatLanguage;
+use biome_json_syntax::JsonLanguage;
+use biome_test_utils::create_formatting_options;
 use camino::Utf8Path;
 
 mod language {
@@ -29,8 +31,11 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
     let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path, None) else {
         return;
     };
+    let mut diagnostics = vec![];
 
-    let options = JsonFormatOptions::default();
+    let options =
+        create_formatting_options::<JsonLanguage>(test_file.input_file(), &mut diagnostics);
+
     let language = language::JsonTestFormatLanguage::default();
 
     let snapshot = SpecSnapshot::new(

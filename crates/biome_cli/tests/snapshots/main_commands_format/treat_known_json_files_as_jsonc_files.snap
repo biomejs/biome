@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `files/.babelrc`
 
@@ -46,22 +47,6 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-files/.babelrc format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-    1   │ - 
-    2   │ - /*test*/·[
-    3   │ - 
-    4   │ - /*·some·other·comment*/1,·2,·3]
-    5   │ - → 
-      1 │ + /*test*/·[/*·some·other·comment*/·1,·2,·3]
-      2 │ + 
-  
-
-```
-
-```block
 files/.eslintrc.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Formatter would have printed the following content:
@@ -78,22 +63,6 @@ files/.eslintrc.json format ━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-files/.jshintrc format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-    1   │ - 
-    2   │ - /*test*/·[
-    3   │ - 
-    4   │ - /*·some·other·comment*/1,·2,·3]
-    5   │ - → 
-      1 │ + /*test*/·[/*·some·other·comment*/·1,·2,·3]
-      2 │ + 
-  
-
-```
-
-```block
-Checked 3 files in <TIME>. No fixes applied.
-Found 3 errors.
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
 ```

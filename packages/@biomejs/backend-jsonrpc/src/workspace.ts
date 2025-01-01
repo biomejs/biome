@@ -2808,6 +2808,7 @@ export interface JsFileSource {
 export interface JsonFileSource {
 	allowComments: boolean;
 	allowTrailingCommas: boolean;
+	variant: JsonFileVariant;
 }
 export interface CssFileSource {
 	variant: CssVariant;
@@ -2836,6 +2837,10 @@ export type LanguageVariant = "standard" | "standardRestricted" | "jsx";
 Defaults to the latest stable ECMAScript standard. 
 	 */
 export type LanguageVersion = "eS2022" | "eSNext";
+/**
+ * It represents the extension of the file
+ */
+export type JsonFileVariant = "standard" | "jsonc";
 /**
 	* The style of CSS contained in the file.
 

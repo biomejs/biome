@@ -421,7 +421,6 @@ fn assert_lint(
                 let options =
                     create_analyzer_options::<JsLanguage>(&workspace_settings, &file_path, test);
 
-                // dbg!(&options);
                 biome_js_analyze::analyze(
                     &root,
                     filter,

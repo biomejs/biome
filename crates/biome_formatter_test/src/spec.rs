@@ -36,6 +36,9 @@ impl<'a> SpecTestFile<'a> {
         root_path: &'a Utf8Path,
         settings: Option<UpdateSettingsParams>,
     ) -> Option<SpecTestFile<'a>> {
+        if input_file.ends_with("options.json") {
+            return None;
+        }
         let mut console = EnvConsole::default();
         let app = App::with_console(&mut console);
         let file_path = &input_file;
