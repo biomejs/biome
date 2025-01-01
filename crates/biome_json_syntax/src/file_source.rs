@@ -15,12 +15,12 @@ pub struct JsonFileSource {
     variant: JsonFileVariant,
 }
 
+/// It represents the extension of the file
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
 #[serde(rename_all = "camelCase")]
-/// It represents the extension of the file
 pub enum JsonFileVariant {
     #[default]
     Standard,

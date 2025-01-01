@@ -4410,12 +4410,12 @@
 		"TrailingCommas2": {
 			"oneOf": [
 				{
-					"description": "The formatter will remove the trailing commas",
+					"description": "The formatter will remove the trailing commas.",
 					"type": "string",
 					"enum": ["none"]
 				},
 				{
-					"description": "The trailing commas are allowed and advised",
+					"description": "The trailing commas are allowed and advised only in JSONC files. Trailing commas are removed from JSON files.",
 					"type": "string",
 					"enum": ["all"]
 				}

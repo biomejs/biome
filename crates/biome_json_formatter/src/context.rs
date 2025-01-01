@@ -81,9 +81,9 @@ pub struct JsonFormatOptions {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum TrailingCommas {
     #[default]
-    /// The formatter will remove the trailing commas
+    /// The formatter will remove the trailing commas.
     None,
-    /// The trailing commas are allowed and advised
+    /// The trailing commas are allowed and advised only in JSONC files. Trailing commas are removed from JSON files.
     All,
 }
 

@@ -42,75 +42,75 @@ pub fn create_analyzer_options(
         .with_preferred_quote(PreferredQuote::Double)
         .with_jsx_runtime(JsxRuntime::Transparent);
     let options_file = input_file.with_extension("options.json");
-    if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
-        let deserialized = biome_deserialize::json::deserialize_from_json_str::<PartialConfiguration>(
-            json.as_str(),
-            JsonParserOptions::default(),
-            "",
+    let Ok(json) = std::fs::read_to_string(options_file.clone()) else {
+        return options.with_configuration(analyzer_configuration);
+    };
+    let deserialized = biome_deserialize::json::deserialize_from_json_str::<PartialConfiguration>(
+        json.as_str(),
+        JsonParserOptions::default(),
+        "",
+    );
+    if deserialized.has_errors() {
+        diagnostics.extend(
+            deserialized
+                .into_diagnostics()
+                .into_iter()
+                .map(|diagnostic| {
+                    diagnostic_to_string(options_file.file_stem().unwrap(), &json, diagnostic)
+                })
+                .collect::<Vec<_>>(),
         );
-        if deserialized.has_errors() {
-            diagnostics.extend(
-                deserialized
-                    .into_diagnostics()
-                    .into_iter()
-                    .map(|diagnostic| {
-                        diagnostic_to_string(options_file.file_stem().unwrap(), &json, diagnostic)
+    } else {
+        let configuration = deserialized.into_deserialized().unwrap_or_default();
+        let mut settings = Settings::default();
+        analyzer_configuration = analyzer_configuration.with_preferred_quote(
+            configuration
+                .javascript
+                .as_ref()
+                .and_then(|js| js.formatter.as_ref())
+                .and_then(|f| {
+                    f.quote_style.map(|quote_style| {
+                        if quote_style.is_double() {
+                            PreferredQuote::Double
+                        } else {
+                            PreferredQuote::Single
+                        }
                     })
-                    .collect::<Vec<_>>(),
-            );
-        } else {
-            let configuration = deserialized.into_deserialized().unwrap_or_default();
-            let mut settings = Settings::default();
-            analyzer_configuration = analyzer_configuration.with_preferred_quote(
-                configuration
-                    .javascript
-                    .as_ref()
-                    .and_then(|js| js.formatter.as_ref())
-                    .and_then(|f| {
-                        f.quote_style.map(|quote_style| {
-                            if quote_style.is_double() {
-                                PreferredQuote::Double
-                            } else {
-                                PreferredQuote::Single
-                            }
-                        })
-                    })
-                    .unwrap_or_default(),
-            );
+                })
+                .unwrap_or_default(),
+        );
 
-            use biome_configuration::javascript::JsxRuntime::*;
-            analyzer_configuration = analyzer_configuration.with_jsx_runtime(
-                match configuration
-                    .javascript
-                    .as_ref()
-                    .and_then(|js| js.jsx_runtime)
-                    .unwrap_or_default()
-                {
-                    ReactClassic => JsxRuntime::ReactClassic,
-                    Transparent => JsxRuntime::Transparent,
-                },
-            );
-            analyzer_configuration = analyzer_configuration.with_globals(
-                configuration
-                    .javascript
-                    .as_ref()
-                    .and_then(|js| {
-                        js.globals
-                            .as_ref()
-                            .map(|globals| globals.iter().cloned().collect())
-                    })
-                    .unwrap_or_default(),
-            );
+        use biome_configuration::javascript::JsxRuntime::*;
+        analyzer_configuration = analyzer_configuration.with_jsx_runtime(
+            match configuration
+                .javascript
+                .as_ref()
+                .and_then(|js| js.jsx_runtime)
+                .unwrap_or_default()
+            {
+                ReactClassic => JsxRuntime::ReactClassic,
+                Transparent => JsxRuntime::Transparent,
+            },
+        );
+        analyzer_configuration = analyzer_configuration.with_globals(
+            configuration
+                .javascript
+                .as_ref()
+                .and_then(|js| {
+                    js.globals
+                        .as_ref()
+                        .map(|globals| globals.iter().cloned().collect())
+                })
+                .unwrap_or_default(),
+        );
 
-            settings
-                .merge_with_configuration(configuration, None, None, &[])
-                .unwrap();
+        settings
+            .merge_with_configuration(configuration, None, None, &[])
+            .unwrap();
 
-            analyzer_configuration =
-                analyzer_configuration.with_rules(to_analyzer_rules(&settings, input_file));
-        }
+        analyzer_configuration =
+            analyzer_configuration.with_rules(to_analyzer_rules(&settings, input_file));
     }
-
     options.with_configuration(analyzer_configuration)
 }
 
@@ -126,37 +126,36 @@ where
     workspace.set_current_project(key);
 
     let options_file = input_file.with_extension("options.json");
-    if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
-        let deserialized = biome_deserialize::json::deserialize_from_json_str::<PartialConfiguration>(
-            json.as_str(),
-            JsonParserOptions::default(),
-            "",
+    let Ok(json) = std::fs::read_to_string(options_file.clone()) else {
+        return Default::default();
+    };
+    let deserialized = biome_deserialize::json::deserialize_from_json_str::<PartialConfiguration>(
+        json.as_str(),
+        JsonParserOptions::default(),
+        "",
+    );
+    if deserialized.has_errors() {
+        diagnostics.extend(
+            deserialized
+                .into_diagnostics()
+                .into_iter()
+                .map(|diagnostic| {
+                    diagnostic_to_string(options_file.file_stem().unwrap(), &json, diagnostic)
+                })
+                .collect::<Vec<_>>(),
         );
-        if deserialized.has_errors() {
-            diagnostics.extend(
-                deserialized
-                    .into_diagnostics()
-                    .into_iter()
-                    .map(|diagnostic| {
-                        diagnostic_to_string(options_file.file_stem().unwrap(), &json, diagnostic)
-                    })
-                    .collect::<Vec<_>>(),
-            );
 
-            Default::default()
-        } else {
-            let configuration = deserialized.into_deserialized().unwrap_or_default();
-            let mut settings = workspace.get_current_settings().unwrap_or_default();
-            settings
-                .merge_with_configuration(configuration, None, None, &[])
-                .unwrap();
-
-            let handle = WorkspaceSettingsHandle::from(settings);
-            let document_file_source = DocumentFileSource::from_path(input_file);
-            handle.format_options::<L>(&input_file.into(), &document_file_source)
-        }
-    } else {
         Default::default()
+    } else {
+        let configuration = deserialized.into_deserialized().unwrap_or_default();
+        let mut settings = workspace.get_current_settings().unwrap_or_default();
+        settings
+            .merge_with_configuration(configuration, None, None, &[])
+            .unwrap();
+
+        let handle = WorkspaceSettingsHandle::from(settings);
+        let document_file_source = DocumentFileSource::from_path(input_file);
+        handle.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }
 
