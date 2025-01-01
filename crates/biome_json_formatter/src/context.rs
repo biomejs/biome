@@ -200,6 +200,11 @@ impl JsonFormatOptions {
         self.trailing_commas = trailing_commas;
     }
 
+    /// Set `expand_lists`
+    pub fn set_expand_lists(&mut self, expand_lists: ExpandLists) {
+        self.expand_lists = expand_lists;
+    }
+
     pub(crate) fn to_trailing_separator(&self) -> TrailingSeparator {
         match self.trailing_commas {
             TrailingCommas::None => TrailingSeparator::Omit,

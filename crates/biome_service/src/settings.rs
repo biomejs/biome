@@ -1297,6 +1297,9 @@ impl OverrideSettingPattern {
         if let Some(trailing_commas) = json_formatter.trailing_commas {
             options.set_trailing_commas(trailing_commas);
         }
+        if let Some(expand_lists) = json_formatter.expand_lists {
+            options.set_expand_lists(expand_lists);
+        }
     }
 
     fn apply_overrides_to_css_format_options(&self, options: &mut CssFormatOptions) {

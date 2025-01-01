@@ -574,7 +574,7 @@ export interface PartialJsonFormatter {
 	 */
 	enabled?: boolean;
 	/**
-	 * Whether to expand lists (arrays and objects) on multiple lines. When set to `always`, lists are formatted on multiple lines, regardless of length of the list.  Defaults to "followSource".
+	 * Whether to expand lists (arrays and objects) on multiple lines. When set to `always`, lists are formatted on multiple lines, regardless of length of the list. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "followSource".
 	 */
 	expandLists?: ExpandLists;
 	/**
