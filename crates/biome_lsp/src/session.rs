@@ -560,7 +560,7 @@ impl Session {
                                 return ConfigurationStatus::Error;
                             }
                             let result = self.workspace.update_settings(UpdateSettingsParams {
-                                workspace_directory: fs.working_directory().map(BiomePath::from),
+                                workspace_directory: configuration_path.map(BiomePath::from),
                                 configuration,
                                 vcs_base_path: vcs_base_path.map(BiomePath::from),
                                 gitignore_matches,

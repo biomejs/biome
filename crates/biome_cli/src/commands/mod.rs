@@ -791,7 +791,7 @@ pub(crate) trait CommandRunner: Sized {
         }
         let configuration_path = loaded_configuration.directory_path.clone();
         let configuration = self.merge_configuration(loaded_configuration, fs, console)?;
-        let vcs_base_path = configuration_path.or(fs.working_directory());
+        let vcs_base_path = configuration_path.clone().or(fs.working_directory());
         let (vcs_base_path, gitignore_matches) =
             configuration.retrieve_gitignore_matches(fs, vcs_base_path.as_deref())?;
         let paths = self.get_files_to_process(fs, &configuration)?;
@@ -806,7 +806,7 @@ pub(crate) trait CommandRunner: Sized {
             workspace.set_manifest_for_project(manifest_data.into())?;
         }
         workspace.update_settings(UpdateSettingsParams {
-            workspace_directory: fs.working_directory().map(BiomePath::from),
+            workspace_directory: configuration_path.map(BiomePath::from),
             configuration,
             vcs_base_path: vcs_base_path.map(BiomePath::from),
             gitignore_matches,
