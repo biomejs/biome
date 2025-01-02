@@ -1924,11 +1924,8 @@ impl JsCallExpression {
 
             // it("description", ..)
             // it(Test.name, ..)
-            (Some(Ok(AnyJsCallArgument::AnyJsExpression(first))), Some(Ok(second)), third)
-                if arguments.args().len() <= 3
-                    && callee.contains_a_test_pattern()?
-                    && (first.syntax().kind() == JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION
-                        || first.syntax().kind() == JsSyntaxKind::JS_TEMPLATE_EXPRESSION) =>
+            (Some(Ok(AnyJsCallArgument::AnyJsExpression(_))), Some(Ok(second)), third)
+                if arguments.args().len() <= 3 && callee.contains_a_test_pattern()? =>
             {
                 // it('name', callback, duration)
                 if !matches!(
