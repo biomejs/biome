@@ -53,7 +53,6 @@ fn run_test(input: &'static str, _: &str, directory_path: &str, _: &str) {
     if input_code.contains("/* should not generate diagnostics */") && quantity_diagnostics > 0 {
         panic!("This test should not generate diagnostics");
     }
-    env::set_var("BIOME_VERSION", "0.0.0");
 }
 
 pub(crate) fn analyze_and_snap(
@@ -71,7 +70,6 @@ pub(crate) fn analyze_and_snap(
     let version = read_to_string(input_file.with_extension("version.txt"))
         .ok()
         .map_or_else(|| "1.5.0".to_string(), |v| v.trim().to_string());
-    env::set_var("BIOME_VERSION", version.clone());
     let rule_name = directory_path.file_name().unwrap().to_str().unwrap();
     let rule_filter = RuleFilter::Rule("migrations", rule_name);
     let filter = AnalysisFilter {
