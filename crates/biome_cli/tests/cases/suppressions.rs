@@ -23,14 +23,7 @@ fn ok() {
     let (_, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--suppress",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--suppress", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -47,15 +40,7 @@ fn err_when_both_write_and_suppress_are_passed() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--write",
-                "--suppress",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--write", "--suppress", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -79,14 +64,7 @@ fn suppress_ok() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--suppress",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--suppress", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -122,14 +100,7 @@ fn suppress_multiple_ok() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--suppress",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--suppress", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -167,7 +138,7 @@ fn suppress_only_ok() {
                 "lint",
                 "--suppress",
                 "--only=lint/suspicious/noCompareNegZero",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -208,7 +179,7 @@ fn suppress_skip_ok() {
                 "lint",
                 "--suppress",
                 "--skip=lint/suspicious/noCompareNegZero",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -244,7 +215,7 @@ fn err_when_only_reason() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--reason", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--reason", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -282,7 +253,7 @@ fn custom_explanation_with_reason() {
                 "lint",
                 "--suppress",
                 "--reason=We love Biome",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -330,7 +301,7 @@ let bar = 33;",
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -365,7 +336,7 @@ let bar = 33;",
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -399,7 +370,7 @@ a == b;
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

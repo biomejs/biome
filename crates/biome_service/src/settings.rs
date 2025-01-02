@@ -9,8 +9,8 @@ use biome_configuration::{
     push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, FormatterConfiguration,
     JavascriptConfiguration, LinterConfiguration, OverrideAssistConfiguration,
     OverrideFormatterConfiguration, OverrideLinterConfiguration, Overrides, PartialConfiguration,
-    PartialCssConfiguration, PartialGraphqlConfiguration, PartialJavascriptConfiguration,
-    PartialJsonConfiguration, Rules,
+    PartialCssConfiguration, PartialGraphqlConfiguration, PartialGritConfiguration,
+    PartialJavascriptConfiguration, PartialJsonConfiguration, Rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -1483,6 +1483,8 @@ pub fn to_override_settings(
         let json = pattern.json.take().unwrap_or_default();
         let css = pattern.css.take().unwrap_or_default();
         let graphql = pattern.graphql.take().unwrap_or_default();
+        let grit = pattern.grit.take().unwrap_or_default();
+
         languages.javascript =
             to_javascript_language_settings(javascript, &current_settings.languages.javascript);
 
@@ -1490,6 +1492,7 @@ pub fn to_override_settings(
         languages.css = to_css_language_settings(css, &current_settings.languages.css);
         languages.graphql =
             to_graphql_language_settings(graphql, &current_settings.languages.graphql);
+        languages.grit = to_grit_language_settings(grit, &current_settings.languages.grit);
 
         let pattern_setting = OverrideSettingPattern {
             include: Matcher::from_globs(working_directory.clone(), pattern.include.as_deref())?,
@@ -1608,6 +1611,22 @@ fn to_graphql_language_settings(
     language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
     language_setting.formatter.quote_style = formatter.quote_style;
     language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
+
+    language_setting
+}
+
+fn to_grit_language_settings(
+    mut conf: PartialGritConfiguration,
+    _parent_settings: &LanguageSettings<GritLanguage>,
+) -> LanguageSettings<GritLanguage> {
+    let mut language_setting: LanguageSettings<GritLanguage> = LanguageSettings::default();
+    let formatter = conf.formatter.take().unwrap_or_default();
+
+    language_setting.formatter.enabled = formatter.enabled;
+    language_setting.formatter.line_width = formatter.line_width;
+    language_setting.formatter.line_ending = formatter.line_ending;
+    language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
+    language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
 
     language_setting
 }

@@ -43,8 +43,8 @@ fn reports_diagnostics_junit_check_command() {
             [
                 "check",
                 "--reporter=junit",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -79,8 +79,8 @@ fn reports_diagnostics_junit_ci_command() {
             [
                 "ci",
                 "--reporter=junit",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -115,8 +115,8 @@ fn reports_diagnostics_junit_lint_command() {
             [
                 "lint",
                 "--reporter=junit",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -151,8 +151,8 @@ fn reports_diagnostics_junit_format_command() {
             [
                 "format",
                 "--reporter=junit",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),

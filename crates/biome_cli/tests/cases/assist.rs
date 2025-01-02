@@ -35,7 +35,7 @@ fn assist_emit_diagnostic() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -79,7 +79,7 @@ fn assist_writes() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

@@ -49,6 +49,10 @@ export interface PartialConfiguration {
 	 */
 	graphql?: PartialGraphqlConfiguration;
 	/**
+	 * Specific configuration for the GraphQL language
+	 */
+	grit?: PartialGritConfiguration;
+	/**
 	 * Specific configuration for the JavaScript language
 	 */
 	javascript?: PartialJavascriptConfiguration;
@@ -192,6 +196,15 @@ export interface PartialGraphqlConfiguration {
 	 */
 	formatter?: PartialGraphqlFormatter;
 	linter?: PartialGraphqlLinter;
+}
+/**
+ * Options applied to GritQL files
+ */
+export interface PartialGritConfiguration {
+	/**
+	 * Formatting options
+	 */
+	formatter?: PartialGritFormatter;
 }
 /**
  * A set of options applied to the JavaScript files
@@ -421,6 +434,28 @@ export interface PartialGraphqlLinter {
 	 */
 	enabled?: boolean;
 }
+export interface PartialGritFormatter {
+	/**
+	 * Control the formatter for Grit files.
+	 */
+	enabled?: boolean;
+	/**
+	 * The indent style applied to Grit files.
+	 */
+	indentStyle?: IndentStyle;
+	/**
+	 * The size of the indentation applied to Grit files. Default to 2.
+	 */
+	indentWidth?: IndentWidth;
+	/**
+	 * The type of line ending applied to Grit files.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * What's the max width of a line applied to Grit files. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
+}
 /**
  * Linter options specific to the JavaScript linter
  */
@@ -612,6 +647,10 @@ export interface OverridePattern {
 	 * Specific configuration for the Graphql language
 	 */
 	graphql?: PartialGraphqlConfiguration;
+	/**
+	 * Specific configuration for the GritQL language
+	 */
+	grit?: PartialGritConfiguration;
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */

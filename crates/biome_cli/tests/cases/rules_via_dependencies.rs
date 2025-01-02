@@ -39,7 +39,7 @@ function Component2() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", test.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", test.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -86,7 +86,7 @@ describe("foo", () => {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", test.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", test.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -148,7 +148,7 @@ function Component2() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", test.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", test.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

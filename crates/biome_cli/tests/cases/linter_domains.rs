@@ -47,14 +47,7 @@ describe("foo", () => {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                test1.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", test1.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -108,14 +101,7 @@ describe("foo", () => {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                test1.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", test1.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -177,14 +163,7 @@ describe("foo", () => {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                test1.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", test1.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -241,8 +220,8 @@ describe("foo", () => {
         Args::from(
             [
                 "lint",
-                test1.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
+                test1.as_str(),
+                test2.as_str(),
                 "--skip=suspicious/noDuplicateTestHooks",
             ]
             .as_slice(),
@@ -305,8 +284,8 @@ describe("foo", () => {
         Args::from(
             [
                 "lint",
-                test1.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
+                test1.as_str(),
+                test2.as_str(),
                 "--only=suspicious/noDebugger",
             ]
             .as_slice(),

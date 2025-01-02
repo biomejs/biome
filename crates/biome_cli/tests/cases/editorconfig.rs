@@ -32,7 +32,7 @@ max_line_length = 300
                 "format",
                 "--write",
                 "--use-editorconfig=true",
-                test_file.as_os_str().to_str().unwrap(),
+                test_file.as_str(),
             ]
             .as_slice(),
         ),
@@ -83,7 +83,7 @@ max_line_length = 300
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", "--write", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -120,14 +120,7 @@ max_line_length = 300
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--use-editorconfig=true",
-                test_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--use-editorconfig=true", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -175,7 +168,7 @@ max_line_length = 300
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", test_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -231,7 +224,7 @@ indent_style = tab
                 "format",
                 "--write",
                 "--use-editorconfig=true",
-                test_file.as_os_str().to_str().unwrap(),
+                test_file.as_str(),
             ]
             .as_slice(),
         ),
@@ -275,7 +268,7 @@ max_line_length = 90
                 "check",
                 "--line-width=100",
                 "--use-editorconfig=true",
-                test_file.as_os_str().to_str().unwrap(),
+                test_file.as_str(),
             ]
             .as_slice(),
         ),
@@ -335,8 +328,8 @@ indent_style = space
             [
                 "check",
                 "--use-editorconfig=true",
-                test_file.as_os_str().to_str().unwrap(),
-                test_file2.as_os_str().to_str().unwrap(),
+                test_file.as_str(),
+                test_file2.as_str(),
             ]
             .as_slice(),
         ),
@@ -375,14 +368,7 @@ max_line_length = 300
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "ci",
-                "--use-editorconfig=true",
-                test_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["ci", "--use-editorconfig=true", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -430,7 +416,7 @@ max_line_length = 300
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", test_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["ci", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -472,7 +458,7 @@ insert_final_newline = false
                 "format",
                 "--write",
                 "--use-editorconfig=true",
-                test_file.as_os_str().to_str().unwrap(),
+                test_file.as_str(),
             ]
             .as_slice(),
         ),

@@ -34,7 +34,7 @@ fn search_css_pattern() {
                 "search",
                 "--language=css",
                 "`color: green`",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -62,15 +62,7 @@ fn search_css_pattern_shorthand() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "search",
-                "-lcss",
-                "`color: green`",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["search", "-lcss", "`color: green`", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -95,14 +87,7 @@ fn search_js_pattern() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "search",
-                "`\"foo\"`",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["search", "`\"foo\"`", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

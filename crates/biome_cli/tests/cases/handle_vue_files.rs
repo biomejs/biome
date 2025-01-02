@@ -120,7 +120,7 @@ fn format_vue_implicit_js_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", vue_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -150,14 +150,7 @@ fn format_vue_implicit_js_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                vue_file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", vue_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -187,7 +180,7 @@ fn format_vue_explicit_js_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", vue_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -217,14 +210,7 @@ fn format_vue_explicit_js_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                vue_file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", vue_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -251,14 +237,7 @@ fn format_empty_vue_js_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                vue_file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", vue_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -285,7 +264,7 @@ fn format_vue_ts_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", vue_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -312,14 +291,7 @@ fn format_vue_ts_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                vue_file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", vue_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -346,14 +318,7 @@ fn format_empty_vue_ts_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                vue_file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", vue_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -383,7 +348,7 @@ fn format_vue_carriage_return_line_feed_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", vue_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -417,7 +382,7 @@ fn format_vue_generic_component_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", vue_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -444,7 +409,7 @@ fn lint_vue_js_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", vue_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -469,7 +434,7 @@ fn lint_vue_ts_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", vue_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -499,7 +464,7 @@ fn sorts_imports_check() {
                 "check",
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
-                vue_file_path.as_os_str().to_str().unwrap(),
+                vue_file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -535,7 +500,7 @@ fn sorts_imports_write() {
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
                 "--write",
-                vue_file_path.as_os_str().to_str().unwrap(),
+                vue_file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -775,7 +740,7 @@ fn vue_compiler_macros_as_globals() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", vue_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");

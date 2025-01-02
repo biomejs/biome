@@ -9,6 +9,7 @@ pub mod editorconfig;
 pub mod formatter;
 pub mod generated;
 pub mod graphql;
+pub mod grit;
 pub mod javascript;
 pub mod json;
 mod overrides;
@@ -23,6 +24,9 @@ use crate::css::CssLinter;
 pub use crate::diagnostics::BiomeDiagnostic;
 pub use crate::diagnostics::CantLoadExtendFile;
 pub use crate::generated::{push_to_analyzer_assist, push_to_analyzer_rules};
+pub use crate::grit::{
+    partial_grit_configuration, GritConfiguration, PartialGritConfiguration, PartialGritFormatter,
+};
 use crate::javascript::JavascriptLinter;
 use crate::json::JsonLinter;
 use crate::vcs::{partial_vcs_configuration, PartialVcsConfiguration, VcsConfiguration};
@@ -124,6 +128,10 @@ pub struct Configuration {
     /// Specific configuration for the GraphQL language
     #[partial(type, bpaf(external(partial_graphql_configuration), optional))]
     pub graphql: GraphqlConfiguration,
+
+    /// Specific configuration for the GraphQL language
+    #[partial(type, bpaf(external(partial_grit_configuration), optional))]
+    pub grit: GritConfiguration,
 
     /// A list of granular patterns that should be applied only to a sub set of files
     #[partial(bpaf(hide))]

@@ -17,7 +17,7 @@ fn should_not_format_files_by_default() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", css_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", css_file.as_str()].as_slice()),
     );
 
     // no files processed error
@@ -44,14 +44,7 @@ fn should_format_files_by_when_opt_in() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--css-formatter-enabled=true",
-                css_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--css-formatter-enabled=true", css_file.as_str()].as_slice()),
     );
 
     // not formatted error
@@ -83,7 +76,7 @@ fn should_format_write_files_by_when_opt_in() {
                 "format",
                 "--write",
                 "--css-formatter-enabled=true",
-                css_file.as_os_str().to_str().unwrap(),
+                css_file.as_str(),
             ]
             .as_slice(),
         ),

@@ -1,10 +1,12 @@
 use super::javascript::PartialJavascriptConfiguration;
 use super::json::PartialJsonConfiguration;
-use super::{PartialCssConfiguration, PartialGraphqlConfiguration, Rules};
+use super::{
+    PartialCssConfiguration, PartialGraphqlConfiguration, PartialGritConfiguration, Rules,
+};
 use crate::analyzer::RuleDomainValue;
 use crate::{
-    partial_css_configuration, partial_graphql_configuration, partial_javascript_configuration,
-    partial_json_configuration,
+    partial_css_configuration, partial_graphql_configuration, partial_grit_configuration,
+    partial_javascript_configuration, partial_json_configuration,
 };
 use biome_analyze::RuleDomain;
 use biome_deserialize_macros::{Deserializable, Merge};
@@ -69,6 +71,11 @@ pub struct OverridePattern {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(external(partial_graphql_configuration), optional, hide)]
     pub graphql: Option<PartialGraphqlConfiguration>,
+
+    /// Specific configuration for the GritQL language
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external(partial_grit_configuration), optional, hide)]
+    pub grit: Option<PartialGritConfiguration>,
 
     /// Override specific formatter configuration
     #[serde(skip_serializing_if = "Option::is_none")]

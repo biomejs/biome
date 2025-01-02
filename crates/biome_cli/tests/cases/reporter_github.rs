@@ -43,8 +43,8 @@ fn reports_diagnostics_github_check_command() {
             [
                 "check",
                 "--reporter=github",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -79,8 +79,8 @@ fn reports_diagnostics_github_ci_command() {
             [
                 "ci",
                 "--reporter=github",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -115,8 +115,8 @@ fn reports_diagnostics_github_lint_command() {
             [
                 "lint",
                 "--reporter=github",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -151,8 +151,8 @@ fn reports_diagnostics_github_format_command() {
             [
                 "format",
                 "--reporter=github",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),

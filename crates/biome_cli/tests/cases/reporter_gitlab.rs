@@ -64,8 +64,8 @@ fn reports_diagnostics_gitlab_check_command() {
                 "check",
                 "--reporter=gitlab",
                 "--max-diagnostics=200",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -101,8 +101,8 @@ fn reports_diagnostics_gitlab_ci_command() {
                 "ci",
                 "--reporter=gitlab",
                 "--max-diagnostics=200",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -138,8 +138,8 @@ fn reports_diagnostics_gitlab_lint_command() {
                 "lint",
                 "--reporter=gitlab",
                 "--max-diagnostics=200",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -175,8 +175,8 @@ fn reports_diagnostics_gitlab_format_command() {
                 "format",
                 "--reporter=gitlab",
                 "--max-diagnostics=200",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),

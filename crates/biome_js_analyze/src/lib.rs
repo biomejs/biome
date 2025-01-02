@@ -45,7 +45,7 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 /// Additionally, this function takes a `inspect_matcher` function that can be
 /// used to inspect the "query matches" emitted by the analyzer before they are
 /// processed by the lint rules registry
-#[allow(clippy::too_many_arguments)]
+#[expect(clippy::too_many_arguments)]
 pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     root: &LanguageRoot<JsLanguage>,
     filter: AnalysisFilter,

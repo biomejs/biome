@@ -19,7 +19,7 @@ fn should_allow_using_export_statements() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

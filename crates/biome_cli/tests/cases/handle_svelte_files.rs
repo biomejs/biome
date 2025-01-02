@@ -65,7 +65,7 @@ fn sorts_imports_check() {
                 "check",
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
-                svelte_file_path.as_os_str().to_str().unwrap(),
+                svelte_file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -104,7 +104,7 @@ fn sorts_imports_write() {
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
                 "--write",
-                svelte_file_path.as_os_str().to_str().unwrap(),
+                svelte_file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -137,7 +137,7 @@ fn format_svelte_ts_context_module_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", svelte_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", svelte_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -171,14 +171,7 @@ fn format_svelte_ts_context_module_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                svelte_file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", svelte_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -212,7 +205,7 @@ fn format_svelte_carriage_return_line_feed_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", svelte_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", svelte_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");

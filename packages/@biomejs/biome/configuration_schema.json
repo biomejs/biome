@@ -48,6 +48,13 @@
 				{ "type": "null" }
 			]
 		},
+		"grit": {
+			"description": "Specific configuration for the GraphQL language",
+			"anyOf": [
+				{ "$ref": "#/definitions/GritConfiguration" },
+				{ "type": "null" }
+			]
+		},
 		"javascript": {
 			"description": "Specific configuration for the JavaScript language",
 			"anyOf": [
@@ -1523,6 +1530,46 @@
 			},
 			"additionalProperties": false
 		},
+		"GritConfiguration": {
+			"description": "Options applied to GritQL files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"description": "Formatting options",
+					"anyOf": [
+						{ "$ref": "#/definitions/GritFormatter" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"GritFormatter": {
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for Grit files.",
+					"type": ["boolean", "null"]
+				},
+				"indentStyle": {
+					"description": "The indent style applied to Grit files.",
+					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to Grit files. Default to 2.",
+					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to Grit files.",
+					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to Grit files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"Hook": {
 			"type": "object",
 			"properties": {
@@ -2738,6 +2785,13 @@
 					"description": "Specific configuration for the Graphql language",
 					"anyOf": [
 						{ "$ref": "#/definitions/GraphqlConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"grit": {
+					"description": "Specific configuration for the GritQL language",
+					"anyOf": [
+						{ "$ref": "#/definitions/GritConfiguration" },
 						{ "type": "null" }
 					]
 				},

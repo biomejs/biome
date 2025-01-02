@@ -42,7 +42,7 @@ fn formatter_biome_json() {
                 "--indent-width",
                 "8",
                 "--write",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -87,7 +87,7 @@ fn linter_biome_json() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -136,7 +136,7 @@ fn check_biome_json() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -181,7 +181,7 @@ fn ci_biome_json() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", input_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["ci", input_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
