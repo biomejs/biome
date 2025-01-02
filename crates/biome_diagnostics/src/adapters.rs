@@ -143,7 +143,7 @@ impl Diagnostic for ResolveError {
         write!(fmt, "{}", self.error)
     }
 
-    fn message(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
+    fn message(&self, fmt: &mut fmt::Formatter<'_>) -> std::io::Result<()> {
         fmt.write_markup(markup!({ AsConsoleDisplay(&self.error) }))
     }
 }

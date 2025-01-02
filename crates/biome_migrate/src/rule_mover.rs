@@ -180,7 +180,6 @@ impl AnalyzerMover {
     /// ## Panics
     ///
     /// It panics if the group doesn't exist. This usually means that the developer must add the new group
-    #[allow(unused)]
     pub(crate) fn insert_rule(
         &mut self,
         rule_name: impl ToString,
@@ -201,7 +200,7 @@ impl AnalyzerMover {
     /// ## Panics
     ///
     /// It panics if the group doesn't exist. This usually means that the developer must add the new group
-    #[allow(unused)]
+    #[expect(unused)]
     pub(crate) fn remove_rule(
         &mut self,
         rule_name: impl ToString,

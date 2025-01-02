@@ -82,7 +82,7 @@ fn format_astro_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", astro_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", astro_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -107,14 +107,7 @@ fn format_astro_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                astro_file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", astro_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -139,14 +132,7 @@ fn format_empty_astro_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                astro_file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", astro_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -174,7 +160,7 @@ fn format_astro_carriage_return_line_feed_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", astro_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", astro_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -202,7 +188,7 @@ fn lint_astro_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", astro_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", astro_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -230,15 +216,7 @@ fn lint_and_fix_astro_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--write",
-                "--unsafe",
-                astro_file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--write", "--unsafe", astro_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -268,7 +246,7 @@ fn sorts_imports_check() {
                 "check",
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
-                astro_file_path.as_os_str().to_str().unwrap(),
+                astro_file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -302,7 +280,7 @@ fn sorts_imports_write() {
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
                 "--write",
-                astro_file_path.as_os_str().to_str().unwrap(),
+                astro_file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -330,7 +308,7 @@ fn does_not_throw_parse_error_for_return() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", astro_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", astro_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -640,7 +618,7 @@ fn astro_global_object() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", astro_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", astro_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

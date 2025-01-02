@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 # Emitted Messages
 
@@ -113,6 +114,13 @@ The configuration that is contained inside the file `biome.json`
         --graphql-formatter-quote-style=<double|single>  The type of quotes used in GraphQL code.
                               Defaults to double.
         --graphql-linter-enabled=<true|false>  Control the formatter for GraphQL files.
+        --grit-formatter-enabled=<true|false>  Control the formatter for Grit files.
+        --grit-formatter-indent-style=<tab|space>  The indent style applied to Grit files.
+        --grit-formatter-indent-width=NUMBER  The size of the indentation applied to Grit files.
+                              Default to 2.
+        --grit-formatter-line-ending=<lf|crlf|cr>  The type of line ending applied to Grit files.
+        --grit-formatter-line-width=NUMBER  What's the max width of a line applied to Grit files.
+                              Defaults to 80.
         --assist-enabled=<true|false>  Whether Biome should enable assist via LSP.
 
 Global options applied to all commands

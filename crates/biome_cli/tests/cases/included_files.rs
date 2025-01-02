@@ -39,15 +39,7 @@ fn does_handle_only_included_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -88,15 +80,7 @@ fn does_not_handle_included_files_if_overridden_by_ignore() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -137,15 +121,7 @@ fn does_not_handle_included_files_if_overridden_by_ignore_formatter() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -186,15 +162,7 @@ fn does_not_handle_included_files_if_overridden_by_ignore_linter() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--write",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -237,15 +205,7 @@ fn does_not_handle_included_files_if_overridden_by_organize_imports() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--write",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

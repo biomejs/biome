@@ -55,15 +55,7 @@ fn does_handle_included_file_and_disable_formatter() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -104,15 +96,7 @@ fn does_include_file_with_different_formatting() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -156,15 +140,7 @@ fn does_include_file_with_different_formatting_and_all_of_them() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -208,15 +184,7 @@ fn does_include_file_with_different_overrides() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -282,8 +250,8 @@ fn complex_enable_disable_overrides() {
             [
                 "format",
                 "--write",
-                formatted.as_os_str().to_str().unwrap(),
-                unformatted.as_os_str().to_str().unwrap(),
+                formatted.as_str(),
+                unformatted.as_str(),
             ]
             .as_slice(),
         ),
@@ -334,9 +302,9 @@ fn does_include_file_with_different_languages() {
             [
                 "format",
                 "--write",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-                test_css.as_os_str().to_str().unwrap(),
+                test.as_str(),
+                test2.as_str(),
+                test_css.as_str(),
             ]
             .as_slice(),
         ),
@@ -405,10 +373,10 @@ fn does_include_file_with_different_languages_and_files() {
             [
                 "format",
                 "--write",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-                json_file.as_os_str().to_str().unwrap(),
-                css_file.as_os_str().to_str().unwrap(),
+                test.as_str(),
+                test2.as_str(),
+                json_file.as_str(),
+                css_file.as_str(),
             ]
             .as_slice(),
         ),
@@ -457,15 +425,7 @@ fn does_not_change_formatting_settings() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -509,15 +469,7 @@ fn does_not_change_formatting_language_settings() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -561,15 +513,7 @@ fn does_not_change_formatting_language_settings_2() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -612,14 +556,7 @@ fn does_not_conceal_previous_overrides() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -658,7 +595,7 @@ fn takes_last_formatter_enabled_into_account() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", test.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", test.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -710,14 +647,7 @@ fn does_not_override_well_known_special_files_when_config_override_is_present() 
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                other_json.as_os_str().to_str().unwrap(),
-                tsconfig.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", other_json.as_str(), tsconfig.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -785,15 +715,7 @@ fn allow_trailing_commas_on_well_known_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                other_json.as_os_str().to_str().unwrap(),
-                tsconfig.as_os_str().to_str().unwrap(),
-                ".vscode/",
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", other_json.as_str(), tsconfig.as_str(), ".vscode/"].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -841,12 +763,59 @@ fn disallow_comments_on_well_known_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", tsconfig.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", tsconfig.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "disallow_comments_on_well_known_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn overrides_grit_formatting_options() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "formatter": {
+                "indentStyle": "tab"
+            },
+            "overrides": [
+                {
+                    "include": [
+                        "file.grit"
+                    ],
+                    "grit": { "formatter": { "indentStyle": "space", "indentWidth": 8 }  }
+                }
+            ]
+        }"#
+        .as_bytes(),
+    );
+
+    let js_file = Utf8Path::new("file.js");
+    fs.insert(js_file.into(), r#"function name() { return "hello"; }"#);
+
+    let grit_file = Utf8Path::new("file.grit");
+    fs.insert(
+        grit_file.into(),
+        r#"`console.$_($content)` where { $content <: contains `secret` until `sanitized($_)` }"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", js_file.as_str(), grit_file.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "overrides_grit_formatting_options",
         fs,
         console,
         result,

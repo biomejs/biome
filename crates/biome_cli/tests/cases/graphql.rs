@@ -31,7 +31,7 @@ fn format_graphql_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -58,7 +58,7 @@ fn format_and_write_graphql_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -89,7 +89,7 @@ fn lint_single_rule() {
             [
                 "lint",
                 "--only=nursery/useDeprecatedReason",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),

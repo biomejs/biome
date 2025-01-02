@@ -233,7 +233,7 @@ fn print() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -260,7 +260,7 @@ fn write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -289,7 +289,7 @@ fn format_shows_parse_diagnostics() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -350,7 +350,7 @@ fn lint_warning() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -400,7 +400,7 @@ fn custom_config_file_path() {
                 "format",
                 format!("--config-path={}", config_path.to_string().as_str()).as_str(),
                 "--write",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -440,7 +440,7 @@ fn invalid_config_file_path() {
                 "--config-path",
                 (config_path.to_string().as_str()),
                 "--write",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -478,7 +478,7 @@ fn applies_custom_configuration() {
                 "--indent-width",
                 "8",
                 "--write",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -521,7 +521,7 @@ fn applies_custom_configuration_over_config_file() {
                 "--indent-width",
                 "8",
                 "--write",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -554,15 +554,7 @@ fn applies_custom_configuration_over_config_file_issue_3175_v1() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--quote-style",
-                "single",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--quote-style", "single", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -597,15 +589,7 @@ fn applies_custom_configuration_over_config_file_issue_3175_v2() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--indent-style",
-                "space",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--indent-style", "space", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -640,7 +624,7 @@ fn applies_custom_jsx_quote_style() {
                 "--quote-properties",
                 "preserve",
                 "--write",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -678,7 +662,7 @@ fn applies_custom_quote_style() {
                 "--quote-properties",
                 "preserve",
                 "--write",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -718,7 +702,7 @@ fn applies_custom_css_quote_style() {
                 "--css-formatter-quote-style",
                 "single",
                 "--write",
-                css_file_path.as_os_str().to_str().unwrap(),
+                css_file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -754,7 +738,7 @@ fn applies_custom_trailing_commas() {
                 "--trailing-commas",
                 "none",
                 "--write",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -790,7 +774,7 @@ fn applies_custom_attribute_position() {
                 "--attribute-position",
                 "multiline",
                 "--write",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -826,7 +810,7 @@ fn applies_custom_arrow_parentheses() {
                 "--arrow-parentheses",
                 "as-needed",
                 "--write",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -862,7 +846,7 @@ fn applies_custom_bracket_spacing() {
                 "--bracket-spacing",
                 "false",
                 "--write",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -898,7 +882,7 @@ fn applies_custom_bracket_same_line() {
                 "--bracket-same-line",
                 "true",
                 "--write",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -955,7 +939,7 @@ fn with_semicolons_options() {
                 "format",
                 "--semicolons=as-needed",
                 "--write",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -1336,8 +1320,8 @@ fn does_not_format_if_files_are_listed_in_ignore_option() {
         Args::from(
             [
                 "format",
-                file_path_test1.as_os_str().to_str().unwrap(),
-                file_path_test2.as_os_str().to_str().unwrap(),
+                file_path_test1.as_str(),
+                file_path_test2.as_str(),
                 "--write",
             ]
             .as_slice(),
@@ -1537,7 +1521,7 @@ fn fs_error_read_only() {
     let (mut fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1565,7 +1549,7 @@ fn file_too_large() {
     let (mut fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path.as_os_str().to_str().unwrap(), "--write"].as_slice()),
+        Args::from(["format", file_path.as_str(), "--write"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1595,7 +1579,7 @@ fn file_too_large_config_limit() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1620,14 +1604,7 @@ fn file_too_large_cli_limit() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--files-max-size=16",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--files-max-size=16", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1652,14 +1629,7 @@ fn files_max_size_parse_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--files-max-size=-1",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--files-max-size=-1", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1804,14 +1774,7 @@ fn print_verbose() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--verbose",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--verbose", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1872,8 +1835,8 @@ file2.js
             [
                 "format",
                 "--write",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -1933,8 +1896,8 @@ file2.js
                 "--vcs-use-ignore-file=true",
                 "--vcs-root=.",
                 "--write",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -2080,8 +2043,8 @@ fn ignores_unknown_file() {
         Args::from(
             [
                 "format",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
                 "--files-ignore-unknown=true",
             ]
             .as_slice(),
@@ -2142,7 +2105,7 @@ fn ignore_comments_error_when_allow_comments() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2172,7 +2135,7 @@ fn format_jsonc_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2209,7 +2172,7 @@ fn format_json_when_allow_trailing_commas() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2243,7 +2206,7 @@ fn format_json_when_allow_trailing_commas_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2280,7 +2243,7 @@ fn format_json_trailing_commas_none() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2317,7 +2280,7 @@ fn format_json_trailing_commas_all() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2360,7 +2323,7 @@ fn format_json_trailing_commas_overrides_all() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2403,7 +2366,7 @@ fn format_json_trailing_commas_overrides_none() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2439,15 +2402,7 @@ fn treat_known_json_files_as_jsonc_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                eslint.as_os_str().to_str().unwrap(),
-                jshint.as_os_str().to_str().unwrap(),
-                babel.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", eslint.as_str(), jshint.as_str(), babel.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2520,9 +2475,9 @@ const a = {
             [
                 "format",
                 "--write",
-                json_file.as_os_str().to_str().unwrap(),
-                js_file.as_os_str().to_str().unwrap(),
-                css_file.as_os_str().to_str().unwrap(),
+                json_file.as_str(),
+                js_file.as_str(),
+                css_file.as_str(),
             ]
             .as_slice(),
         ),
@@ -2588,9 +2543,9 @@ const a = {
                 "--css-formatter-line-width=40",
                 "--css-formatter-indent-width=6",
                 "--css-formatter-enabled=true",
-                json_file.as_os_str().to_str().unwrap(),
-                js_file.as_os_str().to_str().unwrap(),
-                css_file.as_os_str().to_str().unwrap(),
+                json_file.as_str(),
+                js_file.as_str(),
+                css_file.as_str(),
             ]
             .as_slice(),
         ),
@@ -2652,15 +2607,7 @@ const a = {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                json_file.as_os_str().to_str().unwrap(),
-                js_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", json_file.as_str(), js_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2721,15 +2668,7 @@ const a = {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                json_file.as_os_str().to_str().unwrap(),
-                js_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", json_file.as_str(), js_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2789,15 +2728,7 @@ const a = {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                css_file.as_os_str().to_str().unwrap(),
-                js_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", css_file.as_str(), js_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2861,15 +2792,7 @@ const a = {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                json_file.as_os_str().to_str().unwrap(),
-                js_file.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", json_file.as_str(), js_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3045,7 +2968,7 @@ fn applies_configuration_from_biome_jsonc() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3092,7 +3015,7 @@ fn format_package_json() {
                 "format",
                 "--write",
                 "--indent-style=space",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -3127,7 +3050,7 @@ fn format_svelte_implicit_js_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", svelte_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", svelte_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -3157,14 +3080,7 @@ fn format_svelte_implicit_js_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                svelte_file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", svelte_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3194,7 +3110,7 @@ fn format_svelte_explicit_js_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", svelte_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", svelte_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -3224,14 +3140,7 @@ fn format_svelte_explicit_js_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                svelte_file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", svelte_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3258,14 +3167,7 @@ fn format_empty_svelte_js_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                svelte_file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", svelte_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3295,7 +3197,7 @@ fn format_svelte_ts_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", svelte_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", svelte_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -3325,14 +3227,7 @@ fn format_svelte_ts_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                svelte_file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", svelte_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3359,14 +3254,7 @@ fn format_empty_svelte_ts_files_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                svelte_file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", svelte_file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3417,7 +3305,7 @@ fn should_format_files_in_folders_ignored_by_linter() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3442,14 +3330,7 @@ fn print_json() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--reporter=json",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--reporter=json", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -3476,14 +3357,7 @@ fn print_json_pretty() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--reporter=json-pretty",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--reporter=json-pretty", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -3531,7 +3405,7 @@ fn fix() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--fix", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", "--fix", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3615,7 +3489,7 @@ fn applies_custom_bracket_spacing_for_graphql() {
                 "--bracket-spacing",
                 "false",
                 "--write",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),

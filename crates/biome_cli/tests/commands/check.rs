@@ -85,7 +85,7 @@ fn ok() {
     let (_, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -102,7 +102,7 @@ fn ok_read_only() {
     let (_, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -119,7 +119,7 @@ fn parse_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -143,7 +143,7 @@ fn lint_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -167,7 +167,7 @@ fn maximum_diagnostics() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -212,7 +212,7 @@ fn apply_ok() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -245,7 +245,7 @@ fn apply_noop() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -270,15 +270,7 @@ fn apply_suggested_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--unsafe",
-                "--write",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--unsafe", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -303,15 +295,7 @@ fn apply_suggested() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--write",
-                "--unsafe",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--write", "--unsafe", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -364,8 +348,8 @@ function f() {\n\targuments;\n}
                 "check",
                 "--write",
                 "--unsafe",
-                test1.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
+                test1.as_str(),
+                test2.as_str(),
             ]
             .as_slice(),
         ),
@@ -399,7 +383,7 @@ fn no_lint_if_linter_is_disabled_when_run_apply() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -435,7 +419,7 @@ fn no_lint_if_linter_is_disabled_when_run_apply_biome_jsonc() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -471,7 +455,7 @@ fn no_lint_if_linter_is_disabled() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -507,7 +491,7 @@ fn should_disable_a_rule() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -546,7 +530,7 @@ fn should_disable_a_rule_group() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -584,7 +568,7 @@ fn downgrade_severity() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -628,7 +612,7 @@ fn upgrade_severity() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -673,7 +657,7 @@ fn no_lint_when_file_is_ignored() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -728,8 +712,8 @@ fn no_lint_if_files_are_listed_in_ignore_option() {
             [
                 "check",
                 "--write",
-                file_path_test1.as_os_str().to_str().unwrap(),
-                file_path_test2.as_os_str().to_str().unwrap(),
+                file_path_test1.as_str(),
+                file_path_test2.as_str(),
             ]
             .as_slice(),
         ),
@@ -924,7 +908,7 @@ fn fs_error_read_only() {
     let (mut fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1098,7 +1082,7 @@ fn file_too_large() {
     let (mut fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1128,7 +1112,7 @@ fn file_too_large_config_limit() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1153,14 +1137,7 @@ fn file_too_large_cli_limit() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--files-max-size=16",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--files-max-size=16", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1185,14 +1162,7 @@ fn files_max_size_parse_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--files-max-size=-1",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--files-max-size=-1", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1265,7 +1235,7 @@ fn max_diagnostics() {
                 "check",
                 "--max-diagnostics",
                 "10",
-                Utf8Path::new("src").as_os_str().to_str().unwrap(),
+                Utf8Path::new("src").as_str(),
             ]
             .as_slice(),
         ),
@@ -1327,14 +1297,7 @@ fn print_verbose() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--verbose",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--verbose", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1359,15 +1322,7 @@ fn print_verbose_write() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--verbose",
-                "--write",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--verbose", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1392,7 +1347,7 @@ fn unsupported_file() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -1416,14 +1371,7 @@ fn unsupported_file_verbose() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--verbose",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--verbose", file_path.as_str()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -1447,7 +1395,7 @@ fn suppression_syntax_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1475,7 +1423,7 @@ fn config_recommended_group() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
@@ -1498,7 +1446,7 @@ fn nursery_unstable() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1533,7 +1481,7 @@ import * as something from "../something";
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1577,7 +1525,7 @@ fn applies_organize_imports_bug_4552() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1605,7 +1553,7 @@ import * as something from "../something";
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1638,7 +1586,7 @@ import * as something from "../something";
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1673,15 +1621,7 @@ import * as something from "../something";
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--write",
-                "--unsafe",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--write", "--unsafe", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1722,7 +1662,7 @@ import * as something from "../something";
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
                 "--assist-enabled=true",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -1764,7 +1704,7 @@ fn ignore_configured_globals() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1815,14 +1755,7 @@ file2.js
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", file_path1.as_str(), file_path2.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1874,8 +1807,8 @@ ignored/**
                 "--vcs-root=.",
                 "--write",
                 "--unsafe",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -1937,9 +1870,9 @@ fn ignore_vcs_os_independent_parse() {
         Args::from(
             [
                 "check",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
-                file_path3.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
+                file_path3.as_str(),
             ]
             .as_slice(),
         ),
@@ -1992,8 +1925,8 @@ file2.js
                 "--vcs-client-kind=git",
                 "--vcs-use-ignore-file=true",
                 "--vcs-root=.",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -2272,7 +2205,7 @@ fn should_apply_correct_file_source() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2335,7 +2268,7 @@ fn should_not_enable_all_recommended_rules() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2384,7 +2317,7 @@ array.map((sentence) => sentence.split(" ")).flat();
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2412,15 +2345,7 @@ fn apply_bogus_argument() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                file_path.as_os_str().to_str().unwrap(),
-                "--write",
-                "--unsafe",
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", file_path.as_str(), "--write", "--unsafe"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2451,8 +2376,8 @@ fn ignores_unknown_file() {
         Args::from(
             [
                 "check",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
                 "--files-ignore-unknown=true",
             ]
             .as_slice(),
@@ -2497,7 +2422,7 @@ fn check_json_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path1.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path1.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2568,15 +2493,7 @@ A = 0;
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--write",
-                "--unsafe",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--write", "--unsafe", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2631,7 +2548,7 @@ A = 0;
                 "--write",
                 "--unsafe",
                 "--error-on-warnings",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -2664,15 +2581,7 @@ fn use_literal_keys_should_emit_correct_ast_issue_266() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--write",
-                "--unsafe",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--write", "--unsafe", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2721,7 +2630,7 @@ fn should_show_formatter_diagnostics_for_files_ignored_by_linter() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2752,7 +2661,7 @@ fn print_json() {
                 "--write",
                 "--unsafe",
                 "--reporter=json",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -2786,7 +2695,7 @@ fn print_json_pretty() {
                 "--write",
                 "--unsafe",
                 "--reporter=json-pretty",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -2833,7 +2742,7 @@ fn fix_ok() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--fix", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--fix", file_path.as_str()].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -2862,15 +2771,7 @@ fn fix_unsafe_ok() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--fix",
-                "--unsafe",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--fix", "--unsafe", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2902,7 +2803,7 @@ fn fix_noop() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--fix", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--fix", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2925,15 +2826,7 @@ fn fix_suggested_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--fix",
-                "--write",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--fix", "--write", file_path.as_str()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
@@ -2969,16 +2862,7 @@ function f() {\n\targuments;\n}
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--fix",
-                "--unsafe",
-                test1.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--fix", "--unsafe", test1.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3003,7 +2887,7 @@ fn write_ok() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -3032,15 +2916,7 @@ fn write_unsafe_ok() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--write",
-                "--unsafe",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--write", "--unsafe", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3072,7 +2948,7 @@ fn write_noop() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3095,15 +2971,7 @@ fn write_suggested_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--write",
-                "--write",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--write", "--write", file_path.as_str()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
@@ -3144,8 +3012,8 @@ function f() {\n\targuments;\n}
                 "check",
                 "--write",
                 "--unsafe",
-                test1.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
+                test1.as_str(),
+                test2.as_str(),
             ]
             .as_slice(),
         ),

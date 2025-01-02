@@ -81,7 +81,7 @@ fn ok() {
     let (_, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -98,7 +98,7 @@ fn ok_read_only() {
     let (_, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -115,7 +115,7 @@ fn parse_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -138,7 +138,7 @@ fn maximum_diagnostics() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -183,7 +183,7 @@ fn apply_ok() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -216,7 +216,7 @@ fn apply_noop() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -241,15 +241,7 @@ fn apply_suggested_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--write",
-                "--unsafe",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--write", "--unsafe", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -274,15 +266,7 @@ fn apply_suggested() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--write",
-                "--unsafe",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--write", "--unsafe", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -335,8 +319,8 @@ function f() { arguments; }
                 "lint",
                 "--write",
                 "--unsafe",
-                test1.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
+                test1.as_str(),
+                test2.as_str(),
             ]
             .as_slice(),
         ),
@@ -370,7 +354,7 @@ fn no_lint_if_linter_is_disabled_when_run_apply() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -406,7 +390,7 @@ fn no_lint_if_linter_is_disabled_when_run_apply_biome_jsonc() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -442,7 +426,7 @@ fn no_lint_if_linter_is_disabled() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -478,7 +462,7 @@ fn should_disable_a_rule() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -517,7 +501,7 @@ fn should_disable_a_rule_group() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -555,7 +539,7 @@ fn downgrade_severity() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     println!("{console:?}");
@@ -601,14 +585,7 @@ fn downgrade_severity_info() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--error-on-warnings",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--error-on-warnings", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -652,7 +629,7 @@ fn upgrade_severity() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -697,7 +674,7 @@ fn no_lint_when_file_is_ignored() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -740,8 +717,8 @@ fn no_lint_if_files_are_listed_in_ignore_option() {
             [
                 "lint",
                 "--write",
-                file_path_test1.as_os_str().to_str().unwrap(),
-                file_path_test2.as_os_str().to_str().unwrap(),
+                file_path_test1.as_str(),
+                file_path_test2.as_str(),
             ]
             .as_slice(),
         ),
@@ -950,7 +927,7 @@ fn fs_error_read_only() {
     let (mut fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1290,7 +1267,7 @@ fn file_too_large() {
     let (mut fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1320,7 +1297,7 @@ fn file_too_large_config_limit() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1345,14 +1322,7 @@ fn file_too_large_cli_limit() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--files-max-size=16",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--files-max-size=16", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1377,14 +1347,7 @@ fn files_max_size_parse_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--files-max-size=-1",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--files-max-size=-1", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1455,7 +1418,7 @@ fn max_diagnostics() {
                 "lint",
                 "--max-diagnostics",
                 "10",
-                Utf8Path::new("src").as_os_str().to_str().unwrap(),
+                Utf8Path::new("src").as_str(),
             ]
             .as_slice(),
         ),
@@ -1515,7 +1478,7 @@ fn print_verbose() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--verbose", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--verbose", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1540,7 +1503,7 @@ fn unsupported_file() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -1564,7 +1527,7 @@ fn unsupported_file_verbose() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--verbose", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--verbose", file_path.as_str()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -1588,7 +1551,7 @@ fn suppression_syntax_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1616,7 +1579,7 @@ fn config_recommended_group() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
@@ -1639,7 +1602,7 @@ fn nursery_unstable() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1685,7 +1648,7 @@ fn group_level_recommended_false_enable_specific() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1729,7 +1692,7 @@ fn ignore_configured_globals() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1780,14 +1743,7 @@ file2.js
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", file_path1.as_str(), file_path2.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1843,9 +1799,9 @@ fn ignore_vcs_os_independent_parse() {
         Args::from(
             [
                 "lint",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
-                file_path3.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
+                file_path3.as_str(),
             ]
             .as_slice(),
         ),
@@ -1898,8 +1854,8 @@ file2.js
                 "--vcs-client-kind=git",
                 "--vcs-use-ignore-file=true",
                 "--vcs-root=.",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -2064,7 +2020,7 @@ fn should_apply_correct_file_source() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2127,7 +2083,7 @@ fn should_not_enable_all_recommended_rules() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2176,7 +2132,7 @@ array.map((sentence) => sentence.split(" ")).flat();
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2204,15 +2160,7 @@ fn apply_bogus_argument() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                file_path.as_os_str().to_str().unwrap(),
-                "--write",
-                "--unsafe",
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", file_path.as_str(), "--write", "--unsafe"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2243,8 +2191,8 @@ fn ignores_unknown_file() {
         Args::from(
             [
                 "lint",
-                file_path1.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path1.as_str(),
+                file_path2.as_str(),
                 "--files-ignore-unknown=true",
             ]
             .as_slice(),
@@ -2289,7 +2237,7 @@ fn check_json_files() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path1.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path1.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2415,7 +2363,7 @@ A = 0;
                 "--write",
                 "--unsafe",
                 "--error-on-warnings",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -2453,8 +2401,8 @@ fn should_only_processes_changed_files_when_changed_flag_is_set() {
                 "lint",
                 "--changed",
                 "--since=main",
-                file_path.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -2487,15 +2435,7 @@ fn should_error_if_changed_flag_is_used_without_since_or_default_branch_config()
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--changed",
-                file_path.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--changed", file_path.as_str(), file_path2.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2538,15 +2478,7 @@ fn should_process_changed_files_if_changed_flag_is_set_and_default_branch_is_con
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--changed",
-                file_path.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--changed", file_path.as_str(), file_path2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2580,8 +2512,8 @@ fn should_error_if_since_arg_is_used_without_changed() {
             [
                 "lint",
                 "--since=main",
-                file_path.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -2637,8 +2569,8 @@ fn should_only_process_changed_file_if_its_included() {
                 "lint",
                 "--changed",
                 "--since=main",
-                file_path.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -2692,8 +2624,8 @@ fn should_not_process_ignored_file_even_if_its_changed() {
                 "lint",
                 "--changed",
                 "--since=main",
-                file_path.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -2730,8 +2662,8 @@ fn should_not_error_for_no_changed_files_with_no_errors_on_unmatched() {
                 "--changed",
                 "--since=main",
                 "--no-errors-on-unmatched",
-                file_path.as_os_str().to_str().unwrap(),
-                file_path2.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
+                file_path2.as_str(),
             ]
             .as_slice(),
         ),
@@ -2924,7 +2856,7 @@ fn lint_syntax_rules() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2970,7 +2902,7 @@ fn lint_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2995,14 +2927,7 @@ fn lint_only_rule_doesnt_exist() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--only=suspicious/inexistant",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--only=suspicious/inexistant", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -3027,14 +2952,7 @@ fn lint_only_missing_group() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--only=noDebugger",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--only=noDebugger", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -3060,14 +2978,7 @@ fn lint_only_rule() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--only=suspicious/noDebugger",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--only=suspicious/noDebugger", file_path.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -3096,7 +3007,7 @@ fn lint_only_multiple_rules() {
                 "lint",
                 "--only=suspicious/noDebugger",
                 "--only=performance/noDelete",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -3128,7 +3039,7 @@ fn lint_only_rule_and_group() {
                 "lint",
                 "--only=suspicious/noDebugger",
                 "--only=performance",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -3159,14 +3070,7 @@ fn lint_only_rule_ignore_suppression_comments() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--only=suspicious/noDebugger",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--only=suspicious/noDebugger", file_path.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -3213,7 +3117,7 @@ fn lint_only_rule_with_config() {
             [
                 "lint",
                 "--only=style/useNamingConvention",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -3255,7 +3159,7 @@ fn lint_only_rule_with_recommended_disabled() {
             [
                 "lint",
                 "--only=lint/style/useNamingConvention",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -3295,7 +3199,7 @@ fn lint_only_rule_with_linter_disabled() {
             [
                 "lint",
                 "--only=style/useNamingConvention",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -3337,14 +3241,7 @@ fn lint_only_group() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--only=suspicious",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--only=suspicious", file_path.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -3383,14 +3280,7 @@ fn lint_only_group_with_disabled_rule() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--only=lint/suspicious",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--only=lint/suspicious", file_path.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -3427,7 +3317,7 @@ fn lint_only_write() {
                 "lint",
                 "--write",
                 "--only=complexity/useArrowFunction",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -3454,14 +3344,7 @@ fn lint_skip_rule() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--skip=suspicious/noDebugger",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--skip=suspicious/noDebugger", file_path.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -3496,14 +3379,7 @@ fn lint_skip_group_with_enabled_rule() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--skip=suspicious",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--skip=suspicious", file_path.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -3532,7 +3408,7 @@ fn lint_skip_multiple_rules() {
                 "lint",
                 "--skip=suspicious/noDebugger",
                 "--skip=performance/noDelete",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -3564,7 +3440,7 @@ fn lint_skip_rule_and_group() {
                 "lint",
                 "--skip=suspicious/noDebugger",
                 "--skip=performance",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -3604,7 +3480,7 @@ fn lint_skip_write() {
                 "lint",
                 "--write",
                 "--skip=complexity/useArrowFunction",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -3636,7 +3512,7 @@ fn lint_only_group_skip_rule() {
                 "lint",
                 "--only=suspicious",
                 "--skip=suspicious/noDebugger",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -3668,7 +3544,7 @@ fn lint_only_rule_skip_group() {
                 "lint",
                 "--only=suspicious/noDebugger",
                 "--skip=suspicious",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -3700,7 +3576,7 @@ fn lint_only_skip_rule() {
                 "lint",
                 "--only=suspicious/noDebugger",
                 "--skip=suspicious/noDebugger",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -3732,7 +3608,7 @@ fn lint_only_skip_group() {
                 "lint",
                 "--only=suspicious",
                 "--skip=suspicious",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -3756,7 +3632,7 @@ fn fix_ok() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--fix", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--fix", file_path.as_str()].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -3784,7 +3660,7 @@ fn fix_noop() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", "--fix", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--fix", file_path.as_str()].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
@@ -3805,15 +3681,7 @@ fn fix_suggested_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--fix",
-                "--write",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--fix", "--write", file_path.as_str()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
@@ -3834,15 +3702,7 @@ fn fix_suggested() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--fix",
-                "--unsafe",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--fix", "--unsafe", file_path.as_str()].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -3883,16 +3743,7 @@ function f() { arguments; }
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--fix",
-                "--unsafe",
-                test1.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--fix", "--unsafe", test1.as_str(), test2.as_str()].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_file_contents(&fs, test1, expected);
@@ -3979,7 +3830,7 @@ fn linter_shows_the_default_severity_of_rule_on() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["lint", file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file.as_str()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(

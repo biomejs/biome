@@ -37,14 +37,7 @@ fn logs_the_appropriate_messages_according_to_set_diagnostics_level() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "lint",
-                "--diagnostic-level=error",
-                test.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--diagnostic-level=error", test.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -213,15 +206,7 @@ fn max_diagnostics_are_lifted() {
     let (mut fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "ci",
-                "--max-diagnostics",
-                "none",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["ci", "--max-diagnostics", "none", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
