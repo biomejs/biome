@@ -158,7 +158,7 @@ fn maximum_diagnostics() {
         .filter(|m| m.level == LogLevel::Log)
         .any(|m| {
             let content = format!("{:?}", m.content);
-            content.contains("The number of diagnostics exceeds the number allowed by Biome")
+            content.contains("The number of diagnostics exceeds the limit allowed")
                 && content.contains("Diagnostics not shown")
                 && content.contains("28")
         }));

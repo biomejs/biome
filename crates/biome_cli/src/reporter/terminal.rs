@@ -68,7 +68,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
 
         if !execution.is_ci() && summary.diagnostics_not_printed > 0 {
             self.0.log(markup! {
-                <Warn>"The number of diagnostics exceeds the number allowed by Biome.\n"</Warn>
+                <Warn>"The number of diagnostics exceeds the limit allowed. Use "<Emphasis>"--max-diagnostics"</Emphasis>" to increase it.\n"</Warn>
                 <Info>"Diagnostics not shown: "</Info><Emphasis>{summary.diagnostics_not_printed}</Emphasis><Info>"."</Info>
             })
         }
