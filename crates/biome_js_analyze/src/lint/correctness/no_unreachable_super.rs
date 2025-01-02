@@ -72,7 +72,6 @@ declare_lint_rule! {
     }
 }
 
-#[allow(clippy::enum_variant_names)]
 pub enum RuleState {
     /// The constructor may call `super` multiple times
     DuplicateSuper { first: TextRange, second: TextRange },

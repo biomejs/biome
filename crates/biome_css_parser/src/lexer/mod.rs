@@ -55,7 +55,7 @@ impl LexContext for CssLexContext {
 /// Context in which the [CssLexContext]'s current should be re-lexed.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum CssReLexContext {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     Regular,
     /// See [CssLexContext::UnicodeRange]
     UnicodeRange,
@@ -922,6 +922,8 @@ impl<'src> CssLexer<'src> {
             b"value" => VALUE_KW,
             b"as" => AS_KW,
             b"composes" => COMPOSES_KW,
+            b"position-try" => POSITION_TRY_KW,
+            b"view-transition" => VIEW_TRANSITION_KW,
             _ => IDENT,
         }
     }

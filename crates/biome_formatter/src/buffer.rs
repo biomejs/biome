@@ -1,4 +1,4 @@
-#![allow(clippy::mutable_key_type)]
+#![expect(clippy::mutable_key_type)]
 use super::{write, Arguments, FormatElement};
 use crate::format_element::Interned;
 use crate::prelude::tag::Condition;

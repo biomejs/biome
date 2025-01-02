@@ -148,7 +148,7 @@ pub enum EditorconfigValue<T> {
 }
 
 // This is an `Into` because implementing `From` is not possible because you can't implement traits for a type you don't own.
-#[allow(clippy::from_over_into)]
+#[expect(clippy::from_over_into)]
 impl<T: Default> Into<Option<T>> for EditorconfigValue<T> {
     fn into(self) -> Option<T> {
         match self {

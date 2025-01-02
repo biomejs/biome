@@ -8,8 +8,6 @@ use camino::Utf8Path;
 )]
 #[serde(rename_all = "camelCase")]
 pub struct CssFileSource {
-    // Unused until we potentially support postcss/less/sass
-    #[allow(unused)]
     variant: CssVariant,
 }
 

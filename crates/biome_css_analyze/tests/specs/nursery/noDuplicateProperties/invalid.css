@@ -42,3 +42,20 @@ a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
 a { color: red !important; color: blue; }
 
 a { color: red !important; color: blue !important; }
+
+a {
+    @supports (color: pink) {
+        color: pink;
+        color: orange;
+    }
+}
+
+a {
+    @supports (color: pink) {
+        color: pink;
+        &:hover {
+            color: orange;
+            color: black;
+        }
+    }
+}

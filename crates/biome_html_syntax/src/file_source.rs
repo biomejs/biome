@@ -7,7 +7,6 @@ use camino::Utf8Path;
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
 pub struct HtmlFileSource {
-    #[allow(unused)]
     variant: HtmlVariant,
 }
 

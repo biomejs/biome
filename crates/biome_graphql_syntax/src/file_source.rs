@@ -8,7 +8,6 @@ use camino::Utf8Path;
 )]
 #[serde(rename_all = "camelCase")]
 pub struct GraphqlFileSource {
-    #[allow(unused)]
     variant: GraphqlVariant,
 }
 

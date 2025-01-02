@@ -1411,7 +1411,7 @@ impl OverrideSettingPattern {
         }
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     // NOTE: Currently not used because the rule options are typed using TypeId and Any, which isn't thread safe.
     // TODO: Find a way to cache this
     fn analyzer_rules_mut(&self, _analyzer_rules: &mut AnalyzerRules) {}

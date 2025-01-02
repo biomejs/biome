@@ -422,7 +422,7 @@ struct JsonRpcRequest<P> {
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct JsonRpcResponse {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     jsonrpc: Cow<'static, str>,
     id: u64,
     result: Option<Box<RawValue>>,
@@ -431,10 +431,10 @@ struct JsonRpcResponse {
 
 #[derive(Debug, Deserialize)]
 struct JsonRpcError {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     code: i64,
     message: String,
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     data: Option<Box<RawValue>>,
 }
 

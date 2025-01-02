@@ -87,6 +87,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   </Suspense>;
   ```
 
+- `noDuplicateProperties` now throws lint errors properly when we use `@supports` (fix [#4756](https://github.com/biomejs/biome/issues/4756)) Contributed by @mehm8128
+
 ### JavaScript APIs
 
 ### Linter
@@ -347,6 +349,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fixed `useSortedClasses` false positive and Supplementary test case ([#3394](https://github.com/biomejs/biome/issues/3394)) Contributed by @hangaoke1
 - [noLabelWithoutControl](https://biomejs.dev/linter/rules/no-label-without-control/) detects button tags as input ([#4511])(https://github.com/biomejs/biome/issues/4511). Contributed by @unvalley
+
+- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) now handles `JsxAttributeInitializerClause`, ensuring that fragments inside expressions like `<A b=<></> />` are preserved. ([#4208](https://github.com/biomejs/biome/issues/4208)). Contributed by @MaxtuneLee
 
 ### Parser
 

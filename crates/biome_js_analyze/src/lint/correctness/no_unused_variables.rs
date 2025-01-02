@@ -28,9 +28,11 @@ declare_lint_rule! {
     /// If you want to report unused imports,
     /// enable [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/).
     ///
-    /// From `v1.9.0`, the rule won't check unused function parameters any more.
+    /// :::caution
+    /// From `v2.0.0`, the rule won't check unused function parameters any more.
     /// If you want to report unused function parameters,
     /// enable [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/).
+    /// :::
     ///
     /// ## Examples
     ///

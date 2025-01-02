@@ -11,8 +11,9 @@ use biome_js_factory::make::{
 };
 use biome_js_syntax::{
     AnyJsExpression, AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsLogicalExpression,
-    JsParenthesizedExpression, JsSyntaxKind, JsxChildList, JsxElement, JsxExpressionAttributeValue,
-    JsxExpressionChild, JsxFragment, JsxTagExpression, JsxText, T,
+    JsParenthesizedExpression, JsSyntaxKind, JsxAttributeInitializerClause, JsxChildList,
+    JsxElement, JsxExpressionAttributeValue, JsxExpressionChild, JsxFragment, JsxTagExpression,
+    JsxText, T,
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt};
 
@@ -131,7 +132,7 @@ impl Rule for NoUselessFragments {
             NoUselessFragmentsQuery::JsxFragment(fragment) => {
                 let parents_where_fragments_must_be_preserved = node.syntax().parent().map_or(
                     false,
-                    |parent| match JsxTagExpression::try_cast(parent) {
+                    |parent| match JsxTagExpression::try_cast(parent.clone()) {
                         Ok(parent) => parent
                             .syntax()
                             .parent()
@@ -164,7 +165,7 @@ impl Rule for NoUselessFragments {
                                         | JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER
                                 )
                             }),
-                        Err(_) => false,
+                        Err(_) => JsxAttributeInitializerClause::try_cast(parent.clone()).is_ok(),
                     },
                 );
 
@@ -409,6 +410,8 @@ impl Rule for NoUselessFragments {
                 // a syntax error
                 return None;
             }
+        } else if let Some(_parent) = node.parent::<JsxAttributeInitializerClause>() {
+            return None;
         }
 
         Some(JsRuleAction::new(

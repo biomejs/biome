@@ -12,7 +12,7 @@ use std::{fmt, path};
 
 /// A pattern parsing error.
 #[derive(Debug)]
-#[allow(missing_copy_implementations)]
+#[expect(missing_copy_implementations)]
 pub struct PatternError {
     /// The approximate character index of where the error occurred.
     pub pos: usize,
@@ -555,7 +555,6 @@ fn chars_eq(a: char, b: char, case_sensitive: bool) -> bool {
 }
 
 /// Configuration options to modify the behaviour of `Pattern::matches_with(..)`.
-#[allow(missing_copy_implementations)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub struct MatchOptions {
     /// Whether or not patterns should be matched in a case-sensitive manner.

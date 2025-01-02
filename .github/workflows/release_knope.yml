@@ -131,7 +131,7 @@ jobs:
 
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
         with:
           name: cli-${{ matrix.target }}
           path: ./dist/biome-*
@@ -156,7 +156,7 @@ jobs:
         run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomejs crates/biome_wasm
 
       - name: Upload WASM artifact
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
         with:
           name: wasm-${{ matrix.target }}
           path: |

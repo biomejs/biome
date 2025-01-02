@@ -415,7 +415,7 @@ trait GritTargetLanguageImpl {
 }
 
 pub trait GritTargetParser: Parser<Tree = GritTargetTree> {
-    #[allow(clippy::wrong_self_convention)]
+    #[expect(clippy::wrong_self_convention)]
     fn from_cached_parse_result(
         &self,
         parse: &AnyParse,

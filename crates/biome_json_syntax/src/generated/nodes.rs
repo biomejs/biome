@@ -1,7 +1,7 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-#![allow(clippy::enum_variant_names)]
-#![allow(clippy::match_like_matches_macro)]
+#![allow(dead_code)]
+#![allow(unused)]
 use crate::{
     macros::map_syntax_node,
     JsonLanguage as Language, JsonSyntaxElement as SyntaxElement,
@@ -9,18 +9,15 @@ use crate::{
     JsonSyntaxKind::{self as SyntaxKind, *},
     JsonSyntaxList as SyntaxList, JsonSyntaxNode as SyntaxNode, JsonSyntaxToken as SyntaxToken,
 };
-use biome_rowan::{support, AstNode, RawSyntaxKind, SyntaxKindSet, SyntaxResult};
-#[allow(unused)]
 use biome_rowan::{
-    AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
-    AstSeparatedListNodesIterator,
+    support, AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
+    AstSeparatedListNodesIterator, RawSyntaxKind, SyntaxKindSet, SyntaxResult,
 };
 use serde::ser::SerializeSeq;
 use serde::{Serialize, Serializer};
 use std::fmt::{Debug, Formatter};
 #[doc = r" Sentinel value indicating a missing element in a dynamic node, where"]
 #[doc = r" the slots are not statically known."]
-#[allow(dead_code)]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsonArrayValue {

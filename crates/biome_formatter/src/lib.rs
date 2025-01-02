@@ -1679,9 +1679,9 @@ pub fn format_range<Language: FormatLanguage>(
         // nodes and iterating along the two paths at once to find the first
         // divergence (the ancestors have to be collected into vectors first
         // since the ancestor iterator isn't double ended)
-        #[allow(clippy::needless_collect)]
+        #[expect(clippy::needless_collect)]
         let start_to_root: Vec<_> = result_start_node.ancestors().collect();
-        #[allow(clippy::needless_collect)]
+        #[expect(clippy::needless_collect)]
         let end_to_root: Vec<_> = result_end_node.ancestors().collect();
 
         start_to_root
@@ -1957,7 +1957,7 @@ impl<Context> FormatState<Context> {
 
     /// Tracks the given token as formatted
     #[inline]
-    pub fn track_token<L: Language>(&mut self, #[allow(unused_variables)] token: &SyntaxToken<L>) {
+    pub fn track_token<L: Language>(&mut self, token: &SyntaxToken<L>) {
         cfg_if::cfg_if! {
             if #[cfg(debug_assertions)] {
                 self.printed_tokens.track_token(token);
@@ -1991,10 +1991,7 @@ impl<Context> FormatState<Context> {
 
     /// Asserts in debug builds that all tokens have been printed.
     #[inline]
-    pub fn assert_formatted_all_tokens<L: Language>(
-        &self,
-        #[allow(unused_variables)] root: &SyntaxNode<L>,
-    ) {
+    pub fn assert_formatted_all_tokens<L: Language>(&self, root: &SyntaxNode<L>) {
         cfg_if::cfg_if! {
             if #[cfg(debug_assertions)] {
                 self.printed_tokens.assert_all_tracked(root);

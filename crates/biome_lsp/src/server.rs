@@ -232,7 +232,7 @@ impl LSPServer {
 #[tower_lsp::async_trait]
 impl LanguageServer for LSPServer {
     // The `root_path` field is deprecated, but we still read it so we can print a warning about it
-    #[allow(deprecated)]
+    #[expect(deprecated)]
     #[tracing::instrument(
         level = "trace",
         skip_all,
