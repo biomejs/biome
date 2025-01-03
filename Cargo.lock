@@ -1033,6 +1033,7 @@ dependencies = [
  "biome_text_edit",
  "camino",
  "futures",
+ "papaya",
  "rustc-hash 2.1.0",
  "serde",
  "serde_json",

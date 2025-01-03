@@ -3,6 +3,7 @@ import type {
 	Diagnostic,
 	FixFileMode,
 	PartialConfiguration,
+	ProjectKey,
 	Workspace,
 } from "@biomejs/wasm-nodejs";
 import { Distribution, type WasmModule, loadModule, wrapError } from "./wasm";
@@ -101,7 +102,7 @@ export class Biome {
 		const module = await loadModule(options.distribution);
 		const workspace = new module.Workspace();
 		const biome = new Biome(module, workspace);
-		biome.registerProjectFolder();
+		biome.openProject();
 		return biome;
 	}
 
@@ -122,9 +123,13 @@ export class Biome {
 	 *
 	 * @param configuration
 	 */
-	applyConfiguration(configuration: Configuration): void {
+	applyConfiguration(
+		projectKey: ProjectKey,
+		configuration: Configuration,
+	): void {
 		try {
 			this.workspace.updateSettings({
+				projectKey,
 				configuration,
 				gitignoreMatches: [],
 				workspaceDirectory: "./",
@@ -134,11 +139,10 @@ export class Biome {
 		}
 	}
 
-	registerProjectFolder(): void;
-	registerProjectFolder(path?: string): void {
-		this.workspace.registerProjectFolder({
-			path,
-			setAsCurrentWorkspace: true,
+	openProject(): ProjectKey;
+	openProject(path?: string): ProjectKey {
+		return this.workspace.openProject({
+			path: path || "",
 		});
 	}
 
@@ -151,12 +155,14 @@ export class Biome {
 	}
 
 	private withFile<T>(
+		projectKey: ProjectKey,
 		path: string,
 		content: string,
 		func: (path: BiomePath) => T,
 	): T {
 		return this.tryCatchWrapper(() => {
 			this.workspace.openFile({
+				projectKey,
 				content: { type: "fromClient", content },
 				version: 0,
 				path,
@@ -166,14 +172,20 @@ export class Biome {
 				return func(path);
 			} finally {
 				this.workspace.closeFile({
+					projectKey,
 					path,
 				});
 			}
 		});
 	}
 
-	formatContent(content: string, options: FormatContentOptions): FormatResult;
 	formatContent(
+		projectKey: ProjectKey,
+		content: string,
+		options: FormatContentOptions,
+	): FormatResult;
+	formatContent(
+		projectKey: ProjectKey,
 		content: string,
 		options: FormatContentDebugOptions,
 	): FormatDebugResult;
@@ -185,13 +197,15 @@ export class Biome {
 	 * @param {FormatContentOptions | FormatContentDebugOptions} options Options needed when formatting some content
 	 */
 	formatContent(
+		projectKey: ProjectKey,
 		content: string,
 		options: FormatContentOptions | FormatContentDebugOptions,
 	): FormatResult | FormatDebugResult {
-		return this.withFile(options.filePath, content, (path) => {
+		return this.withFile(projectKey, options.filePath, content, (path) => {
 			let code = content;
 
 			const { diagnostics } = this.workspace.pullDiagnostics({
+				projectKey,
 				path,
 				categories: ["syntax"],
 				maxDiagnostics: Number.MAX_SAFE_INTEGER,
@@ -205,12 +219,14 @@ export class Biome {
 			if (!hasErrors) {
 				if (options.range) {
 					const result = this.workspace.formatRange({
+						projectKey,
 						path,
 						range: options.range,
 					});
 					code = result.code;
 				} else {
 					const result = this.workspace.formatFile({
+						projectKey,
 						path,
 					});
 					code = result.code;
@@ -218,6 +234,7 @@ export class Biome {
 
 				if (isFormatContentDebug(options)) {
 					const ir = this.workspace.getFormatterIr({
+						projectKey,
 						path,
 					});
 
@@ -243,14 +260,16 @@ export class Biome {
 	 * @param {LintContentOptions} options Options needed when linting some content
 	 */
 	lintContent(
+		projectKey: ProjectKey,
 		content: string,
 		{ filePath, fixFileMode }: LintContentOptions,
 	): LintResult {
 		const maybeFixedContent = fixFileMode
-			? this.withFile(filePath, content, (path) => {
+			? this.withFile(projectKey, filePath, content, (path) => {
 					let code = content;
 
 					const result = this.workspace.fixFile({
+						projectKey,
 						path,
 						fixFileMode: fixFileMode,
 						shouldFormat: false,
@@ -265,8 +284,9 @@ export class Biome {
 				})
 			: content;
 
-		return this.withFile(filePath, maybeFixedContent, (path) => {
+		return this.withFile(projectKey, filePath, maybeFixedContent, (path) => {
 			const { diagnostics } = this.workspace.pullDiagnostics({
+				projectKey,
 				path,
 				categories: ["syntax", "lint"],
 				maxDiagnostics: Number.MAX_SAFE_INTEGER,

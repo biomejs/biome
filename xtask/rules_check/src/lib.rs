@@ -20,7 +20,8 @@ use biome_json_factory::make;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
 use biome_rowan::AstNode;
-use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
+use biome_service::projects::{ProjectKey, Projects};
+use biome_service::settings::ServiceLanguage;
 use biome_service::workspace::DocumentFileSource;
 use camino::Utf8PathBuf;
 use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
@@ -316,7 +317,8 @@ impl<'a> DiagnosticWriter<'a> {
 }
 
 fn create_analyzer_options<L>(
-    workspace_settings: &WorkspaceSettings,
+    workspace_settings: &Projects,
+    project_key: ProjectKey,
     file_path: &String,
     test: &CodeBlockTest,
 ) -> AnalyzerOptions
@@ -327,7 +329,7 @@ where
     let file_source = &test.document_file_source();
     let supression_reason = None;
 
-    let settings = workspace_settings.get_current_settings();
+    let settings = workspace_settings.get_settings(project_key);
     let linter = settings.as_ref().map(|s| &s.linter);
     let overrides = settings.as_ref().map(|s| &s.override_settings);
     let language_settings = settings
@@ -367,9 +369,8 @@ fn assert_lint(
     let mut diagnostics = DiagnosticWriter::new(group, rule, test, code);
 
     // Create a synthetic workspace configuration
-    let workspace_settings = WorkspaceSettings::default();
-    let key = workspace_settings.insert_project(Utf8PathBuf::new());
-    workspace_settings.set_current_project(key);
+    let workspace_settings = Projects::default();
+    let project_key = workspace_settings.insert_project(Utf8PathBuf::new());
 
     // Load settings from the preceding `json,options` block if requested
     if test.use_options {
@@ -377,9 +378,9 @@ fn assert_lint(
             bail!("Code blocks tagged with 'use_options' must be preceded by a valid 'json,options' code block.");
         };
 
-        if let Some(mut settings) = workspace_settings.get_current_settings() {
+        if let Some(mut settings) = workspace_settings.get_settings(project_key) {
             settings.merge_with_configuration(partial_config.clone(), None, None, &[])?;
-            workspace_settings.set_current_settings(settings);
+            workspace_settings.set_settings(project_key, settings);
         }
     }
 
@@ -418,8 +419,12 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options =
-                    create_analyzer_options::<JsLanguage>(&workspace_settings, &file_path, test);
+                let options = create_analyzer_options::<JsLanguage>(
+                    &workspace_settings,
+                    project_key,
+                    &file_path,
+                    test,
+                );
 
                 biome_js_analyze::analyze(
                     &root,
@@ -468,8 +473,12 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options =
-                    create_analyzer_options::<JsonLanguage>(&workspace_settings, &file_path, test);
+                let options = create_analyzer_options::<JsonLanguage>(
+                    &workspace_settings,
+                    project_key,
+                    &file_path,
+                    test,
+                );
 
                 biome_json_analyze::analyze(&root, filter, &options, file_source, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
@@ -510,8 +519,12 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options =
-                    create_analyzer_options::<JsonLanguage>(&workspace_settings, &file_path, test);
+                let options = create_analyzer_options::<JsonLanguage>(
+                    &workspace_settings,
+                    project_key,
+                    &file_path,
+                    test,
+                );
 
                 biome_css_analyze::analyze(&root, filter, &options, Vec::new(), |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
@@ -552,8 +565,12 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options =
-                    create_analyzer_options::<JsonLanguage>(&workspace_settings, &file_path, test);
+                let options = create_analyzer_options::<JsonLanguage>(
+                    &workspace_settings,
+                    project_key,
+                    &file_path,
+                    test,
+                );
 
                 biome_graphql_analyze::analyze(&root, filter, &options, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {

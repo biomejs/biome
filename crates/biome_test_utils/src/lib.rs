@@ -10,10 +10,9 @@ use biome_project::PackageJson;
 use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
 use biome_service::file_handlers::DocumentFileSource;
-use biome_service::settings::{
-    ServiceLanguage, Settings, WorkspaceSettings, WorkspaceSettingsHandle,
-};
-use camino::Utf8Path;
+use biome_service::projects::Projects;
+use biome_service::settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle};
+use camino::{Utf8Path, Utf8PathBuf};
 use json_comments::StripComments;
 use similar::{DiffableStr, TextDiff};
 use std::ffi::c_int;
@@ -121,9 +120,8 @@ pub fn create_formatting_options<L>(
 where
     L: ServiceLanguage,
 {
-    let workspace = WorkspaceSettings::default();
-    let key = workspace.insert_project(Utf8Path::new(""));
-    workspace.set_current_project(key);
+    let projects = Projects::default();
+    let key = projects.insert_project(Utf8PathBuf::from(""));
 
     let options_file = input_file.with_extension("options.json");
     let Ok(json) = std::fs::read_to_string(options_file.clone()) else {
@@ -148,7 +146,7 @@ where
         Default::default()
     } else {
         let configuration = deserialized.into_deserialized().unwrap_or_default();
-        let mut settings = workspace.get_current_settings().unwrap_or_default();
+        let mut settings = projects.get_settings(key).unwrap_or_default();
         settings
             .merge_with_configuration(configuration, None, None, &[])
             .unwrap();

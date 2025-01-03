@@ -1,7 +1,7 @@
 use crate::workspace::{
-    CheckFileSizeParams, CheckFileSizeResult, FileFeaturesResult, GetFileContentParams,
-    IsPathIgnoredParams, ProjectKey, RageParams, RageResult, RegisterProjectFolderParams,
-    ServerInfo, SetManifestForProjectParams, UnregisterProjectFolderParams,
+    CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
+    GetFileContentParams, IsPathIgnoredParams, OpenProjectParams, ProjectKey, RageParams,
+    RageResult, ServerInfo, SetManifestForProjectParams,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -18,8 +18,8 @@ use super::{
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
     GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, PullActionsParams, PullActionsResult,
     PullDiagnosticsParams, PullDiagnosticsResult, RenameParams, RenameResult,
-    ScanProjectFolderResult, SearchPatternParams, SearchResults, SupportsFeatureParams,
-    UpdateSettingsParams,
+    ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
+    SupportsFeatureParams, UpdateSettingsParams,
 };
 
 pub struct WorkspaceClient<T> {
@@ -115,9 +115,11 @@ where
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         self.request("biome/file_features", params)
     }
+
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
         self.request("biome/is_path_ignored", params)
     }
+
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
         self.request("biome/update_settings", params)
     }
@@ -133,25 +135,19 @@ where
         self.request("biome/set_manifest_for_project", params)
     }
 
-    fn register_project_folder(
-        &self,
-        params: RegisterProjectFolderParams,
-    ) -> Result<ProjectKey, WorkspaceError> {
-        self.request("biome/register_project_folder", params)
+    fn open_project(&self, params: OpenProjectParams) -> Result<ProjectKey, WorkspaceError> {
+        self.request("biome/open_project", params)
     }
 
-    fn scan_current_project_folder(
+    fn scan_project_folder(
         &self,
-        params: (),
+        params: ScanProjectFolderParams,
     ) -> Result<ScanProjectFolderResult, WorkspaceError> {
-        self.request("biome/scan_current_project_folder", params)
+        self.request("biome/scan_project_folder", params)
     }
 
-    fn unregister_project_folder(
-        &self,
-        params: UnregisterProjectFolderParams,
-    ) -> Result<(), WorkspaceError> {
-        self.request("biome/unregister_project_folder", params)
+    fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError> {
+        self.request("biome/close_project", params)
     }
 
     fn get_syntax_tree(

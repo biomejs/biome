@@ -12,6 +12,7 @@ use biome_diagnostics::{Diagnostic as _, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, TraversalContext, TraversalScope};
 
 use crate::diagnostics::Panic;
+use crate::projects::ProjectKey;
 use crate::workspace::{DocumentFileSource, FileContent, OpenFileParams};
 use crate::{Workspace, WorkspaceError};
 
@@ -27,6 +28,7 @@ pub(crate) struct ScanResult {
 
 pub(crate) fn scan(
     workspace: &WorkspaceServer,
+    project_key: ProjectKey,
     folder: &Utf8Path,
 ) -> Result<ScanResult, WorkspaceError> {
     init_thread_pool();
@@ -48,6 +50,7 @@ pub(crate) fn scan(
             folder,
             &ScanContext {
                 workspace,
+                project_key,
                 interner,
                 diagnostics_sender,
                 evaluated_paths: Default::default(),
@@ -139,6 +142,9 @@ pub(crate) struct ScanContext<'app> {
     /// [Workspace] instance.
     pub(crate) workspace: &'app WorkspaceServer,
 
+    /// Key of the project within which this scanner is active.
+    project_key: ProjectKey,
+
     /// File paths interner cache used by the filesystem traversal.
     interner: PathInterner,
 
@@ -193,6 +199,7 @@ impl<'app> TraversalContext for ScanContext<'app> {
 fn open_file(ctx: &ScanContext, path: &BiomePath) {
     match catch_unwind(move || {
         ctx.workspace.open_file_by_scanner(OpenFileParams {
+            project_key: ctx.project_key,
             path: path.clone(),
             content: FileContent::FromServer,
             document_file_source: None,

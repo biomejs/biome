@@ -417,6 +417,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             .with_only(&params.only)
             .with_skip(&params.skip)
             .with_path(params.biome_path.as_path())
+            .with_enabled_rules(&params.enabled_rules)
             .with_manifest(params.manifest.as_ref())
             .finish();
 

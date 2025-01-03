@@ -455,7 +455,7 @@ pub fn methods() -> [WorkspaceMethod; 22] {
     [
         workspace_method!(file_features),
         workspace_method!(update_settings),
-        workspace_method!(register_project_folder),
+        workspace_method!(open_project),
         workspace_method!(set_manifest_for_project),
         workspace_method!(open_file),
         workspace_method!(change_file),

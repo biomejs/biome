@@ -3,9 +3,11 @@ import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
 	features: FeatureName;
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export type FeatureName = FeatureKind[];
 export type BiomePath = string;
+export type ProjectKey = number;
 export type FeatureKind = "format" | "lint" | "search" | "assist" | "debug";
 export interface FileFeaturesResult {
 	featuresSupported: {};
@@ -13,6 +15,7 @@ export interface FileFeaturesResult {
 export interface UpdateSettingsParams {
 	configuration: PartialConfiguration;
 	gitignoreMatches: string[];
+	projectKey: ProjectKey;
 	vcsBasePath?: BiomePath;
 	workspaceDirectory?: BiomePath;
 }
@@ -72,6 +75,10 @@ export interface PartialConfiguration {
 	 * List of plugins to load.
 	 */
 	plugins?: Plugins;
+	/**
+	 * Indicates whether this configuration file is at the root of a Biome project. By default, this is `true`.
+	 */
+	root?: boolean;
 	/**
 	 * The configuration of the VCS integration
 	 */
@@ -2806,14 +2813,20 @@ export type RestrictedModifier =
 	| "protected"
 	| "readonly"
 	| "static";
-export interface RegisterProjectFolderParams {
-	path?: BiomePath;
-	setAsCurrentWorkspace: boolean;
+export interface OpenProjectParams {
+	/**
+	 * Whether the folder should be opened as a project, even if no `biome.json` can be found.
+	 */
+	openUninitialized: boolean;
+	/**
+	 * The path to open
+	 */
+	path: BiomePath;
 }
-export type ProjectKey = number;
 export interface SetManifestForProjectParams {
 	content: string;
 	manifestPath: BiomePath;
+	projectKey: ProjectKey;
 	version: number;
 }
 export interface OpenFileParams {
@@ -2826,6 +2839,7 @@ export interface OpenFileParams {
 This should only be enabled if reparsing is to be expected, such as when the file is opened through the LSP Proxy. 
 	 */
 	persistNodeCache?: boolean;
+	projectKey: ProjectKey;
 	version: number;
 }
 export type FileContent =
@@ -2900,13 +2914,16 @@ export type GritVariant = "Standard";
 export interface ChangeFileParams {
 	content: string;
 	path: BiomePath;
+	projectKey: ProjectKey;
 	version: number;
 }
 export interface CloseFileParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export interface GetSyntaxTreeParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export interface GetSyntaxTreeResult {
 	ast: string;
@@ -2914,6 +2931,7 @@ export interface GetSyntaxTreeResult {
 }
 export interface CheckFileSizeParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export interface CheckFileSizeResult {
 	fileSize: number;
@@ -2921,14 +2939,17 @@ export interface CheckFileSizeResult {
 }
 export interface GetFileContentParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export interface GetControlFlowGraphParams {
 	cursor: TextSize;
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export type TextSize = number;
 export interface GetFormatterIRParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
@@ -2939,6 +2960,7 @@ export interface PullDiagnosticsParams {
 	maxDiagnostics: number;
 	only?: RuleCode[];
 	path: BiomePath;
+	projectKey: ProjectKey;
 	skip?: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];
@@ -3432,6 +3454,7 @@ export interface PullActionsParams {
 	enabledRules?: RuleCode[];
 	only?: RuleCode[];
 	path: BiomePath;
+	projectKey: ProjectKey;
 	range?: TextRange;
 	skip?: RuleCode[];
 	suppressionReason?: string;
@@ -3493,6 +3516,7 @@ export type OtherActionCategory =
 export type Applicability = "always" | "maybeIncorrect";
 export interface FormatFileParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export interface Printed {
 	code: string;
@@ -3515,11 +3539,13 @@ export interface SourceMarker {
 }
 export interface FormatRangeParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 	range: TextRange;
 }
 export interface FormatOnTypeParams {
 	offset: TextSize;
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export interface FixFileParams {
 	/**
@@ -3529,6 +3555,7 @@ export interface FixFileParams {
 	fixFileMode: FixFileMode;
 	only?: RuleCode[];
 	path: BiomePath;
+	projectKey: ProjectKey;
 	ruleCategories: RuleCategories;
 	shouldFormat: boolean;
 	skip?: RuleCode[];
@@ -3572,6 +3599,7 @@ export interface FixAction {
 export interface RenameParams {
 	newName: string;
 	path: BiomePath;
+	projectKey: ProjectKey;
 	symbolAt: TextSize;
 }
 export interface RenameResult {
@@ -3596,10 +3624,11 @@ export type PatternId = string;
 export interface SearchPatternParams {
 	path: BiomePath;
 	pattern: PatternId;
+	projectKey: ProjectKey;
 }
 export interface SearchResults {
-	file: BiomePath;
 	matches: TextRange[];
+	path: BiomePath;
 }
 export interface DropPatternParams {
 	pattern: PatternId;
@@ -3608,9 +3637,7 @@ export type Configuration = PartialConfiguration;
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;
-	registerProjectFolder(
-		params: RegisterProjectFolderParams,
-	): Promise<ProjectKey>;
+	openProject(params: OpenProjectParams): Promise<ProjectKey>;
 	setManifestForProject(params: SetManifestForProjectParams): Promise<void>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
@@ -3642,8 +3669,8 @@ export function createWorkspace(transport: Transport): Workspace {
 		updateSettings(params) {
 			return transport.request("biome/update_settings", params);
 		},
-		registerProjectFolder(params) {
-			return transport.request("biome/register_project_folder", params);
+		openProject(params) {
+			return transport.request("biome/open_project", params);
 		},
 		setManifestForProject(params) {
 			return transport.request("biome/set_manifest_for_project", params);

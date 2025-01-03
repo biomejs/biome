@@ -27,7 +27,7 @@ mod language {
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, file_type: &str) {
     let root_path = Utf8Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
 
-    let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path, None) else {
+    let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path, |_| None) else {
         return;
     };
 
