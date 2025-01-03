@@ -1,0 +1,95 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+type A<T
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@0..5 "type" [] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@5..6 "A" [] [],
+            },
+            type_parameters: TsTypeParameters {
+                l_angle_token: L_ANGLE@6..7 "<" [] [],
+                items: TsTypeParameterList [
+                    TsTypeParameter {
+                        modifiers: TsTypeParameterModifierList [],
+                        name: TsTypeParameterName {
+                            ident_token: IDENT@7..8 "T" [] [],
+                        },
+                        constraint: missing (optional),
+                        default: missing (optional),
+                    },
+                ],
+                r_angle_token: missing (required),
+            },
+            eq_token: missing (required),
+            ty: missing (required),
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@8..9 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..9
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..8
+    0: TS_TYPE_ALIAS_DECLARATION@0..8
+      0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@5..6
+        0: IDENT@5..6 "A" [] []
+      2: TS_TYPE_PARAMETERS@6..8
+        0: L_ANGLE@6..7 "<" [] []
+        1: TS_TYPE_PARAMETER_LIST@7..8
+          0: TS_TYPE_PARAMETER@7..8
+            0: TS_TYPE_PARAMETER_MODIFIER_LIST@7..7
+            1: TS_TYPE_PARAMETER_NAME@7..8
+              0: IDENT@7..8 "T" [] []
+            2: (empty)
+            3: (empty)
+        2: (empty)
+      3: (empty)
+      4: (empty)
+      5: (empty)
+  4: EOF@8..9 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_type_parameters_incomplete.ts:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `>` but instead the file ends
+  
+    1 │ type A<T
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ type A<T
+  > 2 │ 
+      │ 
+  
+```

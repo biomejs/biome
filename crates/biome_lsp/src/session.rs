@@ -1,4 +1,3 @@
-use crate::converters::{negotiated_encoding, PositionEncoding, WideEncoding};
 use crate::diagnostics::LspError;
 use crate::documents::Document;
 use crate::extension_settings::ExtensionSettings;
@@ -11,6 +10,7 @@ use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDescription};
 use biome_fs::{BiomePath, FileSystem};
+use biome_lsp_converters::{negotiated_encoding, PositionEncoding, WideEncoding};
 use biome_service::configuration::{
     load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
 };
@@ -91,7 +91,6 @@ struct InitializeParams {
     client_capabilities: lsp_types::ClientCapabilities,
     client_information: Option<ClientInformation>,
     root_uri: Option<Url>,
-    #[allow(unused)]
     workspace_folders: Option<Vec<WorkspaceFolder>>,
 }
 

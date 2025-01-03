@@ -1,8 +1,10 @@
-use crate::{services::aria::Aria, JsRuleAction};
+use std::str::FromStr;
+
+use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
+use biome_aria_metadata::AriaAttribute;
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
@@ -67,14 +69,13 @@ pub struct RuleState {
 }
 
 impl Rule for NoAriaUnsupportedElements {
-    type Query = Aria<AnyJsxElement>;
+    type Query = Ast<AnyJsxElement>;
     type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let aria_properties = ctx.aria_properties();
 
         let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
         let element_name = element_name.text_trimmed();
@@ -86,9 +87,7 @@ impl Rule for NoAriaUnsupportedElements {
                 let attribute_name = attribute.name().ok()?.as_jsx_name()?.value_token().ok()?;
 
                 if attribute_name.text_trimmed().starts_with("aria-")
-                    && aria_properties
-                        .get_property(attribute_name.text_trimmed())
-                        .is_some()
+                    && AriaAttribute::from_str(attribute_name.text_trimmed()).is_ok()
                 {
                     return Some(RuleState {
                         attribute_kind: AttributeKind::Aria,
@@ -146,7 +145,7 @@ impl Rule for NoAriaUnsupportedElements {
         mutation.remove_node(attribute);
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the "<Emphasis>""{removed_attribute}""</Emphasis>" attribute." }
                 .to_owned(),

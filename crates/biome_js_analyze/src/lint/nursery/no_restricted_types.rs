@@ -1,9 +1,7 @@
 use crate::JsRuleAction;
 use ::serde::{Deserialize, Serialize};
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationDiagnostic,
@@ -30,9 +28,8 @@ declare_lint_rule! {
     /// Use the options to specify additional types that you want to restrict in your
     /// source code.
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "types": {
     ///            "Foo": {
@@ -105,7 +102,7 @@ impl Rule for NoRestrictedTypes {
         mutation.replace_element(prev_token.into(), new_token.into());
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use '"{suggested_type}"' instead" }.to_owned(),
             mutation,

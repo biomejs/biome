@@ -1,0 +1,75 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+snapshot_kind: text
+---
+# Input
+```jsx
+typeof foo === "string";
+typeof foo === "object";
+typeof foo === "function";
+typeof foo === "undefined";
+typeof foo === "boolean";
+typeof foo === "number";
+typeof foo === "bigint";
+"string" === typeof foo;
+"object" === typeof foo;
+"function" === typeof foo;
+"undefined" === typeof foo;
+"boolean" === typeof foo;
+"number" === typeof foo;
+
+typeof foo == "string";
+typeof(foo) === "string";
+typeof(foo) !== "string";
+typeof(foo) == "string";
+typeof(foo) != "string";
+
+typeof foo === typeof bar;
+typeof foo === baz;
+typeof foo !== someType;
+typeof bar != someType;
+someType === typeof bar;
+someType == typeof bar;
+var oddUse = typeof foo + "thing";
+function f(undefined) { typeof x === undefined }
+
+typeof foo === f();
+typeof foo == (f() ?? g());
+typeof foo === obj.prop;
+typeof foo === obj["prop"];
+class C {
+	f() {
+		typeof foo === this.prop;
+		typeof foo === super.f();
+	}
+}
+
+```
+
+# Diagnostics
+```
+valid.js:28:38 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Invalid typeof comparison.
+  
+    26 │ someType == typeof bar;
+    27 │ var oddUse = typeof foo + "thing";
+  > 28 │ function f(undefined) { typeof x === undefined }
+       │                                      ^^^^^^^^^
+    29 │ 
+    30 │ typeof foo === f();
+  
+  i Compare with one of the following string literals:
+  
+  - "bigint"
+  - "boolean"
+  - "function"
+  - "number"
+  - "object"
+  - "string"
+  - "symbol"
+  - "undefined"
+  
+
+```

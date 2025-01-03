@@ -440,7 +440,7 @@
 				"noForEach": {
 					"description": "Prefer for...of statement instead of Array.forEach.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoForEachConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -910,14 +910,14 @@
 				"noUndeclaredDependencies": {
 					"description": "Disallow the use of dependencies that aren't specified in the package.json.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoUndeclaredDependenciesConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noUndeclaredVariables": {
 					"description": "Prevents the usage of variables that haven't been declared inside the document.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/UndeclaredVariablesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1197,6 +1197,38 @@
 			},
 			"additionalProperties": false
 		},
+		"CustomRestrictedImport": {
+			"anyOf": [
+				{
+					"description": "The message to display when this module is imported.",
+					"type": "string"
+				},
+				{
+					"description": "Additional options to configure the message and allowed/disallowed import names.",
+					"allOf": [{ "$ref": "#/definitions/CustomRestrictedImportOptions" }]
+				}
+			]
+		},
+		"CustomRestrictedImportOptions": {
+			"type": "object",
+			"properties": {
+				"allowImportNames": {
+					"description": "Names of the exported members that allowed to be not be used.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"importNames": {
+					"description": "Names of the exported members that should not be used.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"message": {
+					"description": "The message to display when this module is imported.",
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
 		"CustomRestrictedType": {
 			"anyOf": [
 				{ "type": "string" },
@@ -1210,6 +1242,20 @@
 				"use": { "default": null, "type": ["string", "null"] }
 			},
 			"additionalProperties": false
+		},
+		"DependencyAvailability": {
+			"oneOf": [
+				{
+					"description": "This type of dependency will be always available or unavailable.",
+					"type": "boolean"
+				},
+				{
+					"description": "This type of dependency will be available only if the linted file matches any of the globs.",
+					"type": "array",
+					"items": { "type": "string" },
+					"minItems": 1
+				}
+			]
 		},
 		"DeprecatedHooksConfiguration": {
 			"anyOf": [
@@ -1497,6 +1543,12 @@
 			},
 			"additionalProperties": false
 		},
+		"ImportGroup": {
+			"anyOf": [
+				{ "$ref": "#/definitions/PredefinedImportGroup" },
+				{ "$ref": "#/definitions/Regex" }
+			]
+		},
 		"IndentStyle": {
 			"oneOf": [
 				{ "description": "Tab", "type": "string", "enum": ["tab"] },
@@ -1672,6 +1724,10 @@
 			"description": "Options that changes how the JavaScript parser behaves",
 			"type": "object",
 			"properties": {
+				"gritMetavariables": {
+					"description": "Enables parsing of Grit metavariables. Defaults to `false`.",
+					"type": ["boolean", "null"]
+				},
 				"unsafeParameterDecoratorsEnabled": {
 					"description": "It enables the experimental and unsafe parsing of parameter decorators\n\nThese decorators belong to an old proposal, and they are subject to change.",
 					"type": ["boolean", "null"]
@@ -2014,6 +2070,23 @@
 			},
 			"additionalProperties": false
 		},
+		"NoForEachConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoForEachOptions" }
+			]
+		},
+		"NoForEachOptions": {
+			"type": "object",
+			"properties": {
+				"allowedIdentifiers": {
+					"description": "A list of variable names allowed for `forEach` calls.",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoLabelWithoutControlConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2077,6 +2150,34 @@
 					"type": ["integer", "null"],
 					"format": "uint16",
 					"minimum": 0.0
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoUndeclaredDependenciesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUndeclaredDependenciesOptions" }
+			]
+		},
+		"NoUndeclaredDependenciesOptions": {
+			"description": "Rule's options",
+			"type": "object",
+			"properties": {
+				"devDependencies": {
+					"description": "If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.",
+					"default": true,
+					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
+				},
+				"optionalDependencies": {
+					"description": "If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.",
+					"default": true,
+					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
+				},
+				"peerDependencies": {
+					"description": "If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.",
+					"default": true,
+					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
 				}
 			},
 			"additionalProperties": false
@@ -2166,6 +2267,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noGlobalDirnameFilename": {
+					"description": "Disallow the use of __dirname and __filename in the global scope.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noHeadElement": {
 					"description": "Prevent usage of \\<head> element in a Next.js project.",
 					"anyOf": [
@@ -2222,6 +2330,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noProcessGlobal": {
+					"description": "Disallow the use of process global.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRestrictedImports": {
 					"description": "Disallow specified modules when loaded by import or require.",
 					"anyOf": [
@@ -2259,6 +2374,13 @@
 				},
 				"noTemplateCurlyInString": {
 					"description": "Disallow template literal placeholder syntax in regular strings.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownAtRule": {
+					"description": "Disallow unknown at-rules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2384,10 +2506,24 @@
 						{ "type": "null" }
 					]
 				},
+				"useExportsLast": {
+					"description": "Require that all exports are declared after all non-export statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGoogleFontDisplay": {
 					"description": "Enforces the use of a recommended display strategy with Google Fonts.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useGoogleFontPreconnect": {
+					"description": "Ensure the preconnect attribute is used when using Google Fonts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2402,6 +2538,27 @@
 					"description": "Disallows package private imports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNamedOperation": {
+					"description": "Enforce specifying the name of GraphQL operations.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNamingConvention": {
+					"description": "Validates that all enum values are capitalized.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useParseIntRadix": {
+					"description": "Enforce the consistent use of the radix argument when using parseInt().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2440,6 +2597,18 @@
 						{ "type": "null" }
 					]
 				}
+			},
+			"additionalProperties": false
+		},
+		"Options": {
+			"type": "object",
+			"properties": {
+				"importGroups": {
+					"default": [],
+					"type": "array",
+					"items": { "$ref": "#/definitions/ImportGroup" }
+				},
+				"legacy": { "default": false, "type": "boolean" }
 			},
 			"additionalProperties": false
 		},
@@ -2647,6 +2816,10 @@
 			},
 			"additionalProperties": false
 		},
+		"PredefinedImportGroup": {
+			"type": "string",
+			"enum": [":blank-line:", ":bun:", ":node:", ":types:"]
+		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
 		"Regex": { "type": "string" },
@@ -2679,9 +2852,11 @@
 			"type": "object",
 			"properties": {
 				"paths": {
-					"description": "A list of names that should trigger the rule",
+					"description": "A list of import paths that should trigger the rule.",
 					"type": "object",
-					"additionalProperties": { "type": "string" }
+					"additionalProperties": {
+						"$ref": "#/definitions/CustomRestrictedImport"
+					}
 				}
 			},
 			"additionalProperties": false
@@ -2690,7 +2865,46 @@
 			"type": "string",
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
 		},
-		"RuleAssistConfiguration": { "type": "string", "enum": ["on", "off"] },
+		"RuleAssistConfiguration_for_Null": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/definitions/RuleAssistWithOptions_for_Null" }
+			]
+		},
+		"RuleAssistConfiguration_for_Options": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/definitions/RuleAssistWithOptions_for_Options" }
+			]
+		},
+		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["on", "off"] },
+		"RuleAssistWithOptions_for_Null": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RuleAssistPlainConfiguration" }]
+				},
+				"options": { "description": "Rule's options", "type": "null" }
+			},
+			"additionalProperties": false
+		},
+		"RuleAssistWithOptions_for_Options": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RuleAssistPlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/Options" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2879,6 +3093,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoForEachOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoForEachOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoLabelWithoutControlOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -2939,6 +3168,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoUndeclaredDependenciesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUndeclaredDependenciesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithRestrictedGlobalsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -2965,6 +3209,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/RestrictedImportsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUndeclaredVariablesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UndeclaredVariablesOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -3192,17 +3451,24 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"sortJsxProps": {
-					"description": "Enforce props sorting in JSX elements.",
+				"organizeImports": {
+					"description": "Provides a whole-source code action to sort the imports in the file using import groups and natural ordering.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleAssistConfiguration" },
+						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Options" },
+						{ "type": "null" }
+					]
+				},
+				"useSortedAttributes": {
+					"description": "Enforce attribute sorting in JSX elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useSortedKeys": {
 					"description": "Sorts the keys of a JSON object in natural order",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleAssistConfiguration" },
+						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				}
@@ -4089,7 +4355,7 @@
 					]
 				},
 				"useValidTypeof": {
-					"description": "This rule verifies the result of typeof $expr unary expressions is being compared to valid values, either string literals containing valid type names or other typeof expressions",
+					"description": "This rule checks that the result of a `typeof' expression is compared to a valid value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -4131,6 +4397,22 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UndeclaredVariablesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUndeclaredVariablesOptions" }
+			]
+		},
+		"UndeclaredVariablesOptions": {
+			"type": "object",
+			"properties": {
+				"checkTypes": {
+					"description": "Check undeclared types.",
+					"default": true,
+					"type": "boolean"
+				}
+			}
 		},
 		"UseComponentExportOnlyModulesConfiguration": {
 			"anyOf": [

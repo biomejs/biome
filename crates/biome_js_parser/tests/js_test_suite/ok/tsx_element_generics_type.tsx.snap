@@ -1,0 +1,159 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```tsx
+<NonGeneric />;
+<Generic<true> />;
+<Generic<true>></Generic>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxSelfClosingElement {
+                    l_angle_token: L_ANGLE@0..1 "<" [] [],
+                    name: JsxReferenceIdentifier {
+                        value_token: JSX_IDENT@1..12 "NonGeneric" [] [Whitespace(" ")],
+                    },
+                    type_arguments: missing (optional),
+                    attributes: JsxAttributeList [],
+                    slash_token: SLASH@12..13 "/" [] [],
+                    r_angle_token: R_ANGLE@13..14 ">" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@14..15 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxSelfClosingElement {
+                    l_angle_token: L_ANGLE@15..17 "<" [Newline("\n")] [],
+                    name: JsxReferenceIdentifier {
+                        value_token: JSX_IDENT@17..24 "Generic" [] [],
+                    },
+                    type_arguments: TsTypeArguments {
+                        l_angle_token: L_ANGLE@24..25 "<" [] [],
+                        ts_type_argument_list: TsTypeArgumentList [
+                            TsBooleanLiteralType {
+                                literal: TRUE_KW@25..29 "true" [] [],
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@29..31 ">" [] [Whitespace(" ")],
+                    },
+                    attributes: JsxAttributeList [],
+                    slash_token: SLASH@31..32 "/" [] [],
+                    r_angle_token: R_ANGLE@32..33 ">" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@33..34 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxElement {
+                    opening_element: JsxOpeningElement {
+                        l_angle_token: L_ANGLE@34..36 "<" [Newline("\n")] [],
+                        name: JsxReferenceIdentifier {
+                            value_token: JSX_IDENT@36..43 "Generic" [] [],
+                        },
+                        type_arguments: TsTypeArguments {
+                            l_angle_token: L_ANGLE@43..44 "<" [] [],
+                            ts_type_argument_list: TsTypeArgumentList [
+                                TsBooleanLiteralType {
+                                    literal: TRUE_KW@44..48 "true" [] [],
+                                },
+                            ],
+                            r_angle_token: R_ANGLE@48..49 ">" [] [],
+                        },
+                        attributes: JsxAttributeList [],
+                        r_angle_token: R_ANGLE@49..50 ">" [] [],
+                    },
+                    children: JsxChildList [],
+                    closing_element: JsxClosingElement {
+                        l_angle_token: L_ANGLE@50..51 "<" [] [],
+                        slash_token: SLASH@51..52 "/" [] [],
+                        name: JsxReferenceIdentifier {
+                            value_token: JSX_IDENT@52..59 "Generic" [] [],
+                        },
+                        r_angle_token: R_ANGLE@59..60 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@60..61 ";" [] [],
+        },
+    ],
+    eof_token: EOF@61..62 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..62
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..61
+    0: JS_EXPRESSION_STATEMENT@0..15
+      0: JSX_TAG_EXPRESSION@0..14
+        0: JSX_SELF_CLOSING_ELEMENT@0..14
+          0: L_ANGLE@0..1 "<" [] []
+          1: JSX_REFERENCE_IDENTIFIER@1..12
+            0: JSX_IDENT@1..12 "NonGeneric" [] [Whitespace(" ")]
+          2: (empty)
+          3: JSX_ATTRIBUTE_LIST@12..12
+          4: SLASH@12..13 "/" [] []
+          5: R_ANGLE@13..14 ">" [] []
+      1: SEMICOLON@14..15 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@15..34
+      0: JSX_TAG_EXPRESSION@15..33
+        0: JSX_SELF_CLOSING_ELEMENT@15..33
+          0: L_ANGLE@15..17 "<" [Newline("\n")] []
+          1: JSX_REFERENCE_IDENTIFIER@17..24
+            0: JSX_IDENT@17..24 "Generic" [] []
+          2: TS_TYPE_ARGUMENTS@24..31
+            0: L_ANGLE@24..25 "<" [] []
+            1: TS_TYPE_ARGUMENT_LIST@25..29
+              0: TS_BOOLEAN_LITERAL_TYPE@25..29
+                0: TRUE_KW@25..29 "true" [] []
+            2: R_ANGLE@29..31 ">" [] [Whitespace(" ")]
+          3: JSX_ATTRIBUTE_LIST@31..31
+          4: SLASH@31..32 "/" [] []
+          5: R_ANGLE@32..33 ">" [] []
+      1: SEMICOLON@33..34 ";" [] []
+    2: JS_EXPRESSION_STATEMENT@34..61
+      0: JSX_TAG_EXPRESSION@34..60
+        0: JSX_ELEMENT@34..60
+          0: JSX_OPENING_ELEMENT@34..50
+            0: L_ANGLE@34..36 "<" [Newline("\n")] []
+            1: JSX_REFERENCE_IDENTIFIER@36..43
+              0: JSX_IDENT@36..43 "Generic" [] []
+            2: TS_TYPE_ARGUMENTS@43..49
+              0: L_ANGLE@43..44 "<" [] []
+              1: TS_TYPE_ARGUMENT_LIST@44..48
+                0: TS_BOOLEAN_LITERAL_TYPE@44..48
+                  0: TRUE_KW@44..48 "true" [] []
+              2: R_ANGLE@48..49 ">" [] []
+            3: JSX_ATTRIBUTE_LIST@49..49
+            4: R_ANGLE@49..50 ">" [] []
+          1: JSX_CHILD_LIST@50..50
+          2: JSX_CLOSING_ELEMENT@50..60
+            0: L_ANGLE@50..51 "<" [] []
+            1: SLASH@51..52 "/" [] []
+            2: JSX_REFERENCE_IDENTIFIER@52..59
+              0: JSX_IDENT@52..59 "Generic" [] []
+            3: R_ANGLE@59..60 ">" [] []
+      1: SEMICOLON@60..61 ";" [] []
+  4: EOF@61..62 "" [Newline("\n")] []
+
+```

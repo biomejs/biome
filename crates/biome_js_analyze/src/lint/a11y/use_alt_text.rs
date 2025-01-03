@@ -87,7 +87,7 @@ impl Rule for UseAltText {
         let has_aria_label = has_valid_label(element, "aria-label");
         let has_aria_labelledby = has_valid_label(element, "aria-labelledby");
         let aria_hidden = is_aria_hidden(element);
-        match element.name_value_token()?.text_trimmed() {
+        match element.name_value_token().ok()?.text_trimmed() {
             "object" => {
                 let has_title = has_valid_label(element, "title");
 

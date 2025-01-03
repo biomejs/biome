@@ -1,0 +1,39 @@
+foo /* a comment */
+.aRule {
+	color: red;
+}
+
+foo /* a comment */
+
+.aRule {
+	color: red;
+}
+
+foo
+
+
+	/* a comment */
+
+.aRule {
+	color: red;
+}
+
+/* input */
+foo
+
+	/* a comment */
+
+.aRule {
+	color: red
+}
+
+
+
+
+/* first format */
+foo
+	/* a comment */
+
+.aRule {
+	color: red;
+}

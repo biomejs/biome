@@ -1,0 +1,175 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```cjs
+// SCRIPT
+class A { static { await; } }
+class B { static { await 10; } }
+
+```
+
+
+## AST
+
+```
+JsScript {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    statements: JsStatementList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..16 "class" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@16..18 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@18..20 "{" [] [Whitespace(" ")],
+            members: JsClassMemberList [
+                JsStaticInitializationBlockClassMember {
+                    static_token: STATIC_KW@20..27 "static" [] [Whitespace(" ")],
+                    l_curly_token: L_CURLY@27..29 "{" [] [Whitespace(" ")],
+                    statements: JsStatementList [
+                        JsExpressionStatement {
+                            expression: JsBogusExpression {
+                                items: [
+                                    JsBogus {
+                                        items: [
+                                            IDENT@29..34 "await" [] [],
+                                        ],
+                                    },
+                                ],
+                            },
+                            semicolon_token: SEMICOLON@34..36 ";" [] [Whitespace(" ")],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@36..38 "}" [] [Whitespace(" ")],
+                },
+            ],
+            r_curly_token: R_CURLY@38..39 "}" [] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@39..46 "class" [Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@46..48 "B" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@48..50 "{" [] [Whitespace(" ")],
+            members: JsClassMemberList [
+                JsStaticInitializationBlockClassMember {
+                    static_token: STATIC_KW@50..57 "static" [] [Whitespace(" ")],
+                    l_curly_token: L_CURLY@57..59 "{" [] [Whitespace(" ")],
+                    statements: JsStatementList [
+                        JsExpressionStatement {
+                            expression: JsBogusExpression {
+                                items: [
+                                    AWAIT_KW@59..65 "await" [] [Whitespace(" ")],
+                                    JsNumberLiteralExpression {
+                                        value_token: JS_NUMBER_LITERAL@65..67 "10" [] [],
+                                    },
+                                ],
+                            },
+                            semicolon_token: SEMICOLON@67..69 ";" [] [Whitespace(" ")],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@69..71 "}" [] [Whitespace(" ")],
+                },
+            ],
+            r_curly_token: R_CURLY@71..72 "}" [] [],
+        },
+    ],
+    eof_token: EOF@72..73 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SCRIPT@0..73
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_STATEMENT_LIST@0..72
+    0: JS_CLASS_DECLARATION@0..39
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..16 "class" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@16..18
+        0: IDENT@16..18 "A" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@18..20 "{" [] [Whitespace(" ")]
+      8: JS_CLASS_MEMBER_LIST@20..38
+        0: JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER@20..38
+          0: STATIC_KW@20..27 "static" [] [Whitespace(" ")]
+          1: L_CURLY@27..29 "{" [] [Whitespace(" ")]
+          2: JS_STATEMENT_LIST@29..36
+            0: JS_EXPRESSION_STATEMENT@29..36
+              0: JS_BOGUS_EXPRESSION@29..34
+                0: JS_BOGUS@29..34
+                  0: IDENT@29..34 "await" [] []
+              1: SEMICOLON@34..36 ";" [] [Whitespace(" ")]
+          3: R_CURLY@36..38 "}" [] [Whitespace(" ")]
+      9: R_CURLY@38..39 "}" [] []
+    1: JS_CLASS_DECLARATION@39..72
+      0: JS_DECORATOR_LIST@39..39
+      1: (empty)
+      2: CLASS_KW@39..46 "class" [Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@46..48
+        0: IDENT@46..48 "B" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@48..50 "{" [] [Whitespace(" ")]
+      8: JS_CLASS_MEMBER_LIST@50..71
+        0: JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER@50..71
+          0: STATIC_KW@50..57 "static" [] [Whitespace(" ")]
+          1: L_CURLY@57..59 "{" [] [Whitespace(" ")]
+          2: JS_STATEMENT_LIST@59..69
+            0: JS_EXPRESSION_STATEMENT@59..69
+              0: JS_BOGUS_EXPRESSION@59..67
+                0: AWAIT_KW@59..65 "await" [] [Whitespace(" ")]
+                1: JS_NUMBER_LITERAL_EXPRESSION@65..67
+                  0: JS_NUMBER_LITERAL@65..67 "10" [] []
+              1: SEMICOLON@67..69 ";" [] [Whitespace(" ")]
+          3: R_CURLY@69..71 "}" [] [Whitespace(" ")]
+      9: R_CURLY@71..72 "}" [] []
+  4: EOF@72..73 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+await_in_static_initialization_block_member.cjs:2:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of `await` as an identifier in an async context
+  
+    1 │ // SCRIPT
+  > 2 │ class A { static { await; } }
+      │                    ^^^^^
+    3 │ class B { static { await 10; } }
+    4 │ 
+  
+await_in_static_initialization_block_member.cjs:3:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `await` is only allowed within async functions and at the top levels of modules.
+  
+    1 │ // SCRIPT
+    2 │ class A { static { await; } }
+  > 3 │ class B { static { await 10; } }
+      │                    ^^^^^
+    4 │ 
+  
+```

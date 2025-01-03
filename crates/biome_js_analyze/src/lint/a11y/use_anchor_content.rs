@@ -1,7 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::JsxElement;
@@ -83,7 +81,7 @@ impl Rule for UseAnchorContent {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let name = node.name().ok()?.name_value_token()?;
+        let name = node.name().ok()?.name_value_token().ok()?;
 
         if name.text_trimmed() == "a" {
             if node.has_truthy_attribute("aria-hidden") {
@@ -144,7 +142,7 @@ impl Rule for UseAnchorContent {
             mutation.remove_node(aria_hidden);
 
             return Some(JsRuleAction::new(
-                ActionCategory::QuickFix,
+                ctx.metadata().action_category(ctx.category(), ctx.group()),
                 ctx.metadata().applicability(),
                  markup! { "Remove the "<Emphasis>"aria-hidden"</Emphasis>" attribute to allow the anchor element and its content visible to assistive technologies." }.to_owned(),
                 mutation,

@@ -1,7 +1,9 @@
 use crate::categories::{ActionCategory, RuleCategory};
 use crate::context::RuleContext;
 use crate::registry::{RegistryVisitor, RuleLanguage, RuleSuppressions};
-use crate::{Phase, Phases, Queryable, SuppressionAction, SuppressionCommentEmitterPayload};
+use crate::{
+    Phase, Phases, Queryable, SourceActionKind, SuppressionAction, SuppressionCommentEmitterPayload,
+};
 use biome_console::fmt::Display;
 use biome_console::{markup, MarkupBuf};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
@@ -12,6 +14,7 @@ use biome_diagnostics::{
     Visit,
 };
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
+use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
@@ -94,6 +97,8 @@ pub enum RuleSource {
     Eslint(&'static str),
     /// Rules from [GraphQL-ESLint](https://github.com/dimaMachina/graphql-eslint)
     EslintGraphql(&'static str),
+    /// Rules from [graphql-schema-linter](https://github.com/cjoudrey/graphql-schema-linter)
+    EslintGraphqlSchemaLinter(&'static str),
     /// Rules from [Eslint Plugin Import](https://github.com/import-js/eslint-plugin-import)
     EslintImport(&'static str),
     /// Rules from [Eslint Plugin Import Access](https://github.com/uhyo/eslint-plugin-import-access)
@@ -132,6 +137,8 @@ pub enum RuleSource {
     Stylelint(&'static str),
     /// Rules from [Eslint Plugin No Secrets](https://github.com/nickdeis/eslint-plugin-no-secrets)
     EslintNoSecrets(&'static str),
+    /// Rules from [deno lint](https://github.com/denoland/deno_lint)
+    DenoLint(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -146,6 +153,7 @@ impl std::fmt::Display for RuleSource {
             Self::Clippy(_) => write!(f, "Clippy"),
             Self::Eslint(_) => write!(f, "ESLint"),
             Self::EslintGraphql(_) => write!(f, "GraphQL-ESLint"),
+            Self::EslintGraphqlSchemaLinter(_) => write!(f, "graphql-schema-linter"),
             Self::EslintImport(_) => write!(f, "eslint-plugin-import"),
             Self::EslintImportAccess(_) => write!(f, "eslint-plugin-import-access"),
             Self::EslintJest(_) => write!(f, "eslint-plugin-jest"),
@@ -165,6 +173,7 @@ impl std::fmt::Display for RuleSource {
             Self::EslintNext(_) => write!(f, "@next/eslint-plugin-next"),
             Self::Stylelint(_) => write!(f, "Stylelint"),
             Self::EslintNoSecrets(_) => write!(f, "eslint-plugin-no-secrets"),
+            Self::DenoLint(_) => write!(f, "deno-lint"),
         }
     }
 }
@@ -197,6 +206,7 @@ impl RuleSource {
             Self::Clippy(rule_name)
             | Self::Eslint(rule_name)
             | Self::EslintGraphql(rule_name)
+            | Self::EslintGraphqlSchemaLinter(rule_name)
             | Self::EslintImport(rule_name)
             | Self::EslintImportAccess(rule_name)
             | Self::EslintJest(rule_name)
@@ -215,7 +225,8 @@ impl RuleSource {
             | Self::EslintN(rule_name)
             | Self::EslintNext(rule_name)
             | Self::EslintNoSecrets(rule_name)
-            | Self::Stylelint(rule_name) => rule_name,
+            | Self::Stylelint(rule_name)
+            | Self::DenoLint(rule_name) => rule_name,
         }
     }
 
@@ -223,6 +234,7 @@ impl RuleSource {
         match self {
             Self::Clippy(rule_name) | Self::Eslint(rule_name) => (*rule_name).to_string(),
             Self::EslintGraphql(rule_name) => format!("graphql/{rule_name}"),
+            Self::EslintGraphqlSchemaLinter(rule_name) => format!("graphql/{rule_name}"),
             Self::EslintImport(rule_name) => format!("import/{rule_name}"),
             Self::EslintImportAccess(rule_name) => format!("import-access/{rule_name}"),
             Self::EslintJest(rule_name) => format!("jest/{rule_name}"),
@@ -242,6 +254,7 @@ impl RuleSource {
             Self::EslintNext(rule_name) => format!("@next/{rule_name}"),
             Self::Stylelint(rule_name) => format!("stylelint/{rule_name}"),
             Self::EslintNoSecrets(rule_name) => format!("no-secrets/{rule_name}"),
+            Self::DenoLint(rule_name) => format!("deno-lint/{rule_name}"),
         }
     }
 
@@ -250,6 +263,7 @@ impl RuleSource {
             Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
             Self::EslintGraphql(rule_name) => format!("https://the-guild.dev/graphql/eslint/rules/{rule_name}"),
+            Self::EslintGraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),
             Self::EslintImport(rule_name) => format!("https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintImportAccess(_) => "https://github.com/uhyo/eslint-plugin-import-access".to_string(),
             Self::EslintJest(rule_name) => format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"),
@@ -269,6 +283,7 @@ impl RuleSource {
             Self::EslintNext(rule_name) => format!("https://nextjs.org/docs/messages/{rule_name}"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
             Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
+            Self::DenoLint(rule_name) => format!("https://lint.deno.land/rules/{rule_name}"),
         }
     }
 
@@ -366,6 +381,18 @@ impl RuleMetadata {
             .try_into()
             .expect("Fix kind is not set in the rule metadata")
     }
+
+    pub fn action_category(&self, category: RuleCategory, group: &'static str) -> ActionCategory {
+        match category {
+            RuleCategory::Lint => {
+                ActionCategory::QuickFix(Cow::Owned(format!("{}.{}", group, self.name)))
+            }
+            RuleCategory::Action => {
+                ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed(self.name)))
+            }
+            RuleCategory::Syntax | RuleCategory::Transformation => unimplemented!(""),
+        }
+    }
 }
 
 pub trait RuleMeta {
@@ -418,7 +445,7 @@ macro_rules! declare_lint_rule {
         // This is implemented by calling the `group_category!` macro from the
         // parent module (that should be declared by a call to `declare_group!`)
         // and providing it with the name of this rule as a string literal token
-        #[allow(unused_macros)]
+        #[expect(unused_macros)]
         macro_rules! rule_category {
             () => { super::group_category!( $name ) };
         }
@@ -470,7 +497,7 @@ macro_rules! declare_syntax_rule {
         // This is implemented by calling the `group_category!` macro from the
         // parent module (that should be declared by a call to `declare_group!`)
         // and providing it with the name of this rule as a string literal token
-        #[allow(unused_macros)]
+        #[expect(unused_macros)]
         macro_rules! rule_category {
             () => { super::group_category!( $name ) };
         }
@@ -537,7 +564,7 @@ macro_rules! declare_source_rule {
         );
 
         /// This macro returns the corresponding [ActionCategory] to use inside the [RuleAction]
-        #[allow(unused_macros)]
+        #[expect(unused_macros)]
         macro_rules! rule_action_category {
             () => { ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed(concat!($language, ".", $name) )))  };
         }
@@ -582,7 +609,7 @@ macro_rules! declare_lint_group {
         // name within this group.
         // This is implemented by calling the `category_concat!` macro with the
         // "lint" prefix, the name of this group, and the rule name argument
-        #[allow(unused_macros)]
+        #[expect(unused_macros)]
         macro_rules! group_category {
             ( $rule_name:tt ) => { $crate::category_concat!( "lint", $name, $rule_name ) };
         }
@@ -619,7 +646,7 @@ macro_rules! declare_assists_group {
         // name within this group.
         // This is implemented by calling the `category_concat!` macro with the
         // "lint" prefix, the name of this group, and the rule name argument
-        #[allow(unused_macros)]
+        #[expect(unused_macros)]
         macro_rules! group_category {
             ( $rule_name:tt ) => { $crate::category_concat!( "assists", $name, $rule_name ) };
         }
@@ -656,7 +683,7 @@ macro_rules! declare_syntax_group {
         // name within this group.
         // This is implemented by calling the `category_concat!` macro with the
         // "lint" prefix, the name of this group, and the rule name argument
-        #[allow(unused_macros)]
+        #[expect(unused_macros)]
         macro_rules! group_category {
             ( $rule_name:tt ) => { $crate::category_concat!( "syntax", $name, $rule_name ) };
         }
@@ -881,6 +908,7 @@ pub trait Rule: RuleMeta + Sized {
         ctx: &RuleContext<Self>,
         text_range: &TextRange,
         suppression_action: &dyn SuppressionAction<Language = RuleLanguage<Self>>,
+        suppression_reason: Option<&str>,
     ) -> Option<SuppressAction<RuleLanguage<Self>>>
     where
         Self: 'static,
@@ -901,6 +929,7 @@ pub trait Rule: RuleMeta + Sized {
                 mutation: &mut mutation,
                 token_offset: token,
                 diagnostic_text_range: text_range,
+                suppression_reason: suppression_reason.unwrap_or("<explanation>"),
             });
 
             Some(SuppressAction {
@@ -1065,17 +1094,18 @@ impl RuleDiagnostic {
 
     /// It creates a new footer note which contains a message and a list of possible suggestions.
     /// Useful when there's need to suggest a list of things inside a diagnostic.
-    pub fn footer_list(mut self, message: impl Display, list: &[impl Display]) -> Self {
-        if !list.is_empty() {
-            self.rule_advice.suggestion_list = Some(SuggestionList {
-                message: markup! { {message} }.to_owned(),
-                list: list
-                    .iter()
-                    .map(|msg| markup! { {msg} }.to_owned())
-                    .collect(),
-            });
-        }
-
+    pub fn footer_list(
+        mut self,
+        message: impl Display,
+        list: impl IntoIterator<Item = impl Display>,
+    ) -> Self {
+        self.rule_advice.suggestion_list = Some(SuggestionList {
+            message: markup! { {message} }.to_owned(),
+            list: list
+                .into_iter()
+                .map(|msg| markup! {{msg}}.to_owned())
+                .collect(),
+        });
         self
     }
 

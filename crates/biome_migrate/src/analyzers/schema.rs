@@ -1,7 +1,7 @@
 use crate::version_services::Version;
 use crate::{declare_migration, MigrationAction};
 use biome_analyze::context::RuleContext;
-use biome_analyze::{ActionCategory, Rule, RuleAction, RuleDiagnostic};
+use biome_analyze::{Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::{category, Applicability};
 use biome_json_factory::make::{ident, json_string_value};
@@ -70,7 +70,7 @@ impl Rule for Schema {
         mutation.replace_node(member_value.clone(), new_node);
 
         Some(RuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             Applicability::Always,
             markup! {
                 "Update the URL."

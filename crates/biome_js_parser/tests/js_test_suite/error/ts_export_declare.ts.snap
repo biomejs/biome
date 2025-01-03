@@ -1,0 +1,248 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+export declare @decorator class D {}
+export declare @decorator abstract class D {}
+
+declare@
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsBogusStatement {
+            items: [
+                JsDecoratorList [],
+                EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+                JsBogus {
+                    items: [
+                        DECLARE_KW@7..15 "declare" [] [Whitespace(" ")],
+                        JsBogusStatement {
+                            items: [
+                                JsDecorator {
+                                    at_token: AT@15..16 "@" [] [],
+                                    expression: JsIdentifierExpression {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@16..26 "decorator" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                        JsClassDeclaration {
+                            decorators: JsDecoratorList [],
+                            abstract_token: missing (optional),
+                            class_token: CLASS_KW@26..32 "class" [] [Whitespace(" ")],
+                            id: JsIdentifierBinding {
+                                name_token: IDENT@32..34 "D" [] [Whitespace(" ")],
+                            },
+                            type_parameters: missing (optional),
+                            extends_clause: missing (optional),
+                            implements_clause: missing (optional),
+                            l_curly_token: L_CURLY@34..35 "{" [] [],
+                            members: JsClassMemberList [],
+                            r_curly_token: R_CURLY@35..36 "}" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecoratorList [],
+                EXPORT_KW@36..44 "export" [Newline("\n")] [Whitespace(" ")],
+                JsBogus {
+                    items: [
+                        DECLARE_KW@44..52 "declare" [] [Whitespace(" ")],
+                        JsBogusStatement {
+                            items: [
+                                JsDecorator {
+                                    at_token: AT@52..53 "@" [] [],
+                                    expression: JsIdentifierExpression {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@53..63 "decorator" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                        JsClassDeclaration {
+                            decorators: JsDecoratorList [],
+                            abstract_token: ABSTRACT_KW@63..72 "abstract" [] [Whitespace(" ")],
+                            class_token: CLASS_KW@72..78 "class" [] [Whitespace(" ")],
+                            id: JsIdentifierBinding {
+                                name_token: IDENT@78..80 "D" [] [Whitespace(" ")],
+                            },
+                            type_parameters: missing (optional),
+                            extends_clause: missing (optional),
+                            implements_clause: missing (optional),
+                            l_curly_token: L_CURLY@80..81 "{" [] [],
+                            members: JsClassMemberList [],
+                            r_curly_token: R_CURLY@81..82 "}" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                DECLARE_KW@82..91 "declare" [Newline("\n"), Newline("\n")] [],
+                JsBogusStatement {
+                    items: [
+                        JsDecorator {
+                            at_token: AT@91..92 "@" [] [],
+                            expression: missing (required),
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@92..92 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..92
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..92
+    0: JS_BOGUS_STATEMENT@0..36
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: JS_BOGUS@7..36
+        0: DECLARE_KW@7..15 "declare" [] [Whitespace(" ")]
+        1: JS_BOGUS_STATEMENT@15..26
+          0: JS_DECORATOR@15..26
+            0: AT@15..16 "@" [] []
+            1: JS_IDENTIFIER_EXPRESSION@16..26
+              0: JS_REFERENCE_IDENTIFIER@16..26
+                0: IDENT@16..26 "decorator" [] [Whitespace(" ")]
+        2: JS_CLASS_DECLARATION@26..36
+          0: JS_DECORATOR_LIST@26..26
+          1: (empty)
+          2: CLASS_KW@26..32 "class" [] [Whitespace(" ")]
+          3: JS_IDENTIFIER_BINDING@32..34
+            0: IDENT@32..34 "D" [] [Whitespace(" ")]
+          4: (empty)
+          5: (empty)
+          6: (empty)
+          7: L_CURLY@34..35 "{" [] []
+          8: JS_CLASS_MEMBER_LIST@35..35
+          9: R_CURLY@35..36 "}" [] []
+    1: JS_BOGUS_STATEMENT@36..82
+      0: JS_DECORATOR_LIST@36..36
+      1: EXPORT_KW@36..44 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_BOGUS@44..82
+        0: DECLARE_KW@44..52 "declare" [] [Whitespace(" ")]
+        1: JS_BOGUS_STATEMENT@52..63
+          0: JS_DECORATOR@52..63
+            0: AT@52..53 "@" [] []
+            1: JS_IDENTIFIER_EXPRESSION@53..63
+              0: JS_REFERENCE_IDENTIFIER@53..63
+                0: IDENT@53..63 "decorator" [] [Whitespace(" ")]
+        2: JS_CLASS_DECLARATION@63..82
+          0: JS_DECORATOR_LIST@63..63
+          1: ABSTRACT_KW@63..72 "abstract" [] [Whitespace(" ")]
+          2: CLASS_KW@72..78 "class" [] [Whitespace(" ")]
+          3: JS_IDENTIFIER_BINDING@78..80
+            0: IDENT@78..80 "D" [] [Whitespace(" ")]
+          4: (empty)
+          5: (empty)
+          6: (empty)
+          7: L_CURLY@80..81 "{" [] []
+          8: JS_CLASS_MEMBER_LIST@81..81
+          9: R_CURLY@81..82 "}" [] []
+    2: JS_BOGUS_STATEMENT@82..92
+      0: DECLARE_KW@82..91 "declare" [Newline("\n"), Newline("\n")] []
+      1: JS_BOGUS_STATEMENT@91..92
+        0: JS_DECORATOR@91..92
+          0: AT@91..92 "@" [] []
+          1: (empty)
+  4: EOF@92..92 "" [] []
+
+```
+
+## Diagnostics
+
+```
+ts_export_declare.ts:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+  > 1 │ export declare @decorator class D {}
+      │                ^^^^^^^^^^
+    2 │ export declare @decorator abstract class D {}
+    3 │ 
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+ts_export_declare.ts:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    1 │ export declare @decorator class D {}
+  > 2 │ export declare @decorator abstract class D {}
+      │                ^^^^^^^^^^
+    3 │ 
+    4 │ declare@
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+ts_export_declare.ts:4:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found the end of the file.
+  
+    2 │ export declare @decorator abstract class D {}
+    3 │ 
+  > 4 │ declare@
+      │         
+  
+  i Expected an expression here.
+  
+    2 │ export declare @decorator abstract class D {}
+    3 │ 
+  > 4 │ declare@
+      │         
+  
+ts_export_declare.ts:4:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    2 │ export declare @decorator abstract class D {}
+    3 │ 
+  > 4 │ declare@
+      │        ^
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+ts_export_declare.ts:4:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declare statement but instead found the end of the file.
+  
+    2 │ export declare @decorator abstract class D {}
+    3 │ 
+  > 4 │ declare@
+      │         
+  
+  i Expected a declare statement here.
+  
+    2 │ export declare @decorator abstract class D {}
+    3 │ 
+  > 4 │ declare@
+      │         
+  
+```

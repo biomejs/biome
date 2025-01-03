@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use biome_grit_syntax::GritAssignmentAsPattern;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_grit_syntax::{GritAssignmentAsPattern, GritAssignmentAsPatternFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritAssignmentAsPattern;
 impl FormatNodeRule<GritAssignmentAsPattern> for FormatGritAssignmentAsPattern {
@@ -9,6 +9,21 @@ impl FormatNodeRule<GritAssignmentAsPattern> for FormatGritAssignmentAsPattern {
         node: &GritAssignmentAsPattern,
         f: &mut GritFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GritAssignmentAsPatternFields {
+            pattern,
+            eq_token,
+            container,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                container.format(),
+                space(),
+                eq_token.format(),
+                space(),
+                pattern.format()
+            ]
+        )
     }
 }

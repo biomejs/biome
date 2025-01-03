@@ -1,0 +1,129 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+<span></span>;
+<span>=</span>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxElement {
+                    opening_element: JsxOpeningElement {
+                        l_angle_token: L_ANGLE@0..1 "<" [] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@1..5 "span" [] [],
+                        },
+                        type_arguments: missing (optional),
+                        attributes: JsxAttributeList [],
+                        r_angle_token: R_ANGLE@5..6 ">" [] [],
+                    },
+                    children: JsxChildList [],
+                    closing_element: JsxClosingElement {
+                        l_angle_token: L_ANGLE@6..7 "<" [] [],
+                        slash_token: SLASH@7..8 "/" [] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@8..12 "span" [] [],
+                        },
+                        r_angle_token: R_ANGLE@12..13 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@13..14 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxElement {
+                    opening_element: JsxOpeningElement {
+                        l_angle_token: L_ANGLE@14..16 "<" [Newline("\n")] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@16..20 "span" [] [],
+                        },
+                        type_arguments: missing (optional),
+                        attributes: JsxAttributeList [],
+                        r_angle_token: R_ANGLE@20..21 ">" [] [],
+                    },
+                    children: JsxChildList [
+                        JsxText {
+                            value_token: JSX_TEXT_LITERAL@21..22 "=" [] [],
+                        },
+                    ],
+                    closing_element: JsxClosingElement {
+                        l_angle_token: L_ANGLE@22..23 "<" [] [],
+                        slash_token: SLASH@23..24 "/" [] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@24..28 "span" [] [],
+                        },
+                        r_angle_token: R_ANGLE@28..29 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@29..30 ";" [] [],
+        },
+    ],
+    eof_token: EOF@30..31 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..31
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..30
+    0: JS_EXPRESSION_STATEMENT@0..14
+      0: JSX_TAG_EXPRESSION@0..13
+        0: JSX_ELEMENT@0..13
+          0: JSX_OPENING_ELEMENT@0..6
+            0: L_ANGLE@0..1 "<" [] []
+            1: JSX_NAME@1..5
+              0: JSX_IDENT@1..5 "span" [] []
+            2: (empty)
+            3: JSX_ATTRIBUTE_LIST@5..5
+            4: R_ANGLE@5..6 ">" [] []
+          1: JSX_CHILD_LIST@6..6
+          2: JSX_CLOSING_ELEMENT@6..13
+            0: L_ANGLE@6..7 "<" [] []
+            1: SLASH@7..8 "/" [] []
+            2: JSX_NAME@8..12
+              0: JSX_IDENT@8..12 "span" [] []
+            3: R_ANGLE@12..13 ">" [] []
+      1: SEMICOLON@13..14 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@14..30
+      0: JSX_TAG_EXPRESSION@14..29
+        0: JSX_ELEMENT@14..29
+          0: JSX_OPENING_ELEMENT@14..21
+            0: L_ANGLE@14..16 "<" [Newline("\n")] []
+            1: JSX_NAME@16..20
+              0: JSX_IDENT@16..20 "span" [] []
+            2: (empty)
+            3: JSX_ATTRIBUTE_LIST@20..20
+            4: R_ANGLE@20..21 ">" [] []
+          1: JSX_CHILD_LIST@21..22
+            0: JSX_TEXT@21..22
+              0: JSX_TEXT_LITERAL@21..22 "=" [] []
+          2: JSX_CLOSING_ELEMENT@22..29
+            0: L_ANGLE@22..23 "<" [] []
+            1: SLASH@23..24 "/" [] []
+            2: JSX_NAME@24..28
+              0: JSX_IDENT@24..28 "span" [] []
+            3: R_ANGLE@28..29 ">" [] []
+      1: SEMICOLON@29..30 ";" [] []
+  4: EOF@30..31 "" [Newline("\n")] []
+
+```

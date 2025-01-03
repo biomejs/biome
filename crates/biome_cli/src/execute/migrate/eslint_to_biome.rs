@@ -323,8 +323,8 @@ mod tests {
     #[test]
     fn flat_config_single_config_object() {
         let flat_config = FlatConfigData(vec![FlatConfigObject {
-            files: vec!["*.js".to_string()],
-            ignores: vec!["*.test.js".to_string()],
+            files: ["*.js".to_string()].into_iter().collect(),
+            ignores: ["*.test.js".to_string()].into_iter().collect(),
             language_options: None,
             rules: Some(Rules(
                 [Rule::Any(Cow::Borrowed("eqeqeq"), Severity::Error)]
@@ -354,14 +354,14 @@ mod tests {
     fn flat_config_multiple_config_object() {
         let flat_config = FlatConfigData(vec![
             FlatConfigObject {
-                files: vec![],
-                ignores: vec!["*.test.js".to_string()],
+                files: ShorthandVec::default(),
+                ignores: ["*.test.js".to_string()].into_iter().collect(),
                 language_options: None,
                 rules: None,
             },
             FlatConfigObject {
-                files: vec![],
-                ignores: vec![],
+                files: ShorthandVec::default(),
+                ignores: ShorthandVec::default(),
                 language_options: None,
                 rules: Some(Rules(
                     [Rule::Any(Cow::Borrowed("eqeqeq"), Severity::Error)]
@@ -370,14 +370,14 @@ mod tests {
                 )),
             },
             FlatConfigObject {
-                files: vec![],
-                ignores: vec!["*.spec.js".to_string()],
+                files: ShorthandVec::default(),
+                ignores: ["*.spec.js".to_string()].into_iter().collect(),
                 language_options: None,
                 rules: None,
             },
             FlatConfigObject {
-                files: vec!["*.ts".to_string()],
-                ignores: vec![],
+                files: ["*.ts".to_string()].into_iter().collect(),
+                ignores: ShorthandVec::default(),
                 language_options: None,
                 rules: Some(Rules(
                     [Rule::Any(Cow::Borrowed("eqeqeq"), Severity::Off)]

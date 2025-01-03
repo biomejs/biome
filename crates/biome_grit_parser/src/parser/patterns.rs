@@ -1,9 +1,8 @@
 use super::literals::*;
 use super::parse_error::*;
-use super::parse_maybe_named_arg;
-use super::parse_pattern_arg_list;
 use super::predicates::parse_expected_predicate;
 use super::VariableList;
+use super::{parse_maybe_named_arg, parse_variable_list};
 use super::{parse_name, parse_not, parse_variable, GritParser};
 use crate::constants::*;
 use biome_grit_syntax::GritSyntaxKind;
@@ -937,7 +936,7 @@ fn parse_regex_pattern_variables(p: &mut GritParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T!['(']);
 
-    parse_pattern_arg_list(p).ok();
+    parse_variable_list(p);
 
     p.eat(T![')']);
 

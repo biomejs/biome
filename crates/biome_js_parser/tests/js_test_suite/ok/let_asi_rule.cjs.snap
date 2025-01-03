@@ -1,0 +1,149 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```cjs
+// SCRIPT
+let // NO ASI
+x = 1;
+for await (var x of []) let // ASI
+x = 1;
+
+```
+
+
+## AST
+
+```
+JsScript {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    statements: JsStatementList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..23 "let" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" "), Comments("// NO ASI")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@23..26 "x" [Newline("\n")] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@26..28 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@28..29 "1" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@29..30 ";" [] [],
+        },
+        JsForOfStatement {
+            for_token: FOR_KW@30..35 "for" [Newline("\n")] [Whitespace(" ")],
+            await_token: AWAIT_KW@35..41 "await" [] [Whitespace(" ")],
+            l_paren_token: L_PAREN@41..42 "(" [] [],
+            initializer: JsForVariableDeclaration {
+                await_token: missing (optional),
+                kind_token: VAR_KW@42..46 "var" [] [Whitespace(" ")],
+                declarator: JsVariableDeclarator {
+                    id: JsIdentifierBinding {
+                        name_token: IDENT@46..48 "x" [] [Whitespace(" ")],
+                    },
+                    variable_annotation: missing (optional),
+                    initializer: missing (optional),
+                },
+            },
+            of_token: OF_KW@48..51 "of" [] [Whitespace(" ")],
+            expression: JsArrayExpression {
+                l_brack_token: L_BRACK@51..52 "[" [] [],
+                elements: JsArrayElementList [],
+                r_brack_token: R_BRACK@52..53 "]" [] [],
+            },
+            r_paren_token: R_PAREN@53..55 ")" [] [Whitespace(" ")],
+            body: JsExpressionStatement {
+                expression: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@55..65 "let" [] [Whitespace(" "), Comments("// ASI")],
+                    },
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+        JsExpressionStatement {
+            expression: JsAssignmentExpression {
+                left: JsIdentifierAssignment {
+                    name_token: IDENT@65..68 "x" [Newline("\n")] [Whitespace(" ")],
+                },
+                operator_token: EQ@68..70 "=" [] [Whitespace(" ")],
+                right: JsNumberLiteralExpression {
+                    value_token: JS_NUMBER_LITERAL@70..71 "1" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@71..72 ";" [] [],
+        },
+    ],
+    eof_token: EOF@72..73 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SCRIPT@0..73
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_STATEMENT_LIST@0..72
+    0: JS_VARIABLE_STATEMENT@0..30
+      0: JS_VARIABLE_DECLARATION@0..29
+        0: (empty)
+        1: LET_KW@0..23 "let" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" "), Comments("// NO ASI")]
+        2: JS_VARIABLE_DECLARATOR_LIST@23..29
+          0: JS_VARIABLE_DECLARATOR@23..29
+            0: JS_IDENTIFIER_BINDING@23..26
+              0: IDENT@23..26 "x" [Newline("\n")] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@26..29
+              0: EQ@26..28 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@28..29
+                0: JS_NUMBER_LITERAL@28..29 "1" [] []
+      1: SEMICOLON@29..30 ";" [] []
+    1: JS_FOR_OF_STATEMENT@30..65
+      0: FOR_KW@30..35 "for" [Newline("\n")] [Whitespace(" ")]
+      1: AWAIT_KW@35..41 "await" [] [Whitespace(" ")]
+      2: L_PAREN@41..42 "(" [] []
+      3: JS_FOR_VARIABLE_DECLARATION@42..48
+        0: (empty)
+        1: VAR_KW@42..46 "var" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR@46..48
+          0: JS_IDENTIFIER_BINDING@46..48
+            0: IDENT@46..48 "x" [] [Whitespace(" ")]
+          1: (empty)
+          2: (empty)
+      4: OF_KW@48..51 "of" [] [Whitespace(" ")]
+      5: JS_ARRAY_EXPRESSION@51..53
+        0: L_BRACK@51..52 "[" [] []
+        1: JS_ARRAY_ELEMENT_LIST@52..52
+        2: R_BRACK@52..53 "]" [] []
+      6: R_PAREN@53..55 ")" [] [Whitespace(" ")]
+      7: JS_EXPRESSION_STATEMENT@55..65
+        0: JS_IDENTIFIER_EXPRESSION@55..65
+          0: JS_REFERENCE_IDENTIFIER@55..65
+            0: IDENT@55..65 "let" [] [Whitespace(" "), Comments("// ASI")]
+        1: (empty)
+    2: JS_EXPRESSION_STATEMENT@65..72
+      0: JS_ASSIGNMENT_EXPRESSION@65..71
+        0: JS_IDENTIFIER_ASSIGNMENT@65..68
+          0: IDENT@65..68 "x" [Newline("\n")] [Whitespace(" ")]
+        1: EQ@68..70 "=" [] [Whitespace(" ")]
+        2: JS_NUMBER_LITERAL_EXPRESSION@70..71
+          0: JS_NUMBER_LITERAL@70..71 "1" [] []
+      1: SEMICOLON@71..72 ";" [] []
+  4: EOF@72..73 "" [Newline("\n")] []
+
+```

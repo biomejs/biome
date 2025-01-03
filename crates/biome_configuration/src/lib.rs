@@ -1,7 +1,7 @@
 //! This module contains the configuration of `biome.json`
 //!
 //! The configuration is divided by "tool", and then it's possible to further customise it
-//! by language. The language might further options divided by tool.
+//! by language. The language might further option divided by tool.
 pub mod analyzer;
 pub mod css;
 pub mod diagnostics;
@@ -398,6 +398,7 @@ impl ConfigurationPathHint {
 mod test {
     use oxc_resolver::{FileMetadata, ResolveOptions, ResolverGeneric};
     use std::env;
+    use std::fs::read_link;
     use std::path::{Path, PathBuf};
 
     #[test]
@@ -420,8 +421,8 @@ mod test {
                 Ok(FileMetadata::new(true, false, false))
             }
 
-            fn canonicalize(&self, _path: &Path) -> std::io::Result<PathBuf> {
-                env::current_dir().unwrap().canonicalize()
+            fn read_link(&self, path: &Path) -> std::io::Result<PathBuf> {
+                read_link(path)
             }
         }
 

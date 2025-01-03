@@ -1,9 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_analyze::{Ast, RuleSource, RuleSourceKind};
 use biome_console::markup;
-use biome_js_syntax::{
-    JsExport, JsExportFromClause, JsExportNamedFromClause, JsFileSource, JsModule,
-};
+use biome_js_syntax::{JsExport, JsExportFromClause, JsExportNamedFromClause, JsModule};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -58,15 +56,7 @@ impl Rule for NoBarrelFile {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if ctx
-            .source_type::<JsFileSource>()
-            .language()
-            .is_definition_file()
-        {
-            return None;
-        }
         let items = ctx.query().items();
-
         for item in items {
             if let Some(export) = JsExport::cast(item.into()) {
                 if let Ok(export_from_clause) = export.export_clause() {

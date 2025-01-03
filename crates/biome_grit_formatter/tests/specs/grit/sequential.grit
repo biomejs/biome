@@ -1,0 +1,4 @@
+sequential {
+    bubble file($body) where $body <: contains `console.log($message)` => `console.warn($message)`,
+    bubble file($body) where $body <: contains `console.warn($message)` => `console.info($message)`
+}

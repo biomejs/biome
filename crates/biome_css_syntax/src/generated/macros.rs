@@ -178,6 +178,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssDocumentCustomMatcher::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_EMPTY_DECLARATION => {
+                    let $pattern = unsafe { $crate::CssEmptyDeclaration::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_FONT_FACE_AT_RULE => {
                     let $pattern = unsafe { $crate::CssFontFaceAtRule::new_unchecked(node) };
                     $body
@@ -397,6 +401,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_PERCENTAGE => {
                     let $pattern = unsafe { $crate::CssPercentage::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_POSITION_TRY_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssPositionTryAtRule::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_PROPERTY_AT_RULE => {
@@ -682,6 +690,10 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_VALUE_AT_RULE_NAMED_IMPORT_SPECIFIER => {
                     let $pattern =
                         unsafe { $crate::CssValueAtRuleNamedImportSpecifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_VIEW_TRANSITION_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssViewTransitionAtRule::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS => {

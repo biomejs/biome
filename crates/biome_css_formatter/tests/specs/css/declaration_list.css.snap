@@ -39,6 +39,25 @@ a {
 	'Liberation Mono' , 'Courier New' , monospace;
 }
 
+a {
+    color: red;;;;
+}
+
+.with-comments {
+  /* hello */
+  a,
+  /* world */
+  button {
+    color: blue;
+  }
+}
+  
+.without-comments {
+  a,
+  button {
+    color: blue;
+  }
+}
 ```
 
 
@@ -95,5 +114,25 @@ a {
 	--bs-font-monospace: sfmono-regular / menlo;
 	--bs-font-monospace: sfmono-regular, menlo, monaco, consolas,
 		"Liberation Mono", "Courier New", monospace;
+}
+
+a {
+	color: red;
+}
+
+.with-comments {
+	/* hello */
+	a,
+	/* world */
+	button {
+		color: blue;
+	}
+}
+
+.without-comments {
+	a,
+	button {
+		color: blue;
+	}
 }
 ```

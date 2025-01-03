@@ -26,6 +26,10 @@ div {
     --\eeunquoted: green;
     color: var(--\eeunquoted);
 }
+
+@charset·"UTF-8";
+@charset "iso-8859-15";
+@charset "any-string-is-okay";
 ```
 
 
@@ -65,6 +69,10 @@ div {
 	--\eeunquoted: green;
 	color: var(--\eeunquoted);
 }
+
+@charset· "UTF-8";
+@charset "iso-8859-15";
+@charset "any-string-is-okay";
 ```
 
 ## Output 1
@@ -99,4 +107,8 @@ div {
 	--\eeunquoted: green;
 	color: var(--\eeunquoted);
 }
+
+@charset· "UTF-8";
+@charset "iso-8859-15";
+@charset "any-string-is-okay";
 ```

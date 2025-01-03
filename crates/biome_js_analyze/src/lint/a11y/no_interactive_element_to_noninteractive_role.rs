@@ -1,8 +1,8 @@
 use crate::{services::aria::Aria, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
+use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt};
@@ -54,39 +54,36 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let aria_roles = ctx.aria_roles();
         if node.is_element() {
             let role_attribute = node.find_attribute_by_name("role")?;
             let role_attribute_static_value = role_attribute.as_static_value()?;
             let role_attribute_value = role_attribute_static_value.text();
             let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
+            let element_name = element_name.text_trimmed();
 
-            let attributes = ctx.extract_attributes(&node.attributes());
-            let attributes = ctx.convert_all_attribute_values(attributes);
-            if !aria_roles.is_not_interactive_element(element_name.text_trimmed(), attributes)
-                && !aria_roles.is_role_interactive(role_attribute_value)
+            if !ctx.aria_roles().is_not_interactive_element(node)
+                && AriaRole::from_roles(role_attribute_value)
+                    .is_some_and(|role| role.is_non_interactive())
             {
                 // <div> and <span> are considered neither interactive nor non-interactive, depending on the presence or absence of the role attribute.
                 // We don't report <div> and <span> here, because we cannot determine whether they are interactive or non-interactive.
                 let role_sensitive_elements = ["div", "span", "source"];
-                if role_sensitive_elements.contains(&element_name.text_trimmed()) {
+                if role_sensitive_elements.contains(&element_name) {
                     return None;
                 }
 
                 // A <svg> element can be given an "img" to make it non-interactive for a11y reasons.
-                if element_name.text_trimmed() == "svg" && role_attribute_value == "img" {
+                if element_name == "svg" && role_attribute_value == "img" {
                     return None;
                 }
 
                 // A <canvas> element can be given an "img" to make it non-interactive for a11y reasons.
-                if element_name.text_trimmed() == "canvas" && role_attribute_value == "img" {
+                if element_name == "canvas" && role_attribute_value == "img" {
                     return None;
                 }
 
                 // a tag without href is considered non-interactive
-                if element_name.text_trimmed() == "a"
-                    && node.find_attribute_by_name("href").is_none()
-                {
+                if element_name == "a" && node.find_attribute_by_name("href").is_none() {
                     return None;
                 }
 
@@ -123,7 +120,7 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
         let mut mutation = ctx.root().begin();
         mutation.remove_node(role_attribute);
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the "<Emphasis>"role"</Emphasis>" attribute." }.to_owned(),
             mutation,

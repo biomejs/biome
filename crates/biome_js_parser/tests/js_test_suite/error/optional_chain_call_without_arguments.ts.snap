@@ -1,0 +1,207 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+let a = { test: null };
+a.test?.;
+a.test?.<ab;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..4 "let" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..6 "a" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@6..8 "=" [] [Whitespace(" ")],
+                            expression: JsObjectExpression {
+                                l_curly_token: L_CURLY@8..10 "{" [] [Whitespace(" ")],
+                                members: JsObjectMemberList [
+                                    JsPropertyObjectMember {
+                                        name: JsLiteralMemberName {
+                                            value: IDENT@10..14 "test" [] [],
+                                        },
+                                        colon_token: COLON@14..16 ":" [] [Whitespace(" ")],
+                                        value: JsNullLiteralExpression {
+                                            value_token: NULL_KW@16..21 "null" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@21..22 "}" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@22..23 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsStaticMemberExpression {
+                object: JsStaticMemberExpression {
+                    object: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@23..25 "a" [Newline("\n")] [],
+                        },
+                    },
+                    operator_token: DOT@25..26 "." [] [],
+                    member: JsName {
+                        value_token: IDENT@26..30 "test" [] [],
+                    },
+                },
+                operator_token: QUESTIONDOT@30..32 "?." [] [],
+                member: missing (required),
+            },
+            semicolon_token: SEMICOLON@32..33 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsBinaryExpression {
+                left: JsStaticMemberExpression {
+                    object: JsStaticMemberExpression {
+                        object: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@33..35 "a" [Newline("\n")] [],
+                            },
+                        },
+                        operator_token: DOT@35..36 "." [] [],
+                        member: JsName {
+                            value_token: IDENT@36..40 "test" [] [],
+                        },
+                    },
+                    operator_token: QUESTIONDOT@40..42 "?." [] [],
+                    member: missing (required),
+                },
+                operator_token: L_ANGLE@42..43 "<" [] [],
+                right: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@43..45 "ab" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@45..46 ";" [] [],
+        },
+    ],
+    eof_token: EOF@46..47 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..47
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..46
+    0: JS_VARIABLE_STATEMENT@0..23
+      0: JS_VARIABLE_DECLARATION@0..22
+        0: (empty)
+        1: LET_KW@0..4 "let" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..22
+          0: JS_VARIABLE_DECLARATOR@4..22
+            0: JS_IDENTIFIER_BINDING@4..6
+              0: IDENT@4..6 "a" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@6..22
+              0: EQ@6..8 "=" [] [Whitespace(" ")]
+              1: JS_OBJECT_EXPRESSION@8..22
+                0: L_CURLY@8..10 "{" [] [Whitespace(" ")]
+                1: JS_OBJECT_MEMBER_LIST@10..21
+                  0: JS_PROPERTY_OBJECT_MEMBER@10..21
+                    0: JS_LITERAL_MEMBER_NAME@10..14
+                      0: IDENT@10..14 "test" [] []
+                    1: COLON@14..16 ":" [] [Whitespace(" ")]
+                    2: JS_NULL_LITERAL_EXPRESSION@16..21
+                      0: NULL_KW@16..21 "null" [] [Whitespace(" ")]
+                2: R_CURLY@21..22 "}" [] []
+      1: SEMICOLON@22..23 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@23..33
+      0: JS_STATIC_MEMBER_EXPRESSION@23..32
+        0: JS_STATIC_MEMBER_EXPRESSION@23..30
+          0: JS_IDENTIFIER_EXPRESSION@23..25
+            0: JS_REFERENCE_IDENTIFIER@23..25
+              0: IDENT@23..25 "a" [Newline("\n")] []
+          1: DOT@25..26 "." [] []
+          2: JS_NAME@26..30
+            0: IDENT@26..30 "test" [] []
+        1: QUESTIONDOT@30..32 "?." [] []
+        2: (empty)
+      1: SEMICOLON@32..33 ";" [] []
+    2: JS_EXPRESSION_STATEMENT@33..46
+      0: JS_BINARY_EXPRESSION@33..45
+        0: JS_STATIC_MEMBER_EXPRESSION@33..42
+          0: JS_STATIC_MEMBER_EXPRESSION@33..40
+            0: JS_IDENTIFIER_EXPRESSION@33..35
+              0: JS_REFERENCE_IDENTIFIER@33..35
+                0: IDENT@33..35 "a" [Newline("\n")] []
+            1: DOT@35..36 "." [] []
+            2: JS_NAME@36..40
+              0: IDENT@36..40 "test" [] []
+          1: QUESTIONDOT@40..42 "?." [] []
+          2: (empty)
+        1: L_ANGLE@42..43 "<" [] []
+        2: JS_IDENTIFIER_EXPRESSION@43..45
+          0: JS_REFERENCE_IDENTIFIER@43..45
+            0: IDENT@43..45 "ab" [] []
+      1: SEMICOLON@45..46 ";" [] []
+  4: EOF@46..47 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+optional_chain_call_without_arguments.ts:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ';'.
+  
+    1 │ let a = { test: null };
+  > 2 │ a.test?.;
+      │         ^
+    3 │ a.test?.<ab;
+    4 │ 
+  
+  i Expected an identifier here.
+  
+    1 │ let a = { test: null };
+  > 2 │ a.test?.;
+      │         ^
+    3 │ a.test?.<ab;
+    4 │ 
+  
+optional_chain_call_without_arguments.ts:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '<'.
+  
+    1 │ let a = { test: null };
+    2 │ a.test?.;
+  > 3 │ a.test?.<ab;
+      │         ^
+    4 │ 
+  
+  i Expected an identifier here.
+  
+    1 │ let a = { test: null };
+    2 │ a.test?.;
+  > 3 │ a.test?.<ab;
+      │         ^
+    4 │ 
+  
+```

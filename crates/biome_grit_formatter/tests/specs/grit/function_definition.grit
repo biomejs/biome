@@ -1,0 +1,25 @@
+/ define a lines function
+function lines($string) {
+    return split($string, separator=`\n`)
+}
+
+// Define a my_todo function
+function my_todo($target, $message) {
+   if($message <: undefined) {
+       $message = "This requires manual intervention."
+   },
+   $lines = lines(string = $message),
+   $lines <: some bubble($result) $x where {
+       if ($result <: undefined) {
+            $result = `// TODO: $x`
+        } else {
+            $result += `\n// $x`
+        }
+   },
+   $target_lines = lines(string = $target),
+   $target_lines <: some bubble($result) $x where { $result += `\n// $x` },
+   return $result,
+}
+
+// Use the my_todo function
+`module.exports = $_` as $x => my_todo(target=$x, message=`Fix this\nAnd that`)

@@ -1,8 +1,9 @@
-use crate::converters::{from_proto, to_proto};
 use crate::diagnostics::LspError;
 use crate::session::Session;
+use crate::utils::text_edit;
 use anyhow::Context;
 use biome_fs::BiomePath;
+use biome_lsp_converters::from_proto;
 use biome_rowan::{TextRange, TextSize};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
@@ -11,7 +12,7 @@ use biome_service::workspace::{
 };
 use biome_service::{extension_error, WorkspaceError};
 use std::ffi::OsStr;
-use std::ops::{Add, Sub};
+use std::ops::Sub;
 use tower_lsp::lsp_types::*;
 use tracing::debug;
 
@@ -56,20 +57,13 @@ pub(crate) fn format(
             _ => {}
         }
 
-        let num_lines: u32 = doc.line_index.len();
-
-        let range = Range {
-            start: Position::default(),
-            end: Position {
-                line: num_lines,
-                character: 0,
-            },
-        };
-
-        let edits = vec![TextEdit {
-            range,
-            new_text: output,
-        }];
+        let content = session.workspace.get_file_content(GetFileContentParams {
+            path: biome_path.clone(),
+        })?;
+        let indels =
+            biome_text_edit::TextEdit::from_unicode_words(content.as_str(), output.as_str());
+        let position_encoding = session.position_encoding();
+        let edits = text_edit(&doc.line_index, indels, position_encoding, None)?;
 
         Ok(Some(edits))
     } else {
@@ -124,37 +118,24 @@ pub(crate) fn format_range(
         };
 
         let formatted = session.workspace.format_range(FormatRangeParams {
-            path: biome_path,
+            path: biome_path.clone(),
             range: format_range,
         })?;
 
-        // Recalculate the actual range that was reformatted from the formatter result
-        let formatted_range = match formatted.range() {
-            Some(range) => {
-                let position_encoding = session.position_encoding();
-                let range = if let Some(offset) = offset {
-                    TextRange::new(
-                        range.start().add(TextSize::from(offset)),
-                        range.end().add(TextSize::from(offset)),
-                    )
-                } else {
-                    range
-                };
-                to_proto::range(&doc.line_index, range, position_encoding)?
-            }
-            None => Range {
-                start: Position::default(),
-                end: Position {
-                    line: doc.line_index.len(),
-                    character: 0,
-                },
-            },
-        };
+        let content = session.workspace.get_file_content(GetFileContentParams {
+            path: biome_path.clone(),
+        })?;
+        let indels =
+            biome_text_edit::TextEdit::from_unicode_words(content.as_str(), formatted.as_code());
+        let position_encoding = session.position_encoding();
+        let edits = text_edit(
+            &doc.line_index,
+            indels,
+            position_encoding,
+            Some(format_range.start().into()),
+        )?;
 
-        Ok(Some(vec![TextEdit {
-            range: formatted_range,
-            new_text: formatted.into_code(),
-        }]))
+        Ok(Some(edits))
     } else {
         notify_user(file_features, biome_path)
     }
@@ -183,35 +164,23 @@ pub(crate) fn format_on_type(
             .with_context(|| format!("failed to access position {position:?} in document {url}"))?;
 
         let formatted = session.workspace.format_on_type(FormatOnTypeParams {
-            path: biome_path,
+            path: biome_path.clone(),
             offset,
         })?;
 
-        // Recalculate the actual range that was reformatted from the formatter result
-        let formatted_range = match formatted.range() {
-            Some(range) => {
-                let position_encoding = session.position_encoding();
-                let start_loc =
-                    to_proto::position(&doc.line_index, range.start(), position_encoding)?;
-                let end_loc = to_proto::position(&doc.line_index, range.end(), position_encoding)?;
-                Range {
-                    start: start_loc,
-                    end: end_loc,
-                }
-            }
-            None => Range {
-                start: Position::default(),
-                end: Position {
-                    line: doc.line_index.len(),
-                    character: 0,
-                },
-            },
-        };
+        let content = session.workspace.get_file_content(GetFileContentParams {
+            path: biome_path.clone(),
+        })?;
 
-        Ok(Some(vec![TextEdit {
-            range: formatted_range,
-            new_text: formatted.into_code(),
-        }]))
+        let indels =
+            biome_text_edit::TextEdit::from_unicode_words(content.as_str(), formatted.as_code());
+        let edits = text_edit(
+            &doc.line_index,
+            indels,
+            position_encoding,
+            Some(offset.into()),
+        )?;
+        Ok(Some(edits))
     } else {
         notify_user(file_features, biome_path)
     }

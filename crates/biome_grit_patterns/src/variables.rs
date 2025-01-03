@@ -16,7 +16,7 @@ impl VariableLocations {
         Self(locations)
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub(crate) fn compiled_vars(&self) -> Vec<VariableBinding> {
         let mut variables = Vec::new();
         for (i, scope) in self.0.iter().enumerate() {

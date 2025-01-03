@@ -1,0 +1,253 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+export default interface A{};
+export default interface A{};
+export default function a(){};
+export default interface A{};
+export default interface A{};
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@7..15 "default" [] [Whitespace(" ")],
+                declaration: TsInterfaceDeclaration {
+                    interface_token: INTERFACE_KW@15..25 "interface" [] [Whitespace(" ")],
+                    id: TsIdentifierBinding {
+                        name_token: IDENT@25..26 "A" [] [],
+                    },
+                    type_parameters: missing (optional),
+                    extends_clause: missing (optional),
+                    l_curly_token: L_CURLY@26..27 "{" [] [],
+                    members: TsTypeMemberList [],
+                    r_curly_token: R_CURLY@27..28 "}" [] [],
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@28..29 ";" [] [],
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@29..37 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@37..45 "default" [] [Whitespace(" ")],
+                declaration: TsInterfaceDeclaration {
+                    interface_token: INTERFACE_KW@45..55 "interface" [] [Whitespace(" ")],
+                    id: TsIdentifierBinding {
+                        name_token: IDENT@55..56 "A" [] [],
+                    },
+                    type_parameters: missing (optional),
+                    extends_clause: missing (optional),
+                    l_curly_token: L_CURLY@56..57 "{" [] [],
+                    members: TsTypeMemberList [],
+                    r_curly_token: R_CURLY@57..58 "}" [] [],
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@58..59 ";" [] [],
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@59..67 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@67..75 "default" [] [Whitespace(" ")],
+                declaration: JsFunctionExportDefaultDeclaration {
+                    async_token: missing (optional),
+                    function_token: FUNCTION_KW@75..84 "function" [] [Whitespace(" ")],
+                    star_token: missing (optional),
+                    id: JsIdentifierBinding {
+                        name_token: IDENT@84..85 "a" [] [],
+                    },
+                    type_parameters: missing (optional),
+                    parameters: JsParameters {
+                        l_paren_token: L_PAREN@85..86 "(" [] [],
+                        items: JsParameterList [],
+                        r_paren_token: R_PAREN@86..87 ")" [] [],
+                    },
+                    return_type_annotation: missing (optional),
+                    body: JsFunctionBody {
+                        l_curly_token: L_CURLY@87..88 "{" [] [],
+                        directives: JsDirectiveList [],
+                        statements: JsStatementList [],
+                        r_curly_token: R_CURLY@88..89 "}" [] [],
+                    },
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@89..90 ";" [] [],
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@90..98 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@98..106 "default" [] [Whitespace(" ")],
+                declaration: TsInterfaceDeclaration {
+                    interface_token: INTERFACE_KW@106..116 "interface" [] [Whitespace(" ")],
+                    id: TsIdentifierBinding {
+                        name_token: IDENT@116..117 "A" [] [],
+                    },
+                    type_parameters: missing (optional),
+                    extends_clause: missing (optional),
+                    l_curly_token: L_CURLY@117..118 "{" [] [],
+                    members: TsTypeMemberList [],
+                    r_curly_token: R_CURLY@118..119 "}" [] [],
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@119..120 ";" [] [],
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@120..128 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@128..136 "default" [] [Whitespace(" ")],
+                declaration: TsInterfaceDeclaration {
+                    interface_token: INTERFACE_KW@136..146 "interface" [] [Whitespace(" ")],
+                    id: TsIdentifierBinding {
+                        name_token: IDENT@146..147 "A" [] [],
+                    },
+                    type_parameters: missing (optional),
+                    extends_clause: missing (optional),
+                    l_curly_token: L_CURLY@147..148 "{" [] [],
+                    members: TsTypeMemberList [],
+                    r_curly_token: R_CURLY@148..149 "}" [] [],
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@149..150 ";" [] [],
+        },
+    ],
+    eof_token: EOF@150..151 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..151
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..150
+    0: JS_EXPORT@0..28
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@7..28
+        0: DEFAULT_KW@7..15 "default" [] [Whitespace(" ")]
+        1: TS_INTERFACE_DECLARATION@15..28
+          0: INTERFACE_KW@15..25 "interface" [] [Whitespace(" ")]
+          1: TS_IDENTIFIER_BINDING@25..26
+            0: IDENT@25..26 "A" [] []
+          2: (empty)
+          3: (empty)
+          4: L_CURLY@26..27 "{" [] []
+          5: TS_TYPE_MEMBER_LIST@27..27
+          6: R_CURLY@27..28 "}" [] []
+        2: (empty)
+    1: JS_EMPTY_STATEMENT@28..29
+      0: SEMICOLON@28..29 ";" [] []
+    2: JS_EXPORT@29..58
+      0: JS_DECORATOR_LIST@29..29
+      1: EXPORT_KW@29..37 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@37..58
+        0: DEFAULT_KW@37..45 "default" [] [Whitespace(" ")]
+        1: TS_INTERFACE_DECLARATION@45..58
+          0: INTERFACE_KW@45..55 "interface" [] [Whitespace(" ")]
+          1: TS_IDENTIFIER_BINDING@55..56
+            0: IDENT@55..56 "A" [] []
+          2: (empty)
+          3: (empty)
+          4: L_CURLY@56..57 "{" [] []
+          5: TS_TYPE_MEMBER_LIST@57..57
+          6: R_CURLY@57..58 "}" [] []
+        2: (empty)
+    3: JS_EMPTY_STATEMENT@58..59
+      0: SEMICOLON@58..59 ";" [] []
+    4: JS_EXPORT@59..89
+      0: JS_DECORATOR_LIST@59..59
+      1: EXPORT_KW@59..67 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@67..89
+        0: DEFAULT_KW@67..75 "default" [] [Whitespace(" ")]
+        1: JS_FUNCTION_EXPORT_DEFAULT_DECLARATION@75..89
+          0: (empty)
+          1: FUNCTION_KW@75..84 "function" [] [Whitespace(" ")]
+          2: (empty)
+          3: JS_IDENTIFIER_BINDING@84..85
+            0: IDENT@84..85 "a" [] []
+          4: (empty)
+          5: JS_PARAMETERS@85..87
+            0: L_PAREN@85..86 "(" [] []
+            1: JS_PARAMETER_LIST@86..86
+            2: R_PAREN@86..87 ")" [] []
+          6: (empty)
+          7: JS_FUNCTION_BODY@87..89
+            0: L_CURLY@87..88 "{" [] []
+            1: JS_DIRECTIVE_LIST@88..88
+            2: JS_STATEMENT_LIST@88..88
+            3: R_CURLY@88..89 "}" [] []
+        2: (empty)
+    5: JS_EMPTY_STATEMENT@89..90
+      0: SEMICOLON@89..90 ";" [] []
+    6: JS_EXPORT@90..119
+      0: JS_DECORATOR_LIST@90..90
+      1: EXPORT_KW@90..98 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@98..119
+        0: DEFAULT_KW@98..106 "default" [] [Whitespace(" ")]
+        1: TS_INTERFACE_DECLARATION@106..119
+          0: INTERFACE_KW@106..116 "interface" [] [Whitespace(" ")]
+          1: TS_IDENTIFIER_BINDING@116..117
+            0: IDENT@116..117 "A" [] []
+          2: (empty)
+          3: (empty)
+          4: L_CURLY@117..118 "{" [] []
+          5: TS_TYPE_MEMBER_LIST@118..118
+          6: R_CURLY@118..119 "}" [] []
+        2: (empty)
+    7: JS_EMPTY_STATEMENT@119..120
+      0: SEMICOLON@119..120 ";" [] []
+    8: JS_EXPORT@120..149
+      0: JS_DECORATOR_LIST@120..120
+      1: EXPORT_KW@120..128 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@128..149
+        0: DEFAULT_KW@128..136 "default" [] [Whitespace(" ")]
+        1: TS_INTERFACE_DECLARATION@136..149
+          0: INTERFACE_KW@136..146 "interface" [] [Whitespace(" ")]
+          1: TS_IDENTIFIER_BINDING@146..147
+            0: IDENT@146..147 "A" [] []
+          2: (empty)
+          3: (empty)
+          4: L_CURLY@147..148 "{" [] []
+          5: TS_TYPE_MEMBER_LIST@148..148
+          6: R_CURLY@148..149 "}" [] []
+        2: (empty)
+    9: JS_EMPTY_STATEMENT@149..150
+      0: SEMICOLON@149..150 ";" [] []
+  4: EOF@150..151 "" [Newline("\n")] []
+
+```

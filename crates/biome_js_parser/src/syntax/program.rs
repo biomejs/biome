@@ -26,7 +26,14 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
         }
         ModuleKind::Module => {
             parse_module_body(p, statement_list);
-            m.complete(p, JS_MODULE)
+            m.complete(
+                p,
+                if p.source_type().language().is_definition_file() {
+                    TS_DECLARATION_MODULE
+                } else {
+                    JS_MODULE
+                },
+            )
         }
     };
 

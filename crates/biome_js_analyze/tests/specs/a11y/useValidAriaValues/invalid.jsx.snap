@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -35,8 +36,8 @@ invalid.jsx:1:31 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
   
   i The only supported value for the aria-checked property one of the following:
   
-  - true
   - false
+  - true
   - mixed
   
 
@@ -55,10 +56,10 @@ invalid.jsx:2:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
   
   i The only supported value for the aria-autocomplete property is one of the following:
   
+  - none
+  - both
   - inline
   - list
-  - both
-  - none
   
 
 ```
@@ -77,8 +78,8 @@ invalid.jsx:3:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
   
   i The only supported value for the aria-invalid property is one of the following:
   
-  - grammar
   - false
+  - grammar
   - spelling
   - true
   
@@ -99,8 +100,8 @@ invalid.jsx:5:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
   
   i The only supported value for the aria-invalid property is one of the following:
   
-  - grammar
   - false
+  - grammar
   - spelling
   - true
   
@@ -119,7 +120,7 @@ invalid.jsx:6:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
     7 │ var a = <span aria-relevant="fancy"></span>;
     8 │ var a = <span aria-labelledby=""></span>;
   
-  i The only supported value is an HTML identifier.
+  i The only supported value is a space-separated list of HTML identifiers.
   
 
 ```
@@ -138,6 +139,7 @@ invalid.jsx:7:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
   
   i The values supported for aria-relevant property are one or more of the following:
   
+  - additions text
   - additions
   - all
   - removals
@@ -209,7 +211,7 @@ invalid.jsx:11:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━
     12 │ var a = <span aria-setsize="hey"></span>;
     13 │ var a = <span aria-valuemax="hey"></span>;
   
-  i The only supported value is an HTML identifier.
+  i The only supported value is a space-separated list of HTML identifiers.
   
 
 ```
@@ -262,11 +264,11 @@ invalid.jsx:14:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━
   
   i The values supported for aria-dropeffect property are one or more of the following:
   
+  - none
   - copy
   - execute
   - link
   - move
-  - none
   - popup
   
 
@@ -285,9 +287,9 @@ invalid.jsx:15:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━
   
   i The only supported value for the aria-orientation property is one of the following:
   
-  - vertical
   - undefined
   - horizontal
+  - vertical
   
 
 ```

@@ -7,7 +7,7 @@ use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::JsModule;
 use biome_rowan::BatchMutationExt;
 
-use crate::{utils::restricted_glob::RestrictedGlob, JsRuleAction};
+use crate::JsRuleAction;
 
 pub mod legacy;
 pub mod util;
@@ -79,7 +79,9 @@ pub enum State {
     Modern,
 }
 
-#[derive(Clone, Debug, Default, serde::Deserialize, Deserializable, serde::Serialize)]
+#[derive(
+    Clone, Debug, Default, Eq, PartialEq, serde::Deserialize, Deserializable, serde::Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct Options {
@@ -87,12 +89,12 @@ pub struct Options {
     import_groups: Box<[ImportGroup]>,
 }
 
-#[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(untagged)]
 pub enum ImportGroup {
     Predefined(PredefinedImportGroup),
-    Custom(RestrictedGlob),
+    Custom(biome_glob::Glob),
 }
 impl Deserializable for ImportGroup {
     fn deserialize(
@@ -110,7 +112,7 @@ impl Deserializable for ImportGroup {
     }
 }
 
-#[derive(Clone, Debug, serde::Deserialize, Deserializable, Eq, PartialEq, serde::Serialize)]
+#[derive(Clone, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum PredefinedImportGroup {
     #[serde(rename = ":blank-line:")]

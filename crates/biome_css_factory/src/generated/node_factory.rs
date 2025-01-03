@@ -1,7 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 #![allow(clippy::redundant_closure)]
-#![allow(clippy::too_many_arguments)]
 use biome_css_syntax::{
     CssSyntaxElement as SyntaxElement, CssSyntaxNode as SyntaxNode, CssSyntaxToken as SyntaxToken,
     *,
@@ -614,17 +613,43 @@ pub fn css_document_at_rule(
 pub fn css_document_custom_matcher(
     name_token: SyntaxToken,
     l_paren_token: SyntaxToken,
-    value: CssString,
     r_paren_token: SyntaxToken,
-) -> CssDocumentCustomMatcher {
-    CssDocumentCustomMatcher::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_DOCUMENT_CUSTOM_MATCHER,
-        [
-            Some(SyntaxElement::Token(name_token)),
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
+) -> CssDocumentCustomMatcherBuilder {
+    CssDocumentCustomMatcherBuilder {
+        name_token,
+        l_paren_token,
+        r_paren_token,
+        value: None,
+    }
+}
+pub struct CssDocumentCustomMatcherBuilder {
+    name_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+    value: Option<AnyCssUrlValue>,
+}
+impl CssDocumentCustomMatcherBuilder {
+    pub fn with_value(mut self, value: AnyCssUrlValue) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn build(self) -> CssDocumentCustomMatcher {
+        CssDocumentCustomMatcher::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_DOCUMENT_CUSTOM_MATCHER,
+            [
+                Some(SyntaxElement::Token(self.name_token)),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn css_empty_declaration(semicolon_token: SyntaxToken) -> CssEmptyDeclaration {
+    CssEmptyDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_EMPTY_DECLARATION,
+        [Some(SyntaxElement::Token(semicolon_token))],
     ))
 }
 pub fn css_font_face_at_rule(
@@ -1336,6 +1361,20 @@ pub fn css_percentage(value_token: SyntaxToken, percent_token: SyntaxToken) -> C
         [
             Some(SyntaxElement::Token(value_token)),
             Some(SyntaxElement::Token(percent_token)),
+        ],
+    ))
+}
+pub fn css_position_try_at_rule(
+    position_try_token: SyntaxToken,
+    name: CssDashedIdentifier,
+    block: AnyCssDeclarationBlock,
+) -> CssPositionTryAtRule {
+    CssPositionTryAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_POSITION_TRY_AT_RULE,
+        [
+            Some(SyntaxElement::Token(position_try_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }
@@ -2278,6 +2317,18 @@ pub fn css_value_at_rule_named_import_specifier(
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(as_token)),
             Some(SyntaxElement::Node(local_name.into_syntax())),
+        ],
+    ))
+}
+pub fn css_view_transition_at_rule(
+    view_transition_token: SyntaxToken,
+    block: AnyCssDeclarationBlock,
+) -> CssViewTransitionAtRule {
+    CssViewTransitionAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_VIEW_TRANSITION_AT_RULE,
+        [
+            Some(SyntaxElement::Token(view_transition_token)),
+            Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }

@@ -1,0 +1,173 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+declare class A { prop = "test"; }
+class B { declare prop = "test"; }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsDeclareStatement {
+            declare_token: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")],
+            declaration: JsClassDeclaration {
+                decorators: JsDecoratorList [],
+                abstract_token: missing (optional),
+                class_token: CLASS_KW@8..14 "class" [] [Whitespace(" ")],
+                id: JsIdentifierBinding {
+                    name_token: IDENT@14..16 "A" [] [Whitespace(" ")],
+                },
+                type_parameters: missing (optional),
+                extends_clause: missing (optional),
+                implements_clause: missing (optional),
+                l_curly_token: L_CURLY@16..18 "{" [] [Whitespace(" ")],
+                members: JsClassMemberList [
+                    TsInitializedPropertySignatureClassMember {
+                        modifiers: TsPropertySignatureModifierList [],
+                        name: JsLiteralMemberName {
+                            value: IDENT@18..23 "prop" [] [Whitespace(" ")],
+                        },
+                        question_mark_token: missing (optional),
+                        value: JsInitializerClause {
+                            eq_token: EQ@23..25 "=" [] [Whitespace(" ")],
+                            expression: JsStringLiteralExpression {
+                                value_token: JS_STRING_LITERAL@25..31 "\"test\"" [] [],
+                            },
+                        },
+                        semicolon_token: SEMICOLON@31..33 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@33..34 "}" [] [],
+            },
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@34..41 "class" [Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@41..43 "B" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@43..45 "{" [] [Whitespace(" ")],
+            members: JsClassMemberList [
+                TsInitializedPropertySignatureClassMember {
+                    modifiers: TsPropertySignatureModifierList [
+                        TsDeclareModifier {
+                            modifier_token: DECLARE_KW@45..53 "declare" [] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@53..58 "prop" [] [Whitespace(" ")],
+                    },
+                    question_mark_token: missing (optional),
+                    value: JsInitializerClause {
+                        eq_token: EQ@58..60 "=" [] [Whitespace(" ")],
+                        expression: JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@60..66 "\"test\"" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@66..68 ";" [] [Whitespace(" ")],
+                },
+            ],
+            r_curly_token: R_CURLY@68..69 "}" [] [],
+        },
+    ],
+    eof_token: EOF@69..70 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..70
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..69
+    0: TS_DECLARE_STATEMENT@0..34
+      0: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")]
+      1: JS_CLASS_DECLARATION@8..34
+        0: JS_DECORATOR_LIST@8..8
+        1: (empty)
+        2: CLASS_KW@8..14 "class" [] [Whitespace(" ")]
+        3: JS_IDENTIFIER_BINDING@14..16
+          0: IDENT@14..16 "A" [] [Whitespace(" ")]
+        4: (empty)
+        5: (empty)
+        6: (empty)
+        7: L_CURLY@16..18 "{" [] [Whitespace(" ")]
+        8: JS_CLASS_MEMBER_LIST@18..33
+          0: TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER@18..33
+            0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@18..18
+            1: JS_LITERAL_MEMBER_NAME@18..23
+              0: IDENT@18..23 "prop" [] [Whitespace(" ")]
+            2: (empty)
+            3: JS_INITIALIZER_CLAUSE@23..31
+              0: EQ@23..25 "=" [] [Whitespace(" ")]
+              1: JS_STRING_LITERAL_EXPRESSION@25..31
+                0: JS_STRING_LITERAL@25..31 "\"test\"" [] []
+            4: SEMICOLON@31..33 ";" [] [Whitespace(" ")]
+        9: R_CURLY@33..34 "}" [] []
+    1: JS_CLASS_DECLARATION@34..69
+      0: JS_DECORATOR_LIST@34..34
+      1: (empty)
+      2: CLASS_KW@34..41 "class" [Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@41..43
+        0: IDENT@41..43 "B" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@43..45 "{" [] [Whitespace(" ")]
+      8: JS_CLASS_MEMBER_LIST@45..68
+        0: TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER@45..68
+          0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@45..53
+            0: TS_DECLARE_MODIFIER@45..53
+              0: DECLARE_KW@45..53 "declare" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@53..58
+            0: IDENT@53..58 "prop" [] [Whitespace(" ")]
+          2: (empty)
+          3: JS_INITIALIZER_CLAUSE@58..66
+            0: EQ@58..60 "=" [] [Whitespace(" ")]
+            1: JS_STRING_LITERAL_EXPRESSION@60..66
+              0: JS_STRING_LITERAL@60..66 "\"test\"" [] []
+          4: SEMICOLON@66..68 ";" [] [Whitespace(" ")]
+      9: R_CURLY@68..69 "}" [] []
+  4: EOF@69..70 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_property_initializer_ambient_context.ts:1:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × In ambient contexts, properties with initializers need to be readonly.
+  
+  > 1 │ declare class A { prop = "test"; }
+      │                        ^^^^^^^^
+    2 │ class B { declare prop = "test"; }
+    3 │ 
+  
+ts_property_initializer_ambient_context.ts:2:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × In ambient contexts, properties with initializers need to be readonly.
+  
+    1 │ declare class A { prop = "test"; }
+  > 2 │ class B { declare prop = "test"; }
+      │                        ^^^^^^^^
+    3 │ 
+  
+```

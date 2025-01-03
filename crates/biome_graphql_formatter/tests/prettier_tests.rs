@@ -8,7 +8,6 @@ mod language;
 
 tests_macros::gen_tests! {"tests/specs/prettier/{graphql}/**/*.{graphql}", crate::test_snapshot, ""}
 
-#[allow(dead_code)]
 fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     countme::enable(true);
 

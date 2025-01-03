@@ -1,0 +1,25 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Biome's tools to convert between LSP and Biome's data structures"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_lsp_converters"
+repository.workspace = true
+version              = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow      = { workspace = true }
+biome_rowan = { workspace = true }
+rustc-hash  = { workspace = true }
+tower-lsp   = { version = "0.20.0" }
+
+[dev-dependencies]
+tower = { version = "0.4.13", features = ["timeout"] }
+
+[lints]
+workspace = true

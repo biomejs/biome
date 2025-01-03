@@ -1,6 +1,6 @@
 use crate::options::{JsxRuntime, PreferredQuote};
-use crate::RuleMetadata;
 use crate::{registry::RuleRoot, FromServices, Queryable, Rule, RuleKey, ServiceBag};
+use crate::{GroupCategory, RuleCategory, RuleGroup, RuleMetadata};
 use biome_diagnostics::{Error, Result};
 use std::ops::Deref;
 use std::path::Path;
@@ -24,7 +24,7 @@ impl<'a, R> RuleContext<'a, R>
 where
     R: Rule + Sized + 'static,
 {
-    #[allow(clippy::too_many_arguments)]
+    #[expect(clippy::too_many_arguments)]
     pub fn new(
         query_result: &'a RuleQueryResult<R>,
         root: &'a RuleRoot<R>,
@@ -51,6 +51,16 @@ where
 
     pub fn query(&self) -> &RuleQueryResult<R> {
         self.query_result
+    }
+
+    /// Returns the group that belongs to the current rule
+    pub fn group(&self) -> &'static str {
+        <R::Group as RuleGroup>::NAME
+    }
+
+    /// Returns the category that belongs to the current rule
+    pub fn category(&self) -> RuleCategory {
+        <<R::Group as RuleGroup>::Category as GroupCategory>::CATEGORY
     }
 
     /// Returns a clone of the AST root

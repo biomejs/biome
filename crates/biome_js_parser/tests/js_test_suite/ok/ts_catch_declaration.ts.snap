@@ -1,0 +1,137 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+try {} catch (error: any) {}
+try {} catch (error: unknown) {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsTryStatement {
+            try_token: TRY_KW@0..4 "try" [] [Whitespace(" ")],
+            body: JsBlockStatement {
+                l_curly_token: L_CURLY@4..5 "{" [] [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@5..7 "}" [] [Whitespace(" ")],
+            },
+            catch_clause: JsCatchClause {
+                catch_token: CATCH_KW@7..13 "catch" [] [Whitespace(" ")],
+                declaration: JsCatchDeclaration {
+                    l_paren_token: L_PAREN@13..14 "(" [] [],
+                    binding: JsIdentifierBinding {
+                        name_token: IDENT@14..19 "error" [] [],
+                    },
+                    type_annotation: TsTypeAnnotation {
+                        colon_token: COLON@19..21 ":" [] [Whitespace(" ")],
+                        ty: TsAnyType {
+                            any_token: ANY_KW@21..24 "any" [] [],
+                        },
+                    },
+                    r_paren_token: R_PAREN@24..26 ")" [] [Whitespace(" ")],
+                },
+                body: JsBlockStatement {
+                    l_curly_token: L_CURLY@26..27 "{" [] [],
+                    statements: JsStatementList [],
+                    r_curly_token: R_CURLY@27..28 "}" [] [],
+                },
+            },
+        },
+        JsTryStatement {
+            try_token: TRY_KW@28..33 "try" [Newline("\n")] [Whitespace(" ")],
+            body: JsBlockStatement {
+                l_curly_token: L_CURLY@33..34 "{" [] [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@34..36 "}" [] [Whitespace(" ")],
+            },
+            catch_clause: JsCatchClause {
+                catch_token: CATCH_KW@36..42 "catch" [] [Whitespace(" ")],
+                declaration: JsCatchDeclaration {
+                    l_paren_token: L_PAREN@42..43 "(" [] [],
+                    binding: JsIdentifierBinding {
+                        name_token: IDENT@43..48 "error" [] [],
+                    },
+                    type_annotation: TsTypeAnnotation {
+                        colon_token: COLON@48..50 ":" [] [Whitespace(" ")],
+                        ty: TsUnknownType {
+                            unknown_token: UNKNOWN_KW@50..57 "unknown" [] [],
+                        },
+                    },
+                    r_paren_token: R_PAREN@57..59 ")" [] [Whitespace(" ")],
+                },
+                body: JsBlockStatement {
+                    l_curly_token: L_CURLY@59..60 "{" [] [],
+                    statements: JsStatementList [],
+                    r_curly_token: R_CURLY@60..61 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@61..62 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..62
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..61
+    0: JS_TRY_STATEMENT@0..28
+      0: TRY_KW@0..4 "try" [] [Whitespace(" ")]
+      1: JS_BLOCK_STATEMENT@4..7
+        0: L_CURLY@4..5 "{" [] []
+        1: JS_STATEMENT_LIST@5..5
+        2: R_CURLY@5..7 "}" [] [Whitespace(" ")]
+      2: JS_CATCH_CLAUSE@7..28
+        0: CATCH_KW@7..13 "catch" [] [Whitespace(" ")]
+        1: JS_CATCH_DECLARATION@13..26
+          0: L_PAREN@13..14 "(" [] []
+          1: JS_IDENTIFIER_BINDING@14..19
+            0: IDENT@14..19 "error" [] []
+          2: TS_TYPE_ANNOTATION@19..24
+            0: COLON@19..21 ":" [] [Whitespace(" ")]
+            1: TS_ANY_TYPE@21..24
+              0: ANY_KW@21..24 "any" [] []
+          3: R_PAREN@24..26 ")" [] [Whitespace(" ")]
+        2: JS_BLOCK_STATEMENT@26..28
+          0: L_CURLY@26..27 "{" [] []
+          1: JS_STATEMENT_LIST@27..27
+          2: R_CURLY@27..28 "}" [] []
+    1: JS_TRY_STATEMENT@28..61
+      0: TRY_KW@28..33 "try" [Newline("\n")] [Whitespace(" ")]
+      1: JS_BLOCK_STATEMENT@33..36
+        0: L_CURLY@33..34 "{" [] []
+        1: JS_STATEMENT_LIST@34..34
+        2: R_CURLY@34..36 "}" [] [Whitespace(" ")]
+      2: JS_CATCH_CLAUSE@36..61
+        0: CATCH_KW@36..42 "catch" [] [Whitespace(" ")]
+        1: JS_CATCH_DECLARATION@42..59
+          0: L_PAREN@42..43 "(" [] []
+          1: JS_IDENTIFIER_BINDING@43..48
+            0: IDENT@43..48 "error" [] []
+          2: TS_TYPE_ANNOTATION@48..57
+            0: COLON@48..50 ":" [] [Whitespace(" ")]
+            1: TS_UNKNOWN_TYPE@50..57
+              0: UNKNOWN_KW@50..57 "unknown" [] []
+          3: R_PAREN@57..59 ")" [] [Whitespace(" ")]
+        2: JS_BLOCK_STATEMENT@59..61
+          0: L_CURLY@59..60 "{" [] []
+          1: JS_STATEMENT_LIST@60..60
+          2: R_CURLY@60..61 "}" [] []
+  4: EOF@61..62 "" [Newline("\n")] []
+
+```

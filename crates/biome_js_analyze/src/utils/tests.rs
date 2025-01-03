@@ -42,7 +42,7 @@ pub fn assert_rename_binding_a_to_b_ok(before: &str, expected: &str) {
     let after = root.to_string();
     assert_eq!(expected, after.as_str());
 
-    assert!(!biome_js_parser::test_utils::has_bogus_nodes_or_empty_slots(&root));
+    assert!(!biome_test_utils::has_bogus_nodes_or_empty_slots(&root));
 }
 
 pub fn assert_rename_ts_binding_a_to_b_ok(before: &str, expected: &str) {
@@ -71,7 +71,7 @@ pub fn assert_rename_ts_binding_a_to_b_ok(before: &str, expected: &str) {
     let after = root.to_string();
     assert_eq!(expected, after.as_str());
 
-    assert!(!biome_js_parser::test_utils::has_bogus_nodes_or_empty_slots(&root));
+    assert!(!biome_test_utils::has_bogus_nodes_or_empty_slots(&root));
 }
 
 /// Search and renames one binding named "a" to "b".

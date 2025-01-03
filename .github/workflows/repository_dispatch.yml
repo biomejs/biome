@@ -24,11 +24,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Warm up wasm-pack cache
         id: cache-restore
-        uses: actions/cache/restore@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4.1.1
+        uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: |
             ./target
@@ -39,7 +39,7 @@ jobs:
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
       - name: Build WASM module for the web
-        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --profiling --scope biomejs crates/biome_wasm --features experimental-html,experimental-grit
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --profiling --scope biomejs crates/biome_wasm --features experimental-html
 
       # https://github.com/actions/cache/issues/342
       - name: Clear old wasm-pack cache
@@ -52,7 +52,7 @@ jobs:
         continue-on-error: true
 
       - name: Save new wasm-pack cache
-        uses: actions/cache/save@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4.1.1
+        uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: |
             ./target
@@ -63,7 +63,7 @@ jobs:
         run: corepack enable
 
       - name: Setup node
-        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
           node-version: 20
           cache: pnpm

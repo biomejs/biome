@@ -6,7 +6,7 @@ expression: content
 ## `fix.js`
 
 ```js
-// biome-ignore lint/suspicious/noCompareNegZero: <explanation>
+// biome-ignore lint/suspicious/noCompareNegZero: ignored using `--suppress`
 (1 >= -0)
 ```
 

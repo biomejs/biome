@@ -1,0 +1,100 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/issue_3229.css
+snapshot_kind: text
+---
+# Input
+
+```css
+foo /* a comment */
+.aRule {
+	color: red;
+}
+
+foo /* a comment */
+
+.aRule {
+	color: red;
+}
+
+foo
+
+
+	/* a comment */
+
+.aRule {
+	color: red;
+}
+
+/* input */
+foo
+
+	/* a comment */
+
+.aRule {
+	color: red
+}
+
+
+
+
+/* first format */
+foo
+	/* a comment */
+
+.aRule {
+	color: red;
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+foo /* a comment */ .aRule {
+	color: red;
+}
+
+foo
+	/* a comment */
+
+	.aRule {
+	color: red;
+}
+
+foo
+	/* a comment */
+
+	.aRule {
+	color: red;
+}
+
+/* input */
+foo
+/* a comment */
+
+.aRule {
+	color: red;
+}
+
+/* first format */
+foo
+/* a comment */
+
+.aRule {
+	color: red;
+}
+```

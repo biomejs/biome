@@ -1,6 +1,7 @@
 ---
 source: crates/biome_grit_parser/tests/spec_test.rs
 expression: snapshot
+snapshot_kind: text
 ---
 ## Input
 ```grit
@@ -52,7 +53,7 @@ GritRoot {
                 },
             ],
             r_paren_token: R_PAREN@49..51 ")" [] [Whitespace(" ")],
-            body: GritCurlyPredicateList {
+            body: GritPredicateCurly {
                 l_curly_token: L_CURLY@51..52 "{" [] [],
                 predicates: GritPredicateList [
                     GritPredicateReturn {
@@ -103,7 +104,7 @@ GritRoot {
                 },
             ],
             r_paren_token: R_PAREN@161..163 ")" [] [Whitespace(" ")],
-            body: GritCurlyPredicateList {
+            body: GritPredicateCurly {
                 l_curly_token: L_CURLY@163..164 "{" [] [],
                 predicates: GritPredicateList [
                     GritPredicateIfElse {
@@ -172,7 +173,7 @@ GritRoot {
                             some_token: SOME_KW@308..313 "some" [] [Whitespace(" ")],
                             pattern: GritBubble {
                                 bubble_token: BUBBLE_KW@313..319 "bubble" [] [],
-                                variables: GritBubbleScope {
+                                scope: GritBubbleScope {
                                     l_paren_token: L_PAREN@319..320 "(" [] [],
                                     variables: GritVariableList [
                                         GritVariable {
@@ -285,7 +286,7 @@ GritRoot {
                             some_token: SOME_KW@541..546 "some" [] [Whitespace(" ")],
                             pattern: GritBubble {
                                 bubble_token: BUBBLE_KW@546..552 "bubble" [] [],
-                                variables: GritBubbleScope {
+                                scope: GritBubbleScope {
                                     l_paren_token: L_PAREN@552..553 "(" [] [],
                                     variables: GritVariableList [
                                         GritVariable {
@@ -401,7 +402,7 @@ GritRoot {
         0: GRIT_VARIABLE@42..49
           0: GRIT_VARIABLE@42..49 "$string" [] []
       4: R_PAREN@49..51 ")" [] [Whitespace(" ")]
-      5: GRIT_CURLY_PREDICATE_LIST@51..96
+      5: GRIT_PREDICATE_CURLY@51..96
         0: L_CURLY@51..52 "{" [] []
         1: GRIT_PREDICATE_LIST@52..94
           0: GRIT_PREDICATE_RETURN@52..94
@@ -436,7 +437,7 @@ GritRoot {
         2: GRIT_VARIABLE@153..161
           0: GRIT_VARIABLE@153..161 "$message" [] []
       4: R_PAREN@161..163 ")" [] [Whitespace(" ")]
-      5: GRIT_CURLY_PREDICATE_LIST@163..617
+      5: GRIT_PREDICATE_CURLY@163..617
         0: L_CURLY@163..164 "{" [] []
         1: GRIT_PREDICATE_LIST@164..615
           0: GRIT_PREDICATE_IF_ELSE@164..255

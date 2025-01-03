@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: grit/predicates/any.grit
+snapshot_kind: text
+---
+# Input
+
+```grit
+`console.$method('$message');` => `console.warn('$message');` where {
+  any {
+
+  $message <: r"Hello, .*!",     $method <: `log` }
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+-----
+
+```grit
+`console.$method('$message');` => `console.warn('$message');` where {
+	any { $message <: r"Hello, .*!", $method <: `log` }
+}
+```

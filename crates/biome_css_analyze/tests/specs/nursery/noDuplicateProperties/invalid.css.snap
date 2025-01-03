@@ -49,6 +49,23 @@ a { color: red !important; color: blue; }
 
 a { color: red !important; color: blue !important; }
 
+a {
+    @supports (color: pink) {
+        color: pink;
+        color: orange;
+    }
+}
+
+a {
+    @supports (color: pink) {
+        color: pink;
+        &:hover {
+            color: orange;
+            color: black;
+        }
+    }
+}
+
 ```
 
 # Diagnostics
@@ -370,6 +387,7 @@ invalid.css:44:28 lint/nursery/noDuplicateProperties ━━━━━━━━━
   > 44 │ a { color: red !important; color: blue !important; }
        │                            ^^^^^
     45 │ 
+    46 │ a {
   
   i color is already defined here.
   
@@ -378,6 +396,59 @@ invalid.css:44:28 lint/nursery/noDuplicateProperties ━━━━━━━━━
   > 44 │ a { color: red !important; color: blue !important; }
        │     ^^^^^
     45 │ 
+    46 │ a {
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:49:9 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    47 │     @supports (color: pink) {
+    48 │         color: pink;
+  > 49 │         color: orange;
+       │         ^^^^^
+    50 │     }
+    51 │ }
+  
+  i color is already defined here.
+  
+    46 │ a {
+    47 │     @supports (color: pink) {
+  > 48 │         color: pink;
+       │         ^^^^^
+    49 │         color: orange;
+    50 │     }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.css:58:13 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    56 │         &:hover {
+    57 │             color: orange;
+  > 58 │             color: black;
+       │             ^^^^^
+    59 │         }
+    60 │     }
+  
+  i color is already defined here.
+  
+    55 │         color: pink;
+    56 │         &:hover {
+  > 57 │             color: orange;
+       │             ^^^^^
+    58 │             color: black;
+    59 │         }
   
   i Remove or rename the duplicate property to ensure consistent styling.
   
