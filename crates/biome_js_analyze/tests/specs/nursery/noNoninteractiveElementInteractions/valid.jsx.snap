@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -37,7 +38,6 @@ expression: valid.jsx
     <div role="menuitemcheckbox" onClick={() => { }} />
     <div role="menuitemradio" onClick={() => { }} />
     <div role="option" onClick={() => { }} />
-    <div role="progressbar" onClick={() => { }} />
     <div role="radio" onClick={() => { }} />
     <div role="row" onClick={() => { }} />
     <div role="scrollbar" onClick={() => { }} />
@@ -50,5 +50,10 @@ expression: valid.jsx
 
     {/* Presentation role */}
     <div role="presentation" onClick={() => { }} />
+
+		<div onClick={() => {}} aria-hidden />
+		<div onClick={() => {}} aria-hidden="true" />
+
 </>
+
 ```

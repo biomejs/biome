@@ -31,7 +31,6 @@
     <div role="menuitemcheckbox" onClick={() => { }} />
     <div role="menuitemradio" onClick={() => { }} />
     <div role="option" onClick={() => { }} />
-    <div role="progressbar" onClick={() => { }} />
     <div role="radio" onClick={() => { }} />
     <div role="row" onClick={() => { }} />
     <div role="scrollbar" onClick={() => { }} />
@@ -44,4 +43,8 @@
 
     {/* Presentation role */}
     <div role="presentation" onClick={() => { }} />
+
+		<div onClick={() => {}} aria-hidden />
+		<div onClick={() => {}} aria-hidden="true" />
+
 </>

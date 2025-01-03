@@ -86,4 +86,5 @@
     <div role="term" onClick={() => { }} />
     <div role="timer" onClick={() => { }} />
     <div role="tooltip" onClick={() => { }} />
+	  <div role="progressbar" onClick={() => { }} />
 </>

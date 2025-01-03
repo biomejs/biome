@@ -865,6 +865,7 @@ name = "biome_js_syntax"
 version = "0.5.7"
 dependencies = [
  "biome_aria",
+ "biome_aria_metadata",
  "biome_js_factory",
  "biome_js_parser",
  "biome_rowan",

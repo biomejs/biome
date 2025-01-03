@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -92,7 +93,9 @@ expression: invalid.jsx
     <div role="term" onClick={() => { }} />
     <div role="timer" onClick={() => { }} />
     <div role="tooltip" onClick={() => { }} />
+	  <div role="progressbar" onClick={() => { }} />
 </>
+
 ```
 
 # Diagnostics
@@ -276,23 +279,6 @@ invalid.jsx:12:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │     <dl onClick={() => { }} />
     14 │     <dir onClick={() => { }} />
-  
-  i Consider replace semantically interactive element like <button/> or <a href/>.
-  
-
-```
-
-```
-invalid.jsx:13:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Non-interactive element should not have event handler.
-  
-    11 │     <details onClick={() => { }} />
-    12 │     <dfn onClick={() => { }} />
-  > 13 │     <dl onClick={() => { }} />
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    14 │     <dir onClick={() => { }} />
-    15 │     <dt onClick={() => { }} />
   
   i Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1550,7 +1536,7 @@ invalid.jsx:87:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
   > 87 │     <div role="timer" onClick={() => { }} />
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     88 │     <div role="tooltip" onClick={() => { }} />
-    89 │ </>
+    89 │ 	  <div role="progressbar" onClick={() => { }} />
   
   i Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1566,7 +1552,25 @@ invalid.jsx:88:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
     87 │     <div role="timer" onClick={() => { }} />
   > 88 │     <div role="tooltip" onClick={() => { }} />
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    89 │ </>
+    89 │ 	  <div role="progressbar" onClick={() => { }} />
+    90 │ </>
+  
+  i Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.jsx:89:4 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Non-interactive element should not have event handler.
+  
+    87 │     <div role="timer" onClick={() => { }} />
+    88 │     <div role="tooltip" onClick={() => { }} />
+  > 89 │ 	  <div role="progressbar" onClick={() => { }} />
+       │ 	  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    90 │ </>
+    91 │ 
   
   i Consider replace semantically interactive element like <button/> or <a href/>.
   
