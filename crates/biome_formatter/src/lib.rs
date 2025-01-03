@@ -552,6 +552,48 @@ impl From<QuoteStyle> for Quote {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
+)]
+pub struct SpaceInsideStuff(bool);
+
+impl SpaceInsideStuff {
+    /// Return the boolean value for this [SpaceInsideStuff]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl From<bool> for SpaceInsideStuff {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
+impl std::fmt::Display for SpaceInsideStuff {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::write!(f, "{}", self.value())
+    }
+}
+
+impl FromStr for SpaceInsideStuff {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let value = bool::from_str(s);
+
+        match value {
+            Ok(value) => Ok(Self(value)),
+            Err(_) => Err(
+                "Value not supported for SpaceInsideStuff. Supported values are 'true' and 'false'.",
+            ),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
