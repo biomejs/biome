@@ -11,6 +11,8 @@ use serde::{Deserialize, Serialize};
 declare_lint_rule! {
     /// This rule allows you to specify global variable names that you don’t want to use in your application.
     ///
+    /// References to the global identifiers `error` and `event` are always disallowed by this rule.
+    ///
     /// > Disallowing usage of specific global variables can be useful if you want to allow a set of
     /// global variables by enabling an environment, but still want to disallow some of those.
     ///
@@ -33,9 +35,8 @@ declare_lint_rule! {
     /// Use the options to specify additional globals that you want to restrict in your
     /// source code.
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "deniedGlobals": ["$", "MooTools"]
     ///     }

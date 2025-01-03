@@ -58,9 +58,8 @@ declare_lint_rule! {
     ///
     /// Allows to specify the maximum allowed complexity.
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "maxAllowedComplexity": 15
     ///     }

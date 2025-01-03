@@ -2,9 +2,7 @@ use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::path::{Component, Path};
 
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
@@ -86,9 +84,8 @@ declare_lint_rule! {
     /// For example, if you want `.ts` files to import other modules as `.js` (or `.jsx`), you should
     /// configure the following options in your Biome config:
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "suggestedExtensions": {
     ///             "ts": {
@@ -190,7 +187,7 @@ impl Rule for UseImportExtensions {
         );
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {
                 "Add potential import extension "<Emphasis>"."{extension}</Emphasis>"."

@@ -17,7 +17,7 @@ impl Language for RawLanguage {
 #[doc(hidden)]
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 #[repr(u16)]
-#[allow(bad_style)]
+#[expect(bad_style)]
 pub enum RawLanguageKind {
     ROOT = 0,
     EXPRESSION_LIST = 1,
@@ -57,7 +57,7 @@ impl SyntaxKind for RawLanguageKind {
         RawSyntaxKind(*self as u16)
     }
 
-    #[allow(unsafe_code)]
+    #[expect(unsafe_code)]
     fn from_raw(raw: RawSyntaxKind) -> Self {
         assert!(raw.0 < RawLanguageKind::__LAST as u16);
 

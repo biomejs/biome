@@ -621,6 +621,7 @@ pub struct PullActionsParams {
     pub range: Option<TextRange>,
     pub only: Vec<RuleSelector>,
     pub skip: Vec<RuleSelector>,
+    pub suppression_reason: Option<String>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -665,6 +666,8 @@ pub enum FixFileMode {
     SafeFixes,
     /// Applies [safe](biome_diagnostics::Applicability::Always) and [unsafe](biome_diagnostics::Applicability::MaybeIncorrect) fixes
     SafeAndUnsafeFixes,
+    /// Applies suppression comments to existing diagnostics when using `--suppress`
+    ApplySuppressions,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -676,6 +679,7 @@ pub struct FixFileParams {
     pub only: Vec<RuleSelector>,
     pub skip: Vec<RuleSelector>,
     pub rule_categories: RuleCategories,
+    pub suppression_reason: Option<String>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1065,12 +1069,14 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         range: Option<TextRange>,
         only: Vec<RuleSelector>,
         skip: Vec<RuleSelector>,
+        suppression_reason: Option<String>,
     ) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
             path: self.path.clone(),
             range,
             only,
             skip,
+            suppression_reason,
         })
     }
 
@@ -1101,6 +1107,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         rule_categories: RuleCategories,
         only: Vec<RuleSelector>,
         skip: Vec<RuleSelector>,
+        suppression_reason: Option<String>,
     ) -> Result<FixFileResult, WorkspaceError> {
         self.workspace.fix_file(FixFileParams {
             path: self.path.clone(),
@@ -1109,6 +1116,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             only,
             skip,
             rule_categories,
+            suppression_reason,
         })
     }
 

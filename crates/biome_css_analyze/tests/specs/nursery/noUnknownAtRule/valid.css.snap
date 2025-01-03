@@ -1,0 +1,132 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+snapshot_kind: text
+---
+# Input
+```css
+@starting-style {
+    opacity: 0;
+}
+@charset 'UTF-8';
+@container (min-width: 700px)
+@CONTAINER (min-width: 500px)
+@CHARSET 'UTF-8';
+@charset 'iso-8859-15';
+@import url("fineprint.css") print;
+@import 'custom.css'
+@import url('landscape.css') screen and (orientation:landscape);
+@namespace url(http://www.w3.org/1999/xhtml);
+@namespace prefix url(XML-namespace-URL);
+@media print {
+    body {
+        font-size: 10pt
+    }
+}
+@media (max-width: 960px) {
+    body {
+        font-size: 13px
+    }
+}
+@media screen,
+print {
+    body {
+        line-height: 1.2
+    }
+}
+@supports (--foo: green) {
+    body {
+        color: green;
+    }
+}
+@supports ((perspective: 10px) or (-webkit-perspective: 10px)) {
+    font-size: 10pt
+}
+@counter-style win-list {
+    system: fixed;
+    symbols: url(gold-medal.svg);
+    suffix: ' ';
+}
+@document url(http://www.w3.org/),
+url-prefix(http: //www.w3.org/Style/), domain(mozilla.org), regexp('https:.*')
+@page :left {
+    margin-left: 4cm;
+}
+@page {
+    @top-center {
+        content: none
+    }
+}
+@font-face {
+    font-family: MyHelvetica;
+    src: local("Helvetica"), url(MgOpenModern.ttf);
+}
+@keyframes identifier {
+    0% {
+        top: 0;
+        left: 0;
+    }
+
+    30% {
+        top: 50px;
+    }
+
+    68%,
+    100% {
+        top: 100px;
+        left: 100%;
+    }
+}
+@-webkit-keyframes identifier {
+    0% {
+        top: 0;
+        left: 0;
+    }
+
+    30% {
+        top: 50px;
+    }
+
+    68%,
+    100% {
+        top: 100px;
+        left: 100%;
+    }
+}
+
+@counter-style winners-list {
+    system: fixed;
+    symbols: url(gold-medal.svg);
+    suffix: " ";
+}
+
+@font-feature-values Font One {
+    @styleset {
+        nice-style: 12;
+    }
+}
+
+@layer framework {
+    h1 {
+        background: white;
+    }
+}
+
+@position-try --foo {}
+@view-transition {
+    navigation: auto;
+}
+
+/* These at-rules have already been removed from the draft. Support will be provided if there's strong demand*/
+/* @scroll-timeline foo {}
+@viewport {
+     min-width: 640px;
+     max-width: 800px;
+ }
+
+ @viewport {
+     orientation: landscape;
+ } */
+
+
+```

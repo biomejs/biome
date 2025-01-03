@@ -155,6 +155,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "of",
         "out",
         "using",
+        "meta",
     ],
     literals: &[
         "JS_NUMBER_LITERAL",
@@ -184,6 +185,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "JS_MODULE",
         "JS_MODULE_ITEM_LIST",
         "JS_SCRIPT",
+        "TS_DECLARATION_MODULE",
         "JS_EXPRESSION_SNIPPED",
         "JS_DIRECTIVE",
         "JS_DIRECTIVE_LIST",
@@ -427,6 +429,9 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "TS_SETTER_SIGNATURE_TYPE_MEMBER",
         "TS_INDEX_SIGNATURE_TYPE_MEMBER",
         "TS_IMPORT_TYPE",
+        "TS_IMPORT_TYPE_ARGUMENTS",
+        "TS_IMPORT_TYPE_ASSERTION",
+        "TS_IMPORT_TYPE_ASSERTION_BLOCK",
         "TS_IMPORT_TYPE_QUALIFIER",
         "TS_ARRAY_TYPE",
         "TS_INDEXED_ACCESS_TYPE",
@@ -576,7 +581,7 @@ pub struct AstListSeparatorConfiguration {
 
 #[derive(Debug)]
 pub struct AstNodeSrc {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub documentation: Vec<String>,
     pub name: String,
     // pub traits: Vec<String>,
@@ -610,7 +615,7 @@ pub enum Field {
 
 #[derive(Debug, Clone)]
 pub struct AstEnumSrc {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub documentation: Vec<String>,
     pub name: String,
     // pub traits: Vec<String>,
@@ -721,7 +726,7 @@ impl Field {
             }
         }
     }
-    #[allow(dead_code)]
+
     pub fn ty(&self) -> proc_macro2::Ident {
         match self {
             Field::Token { .. } => format_ident!("SyntaxToken"),

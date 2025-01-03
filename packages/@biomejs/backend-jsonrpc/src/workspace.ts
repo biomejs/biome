@@ -549,6 +549,10 @@ export interface PartialJavascriptOrganizeImports {}
  */
 export interface PartialJavascriptParser {
 	/**
+	 * Enables parsing of Grit metavariables. Defaults to `false`.
+	 */
+	gritMetavariables?: boolean;
+	/**
 	* It enables the experimental and unsafe parsing of parameter decorators
 
 These decorators belong to an old proposal, and they are subject to change. 
@@ -678,13 +682,17 @@ export type VcsClientKind = "git";
  */
 export interface Source {
 	/**
-	 * Enforce props sorting in JSX elements.
+	 * Provides a whole-source code action to sort the imports in the file using import groups and natural ordering.
 	 */
-	sortJsxProps?: RuleAssistConfiguration;
+	organizeImports?: RuleAssistConfiguration_for_Options;
+	/**
+	 * Enforce attribute sorting in JSX elements.
+	 */
+	useSortedAttributes?: RuleAssistConfiguration_for_Null;
 	/**
 	 * Sorts the keys of a JSON object in natural order
 	 */
-	useSortedKeys?: RuleAssistConfiguration;
+	useSortedKeys?: RuleAssistConfiguration_for_Null;
 }
 export type QuoteStyle = "double" | "single";
 export type ArrowParentheses = "always" | "asNeeded";
@@ -875,7 +883,7 @@ export interface Complexity {
 	/**
 	 * Prefer for...of statement instead of Array.forEach.
 	 */
-	noForEach?: RuleConfiguration_for_Null;
+	noForEach?: RuleConfiguration_for_NoForEachOptions;
 	/**
 	 * Disallow unclear usage of consecutive space characters in regular expression literals
 	 */
@@ -1100,11 +1108,11 @@ export interface Correctness {
 	/**
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
-	noUndeclaredDependencies?: RuleConfiguration_for_Null;
+	noUndeclaredDependencies?: RuleConfiguration_for_NoUndeclaredDependenciesOptions;
 	/**
 	 * Prevents the usage of variables that haven't been declared inside the document.
 	 */
-	noUndeclaredVariables?: RuleConfiguration_for_Null;
+	noUndeclaredVariables?: RuleConfiguration_for_UndeclaredVariablesOptions;
 	/**
 	 * Disallow unknown CSS value functions.
 	 */
@@ -1263,6 +1271,10 @@ export interface Nursery {
 	 */
 	noExportedImports?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of __dirname and __filename in the global scope.
+	 */
+	noGlobalDirnameFilename?: RuleFixConfiguration_for_Null;
+	/**
 	 * Prevent usage of \<head> element in a Next.js project.
 	 */
 	noHeadElement?: RuleConfiguration_for_Null;
@@ -1299,6 +1311,10 @@ export interface Nursery {
 	 */
 	noProcessEnv?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of process global.
+	 */
+	noProcessGlobal?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow specified modules when loaded by import or require.
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
@@ -1322,6 +1338,10 @@ export interface Nursery {
 	 * Disallow template literal placeholder syntax in regular strings.
 	 */
 	noTemplateCurlyInString?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown at-rules.
+	 */
+	noUnknownAtRule?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown pseudo-class selectors.
 	 */
@@ -1391,9 +1411,17 @@ export interface Nursery {
 	 */
 	useExplicitType?: RuleConfiguration_for_Null;
 	/**
+	 * Require that all exports are declared after all non-export statements.
+	 */
+	useExportsLast?: RuleConfiguration_for_Null;
+	/**
 	 * Enforces the use of a recommended display strategy with Google Fonts.
 	 */
 	useGoogleFontDisplay?: RuleConfiguration_for_Null;
+	/**
+	 * Ensure the preconnect attribute is used when using Google Fonts.
+	 */
+	useGoogleFontPreconnect?: RuleFixConfiguration_for_Null;
 	/**
 	 * Require for-in loops to include an if statement.
 	 */
@@ -1402,6 +1430,18 @@ export interface Nursery {
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce specifying the name of GraphQL operations.
+	 */
+	useNamedOperation?: RuleFixConfiguration_for_Null;
+	/**
+	 * Validates that all enum values are capitalized.
+	 */
+	useNamingConvention?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce the consistent use of the radix argument when using parseInt().
+	 */
+	useParseIntRadix?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
@@ -1652,7 +1692,7 @@ export interface Style {
 	/**
 	 * Prevent extra closing tags for components without children
 	 */
-	useSelfClosingElements?: RuleFixConfiguration_for_Null;
+	useSelfClosingElements?: RuleFixConfiguration_for_UseSelfClosingElementsOptions;
 	/**
 	 * When expressing array types, this rule promotes the usage of T\[] shorthand instead of Array\<T>.
 	 */
@@ -1885,7 +1925,7 @@ export interface Suspicious {
 	/**
 	 * Disallow direct use of Object.prototype builtins.
 	 */
-	noPrototypeBuiltins?: RuleConfiguration_for_Null;
+	noPrototypeBuiltins?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prevents React-specific JSX properties from being used.
 	 */
@@ -1967,7 +2007,7 @@ export interface Suspicious {
 	 */
 	useNumberToFixedDigitsArgument?: RuleFixConfiguration_for_Null;
 	/**
-	 * This rule verifies the result of typeof $expr unary expressions is being compared to valid values, either string literals containing valid type names or other typeof expressions
+	 * This rule checks that the result of a `typeof' expression is compared to a valid value.
 	 */
 	useValidTypeof?: RuleFixConfiguration_for_Null;
 }
@@ -2022,7 +2062,12 @@ export interface OverrideOrganizeImportsConfiguration {
 	 */
 	enabled?: boolean;
 }
-export type RuleAssistConfiguration = "on" | "off";
+export type RuleAssistConfiguration_for_Options =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithOptions_for_Options;
+export type RuleAssistConfiguration_for_Null =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithOptions_for_Null;
 export type RuleFixConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_Null;
@@ -2041,6 +2086,15 @@ export type RuleFixConfiguration_for_ValidAriaRoleOptions =
 export type RuleConfiguration_for_ComplexityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ComplexityOptions;
+export type RuleConfiguration_for_NoForEachOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoForEachOptions;
+export type RuleConfiguration_for_NoUndeclaredDependenciesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUndeclaredDependenciesOptions;
+export type RuleConfiguration_for_UndeclaredVariablesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UndeclaredVariablesOptions;
 export type RuleConfiguration_for_UseExhaustiveDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseExhaustiveDependenciesOptions;
@@ -2083,12 +2137,36 @@ export type RuleConfiguration_for_FilenamingConventionOptions =
 export type RuleFixConfiguration_for_NamingConventionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NamingConventionOptions;
+export type RuleFixConfiguration_for_UseSelfClosingElementsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseSelfClosingElementsOptions;
 export type RuleFixConfiguration_for_NoConsoleOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoConsoleOptions;
 export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
+export type RuleAssistPlainConfiguration = "on" | "off";
+export interface RuleAssistWithOptions_for_Options {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RuleAssistPlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: Options;
+}
+export interface RuleAssistWithOptions_for_Null {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RuleAssistPlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: null;
+}
 export type RulePlainConfiguration = "warn" | "error" | "info" | "off";
 export interface RuleWithFixOptions_for_Null {
 	/**
@@ -2161,6 +2239,36 @@ export interface RuleWithOptions_for_ComplexityOptions {
 	 * Rule's options
 	 */
 	options: ComplexityOptions;
+}
+export interface RuleWithOptions_for_NoForEachOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoForEachOptions;
+}
+export interface RuleWithOptions_for_NoUndeclaredDependenciesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUndeclaredDependenciesOptions;
+}
+export interface RuleWithOptions_for_UndeclaredVariablesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UndeclaredVariablesOptions;
 }
 export interface RuleWithOptions_for_UseExhaustiveDependenciesOptions {
 	/**
@@ -2322,6 +2430,20 @@ export interface RuleWithFixOptions_for_NamingConventionOptions {
 	 */
 	options: NamingConventionOptions;
 }
+export interface RuleWithFixOptions_for_UseSelfClosingElementsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseSelfClosingElementsOptions;
+}
 export interface RuleWithFixOptions_for_NoConsoleOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -2349,6 +2471,10 @@ export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
 	 * Rule's options
 	 */
 	options: NoDoubleEqualsOptions;
+}
+export interface Options {
+	importGroups?: ImportGroup[];
+	legacy?: boolean;
 }
 /**
  * Used to identify the kind of code action emitted by a rule
@@ -2387,6 +2513,35 @@ export interface ComplexityOptions {
 	 */
 	maxAllowedComplexity?: number;
 }
+export interface NoForEachOptions {
+	/**
+	 * A list of variable names allowed for `forEach` calls.
+	 */
+	allowedIdentifiers: string[];
+}
+/**
+ * Rule's options
+ */
+export interface NoUndeclaredDependenciesOptions {
+	/**
+	 * If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.
+	 */
+	devDependencies?: DependencyAvailability;
+	/**
+	 * If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.
+	 */
+	optionalDependencies?: DependencyAvailability;
+	/**
+	 * If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.
+	 */
+	peerDependencies?: DependencyAvailability;
+}
+export interface UndeclaredVariablesOptions {
+	/**
+	 * Check undeclared types.
+	 */
+	checkTypes?: boolean;
+}
 /**
  * Options for the rule `useExhaustiveDependencies`
  */
@@ -2419,7 +2574,7 @@ export interface UseImportExtensionsOptions {
  */
 export interface RestrictedImportsOptions {
 	/**
-	 * A list of names that should trigger the rule
+	 * A list of import paths that should trigger the rule.
 	 */
 	paths: {};
 }
@@ -2515,6 +2670,12 @@ export interface NamingConventionOptions {
 	 */
 	strictCase: boolean;
 }
+/**
+ * Options for the `useSelfClosingElements` rule.
+ */
+export interface UseSelfClosingElementsOptions {
+	ignoreHtmlElements?: boolean;
+}
 export interface NoConsoleOptions {
 	/**
 	 * Allowed calls on the console object.
@@ -2532,6 +2693,8 @@ If `false`, no such exception will be made.
 	 */
 	ignoreNull: boolean;
 }
+export type ImportGroup = PredefinedImportGroup | Regex;
+export type DependencyAvailability = boolean | string[];
 export interface Hook {
 	/**
 	* The "position" of the closure function, starting from zero.
@@ -2584,6 +2747,11 @@ export type Format =
 	| "CONSTANT_CASE"
 	| "PascalCase"
 	| "snake_case";
+export type PredefinedImportGroup =
+	| ":blank-line:"
+	| ":bun:"
+	| ":node:"
+	| ":types:";
 export type StableHookResult = boolean | number[];
 /**
  * Supported cases for file names.
@@ -2936,6 +3104,7 @@ export type Category =
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
+	| "lint/nursery/noGlobalDirnameFilename"
 	| "lint/nursery/noHeadElement"
 	| "lint/nursery/noHeadImportInDocument"
 	| "lint/nursery/noImgElement"
@@ -2950,6 +3119,7 @@ export type Category =
 	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noProcessEnv"
+	| "lint/nursery/noProcessGlobal"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
@@ -2959,6 +3129,7 @@ export type Category =
 	| "lint/nursery/noSubstr"
 	| "lint/nursery/noTemplateCurlyInString"
 	| "lint/nursery/noUndeclaredDependencies"
+	| "lint/nursery/noUnknownAtRule"
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"
@@ -2985,10 +3156,15 @@ export type Category =
 	| "lint/nursery/useDeprecatedReason"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
+	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useGoogleFontDisplay"
+	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useGuardForIn"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useNamedOperation"
+	| "lint/nursery/useNamingConvention"
+	| "lint/nursery/useParseIntRadix"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useTrimStartEnd"
@@ -3255,6 +3431,7 @@ export interface PullActionsParams {
 	path: BiomePath;
 	range?: TextRange;
 	skip: RuleCode[];
+	suppression_reason?: string;
 }
 export interface PullActionsResult {
 	actions: CodeAction[];
@@ -3270,7 +3447,7 @@ export interface CodeAction {
 [CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind 
 	 */
 export type ActionCategory =
-	| "QuickFix"
+	| { QuickFix: string }
 	| { Refactor: RefactorKind }
 	| { Source: SourceActionKind }
 	| { Other: string };
@@ -3344,11 +3521,15 @@ export interface FixFileParams {
 	rule_categories: RuleCategories;
 	should_format: boolean;
 	skip: RuleCode[];
+	suppression_reason?: string;
 }
 /**
  * Which fixes should be applied during the analyzing phase
  */
-export type FixFileMode = "SafeFixes" | "SafeAndUnsafeFixes";
+export type FixFileMode =
+	| "SafeFixes"
+	| "SafeAndUnsafeFixes"
+	| "ApplySuppressions";
 export interface FixFileResult {
 	/**
 	 * List of all the code actions applied to the file

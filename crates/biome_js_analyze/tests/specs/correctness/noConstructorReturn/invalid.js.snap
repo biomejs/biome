@@ -58,7 +58,7 @@ invalid.js:3:3 lint/correctness/noConstructorReturn ━━━━━━━━━�
     5 │ }
     6 │ 
   
-  i Returning a value from a constructor is ignored.
+  i Returning a value from a constructor may confuse users of the class.
   
 
 ```
@@ -86,7 +86,7 @@ invalid.js:9:3 lint/correctness/noConstructorReturn ━━━━━━━━━�
     11 │ }
     12 │ 
   
-  i Returning a value from a constructor is ignored.
+  i Returning a value from a constructor may confuse users of the class.
   
 
 ```
@@ -115,7 +115,7 @@ invalid.js:16:3 lint/correctness/noConstructorReturn ━━━━━━━━━
     18 │ }
     19 │ 
   
-  i Returning a value from a constructor is ignored.
+  i Returning a value from a constructor may confuse users of the class.
   
 
 ```
@@ -146,9 +146,7 @@ invalid.js:24:4 lint/correctness/noConstructorReturn ━━━━━━━━━
        │ 	^
     28 │ }
   
-  i Returning a value from a constructor is ignored.
+  i Returning a value from a constructor may confuse users of the class.
   
 
 ```
-
-

@@ -1,0 +1,475 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+new Test<string>?.test();
+new Test?.test();
+new A.b?.c()
+new (A.b)?.c()
+new (A.b?.()).c()
+new A.b?.()()
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsCallExpression {
+                callee: JsStaticMemberExpression {
+                    object: JsNewExpression {
+                        new_token: NEW_KW@0..4 "new" [] [Whitespace(" ")],
+                        callee: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@4..8 "Test" [] [],
+                            },
+                        },
+                        type_arguments: TsTypeArguments {
+                            l_angle_token: L_ANGLE@8..9 "<" [] [],
+                            ts_type_argument_list: TsTypeArgumentList [
+                                TsStringType {
+                                    string_token: STRING_KW@9..15 "string" [] [],
+                                },
+                            ],
+                            r_angle_token: R_ANGLE@15..16 ">" [] [],
+                        },
+                        arguments: missing (optional),
+                    },
+                    operator_token: QUESTIONDOT@16..18 "?." [] [],
+                    member: JsName {
+                        value_token: IDENT@18..22 "test" [] [],
+                    },
+                },
+                optional_chain_token: missing (optional),
+                type_arguments: missing (optional),
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@22..23 "(" [] [],
+                    args: JsCallArgumentList [],
+                    r_paren_token: R_PAREN@23..24 ")" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@24..25 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsCallExpression {
+                callee: JsStaticMemberExpression {
+                    object: JsNewExpression {
+                        new_token: NEW_KW@25..30 "new" [Newline("\n")] [Whitespace(" ")],
+                        callee: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@30..34 "Test" [] [],
+                            },
+                        },
+                        type_arguments: missing (optional),
+                        arguments: missing (optional),
+                    },
+                    operator_token: QUESTIONDOT@34..36 "?." [] [],
+                    member: JsName {
+                        value_token: IDENT@36..40 "test" [] [],
+                    },
+                },
+                optional_chain_token: missing (optional),
+                type_arguments: missing (optional),
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@40..41 "(" [] [],
+                    args: JsCallArgumentList [],
+                    r_paren_token: R_PAREN@41..42 ")" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@42..43 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsCallExpression {
+                callee: JsStaticMemberExpression {
+                    object: JsNewExpression {
+                        new_token: NEW_KW@43..48 "new" [Newline("\n")] [Whitespace(" ")],
+                        callee: JsStaticMemberExpression {
+                            object: JsIdentifierExpression {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@48..49 "A" [] [],
+                                },
+                            },
+                            operator_token: DOT@49..50 "." [] [],
+                            member: JsName {
+                                value_token: IDENT@50..51 "b" [] [],
+                            },
+                        },
+                        type_arguments: missing (optional),
+                        arguments: missing (optional),
+                    },
+                    operator_token: QUESTIONDOT@51..53 "?." [] [],
+                    member: JsName {
+                        value_token: IDENT@53..54 "c" [] [],
+                    },
+                },
+                optional_chain_token: missing (optional),
+                type_arguments: missing (optional),
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@54..55 "(" [] [],
+                    args: JsCallArgumentList [],
+                    r_paren_token: R_PAREN@55..56 ")" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsCallExpression {
+                callee: JsStaticMemberExpression {
+                    object: JsNewExpression {
+                        new_token: NEW_KW@56..61 "new" [Newline("\n")] [Whitespace(" ")],
+                        callee: JsParenthesizedExpression {
+                            l_paren_token: L_PAREN@61..62 "(" [] [],
+                            expression: JsStaticMemberExpression {
+                                object: JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@62..63 "A" [] [],
+                                    },
+                                },
+                                operator_token: DOT@63..64 "." [] [],
+                                member: JsName {
+                                    value_token: IDENT@64..65 "b" [] [],
+                                },
+                            },
+                            r_paren_token: R_PAREN@65..66 ")" [] [],
+                        },
+                        type_arguments: missing (optional),
+                        arguments: missing (optional),
+                    },
+                    operator_token: QUESTIONDOT@66..68 "?." [] [],
+                    member: JsName {
+                        value_token: IDENT@68..69 "c" [] [],
+                    },
+                },
+                optional_chain_token: missing (optional),
+                type_arguments: missing (optional),
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@69..70 "(" [] [],
+                    args: JsCallArgumentList [],
+                    r_paren_token: R_PAREN@70..71 ")" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsNewExpression {
+                new_token: NEW_KW@71..76 "new" [Newline("\n")] [Whitespace(" ")],
+                callee: JsStaticMemberExpression {
+                    object: JsParenthesizedExpression {
+                        l_paren_token: L_PAREN@76..77 "(" [] [],
+                        expression: JsCallExpression {
+                            callee: JsStaticMemberExpression {
+                                object: JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@77..78 "A" [] [],
+                                    },
+                                },
+                                operator_token: DOT@78..79 "." [] [],
+                                member: JsName {
+                                    value_token: IDENT@79..80 "b" [] [],
+                                },
+                            },
+                            optional_chain_token: QUESTIONDOT@80..82 "?." [] [],
+                            type_arguments: missing (optional),
+                            arguments: JsCallArguments {
+                                l_paren_token: L_PAREN@82..83 "(" [] [],
+                                args: JsCallArgumentList [],
+                                r_paren_token: R_PAREN@83..84 ")" [] [],
+                            },
+                        },
+                        r_paren_token: R_PAREN@84..85 ")" [] [],
+                    },
+                    operator_token: DOT@85..86 "." [] [],
+                    member: JsName {
+                        value_token: IDENT@86..87 "c" [] [],
+                    },
+                },
+                type_arguments: missing (optional),
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@87..88 "(" [] [],
+                    args: JsCallArgumentList [],
+                    r_paren_token: R_PAREN@88..89 ")" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsCallExpression {
+                callee: JsCallExpression {
+                    callee: JsNewExpression {
+                        new_token: NEW_KW@89..94 "new" [Newline("\n")] [Whitespace(" ")],
+                        callee: JsStaticMemberExpression {
+                            object: JsIdentifierExpression {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@94..95 "A" [] [],
+                                },
+                            },
+                            operator_token: DOT@95..96 "." [] [],
+                            member: JsName {
+                                value_token: IDENT@96..97 "b" [] [],
+                            },
+                        },
+                        type_arguments: missing (optional),
+                        arguments: missing (optional),
+                    },
+                    optional_chain_token: QUESTIONDOT@97..99 "?." [] [],
+                    type_arguments: missing (optional),
+                    arguments: JsCallArguments {
+                        l_paren_token: L_PAREN@99..100 "(" [] [],
+                        args: JsCallArgumentList [],
+                        r_paren_token: R_PAREN@100..101 ")" [] [],
+                    },
+                },
+                optional_chain_token: missing (optional),
+                type_arguments: missing (optional),
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@101..102 "(" [] [],
+                    args: JsCallArgumentList [],
+                    r_paren_token: R_PAREN@102..103 ")" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@103..104 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..104
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..103
+    0: JS_EXPRESSION_STATEMENT@0..25
+      0: JS_CALL_EXPRESSION@0..24
+        0: JS_STATIC_MEMBER_EXPRESSION@0..22
+          0: JS_NEW_EXPRESSION@0..16
+            0: NEW_KW@0..4 "new" [] [Whitespace(" ")]
+            1: JS_IDENTIFIER_EXPRESSION@4..8
+              0: JS_REFERENCE_IDENTIFIER@4..8
+                0: IDENT@4..8 "Test" [] []
+            2: TS_TYPE_ARGUMENTS@8..16
+              0: L_ANGLE@8..9 "<" [] []
+              1: TS_TYPE_ARGUMENT_LIST@9..15
+                0: TS_STRING_TYPE@9..15
+                  0: STRING_KW@9..15 "string" [] []
+              2: R_ANGLE@15..16 ">" [] []
+            3: (empty)
+          1: QUESTIONDOT@16..18 "?." [] []
+          2: JS_NAME@18..22
+            0: IDENT@18..22 "test" [] []
+        1: (empty)
+        2: (empty)
+        3: JS_CALL_ARGUMENTS@22..24
+          0: L_PAREN@22..23 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@23..23
+          2: R_PAREN@23..24 ")" [] []
+      1: SEMICOLON@24..25 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@25..43
+      0: JS_CALL_EXPRESSION@25..42
+        0: JS_STATIC_MEMBER_EXPRESSION@25..40
+          0: JS_NEW_EXPRESSION@25..34
+            0: NEW_KW@25..30 "new" [Newline("\n")] [Whitespace(" ")]
+            1: JS_IDENTIFIER_EXPRESSION@30..34
+              0: JS_REFERENCE_IDENTIFIER@30..34
+                0: IDENT@30..34 "Test" [] []
+            2: (empty)
+            3: (empty)
+          1: QUESTIONDOT@34..36 "?." [] []
+          2: JS_NAME@36..40
+            0: IDENT@36..40 "test" [] []
+        1: (empty)
+        2: (empty)
+        3: JS_CALL_ARGUMENTS@40..42
+          0: L_PAREN@40..41 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@41..41
+          2: R_PAREN@41..42 ")" [] []
+      1: SEMICOLON@42..43 ";" [] []
+    2: JS_EXPRESSION_STATEMENT@43..56
+      0: JS_CALL_EXPRESSION@43..56
+        0: JS_STATIC_MEMBER_EXPRESSION@43..54
+          0: JS_NEW_EXPRESSION@43..51
+            0: NEW_KW@43..48 "new" [Newline("\n")] [Whitespace(" ")]
+            1: JS_STATIC_MEMBER_EXPRESSION@48..51
+              0: JS_IDENTIFIER_EXPRESSION@48..49
+                0: JS_REFERENCE_IDENTIFIER@48..49
+                  0: IDENT@48..49 "A" [] []
+              1: DOT@49..50 "." [] []
+              2: JS_NAME@50..51
+                0: IDENT@50..51 "b" [] []
+            2: (empty)
+            3: (empty)
+          1: QUESTIONDOT@51..53 "?." [] []
+          2: JS_NAME@53..54
+            0: IDENT@53..54 "c" [] []
+        1: (empty)
+        2: (empty)
+        3: JS_CALL_ARGUMENTS@54..56
+          0: L_PAREN@54..55 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@55..55
+          2: R_PAREN@55..56 ")" [] []
+      1: (empty)
+    3: JS_EXPRESSION_STATEMENT@56..71
+      0: JS_CALL_EXPRESSION@56..71
+        0: JS_STATIC_MEMBER_EXPRESSION@56..69
+          0: JS_NEW_EXPRESSION@56..66
+            0: NEW_KW@56..61 "new" [Newline("\n")] [Whitespace(" ")]
+            1: JS_PARENTHESIZED_EXPRESSION@61..66
+              0: L_PAREN@61..62 "(" [] []
+              1: JS_STATIC_MEMBER_EXPRESSION@62..65
+                0: JS_IDENTIFIER_EXPRESSION@62..63
+                  0: JS_REFERENCE_IDENTIFIER@62..63
+                    0: IDENT@62..63 "A" [] []
+                1: DOT@63..64 "." [] []
+                2: JS_NAME@64..65
+                  0: IDENT@64..65 "b" [] []
+              2: R_PAREN@65..66 ")" [] []
+            2: (empty)
+            3: (empty)
+          1: QUESTIONDOT@66..68 "?." [] []
+          2: JS_NAME@68..69
+            0: IDENT@68..69 "c" [] []
+        1: (empty)
+        2: (empty)
+        3: JS_CALL_ARGUMENTS@69..71
+          0: L_PAREN@69..70 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@70..70
+          2: R_PAREN@70..71 ")" [] []
+      1: (empty)
+    4: JS_EXPRESSION_STATEMENT@71..89
+      0: JS_NEW_EXPRESSION@71..89
+        0: NEW_KW@71..76 "new" [Newline("\n")] [Whitespace(" ")]
+        1: JS_STATIC_MEMBER_EXPRESSION@76..87
+          0: JS_PARENTHESIZED_EXPRESSION@76..85
+            0: L_PAREN@76..77 "(" [] []
+            1: JS_CALL_EXPRESSION@77..84
+              0: JS_STATIC_MEMBER_EXPRESSION@77..80
+                0: JS_IDENTIFIER_EXPRESSION@77..78
+                  0: JS_REFERENCE_IDENTIFIER@77..78
+                    0: IDENT@77..78 "A" [] []
+                1: DOT@78..79 "." [] []
+                2: JS_NAME@79..80
+                  0: IDENT@79..80 "b" [] []
+              1: QUESTIONDOT@80..82 "?." [] []
+              2: (empty)
+              3: JS_CALL_ARGUMENTS@82..84
+                0: L_PAREN@82..83 "(" [] []
+                1: JS_CALL_ARGUMENT_LIST@83..83
+                2: R_PAREN@83..84 ")" [] []
+            2: R_PAREN@84..85 ")" [] []
+          1: DOT@85..86 "." [] []
+          2: JS_NAME@86..87
+            0: IDENT@86..87 "c" [] []
+        2: (empty)
+        3: JS_CALL_ARGUMENTS@87..89
+          0: L_PAREN@87..88 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@88..88
+          2: R_PAREN@88..89 ")" [] []
+      1: (empty)
+    5: JS_EXPRESSION_STATEMENT@89..103
+      0: JS_CALL_EXPRESSION@89..103
+        0: JS_CALL_EXPRESSION@89..101
+          0: JS_NEW_EXPRESSION@89..97
+            0: NEW_KW@89..94 "new" [Newline("\n")] [Whitespace(" ")]
+            1: JS_STATIC_MEMBER_EXPRESSION@94..97
+              0: JS_IDENTIFIER_EXPRESSION@94..95
+                0: JS_REFERENCE_IDENTIFIER@94..95
+                  0: IDENT@94..95 "A" [] []
+              1: DOT@95..96 "." [] []
+              2: JS_NAME@96..97
+                0: IDENT@96..97 "b" [] []
+            2: (empty)
+            3: (empty)
+          1: QUESTIONDOT@97..99 "?." [] []
+          2: (empty)
+          3: JS_CALL_ARGUMENTS@99..101
+            0: L_PAREN@99..100 "(" [] []
+            1: JS_CALL_ARGUMENT_LIST@100..100
+            2: R_PAREN@100..101 ")" [] []
+        1: (empty)
+        2: (empty)
+        3: JS_CALL_ARGUMENTS@101..103
+          0: L_PAREN@101..102 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@102..102
+          2: R_PAREN@102..103 ")" [] []
+      1: (empty)
+  4: EOF@103..104 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+invalid_optional_chain_from_new_expressions.ts:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid optional chain from new expression.
+  
+  > 1 │ new Test<string>?.test();
+      │                 ^^
+    2 │ new Test?.test();
+    3 │ new A.b?.c()
+  
+  i Did you mean to call 'Test<string>()'?
+  
+invalid_optional_chain_from_new_expressions.ts:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid optional chain from new expression.
+  
+    1 │ new Test<string>?.test();
+  > 2 │ new Test?.test();
+      │         ^^
+    3 │ new A.b?.c()
+    4 │ new (A.b)?.c()
+  
+  i Did you mean to call 'Test()'?
+  
+invalid_optional_chain_from_new_expressions.ts:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid optional chain from new expression.
+  
+    1 │ new Test<string>?.test();
+    2 │ new Test?.test();
+  > 3 │ new A.b?.c()
+      │        ^^
+    4 │ new (A.b)?.c()
+    5 │ new (A.b?.()).c()
+  
+  i Did you mean to call 'A.b()'?
+  
+invalid_optional_chain_from_new_expressions.ts:4:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid optional chain from new expression.
+  
+    2 │ new Test?.test();
+    3 │ new A.b?.c()
+  > 4 │ new (A.b)?.c()
+      │          ^^
+    5 │ new (A.b?.()).c()
+    6 │ new A.b?.()()
+  
+  i Did you mean to call '(A.b)()'?
+  
+invalid_optional_chain_from_new_expressions.ts:6:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid optional chain from new expression.
+  
+    4 │ new (A.b)?.c()
+    5 │ new (A.b?.()).c()
+  > 6 │ new A.b?.()()
+      │        ^^
+    7 │ 
+  
+  i Did you mean to call 'A.b()'?
+  
+```

@@ -1,7 +1,5 @@
 use crate::{services::semantic::Semantic, JsRuleAction};
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{global_identifier, AnyJsExpression, T};
@@ -112,7 +110,7 @@ impl Rule for NoGlobalIsFinite {
         };
         mutation.replace_node(old, new.into());
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {
                 "Use "<Emphasis>"Number.isFinite"</Emphasis>" instead."

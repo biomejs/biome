@@ -74,7 +74,7 @@ impl Rule for UseGoogleFontDisplay {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
 
-        if element.name().ok()?.name_value_token()?.text_trimmed() != "link" {
+        if element.name().ok()?.name_value_token().ok()?.text_trimmed() != "link" {
             return None;
         }
 

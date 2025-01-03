@@ -1,0 +1,133 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+<test>
+  { 5 + 3
+  some text
+</test>
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxElement {
+                    opening_element: JsxOpeningElement {
+                        l_angle_token: L_ANGLE@0..1 "<" [] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@1..5 "test" [] [],
+                        },
+                        type_arguments: missing (optional),
+                        attributes: JsxAttributeList [],
+                        r_angle_token: R_ANGLE@5..6 ">" [] [],
+                    },
+                    children: JsxChildList [
+                        JsxText {
+                            value_token: JSX_TEXT_LITERAL@6..9 "\n  " [] [],
+                        },
+                        JsxExpressionChild {
+                            l_curly_token: L_CURLY@9..11 "{" [] [Whitespace(" ")],
+                            expression: JsBinaryExpression {
+                                left: JsNumberLiteralExpression {
+                                    value_token: JS_NUMBER_LITERAL@11..13 "5" [] [Whitespace(" ")],
+                                },
+                                operator_token: PLUS@13..15 "+" [] [Whitespace(" ")],
+                                right: JsNumberLiteralExpression {
+                                    value_token: JS_NUMBER_LITERAL@15..16 "3" [] [],
+                                },
+                            },
+                            r_curly_token: missing (required),
+                        },
+                        JsxText {
+                            value_token: JSX_TEXT_LITERAL@16..29 "some text\n" [Newline("\n"), Whitespace("  ")] [],
+                        },
+                    ],
+                    closing_element: JsxClosingElement {
+                        l_angle_token: L_ANGLE@29..30 "<" [] [],
+                        slash_token: SLASH@30..31 "/" [] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@31..35 "test" [] [],
+                        },
+                        r_angle_token: R_ANGLE@35..36 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@36..37 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..37
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..36
+    0: JS_EXPRESSION_STATEMENT@0..36
+      0: JSX_TAG_EXPRESSION@0..36
+        0: JSX_ELEMENT@0..36
+          0: JSX_OPENING_ELEMENT@0..6
+            0: L_ANGLE@0..1 "<" [] []
+            1: JSX_NAME@1..5
+              0: JSX_IDENT@1..5 "test" [] []
+            2: (empty)
+            3: JSX_ATTRIBUTE_LIST@5..5
+            4: R_ANGLE@5..6 ">" [] []
+          1: JSX_CHILD_LIST@6..29
+            0: JSX_TEXT@6..9
+              0: JSX_TEXT_LITERAL@6..9 "\n  " [] []
+            1: JSX_EXPRESSION_CHILD@9..16
+              0: L_CURLY@9..11 "{" [] [Whitespace(" ")]
+              1: JS_BINARY_EXPRESSION@11..16
+                0: JS_NUMBER_LITERAL_EXPRESSION@11..13
+                  0: JS_NUMBER_LITERAL@11..13 "5" [] [Whitespace(" ")]
+                1: PLUS@13..15 "+" [] [Whitespace(" ")]
+                2: JS_NUMBER_LITERAL_EXPRESSION@15..16
+                  0: JS_NUMBER_LITERAL@15..16 "3" [] []
+              2: (empty)
+            2: JSX_TEXT@16..29
+              0: JSX_TEXT_LITERAL@16..29 "some text\n" [Newline("\n"), Whitespace("  ")] []
+          2: JSX_CLOSING_ELEMENT@29..36
+            0: L_ANGLE@29..30 "<" [] []
+            1: SLASH@30..31 "/" [] []
+            2: JSX_NAME@31..35
+              0: JSX_IDENT@31..35 "test" [] []
+            3: R_ANGLE@35..36 ">" [] []
+      1: (empty)
+  4: EOF@36..37 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+jsx_children_expression_missing_r_curly.jsx:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead found `some`
+  
+    1 │ <test>
+    2 │   { 5 + 3
+  > 3 │   some text
+      │   ^^^^
+    4 │ </test>
+    5 │ 
+  
+  i Remove some
+  
+```

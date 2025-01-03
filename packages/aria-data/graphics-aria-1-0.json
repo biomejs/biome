@@ -1,0 +1,164 @@
+{
+  "permalink": "https://www.w3.org/TR/2018/REC-graphics-aria-1.0-20181002/",
+  "url": "https://www.w3.org/TR/graphics-aria-1.0/",
+  "version": "1.0",
+  "roles": {
+    "graphics-document": {
+      "description": "A type of document in which the visual appearance or layout of content conveys meaning.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "document"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "role",
+          "name": "graphics-object",
+          "module": "aria"
+        },
+        {
+          "type": "role",
+          "name": "img",
+          "module": "aria"
+        },
+        {
+          "type": "role",
+          "name": "article",
+          "module": "aria"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": true,
+      "hasPresentationalChildren": false
+    },
+    "graphics-object": {
+      "description": "A section of a graphics-documentthat represents a distinct object or sub-componentwith semantic meaning.  A graphical object may itself have nested sub-components.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "group"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "role",
+          "name": "graphics-document",
+          "module": "aria"
+        },
+        {
+          "type": "role",
+          "name": "group",
+          "module": "aria"
+        },
+        {
+          "type": "role",
+          "name": "img",
+          "module": "aria"
+        },
+        {
+          "type": "role",
+          "name": "graphics-symbol",
+          "module": "aria"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-activedescendant",
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author",
+        "contents"
+      ],
+      "isAccessibleNameRequired": false,
+      "hasPresentationalChildren": false
+    },
+    "graphics-symbol": {
+      "description": "A graphical object used to convey a simple meaning or category, where the meaning is more important than the particular visual appearance.  It may be a component of a larger structured graphic such as a chart or map.  The symbol itself is an atomic object; children are presentational.",
+      "isAbstract": false,
+      "superclassRoles": [
+        "img"
+      ],
+      "relatedConcepts": [
+        {
+          "type": "role",
+          "name": "symbol",
+          "module": "aria"
+        }
+      ],
+      "inheritedAttributes": [
+        "aria-atomic",
+        "aria-busy",
+        "aria-controls",
+        "aria-current",
+        "aria-describedby",
+        "aria-details",
+        "aria-disabled",
+        "aria-dropeffect",
+        "aria-errormessage",
+        "aria-expanded",
+        "aria-flowto",
+        "aria-grabbed",
+        "aria-haspopup",
+        "aria-hidden",
+        "aria-invalid",
+        "aria-keyshortcuts",
+        "aria-label",
+        "aria-labelledby",
+        "aria-live",
+        "aria-owns",
+        "aria-relevant",
+        "aria-roledescription"
+      ],
+      "nameFrom": [
+        "author"
+      ],
+      "isAccessibleNameRequired": true,
+      "hasPresentationalChildren": true
+    }
+  },
+  "attributes": {}
+}

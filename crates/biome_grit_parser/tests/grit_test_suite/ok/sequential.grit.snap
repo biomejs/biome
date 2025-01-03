@@ -1,0 +1,196 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+```grit
+sequential {
+    bubble file($body) where $body <: contains `console.log($message)` => `console.warn($message)`,
+    bubble file($body) where $body <: contains `console.warn($message)` => `console.info($message)`
+}
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritSequential {
+            sequential_token: SEQUENTIAL_KW@0..11 "sequential" [] [Whitespace(" ")],
+            l_curly_token: L_CURLY@11..12 "{" [] [],
+            sequential: GritPatternList [
+                GritBubble {
+                    bubble_token: BUBBLE_KW@12..24 "bubble" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                    scope: missing (optional),
+                    pattern: GritPatternWhere {
+                        pattern: GritNodeLike {
+                            name: GritName {
+                                value_token: GRIT_NAME@24..28 "file" [] [],
+                            },
+                            l_paren_token: L_PAREN@28..29 "(" [] [],
+                            named_args: GritNamedArgList [
+                                GritVariable {
+                                    value_token: GRIT_VARIABLE@29..34 "$body" [] [],
+                                },
+                            ],
+                            r_paren_token: R_PAREN@34..36 ")" [] [Whitespace(" ")],
+                        },
+                        where_token: WHERE_KW@36..42 "where" [] [Whitespace(" ")],
+                        side_condition: GritPredicateMatch {
+                            left: GritVariable {
+                                value_token: GRIT_VARIABLE@42..48 "$body" [] [Whitespace(" ")],
+                            },
+                            match_token: MATCH@48..51 "<:" [] [Whitespace(" ")],
+                            right: GritPatternContains {
+                                contains_token: CONTAINS_KW@51..60 "contains" [] [Whitespace(" ")],
+                                contains: GritRewrite {
+                                    left: GritCodeSnippet {
+                                        source: GritBacktickSnippetLiteral {
+                                            value_token: GRIT_BACKTICK_SNIPPET@60..84 "`console.log($message)`" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    annotation: missing (optional),
+                                    fat_arrow_token: FAT_ARROW@84..87 "=>" [] [Whitespace(" ")],
+                                    right: GritCodeSnippet {
+                                        source: GritBacktickSnippetLiteral {
+                                            value_token: GRIT_BACKTICK_SNIPPET@87..111 "`console.warn($message)`" [] [],
+                                        },
+                                    },
+                                },
+                                until_clause: missing (optional),
+                            },
+                        },
+                    },
+                },
+                COMMA@111..112 "," [] [],
+                GritBubble {
+                    bubble_token: BUBBLE_KW@112..124 "bubble" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                    scope: missing (optional),
+                    pattern: GritPatternWhere {
+                        pattern: GritNodeLike {
+                            name: GritName {
+                                value_token: GRIT_NAME@124..128 "file" [] [],
+                            },
+                            l_paren_token: L_PAREN@128..129 "(" [] [],
+                            named_args: GritNamedArgList [
+                                GritVariable {
+                                    value_token: GRIT_VARIABLE@129..134 "$body" [] [],
+                                },
+                            ],
+                            r_paren_token: R_PAREN@134..136 ")" [] [Whitespace(" ")],
+                        },
+                        where_token: WHERE_KW@136..142 "where" [] [Whitespace(" ")],
+                        side_condition: GritPredicateMatch {
+                            left: GritVariable {
+                                value_token: GRIT_VARIABLE@142..148 "$body" [] [Whitespace(" ")],
+                            },
+                            match_token: MATCH@148..151 "<:" [] [Whitespace(" ")],
+                            right: GritPatternContains {
+                                contains_token: CONTAINS_KW@151..160 "contains" [] [Whitespace(" ")],
+                                contains: GritRewrite {
+                                    left: GritCodeSnippet {
+                                        source: GritBacktickSnippetLiteral {
+                                            value_token: GRIT_BACKTICK_SNIPPET@160..185 "`console.warn($message)`" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    annotation: missing (optional),
+                                    fat_arrow_token: FAT_ARROW@185..188 "=>" [] [Whitespace(" ")],
+                                    right: GritCodeSnippet {
+                                        source: GritBacktickSnippetLiteral {
+                                            value_token: GRIT_BACKTICK_SNIPPET@188..212 "`console.info($message)`" [] [],
+                                        },
+                                    },
+                                },
+                                until_clause: missing (optional),
+                            },
+                        },
+                    },
+                },
+            ],
+            r_curly_token: R_CURLY@212..214 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@214..215 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..215
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..214
+    0: GRIT_SEQUENTIAL@0..214
+      0: SEQUENTIAL_KW@0..11 "sequential" [] [Whitespace(" ")]
+      1: L_CURLY@11..12 "{" [] []
+      2: GRIT_PATTERN_LIST@12..212
+        0: GRIT_BUBBLE@12..111
+          0: BUBBLE_KW@12..24 "bubble" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+          1: (empty)
+          2: GRIT_PATTERN_WHERE@24..111
+            0: GRIT_NODE_LIKE@24..36
+              0: GRIT_NAME@24..28
+                0: GRIT_NAME@24..28 "file" [] []
+              1: L_PAREN@28..29 "(" [] []
+              2: GRIT_NAMED_ARG_LIST@29..34
+                0: GRIT_VARIABLE@29..34
+                  0: GRIT_VARIABLE@29..34 "$body" [] []
+              3: R_PAREN@34..36 ")" [] [Whitespace(" ")]
+            1: WHERE_KW@36..42 "where" [] [Whitespace(" ")]
+            2: GRIT_PREDICATE_MATCH@42..111
+              0: GRIT_VARIABLE@42..48
+                0: GRIT_VARIABLE@42..48 "$body" [] [Whitespace(" ")]
+              1: MATCH@48..51 "<:" [] [Whitespace(" ")]
+              2: GRIT_PATTERN_CONTAINS@51..111
+                0: CONTAINS_KW@51..60 "contains" [] [Whitespace(" ")]
+                1: GRIT_REWRITE@60..111
+                  0: GRIT_CODE_SNIPPET@60..84
+                    0: GRIT_BACKTICK_SNIPPET_LITERAL@60..84
+                      0: GRIT_BACKTICK_SNIPPET@60..84 "`console.log($message)`" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: FAT_ARROW@84..87 "=>" [] [Whitespace(" ")]
+                  3: GRIT_CODE_SNIPPET@87..111
+                    0: GRIT_BACKTICK_SNIPPET_LITERAL@87..111
+                      0: GRIT_BACKTICK_SNIPPET@87..111 "`console.warn($message)`" [] []
+                2: (empty)
+        1: COMMA@111..112 "," [] []
+        2: GRIT_BUBBLE@112..212
+          0: BUBBLE_KW@112..124 "bubble" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+          1: (empty)
+          2: GRIT_PATTERN_WHERE@124..212
+            0: GRIT_NODE_LIKE@124..136
+              0: GRIT_NAME@124..128
+                0: GRIT_NAME@124..128 "file" [] []
+              1: L_PAREN@128..129 "(" [] []
+              2: GRIT_NAMED_ARG_LIST@129..134
+                0: GRIT_VARIABLE@129..134
+                  0: GRIT_VARIABLE@129..134 "$body" [] []
+              3: R_PAREN@134..136 ")" [] [Whitespace(" ")]
+            1: WHERE_KW@136..142 "where" [] [Whitespace(" ")]
+            2: GRIT_PREDICATE_MATCH@142..212
+              0: GRIT_VARIABLE@142..148
+                0: GRIT_VARIABLE@142..148 "$body" [] [Whitespace(" ")]
+              1: MATCH@148..151 "<:" [] [Whitespace(" ")]
+              2: GRIT_PATTERN_CONTAINS@151..212
+                0: CONTAINS_KW@151..160 "contains" [] [Whitespace(" ")]
+                1: GRIT_REWRITE@160..212
+                  0: GRIT_CODE_SNIPPET@160..185
+                    0: GRIT_BACKTICK_SNIPPET_LITERAL@160..185
+                      0: GRIT_BACKTICK_SNIPPET@160..185 "`console.warn($message)`" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: FAT_ARROW@185..188 "=>" [] [Whitespace(" ")]
+                  3: GRIT_CODE_SNIPPET@188..212
+                    0: GRIT_BACKTICK_SNIPPET_LITERAL@188..212
+                      0: GRIT_BACKTICK_SNIPPET@188..212 "`console.info($message)`" [] []
+                2: (empty)
+      3: R_CURLY@212..214 "}" [Newline("\n")] []
+  4: EOF@214..215 "" [Newline("\n")] []
+
+```

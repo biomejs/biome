@@ -237,7 +237,6 @@ enum BinaryLeftOrRightSide {
 }
 
 impl BinaryLeftOrRightSide {
-    #[allow(unused)]
     fn is_jsx(&self) -> bool {
         match self {
             BinaryLeftOrRightSide::Left { parent, .. } => matches!(

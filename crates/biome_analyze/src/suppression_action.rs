@@ -10,6 +10,7 @@ pub trait SuppressionAction {
             mutation,
             suppression_text,
             diagnostic_text_range,
+            suppression_reason,
         } = payload;
 
         // retrieve the most suited, most left token where the diagnostics was emitted
@@ -22,7 +23,12 @@ pub trait SuppressionAction {
         });
 
         if let Some(apply_suppression) = apply_suppression {
-            self.apply_suppression(mutation, apply_suppression, suppression_text);
+            self.apply_suppression(
+                mutation,
+                apply_suppression,
+                suppression_text,
+                suppression_reason,
+            );
         }
     }
 
@@ -72,6 +78,7 @@ pub trait SuppressionAction {
         mutation: &mut BatchMutation<Self::Language>,
         apply_suppression: ApplySuppression<Self::Language>,
         suppression_text: &str,
+        suppression_reason: &str,
     );
 }
 

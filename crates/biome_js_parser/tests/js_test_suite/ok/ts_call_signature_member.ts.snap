@@ -1,0 +1,457 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+type A = { (): string; }
+type B = { (a, b, c): number }
+type C = { <A, B>(a: A, b: B): number }
+type D = { <const A>(a: A): number }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@0..5 "type" [] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
+            ty: TsObjectType {
+                l_curly_token: L_CURLY@9..11 "{" [] [Whitespace(" ")],
+                members: TsTypeMemberList [
+                    TsCallSignatureTypeMember {
+                        type_parameters: missing (optional),
+                        parameters: JsParameters {
+                            l_paren_token: L_PAREN@11..12 "(" [] [],
+                            items: JsParameterList [],
+                            r_paren_token: R_PAREN@12..13 ")" [] [],
+                        },
+                        return_type_annotation: TsReturnTypeAnnotation {
+                            colon_token: COLON@13..15 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@15..21 "string" [] [],
+                            },
+                        },
+                        separator_token: SEMICOLON@21..23 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@23..24 "}" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@24..30 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@30..32 "B" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@32..34 "=" [] [Whitespace(" ")],
+            ty: TsObjectType {
+                l_curly_token: L_CURLY@34..36 "{" [] [Whitespace(" ")],
+                members: TsTypeMemberList [
+                    TsCallSignatureTypeMember {
+                        type_parameters: missing (optional),
+                        parameters: JsParameters {
+                            l_paren_token: L_PAREN@36..37 "(" [] [],
+                            items: JsParameterList [
+                                JsFormalParameter {
+                                    decorators: JsDecoratorList [],
+                                    binding: JsIdentifierBinding {
+                                        name_token: IDENT@37..38 "a" [] [],
+                                    },
+                                    question_mark_token: missing (optional),
+                                    type_annotation: missing (optional),
+                                    initializer: missing (optional),
+                                },
+                                COMMA@38..40 "," [] [Whitespace(" ")],
+                                JsFormalParameter {
+                                    decorators: JsDecoratorList [],
+                                    binding: JsIdentifierBinding {
+                                        name_token: IDENT@40..41 "b" [] [],
+                                    },
+                                    question_mark_token: missing (optional),
+                                    type_annotation: missing (optional),
+                                    initializer: missing (optional),
+                                },
+                                COMMA@41..43 "," [] [Whitespace(" ")],
+                                JsFormalParameter {
+                                    decorators: JsDecoratorList [],
+                                    binding: JsIdentifierBinding {
+                                        name_token: IDENT@43..44 "c" [] [],
+                                    },
+                                    question_mark_token: missing (optional),
+                                    type_annotation: missing (optional),
+                                    initializer: missing (optional),
+                                },
+                            ],
+                            r_paren_token: R_PAREN@44..45 ")" [] [],
+                        },
+                        return_type_annotation: TsReturnTypeAnnotation {
+                            colon_token: COLON@45..47 ":" [] [Whitespace(" ")],
+                            ty: TsNumberType {
+                                number_token: NUMBER_KW@47..54 "number" [] [Whitespace(" ")],
+                            },
+                        },
+                        separator_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@54..55 "}" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@55..61 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@61..63 "C" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@63..65 "=" [] [Whitespace(" ")],
+            ty: TsObjectType {
+                l_curly_token: L_CURLY@65..67 "{" [] [Whitespace(" ")],
+                members: TsTypeMemberList [
+                    TsCallSignatureTypeMember {
+                        type_parameters: TsTypeParameters {
+                            l_angle_token: L_ANGLE@67..68 "<" [] [],
+                            items: TsTypeParameterList [
+                                TsTypeParameter {
+                                    modifiers: TsTypeParameterModifierList [],
+                                    name: TsTypeParameterName {
+                                        ident_token: IDENT@68..69 "A" [] [],
+                                    },
+                                    constraint: missing (optional),
+                                    default: missing (optional),
+                                },
+                                COMMA@69..71 "," [] [Whitespace(" ")],
+                                TsTypeParameter {
+                                    modifiers: TsTypeParameterModifierList [],
+                                    name: TsTypeParameterName {
+                                        ident_token: IDENT@71..72 "B" [] [],
+                                    },
+                                    constraint: missing (optional),
+                                    default: missing (optional),
+                                },
+                            ],
+                            r_angle_token: R_ANGLE@72..73 ">" [] [],
+                        },
+                        parameters: JsParameters {
+                            l_paren_token: L_PAREN@73..74 "(" [] [],
+                            items: JsParameterList [
+                                JsFormalParameter {
+                                    decorators: JsDecoratorList [],
+                                    binding: JsIdentifierBinding {
+                                        name_token: IDENT@74..75 "a" [] [],
+                                    },
+                                    question_mark_token: missing (optional),
+                                    type_annotation: TsTypeAnnotation {
+                                        colon_token: COLON@75..77 ":" [] [Whitespace(" ")],
+                                        ty: TsReferenceType {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@77..78 "A" [] [],
+                                            },
+                                            type_arguments: missing (optional),
+                                        },
+                                    },
+                                    initializer: missing (optional),
+                                },
+                                COMMA@78..80 "," [] [Whitespace(" ")],
+                                JsFormalParameter {
+                                    decorators: JsDecoratorList [],
+                                    binding: JsIdentifierBinding {
+                                        name_token: IDENT@80..81 "b" [] [],
+                                    },
+                                    question_mark_token: missing (optional),
+                                    type_annotation: TsTypeAnnotation {
+                                        colon_token: COLON@81..83 ":" [] [Whitespace(" ")],
+                                        ty: TsReferenceType {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@83..84 "B" [] [],
+                                            },
+                                            type_arguments: missing (optional),
+                                        },
+                                    },
+                                    initializer: missing (optional),
+                                },
+                            ],
+                            r_paren_token: R_PAREN@84..85 ")" [] [],
+                        },
+                        return_type_annotation: TsReturnTypeAnnotation {
+                            colon_token: COLON@85..87 ":" [] [Whitespace(" ")],
+                            ty: TsNumberType {
+                                number_token: NUMBER_KW@87..94 "number" [] [Whitespace(" ")],
+                            },
+                        },
+                        separator_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@94..95 "}" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@95..101 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@101..103 "D" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@103..105 "=" [] [Whitespace(" ")],
+            ty: TsObjectType {
+                l_curly_token: L_CURLY@105..107 "{" [] [Whitespace(" ")],
+                members: TsTypeMemberList [
+                    TsCallSignatureTypeMember {
+                        type_parameters: TsTypeParameters {
+                            l_angle_token: L_ANGLE@107..108 "<" [] [],
+                            items: TsTypeParameterList [
+                                TsTypeParameter {
+                                    modifiers: TsTypeParameterModifierList [
+                                        TsConstModifier {
+                                            modifier_token: CONST_KW@108..114 "const" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                    name: TsTypeParameterName {
+                                        ident_token: IDENT@114..115 "A" [] [],
+                                    },
+                                    constraint: missing (optional),
+                                    default: missing (optional),
+                                },
+                            ],
+                            r_angle_token: R_ANGLE@115..116 ">" [] [],
+                        },
+                        parameters: JsParameters {
+                            l_paren_token: L_PAREN@116..117 "(" [] [],
+                            items: JsParameterList [
+                                JsFormalParameter {
+                                    decorators: JsDecoratorList [],
+                                    binding: JsIdentifierBinding {
+                                        name_token: IDENT@117..118 "a" [] [],
+                                    },
+                                    question_mark_token: missing (optional),
+                                    type_annotation: TsTypeAnnotation {
+                                        colon_token: COLON@118..120 ":" [] [Whitespace(" ")],
+                                        ty: TsReferenceType {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@120..121 "A" [] [],
+                                            },
+                                            type_arguments: missing (optional),
+                                        },
+                                    },
+                                    initializer: missing (optional),
+                                },
+                            ],
+                            r_paren_token: R_PAREN@121..122 ")" [] [],
+                        },
+                        return_type_annotation: TsReturnTypeAnnotation {
+                            colon_token: COLON@122..124 ":" [] [Whitespace(" ")],
+                            ty: TsNumberType {
+                                number_token: NUMBER_KW@124..131 "number" [] [Whitespace(" ")],
+                            },
+                        },
+                        separator_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@131..132 "}" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@132..133 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..133
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..132
+    0: TS_TYPE_ALIAS_DECLARATION@0..24
+      0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@5..7
+        0: IDENT@5..7 "A" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@7..9 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@9..24
+        0: L_CURLY@9..11 "{" [] [Whitespace(" ")]
+        1: TS_TYPE_MEMBER_LIST@11..23
+          0: TS_CALL_SIGNATURE_TYPE_MEMBER@11..23
+            0: (empty)
+            1: JS_PARAMETERS@11..13
+              0: L_PAREN@11..12 "(" [] []
+              1: JS_PARAMETER_LIST@12..12
+              2: R_PAREN@12..13 ")" [] []
+            2: TS_RETURN_TYPE_ANNOTATION@13..21
+              0: COLON@13..15 ":" [] [Whitespace(" ")]
+              1: TS_STRING_TYPE@15..21
+                0: STRING_KW@15..21 "string" [] []
+            3: SEMICOLON@21..23 ";" [] [Whitespace(" ")]
+        2: R_CURLY@23..24 "}" [] []
+      5: (empty)
+    1: TS_TYPE_ALIAS_DECLARATION@24..55
+      0: TYPE_KW@24..30 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@30..32
+        0: IDENT@30..32 "B" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@32..34 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@34..55
+        0: L_CURLY@34..36 "{" [] [Whitespace(" ")]
+        1: TS_TYPE_MEMBER_LIST@36..54
+          0: TS_CALL_SIGNATURE_TYPE_MEMBER@36..54
+            0: (empty)
+            1: JS_PARAMETERS@36..45
+              0: L_PAREN@36..37 "(" [] []
+              1: JS_PARAMETER_LIST@37..44
+                0: JS_FORMAL_PARAMETER@37..38
+                  0: JS_DECORATOR_LIST@37..37
+                  1: JS_IDENTIFIER_BINDING@37..38
+                    0: IDENT@37..38 "a" [] []
+                  2: (empty)
+                  3: (empty)
+                  4: (empty)
+                1: COMMA@38..40 "," [] [Whitespace(" ")]
+                2: JS_FORMAL_PARAMETER@40..41
+                  0: JS_DECORATOR_LIST@40..40
+                  1: JS_IDENTIFIER_BINDING@40..41
+                    0: IDENT@40..41 "b" [] []
+                  2: (empty)
+                  3: (empty)
+                  4: (empty)
+                3: COMMA@41..43 "," [] [Whitespace(" ")]
+                4: JS_FORMAL_PARAMETER@43..44
+                  0: JS_DECORATOR_LIST@43..43
+                  1: JS_IDENTIFIER_BINDING@43..44
+                    0: IDENT@43..44 "c" [] []
+                  2: (empty)
+                  3: (empty)
+                  4: (empty)
+              2: R_PAREN@44..45 ")" [] []
+            2: TS_RETURN_TYPE_ANNOTATION@45..54
+              0: COLON@45..47 ":" [] [Whitespace(" ")]
+              1: TS_NUMBER_TYPE@47..54
+                0: NUMBER_KW@47..54 "number" [] [Whitespace(" ")]
+            3: (empty)
+        2: R_CURLY@54..55 "}" [] []
+      5: (empty)
+    2: TS_TYPE_ALIAS_DECLARATION@55..95
+      0: TYPE_KW@55..61 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@61..63
+        0: IDENT@61..63 "C" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@63..65 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@65..95
+        0: L_CURLY@65..67 "{" [] [Whitespace(" ")]
+        1: TS_TYPE_MEMBER_LIST@67..94
+          0: TS_CALL_SIGNATURE_TYPE_MEMBER@67..94
+            0: TS_TYPE_PARAMETERS@67..73
+              0: L_ANGLE@67..68 "<" [] []
+              1: TS_TYPE_PARAMETER_LIST@68..72
+                0: TS_TYPE_PARAMETER@68..69
+                  0: TS_TYPE_PARAMETER_MODIFIER_LIST@68..68
+                  1: TS_TYPE_PARAMETER_NAME@68..69
+                    0: IDENT@68..69 "A" [] []
+                  2: (empty)
+                  3: (empty)
+                1: COMMA@69..71 "," [] [Whitespace(" ")]
+                2: TS_TYPE_PARAMETER@71..72
+                  0: TS_TYPE_PARAMETER_MODIFIER_LIST@71..71
+                  1: TS_TYPE_PARAMETER_NAME@71..72
+                    0: IDENT@71..72 "B" [] []
+                  2: (empty)
+                  3: (empty)
+              2: R_ANGLE@72..73 ">" [] []
+            1: JS_PARAMETERS@73..85
+              0: L_PAREN@73..74 "(" [] []
+              1: JS_PARAMETER_LIST@74..84
+                0: JS_FORMAL_PARAMETER@74..78
+                  0: JS_DECORATOR_LIST@74..74
+                  1: JS_IDENTIFIER_BINDING@74..75
+                    0: IDENT@74..75 "a" [] []
+                  2: (empty)
+                  3: TS_TYPE_ANNOTATION@75..78
+                    0: COLON@75..77 ":" [] [Whitespace(" ")]
+                    1: TS_REFERENCE_TYPE@77..78
+                      0: JS_REFERENCE_IDENTIFIER@77..78
+                        0: IDENT@77..78 "A" [] []
+                      1: (empty)
+                  4: (empty)
+                1: COMMA@78..80 "," [] [Whitespace(" ")]
+                2: JS_FORMAL_PARAMETER@80..84
+                  0: JS_DECORATOR_LIST@80..80
+                  1: JS_IDENTIFIER_BINDING@80..81
+                    0: IDENT@80..81 "b" [] []
+                  2: (empty)
+                  3: TS_TYPE_ANNOTATION@81..84
+                    0: COLON@81..83 ":" [] [Whitespace(" ")]
+                    1: TS_REFERENCE_TYPE@83..84
+                      0: JS_REFERENCE_IDENTIFIER@83..84
+                        0: IDENT@83..84 "B" [] []
+                      1: (empty)
+                  4: (empty)
+              2: R_PAREN@84..85 ")" [] []
+            2: TS_RETURN_TYPE_ANNOTATION@85..94
+              0: COLON@85..87 ":" [] [Whitespace(" ")]
+              1: TS_NUMBER_TYPE@87..94
+                0: NUMBER_KW@87..94 "number" [] [Whitespace(" ")]
+            3: (empty)
+        2: R_CURLY@94..95 "}" [] []
+      5: (empty)
+    3: TS_TYPE_ALIAS_DECLARATION@95..132
+      0: TYPE_KW@95..101 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@101..103
+        0: IDENT@101..103 "D" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@103..105 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@105..132
+        0: L_CURLY@105..107 "{" [] [Whitespace(" ")]
+        1: TS_TYPE_MEMBER_LIST@107..131
+          0: TS_CALL_SIGNATURE_TYPE_MEMBER@107..131
+            0: TS_TYPE_PARAMETERS@107..116
+              0: L_ANGLE@107..108 "<" [] []
+              1: TS_TYPE_PARAMETER_LIST@108..115
+                0: TS_TYPE_PARAMETER@108..115
+                  0: TS_TYPE_PARAMETER_MODIFIER_LIST@108..114
+                    0: TS_CONST_MODIFIER@108..114
+                      0: CONST_KW@108..114 "const" [] [Whitespace(" ")]
+                  1: TS_TYPE_PARAMETER_NAME@114..115
+                    0: IDENT@114..115 "A" [] []
+                  2: (empty)
+                  3: (empty)
+              2: R_ANGLE@115..116 ">" [] []
+            1: JS_PARAMETERS@116..122
+              0: L_PAREN@116..117 "(" [] []
+              1: JS_PARAMETER_LIST@117..121
+                0: JS_FORMAL_PARAMETER@117..121
+                  0: JS_DECORATOR_LIST@117..117
+                  1: JS_IDENTIFIER_BINDING@117..118
+                    0: IDENT@117..118 "a" [] []
+                  2: (empty)
+                  3: TS_TYPE_ANNOTATION@118..121
+                    0: COLON@118..120 ":" [] [Whitespace(" ")]
+                    1: TS_REFERENCE_TYPE@120..121
+                      0: JS_REFERENCE_IDENTIFIER@120..121
+                        0: IDENT@120..121 "A" [] []
+                      1: (empty)
+                  4: (empty)
+              2: R_PAREN@121..122 ")" [] []
+            2: TS_RETURN_TYPE_ANNOTATION@122..131
+              0: COLON@122..124 ":" [] [Whitespace(" ")]
+              1: TS_NUMBER_TYPE@124..131
+                0: NUMBER_KW@124..131 "number" [] [Whitespace(" ")]
+            3: (empty)
+        2: R_CURLY@131..132 "}" [] []
+      5: (empty)
+  4: EOF@132..133 "" [Newline("\n")] []
+
+```

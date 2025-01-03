@@ -19,7 +19,7 @@ impl BubbleCompiler {
         // that parameters are registered first
 
         let parameters: Vec<_> = node
-            .variables()
+            .scope()
             .into_iter()
             .map(|node| {
                 let syntax = node.syntax();

@@ -241,7 +241,6 @@ struct AliasPath {
 }
 
 impl AliasPath {
-    #[allow(dead_code)]
     pub fn new(name: impl Into<String>) -> Self {
         Self {
             name: name.into(),
@@ -249,24 +248,22 @@ impl AliasPath {
         }
     }
 
-    #[allow(dead_code)]
     pub fn add_prefix(&mut self, prefix: impl Into<PathBuf>) {
         self.prefix.push(prefix.into());
     }
 }
 
-#[allow(dead_code)]
 pub struct Aliases {
     aliases: Vec<AliasPath>,
 }
 
 impl Aliases {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn new() -> Self {
         Self { aliases: vec![] }
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn with_alias<'a>(
         mut self,
         name: impl Into<String>,
@@ -280,7 +277,7 @@ impl Aliases {
         self
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn get_paths_by_name(&self, name: &str) -> Option<&[PathBuf]> {
         self.aliases
             .iter()

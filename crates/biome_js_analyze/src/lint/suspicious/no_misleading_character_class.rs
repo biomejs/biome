@@ -1,7 +1,6 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -113,7 +112,7 @@ pub struct RuleState {
 }
 
 impl Rule for NoMisleadingCharacterClass {
-    type Query = Semantic<AnyRegexExpression>;
+    type Query = Ast<AnyRegexExpression>;
     type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -185,7 +184,7 @@ impl Rule for NoMisleadingCharacterClass {
                     let mut mutation = ctx.root().begin();
                     mutation.replace_token(prev_token, next_token);
                     Some(JsRuleAction::new(
-                        ActionCategory::QuickFix,
+                        ctx.metadata().action_category(ctx.category(), ctx.group()),
                         ctx.metadata().applicability(),
                         markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
                             .to_owned(),
@@ -202,7 +201,7 @@ impl Rule for NoMisleadingCharacterClass {
                             let mut mutation = ctx.root().begin();
                             mutation.replace_node(prev_node, suggest);
                             Some(JsRuleAction::new(
-                                ActionCategory::QuickFix,
+                                ctx.metadata().action_category(ctx.category(), ctx.group()),
                                 ctx.metadata().applicability(),
                                 markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
                                     .to_owned(),
@@ -222,7 +221,7 @@ impl Rule for NoMisleadingCharacterClass {
                             let mut mutation = ctx.root().begin();
                             mutation.replace_node(prev_node, suggest);
                             Some(JsRuleAction::new(
-                                ActionCategory::QuickFix,
+                                ctx.metadata().action_category(ctx.category(), ctx.group()),
                                 ctx.metadata().applicability(),
                                 markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
                                     .to_owned(),
@@ -501,6 +500,7 @@ fn decode_unicode_escape_sequence(s: &str, is_in_string: bool) -> Option<Unicode
             .skip(offset + 3)
             .find(|(_, &c)| c == b'}')?;
         Some(UnicodeEscape {
+            // SAFETY: slicing is safe because `{` is at `offset + 2` and `}` is at `end`.
             codepoint: u32::from_str_radix(&s[offset + 3..end], 16).ok()?,
             kind: if is_regex_escape {
                 UnicodeEscapeKind::RegexBraced
@@ -509,9 +509,10 @@ fn decode_unicode_escape_sequence(s: &str, is_in_string: bool) -> Option<Unicode
             },
             len: end + 1,
         })
-    } else if (offset + 6) <= bytes.len() {
+    } else {
         Some(UnicodeEscape {
-            codepoint: u32::from_str_radix(&s[offset + 2..offset + 6], 16).ok()?,
+            // We use `get` for slicing to handle malformed escape sequence that end with a multi-byte char.
+            codepoint: u32::from_str_radix(s.get(offset + 2..offset + 6)?, 16).ok()?,
             kind: if is_regex_escape {
                 UnicodeEscapeKind::RegexPlain
             } else {
@@ -519,8 +520,6 @@ fn decode_unicode_escape_sequence(s: &str, is_in_string: bool) -> Option<Unicode
             },
             len: offset + 6,
         })
-    } else {
-        None
     }
 }
 

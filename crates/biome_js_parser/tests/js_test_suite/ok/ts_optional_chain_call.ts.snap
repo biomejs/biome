@@ -1,0 +1,163 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+(<A, B>() => {})?.<A, B>();
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsCallExpression {
+                callee: JsParenthesizedExpression {
+                    l_paren_token: L_PAREN@0..1 "(" [] [],
+                    expression: JsArrowFunctionExpression {
+                        async_token: missing (optional),
+                        type_parameters: TsTypeParameters {
+                            l_angle_token: L_ANGLE@1..2 "<" [] [],
+                            items: TsTypeParameterList [
+                                TsTypeParameter {
+                                    modifiers: TsTypeParameterModifierList [],
+                                    name: TsTypeParameterName {
+                                        ident_token: IDENT@2..3 "A" [] [],
+                                    },
+                                    constraint: missing (optional),
+                                    default: missing (optional),
+                                },
+                                COMMA@3..5 "," [] [Whitespace(" ")],
+                                TsTypeParameter {
+                                    modifiers: TsTypeParameterModifierList [],
+                                    name: TsTypeParameterName {
+                                        ident_token: IDENT@5..6 "B" [] [],
+                                    },
+                                    constraint: missing (optional),
+                                    default: missing (optional),
+                                },
+                            ],
+                            r_angle_token: R_ANGLE@6..7 ">" [] [],
+                        },
+                        parameters: JsParameters {
+                            l_paren_token: L_PAREN@7..8 "(" [] [],
+                            items: JsParameterList [],
+                            r_paren_token: R_PAREN@8..10 ")" [] [Whitespace(" ")],
+                        },
+                        return_type_annotation: missing (optional),
+                        fat_arrow_token: FAT_ARROW@10..13 "=>" [] [Whitespace(" ")],
+                        body: JsFunctionBody {
+                            l_curly_token: L_CURLY@13..14 "{" [] [],
+                            directives: JsDirectiveList [],
+                            statements: JsStatementList [],
+                            r_curly_token: R_CURLY@14..15 "}" [] [],
+                        },
+                    },
+                    r_paren_token: R_PAREN@15..16 ")" [] [],
+                },
+                optional_chain_token: QUESTIONDOT@16..18 "?." [] [],
+                type_arguments: TsTypeArguments {
+                    l_angle_token: L_ANGLE@18..19 "<" [] [],
+                    ts_type_argument_list: TsTypeArgumentList [
+                        TsReferenceType {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@19..20 "A" [] [],
+                            },
+                            type_arguments: missing (optional),
+                        },
+                        COMMA@20..22 "," [] [Whitespace(" ")],
+                        TsReferenceType {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@22..23 "B" [] [],
+                            },
+                            type_arguments: missing (optional),
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@23..24 ">" [] [],
+                },
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@24..25 "(" [] [],
+                    args: JsCallArgumentList [],
+                    r_paren_token: R_PAREN@25..26 ")" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@26..27 ";" [] [],
+        },
+    ],
+    eof_token: EOF@27..28 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..28
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..27
+    0: JS_EXPRESSION_STATEMENT@0..27
+      0: JS_CALL_EXPRESSION@0..26
+        0: JS_PARENTHESIZED_EXPRESSION@0..16
+          0: L_PAREN@0..1 "(" [] []
+          1: JS_ARROW_FUNCTION_EXPRESSION@1..15
+            0: (empty)
+            1: TS_TYPE_PARAMETERS@1..7
+              0: L_ANGLE@1..2 "<" [] []
+              1: TS_TYPE_PARAMETER_LIST@2..6
+                0: TS_TYPE_PARAMETER@2..3
+                  0: TS_TYPE_PARAMETER_MODIFIER_LIST@2..2
+                  1: TS_TYPE_PARAMETER_NAME@2..3
+                    0: IDENT@2..3 "A" [] []
+                  2: (empty)
+                  3: (empty)
+                1: COMMA@3..5 "," [] [Whitespace(" ")]
+                2: TS_TYPE_PARAMETER@5..6
+                  0: TS_TYPE_PARAMETER_MODIFIER_LIST@5..5
+                  1: TS_TYPE_PARAMETER_NAME@5..6
+                    0: IDENT@5..6 "B" [] []
+                  2: (empty)
+                  3: (empty)
+              2: R_ANGLE@6..7 ">" [] []
+            2: JS_PARAMETERS@7..10
+              0: L_PAREN@7..8 "(" [] []
+              1: JS_PARAMETER_LIST@8..8
+              2: R_PAREN@8..10 ")" [] [Whitespace(" ")]
+            3: (empty)
+            4: FAT_ARROW@10..13 "=>" [] [Whitespace(" ")]
+            5: JS_FUNCTION_BODY@13..15
+              0: L_CURLY@13..14 "{" [] []
+              1: JS_DIRECTIVE_LIST@14..14
+              2: JS_STATEMENT_LIST@14..14
+              3: R_CURLY@14..15 "}" [] []
+          2: R_PAREN@15..16 ")" [] []
+        1: QUESTIONDOT@16..18 "?." [] []
+        2: TS_TYPE_ARGUMENTS@18..24
+          0: L_ANGLE@18..19 "<" [] []
+          1: TS_TYPE_ARGUMENT_LIST@19..23
+            0: TS_REFERENCE_TYPE@19..20
+              0: JS_REFERENCE_IDENTIFIER@19..20
+                0: IDENT@19..20 "A" [] []
+              1: (empty)
+            1: COMMA@20..22 "," [] [Whitespace(" ")]
+            2: TS_REFERENCE_TYPE@22..23
+              0: JS_REFERENCE_IDENTIFIER@22..23
+                0: IDENT@22..23 "B" [] []
+              1: (empty)
+          2: R_ANGLE@23..24 ">" [] []
+        3: JS_CALL_ARGUMENTS@24..26
+          0: L_PAREN@24..25 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@25..25
+          2: R_PAREN@25..26 ")" [] []
+      1: SEMICOLON@26..27 ";" [] []
+  4: EOF@27..28 "" [Newline("\n")] []
+
+```

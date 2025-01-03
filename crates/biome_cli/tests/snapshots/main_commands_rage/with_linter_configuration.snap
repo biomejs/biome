@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/commands/rage.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -67,32 +68,32 @@ Linter:
   All:                          false
   Enabled rules:
   complexity/noBannedTypes
-  complexity/noThisInStatic
-  complexity/noUselessConstructor
-  complexity/useLiteralKeys
-  complexity/useOptionalChain
+  complexity/noEmptyTypeParameters
+  complexity/noExcessiveNestedTestSuites
+  complexity/noExtraBooleanCast
+  complexity/noForEach
   complexity/noMultipleSpacesInRegularExpressionLiterals
-  complexity/noUselessLoneBlockStatements
-  complexity/noUselessEmptyExport
-  complexity/noUselessSwitchCase
   complexity/noStaticOnlyClass
+  complexity/noThisInStatic
+  complexity/noUselessCatch
+  complexity/noUselessConstructor
+  complexity/noUselessEmptyExport
+  complexity/noUselessFragments
+  complexity/noUselessLabel
+  complexity/noUselessLoneBlockStatements
+  complexity/noUselessRename
+  complexity/noUselessSwitchCase
+  complexity/noUselessTernary
+  complexity/noUselessThisAlias
   complexity/noUselessTypeConstraint
   complexity/noWith
-  complexity/useRegexLiterals
   complexity/useArrowFunction
-  complexity/noExtraBooleanCast
-  complexity/noEmptyTypeParameters
+  complexity/useFlatMap
+  complexity/useLiteralKeys
+  complexity/useOptionalChain
+  complexity/useRegexLiterals
   complexity/useSimpleNumberKeys
   suspicious/noCommentText
-  complexity/noExcessiveNestedTestSuites
-  complexity/noUselessLabel
-  complexity/noUselessCatch
-  complexity/noUselessFragments
-  complexity/noUselessTernary
-  complexity/noForEach
-  complexity/useFlatMap
-  complexity/noUselessRename
-  complexity/noUselessThisAlias
 
 Server:
   Version:                      0.0.0

@@ -2,7 +2,7 @@ use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::{markup, MarkupBuf};
 use biome_js_factory::make::{jsx_attribute_list, jsx_self_closing_element};
 use biome_js_syntax::{
@@ -208,11 +208,10 @@ impl Rule for NoVoidElementsWithChildren {
                 let name = name.as_jsx_name()?.value_token().ok()?;
                 let name = name.text_trimmed();
                 if is_void_dom_element(name) {
-                    let dangerous_prop = opening_element
-                        .find_attribute_by_name("dangerouslySetInnerHTML")
-                        .ok()?;
+                    let dangerous_prop =
+                        opening_element.find_attribute_by_name("dangerouslySetInnerHTML");
                     let has_children = !element.children().is_empty();
-                    let children_prop = opening_element.find_attribute_by_name("children").ok()?;
+                    let children_prop = opening_element.find_attribute_by_name("children");
                     if dangerous_prop.is_some() || has_children || children_prop.is_some() {
                         let cause = NoVoidElementsWithChildrenCause::Jsx {
                             children_prop,
@@ -229,10 +228,8 @@ impl Rule for NoVoidElementsWithChildren {
                 let name = name.as_jsx_name()?.value_token().ok()?;
                 let name = name.text_trimmed();
                 if is_void_dom_element(name) {
-                    let dangerous_prop = element
-                        .find_attribute_by_name("dangerouslySetInnerHTML")
-                        .ok()?;
-                    let children_prop = element.find_attribute_by_name("children").ok()?;
+                    let dangerous_prop = element.find_attribute_by_name("dangerouslySetInnerHTML");
+                    let children_prop = element.find_attribute_by_name("children");
                     if dangerous_prop.is_some() || children_prop.is_some() {
                         let cause = NoVoidElementsWithChildrenCause::Jsx {
                             children_prop,
@@ -393,7 +390,7 @@ impl Rule for NoVoidElementsWithChildren {
         }
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             state.action_message(),
             mutation,

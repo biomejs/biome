@@ -51,3 +51,8 @@ const staticMember = function(a) {}.bind(null, 0);
 const computedMember = function(a) {}["bind"](null, 0);
 const logical = false || function () {};
 const binary = false + function () {};
+
+const withDirective = function () {
+	"use server";
+	return 0;
+}

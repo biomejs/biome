@@ -152,6 +152,9 @@ versioned_files = ["crates/biome_json_parser/Cargo.toml"]
 [packages.biome_json_syntax]
 changelog       = "crates/biome_json_syntax/CHANGELOG.md"
 versioned_files = ["crates/biome_json_syntax/Cargo.toml"]
+[packages.biome_lsp_converters]
+changelog       = "crates/biome_lsp_converters/CHANGELOG.md"
+versioned_files = ["crates/biome_lsp_converters/Cargo.toml"]
 [packages.biome_markup]
 changelog       = "crates/biome_markup/CHANGELOG.md"
 versioned_files = ["crates/biome_markup/Cargo.toml"]
@@ -211,6 +214,14 @@ versioned_files = ["crates/biome_graphql_semantic/Cargo.toml"]
 [packages.biome_css_semantic]
 changelog       = "crates/biome_css_semantic/CHANGELOG.md"
 versioned_files = ["crates/biome_css_semantic/Cargo.toml"]
+
+[packages.biome_glob]
+changelog       = "crates/biome_glob/CHANGELOG.md"
+versioned_files = ["crates/biome_glob/Cargo.toml"]
+
+[packages.biome_syntax_codegen]
+changelog       = "crates/biome_syntax_codegen/CHANGELOG.md"
+versioned_files = ["crates/biome_syntax_codegen/Cargo.toml"]
 
 ## End of crates. DO NOT CHANGE!
 

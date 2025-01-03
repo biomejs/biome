@@ -45,3 +45,5 @@ type J = {
 }
 
 type K = { set     something( something_with_long_name: string ) }
+
+type L = { set     something( something_with_long_name: string, ) }

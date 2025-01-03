@@ -8,21 +8,21 @@ future_incompatible,
 )]
 #![deny(unsafe_code)]
 #![deny(rustdoc::broken_intra_doc_links)]
-#![allow(clippy::map_unwrap_or, clippy::mem_forget)]
+#![expect(clippy::map_unwrap_or, clippy::mem_forget)]
 
 #[doc(hidden)]
 pub mod macros;
 
-#[allow(unsafe_code)]
+#[expect(unsafe_code)]
 pub mod cursor;
-#[allow(unsafe_code)]
+#[expect(unsafe_code)]
 mod green;
 
 pub mod syntax;
 mod syntax_node_text;
 mod utility_types;
 
-#[allow(unsafe_code)]
+#[expect(unsafe_code)]
 mod arc;
 mod ast;
 mod cow_mut;

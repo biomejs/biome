@@ -1,7 +1,5 @@
 use crate::{services::semantic::Semantic, utils::batch::JsBatchMutation, JsRuleAction};
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_factory::make::{js_literal_member_name, js_property_object_member};
 use biome_js_semantic::{Reference, ReferencesExtensions};
@@ -191,7 +189,7 @@ impl Rule for NoShoutyConstants {
         }
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use the constant value directly" }.to_owned(),
             batch,

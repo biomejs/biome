@@ -1,6 +1,7 @@
 ---
 source: crates/biome_grit_parser/tests/spec_test.rs
 expression: snapshot
+snapshot_kind: text
 ---
 ## Input
 ```grit
@@ -26,13 +27,11 @@ GritRoot {
                 value_token: GRIT_NAME@8..30 "console_method_to_info" [] [],
             },
             l_paren_token: L_PAREN@30..31 "(" [] [],
-            args: GritPatternArgList {
-                grit_variable_list: GritVariableList [
-                    GritVariable {
-                        value_token: GRIT_VARIABLE@31..38 "$method" [] [],
-                    },
-                ],
-            },
+            args: GritVariableList [
+                GritVariable {
+                    value_token: GRIT_VARIABLE@31..38 "$method" [] [],
+                },
+            ],
             r_paren_token: R_PAREN@38..40 ")" [] [Whitespace(" ")],
             language: missing (optional),
             body: GritPatternDefinitionBody {
@@ -96,10 +95,9 @@ GritRoot {
       2: GRIT_NAME@8..30
         0: GRIT_NAME@8..30 "console_method_to_info" [] []
       3: L_PAREN@30..31 "(" [] []
-      4: GRIT_PATTERN_ARG_LIST@31..38
-        0: GRIT_VARIABLE_LIST@31..38
-          0: GRIT_VARIABLE@31..38
-            0: GRIT_VARIABLE@31..38 "$method" [] []
+      4: GRIT_VARIABLE_LIST@31..38
+        0: GRIT_VARIABLE@31..38
+          0: GRIT_VARIABLE@31..38 "$method" [] []
       5: R_PAREN@38..40 ")" [] [Whitespace(" ")]
       6: (empty)
       7: GRIT_PATTERN_DEFINITION_BODY@40..101

@@ -2,8 +2,8 @@ use crate::{
     services::control_flow::AnyJsControlFlowRoot, services::semantic::Semantic, JsRuleAction,
 };
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -176,7 +176,7 @@ impl Rule for NoUselessThisAlias {
             mutation.remove_token(deleted_comma?);
         }
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {
                 "Use "<Emphasis>"this"</Emphasis>" instead of an alias."

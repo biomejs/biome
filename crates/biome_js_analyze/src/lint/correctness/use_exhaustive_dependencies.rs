@@ -176,9 +176,8 @@ declare_lint_rule! {
     ///
     /// #### Example
     ///
-    /// ```json
+    /// ```json, options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "hooks": [
     ///             { "name": "useLocation", "closureIndex": 0, "dependenciesIndex": 1},
@@ -218,7 +217,6 @@ declare_lint_rule! {
     ///
     /// ```json
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "hooks": [
     ///             { "name": "useDispatch", "stableResult": true }
@@ -599,18 +597,14 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
         | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
         | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
-        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
-            unreachable!("The declaration should be resolved to its prent declaration")
-        }
+        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => true,
 
         // This should be unreachable because of the test if the capture is imported
         AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-        | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => {
-            unreachable!()
-        }
+        | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => false,
     }
 }
 

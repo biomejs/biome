@@ -1,0 +1,208 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```cjs
+// SCRIPT
+function foo() { yield *bar; }
+function bar() { yield; }
+function baz() { yield }
+
+```
+
+
+## AST
+
+```
+JsScript {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    statements: JsStatementList [
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@0..19 "function" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@19..22 "foo" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@22..23 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@23..25 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@25..27 "{" [] [Whitespace(" ")],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [
+                    JsExpressionStatement {
+                        expression: JsBinaryExpression {
+                            left: JsIdentifierExpression {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@27..33 "yield" [] [Whitespace(" ")],
+                                },
+                            },
+                            operator_token: STAR@33..34 "*" [] [],
+                            right: JsIdentifierExpression {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@34..37 "bar" [] [],
+                                },
+                            },
+                        },
+                        semicolon_token: SEMICOLON@37..39 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@39..40 "}" [] [],
+            },
+        },
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@40..50 "function" [Newline("\n")] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@50..53 "bar" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@53..54 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@54..56 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@56..58 "{" [] [Whitespace(" ")],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [
+                    JsExpressionStatement {
+                        expression: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@58..63 "yield" [] [],
+                            },
+                        },
+                        semicolon_token: SEMICOLON@63..65 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@65..66 "}" [] [],
+            },
+        },
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@66..76 "function" [Newline("\n")] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@76..79 "baz" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@79..80 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@80..82 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@82..84 "{" [] [Whitespace(" ")],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [
+                    JsExpressionStatement {
+                        expression: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@84..90 "yield" [] [Whitespace(" ")],
+                            },
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@90..91 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@91..92 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SCRIPT@0..92
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_STATEMENT_LIST@0..91
+    0: JS_FUNCTION_DECLARATION@0..40
+      0: (empty)
+      1: FUNCTION_KW@0..19 "function" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@19..22
+        0: IDENT@19..22 "foo" [] []
+      4: (empty)
+      5: JS_PARAMETERS@22..25
+        0: L_PAREN@22..23 "(" [] []
+        1: JS_PARAMETER_LIST@23..23
+        2: R_PAREN@23..25 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@25..40
+        0: L_CURLY@25..27 "{" [] [Whitespace(" ")]
+        1: JS_DIRECTIVE_LIST@27..27
+        2: JS_STATEMENT_LIST@27..39
+          0: JS_EXPRESSION_STATEMENT@27..39
+            0: JS_BINARY_EXPRESSION@27..37
+              0: JS_IDENTIFIER_EXPRESSION@27..33
+                0: JS_REFERENCE_IDENTIFIER@27..33
+                  0: IDENT@27..33 "yield" [] [Whitespace(" ")]
+              1: STAR@33..34 "*" [] []
+              2: JS_IDENTIFIER_EXPRESSION@34..37
+                0: JS_REFERENCE_IDENTIFIER@34..37
+                  0: IDENT@34..37 "bar" [] []
+            1: SEMICOLON@37..39 ";" [] [Whitespace(" ")]
+        3: R_CURLY@39..40 "}" [] []
+    1: JS_FUNCTION_DECLARATION@40..66
+      0: (empty)
+      1: FUNCTION_KW@40..50 "function" [Newline("\n")] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@50..53
+        0: IDENT@50..53 "bar" [] []
+      4: (empty)
+      5: JS_PARAMETERS@53..56
+        0: L_PAREN@53..54 "(" [] []
+        1: JS_PARAMETER_LIST@54..54
+        2: R_PAREN@54..56 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@56..66
+        0: L_CURLY@56..58 "{" [] [Whitespace(" ")]
+        1: JS_DIRECTIVE_LIST@58..58
+        2: JS_STATEMENT_LIST@58..65
+          0: JS_EXPRESSION_STATEMENT@58..65
+            0: JS_IDENTIFIER_EXPRESSION@58..63
+              0: JS_REFERENCE_IDENTIFIER@58..63
+                0: IDENT@58..63 "yield" [] []
+            1: SEMICOLON@63..65 ";" [] [Whitespace(" ")]
+        3: R_CURLY@65..66 "}" [] []
+    2: JS_FUNCTION_DECLARATION@66..91
+      0: (empty)
+      1: FUNCTION_KW@66..76 "function" [Newline("\n")] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@76..79
+        0: IDENT@76..79 "baz" [] []
+      4: (empty)
+      5: JS_PARAMETERS@79..82
+        0: L_PAREN@79..80 "(" [] []
+        1: JS_PARAMETER_LIST@80..80
+        2: R_PAREN@80..82 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@82..91
+        0: L_CURLY@82..84 "{" [] [Whitespace(" ")]
+        1: JS_DIRECTIVE_LIST@84..84
+        2: JS_STATEMENT_LIST@84..90
+          0: JS_EXPRESSION_STATEMENT@84..90
+            0: JS_IDENTIFIER_EXPRESSION@84..90
+              0: JS_REFERENCE_IDENTIFIER@84..90
+                0: IDENT@84..90 "yield" [] [Whitespace(" ")]
+            1: (empty)
+        3: R_CURLY@90..91 "}" [] []
+  4: EOF@91..92 "" [Newline("\n")] []
+
+```

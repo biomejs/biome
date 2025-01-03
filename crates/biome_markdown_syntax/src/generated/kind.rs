@@ -1,6 +1,5 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-#![allow(clippy::all)]
 #![allow(bad_style, missing_docs, unreachable_pub)]
 #[doc = r" The kind of syntax node, e.g. `IDENT`, `FUNCTION_KW`, or `FOR_STMT`."]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -76,33 +75,43 @@ pub enum MarkdownSyntaxKind {
 use self::MarkdownSyntaxKind::*;
 impl MarkdownSyntaxKind {
     pub const fn is_punct(self) -> bool {
-        match self {
-            L_ANGLE | R_ANGLE | L_PAREN | R_PAREN | L_BRACK | R_BRACK | SLASH | EQ | BANG
-            | MINUS | STAR | BACKTICK | TILDE | WHITESPACE3 | UNDERSCORE | HASH => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            L_ANGLE
+                | R_ANGLE
+                | L_PAREN
+                | R_PAREN
+                | L_BRACK
+                | R_BRACK
+                | SLASH
+                | EQ
+                | BANG
+                | MINUS
+                | STAR
+                | BACKTICK
+                | TILDE
+                | WHITESPACE3
+                | UNDERSCORE
+                | HASH
+        )
     }
     pub const fn is_literal(self) -> bool {
-        match self {
+        matches!(
+            self,
             MD_HARD_LINE_LITERAL
-            | MD_SOFT_BREAK_LITERAL
-            | MD_TEXTUAL_LITERAL
-            | MD_STRING_LITERAL
-            | MD_INDENT_CHUNK_LITERAL
-            | MD_THEMATIC_BREAK_LITERAL
-            | MD_ERROR_LITERAL => true,
-            _ => false,
-        }
+                | MD_SOFT_BREAK_LITERAL
+                | MD_TEXTUAL_LITERAL
+                | MD_STRING_LITERAL
+                | MD_INDENT_CHUNK_LITERAL
+                | MD_THEMATIC_BREAK_LITERAL
+                | MD_ERROR_LITERAL
+        )
     }
     pub const fn is_list(self) -> bool {
-        match self {
-            MD_BLOCK_LIST
-            | MD_HASH_LIST
-            | MD_BULLET_LIST
-            | MD_ORDER_LIST
-            | MD_PARAGRAPH_ITEM_LIST => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            MD_BLOCK_LIST | MD_HASH_LIST | MD_BULLET_LIST | MD_ORDER_LIST | MD_PARAGRAPH_ITEM_LIST
+        )
     }
     pub fn from_keyword(ident: &str) -> Option<MarkdownSyntaxKind> {
         let kw = match ident {

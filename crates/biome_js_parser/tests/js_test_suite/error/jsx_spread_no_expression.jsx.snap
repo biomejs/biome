@@ -1,0 +1,110 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+<test>{...}</test>
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxElement {
+                    opening_element: JsxOpeningElement {
+                        l_angle_token: L_ANGLE@0..1 "<" [] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@1..5 "test" [] [],
+                        },
+                        type_arguments: missing (optional),
+                        attributes: JsxAttributeList [],
+                        r_angle_token: R_ANGLE@5..6 ">" [] [],
+                    },
+                    children: JsxChildList [
+                        JsxSpreadChild {
+                            l_curly_token: L_CURLY@6..7 "{" [] [],
+                            dotdotdot_token: DOT3@7..10 "..." [] [],
+                            expression: missing (required),
+                            r_curly_token: R_CURLY@10..11 "}" [] [],
+                        },
+                    ],
+                    closing_element: JsxClosingElement {
+                        l_angle_token: L_ANGLE@11..12 "<" [] [],
+                        slash_token: SLASH@12..13 "/" [] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@13..17 "test" [] [],
+                        },
+                        r_angle_token: R_ANGLE@17..18 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@18..19 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..19
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..18
+    0: JS_EXPRESSION_STATEMENT@0..18
+      0: JSX_TAG_EXPRESSION@0..18
+        0: JSX_ELEMENT@0..18
+          0: JSX_OPENING_ELEMENT@0..6
+            0: L_ANGLE@0..1 "<" [] []
+            1: JSX_NAME@1..5
+              0: JSX_IDENT@1..5 "test" [] []
+            2: (empty)
+            3: JSX_ATTRIBUTE_LIST@5..5
+            4: R_ANGLE@5..6 ">" [] []
+          1: JSX_CHILD_LIST@6..11
+            0: JSX_SPREAD_CHILD@6..11
+              0: L_CURLY@6..7 "{" [] []
+              1: DOT3@7..10 "..." [] []
+              2: (empty)
+              3: R_CURLY@10..11 "}" [] []
+          2: JSX_CLOSING_ELEMENT@11..18
+            0: L_ANGLE@11..12 "<" [] []
+            1: SLASH@12..13 "/" [] []
+            2: JSX_NAME@13..17
+              0: JSX_IDENT@13..17 "test" [] []
+            3: R_ANGLE@17..18 ">" [] []
+      1: (empty)
+  4: EOF@18..19 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+jsx_spread_no_expression.jsx:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found '}'.
+  
+  > 1 │ <test>{...}</test>
+      │           ^
+    2 │ 
+  
+  i Expected an expression here.
+  
+  > 1 │ <test>{...}</test>
+      │           ^
+    2 │ 
+  
+```

@@ -1,0 +1,3 @@
+`console.warn($_)` as $warn where {
+  $warn <: after `console.log($_)`
+}

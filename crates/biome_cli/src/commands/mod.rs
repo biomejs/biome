@@ -203,6 +203,14 @@ pub enum BiomeCommand {
         #[bpaf(long("apply-unsafe"), switch, hide_usage)]
         apply_unsafe: bool,
 
+        /// Fixes lint rule violations with a comment a suppression instead of using a rule code action (fix)
+        #[bpaf(long("suppress"))]
+        suppress: bool,
+
+        /// Explanation for suppressing diagnostics with `--suppress`
+        #[bpaf(long("reason"), argument("STRING"))]
+        suppression_reason: Option<String>,
+
         #[bpaf(external(partial_linter_configuration), hide_usage, optional)]
         linter_configuration: Option<PartialLinterConfiguration>,
 
@@ -703,6 +711,8 @@ pub(crate) struct FixFileModeOptions {
     apply: bool,
     apply_unsafe: bool,
     write: bool,
+    suppress: bool,
+    suppression_reason: Option<String>,
     fix: bool,
     unsafe_: bool,
 }
@@ -719,6 +729,8 @@ pub(crate) fn determine_fix_file_mode(
         apply_unsafe,
         write,
         fix,
+        suppress,
+        suppression_reason: _,
         unsafe_,
     } = options;
 
@@ -743,6 +755,8 @@ pub(crate) fn determine_fix_file_mode(
         Ok(Some(FixFileMode::SafeAndUnsafeFixes))
     } else if safe_fixes {
         Ok(Some(FixFileMode::SafeFixes))
+    } else if suppress {
+        Ok(Some(FixFileMode::ApplySuppressions))
     } else {
         Ok(None)
     }
@@ -754,6 +768,8 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         apply,
         apply_unsafe,
         write,
+        suppress,
+        suppression_reason,
         fix,
         unsafe_,
     } = options;
@@ -779,7 +795,19 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         ));
     } else if write && fix {
         return Err(CliDiagnostic::incompatible_arguments("--write", "--fix"));
-    }
+    } else if suppress && write {
+        return Err(CliDiagnostic::incompatible_arguments(
+            "--suppress",
+            "--write",
+        ));
+    } else if suppress && fix {
+        return Err(CliDiagnostic::incompatible_arguments("--suppress", "--fix"));
+    } else if !suppress && suppression_reason.is_some() {
+        return Err(CliDiagnostic::unexpected_argument(
+            "--reason",
+            "`--reason` is only valid when `--suppress` is used.",
+        ));
+    };
     Ok(())
 }
 
@@ -967,19 +995,21 @@ mod tests {
 
     #[test]
     fn incompatible_arguments() {
-        for (apply, apply_unsafe, write, fix, unsafe_) in [
-            (true, true, false, false, false), // --apply --apply-unsafe
-            (true, false, true, false, false), // --apply --write
-            (true, false, false, true, false), // --apply --fix
-            (false, true, false, false, true), // --apply-unsafe --unsafe
-            (false, true, true, false, false), // --apply-unsafe --write
-            (false, true, false, true, false), // --apply-unsafe --fix
-            (false, false, true, true, false), // --write --fix
+        for (apply, apply_unsafe, write, suppress, suppression_reason, fix, unsafe_) in [
+            (true, true, false, false, None, false, false), // --apply --apply-unsafe
+            (true, false, true, false, None, false, false), // --apply --write
+            (true, false, false, false, None, true, false), // --apply --fix
+            (false, true, false, false, None, false, true), // --apply-unsafe --unsafe
+            (false, true, true, false, None, false, false), // --apply-unsafe --write
+            (false, true, false, false, None, true, false), // --apply-unsafe --fix
+            (false, false, true, false, None, true, false), // --write --fix
         ] {
             assert!(check_fix_incompatible_arguments(FixFileModeOptions {
                 apply,
                 apply_unsafe,
                 write,
+                suppress,
+                suppression_reason,
                 fix,
                 unsafe_
             })
@@ -991,10 +1021,10 @@ mod tests {
     fn safe_fixes() {
         let mut console = BufferConsole::default();
 
-        for (apply, apply_unsafe, write, fix, unsafe_) in [
-            (true, false, false, false, false), // --apply
-            (false, false, true, false, false), // --write
-            (false, false, false, true, false), // --fix
+        for (apply, apply_unsafe, write, suppress, suppression_reason, fix, unsafe_) in [
+            (true, false, false, false, None, false, false), // --apply
+            (false, false, true, false, None, false, false), // --write
+            (false, false, false, false, None, true, false), // --fix
         ] {
             assert_eq!(
                 determine_fix_file_mode(
@@ -1002,6 +1032,8 @@ mod tests {
                         apply,
                         apply_unsafe,
                         write,
+                        suppress,
+                        suppression_reason,
                         fix,
                         unsafe_
                     },
@@ -1017,10 +1049,10 @@ mod tests {
     fn safe_and_unsafe_fixes() {
         let mut console = BufferConsole::default();
 
-        for (apply, apply_unsafe, write, fix, unsafe_) in [
-            (false, true, false, false, false), // --apply-unsafe
-            (false, false, true, false, true),  // --write --unsafe
-            (false, false, false, true, true),  // --fix --unsafe
+        for (apply, apply_unsafe, write, suppress, suppression_reason, fix, unsafe_) in [
+            (false, true, false, false, None, false, false), // --apply-unsafe
+            (false, false, true, false, None, false, true),  // --write --unsafe
+            (false, false, false, false, None, true, true),  // --fix --unsafe
         ] {
             assert_eq!(
                 determine_fix_file_mode(
@@ -1028,6 +1060,8 @@ mod tests {
                         apply,
                         apply_unsafe,
                         write,
+                        suppress,
+                        suppression_reason,
                         fix,
                         unsafe_
                     },
@@ -1043,13 +1077,16 @@ mod tests {
     fn no_fix() {
         let mut console = BufferConsole::default();
 
-        let (apply, apply_unsafe, write, fix, unsafe_) = (false, false, false, false, false);
+        let (apply, apply_unsafe, write, suppress, suppression_reason, fix, unsafe_) =
+            (false, false, false, false, None, false, false);
         assert_eq!(
             determine_fix_file_mode(
                 FixFileModeOptions {
                     apply,
                     apply_unsafe,
                     write,
+                    suppress,
+                    suppression_reason,
                     fix,
                     unsafe_
                 },

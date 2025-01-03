@@ -1,0 +1,199 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+declare module "./test" {
+ global {
+     let VERSION: string;
+ }
+}
+declare module "foo" {
+ global
+ { }
+}
+declare global {}
+declare global
+{ }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsDeclareStatement {
+            declare_token: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")],
+            declaration: TsExternalModuleDeclaration {
+                module_token: MODULE_KW@8..15 "module" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@15..24 "\"./test\"" [] [Whitespace(" ")],
+                },
+                body: TsModuleBlock {
+                    l_curly_token: L_CURLY@24..25 "{" [] [],
+                    items: JsModuleItemList [
+                        TsGlobalDeclaration {
+                            global_token: GLOBAL_KW@25..34 "global" [Newline("\n"), Whitespace(" ")] [Whitespace(" ")],
+                            body: TsModuleBlock {
+                                l_curly_token: L_CURLY@34..35 "{" [] [],
+                                items: JsModuleItemList [
+                                    JsVariableStatement {
+                                        declaration: JsVariableDeclaration {
+                                            await_token: missing (optional),
+                                            kind: LET_KW@35..45 "let" [Newline("\n"), Whitespace("     ")] [Whitespace(" ")],
+                                            declarators: JsVariableDeclaratorList [
+                                                JsVariableDeclarator {
+                                                    id: JsIdentifierBinding {
+                                                        name_token: IDENT@45..52 "VERSION" [] [],
+                                                    },
+                                                    variable_annotation: TsTypeAnnotation {
+                                                        colon_token: COLON@52..54 ":" [] [Whitespace(" ")],
+                                                        ty: TsStringType {
+                                                            string_token: STRING_KW@54..60 "string" [] [],
+                                                        },
+                                                    },
+                                                    initializer: missing (optional),
+                                                },
+                                            ],
+                                        },
+                                        semicolon_token: SEMICOLON@60..61 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@61..64 "}" [Newline("\n"), Whitespace(" ")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@64..66 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        TsDeclareStatement {
+            declare_token: DECLARE_KW@66..75 "declare" [Newline("\n")] [Whitespace(" ")],
+            declaration: TsExternalModuleDeclaration {
+                module_token: MODULE_KW@75..82 "module" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@82..88 "\"foo\"" [] [Whitespace(" ")],
+                },
+                body: TsModuleBlock {
+                    l_curly_token: L_CURLY@88..89 "{" [] [],
+                    items: JsModuleItemList [
+                        TsGlobalDeclaration {
+                            global_token: GLOBAL_KW@89..97 "global" [Newline("\n"), Whitespace(" ")] [],
+                            body: TsModuleBlock {
+                                l_curly_token: L_CURLY@97..101 "{" [Newline("\n"), Whitespace(" ")] [Whitespace(" ")],
+                                items: JsModuleItemList [],
+                                r_curly_token: R_CURLY@101..102 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@102..104 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        TsDeclareStatement {
+            declare_token: DECLARE_KW@104..113 "declare" [Newline("\n")] [Whitespace(" ")],
+            declaration: TsGlobalDeclaration {
+                global_token: GLOBAL_KW@113..120 "global" [] [Whitespace(" ")],
+                body: TsModuleBlock {
+                    l_curly_token: L_CURLY@120..121 "{" [] [],
+                    items: JsModuleItemList [],
+                    r_curly_token: R_CURLY@121..122 "}" [] [],
+                },
+            },
+        },
+        TsDeclareStatement {
+            declare_token: DECLARE_KW@122..131 "declare" [Newline("\n")] [Whitespace(" ")],
+            declaration: TsGlobalDeclaration {
+                global_token: GLOBAL_KW@131..137 "global" [] [],
+                body: TsModuleBlock {
+                    l_curly_token: L_CURLY@137..140 "{" [Newline("\n")] [Whitespace(" ")],
+                    items: JsModuleItemList [],
+                    r_curly_token: R_CURLY@140..141 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@141..142 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..142
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..141
+    0: TS_DECLARE_STATEMENT@0..66
+      0: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")]
+      1: TS_EXTERNAL_MODULE_DECLARATION@8..66
+        0: MODULE_KW@8..15 "module" [] [Whitespace(" ")]
+        1: JS_MODULE_SOURCE@15..24
+          0: JS_STRING_LITERAL@15..24 "\"./test\"" [] [Whitespace(" ")]
+        2: TS_MODULE_BLOCK@24..66
+          0: L_CURLY@24..25 "{" [] []
+          1: JS_MODULE_ITEM_LIST@25..64
+            0: TS_GLOBAL_DECLARATION@25..64
+              0: GLOBAL_KW@25..34 "global" [Newline("\n"), Whitespace(" ")] [Whitespace(" ")]
+              1: TS_MODULE_BLOCK@34..64
+                0: L_CURLY@34..35 "{" [] []
+                1: JS_MODULE_ITEM_LIST@35..61
+                  0: JS_VARIABLE_STATEMENT@35..61
+                    0: JS_VARIABLE_DECLARATION@35..60
+                      0: (empty)
+                      1: LET_KW@35..45 "let" [Newline("\n"), Whitespace("     ")] [Whitespace(" ")]
+                      2: JS_VARIABLE_DECLARATOR_LIST@45..60
+                        0: JS_VARIABLE_DECLARATOR@45..60
+                          0: JS_IDENTIFIER_BINDING@45..52
+                            0: IDENT@45..52 "VERSION" [] []
+                          1: TS_TYPE_ANNOTATION@52..60
+                            0: COLON@52..54 ":" [] [Whitespace(" ")]
+                            1: TS_STRING_TYPE@54..60
+                              0: STRING_KW@54..60 "string" [] []
+                          2: (empty)
+                    1: SEMICOLON@60..61 ";" [] []
+                2: R_CURLY@61..64 "}" [Newline("\n"), Whitespace(" ")] []
+          2: R_CURLY@64..66 "}" [Newline("\n")] []
+    1: TS_DECLARE_STATEMENT@66..104
+      0: DECLARE_KW@66..75 "declare" [Newline("\n")] [Whitespace(" ")]
+      1: TS_EXTERNAL_MODULE_DECLARATION@75..104
+        0: MODULE_KW@75..82 "module" [] [Whitespace(" ")]
+        1: JS_MODULE_SOURCE@82..88
+          0: JS_STRING_LITERAL@82..88 "\"foo\"" [] [Whitespace(" ")]
+        2: TS_MODULE_BLOCK@88..104
+          0: L_CURLY@88..89 "{" [] []
+          1: JS_MODULE_ITEM_LIST@89..102
+            0: TS_GLOBAL_DECLARATION@89..102
+              0: GLOBAL_KW@89..97 "global" [Newline("\n"), Whitespace(" ")] []
+              1: TS_MODULE_BLOCK@97..102
+                0: L_CURLY@97..101 "{" [Newline("\n"), Whitespace(" ")] [Whitespace(" ")]
+                1: JS_MODULE_ITEM_LIST@101..101
+                2: R_CURLY@101..102 "}" [] []
+          2: R_CURLY@102..104 "}" [Newline("\n")] []
+    2: TS_DECLARE_STATEMENT@104..122
+      0: DECLARE_KW@104..113 "declare" [Newline("\n")] [Whitespace(" ")]
+      1: TS_GLOBAL_DECLARATION@113..122
+        0: GLOBAL_KW@113..120 "global" [] [Whitespace(" ")]
+        1: TS_MODULE_BLOCK@120..122
+          0: L_CURLY@120..121 "{" [] []
+          1: JS_MODULE_ITEM_LIST@121..121
+          2: R_CURLY@121..122 "}" [] []
+    3: TS_DECLARE_STATEMENT@122..141
+      0: DECLARE_KW@122..131 "declare" [Newline("\n")] [Whitespace(" ")]
+      1: TS_GLOBAL_DECLARATION@131..141
+        0: GLOBAL_KW@131..137 "global" [] []
+        1: TS_MODULE_BLOCK@137..141
+          0: L_CURLY@137..140 "{" [Newline("\n")] [Whitespace(" ")]
+          1: JS_MODULE_ITEM_LIST@140..140
+          2: R_CURLY@140..141 "}" [] []
+  4: EOF@141..142 "" [Newline("\n")] []
+
+```

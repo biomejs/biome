@@ -22,3 +22,37 @@
 		}
 	}
 }
+
+@-moz-document url-prefix() {}
+
+@-moz-document url-prefix("https://www.example.com/") {}
+
+@-moz-document url-prefix() {
+	body {
+		background-color: green;
+	}
+}
+
+@-moz-document url-prefix("https://www.example.com/") {
+	body {
+		background-color: green;
+	}
+}
+
+@-moz-document url-prefix(https://example.com) {
+	body {
+		background-color: green;
+	}
+}
+
+@-moz-document url(http://www.exmaple.org/), url-prefix(https://www.example.com/test), domain(example.com) {
+	body {
+		background-color: green;
+	}
+}
+
+@-moz-document url(http://www.exmaple.org/), url-prefix(https: //www.example.com/test), domain(example.com), media-document(video) {
+	body {
+		background-color: green;
+	}
+}

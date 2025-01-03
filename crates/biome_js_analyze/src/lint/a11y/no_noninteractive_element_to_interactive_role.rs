@@ -1,10 +1,11 @@
 use crate::services::aria::Aria;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
-use biome_rowan::{AstNode, BatchMutationExt, TextRange};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText};
 
 declare_lint_rule! {
     /// Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.
@@ -56,7 +57,7 @@ declare_lint_rule! {
 
 pub struct RuleState {
     attribute_range: TextRange,
-    element_name: String,
+    element_name: TokenText,
 }
 
 impl Rule for NoNoninteractiveElementToInteractiveRole {
@@ -67,28 +68,32 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let aria_roles = ctx.aria_roles();
         if node.is_element() {
             let role_attribute = node.find_attribute_by_name("role")?;
             let role_attribute_static_value = role_attribute.as_static_value()?;
             let role_attribute_value = role_attribute_static_value.text();
-            let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
+            let element_name = node
+                .name()
+                .ok()?
+                .as_jsx_name()?
+                .value_token()
+                .ok()?
+                .token_text_trimmed();
 
-            let attributes = ctx.extract_attributes(&node.attributes());
-            let attributes = ctx.convert_all_attribute_values(attributes);
-            if aria_roles.is_not_interactive_element(element_name.text_trimmed(), attributes)
-                && aria_roles.is_role_interactive(role_attribute_value)
+            if ctx.aria_roles().is_not_interactive_element(node)
+                && AriaRole::from_roles(role_attribute_value)
+                    .is_some_and(|role| role.is_interactive())
             {
                 // <div> and <span> are considered neither interactive nor non-interactive, depending on the presence or absence of the role attribute.
                 // We don't report <div> and <span> here, because we cannot determine whether they are interactive or non-interactive.
                 let role_sensitive_elements = ["div", "span"];
-                if role_sensitive_elements.contains(&element_name.text_trimmed()) {
+                if role_sensitive_elements.contains(&element_name.text()) {
                     return None;
                 }
 
                 return Some(RuleState {
                     attribute_range: role_attribute.range(),
-                    element_name: element_name.text_trimmed().to_string(),
+                    element_name,
                 });
             }
         }
@@ -96,15 +101,16 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let element_name = state.element_name.text();
         Some(RuleDiagnostic::new(
             rule_category!(),
             state.attribute_range,
             markup! {
-                "The HTML element "<Emphasis>{{&state.element_name}}</Emphasis>" is non-interactive and should not have an interactive role."
+                "The HTML element "<Emphasis>{{element_name}}</Emphasis>" is non-interactive and should not have an interactive role."
             },
         ).note(
             markup!{
-                "Replace "<Emphasis>{{&state.element_name}}</Emphasis>" with a div or a span."
+                "Replace "<Emphasis>{{element_name}}</Emphasis>" with a div or a span."
             }
         ))
     }
@@ -116,7 +122,7 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
         let mut mutation = ctx.root().begin();
         mutation.remove_node(role_attribute);
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the "<Emphasis>"role"</Emphasis>" attribute." }.to_owned(),
             mutation,

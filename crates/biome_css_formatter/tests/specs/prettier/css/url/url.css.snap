@@ -45,7 +45,7 @@ a {
 ```diff
 --- Prettier
 +++ Biome
-@@ -13,17 +13,19 @@
+@@ -13,16 +13,17 @@
    content: url(https://example.com/\)\).jpg);
    content: url(https://example.com/\(\(.jpg);
    content: url(https://example.com/\ \ .jpg);
@@ -69,8 +69,6 @@ a {
      no-repeat url(foo.ttf?query=foo,bar,),
      no-repeat url(foo.woff2?foo=rgb\(255,255,0\))
      no-repeat url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
-+  ;
- }
 ```
 
 # Output
@@ -105,7 +103,6 @@ a {
     no-repeat url(foo.ttf?query=foo,bar,),
     no-repeat url(foo.woff2?foo=rgb\(255,255,0\))
     no-repeat url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
-  ;
 }
 ```
 
@@ -164,26 +161,6 @@ url.css:3:33 parse ━━━━━━━━━━━━━━━━━━━━�
   - ratio
   - custom property
   - function
-  
-url.css:30:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration, or an at rule but instead found ';'.
-  
-    28 │     no-repeat url(foo.woff2?foo=rgb\(255,255,0\))
-    29 │     no-repeat url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
-  > 30 │   ;
-       │   ^
-    31 │ }
-    32 │ 
-  
-  i Expected a declaration, or an at rule here.
-  
-    28 │     no-repeat url(foo.woff2?foo=rgb\(255,255,0\))
-    29 │     no-repeat url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
-  > 30 │   ;
-       │   ^
-    31 │ }
-    32 │ 
   
 
 ```

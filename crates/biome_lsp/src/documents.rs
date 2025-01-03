@@ -1,4 +1,4 @@
-use crate::converters::line_index::LineIndex;
+use biome_lsp_converters::line_index::LineIndex;
 
 /// Represents an open [`textDocument`]. Can be cheaply cloned.
 ///

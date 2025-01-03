@@ -209,9 +209,18 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
         let shared_context = &SharedTraversalOptions::new(ctx);
 
         match ctx.execution.traversal_mode {
-            TraversalMode::Lint { .. } => {
+            TraversalMode::Lint {
+                ref suppression_reason,
+                suppress,
+                ..
+            } => {
                 // the unsupported case should be handled already at this point
-                lint(shared_context, biome_path)
+                lint(
+                    shared_context,
+                    biome_path,
+                    suppress,
+                    suppression_reason.as_deref(),
+                )
             }
             TraversalMode::Format { .. } => {
                 // the unsupported case should be handled already at this point

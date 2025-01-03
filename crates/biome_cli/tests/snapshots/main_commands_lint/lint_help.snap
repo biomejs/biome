@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 423
 expression: content
 ---
 # Emitted Messages
@@ -7,8 +8,8 @@ expression: content
 ```block
 Run various checks on a set of files.
 
-Usage: lint [--write] [--unsafe] [--only=<GROUP|RULE>]... [--skip=<GROUP|RULE>]... [--staged] [
---changed] [--since=REF] [PATH]...
+Usage: lint [--write] [--unsafe] [--suppress] [--reason=STRING] [--only=<GROUP|RULE>]... [--skip=
+<GROUP|RULE>]... [--staged] [--changed] [--since=REF] [PATH]...
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
@@ -82,6 +83,9 @@ Available options:
         --apply               Alias for `--write`, writes safe fixes (deprecated, use `--write`)
         --apply-unsafe        Alias for `--write --unsafe`, writes safe and unsafe fixes
                               (deprecated, use `--write --unsafe`)
+        --suppress            Fixes lint rule violations with a comment a suppression instead of
+                              using a rule code action (fix)
+        --reason=STRING       Explanation for suppressing diagnostics with `--suppress`
         --only=<GROUP|RULE>   Run only the given rule or group of rules. If the severity level of a
                               rule is `off`, then the severity level of the rule is set to `error`
                               if it is a recommended rule or `warn` otherwise.

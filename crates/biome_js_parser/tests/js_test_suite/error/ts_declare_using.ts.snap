@@ -1,0 +1,206 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+declare using x: null
+declare await using x: null
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@0..8 "declare" [] [Whitespace(" ")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: USING_KW@8..14 "using" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@14..15 "x" [] [],
+                        },
+                        variable_annotation: TsTypeAnnotation {
+                            colon_token: COLON@15..17 ":" [] [Whitespace(" ")],
+                            ty: TsNullLiteralType {
+                                literal_token: NULL_KW@17..21 "null" [] [],
+                            },
+                        },
+                        initializer: missing (optional),
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@21..30 "declare" [Newline("\n")] [Whitespace(" ")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: AWAIT_KW@30..36 "await" [] [Whitespace(" ")],
+                kind: USING_KW@36..42 "using" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@42..43 "x" [] [],
+                        },
+                        variable_annotation: TsTypeAnnotation {
+                            colon_token: COLON@43..45 ":" [] [Whitespace(" ")],
+                            ty: TsNullLiteralType {
+                                literal_token: NULL_KW@45..49 "null" [] [],
+                            },
+                        },
+                        initializer: missing (optional),
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@49..50 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..50
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..49
+    0: JS_EXPRESSION_STATEMENT@0..8
+      0: JS_IDENTIFIER_EXPRESSION@0..8
+        0: JS_REFERENCE_IDENTIFIER@0..8
+          0: IDENT@0..8 "declare" [] [Whitespace(" ")]
+      1: (empty)
+    1: JS_VARIABLE_STATEMENT@8..21
+      0: JS_VARIABLE_DECLARATION@8..21
+        0: (empty)
+        1: USING_KW@8..14 "using" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@14..21
+          0: JS_VARIABLE_DECLARATOR@14..21
+            0: JS_IDENTIFIER_BINDING@14..15
+              0: IDENT@14..15 "x" [] []
+            1: TS_TYPE_ANNOTATION@15..21
+              0: COLON@15..17 ":" [] [Whitespace(" ")]
+              1: TS_NULL_LITERAL_TYPE@17..21
+                0: NULL_KW@17..21 "null" [] []
+            2: (empty)
+      1: (empty)
+    2: JS_EXPRESSION_STATEMENT@21..30
+      0: JS_IDENTIFIER_EXPRESSION@21..30
+        0: JS_REFERENCE_IDENTIFIER@21..30
+          0: IDENT@21..30 "declare" [Newline("\n")] [Whitespace(" ")]
+      1: (empty)
+    3: JS_VARIABLE_STATEMENT@30..49
+      0: JS_VARIABLE_DECLARATION@30..49
+        0: AWAIT_KW@30..36 "await" [] [Whitespace(" ")]
+        1: USING_KW@36..42 "using" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@42..49
+          0: JS_VARIABLE_DECLARATOR@42..49
+            0: JS_IDENTIFIER_BINDING@42..43
+              0: IDENT@42..43 "x" [] []
+            1: TS_TYPE_ANNOTATION@43..49
+              0: COLON@43..45 ":" [] [Whitespace(" ")]
+              1: TS_NULL_LITERAL_TYPE@45..49
+                0: NULL_KW@45..49 "null" [] []
+            2: (empty)
+      1: (empty)
+  4: EOF@49..50 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_declare_using.ts:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+  > 1 │ declare using x: null
+      │         ^^^^^
+    2 │ declare await using x: null
+    3 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+  > 1 │ declare using x: null
+      │         ^^^^^
+    2 │ declare await using x: null
+    3 │ 
+  
+  i ...Which is required to end this statement
+  
+  > 1 │ declare using x: null
+      │ ^^^^^^^^^^^^^
+    2 │ declare await using x: null
+    3 │ 
+  
+ts_declare_using.ts:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using declarations must have an initialized value.
+  
+  > 1 │ declare using x: null
+      │               ^
+    2 │ declare await using x: null
+    3 │ 
+  
+  i This variable needs to be initialized.
+  
+ts_declare_using.ts:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    1 │ declare using x: null
+  > 2 │ declare await using x: null
+      │         ^^^^^
+    3 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    1 │ declare using x: null
+  > 2 │ declare await using x: null
+      │         ^^^^^
+    3 │ 
+  
+  i ...Which is required to end this statement
+  
+    1 │ declare using x: null
+  > 2 │ declare await using x: null
+      │ ^^^^^^^^^^^^^
+    3 │ 
+  
+ts_declare_using.ts:2:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using declarations must have an initialized value.
+  
+    1 │ declare using x: null
+  > 2 │ declare await using x: null
+      │                     ^
+    3 │ 
+  
+  i This variable needs to be initialized.
+  
+```

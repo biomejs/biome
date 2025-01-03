@@ -1,11 +1,11 @@
-use crate::services::aria::Aria;
+use std::str::FromStr;
+
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
-use biome_aria::AriaPropertyTypeEnum;
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_aria_metadata::{AriaAttribute, AriaValueType};
 use biome_console::markup;
 use biome_js_syntax::{JsSyntaxToken, JsxAttribute, TextRange};
 use biome_rowan::AstNode;
-use std::slice::Iter;
 
 declare_lint_rule! {
     /// Enforce that ARIA state and property values are valid.
@@ -57,34 +57,29 @@ declare_lint_rule! {
 }
 
 pub struct UseValidAriaValuesState {
-    attribute_value_range: TextRange,
-    allowed_values: Iter<'static, &'static str>,
     attribute_name: JsSyntaxToken,
-    property_type: AriaPropertyTypeEnum,
+    attribute_value_range: TextRange,
+    property_type: AriaValueType,
 }
 
 impl Rule for UseValidAriaValues {
-    type Query = Aria<JsxAttribute>;
+    type Query = Ast<JsxAttribute>;
     type State = UseValidAriaValuesState;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let aria_properties = ctx.aria_properties();
-
         let attribute_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
 
-        if let Some(aria_property) = aria_properties.get_property(attribute_name.text_trimmed()) {
-            let attribute_value_range = node.range();
+        if let Ok(aria_property) = AriaAttribute::from_str(attribute_name.text_trimmed()) {
             let attribute_static_value = node.as_static_value()?;
             let attribute_text = attribute_static_value.text();
-            if !aria_property.contains_correct_value(attribute_text) {
+            if !aria_property.value_type().contains(attribute_text) {
                 return Some(UseValidAriaValuesState {
-                    attribute_value_range,
-                    allowed_values: aria_property.values(),
                     attribute_name,
-                    property_type: aria_property.property_type(),
+                    attribute_value_range: node.range(),
+                    property_type: aria_property.value_type(),
                 });
             }
         }
@@ -101,78 +96,83 @@ impl Rule for UseValidAriaValues {
                 "The value of the ARIA attribute "<Emphasis>{attribute_name}</Emphasis>" is not correct."
             },
         );
-
         let diagnostic = match state.property_type {
-            AriaPropertyTypeEnum::Boolean => {
+            AriaValueType::Boolean => {
                 diagnostic.footer_list(
                     markup!{
                         "The only supported values for the "<Emphasis>{attribute_name}</Emphasis>" property is one of the following:"
                     },
-                    &["true", "false"]
+                    ["false", "true"]
                 )
             }
-            AriaPropertyTypeEnum::Integer => {
+            AriaValueType::OptionalBoolean => {
+                diagnostic.footer_list(
+                    markup!{
+                        "The only supported values for the "<Emphasis>{attribute_name}</Emphasis>" property is one of the following:"
+                    },
+                    ["undefined", "false", "true"]
+                )
+            }
+            AriaValueType::Integer => {
                 diagnostic.note(
                     markup!{
                         "The only value supported is a number without fractional components."
                     }
                 )
             }
-            AriaPropertyTypeEnum::Id => {
+            AriaValueType::IdReference => {
                 diagnostic.note(
                     markup!{
                         "The only supported value is an HTML identifier."
                     }
                 )
             }
-            AriaPropertyTypeEnum::Idlist => {
+            AriaValueType::IdReferenceList => {
                 diagnostic.note(
                     markup!{
                         "The only supported value is a space-separated list of HTML identifiers."
                     }
                 )
             }
-            AriaPropertyTypeEnum::String => {
+            AriaValueType::String => {
                 diagnostic.note(
                     markup!{
                         "The only supported value is text."
                     }
                 )
             }
-
-            AriaPropertyTypeEnum::Number => {
+            AriaValueType::Number => {
                 diagnostic.note(
                     markup!{
                         "The only supported value is number."
                     }
                 )
             }
-            AriaPropertyTypeEnum::Token => {
+            AriaValueType::Token(tokens) => {
                 diagnostic.footer_list(
                     markup!{
                     "The only supported value for the "<Emphasis>{attribute_name}</Emphasis>" property is one of the following:"
                 },
-                    state.allowed_values.as_slice()
+                    tokens
                 )
             }
-            AriaPropertyTypeEnum::Tokenlist => {
+            AriaValueType::TokenList(tokens) => {
                 diagnostic.footer_list(
                     markup!{
                     "The values supported for "<Emphasis>{attribute_name}</Emphasis>" property are one or more of the following:"
                 },
-                    state.allowed_values.as_slice()
+                    tokens
                 )
             }
-            AriaPropertyTypeEnum::Tristate => {
+            AriaValueType::Tristate => {
                 diagnostic.footer_list(
                     markup!{
                         "The only supported value for the "<Emphasis>{attribute_name}</Emphasis>" property one of the following:"
                     },
-                    &["true", "false", "mixed"]
+                    ["false", "true", "mixed"]
                 )
             }
         };
-
         Some(diagnostic)
     }
 }
