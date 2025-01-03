@@ -3561,7 +3561,7 @@ fn should_format_files_in_folders_ignored_by_linter() {
     fs.insert(
         biome_json.into(),
         r#"{
-    "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+    "$schema": "https://biomejs.dev/schemas/0.0.0/schema.json",
     "organizeImports": {
         "enabled": true
     },
@@ -3808,6 +3808,35 @@ fn applies_custom_bracket_spacing_for_graphql() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "applies_custom_bracket_spacing_graphql",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_report_when_schema_version_mismatch() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    let biome_json = Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+    "$schema": "https://biomejs.dev/schemas/0.0.1/schema.json"
+}
+        "#,
+    );
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("check")].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_report_when_schema_version_mismatch",
         fs,
         console,
         result,
