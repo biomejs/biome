@@ -1,8 +1,8 @@
 use biome_rowan::FileSourceError;
-use std::{ffi::OsStr, path::Path};
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
+use camino::Utf8Path;
 
-#[cfg_attr(feature = "schema", derive(schemars::YamlSchema))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
@@ -31,11 +31,8 @@ impl YamlFileSource {
     }
 
     /// Try to return the Yaml file source corresponding to this file name from well-known files
-    pub fn try_from_well_known(path: &Path) -> Result<Self, FileSourceError> {
-        let file_name = path
-            .file_name()
-            .and_then(OsStr::to_str)
-            .ok_or_else(|| FileSourceError::MissingFileName(path.into()))?;
+    pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
+        let file_name = path.file_name().ok_or(FileSourceError::MissingFileName)?;
         if Self::is_well_known_yaml_file(file_name) {
             return Ok(Self::yaml());
         }
@@ -43,14 +40,14 @@ impl YamlFileSource {
     }
 
     /// Try to return the YAML file source corresponding to this file extension
-    pub fn try_from_extension(extension: &OsStr) -> Result<Self, FileSourceError> {
+    pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         // We assume the file extension is normalized to lowercase
-        match extension.as_encoded_bytes() {
+        match extension {
             // https://github.com/github-linguist/linguist/blob/4ac734c15a96f9e16fd12330d0cb8de82274f700/lib/linguist/languages.yml#L8070-L8079
             // https://yaml.org/spec/1.2.2/
-            b"yaml" | b"yml" | b"eyaml" | b"eyml" | b"cff" | b"yaml-tmlanguage"
-            | b"yaml-tmpreferences" | b"yaml-tmtheme" | b"mir" | b"reek" | b"rviz"
-            | b"sublime-syntax" | b"syntax" | b"yaml.sed" | b"yml.mysql" => Ok(Self::yaml()),
+            "yaml" | "yml" | "eyaml" | "eyml" | "cff" | "yaml-tmlanguage"
+            | "yaml-tmpreferences" | "yaml-tmtheme" | "mir" | "reek" | "rviz"
+            | "sublime-syntax" | "syntax" | "yaml.sed" | "yml.mysql" => Ok(Self::yaml()),
             _ => Err(FileSourceError::UnknownExtension),
         }
     }
@@ -63,6 +60,7 @@ impl YamlFileSource {
     ///
     /// [LSP spec]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocumentItem
     /// [VS Code spec]: https://code.visualstudio.com/docs/languages/identifiers
+    #[expect(dead_code)]
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
             "yaml" => Ok(Self::yaml()),
@@ -71,16 +69,11 @@ impl YamlFileSource {
     }
 }
 
-impl TryFrom<&Path> for YamlFileSource {
+impl TryFrom<&Utf8Path> for YamlFileSource {
     type Error = FileSourceError;
 
-    fn try_from(path: &Path) -> Result<Self, Self::Error> {
-        let file_name = path
-            .file_name()
-            .and_then(OsStr::to_str)
-            .ok_or_else(|| FileSourceError::MissingFileName)?;
-
-        if let Ok(file_source) = Self::try_from_well_known(file_name) {
+    fn try_from(path: &Utf8Path) -> Result<Self, Self::Error> {
+        if let Ok(file_source) = Self::try_from_well_known(path) {
             return Ok(file_source);
         }
 

@@ -4,6 +4,7 @@ use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{
     js_string_literal_expression, jsx_expression_attribute_value, jsx_expression_child, jsx_string,
     jsx_string_literal, jsx_tag_expression, token, JsxExpressionChildBuilder,
@@ -65,6 +66,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-no-useless-fragment")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -197,7 +199,7 @@ impl Rule for NoUselessFragments {
                             JsSyntaxKind::JSX_TEXT => {
                                 // We need to whitespaces and newlines from the original string.
                                 // Since in the JSX newlines aren't trivia, we require to allocate a string to trim from those characters.
-                                let original_text = child.text();
+                                let original_text = child.to_trimmed_string();
                                 let child_text = original_text.trim();
 
                                 if (in_jsx_expr || in_js_logical_expr)
@@ -329,7 +331,12 @@ impl Rule for NoUselessFragments {
                     | JsSyntaxKind::JSX_ELEMENT
                     | JsSyntaxKind::JSX_EXPRESSION_CHILD
                     | JsSyntaxKind::JSX_FRAGMENT => true,
-                    JsSyntaxKind::JSX_TEXT => !child.syntax().text().to_string().trim().is_empty(),
+                    JsSyntaxKind::JSX_TEXT => !child
+                        .syntax()
+                        .text_with_trivia()
+                        .to_string()
+                        .trim()
+                        .is_empty(),
                     _ => false,
                 });
 

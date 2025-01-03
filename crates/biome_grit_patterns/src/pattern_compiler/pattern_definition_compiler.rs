@@ -12,7 +12,7 @@ impl PatternDefinitionCompiler {
         node: GritPatternDefinition,
         context: &mut NodeCompilationContext,
     ) -> Result<PatternDefinition<GritQueryContext>, CompileError> {
-        let name = node.name()?.text();
+        let name = node.name()?.to_trimmed_string();
         let name = name.trim();
         let mut local_vars = BTreeMap::new();
         let (scope_index, mut context) = create_scope!(context, local_vars);

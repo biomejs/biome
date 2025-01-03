@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-kebab-case.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 
 ```
 
@@ -18,5 +19,3 @@ invalid-kebab-case.js lint/style/useFilenamingConvention ━━━━━━━�
   
 
 ```
-
-

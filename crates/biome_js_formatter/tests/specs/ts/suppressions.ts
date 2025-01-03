@@ -1,6 +1,6 @@
 
 interface Suppressions {
-    // rome-ignore format: test
+    // biome-ignore format: test
     a: void
 
     b: void

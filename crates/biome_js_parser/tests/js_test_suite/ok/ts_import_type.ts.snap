@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_parser/tests/spec_test.rs
 expression: snapshot
+snapshot_kind: text
 ---
 ## Input
 
@@ -222,7 +223,7 @@ JsModule {
                     ts_import_type_assertion_block: TsImportTypeAssertionBlock {
                         l_curly_token: L_CURLY@200..202 "{" [] [Whitespace(" ")],
                         type_assertion: TsImportTypeAssertion {
-                            assertion_kind: WITH_KW@202..206 "with" [] [],
+                            with_token: WITH_KW@202..206 "with" [] [],
                             colon_token: COLON@206..208 ":" [] [Whitespace(" ")],
                             l_curly_token: L_CURLY@208..210 "{" [] [Whitespace(" ")],
                             assertions: JsImportAssertionEntryList [
@@ -262,7 +263,7 @@ JsModule {
                     ts_import_type_assertion_block: TsImportTypeAssertionBlock {
                         l_curly_token: L_CURLY@268..270 "{" [] [Whitespace(" ")],
                         type_assertion: TsImportTypeAssertion {
-                            assertion_kind: WITH_KW@270..274 "with" [] [],
+                            with_token: WITH_KW@270..274 "with" [] [],
                             colon_token: COLON@274..276 ":" [] [Whitespace(" ")],
                             l_curly_token: L_CURLY@276..278 "{" [] [Whitespace(" ")],
                             assertions: JsImportAssertionEntryList [
@@ -307,7 +308,7 @@ JsModule {
                     ts_import_type_assertion_block: TsImportTypeAssertionBlock {
                         l_curly_token: L_CURLY@351..353 "{" [] [Whitespace(" ")],
                         type_assertion: TsImportTypeAssertion {
-                            assertion_kind: WITH_KW@353..357 "with" [] [],
+                            with_token: WITH_KW@353..357 "with" [] [],
                             colon_token: COLON@357..359 ":" [] [Whitespace(" ")],
                             l_curly_token: L_CURLY@359..361 "{" [] [Whitespace(" ")],
                             assertions: JsImportAssertionEntryList [
@@ -355,7 +356,7 @@ JsModule {
                     ts_import_type_assertion_block: TsImportTypeAssertionBlock {
                         l_curly_token: L_CURLY@427..429 "{" [] [Whitespace(" ")],
                         type_assertion: TsImportTypeAssertion {
-                            assertion_kind: WITH_KW@429..433 "with" [] [],
+                            with_token: WITH_KW@429..433 "with" [] [],
                             colon_token: COLON@433..435 ":" [] [Whitespace(" ")],
                             l_curly_token: L_CURLY@435..437 "{" [] [Whitespace(" ")],
                             assertions: JsImportAssertionEntryList [
@@ -408,7 +409,7 @@ JsModule {
                     ts_import_type_assertion_block: TsImportTypeAssertionBlock {
                         l_curly_token: L_CURLY@513..515 "{" [] [Whitespace(" ")],
                         type_assertion: TsImportTypeAssertion {
-                            assertion_kind: WITH_KW@515..519 "with" [] [],
+                            with_token: WITH_KW@515..519 "with" [] [],
                             colon_token: COLON@519..521 ":" [] [Whitespace(" ")],
                             l_curly_token: L_CURLY@521..523 "{" [] [Whitespace(" ")],
                             assertions: JsImportAssertionEntryList [

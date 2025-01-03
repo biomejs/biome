@@ -4,7 +4,7 @@ expression: invalid.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export const a = 1;
 
 const b = 2;

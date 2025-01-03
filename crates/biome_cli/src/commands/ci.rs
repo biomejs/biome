@@ -2,21 +2,20 @@ use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
 use crate::commands::{CommandRunner, LoadEditorConfig};
 use crate::{CliDiagnostic, Execution};
-use biome_configuration::analyzer::assists::PartialAssistsConfiguration;
-use biome_configuration::{organize_imports::PartialOrganizeImports, PartialConfiguration};
+use biome_configuration::analyzer::assist::PartialAssistConfiguration;
+use biome_configuration::PartialConfiguration;
 use biome_configuration::{PartialFormatterConfiguration, PartialLinterConfiguration};
 use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
-use biome_service::{DynRef, Workspace, WorkspaceError};
+use biome_service::{Workspace, WorkspaceError};
 use std::ffi::OsString;
 
 pub(crate) struct CiCommandPayload {
     pub(crate) formatter_enabled: Option<bool>,
     pub(crate) linter_enabled: Option<bool>,
-    pub(crate) organize_imports_enabled: Option<bool>,
-    pub(crate) assists_enabled: Option<bool>,
+    pub(crate) assist_enabled: Option<bool>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) configuration: Option<PartialConfiguration>,
     pub(crate) changed: bool,
@@ -38,7 +37,7 @@ impl CommandRunner for CiCommandPayload {
     fn merge_configuration(
         &mut self,
         loaded_configuration: LoadedConfiguration,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         console: &mut dyn Console,
     ) -> Result<PartialConfiguration, WorkspaceError> {
         let LoadedConfiguration {
@@ -68,20 +67,12 @@ impl CommandRunner for CiCommandPayload {
             linter.enabled = self.linter_enabled;
         }
 
-        let organize_imports = fs_configuration
-            .organize_imports
-            .get_or_insert_with(PartialOrganizeImports::default);
+        let assist = fs_configuration
+            .assist
+            .get_or_insert_with(PartialAssistConfiguration::default);
 
-        if self.organize_imports_enabled.is_some() {
-            organize_imports.enabled = self.organize_imports_enabled;
-        }
-
-        let assists = fs_configuration
-            .assists
-            .get_or_insert_with(PartialAssistsConfiguration::default);
-
-        if self.assists_enabled.is_some() {
-            assists.enabled = self.assists_enabled;
+        if self.assist_enabled.is_some() {
+            assist.enabled = self.assist_enabled;
         }
 
         if let Some(mut configuration) = self.configuration.clone() {
@@ -100,7 +91,7 @@ impl CommandRunner for CiCommandPayload {
 
     fn get_files_to_process(
         &self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         configuration: &PartialConfiguration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
         if self.changed {
@@ -130,9 +121,9 @@ impl CommandRunner for CiCommandPayload {
     fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
         if matches!(self.formatter_enabled, Some(false))
             && matches!(self.linter_enabled, Some(false))
-            && matches!(self.organize_imports_enabled, Some(false))
+            && matches!(self.assist_enabled, Some(false))
         {
-            return Err(CliDiagnostic::incompatible_end_configuration("Formatter, linter and organize imports are disabled, can't perform the command. At least one feature needs to be enabled. This is probably and error."));
+            return Err(CliDiagnostic::incompatible_end_configuration("Formatter, linter and assist are disabled, can't perform the command. At least one feature needs to be enabled. This is probably and error."));
         }
         if self.since.is_some() && !self.changed {
             return Err(CliDiagnostic::incompatible_arguments("since", "changed"));

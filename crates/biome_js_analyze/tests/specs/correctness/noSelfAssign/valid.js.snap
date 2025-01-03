@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 /* should not generate diagnostics */
 var a = a;
 let a = a;
@@ -36,5 +37,3 @@ lorem.getConfig("foo", "bar").value = document.getConfig("foo", "bar").value
 this.arr[0] = p[0];
 
 ```
-
-

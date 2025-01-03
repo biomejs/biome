@@ -68,7 +68,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
 
         if !execution.is_ci() && summary.diagnostics_not_printed > 0 {
             self.0.log(markup! {
-                <Warn>"The number of diagnostics exceeds the number allowed by Biome.\n"</Warn>
+                <Warn>"The number of diagnostics exceeds the limit allowed. Use "<Emphasis>"--max-diagnostics"</Emphasis>" to increase it.\n"</Warn>
                 <Info>"Diagnostics not shown: "</Info><Emphasis>{summary.diagnostics_not_printed}</Emphasis><Info>"."</Info>
             })
         }
@@ -83,10 +83,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
     fn report_handled_paths(&mut self, evaluated_paths: BTreeSet<BiomePath>) -> io::Result<()> {
         let evaluated_paths_diagnostic = EvaluatedPathsDiagnostic {
             advice: ListAdvice {
-                list: evaluated_paths
-                    .iter()
-                    .map(|p| p.display().to_string())
-                    .collect(),
+                list: evaluated_paths.iter().map(|p| p.to_string()).collect(),
             },
         };
 
@@ -95,7 +92,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
                 list: evaluated_paths
                     .iter()
                     .filter(|p| p.was_written())
-                    .map(|p| p.display().to_string())
+                    .map(|p| p.to_string())
                     .collect(),
             },
         };

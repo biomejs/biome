@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `index.css`
 
@@ -10,7 +11,7 @@ expression: content
 .brokenStyle { color: f( }
 
 .style {
-                color: 
+                color:
                 fakeFunction()
 }
 

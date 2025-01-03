@@ -4,7 +4,7 @@ expression: invalid.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // Header comment
 import A from "mod";
 

@@ -11,9 +11,9 @@ use biome_js_syntax::JsFileSource;
 use biome_rowan::SyntaxKind;
 use biome_service::settings::Settings;
 use biome_test_utils::has_bogus_nodes_or_empty_slots;
+use camino::Utf8Path;
 use std::fmt::Write;
 use std::fs;
-use std::path::Path;
 
 #[derive(Copy, Clone)]
 pub enum ExpectedOutcome {
@@ -30,12 +30,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         _ => panic!("Invalid expected outcome {outcome_str}"),
     };
 
-    let test_case_path = Path::new(test_case);
+    let test_case_path = Utf8Path::new(test_case);
 
     let file_name = test_case_path
         .file_name()
-        .expect("Expected test to have a file name")
-        .to_str()
         .expect("File name to be valid UTF8");
 
     let content = fs::read_to_string(test_case_path)
@@ -43,7 +41,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
     let mut options = JsParserOptions::default();
 
-    let options_path = Path::new(test_case_path).with_extension("options.json");
+    let options_path = Utf8Path::new(test_case_path).with_extension("options.json");
 
     if options_path.exists() {
         let mut options_path = BiomePath::new(&options_path);

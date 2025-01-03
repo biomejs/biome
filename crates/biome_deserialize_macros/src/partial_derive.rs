@@ -146,11 +146,11 @@ pub(crate) fn generate_partial(input: DeriveInput) -> TokenStream {
          }| {
             if *should_wrap {
                 quote! {
-                    #ident: partial.#ident.map(#ty::from).unwrap_or(default.#ident)
+                    #ident: partial.#ident.map(<#ty>::from).unwrap_or(default.#ident)
                 }
             } else {
                 quote! {
-                    #ident: partial.#ident.map(#ty::from)
+                    #ident: partial.#ident.map(<#ty>::from)
                 }
             }
         },

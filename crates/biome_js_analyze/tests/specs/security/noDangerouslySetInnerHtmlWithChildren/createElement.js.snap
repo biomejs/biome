@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: createElement.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 React.createElement('div', { dangerouslySetInnerHTML: { __html: 'HTML' } }, ['children'])
 React.createElement('div', { dangerouslySetInnerHTML: { __html: 'HTML' } }, 'children')
 React.createElement('div', { dangerouslySetInnerHTML: { __html: 'HTML' }, children: 'children' })
@@ -80,5 +81,3 @@ createElement.js:3:30 lint/security/noDangerouslySetInnerHtmlWithChildren ━━
   
 
 ```
-
-

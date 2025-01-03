@@ -3,6 +3,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     global_identifier, static_value::StaticValue, AnyJsExpression, JsUnaryExpression,
@@ -69,7 +70,8 @@ declare_lint_rule! {
         name: "useNumberNamespace",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-number-properties")],
-        recommended: true,
+        recommended: false,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }
@@ -129,7 +131,7 @@ impl Rule for UseNumberNamespace {
         let node = ctx.query();
         let (old_node, new_node) = match node {
             AnyJsExpression::JsIdentifierExpression(expression) => {
-                let name = expression.name().ok()?.text();
+                let name = expression.name().ok()?.to_trimmed_string();
                 if !GLOBAL_NUMBER_PROPERTIES.contains(&name.as_str()) {
                     return None;
                 }
@@ -166,7 +168,7 @@ impl Rule for UseNumberNamespace {
                 )
             }
             AnyJsExpression::JsStaticMemberExpression(expression) => {
-                let name = expression.member().ok()?.text();
+                let name = expression.member().ok()?.to_trimmed_string();
 
                 if !GLOBAL_NUMBER_PROPERTIES.contains(&name.as_str()) {
                     return None;

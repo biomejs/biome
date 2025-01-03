@@ -11,12 +11,12 @@ import {
 
 import TheDefault, {  named} from 'foo';
 
-import {  named} from 'foo' assert {
+import {  named} from 'foo' with {
 
     type :   "json"
 };
 
-import "very_long_import_very_long_import_very" assert {
+import "very_long_import_very_long_import_very" with {
     // something good is here
     "type": /****/ "json"
         }

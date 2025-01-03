@@ -9,7 +9,7 @@ use biome_configuration::ConfigurationPathHint;
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDescription};
-use biome_fs::{BiomePath, FileSystem};
+use biome_fs::BiomePath;
 use biome_lsp_converters::{negotiated_encoding, PositionEncoding, WideEncoding};
 use biome_service::configuration::{
     load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
@@ -21,13 +21,12 @@ use biome_service::workspace::{
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::Workspace;
-use biome_service::{DynRef, WorkspaceError};
+use biome_service::WorkspaceError;
+use camino::Utf8PathBuf;
 use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
 use rustc_hash::FxHashMap;
 use serde_json::Value;
-use std::ffi::OsStr;
-use std::path::PathBuf;
 use std::sync::atomic::Ordering;
 use std::sync::atomic::{AtomicBool, AtomicU8};
 use std::sync::Arc;
@@ -74,15 +73,12 @@ pub(crate) struct Session {
     /// to update the diagnostics
     notified_broken_configuration: AtomicBool,
 
-    /// File system to read files inside the workspace
-    pub(crate) fs: DynRef<'static, dyn FileSystem>,
-
     documents: RwLock<FxHashMap<lsp_types::Url, Document>>,
 
     pub(crate) cancellation: Arc<Notify>,
 
-    pub(crate) config_path: Option<PathBuf>,
-    pub(crate) manifest_path: Option<PathBuf>,
+    pub(crate) config_path: Option<Utf8PathBuf>,
+    pub(crate) manifest_path: Option<Utf8PathBuf>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -164,7 +160,6 @@ impl Session {
         client: tower_lsp::Client,
         workspace: Arc<dyn Workspace>,
         cancellation: Arc<Notify>,
-        fs: DynRef<'static, dyn FileSystem>,
     ) -> Self {
         let documents = Default::default();
         let config = RwLock::new(ExtensionSettings::new());
@@ -176,7 +171,6 @@ impl Session {
             configuration_status: AtomicU8::new(ConfigurationStatus::Missing as u8),
             documents,
             extension_settings: config,
-            fs,
             cancellation,
             config_path: None,
             manifest_path: None,
@@ -184,7 +178,7 @@ impl Session {
         }
     }
 
-    pub(crate) fn set_config_path(&mut self, path: PathBuf) {
+    pub(crate) fn set_config_path(&mut self, path: Utf8PathBuf) {
         self.config_path = Some(path);
     }
 
@@ -288,9 +282,9 @@ impl Session {
             Err(_) => {
                 // If we can't create a path, it's probably because the file doesn't exist.
                 // It can be a newly created file that it's not on disk
-                PathBuf::from(url.path())
+                Utf8PathBuf::from(url.path())
             }
-            Ok(path) => path,
+            Ok(path) => Utf8PathBuf::from_path_buf(path).expect("To to have a UTF-8 path"),
         };
 
         Ok(BiomePath::new(path_to_file))
@@ -310,18 +304,11 @@ impl Session {
                     .await;
         }
         let file_features = self.workspace.file_features(SupportsFeatureParams {
-            features: FeaturesBuilder::new()
-                .with_linter()
-                .with_assists()
-                .with_organize_imports()
-                .build(),
+            features: FeaturesBuilder::new().with_linter().with_assist().build(),
             path: biome_path.clone(),
         })?;
 
-        if !file_features.supports_lint()
-            && !file_features.supports_organize_imports()
-            && !file_features.supports_assists()
-        {
+        if !file_features.supports_lint() && !file_features.supports_assist() {
             self.client
                 .publish_diagnostics(url, vec![], Some(doc.version))
                 .await;
@@ -334,8 +321,8 @@ impl Session {
                 if file_features.supports_lint() {
                     categories = categories.with_lint();
                 }
-                if file_features.supports_organize_imports() {
-                    categories = categories.with_action();
+                if file_features.supports_assist() {
+                    categories = categories.with_assist();
                 }
             }
             let result = self.workspace.pull_diagnostics(PullDiagnosticsParams {
@@ -344,16 +331,17 @@ impl Session {
                 max_diagnostics: u64::MAX,
                 only: Vec::new(),
                 skip: Vec::new(),
+                enabled_rules: Vec::new(),
             })?;
 
             tracing::trace!("biome diagnostics: {:#?}", result.diagnostics);
             let content = self.workspace.get_file_content(GetFileContentParams {
                 path: biome_path.clone(),
             })?;
-            let offset = match biome_path.extension().map(OsStr::as_encoded_bytes) {
-                Some(b"vue") => VueFileHandler::start(content.as_str()),
-                Some(b"astro") => AstroFileHandler::start(content.as_str()),
-                Some(b"svelte") => SvelteFileHandler::start(content.as_str()),
+            let offset = match biome_path.extension() {
+                Some("vue") => VueFileHandler::start(content.as_str()),
+                Some("astro") => AstroFileHandler::start(content.as_str()),
+                Some("svelte") => SvelteFileHandler::start(content.as_str()),
                 _ => None,
             };
 
@@ -422,12 +410,14 @@ impl Session {
     }
 
     /// Returns the base path of the workspace on the filesystem if it has one
-    pub(crate) fn base_path(&self) -> Option<PathBuf> {
+    pub(crate) fn base_path(&self) -> Option<Utf8PathBuf> {
         let initialize_params = self.initialize_params.get()?;
 
         let root_uri = initialize_params.root_uri.as_ref()?;
         match root_uri.to_file_path() {
-            Ok(base_path) => Some(base_path),
+            Ok(base_path) => {
+                Some(Utf8PathBuf::from_path_buf(base_path).expect("To have a UTF-8 path"))
+            }
             Err(()) => {
                 error!(
                     "The Workspace root URI {root_uri:?} could not be parsed as a filesystem path"
@@ -456,7 +446,10 @@ impl Session {
             self.set_configuration_status(ConfigurationStatus::Loading);
             for folder in folders {
                 info!("Attempt to load the configuration file in {:?}", folder.uri);
-                let base_path = folder.uri.to_file_path();
+                let base_path = folder
+                    .uri
+                    .to_file_path()
+                    .map(|p| Utf8PathBuf::from_path_buf(p).expect("To have a valid UTF-8 path"));
                 match base_path {
                     Ok(base_path) => {
                         let status = self
@@ -488,7 +481,7 @@ impl Session {
         &self,
         base_path: ConfigurationPathHint,
     ) -> ConfigurationStatus {
-        match load_configuration(&self.fs, base_path.clone()) {
+        match load_configuration(self.workspace.fs(), base_path.clone()) {
             Ok(loaded_configuration) => {
                 if loaded_configuration.has_errors() {
                     error!("Couldn't load the configuration file, reasons:");
@@ -506,7 +499,7 @@ impl Session {
                     info!("Configuration loaded successfully from disk.");
                     info!("Update workspace settings.");
 
-                    let fs = &self.fs;
+                    let fs = self.workspace.fs();
                     let should_use_editorconfig =
                         fs_configuration.use_editorconfig().unwrap_or_default();
                     let mut configuration = if should_use_editorconfig {
@@ -547,7 +540,7 @@ impl Session {
                                     // We don't need the key
                                     self.workspace
                                         .register_project_folder(RegisterProjectFolderParams {
-                                            path: Some(path.clone()),
+                                            path: Some(path.as_path().into()),
                                             // This is naive, but we don't know if the user has a file already open or not, so we register every project as the current one.
                                             // The correct one is actually set when the LSP calls `textDocument/didOpen`
                                             set_as_current_workspace: true,
@@ -556,7 +549,7 @@ impl Session {
                                 } else {
                                     self.workspace
                                         .register_project_folder(RegisterProjectFolderParams {
-                                            path: fs.working_directory(),
+                                            path: fs.working_directory().map(BiomePath::from),
                                             set_as_current_workspace: true,
                                         })
                                         .err()
@@ -567,9 +560,9 @@ impl Session {
                                 return ConfigurationStatus::Error;
                             }
                             let result = self.workspace.update_settings(UpdateSettingsParams {
-                                workspace_directory: fs.working_directory(),
+                                workspace_directory: configuration_path.map(BiomePath::from),
                                 configuration,
-                                vcs_base_path,
+                                vcs_base_path: vcs_base_path.map(BiomePath::from),
                                 gitignore_matches,
                             });
 
@@ -603,10 +596,11 @@ impl Session {
         let base_path = self
             .manifest_path
             .as_deref()
-            .map(PathBuf::from)
+            .map(Utf8PathBuf::from)
             .or(self.base_path());
         if let Some(base_path) = base_path {
-            let result = self.fs.auto_search(&base_path, &["package.json"], false);
+            let fs = self.workspace.fs();
+            let result = fs.auto_search(&base_path, &["package.json"], false);
             match result {
                 Ok(result) => {
                     if let Some(result) = result {

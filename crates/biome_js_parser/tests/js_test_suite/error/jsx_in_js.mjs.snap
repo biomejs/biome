@@ -1,0 +1,159 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```js
+function name() {
+	return <div></div>
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@9..13 "name" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@13..14 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@14..16 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@16..17 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [
+                    JsReturnStatement {
+                        return_token: RETURN_KW@17..26 "return" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                        argument: JsBogusExpression {
+                            items: [
+                                L_ANGLE@26..27 "<" [] [],
+                                TsReferenceType {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@27..30 "div" [] [],
+                                    },
+                                    type_arguments: missing (optional),
+                                },
+                                R_ANGLE@30..31 ">" [] [],
+                                JsBogusExpression {
+                                    items: [
+                                        L_ANGLE@31..32 "<" [] [],
+                                        JsRegexLiteralExpression {
+                                            value_token: JS_REGEX_LITERAL@32..37 "/div>" [] [],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@37..39 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@39..40 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..40
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..39
+    0: JS_FUNCTION_DECLARATION@0..39
+      0: (empty)
+      1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@9..13
+        0: IDENT@9..13 "name" [] []
+      4: (empty)
+      5: JS_PARAMETERS@13..16
+        0: L_PAREN@13..14 "(" [] []
+        1: JS_PARAMETER_LIST@14..14
+        2: R_PAREN@14..16 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@16..39
+        0: L_CURLY@16..17 "{" [] []
+        1: JS_DIRECTIVE_LIST@17..17
+        2: JS_STATEMENT_LIST@17..37
+          0: JS_RETURN_STATEMENT@17..37
+            0: RETURN_KW@17..26 "return" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+            1: JS_BOGUS_EXPRESSION@26..37
+              0: L_ANGLE@26..27 "<" [] []
+              1: TS_REFERENCE_TYPE@27..30
+                0: JS_REFERENCE_IDENTIFIER@27..30
+                  0: IDENT@27..30 "div" [] []
+                1: (empty)
+              2: R_ANGLE@30..31 ">" [] []
+              3: JS_BOGUS_EXPRESSION@31..37
+                0: L_ANGLE@31..32 "<" [] []
+                1: JS_REGEX_LITERAL_EXPRESSION@32..37
+                  0: JS_REGEX_LITERAL@32..37 "/div>" [] []
+            2: (empty)
+        3: R_CURLY@37..39 "}" [Newline("\n")] []
+  4: EOF@39..40 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+jsx_in_js.mjs:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type assertion are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+    1 │ function name() {
+  > 2 │ 	return <div></div>
+      │ 	       ^^^^^^^^^^^
+    3 │ }
+    4 │ 
+  
+  i TypeScript only syntax
+  
+jsx_in_js.mjs:2:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unterminated regex literal
+  
+    1 │ function name() {
+  > 2 │ 	return <div></div>
+      │ 	                  
+    3 │ }
+    4 │ 
+  
+  i ...but the line ends here
+  
+    1 │ function name() {
+  > 2 │ 	return <div></div>
+      │ 	                  
+    3 │ }
+    4 │ 
+  
+  i a regex literal starts there...
+  
+    1 │ function name() {
+  > 2 │ 	return <div></div>
+      │ 	             ^
+    3 │ }
+    4 │ 
+  
+```

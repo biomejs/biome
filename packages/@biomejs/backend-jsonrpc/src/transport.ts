@@ -233,7 +233,7 @@ export class Transport {
 
 		switch (headerName) {
 			case "Content-Length": {
-				const value = Number.parseInt(headerValue);
+				const value = Number.parseInt(headerValue, 10);
 				readerState.contentLength = value;
 				break;
 			}

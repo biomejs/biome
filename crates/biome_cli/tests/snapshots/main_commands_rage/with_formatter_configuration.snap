@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/commands/rage.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -74,33 +75,33 @@ Biome Configuration:
   Status:                       Loaded successfully
   Formatter disabled:           false
   Linter disabled:              false
-  Organize imports disabled:    false
+  Assist disabled:              false
   VCS disabled:                 true
 
 Formatter:
   Format with errors:           true
   Indent style:                 Space
   Indent width:                 2
-  Line ending:                  Lf
+  Line ending:                  LF
   Line width:                   120
   Attribute position:           Multiline
-  Bracket spacing:              BracketSpacing(true)
-  Ignore:                       ["configuration-schema.json"]
-  Include:                      ["**/*.html", "**/*.css", "**/*.js", "**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.json", "**/*.md"]
+  Bracket spacing:              true
+  Ignore:                       configuration-schema.json
+  Include:                      **/*.html, **/*.css, **/*.js, **/*.ts, **/*.tsx, **/*.jsx, **/*.json, **/*.md
 
 JavaScript Formatter:
   Enabled:                      true
-  JSX quote style:              Single
-  Quote properties:             AsNeeded
+  JSX quote style:              Single Quotes
+  Quote properties:             As needed
   Trailing commas:              All
   Semicolons:                   Always
   Arrow parentheses:            Always
   Bracket spacing:              unset
-  Bracket same line:            false
-  Quote style:                  Double
+  Bracket same line:            unset
+  Quote style:                  Double Quotes
   Indent style:                 Tab
   Indent width:                 2
-  Line ending:                  Lf
+  Line ending:                  LF
   Line width:                   100
   Attribute position:           unset
 
@@ -108,9 +109,10 @@ JSON Formatter:
   Enabled:                      true
   Indent style:                 Space
   Indent width:                 2
-  Line ending:                  Lf
+  Line ending:                  LF
   Line width:                   100
   Trailing Commas:              unset
+  Expand lists:                 unset
 
 CSS Formatter:
   Enabled:                      true
@@ -118,7 +120,7 @@ CSS Formatter:
   Indent width:                 unset
   Line ending:                  unset
   Line width:                   unset
-  Quote style:                  Double
+  Quote style:                  Double Quotes
 
 GraphQL Formatter:
   Enabled:                      false

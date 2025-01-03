@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 <CustomComponent />;
 <CustomComponent aria-activedescendant={someID} />;
 <CustomComponent aria-activedescendant={someID} tabIndex={0} />;
@@ -21,5 +22,3 @@ expression: valid.js
 <input aria-activedescendant={someID} tabIndex={-1} />;
 
 ```
-
-

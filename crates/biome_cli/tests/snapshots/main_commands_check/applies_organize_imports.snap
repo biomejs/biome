@@ -1,11 +1,12 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
 ```json
-{ "organizeImports": { "enabled": true } }
+{ "assist": { "enabled": true } }
 ```
 
 ## `check.js`
@@ -17,14 +18,6 @@ import * as something from "../something";
 ```
 
 # Emitted Messages
-
-```block
-internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The argument --apply is deprecated, it will be removed in the next major release. Use --write instead.
-  
-
-```
 
 ```block
 Checked 1 file in <TIME>. Fixed 1 file.

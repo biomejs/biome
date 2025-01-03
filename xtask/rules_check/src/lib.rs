@@ -2,7 +2,6 @@
 //!
 //!
 use anyhow::{bail, ensure};
-use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule,
     RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
@@ -12,7 +11,7 @@ use biome_console::{markup, Console};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_ast;
-use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
+use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, Severity};
 use biome_fs::BiomePath;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_parser::JsParserOptions;
@@ -23,17 +22,35 @@ use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
 use biome_rowan::AstNode;
 use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
 use biome_service::workspace::DocumentFileSource;
+use camino::Utf8PathBuf;
 use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
 use std::collections::BTreeMap;
-use std::fmt::Write;
-use std::path::PathBuf;
+use std::fmt::{Display, Formatter, Write};
 use std::slice;
 use std::str::FromStr;
+
+#[derive(Debug)]
+struct NoStyleRuleError(String);
+
+impl NoStyleRuleError {
+    fn new(rule_name: impl Display) -> Self {
+        Self(format!("The rule '{}' that belongs to the group 'style' can't have Severity::Error. Lower down the severity or change the group.",rule_name))
+    }
+}
+
+impl Display for NoStyleRuleError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.0.as_str())
+    }
+}
+
+impl std::error::Error for NoStyleRuleError {}
 
 pub fn check_rules() -> anyhow::Result<()> {
     #[derive(Default)]
     struct LintRulesVisitor {
         groups: BTreeMap<(&'static str, &'static str), BTreeMap<&'static str, RuleMetadata>>,
+        errors: Vec<NoStyleRuleError>,
     }
 
     impl LintRulesVisitor {
@@ -41,10 +58,14 @@ pub fn check_rules() -> anyhow::Result<()> {
         where
             R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
         {
-            self.groups
-                .entry((<R::Group as RuleGroup>::NAME, R::METADATA.language))
-                .or_default()
-                .insert(R::METADATA.name, R::METADATA);
+            if R::Group::NAME == "style" && R::METADATA.severity == Severity::Error {
+                self.errors.push(NoStyleRuleError::new(R::METADATA.name))
+            } else {
+                self.groups
+                    .entry((<R::Group as RuleGroup>::NAME, R::METADATA.language))
+                    .or_default()
+                    .insert(R::METADATA.name, R::METADATA);
+            }
         }
     }
 
@@ -118,7 +139,13 @@ pub fn check_rules() -> anyhow::Result<()> {
     biome_css_analyze::visit_registry(&mut visitor);
     biome_graphql_analyze::visit_registry(&mut visitor);
 
-    let LintRulesVisitor { groups } = visitor;
+    let LintRulesVisitor { groups, errors } = visitor;
+    if !errors.is_empty() {
+        for error in errors {
+            eprintln!("{error}");
+        }
+        bail!("There are some rules that have errors.")
+    }
 
     for ((group, _), rules) in groups {
         for (_, meta) in rules {
@@ -296,19 +323,20 @@ fn create_analyzer_options<L>(
 where
     L: ServiceLanguage,
 {
-    let path = BiomePath::new(PathBuf::from(&file_path));
+    let path = BiomePath::new(Utf8PathBuf::from(&file_path));
     let file_source = &test.document_file_source();
     let supression_reason = None;
 
     let settings = workspace_settings.get_current_settings();
-    let linter = settings.map(|s| &s.linter);
-    let overrides = settings.map(|s| &s.override_settings);
+    let linter = settings.as_ref().map(|s| &s.linter);
+    let overrides = settings.as_ref().map(|s| &s.override_settings);
     let language_settings = settings
+        .as_ref()
         .map(|s| L::lookup_settings(&s.languages))
         .map(|result| &result.linter);
 
     L::resolve_analyzer_options(
-        settings,
+        settings.as_ref(),
         linter,
         overrides,
         language_settings,
@@ -339,9 +367,9 @@ fn assert_lint(
     let mut diagnostics = DiagnosticWriter::new(group, rule, test, code);
 
     // Create a synthetic workspace configuration
-    let mut settings = WorkspaceSettings::default();
-    let key = settings.insert_project(PathBuf::new());
-    settings.register_current_project(key);
+    let workspace_settings = WorkspaceSettings::default();
+    let key = workspace_settings.insert_project(Utf8PathBuf::new());
+    workspace_settings.set_current_project(key);
 
     // Load settings from the preceding `json,options` block if requested
     if test.use_options {
@@ -349,9 +377,10 @@ fn assert_lint(
             bail!("Code blocks tagged with 'use_options' must be preceded by a valid 'json,options' code block.");
         };
 
-        settings
-            .get_current_settings_mut()
-            .merge_with_configuration(partial_config.clone(), None, None, &[])?;
+        if let Some(mut settings) = workspace_settings.get_current_settings() {
+            settings.merge_with_configuration(partial_config.clone(), None, None, &[])?;
+            workspace_settings.set_current_settings(settings);
+        }
     }
 
     match test.document_file_source() {
@@ -389,40 +418,37 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = {
-                    let mut o = create_analyzer_options::<JsLanguage>(&settings, &file_path, test);
-                    o.configuration.jsx_runtime = Some(JsxRuntime::default());
-                    o
-                };
+                let options =
+                    create_analyzer_options::<JsLanguage>(&workspace_settings, &file_path, test);
 
-                biome_js_analyze::analyze(&root, filter, &options, file_source, None, |signal| {
-                    if let Some(mut diag) = signal.diagnostic() {
-                        let category = diag.category().expect("linter diagnostic has no code");
-                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
-                                "If you see this error, it means you need to run cargo codegen-configuration",
-                            );
+                biome_js_analyze::analyze(
+                    &root,
+                    filter,
+                    &options,
+                    vec![],
+                    file_source,
+                    None,
+                    |signal| {
+                        if let Some(mut diag) = signal.diagnostic() {
+                            for action in signal.actions() {
+                                if !action.is_suppression() {
+                                    diag = diag.add_code_suggestion(action.into());
+                                }
+                            }
 
-                        for action in signal.actions() {
-                            if !action.is_suppression() {
-                                diag = diag.add_code_suggestion(action.into());
+                            let error = diag.with_file_path(&file_path).with_file_source_code(code);
+                            let res = diagnostics.write_diagnostic(error);
+
+                            // Abort the analysis on error
+                            if let Err(err) = res {
+                                eprintln!("Error: {err}");
+                                return ControlFlow::Break(err);
                             }
                         }
 
-                        let error = diag
-                            .with_severity(severity)
-                            .with_file_path(&file_path)
-                            .with_file_source_code(code);
-                        let res = diagnostics.write_diagnostic(error);
-
-                        // Abort the analysis on error
-                        if let Err(err) = res {
-                            eprintln!("Error: {err}");
-                            return ControlFlow::Break(err);
-                        }
-                    }
-
-                    ControlFlow::Continue(())
-                });
+                        ControlFlow::Continue(())
+                    },
+                );
             }
         }
         DocumentFileSource::Json(file_source) => {
@@ -442,25 +468,18 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, test);
+                let options =
+                    create_analyzer_options::<JsonLanguage>(&workspace_settings, &file_path, test);
 
                 biome_json_analyze::analyze(&root, filter, &options, file_source, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
-                        let category = diag.category().expect("linter diagnostic has no code");
-                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
-                                "If you see this error, it means you need to run cargo codegen-configuration",
-                            );
-
                         for action in signal.actions() {
                             if !action.is_suppression() {
                                 diag = diag.add_code_suggestion(action.into());
                             }
                         }
 
-                        let error = diag
-                            .with_severity(severity)
-                            .with_file_path(&file_path)
-                            .with_file_source_code(code);
+                        let error = diag.with_file_path(&file_path).with_file_source_code(code);
                         let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
@@ -491,25 +510,18 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, test);
+                let options =
+                    create_analyzer_options::<JsonLanguage>(&workspace_settings, &file_path, test);
 
-                biome_css_analyze::analyze(&root, filter, &options, |signal| {
+                biome_css_analyze::analyze(&root, filter, &options, Vec::new(), |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
-                        let category = diag.category().expect("linter diagnostic has no code");
-                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
-                                "If you see this error, it means you need to run cargo codegen-configuration",
-                            );
-
                         for action in signal.actions() {
                             if !action.is_suppression() {
                                 diag = diag.add_code_suggestion(action.into());
                             }
                         }
 
-                        let error = diag
-                            .with_severity(severity)
-                            .with_file_path(&file_path)
-                            .with_file_source_code(code);
+                        let error = diag.with_file_path(&file_path).with_file_source_code(code);
                         let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
@@ -540,25 +552,18 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, test);
+                let options =
+                    create_analyzer_options::<JsonLanguage>(&workspace_settings, &file_path, test);
 
                 biome_graphql_analyze::analyze(&root, filter, &options, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
-                        let category = diag.category().expect("linter diagnostic has no code");
-                        let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
-                            "If you see this error, it means you need to run cargo codegen-configuration",
-                        );
-
                         for action in signal.actions() {
                             if !action.is_suppression() {
                                 diag = diag.add_code_suggestion(action.into());
                             }
                         }
 
-                        let error = diag
-                            .with_severity(severity)
-                            .with_file_path(&file_path)
-                            .with_file_source_code(code);
+                        let error = diag.with_file_path(&file_path).with_file_source_code(code);
                         let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error

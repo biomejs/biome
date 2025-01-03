@@ -1,0 +1,7 @@
+---
+source: crates/biome_plugin_loader/src/lib.rs
+expression: content
+---
+plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unsupported rule format for plugin rule rules/1.js

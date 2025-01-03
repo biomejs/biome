@@ -1,18 +1,19 @@
 use biome_configuration::{ConfigurationPathHint, Rules};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{
-    fmt, markup, ConsoleExt, DebugDisplay, DebugDisplayOption, HorizontalLine, KeyValuePair,
-    Padding, SOFT_LINE,
+    fmt, markup, ConsoleExt, DebugDisplay, DisplayOption, HorizontalLine, KeyValuePair, Padding,
+    SOFT_LINE,
 };
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
 use biome_diagnostics::{termcolor, PrintDescription};
 use biome_flags::biome_env;
-use biome_fs::FileSystem;
+use biome_fs::{FileSystem, OsFileSystem};
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{client, RageEntry, RageParams};
-use biome_service::{DynRef, Workspace};
-use std::path::PathBuf;
+use biome_service::Workspace;
+use camino::Utf8PathBuf;
 use std::{env, io, ops::Deref};
+use terminal_size::terminal_size;
 use tokio::runtime::Runtime;
 
 use crate::commands::daemon::read_most_recent_log_file;
@@ -47,7 +48,7 @@ pub(crate) fn rage(
     {EnvVarOs("JS_RUNTIME_NAME")}
     {EnvVarOs("NODE_PACKAGE_MANAGER")}
 
-    {RageConfiguration { fs: &session.app.fs, formatter, linter }}
+    {RageConfiguration { fs: session.app.workspace.fs(), formatter, linter }}
     {WorkspaceRage(session.app.workspace.deref())}
     ));
 
@@ -63,7 +64,7 @@ pub(crate) fn rage(
                     .app
                     .console
                     .log(markup!("Discovering running Biome servers..."));
-                session.app.console.log(markup!({ RunningRomeServer }));
+                session.app.console.log(markup!({ RunningBiomeServer }));
             }
         }
     }
@@ -105,9 +106,9 @@ impl Display for WorkspaceRage<'_> {
 }
 
 /// Prints information about other running biome server instances.
-struct RunningRomeServer;
+struct RunningBiomeServer;
 
-impl Display for RunningRomeServer {
+impl Display for RunningBiomeServer {
     fn fmt(&self, f: &mut Formatter) -> io::Result<()> {
         let versions = match enumerate_pipes() {
             Ok(iter) => iter,
@@ -117,7 +118,7 @@ impl Display for RunningRomeServer {
             }
         };
 
-        for version in versions {
+        for (version, path) in versions {
             if version == biome_configuration::VERSION {
                 let runtime = Runtime::new()?;
                 match service::open_transport(runtime) {
@@ -130,13 +131,23 @@ impl Display for RunningRomeServer {
                         continue;
                     }
                     Ok(Some(transport)) => {
-                        markup!("\n"<Emphasis>"Running Biome Server:"</Emphasis>" "{HorizontalLine::new(78)}"
+                        let header = "Running Biome Server: ";
+                        let width = {
+                            if cfg!(debug_assertions) {
+                                78
+                            } else {
+                                terminal_size().map_or(78, |(width, _)| width.0 as usize)
+                            }
+                        };
+                        let width = width.saturating_sub(header.len());
+
+                        markup!("\n"<Emphasis>{header}</Emphasis>{HorizontalLine::new(width)}"
 
 "<Info>"\u{2139} The client isn't connected to any server but rage discovered this running Biome server."</Info>"
 ")
                 .fmt(f)?;
 
-                        match client(transport) {
+                        match client(transport, Box::new(OsFileSystem::default())) {
                             Ok(client) => WorkspaceRage(client.deref()).fmt(f)?,
                             Err(err) => {
                                 markup!(<Error>"\u{2716} Failed to connect: "</Error>).fmt(f)?;
@@ -152,7 +163,16 @@ impl Display for RunningRomeServer {
 
                 BiomeServerLog.fmt(f)?;
             } else {
-                markup!("\n"<Emphasis>"Incompatible Biome Server:"</Emphasis>" "{HorizontalLine::new(78)}"
+                let header = "Incompatible Biome Server: ";
+                let width = {
+                    if cfg!(debug_assertions) {
+                        78
+                    } else {
+                        terminal_size().map_or(78, |(width, _)| width.0 as usize)
+                    }
+                };
+                let width = width.saturating_sub(header.len());
+                markup!("\n"<Emphasis>{header}</Emphasis>{HorizontalLine::new(width)}"
 
 "<Info>"\u{2139} Rage discovered this running server using an incompatible version of Biome."</Info>"
 ")
@@ -161,6 +181,7 @@ impl Display for RunningRomeServer {
                 markup!(
                     {Section("Server")}
                     {KeyValuePair("Version", markup!({version.as_str()}))}
+                    {KeyValuePair("Path", markup!({path.as_str()}))}
                 )
                 .fmt(f)?;
             }
@@ -170,13 +191,13 @@ impl Display for RunningRomeServer {
     }
 }
 
-struct RageConfiguration<'a, 'app> {
-    fs: &'a DynRef<'app, dyn FileSystem>,
+struct RageConfiguration<'a> {
+    fs: &'a dyn FileSystem,
     formatter: bool,
     linter: bool,
 }
 
-impl Display for RageConfiguration<'_, '_> {
+impl Display for RageConfiguration<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         Section("Biome Configuration").fmt(fmt)?;
 
@@ -208,13 +229,25 @@ impl Display for RageConfiguration<'_, '_> {
                         {KeyValuePair("Status", status)}
                         {KeyValuePair("Formatter disabled", markup!({DebugDisplay(configuration.is_formatter_disabled())}))}
                         {KeyValuePair("Linter disabled", markup!({DebugDisplay(configuration.is_linter_disabled())}))}
-                        {KeyValuePair("Organize imports disabled", markup!({DebugDisplay(configuration.is_organize_imports_disabled())}))}
+                        {KeyValuePair("Assist disabled", markup!({DebugDisplay(configuration.is_assist_disabled())}))}
                         {KeyValuePair("VCS disabled", markup!({DebugDisplay(configuration.is_vcs_disabled())}))}
                     ).fmt(fmt)?;
 
                     // Print formatter configuration if --formatter option is true
                     if self.formatter {
                         let formatter_configuration = configuration.get_formatter_configuration();
+                        let ignore = formatter_configuration
+                            .ignore
+                            .iter()
+                            .map(|s| s.to_string())
+                            .collect::<Vec<_>>()
+                            .join(", ");
+                        let include = formatter_configuration
+                            .include
+                            .iter()
+                            .map(|s| s.to_string())
+                            .collect::<Vec<_>>()
+                            .join(", ");
                         markup! (
                             {Section("Formatter")}
                             {KeyValuePair("Format with errors", markup!({DebugDisplay(configuration.get_formatter_configuration().format_with_errors)}))}
@@ -224,8 +257,8 @@ impl Display for RageConfiguration<'_, '_> {
                             {KeyValuePair("Line width", markup!({DebugDisplay(formatter_configuration.line_width.value())}))}
                             {KeyValuePair("Attribute position", markup!({DebugDisplay(formatter_configuration.attribute_position)}))}
                             {KeyValuePair("Bracket spacing", markup!({DebugDisplay(formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Ignore", markup!({DebugDisplay(formatter_configuration.ignore.iter().collect::<Vec<_>>())}))}
-                            {KeyValuePair("Include", markup!({DebugDisplay(formatter_configuration.include.iter().collect::<Vec<_>>())}))}
+                            {KeyValuePair("Ignore", markup!({DebugDisplay(ignore)}))}
+                            {KeyValuePair("Include", markup!({DebugDisplay(include)}))}
                         ).fmt(fmt)?;
 
                         let javascript_formatter_configuration =
@@ -238,14 +271,14 @@ impl Display for RageConfiguration<'_, '_> {
                             {KeyValuePair("Trailing commas", markup!({DebugDisplay(javascript_formatter_configuration.trailing_commas)}))}
                             {KeyValuePair("Semicolons", markup!({DebugDisplay(javascript_formatter_configuration.semicolons)}))}
                             {KeyValuePair("Arrow parentheses", markup!({DebugDisplay(javascript_formatter_configuration.arrow_parentheses)}))}
-                            {KeyValuePair("Bracket spacing", markup!({DebugDisplayOption(javascript_formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Bracket same line", markup!({DebugDisplay(javascript_formatter_configuration.bracket_same_line)}))}
+                            {KeyValuePair("Bracket spacing", markup!({DisplayOption(javascript_formatter_configuration.bracket_spacing)}))}
+                            {KeyValuePair("Bracket same line", markup!({DisplayOption(javascript_formatter_configuration.bracket_same_line)}))}
                             {KeyValuePair("Quote style", markup!({DebugDisplay(javascript_formatter_configuration.quote_style)}))}
-                            {KeyValuePair("Indent style", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DebugDisplayOption(javascript_formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DebugDisplayOption(javascript_formatter_configuration.line_width.map(|lw| lw.value()))}))}
-                            {KeyValuePair("Attribute position", markup!({DebugDisplayOption(javascript_formatter_configuration.attribute_position)}))}
+                            {KeyValuePair("Indent style", markup!({DisplayOption(javascript_formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent width", markup!({DisplayOption(javascript_formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DisplayOption(javascript_formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DisplayOption(javascript_formatter_configuration.line_width.map(|lw| lw.value()))}))}
+                            {KeyValuePair("Attribute position", markup!({DisplayOption(javascript_formatter_configuration.attribute_position)}))}
                         )
                         .fmt(fmt)?;
 
@@ -254,11 +287,12 @@ impl Display for RageConfiguration<'_, '_> {
                         markup! (
                             {Section("JSON Formatter")}
                             {KeyValuePair("Enabled", markup!({DebugDisplay(json_formatter_configuration.enabled)}))}
-                            {KeyValuePair("Indent style", markup!({DebugDisplayOption(json_formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DebugDisplayOption(json_formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DebugDisplayOption(json_formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DebugDisplayOption(json_formatter_configuration.line_width.map(|lw| lw.value()))}))}
-                            {KeyValuePair("Trailing Commas", markup!({DebugDisplayOption(json_formatter_configuration.trailing_commas)}))}
+                            {KeyValuePair("Indent style", markup!({DisplayOption(json_formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent width", markup!({DisplayOption(json_formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DisplayOption(json_formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DisplayOption(json_formatter_configuration.line_width.map(|lw| lw.value()))}))}
+                            {KeyValuePair("Trailing Commas", markup!({DisplayOption(json_formatter_configuration.trailing_commas)}))}
+                            {KeyValuePair("Expand lists", markup!({DisplayOption(json_formatter_configuration.expand)}))}
                         ).fmt(fmt)?;
 
                         let css_formatter_configuration =
@@ -266,10 +300,10 @@ impl Display for RageConfiguration<'_, '_> {
                         markup! (
                             {Section("CSS Formatter")}
                             {KeyValuePair("Enabled", markup!({DebugDisplay(css_formatter_configuration.enabled)}))}
-                            {KeyValuePair("Indent style", markup!({DebugDisplayOption(css_formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DebugDisplayOption(css_formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DebugDisplayOption(css_formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DebugDisplayOption(css_formatter_configuration.line_width)}))}
+                            {KeyValuePair("Indent style", markup!({DisplayOption(css_formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent width", markup!({DisplayOption(css_formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DisplayOption(css_formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DisplayOption(css_formatter_configuration.line_width)}))}
                             {KeyValuePair("Quote style", markup!({DebugDisplay(css_formatter_configuration.quote_style)}))}
                         ).fmt(fmt)?;
 
@@ -277,13 +311,13 @@ impl Display for RageConfiguration<'_, '_> {
                             configuration.get_graphql_formatter_configuration();
                         markup! (
                             {Section("GraphQL Formatter")}
-                            {KeyValuePair("Enabled", markup!({DebugDisplayOption(graphql_formatter_configuration.enabled)}))}
-                            {KeyValuePair("Indent style", markup!({DebugDisplayOption(graphql_formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DebugDisplayOption(graphql_formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DebugDisplayOption(graphql_formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DebugDisplayOption(graphql_formatter_configuration.line_width)}))}
-                            {KeyValuePair("Bracket spacing", markup!({DebugDisplayOption(graphql_formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Quote style", markup!({DebugDisplayOption(graphql_formatter_configuration.quote_style)}))}
+                            {KeyValuePair("Enabled", markup!({DisplayOption(graphql_formatter_configuration.enabled)}))}
+                            {KeyValuePair("Indent style", markup!({DisplayOption(graphql_formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent width", markup!({DisplayOption(graphql_formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DisplayOption(graphql_formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DisplayOption(graphql_formatter_configuration.line_width)}))}
+                            {KeyValuePair("Bracket spacing", markup!({DisplayOption(graphql_formatter_configuration.bracket_spacing)}))}
+                            {KeyValuePair("Quote style", markup!({DisplayOption(graphql_formatter_configuration.quote_style)}))}
                         ).fmt(fmt)?;
                     }
 
@@ -294,15 +328,14 @@ impl Display for RageConfiguration<'_, '_> {
                         let javascript_linter = configuration.get_javascript_linter_configuration();
                         let json_linter = configuration.get_json_linter_configuration();
                         let css_linter = configuration.get_css_linter_configuration();
-                        let graphq_linter = configuration.get_graphql_linter_configuration();
+                        let graphql_linter = configuration.get_graphql_linter_configuration();
                         markup! (
                             {Section("Linter")}
                             {KeyValuePair("JavaScript enabled", markup!({DebugDisplay(javascript_linter.enabled)}))}
                             {KeyValuePair("JSON enabled", markup!({DebugDisplay(json_linter.enabled)}))}
                             {KeyValuePair("CSS enabled", markup!({DebugDisplay(css_linter.enabled)}))}
-                            {KeyValuePair("GraphQL enabled", markup!({DebugDisplay(graphq_linter.enabled)}))}
+                            {KeyValuePair("GraphQL enabled", markup!({DebugDisplay(graphql_linter.enabled)}))}
                             {KeyValuePair("Recommended", markup!({DebugDisplay(linter_configuration.recommended.unwrap_or_default())}))}
-                            {KeyValuePair("All", markup!({DebugDisplay(linter_configuration.all.unwrap_or_default())}))}
                             {RageConfigurationLintRules("Enabled rules", linter_configuration)}
                         ).fmt(fmt)?;
                     }
@@ -325,12 +358,13 @@ impl Display for RageConfigurationLintRules<'_> {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> io::Result<()> {
         let rules_str = self.0;
         let padding = Padding::new(2);
+        let padding_rules = Padding::new(4);
         fmt.write_markup(markup! {{padding}{rules_str}":"})?;
         fmt.write_markup(markup! {{SOFT_LINE}})?;
         let rules = self.1.as_enabled_rules();
         let rules = rules.iter().collect::<std::collections::BTreeSet<_>>();
         for rule in rules {
-            fmt.write_markup(markup! {{padding}{rule}})?;
+            fmt.write_markup(markup! {{padding_rules}{rule}})?;
             fmt.write_markup(markup! {{SOFT_LINE}})?;
         }
 
@@ -345,7 +379,7 @@ impl fmt::Display for EnvVarOs {
         let name = self.0;
         match env::var_os(name) {
             None => KeyValuePair(name, markup! { <Dim>"unset"</Dim> }).fmt(fmt),
-            Some(value) => KeyValuePair(name, markup! {{DebugDisplay(value)}}).fmt(fmt),
+            Some(value) => KeyValuePair(name, markup! {{DisplayOption(value.to_str())}}).fmt(fmt),
         }
     }
 }
@@ -363,7 +397,7 @@ struct BiomeServerLog;
 impl Display for BiomeServerLog {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         if let Ok(Some(log)) = read_most_recent_log_file(
-            biome_env().biome_log_path.value().map(PathBuf::from),
+            biome_env().biome_log_path.value().map(Utf8PathBuf::from),
             biome_env()
                 .biome_log_prefix
                 .value()

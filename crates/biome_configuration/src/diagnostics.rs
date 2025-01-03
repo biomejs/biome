@@ -1,7 +1,7 @@
 use biome_console::fmt::Display;
 use biome_console::{markup, MarkupBuf};
 use biome_deserialize::DeserializationDiagnostic;
-use biome_diagnostics::adapters::ResolveError;
+use biome_diagnostics::ResolveError;
 use biome_diagnostics::{Advices, Diagnostic, Error, LogCategory, MessageAndDescription, Visit};
 use biome_rowan::SyntaxError;
 use serde::{Deserialize, Serialize};
@@ -88,17 +88,16 @@ impl BiomeDiagnostic {
     }
 
     pub fn new_invalid_ignore_pattern_with_path(
-        pattern: impl Into<String>,
-        reason: impl Into<String>,
-        file_path: Option<impl Into<String>>,
+        pattern: impl std::fmt::Display,
+        reason: impl std::fmt::Display,
+        file_path: impl Into<String>,
     ) -> Self {
         Self::InvalidIgnorePattern(InvalidIgnorePattern {
             message: format!(
                 "Couldn't parse the pattern \"{}\". Reason: {}",
-                pattern.into(),
-                reason.into()
+                pattern, reason,
             ),
-            file_path: file_path.map(|f| f.into()),
+            file_path: Some(file_path.into()),
         })
     }
 
@@ -184,8 +183,8 @@ pub struct InvalidIgnorePattern {
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
-	category = "configuration",
-	severity = Error,
+    category = "configuration",
+    severity = Error,
 )]
 pub struct CantLoadExtendFile {
     #[location(resource)]
@@ -217,8 +216,8 @@ impl CantLoadExtendFile {
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
-	category = "configuration",
-	severity = Error,
+    category = "configuration",
+    severity = Error,
 )]
 pub struct InvalidConfiguration {
     #[message]

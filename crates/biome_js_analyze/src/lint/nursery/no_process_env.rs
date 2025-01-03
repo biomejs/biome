@@ -55,7 +55,7 @@ impl Rule for NoProcessEnv {
         let model = ctx.model();
         let object = static_member_expr.object().ok()?;
         let member_expr = static_member_expr.member().ok()?;
-        if member_expr.as_js_name()?.text() != "env" {
+        if member_expr.as_js_name()?.to_trimmed_string() != "env" {
             return None;
         }
 

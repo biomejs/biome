@@ -108,7 +108,7 @@ impl SemanticModel {
     ///     .syntax()
     ///     .descendants()
     ///     .filter_map(|x| x.cast::<GraphqlNameReference>())
-    ///     .find(|x| x.text() == "fragment")
+    ///     .find(|x| x.to_trimmed_string() == "fragment")
     ///     .unwrap();
     ///
     /// let fragment_binding = model.binding(&fragment_reference);
@@ -116,7 +116,7 @@ impl SemanticModel {
     /// let fragment_binding = fragment_reference.binding(&model);
     /// ```
     pub fn binding(&self, reference: &GraphqlNameReference) -> Option<Binding> {
-        let range = reference.syntax().text_range();
+        let range = reference.syntax().text_range_with_trivia();
         let reference_id = self.data.references_by_start.get(&range.start())?;
         debug_assert!(self.data.references_to_bindings[*reference_id].len() <= 1);
         self.data.references_to_bindings[*reference_id]
@@ -146,13 +146,13 @@ impl SemanticModel {
     ///     .syntax()
     ///     .descendants()
     ///     .filter_map(|x| x.cast::<GraphqlVariableReference>())
-    ///     .find(|x| x.text() == "$var")
+    ///     .find(|x| x.to_trimmed_string() == "$var")
     ///     .unwrap();
     ///
     /// let fragment_bindings = model.bindings(&fragment_reference);
     /// ```
     pub fn bindings(&self, reference: &GraphqlVariableReference) -> Vec<Binding> {
-        let range = reference.syntax().text_range();
+        let range = reference.syntax().text_range_with_trivia();
         let Some(reference_id) = self.data.references_by_start.get(&range.start()) else {
             return Vec::new();
         };
@@ -189,7 +189,7 @@ impl SemanticModel {
     }
 
     pub fn as_binding(&self, binding: &GraphqlNameBinding) -> Binding {
-        let range = binding.syntax().text_range();
+        let range = binding.syntax().text_range_with_trivia();
         let id = self.data.bindings_by_start[&range.start()];
         Binding {
             data: self.data.clone(),

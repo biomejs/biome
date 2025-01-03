@@ -19,12 +19,14 @@ biome_diagnostics  = { workspace = true }
 biome_json_factory = { workspace = true }
 biome_json_syntax  = { workspace = true }
 biome_rowan        = { workspace = true }
+biome_suppression  = { workspace = true }
 natord             = { workspace = true }
 rustc-hash         = { workspace = true }
 
 [dev-dependencies]
 biome_json_parser = { path = "../biome_json_parser" }
 biome_test_utils  = { path = "../biome_test_utils" }
+camino            = { workspace = true }
 insta             = { workspace = true, features = ["glob"] }
 tests_macros      = { path = "../tests_macros" }
 

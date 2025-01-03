@@ -17,5 +17,9 @@ serde    = { workspace = true, optional = true }
 [build-dependencies]
 quote = "1.0.14"
 
+[features]
+schema = ["dep:schemars", "serde"]
+serde  = ["dep:serde"]
+
 [lints]
 workspace = true

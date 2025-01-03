@@ -24,7 +24,7 @@ pub fn assert_rename_binding_a_to_b_ok(before: &str, expected: &str) {
         .syntax()
         .descendants()
         .filter_map(JsIdentifierBinding::cast)
-        .filter(|x| x.text().contains('a'))
+        .filter(|x| x.to_trimmed_string().contains('a'))
         .collect();
 
     let mut batch = r.tree().begin();
@@ -53,7 +53,7 @@ pub fn assert_rename_ts_binding_a_to_b_ok(before: &str, expected: &str) {
         .syntax()
         .descendants()
         .filter_map(TsIdentifierBinding::cast)
-        .filter(|x| x.text().contains('a'))
+        .filter(|x| x.to_trimmed_string().contains('a'))
         .collect();
 
     let mut batch = r.tree().begin();
@@ -88,7 +88,7 @@ pub fn assert_rename_binding_a_to_b_nok(before: &str) {
         .syntax()
         .descendants()
         .filter_map(|x| x.cast::<JsIdentifierBinding>())
-        .find(|x| x.text() == "a")
+        .find(|x| x.to_trimmed_string() == "a")
         .unwrap();
 
     let mut batch = r.tree().begin();

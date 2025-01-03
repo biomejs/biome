@@ -3,7 +3,7 @@ import { hey } from "hey";
 import {
     apple,
 banana } from "fruits";
-import {test} from "foo.json" assert { for: "for" }
+import {test} from "foo.json" with { for: "for" }
 import { // some funky comment
     loooooooooooooooooooong as moreeeeeeloooooooooooooooooooong,
     loooooooooooooooooooong2 as moreeeeeeloooooooooooooooooooong2,
@@ -23,8 +23,8 @@ import { loooooooooooooooooooooooooooooooooooooooooooooooooong } from "loooooooo
 
 import { loooooooooooooooooooooooooooooooooooooooooooooooooong, } from "loooooooooooooooooooooooooooooooooooooooooooooong"
 
-import { 
-// comment 
+import {
+// comment
 loooooooooooooooooooooooooooooooooooooooooooooooooong } from "loooooooooooooooooooooooooooooooooooooooooooooong"
 
 import { a as b } from "loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong"

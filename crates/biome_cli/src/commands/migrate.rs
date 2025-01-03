@@ -9,16 +9,16 @@ use biome_configuration::PartialConfiguration;
 use biome_console::{markup, Console, ConsoleExt};
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
-use biome_service::{DynRef, Workspace, WorkspaceError};
+use biome_service::{Workspace, WorkspaceError};
+use camino::Utf8PathBuf;
 use std::ffi::OsString;
-use std::path::PathBuf;
 
 pub(crate) struct MigrateCommandPayload {
     pub(crate) write: bool,
     pub(crate) fix: bool,
     pub(crate) sub_command: Option<MigrateSubCommand>,
-    pub(crate) configuration_file_path: Option<PathBuf>,
-    pub(crate) configuration_directory_path: Option<PathBuf>,
+    pub(crate) configuration_file_path: Option<Utf8PathBuf>,
+    pub(crate) configuration_directory_path: Option<Utf8PathBuf>,
 }
 
 impl CommandRunner for MigrateCommandPayload {
@@ -27,7 +27,7 @@ impl CommandRunner for MigrateCommandPayload {
     fn merge_configuration(
         &mut self,
         loaded_configuration: LoadedConfiguration,
-        _fs: &DynRef<'_, dyn FileSystem>,
+        _fs: &dyn FileSystem,
         _console: &mut dyn Console,
     ) -> Result<PartialConfiguration, WorkspaceError> {
         self.configuration_file_path = loaded_configuration.file_path;
@@ -37,7 +37,7 @@ impl CommandRunner for MigrateCommandPayload {
 
     fn get_files_to_process(
         &self,
-        _fs: &DynRef<'_, dyn FileSystem>,
+        _fs: &dyn FileSystem,
         _configuration: &PartialConfiguration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
         Ok(vec![])
@@ -79,8 +79,6 @@ impl CommandRunner for MigrateCommandPayload {
 
     fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
         check_fix_incompatible_arguments(FixFileModeOptions {
-            apply: false,
-            apply_unsafe: false,
             write: self.write,
             fix: self.fix,
             unsafe_: false,

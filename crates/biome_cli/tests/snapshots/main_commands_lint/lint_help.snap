@@ -1,6 +1,5 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-assertion_line: 423
 expression: content
 ---
 # Emitted Messages
@@ -80,9 +79,6 @@ Available options:
         --write               Writes safe fixes
         --unsafe              Allow to do unsafe fixes, should be used with `--write` or `--fix`
         --fix                 Alias for `--write`, writes safe fixes
-        --apply               Alias for `--write`, writes safe fixes (deprecated, use `--write`)
-        --apply-unsafe        Alias for `--write --unsafe`, writes safe and unsafe fixes
-                              (deprecated, use `--write --unsafe`)
         --suppress            Fixes lint rule violations with a comment a suppression instead of
                               using a rule code action (fix)
         --reason=STRING       Explanation for suppressing diagnostics with `--suppress`

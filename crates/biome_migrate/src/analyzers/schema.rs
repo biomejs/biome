@@ -7,6 +7,7 @@ use biome_diagnostics::{category, Applicability};
 use biome_json_factory::make::{ident, json_string_value};
 use biome_json_syntax::{JsonMember, TextRange};
 use biome_rowan::{AstNode, BatchMutationExt};
+use std::env;
 
 declare_migration! {
     pub(crate) Schema {
@@ -23,7 +24,6 @@ impl Rule for Schema {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let version = ctx.version();
 
         let node_text = node.name().ok()?.inner_string_text().ok()?;
         let member_value = node.value().ok()?;
@@ -35,9 +35,11 @@ impl Rule for Schema {
                 .strip_prefix("https://biomejs.dev/schemas/")?
                 .strip_suffix("/schema.json");
 
-            if let Some(current_version) = value {
-                if current_version != version {
-                    return Some(string_value.range());
+            if let Ok(version) = env::var("BIOME_VERSION") {
+                if let Some(current_version) = value {
+                    if current_version != version {
+                        return Some(string_value.range());
+                    }
                 }
             }
         }
@@ -61,7 +63,7 @@ impl Rule for Schema {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<MigrationAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-        let version = ctx.version();
+        let version = env::var("BIOME_VERSION").ok()?;
         let schema = format!("\"https://biomejs.dev/schemas/{version}/schema.json\"");
 
         let new_node = json_string_value(ident(&schema));

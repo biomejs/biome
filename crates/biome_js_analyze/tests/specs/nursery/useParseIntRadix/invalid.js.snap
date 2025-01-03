@@ -4,7 +4,7 @@ expression: invalid.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var num = parseInt("071");
 
 var num = parseInt(someValue);

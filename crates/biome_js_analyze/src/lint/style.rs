@@ -18,7 +18,6 @@ pub mod no_restricted_globals;
 pub mod no_shouty_constants;
 pub mod no_unused_template_literal;
 pub mod no_useless_else;
-pub mod no_var;
 pub mod no_yoda_expression;
 pub mod use_as_const_assertion;
 pub mod use_block_statements;
@@ -51,7 +50,6 @@ pub mod use_single_var_declarator;
 pub mod use_template;
 pub mod use_throw_new_error;
 pub mod use_throw_only_error;
-pub mod use_while;
 
 declare_lint_group! {
     pub Style {
@@ -73,7 +71,6 @@ declare_lint_group! {
             self :: no_shouty_constants :: NoShoutyConstants ,
             self :: no_unused_template_literal :: NoUnusedTemplateLiteral ,
             self :: no_useless_else :: NoUselessElse ,
-            self :: no_var :: NoVar ,
             self :: no_yoda_expression :: NoYodaExpression ,
             self :: use_as_const_assertion :: UseAsConstAssertion ,
             self :: use_block_statements :: UseBlockStatements ,
@@ -106,7 +103,6 @@ declare_lint_group! {
             self :: use_template :: UseTemplate ,
             self :: use_throw_new_error :: UseThrowNewError ,
             self :: use_throw_only_error :: UseThrowOnlyError ,
-            self :: use_while :: UseWhile ,
         ]
      }
 }

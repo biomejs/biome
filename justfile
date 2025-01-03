@@ -32,7 +32,7 @@ gen-bindings:
   cargo codegen-bindings
 
 # Generates code generated files for the linter
-gen-lint:
+gen-analyzer:
   cargo run -p xtask_codegen -- analyzer
   cargo codegen-configuration
   cargo codegen-migrate
@@ -59,36 +59,36 @@ documentation:
 # Creates a new lint rule in the given path, with the given name. Name has to be camel case.
 new-js-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=js --category=lint --name={{rulename}}
-  just gen-lint
+  just gen-analyzer
   just documentation
 
 # Creates a new lint rule in the given path, with the given name. Name has to be camel case.
 new-js-assistrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=js --category=assist --name={{rulename}}
-  just gen-lint
+  just gen-analyzer
   just documentation
 
   # Creates a new lint rule in the given path, with the given name. Name has to be camel case.
 new-json-assistrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=json --category=assist --name={{rulename}}
-  just gen-lint
+  just gen-analyzer
   just documentation
 
 # Creates a new css lint rule in the given path, with the given name. Name has to be camel case.
 new-css-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=css --category=lint --name={{rulename}}
-  just gen-lint
+  just gen-analyzer
 
 # Creates a new css lint rule in the given path, with the given name. Name has to be camel case.
 new-graphql-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=graphql --category=lint --name={{rulename}}
-  just gen-lint
+  just gen-analyzer
 
 
 # Promotes a rule from the nursery group to a new group
 promote-rule rulename group:
 	cargo run -p xtask_codegen -- promote-rule --name={{rulename}} --group={{group}}
-	just gen-lint
+	just gen-analyzer
 	just documentation
 	-cargo test -p biome_js_analyze -- {{snakecase(rulename)}}
 	cargo insta accept

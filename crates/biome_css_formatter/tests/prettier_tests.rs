@@ -1,8 +1,8 @@
-use std::{env, path::Path};
-
 use biome_css_formatter::{context::CssFormatOptions, CssFormatLanguage};
 use biome_formatter::{IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
+use camino::Utf8Path;
+use std::env;
 
 mod language;
 
@@ -11,7 +11,7 @@ tests_macros::gen_tests! {"tests/specs/prettier/{css}/**/*.{css}", crate::test_s
 fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     countme::enable(true);
 
-    let root_path = Path::new(concat!(
+    let root_path = Utf8Path::new(concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/tests/specs/prettier/"
     ));

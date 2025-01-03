@@ -4,7 +4,7 @@ expression: valid.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 RegExp("x1f");
 RegExp("[");
 new RegExp("x1f");

@@ -1,10 +1,11 @@
 ---
 source: crates/biome_js_parser/tests/spec_test.rs
 expression: snapshot
+snapshot_kind: text
 ---
 ## Input
 
-```jsx
+```js
 for (await using of x) {};
 for await (await using of x) {};
 

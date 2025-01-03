@@ -4,7 +4,7 @@ use biome_configuration::{
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_graphql_formatter::{context::GraphqlFormatOptions, GraphqlFormatLanguage};
 use biome_service::workspace::UpdateSettingsParams;
-use std::path::Path;
+use camino::Utf8Path;
 
 mod language {
     include!("language.rs");
@@ -28,7 +28,7 @@ mod language {
 /// * `graphql/null` -> input: `tests/specs/graphql/null.graphql`, expected output: `tests/specs/graphql/null.graphql.snap`
 /// * `null` -> input: `tests/specs/null.graphql`, expected output: `tests/specs/null.graphql.snap`
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _file_type: &str) {
-    let root_path = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
+    let root_path = Utf8Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
     let settings = UpdateSettingsParams {
         configuration: PartialConfiguration {
             graphql: Some(PartialGraphqlConfiguration {

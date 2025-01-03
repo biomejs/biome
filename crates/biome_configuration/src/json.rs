@@ -1,6 +1,6 @@
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
-use biome_json_formatter::context::TrailingCommas;
+use biome_json_formatter::context::{Expand, TrailingCommas};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -23,8 +23,8 @@ pub struct JsonConfiguration {
     pub linter: JsonLinter,
 
     /// Assists options
-    #[partial(type, bpaf(external(partial_json_assists), optional))]
-    pub assists: JsonAssists,
+    #[partial(type, bpaf(external(partial_json_assist), optional))]
+    pub assists: JsonAssist,
 }
 
 /// Options that changes how the JSON parser behaves
@@ -59,11 +59,6 @@ pub struct JsonFormatter {
     #[partial(bpaf(long("json-formatter-indent-width"), argument("NUMBER"), optional))]
     pub indent_width: Option<IndentWidth>,
 
-    /// The size of the indentation applied to JSON (and its super languages) files. Default to 2.
-    #[partial(bpaf(long("json-formatter-indent-size"), argument("NUMBER"), optional))]
-    #[partial(deserializable(deprecated(use_instead = "json.formatter.indentWidth")))]
-    pub indent_size: Option<IndentWidth>,
-
     /// The type of line ending applied to JSON (and its super languages) files.
     #[partial(bpaf(long("json-formatter-line-ending"), argument("lf|crlf|cr"), optional))]
     pub line_ending: Option<LineEnding>,
@@ -75,6 +70,15 @@ pub struct JsonFormatter {
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
     #[partial(bpaf(long("json-formatter-trailing-commas"), argument("none|all"), optional))]
     pub trailing_commas: Option<TrailingCommas>,
+
+    /// Whether to expand arrays and objects on multiple lines. When set to `always`, these literals are formatted on multiple lines,
+    /// regardless of length of the list. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "followSource".
+    #[partial(bpaf(
+        long("json-formatter-expand"),
+        argument("always|follow-source"),
+        optional
+    ))]
+    pub expand: Option<Expand>,
 }
 
 impl PartialJsonFormatter {
@@ -83,10 +87,10 @@ impl PartialJsonFormatter {
             enabled: self.enabled.unwrap_or_default(),
             indent_style: self.indent_style,
             indent_width: self.indent_width,
-            indent_size: self.indent_size,
             line_ending: self.line_ending,
             line_width: self.line_width,
             trailing_commas: self.trailing_commas,
+            expand: self.expand,
         }
     }
 }
@@ -97,10 +101,10 @@ impl Default for JsonFormatter {
             enabled: true,
             indent_style: Default::default(),
             indent_width: Default::default(),
-            indent_size: Default::default(),
             line_ending: Default::default(),
             line_width: Default::default(),
             trailing_commas: Default::default(),
+            expand: Default::default(),
         }
     }
 }
@@ -143,13 +147,13 @@ impl PartialJsonLinter {
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct JsonAssists {
+pub struct JsonAssist {
     /// Control the linter for JSON (and its super languages) files.
-    #[partial(bpaf(long("json-assists-enabled"), argument("true|false"), optional))]
+    #[partial(bpaf(long("json-assist-enabled"), argument("true|false"), optional))]
     pub enabled: bool,
 }
 
-impl Default for JsonAssists {
+impl Default for JsonAssist {
     fn default() -> Self {
         Self { enabled: true }
     }

@@ -1,0 +1,15 @@
+---
+source: crates/biome_configuration/tests/spec_tests.rs
+expression: organize_imports.json
+snapshot_kind: text
+---
+organize_imports.json:3:14 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × enabled has an incorrect type, expected a boolean, but received a string.
+  
+    1 │ {
+    2 │ 	"assist": {
+  > 3 │ 		"enabled": "false"
+      │ 		           ^^^^^^^
+    4 │ 	}
+    5 │ }

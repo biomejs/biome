@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: inavlidSelfWrite.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 let a = 1;
 
 (a += 1);
@@ -129,5 +130,3 @@ inavlidSelfWrite.js:10:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
 
 ```
-
-

@@ -16,18 +16,11 @@ console.log(a);
 ```block
 flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Incompatible arguments --apply and --write
+  × Failed to parse CLI arguments.
+    
+    Caused by:
+      argument `--write` cannot be used multiple times in this context
   
 
-
-```
-
-# Emitted Messages
-
-```block
-internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The argument --apply is deprecated, it will be removed in the next major release. Use --write instead.
-  
 
 ```

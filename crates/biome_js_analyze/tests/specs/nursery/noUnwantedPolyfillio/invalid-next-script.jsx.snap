@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-next-script.jsx
+---
+# Input
+```jsx
+import NextScript from 'next/script'
+
+export function MyApp({ Component, pageProps }) {
+  return (
+    <div>
+      <Component {...pageProps} />
+      <NextScript src='https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.copyWithin' />
+    </div>
+  );
+}
+
+```
+
+# Diagnostics
+```
+invalid-next-script.jsx:7:23 lint/nursery/noUnwantedPolyfillio ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prevent duplicate polyfills from Polyfill.io
+  
+    5 │     <div>
+    6 │       <Component {...pageProps} />
+  > 7 │       <NextScript src='https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.copyWithin' />
+      │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │     </div>
+    9 │   );
+  
+  i Array.prototype.copyWithin is already shipped with Next.js.
+  
+  i This unnecessarily increases page weight which can affect loading performance.
+  
+
+```

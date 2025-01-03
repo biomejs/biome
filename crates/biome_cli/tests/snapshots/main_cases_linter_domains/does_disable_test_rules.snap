@@ -1,0 +1,43 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+snapshot_kind: text
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "domains": {
+      "test": "none"
+    }
+  }
+}
+```
+
+## `test1.js`
+
+```js
+describe.only("bar", () => {});
+
+```
+
+## `test2.js`
+
+```js
+
+describe("foo", () => {
+	beforeEach(() => {});
+    beforeEach(() => {});
+    test("bar", () => {
+        someFn();
+    });
+});
+    
+```
+
+# Emitted Messages
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+```

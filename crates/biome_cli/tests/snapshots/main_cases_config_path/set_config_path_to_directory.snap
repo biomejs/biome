@@ -1,12 +1,13 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `config/biome.jsonc`
 
 ```jsonc
 {
-  "organizeImports": {
+  "assist": {
     "enabled": true
   },
   "linter": {

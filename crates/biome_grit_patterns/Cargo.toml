@@ -1,7 +1,7 @@
 [package]
 authors.workspace    = true
 categories.workspace = true
-description          = "Biome implementing for matching Grit Patterns"
+description          = "Biome implementation for Grit Patterns"
 edition.workspace    = true
 homepage.workspace   = true
 keywords.workspace   = true
@@ -12,7 +12,10 @@ repository.workspace = true
 version              = "0.0.1"
 
 [dependencies]
+biome_analyze        = { workspace = true }
 biome_console        = { workspace = true }
+biome_css_parser     = { workspace = true }
+biome_css_syntax     = { workspace = true }
 biome_diagnostics    = { workspace = true }
 biome_grit_parser    = { workspace = true }
 biome_grit_syntax    = { workspace = true }
@@ -21,18 +24,25 @@ biome_js_syntax      = { workspace = true }
 biome_parser         = { workspace = true }
 biome_rowan          = { workspace = true }
 biome_string_case    = { workspace = true }
-grit-pattern-matcher = { version = "0.4" }
-grit-util            = { version = "0.4" }
+camino               = { workspace = true }
+grit-pattern-matcher = { workspace = true }
+grit-util            = { workspace = true }
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
 rand                 = { version = "0.8.5" }
 regex                = { workspace = true }
 rustc-hash           = { workspace = true }
-serde                = { workspace = true, features = ["derive"] }
+schemars             = { workspace = true, optional = true }
+serde                = { workspace = true, features = ["derive"], optional = true }
+serde_json           = { workspace = true, optional = true }
 
 [dev-dependencies]
 biome_test_utils = { path = "../biome_test_utils" }
 insta            = { workspace = true }
 tests_macros     = { path = "../tests_macros" }
+
+[features]
+schema = ["dep:schemars", "serde", "biome_js_parser/schema"]
+serde  = ["dep:serde", "dep:serde_json"]
 
 [lints]
 workspace = true

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -21,7 +22,7 @@ expression: content
 	"loreum_ipsum_lorem_ipsum": "bar",
 	"loreum_ipsum_lorem_ipsum": "bar",
 	"loreum_ipsum_lorem_ipsum": "bar",
-	"loreum_ipsum_lorem_ipsum": "bar",
+	"loreum_ipsum_lorem_ipsum": "bar"
 }
 
 ```

@@ -1,6 +1,6 @@
 {
   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
-  "assists": {
+  "assist": {
     "enabled": true,
     "ignore": [
       "./packages/@biomejs/biome/configuration_schema.json"
@@ -53,12 +53,13 @@
     "rules": {
       "recommended": true,
       "style": {
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "off",
+        "useNodejsImportProtocol": "error"
+      },
+      "suspicious": {
+        "noVar": "on"
       }
     }
-  },
-  "organizeImports": {
-    "enabled": true
   },
   "vcs": {
     "clientKind": "git",

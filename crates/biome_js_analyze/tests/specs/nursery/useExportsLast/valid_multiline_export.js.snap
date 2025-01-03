@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid_multiline_export.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export const greet = (name) => {
 	return `Hello, ${name}!`;
 };

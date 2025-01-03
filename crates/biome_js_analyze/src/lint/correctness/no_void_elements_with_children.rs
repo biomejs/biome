@@ -4,6 +4,7 @@ use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::{markup, MarkupBuf};
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{jsx_attribute_list, jsx_self_closing_element};
 use biome_js_syntax::{
     AnyJsxAttribute, JsCallExpression, JsPropertyObjectMember, JsxAttribute, JsxElement,
@@ -35,6 +36,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("void-dom-elements-no-children")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -43,27 +45,13 @@ declare_node_union! {
     pub NoVoidElementsWithChildrenQuery = JsxElement | JsCallExpression | JsxSelfClosingElement
 }
 
+const VOID_ELEMENTS: [&str; 16] = [
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "menuitem",
+    "meta", "param", "source", "track", "wbr",
+];
 /// Returns true if the name of the element belong to a self-closing element
 fn is_void_dom_element(element_name: &str) -> bool {
-    matches!(
-        element_name,
-        "area"
-            | "base"
-            | "br"
-            | "col"
-            | "embed"
-            | "hr"
-            | "img"
-            | "input"
-            | "keygen"
-            | "link"
-            | "menuitem"
-            | "meta"
-            | "param"
-            | "source"
-            | "track"
-            | "wbr"
-    )
+    VOID_ELEMENTS.contains(&element_name)
 }
 
 pub enum NoVoidElementsWithChildrenCause {

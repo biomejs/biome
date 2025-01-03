@@ -690,7 +690,7 @@ impl AnyJsAssignmentLike {
         }
 
         if let Some(AnyJsExpression::JsCallExpression(call_expression)) = &right_expression {
-            if call_expression.callee()?.syntax().text() == "require" {
+            if call_expression.callee()?.syntax().text_with_trivia() == "require" {
                 return Ok(AssignmentLikeLayout::NeverBreakAfterOperator);
             }
         }

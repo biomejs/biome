@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validExportAlias.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export { X as X }
 
 export { Y as CONSTANT_Y  }
@@ -28,5 +29,3 @@ export { jquery as $ } from ""
 
 export { lodash as _ } from ""
 ```
-
-

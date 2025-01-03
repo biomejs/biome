@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: sumOfPrimes.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function sumOfPrimes(max) {
     let total = 0;
     OUT: for (let i = 1; i <= max; ++i) { // +1
@@ -34,5 +35,3 @@ sumOfPrimes.js:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━�
   
 
 ```
-
-

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 ({ 1n: 1 });
 ({ 0x1: 1 });
 ({
@@ -302,5 +303,3 @@ invalid.js:15:8 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━
   
 
 ```
-
-

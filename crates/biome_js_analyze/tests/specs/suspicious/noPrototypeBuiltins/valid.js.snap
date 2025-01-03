@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 86
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 Object.hasOwn(foo, "bar");
 Object.prototype.isPrototypeOf.call(foo, bar);
 Object.prototype.propertyIsEnumerable.call(foo, 'bar');

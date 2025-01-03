@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: inObject.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // invalid
 React.createElement('button');
 React.createElement('button', {

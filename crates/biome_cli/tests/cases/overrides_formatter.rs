@@ -2,9 +2,8 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 const UNFORMATTED: &str = "  statement(  )  ";
 const UNFORMATTED_JSON: &str = r#"{ "asta": ["lorem", "ipsum", "first", "second"] }"#;
@@ -33,7 +32,7 @@ const CSS_FORMATTED_SINGLE_QUOTES_AND_SPACES: &str =
 fn does_handle_included_file_and_disable_formatter() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -47,24 +46,16 @@ fn does_handle_included_file_and_disable_formatter() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED.as_bytes());
 
-    let test2 = Path::new("special/test2.js");
+    let test2 = Utf8Path::new("special/test2.js");
     fs.insert(test2.into(), UNFORMATTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                ("--write"),
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -85,7 +76,7 @@ fn does_handle_included_file_and_disable_formatter() {
 fn does_include_file_with_different_formatting() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -96,24 +87,16 @@ fn does_include_file_with_different_formatting() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("special/test2.js");
+    let test2 = Utf8Path::new("special/test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                ("--write"),
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -134,7 +117,7 @@ fn does_include_file_with_different_formatting() {
 fn does_include_file_with_different_formatting_and_all_of_them() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -148,24 +131,16 @@ fn does_include_file_with_different_formatting_and_all_of_them() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("special/test2.js");
+    let test2 = Utf8Path::new("special/test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                ("--write"),
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -186,7 +161,7 @@ fn does_include_file_with_different_formatting_and_all_of_them() {
 fn does_include_file_with_different_overrides() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -200,24 +175,16 @@ fn does_include_file_with_different_overrides() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                ("--write"),
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -239,7 +206,7 @@ fn does_include_file_with_different_overrides() {
 fn complex_enable_disable_overrides() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -270,21 +237,21 @@ fn complex_enable_disable_overrides() {
         .as_bytes(),
     );
 
-    let formatted = Path::new("formatted.js");
+    let formatted = Utf8Path::new("formatted.js");
     fs.insert(formatted.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let unformatted = Path::new("dirty.js");
+    let unformatted = Utf8Path::new("dirty.js");
     fs.insert(unformatted.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
-                formatted.as_os_str().to_str().unwrap(),
-                unformatted.as_os_str().to_str().unwrap(),
+                "format",
+                "--write",
+                formatted.as_str(),
+                unformatted.as_str(),
             ]
             .as_slice(),
         ),
@@ -306,7 +273,7 @@ fn complex_enable_disable_overrides() {
 fn does_include_file_with_different_languages() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -320,24 +287,24 @@ fn does_include_file_with_different_languages() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
-    let test_css = Path::new("test.css");
+    let test_css = Utf8Path::new("test.css");
     fs.insert(test_css.into(), CSS_UNFORMATTED_QUOTES.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-                test_css.as_os_str().to_str().unwrap(),
+                "format",
+                "--write",
+                test.as_str(),
+                test2.as_str(),
+                test_css.as_str(),
             ]
             .as_slice(),
         ),
@@ -363,7 +330,7 @@ fn does_include_file_with_different_languages() {
 fn does_include_file_with_different_languages_and_files() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -387,29 +354,29 @@ fn does_include_file_with_different_languages_and_files() {
             .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let json_file = Path::new("test3.json");
+    let json_file = Utf8Path::new("test3.json");
     fs.insert(json_file.into(), UNFORMATTED_JSON.as_bytes());
 
-    let css_file = Path::new("test4.css");
+    let css_file = Utf8Path::new("test4.css");
     fs.insert(css_file.into(), UNFORMATTED_CSS.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-                json_file.as_os_str().to_str().unwrap(),
-                css_file.as_os_str().to_str().unwrap(),
+                "format",
+                "--write",
+                test.as_str(),
+                test2.as_str(),
+                json_file.as_str(),
+                css_file.as_str(),
             ]
             .as_slice(),
         ),
@@ -435,7 +402,7 @@ fn does_include_file_with_different_languages_and_files() {
 fn does_not_change_formatting_settings() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -449,24 +416,16 @@ fn does_not_change_formatting_settings() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                ("--write"),
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -487,7 +446,7 @@ fn does_not_change_formatting_settings() {
 fn does_not_change_formatting_language_settings() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -501,24 +460,16 @@ fn does_not_change_formatting_language_settings() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                ("--write"),
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -539,7 +490,7 @@ fn does_not_change_formatting_language_settings() {
 fn does_not_change_formatting_language_settings_2() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -553,24 +504,16 @@ fn does_not_change_formatting_language_settings_2() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                ("--write"),
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -591,7 +534,7 @@ fn does_not_change_formatting_language_settings_2() {
 fn does_not_conceal_previous_overrides() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -604,23 +547,16 @@ fn does_not_conceal_previous_overrides() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let test2 = Path::new("test2.js");
+    let test2 = Utf8Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", test.as_str(), test2.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -636,7 +572,7 @@ fn does_not_conceal_previous_overrides() {
 fn takes_last_formatter_enabled_into_account() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -653,13 +589,13 @@ fn takes_last_formatter_enabled_into_account() {
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(["format", test.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", test.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -675,7 +611,7 @@ fn takes_last_formatter_enabled_into_account() {
 fn does_not_override_well_known_special_files_when_config_override_is_present() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -691,7 +627,7 @@ fn does_not_override_well_known_special_files_when_config_override_is_present() 
         .as_bytes(),
     );
 
-    let tsconfig = Path::new("tsconfig.json");
+    let tsconfig = Utf8Path::new("tsconfig.json");
     fs.insert(
         tsconfig.into(),
         r#"{
@@ -700,7 +636,7 @@ fn does_not_override_well_known_special_files_when_config_override_is_present() 
 }"#,
     );
 
-    let other_json = Path::new("other.json");
+    let other_json = Utf8Path::new("other.json");
     fs.insert(
         other_json.into(),
         r#"{
@@ -708,17 +644,10 @@ fn does_not_override_well_known_special_files_when_config_override_is_present() 
 }"#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                other_json.as_os_str().to_str().unwrap(),
-                tsconfig.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", other_json.as_str(), tsconfig.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -734,7 +663,7 @@ fn does_not_override_well_known_special_files_when_config_override_is_present() 
 fn allow_trailing_commas_on_well_known_files() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -754,7 +683,7 @@ fn allow_trailing_commas_on_well_known_files() {
         .as_bytes(),
     );
 
-    let tsconfig = Path::new("tsconfig.json");
+    let tsconfig = Utf8Path::new("tsconfig.json");
     fs.insert(
         tsconfig.into(),
         r#"{
@@ -763,7 +692,7 @@ fn allow_trailing_commas_on_well_known_files() {
 }"#,
     );
 
-    let vscode_settings = Path::new(".vscode/settings.json");
+    let vscode_settings = Utf8Path::new(".vscode/settings.json");
     fs.insert(
         vscode_settings.into(),
         r#"{
@@ -772,10 +701,10 @@ fn allow_trailing_commas_on_well_known_files() {
 }"#,
     );
 
-    let vscode_text_file = Path::new(".vscode/any.text");
+    let vscode_text_file = Utf8Path::new(".vscode/any.text");
     fs.insert(vscode_text_file.into(), "any text");
 
-    let other_json = Path::new("other.json");
+    let other_json = Utf8Path::new("other.json");
     fs.insert(
         other_json.into(),
         r#"{
@@ -783,18 +712,10 @@ fn allow_trailing_commas_on_well_known_files() {
 }"#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                other_json.as_os_str().to_str().unwrap(),
-                tsconfig.as_os_str().to_str().unwrap(),
-                ".vscode/",
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", other_json.as_str(), tsconfig.as_str(), ".vscode/"].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -810,7 +731,7 @@ fn allow_trailing_commas_on_well_known_files() {
 fn disallow_comments_on_well_known_files() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
@@ -830,7 +751,7 @@ fn disallow_comments_on_well_known_files() {
         .as_bytes(),
     );
 
-    let tsconfig = Path::new("tsconfig.json");
+    let tsconfig = Utf8Path::new("tsconfig.json");
     fs.insert(
         tsconfig.into(),
         r#"{
@@ -839,15 +760,99 @@ fn disallow_comments_on_well_known_files() {
 }"#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(["check", tsconfig.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", tsconfig.as_str()].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "disallow_comments_on_well_known_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn overrides_default_formatter_for_package_json() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let biome_json = Utf8Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+            "overrides": [
+                {
+                    "include": ["package.json"],
+                    "json": { "formatter": { "expand": "followSource" } }
+                }
+            ]
+        }"#,
+    );
+    let file_path = Utf8Path::new("package.json");
+    fs.insert(
+        file_path.into(),
+        r#"{ "name": "foo", "dependencies": { "foo": "latest" } }"#.as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "overrides_default_formatter_for_package_json",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn overrides_grit_formatting_options() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "formatter": {
+                "indentStyle": "tab"
+            },
+            "overrides": [
+                {
+                    "include": [
+                        "file.grit"
+                    ],
+                    "grit": { "formatter": { "indentStyle": "space", "indentWidth": 8 }  }
+                }
+            ]
+        }"#
+        .as_bytes(),
+    );
+
+    let js_file = Utf8Path::new("file.js");
+    fs.insert(js_file.into(), r#"function name() { return "hello"; }"#);
+
+    let grit_file = Utf8Path::new("file.grit");
+    fs.insert(
+        grit_file.into(),
+        r#"`console.$_($content)` where { $content <: contains `secret` until `sanitized($_)` }"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", js_file.as_str(), grit_file.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "overrides_grit_formatting_options",
         fs,
         console,
         result,

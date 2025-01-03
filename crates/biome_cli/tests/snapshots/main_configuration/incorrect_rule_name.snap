@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -48,7 +49,6 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   i Known keys:
   
   - recommended
-  - all
   - noChildrenProp
   - noConstAssign
   - noConstantCondition
@@ -121,7 +121,6 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   i Known keys:
   
   - recommended
-  - all
   - noArguments
   - noCommaOperator
   - noDefaultExport
@@ -138,7 +137,6 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noShoutyConstants
   - noUnusedTemplateLiteral
   - noUselessElse
-  - noVar
   - noYodaExpression
   - useAsConstAssertion
   - useBlockStatements
@@ -171,7 +169,6 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useTemplate
   - useThrowNewError
   - useThrowOnlyError
-  - useWhile
   
 
 ```

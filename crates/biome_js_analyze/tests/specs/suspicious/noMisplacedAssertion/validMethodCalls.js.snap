@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validMethodCalls.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 it.each([1, 2, 3])('test', (a, b, expected) => {
   expect(a + b).toBe(expected)
 })

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // Hook called directly at the component function
 function Component1({ a }) {
     if (a == 1) {
@@ -799,5 +800,3 @@ invalid.js:163:13 lint/correctness/useHookAtTopLevel ━━━━━━━━━
   
 
 ```
-
-

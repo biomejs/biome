@@ -1,0 +1,43 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: group_level.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "all": true
+      }
+    }
+  }
+}
+```
+
+# Diagnostics
+```
+group_level.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property all has been removed.
+  
+    3 │     "rules": {
+    4 │       "suspicious": {
+  > 5 │         "all": true
+      │         ^^^^^
+    6 │       }
+    7 │     }
+  
+  i Due to the increasing number of rules that span in scope and use-case, certain rules can conflict with each other. The option has become more harmful than useful.
+  
+  i Safe fix: Remove the property.
+  
+    3 3 │       "rules": {
+    4 4 │         "suspicious": {
+    5   │ - ········"all":·true
+    6 5 │         }
+    7 6 │       }
+  
+
+```

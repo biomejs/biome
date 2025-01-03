@@ -8,19 +8,19 @@ pub struct DebugDisplay<T>(pub T);
 
 impl<T> Display for DebugDisplay<T>
 where
-    T: std::fmt::Debug,
+    T: std::fmt::Display,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
-        write!(f, "{:?}", self.0)
+        write!(f, "{}", self.0)
     }
 }
 
 /// It displays a `Option<T>`, where `T` implements [std::fmt::Display]
-pub struct DebugDisplayOption<T>(pub Option<T>);
+pub struct DisplayOption<T>(pub Option<T>);
 
-impl<T> Display for DebugDisplayOption<T>
+impl<T> Display for DisplayOption<T>
 where
-    T: std::fmt::Debug,
+    T: std::fmt::Display,
 {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         use crate as biome_console;

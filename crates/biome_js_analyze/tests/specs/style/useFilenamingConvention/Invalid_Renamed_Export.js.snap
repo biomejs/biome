@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: Invalid_Renamed_Export.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 class Invalid_Renamed_Export {}
 export { Invalid_Renamed_Export as A }
 ```

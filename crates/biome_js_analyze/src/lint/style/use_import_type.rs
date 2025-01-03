@@ -8,6 +8,7 @@ use biome_analyze::{
     RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
@@ -115,7 +116,8 @@ declare_lint_rule! {
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("consistent-type-imports")],
         source_kind: RuleSourceKind::Inspired,
-        recommended: true,
+        recommended: false,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }
@@ -134,7 +136,7 @@ impl Rule for UseImportType {
         let import = ctx.query();
         let import_clause = import.import_clause().ok()?;
         // Import attributes and type-only imports are not compatible.
-        if import_clause.assertion().is_some() {
+        if import_clause.attribute().is_some() {
             return None;
         }
         let model = ctx.model();

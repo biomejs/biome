@@ -18,16 +18,17 @@ use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{CliDiagnostic, CliSession, DiagnosticsPayload, Reporter};
 use biome_configuration::analyzer::RuleSelector;
 use biome_console::{markup, ConsoleExt};
-use biome_diagnostics::adapters::SerdeJsonError;
+use biome_diagnostics::SerdeJsonError;
 use biome_diagnostics::{category, Category};
 use biome_fs::BiomePath;
+use biome_grit_patterns::GritTargetLanguage;
 use biome_service::workspace::{
-    FeatureName, FeaturesBuilder, FixFileMode, FormatFileParams, OpenFileParams, PatternId,
+    FeatureName, FeaturesBuilder, FileContent, FixFileMode, FormatFileParams, OpenFileParams,
+    PatternId,
 };
-use std::borrow::Borrow;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
-use std::path::{Path, PathBuf};
 use tracing::info;
 
 /// Useful information during the traversal of files and virtual content
@@ -68,10 +69,9 @@ impl Execution {
             TraversalMode::Format { .. } => FeaturesBuilder::new().with_formatter().build(),
             TraversalMode::Lint { .. } => FeaturesBuilder::new().with_linter().build(),
             TraversalMode::Check { .. } | TraversalMode::CI { .. } => FeaturesBuilder::new()
-                .with_organize_imports()
                 .with_formatter()
                 .with_linter()
-                .with_assists()
+                .with_assist()
                 .build(),
             TraversalMode::Migrate { .. } => FeatureName::empty(),
             TraversalMode::Search { .. } => FeaturesBuilder::new().with_search().build(),
@@ -88,13 +88,13 @@ pub enum ExecutionEnvironment {
 #[derive(Debug, Clone)]
 pub struct Stdin(
     /// The virtual path to the file
-    PathBuf,
+    Utf8PathBuf,
     /// The content of the file
     String,
 );
 
 impl Stdin {
-    fn as_path(&self) -> &Path {
+    fn as_path(&self) -> &Utf8Path {
         self.0.as_path()
     }
 
@@ -103,8 +103,8 @@ impl Stdin {
     }
 }
 
-impl From<(PathBuf, String)> for Stdin {
-    fn from((path, content): (PathBuf, String)) -> Self {
+impl From<(Utf8PathBuf, String)> for Stdin {
+    fn from((path, content): (Utf8PathBuf, String)) -> Self {
         Self(path, content)
     }
 }
@@ -187,9 +187,9 @@ pub enum TraversalMode {
         /// Write result to disk
         write: bool,
         /// The path to `biome.json`
-        configuration_file_path: PathBuf,
+        configuration_file_path: Utf8PathBuf,
         /// The path directory where `biome.json` is placed
-        configuration_directory_path: PathBuf,
+        configuration_directory_path: Utf8PathBuf,
         sub_command: Option<MigrateSubCommand>,
     },
     /// This mode is enabled when running the command `biome search`
@@ -198,6 +198,15 @@ pub enum TraversalMode {
         ///
         /// Note that the search command does not support rewrites.
         pattern: PatternId,
+
+        /// The language to query for.
+        ///
+        /// Grit queries are specific to the grammar of the language they
+        /// target, so we currently do not support writing queries that apply
+        /// to multiple languages at once.
+        ///
+        /// If none given, the default language is JavaScript.
+        language: Option<GritTargetLanguage>,
 
         /// An optional tuple.
         /// 1. The virtual path to the file
@@ -216,6 +225,16 @@ impl Display for TraversalMode {
             TraversalMode::Lint { .. } => write!(f, "lint"),
             TraversalMode::Search { .. } => write!(f, "search"),
         }
+    }
+}
+
+impl TraversalMode {
+    pub fn should_scan_project(&self) -> bool {
+        matches!(self, Self::CI { .. })
+            || matches!(
+                self,
+                Self::Check { stdin,.. } | Self::Lint { stdin, .. } if stdin.is_none()
+            )
     }
 }
 
@@ -520,10 +539,11 @@ pub fn execute_mode(
                     })?;
                     let report_file = BiomePath::new("_report_output.json");
                     session.app.workspace.open_file(OpenFileParams {
-                        content,
+                        content: FileContent::FromClient(content),
                         path: report_file.clone(),
                         version: 0,
                         document_file_source: None,
+                        persist_node_cache: false,
                     })?;
                     let code = session.app.workspace.format_file(FormatFileParams {
                         path: report_file.clone(),
@@ -559,7 +579,7 @@ pub fn execute_mode(
                 };
                 reporter.write(&mut GitLabReporterVisitor::new(
                     console,
-                    session.app.fs.borrow().working_directory(),
+                    session.app.workspace.fs().working_directory(),
                 ))?;
             }
             ReportMode::Junit => {

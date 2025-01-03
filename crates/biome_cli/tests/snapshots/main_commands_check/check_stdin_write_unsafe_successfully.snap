@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 # Input messages
 
@@ -14,7 +15,7 @@ import zod from 'zod'; import _ from 'lodash'; function f() {var x = 1; return{x
 import _ from "lodash";
 import zod from "zod";
 function f() {
-	const x = 1;
+	var x = 1;
 	return { x };
 }
 class Foo {}

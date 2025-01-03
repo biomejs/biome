@@ -13,7 +13,6 @@ pub mod no_compare_neg_zero;
 pub mod no_confusing_labels;
 pub mod no_confusing_void_type;
 pub mod no_console;
-pub mod no_console_log;
 pub mod no_const_enum;
 pub mod no_control_characters_in_regex;
 pub mod no_debugger;
@@ -55,6 +54,7 @@ pub mod no_suspicious_semicolon_in_jsx;
 pub mod no_then_property;
 pub mod no_unsafe_declaration_merging;
 pub mod no_unsafe_negation;
+pub mod no_var;
 pub mod use_await;
 pub mod use_default_switch_clause_last;
 pub mod use_error_message;
@@ -79,7 +79,6 @@ declare_lint_group! {
             self :: no_confusing_labels :: NoConfusingLabels ,
             self :: no_confusing_void_type :: NoConfusingVoidType ,
             self :: no_console :: NoConsole ,
-            self :: no_console_log :: NoConsoleLog ,
             self :: no_const_enum :: NoConstEnum ,
             self :: no_control_characters_in_regex :: NoControlCharactersInRegex ,
             self :: no_debugger :: NoDebugger ,
@@ -121,6 +120,7 @@ declare_lint_group! {
             self :: no_then_property :: NoThenProperty ,
             self :: no_unsafe_declaration_merging :: NoUnsafeDeclarationMerging ,
             self :: no_unsafe_negation :: NoUnsafeNegation ,
+            self :: no_var :: NoVar ,
             self :: use_await :: UseAwait ,
             self :: use_default_switch_clause_last :: UseDefaultSwitchClauseLast ,
             self :: use_error_message :: UseErrorMessage ,

@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::{
     AnyCssDeclarationBlock, AnyCssKeyframesItem, CssDeclarationImportant, CssKeyframesBlock,
 };
+use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -45,6 +46,7 @@ declare_lint_rule! {
         name: "noImportantInKeyframe",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources:&[RuleSource::Stylelint("keyframe-declaration-no-important")],
     }
 }

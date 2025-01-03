@@ -1,10 +1,11 @@
 #[rustfmt::skip]
 mod rules;
 
-use biome_deserialize::StringSet;
+use biome_analyze::RuleDomain;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
 pub use rules::*;
+use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
@@ -22,13 +23,30 @@ pub struct LinterConfiguration {
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub ignore: StringSet,
+    #[partial(bpaf(hide, pure(Default::default())))]
+    pub ignore: Vec<Box<str>>,
 
     /// A list of Unix shell style patterns. The formatter will include files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub include: StringSet,
+    #[partial(bpaf(hide, pure(Default::default())))]
+    pub include: Vec<Box<str>>,
+
+    /// An object where the keys are the names of the domains, and the values are boolean. `true` to turn-on the rules that
+    /// belong to that domain, `false` to turn them off
+    #[partial(bpaf(hide, pure(Default::default())))]
+    pub domains: FxHashMap<RuleDomain, RuleDomainValue>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize, Merge)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub enum RuleDomainValue {
+    /// Enables all the rules that belong to this domain
+    All,
+    /// Disables all the rules that belong to this domain  
+    None,
+    /// It enables only the recommended rules for this domain
+    Recommended,
 }
 
 impl LinterConfiguration {
@@ -44,6 +62,7 @@ impl Default for LinterConfiguration {
             rules: Default::default(),
             ignore: Default::default(),
             include: Default::default(),
+            domains: Default::default(),
         }
     }
 }

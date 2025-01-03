@@ -1,0 +1,68 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+snapshot_kind: text
+---
+# Emitted Messages
+
+```block
+Summary
+
+- Name: useHookAtTopLevel
+- No fix available.
+- Default severity: error
+- Available from version: 1.0.0
+
+Domains
+
+- Name: react
+- The rule is recommended for this domain
+- The rule is enabled when one of these dependencies are detected:
+  - react@>=16.0.0
+
+- Name: next
+- The rule is recommended for this domain
+- The rule is enabled when one of these dependencies are detected:
+  - next@>=14.0.0
+
+
+Description
+
+ Enforce that all React hooks are being called from the Top Level component functions.
+
+ _This rule should be used only in **React** projects._
+
+ To understand why this required see https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+
+Examples
+
+Invalid
+
+ ```js,expect_diagnostic
+ function Component1({ a }) {
+     if (a == 1) {
+         useEffect();
+     }
+ }
+ ```
+
+ ```js,expect_diagnostic
+ function Component1({ a }) {
+     if (a != 1) {
+         return;
+     }
+
+     useEffect();
+ }
+ ```
+
+Valid
+
+ ```js
+ function Component1() {
+     useEffect();
+ }
+ ```
+
+
+```

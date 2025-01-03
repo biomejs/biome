@@ -5,6 +5,7 @@ use biome_console::{
 use biome_text_edit::TextEdit;
 use std::path::Path;
 use std::{env, io, iter};
+use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
 
 mod backtrace;
@@ -187,11 +188,17 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
 
         // Load the printed width for the header, and fill the rest of the line
         // with the '━' line character up to 100 columns with at least 10 characters
-        const HEADER_WIDTH: usize = 100;
+        let header_width = {
+            if cfg!(debug_assertions) {
+                100
+            } else {
+                terminal_size().map_or(100, |(width, _)| width.0 as usize)
+            }
+        };
         const MIN_WIDTH: usize = 10;
 
         let text_width = slot.map_or(0, |writer| writer.width);
-        let line_width = HEADER_WIDTH.saturating_sub(text_width).max(MIN_WIDTH);
+        let line_width = header_width.saturating_sub(text_width).max(MIN_WIDTH);
         HorizontalLine::new(line_width).fmt(f)
     }
 }

@@ -3506,13 +3506,13 @@ impl JsImportAssertion {
     }
     pub fn as_fields(&self) -> JsImportAssertionFields {
         JsImportAssertionFields {
-            assertion_kind: self.assertion_kind(),
+            with_token: self.with_token(),
             l_curly_token: self.l_curly_token(),
             assertions: self.assertions(),
             r_curly_token: self.r_curly_token(),
         }
     }
-    pub fn assertion_kind(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn with_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
     pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -3535,7 +3535,7 @@ impl Serialize for JsImportAssertion {
 }
 #[derive(Serialize)]
 pub struct JsImportAssertionFields {
-    pub assertion_kind: SyntaxResult<SyntaxToken>,
+    pub with_token: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub assertions: JsImportAssertionEntryList,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
@@ -10107,14 +10107,14 @@ impl TsImportTypeAssertion {
     }
     pub fn as_fields(&self) -> TsImportTypeAssertionFields {
         TsImportTypeAssertionFields {
-            assertion_kind: self.assertion_kind(),
+            with_token: self.with_token(),
             colon_token: self.colon_token(),
             l_curly_token: self.l_curly_token(),
             assertions: self.assertions(),
             r_curly_token: self.r_curly_token(),
         }
     }
-    pub fn assertion_kind(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn with_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -10140,7 +10140,7 @@ impl Serialize for TsImportTypeAssertion {
 }
 #[derive(Serialize)]
 pub struct TsImportTypeAssertionFields {
-    pub assertion_kind: SyntaxResult<SyntaxToken>,
+    pub with_token: SyntaxResult<SyntaxToken>,
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub assertions: JsImportAssertionEntryList,
@@ -19797,10 +19797,7 @@ impl AstNode for JsImportAssertion {
 impl std::fmt::Debug for JsImportAssertion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("JsImportAssertion")
-            .field(
-                "assertion_kind",
-                &support::DebugSyntaxResult(self.assertion_kind()),
-            )
+            .field("with_token", &support::DebugSyntaxResult(self.with_token()))
             .field(
                 "l_curly_token",
                 &support::DebugSyntaxResult(self.l_curly_token()),
@@ -26384,10 +26381,7 @@ impl AstNode for TsImportTypeAssertion {
 impl std::fmt::Debug for TsImportTypeAssertion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TsImportTypeAssertion")
-            .field(
-                "assertion_kind",
-                &support::DebugSyntaxResult(self.assertion_kind()),
-            )
+            .field("with_token", &support::DebugSyntaxResult(self.with_token()))
             .field(
                 "colon_token",
                 &support::DebugSyntaxResult(self.colon_token()),

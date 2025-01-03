@@ -11,7 +11,7 @@ const rootManifest = JSON.parse(
 
 let [major, minor, patch] = rootManifest.version
 	.split(".")
-	.map((num) => Number.parseInt(num));
+	.map((num) => Number.parseInt(num, 10));
 // increment patch version
 patch += 1;
 let version = `${major}.${minor}.${patch}`;

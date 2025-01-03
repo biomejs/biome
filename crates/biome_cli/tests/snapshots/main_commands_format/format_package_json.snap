@@ -1,13 +1,16 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `package.json`
 
 ```json
 {
   "name": "@foo/package",
-  "dependencies": { "foo": "latest" }
+  "dependencies": {
+    "foo": "latest"
+  }
 }
 
 ```

@@ -1,7 +1,7 @@
-use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{
-    AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
+    AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
+    LineWidth,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -30,11 +30,6 @@ pub struct FormatterConfiguration {
     #[partial(bpaf(long("indent-style"), argument("tab|space"), optional))]
     pub indent_style: IndentStyle,
 
-    /// The size of the indentation, 2 by default (deprecated, use `indent-width`)
-    #[partial(bpaf(long("indent-size"), argument("NUMBER"), optional))]
-    #[partial(deserializable(deprecated(use_instead = "formatter.indentWidth")))]
-    pub indent_size: IndentWidth,
-
     /// The size of the indentation, 2 by default
     #[partial(bpaf(long("indent-width"), argument("NUMBER"), optional))]
     pub indent_width: IndentWidth,
@@ -51,19 +46,23 @@ pub struct FormatterConfiguration {
     #[partial(bpaf(long("attribute-position"), argument("multiline|auto"), optional))]
     pub attribute_position: AttributePosition,
 
+    /// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+    #[partial(bpaf(long("bracket-same-line"), argument("true|false"), optional))]
+    pub bracket_same_line: BracketSameLine,
+
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
     #[partial(bpaf(long("bracket-spacing"), argument("true|false"), optional))]
     pub bracket_spacing: BracketSpacing,
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub ignore: StringSet,
+    #[partial(bpaf(hide, pure(Default::default())))]
+    pub ignore: Vec<Box<str>>,
 
     /// A list of Unix shell style patterns. The formatter will include files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub include: StringSet,
+    #[partial(bpaf(hide, pure(Default::default())))]
+    pub include: Vec<Box<str>>,
 }
 
 impl PartialFormatterConfiguration {
@@ -76,11 +75,11 @@ impl PartialFormatterConfiguration {
             enabled: self.enabled.unwrap_or_default(),
             format_with_errors: self.format_with_errors.unwrap_or_default(),
             indent_style: self.indent_style.unwrap_or_default(),
-            indent_size: self.indent_size.unwrap_or_default(),
             indent_width: self.indent_width.unwrap_or_default(),
             line_ending: self.line_ending.unwrap_or_default(),
             line_width: self.line_width.unwrap_or_default(),
             attribute_position: self.attribute_position.unwrap_or_default(),
+            bracket_same_line: self.bracket_same_line.unwrap_or_default(),
             bracket_spacing: self.bracket_spacing.unwrap_or_default(),
             ignore: self.ignore.clone().unwrap_or_default(),
             include: self.include.clone().unwrap_or_default(),
@@ -94,12 +93,12 @@ impl Default for FormatterConfiguration {
         Self {
             enabled: true,
             format_with_errors: false,
-            indent_size: IndentWidth::default(),
             indent_width: IndentWidth::default(),
             indent_style: IndentStyle::default(),
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             attribute_position: AttributePosition::default(),
+            bracket_same_line: BracketSameLine::default(),
             bracket_spacing: Default::default(),
             ignore: Default::default(),
             include: Default::default(),

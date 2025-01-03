@@ -2,6 +2,7 @@ use crate::JsRuleAction;
 use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, AnyTsPropertyAnnotation, AnyTsVariableAnnotation, JsFormalParameter,
     JsInitializerClause, JsPropertyClassMember, JsSyntaxKind, JsVariableDeclaration,
@@ -97,7 +98,8 @@ declare_lint_rule! {
         name: "noInferrableTypes",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-inferrable-types")],
-        recommended: true,
+        recommended: false,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }

@@ -1,5 +1,5 @@
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
-use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules};
+use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
 use biome_configuration::PartialConfiguration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
@@ -9,15 +9,18 @@ use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_project::PackageJson;
 use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
-use biome_service::settings::{ServiceLanguage, Settings};
+use biome_service::file_handlers::DocumentFileSource;
+use biome_service::settings::{
+    ServiceLanguage, Settings, WorkspaceSettings, WorkspaceSettingsHandle,
+};
+use camino::Utf8Path;
 use json_comments::StripComments;
-use similar::TextDiff;
-use std::ffi::{c_int, OsStr};
+use similar::{DiffableStr, TextDiff};
+use std::ffi::c_int;
 use std::fmt::Write;
-use std::path::Path;
 use std::sync::Once;
 
-pub fn scripts_from_json(extension: &OsStr, input_code: &str) -> Option<Vec<String>> {
+pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String>> {
     if extension == "json" || extension == "jsonc" {
         let input_code = StripComments::new(input_code.as_bytes());
         let scripts: Vec<String> = serde_json::from_reader(input_code).ok()?;
@@ -28,47 +31,40 @@ pub fn scripts_from_json(extension: &OsStr, input_code: &str) -> Option<Vec<Stri
 }
 
 pub fn create_analyzer_options(
-    input_file: &Path,
+    input_file: &Utf8Path,
     diagnostics: &mut Vec<String>,
 ) -> AnalyzerOptions {
-    let options = AnalyzerOptions {
-        file_path: input_file.to_path_buf(),
-        ..Default::default()
-    };
+    let options = AnalyzerOptions::default().with_file_path(input_file.to_path_buf());
     // We allow a test file to configure its rule using a special
     // file with the same name as the test but with extension ".options.json"
     // that configures that specific rule.
-    let mut analyzer_configuration = AnalyzerConfiguration {
-        rules: AnalyzerRules::default(),
-        globals: vec![],
-        preferred_quote: PreferredQuote::Double,
-        jsx_runtime: Some(JsxRuntime::Transparent),
-    };
+    let mut analyzer_configuration = AnalyzerConfiguration::default()
+        .with_preferred_quote(PreferredQuote::Double)
+        .with_jsx_runtime(JsxRuntime::Transparent);
     let options_file = input_file.with_extension("options.json");
-    if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
-        let deserialized = biome_deserialize::json::deserialize_from_json_str::<PartialConfiguration>(
-            json.as_str(),
-            JsonParserOptions::default(),
-            "",
+    let Ok(json) = std::fs::read_to_string(options_file.clone()) else {
+        return options.with_configuration(analyzer_configuration);
+    };
+    let deserialized = biome_deserialize::json::deserialize_from_json_str::<PartialConfiguration>(
+        json.as_str(),
+        JsonParserOptions::default(),
+        "",
+    );
+    if deserialized.has_errors() {
+        diagnostics.extend(
+            deserialized
+                .into_diagnostics()
+                .into_iter()
+                .map(|diagnostic| {
+                    diagnostic_to_string(options_file.file_stem().unwrap(), &json, diagnostic)
+                })
+                .collect::<Vec<_>>(),
         );
-        if deserialized.has_errors() {
-            diagnostics.extend(
-                deserialized
-                    .into_diagnostics()
-                    .into_iter()
-                    .map(|diagnostic| {
-                        diagnostic_to_string(
-                            options_file.file_stem().unwrap().to_str().unwrap(),
-                            &json,
-                            diagnostic,
-                        )
-                    })
-                    .collect::<Vec<_>>(),
-            );
-        } else {
-            let configuration = deserialized.into_deserialized().unwrap_or_default();
-            let mut settings = Settings::default();
-            analyzer_configuration.preferred_quote = configuration
+    } else {
+        let configuration = deserialized.into_deserialized().unwrap_or_default();
+        let mut settings = Settings::default();
+        analyzer_configuration = analyzer_configuration.with_preferred_quote(
+            configuration
                 .javascript
                 .as_ref()
                 .and_then(|js| js.formatter.as_ref())
@@ -81,19 +77,23 @@ pub fn create_analyzer_options(
                         }
                     })
                 })
-                .unwrap_or_default();
+                .unwrap_or_default(),
+        );
 
-            use biome_configuration::javascript::JsxRuntime::*;
-            analyzer_configuration.jsx_runtime = match configuration
+        use biome_configuration::javascript::JsxRuntime::*;
+        analyzer_configuration = analyzer_configuration.with_jsx_runtime(
+            match configuration
                 .javascript
                 .as_ref()
                 .and_then(|js| js.jsx_runtime)
                 .unwrap_or_default()
             {
-                ReactClassic => Some(JsxRuntime::ReactClassic),
-                Transparent => Some(JsxRuntime::Transparent),
-            };
-            analyzer_configuration.globals = configuration
+                ReactClassic => JsxRuntime::ReactClassic,
+                Transparent => JsxRuntime::Transparent,
+            },
+        );
+        analyzer_configuration = analyzer_configuration.with_globals(
+            configuration
                 .javascript
                 .as_ref()
                 .and_then(|js| {
@@ -101,22 +101,65 @@ pub fn create_analyzer_options(
                         .as_ref()
                         .map(|globals| globals.iter().cloned().collect())
                 })
-                .unwrap_or_default();
+                .unwrap_or_default(),
+        );
 
-            settings
-                .merge_with_configuration(configuration, None, None, &[])
-                .unwrap();
-            analyzer_configuration.rules = to_analyzer_rules(&settings, input_file);
-        }
+        settings
+            .merge_with_configuration(configuration, None, None, &[])
+            .unwrap();
+
+        analyzer_configuration =
+            analyzer_configuration.with_rules(to_analyzer_rules(&settings, input_file));
     }
+    options.with_configuration(analyzer_configuration)
+}
 
-    AnalyzerOptions {
-        configuration: analyzer_configuration,
-        ..options
+pub fn create_formatting_options<L>(
+    input_file: &Utf8Path,
+    diagnostics: &mut Vec<String>,
+) -> L::FormatOptions
+where
+    L: ServiceLanguage,
+{
+    let workspace = WorkspaceSettings::default();
+    let key = workspace.insert_project(Utf8Path::new(""));
+    workspace.set_current_project(key);
+
+    let options_file = input_file.with_extension("options.json");
+    let Ok(json) = std::fs::read_to_string(options_file.clone()) else {
+        return Default::default();
+    };
+    let deserialized = biome_deserialize::json::deserialize_from_json_str::<PartialConfiguration>(
+        json.as_str(),
+        JsonParserOptions::default(),
+        "",
+    );
+    if deserialized.has_errors() {
+        diagnostics.extend(
+            deserialized
+                .into_diagnostics()
+                .into_iter()
+                .map(|diagnostic| {
+                    diagnostic_to_string(options_file.file_stem().unwrap(), &json, diagnostic)
+                })
+                .collect::<Vec<_>>(),
+        );
+
+        Default::default()
+    } else {
+        let configuration = deserialized.into_deserialized().unwrap_or_default();
+        let mut settings = workspace.get_current_settings().unwrap_or_default();
+        settings
+            .merge_with_configuration(configuration, None, None, &[])
+            .unwrap();
+
+        let handle = WorkspaceSettingsHandle::from(settings);
+        let document_file_source = DocumentFileSource::from_path(input_file);
+        handle.format_options::<L>(&input_file.into(), &document_file_source)
     }
 }
 
-pub fn load_manifest(input_file: &Path, diagnostics: &mut Vec<String>) -> Option<PackageJson> {
+pub fn load_manifest(input_file: &Utf8Path, diagnostics: &mut Vec<String>) -> Option<PackageJson> {
     let options_file = input_file.with_extension("package.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
         let deserialized = biome_deserialize::json::deserialize_from_json_str::<PackageJson>(
@@ -130,11 +173,7 @@ pub fn load_manifest(input_file: &Path, diagnostics: &mut Vec<String>) -> Option
                     .into_diagnostics()
                     .into_iter()
                     .map(|diagnostic| {
-                        diagnostic_to_string(
-                            options_file.file_stem().unwrap().to_str().unwrap(),
-                            &json,
-                            diagnostic,
-                        )
+                        diagnostic_to_string(options_file.file_stem().unwrap(), &json, diagnostic)
                     })
                     .collect::<Vec<_>>(),
             );
@@ -201,19 +240,19 @@ pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerActi
 /// The test runner for the analyzer is currently designed to have a
 /// one-to-one mapping between test case and analyzer rules.
 /// So each testing file will be run through the analyzer with only the rule
-/// corresponding to the directory name. E.g., `style/useWhile/test.js`
-/// will be analyzed with just the `style/useWhile` rule.
-pub fn parse_test_path(file: &Path) -> (&str, &str) {
+/// corresponding to the directory name. E.g., `complexity/useWhile/test.js`
+/// will be analyzed with just the `complexity/useWhile` rule.
+pub fn parse_test_path(file: &Utf8Path) -> (&str, &str) {
     let mut group_name = "";
     let mut rule_name = "";
 
     for component in file.iter().rev() {
-        if component == "specs" || component == "suppression" {
+        if component == "specs" || component == "suppression" || component == "plugin" {
             break;
         }
 
         rule_name = group_name;
-        group_name = component.to_str().unwrap_or_default();
+        group_name = component.as_str().unwrap_or_default();
     }
 
     (group_name, rule_name)
@@ -245,7 +284,7 @@ pub fn has_bogus_nodes_or_empty_slots<L: biome_rowan::Language>(node: &SyntaxNod
 pub fn assert_errors_are_absent<L: ServiceLanguage>(
     program: &SyntaxNode<L>,
     diagnostics: &[ParseDiagnostic],
-    path: &Path,
+    path: &Utf8Path,
 ) {
     let debug_tree = format!("{program:?}");
     let has_missing_children = debug_tree.contains("missing (required)");
@@ -258,7 +297,7 @@ pub fn assert_errors_are_absent<L: ServiceLanguage>(
     for diagnostic in diagnostics {
         let error = diagnostic
             .clone()
-            .with_file_path(path.to_str().unwrap())
+            .with_file_path(path.as_str())
             .with_file_source_code(program.to_string());
         Formatter::new(&mut Termcolor(&mut buffer))
             .write_markup(markup! {
@@ -268,7 +307,7 @@ pub fn assert_errors_are_absent<L: ServiceLanguage>(
     }
 
     panic!("There should be no errors in the file {:?} but the following errors where present:\n{}\n\nParsed tree:\n{:#?}\nPrinted tree:\n{}",
-           path.display(),
+           path,
            std::str::from_utf8(buffer.as_slice()).unwrap(),
            &program,
            &program.to_string()

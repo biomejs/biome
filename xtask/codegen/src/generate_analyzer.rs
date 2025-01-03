@@ -20,15 +20,15 @@ fn generate_js_analyzer() -> Result<()> {
     let mut analyzers = BTreeMap::new();
     generate_category("lint", &mut analyzers, &base_path)?;
 
-    let mut assists = BTreeMap::new();
-    generate_category("assists", &mut assists, &base_path)?;
+    let mut assist = BTreeMap::new();
+    generate_category("assist", &mut assist, &base_path)?;
 
     let mut syntax = BTreeMap::new();
     generate_category("syntax", &mut syntax, &base_path)?;
 
     generate_options(&base_path)?;
 
-    update_js_registry_builder(analyzers, assists, syntax)
+    update_js_registry_builder(analyzers, assist, syntax)
 }
 
 fn generate_json_analyzer() -> Result<()> {
@@ -36,11 +36,11 @@ fn generate_json_analyzer() -> Result<()> {
     let mut analyzers = BTreeMap::new();
     generate_category("lint", &mut analyzers, &base_path)?;
 
-    let mut assists = BTreeMap::new();
-    generate_category("assists", &mut assists, &base_path)?;
+    let mut assist = BTreeMap::new();
+    generate_category("assist", &mut assist, &base_path)?;
 
     generate_options(&base_path)?;
-    update_json_registry_builder(analyzers, assists)
+    update_json_registry_builder(analyzers, assist)
 }
 
 fn generate_css_analyzer() -> Result<()> {
@@ -63,7 +63,7 @@ fn generate_options(base_path: &Path) -> Result<()> {
     let mut rules_options = BTreeMap::new();
     let mut crates = vec![];
     let nl = Punct::new('\n', Spacing::Alone);
-    for category in ["lint", "assists"] {
+    for category in ["lint", "assist"] {
         let category_path = base_path.join(category);
         if !category_path.exists() {
             continue;
@@ -85,9 +85,9 @@ fn generate_options(base_path: &Path) -> Result<()> {
             crates.push(quote! {
                 use crate::lint; #nl
             })
-        } else if category == "assists" {
+        } else if category == "assist" {
             crates.push(quote! {
-                use crate::assists; #nl
+                use crate::assist; #nl
             })
         }
     }
@@ -151,7 +151,7 @@ fn generate_category(
     let kind = match name {
         "syntax" => format_ident!("Syntax"),
         "lint" => format_ident!("Lint"),
-        "assists" => format_ident!("Action"),
+        "assist" => format_ident!("Action"),
         _ => panic!("unimplemented analyzer category {name:?}"),
     };
 
@@ -225,11 +225,11 @@ fn generate_group(category: &'static str, group: &str, base_path: &Path) -> Resu
             ),
             quote!(declare_lint_group),
         ),
-        "assists" => (
+        "assist" => (
             quote!(
-                use biome_analyze::declare_assists_group
+                use biome_analyze::declare_assist_group
             ),
-            quote!(declare_assists_group),
+            quote!(declare_assist_group),
         ),
         "syntax" => (
             quote!(
@@ -262,14 +262,14 @@ fn generate_group(category: &'static str, group: &str, base_path: &Path) -> Resu
 
 fn update_js_registry_builder(
     rules: BTreeMap<&'static str, TokenStream>,
-    assists: BTreeMap<&'static str, TokenStream>,
+    assist: BTreeMap<&'static str, TokenStream>,
     syntax: BTreeMap<&'static str, TokenStream>,
 ) -> Result<()> {
     let path = project_root().join("crates/biome_js_analyze/src/registry.rs");
 
     let categories = rules
         .into_iter()
-        .chain(assists)
+        .chain(assist)
         .chain(syntax)
         .map(|(_, tokens)| tokens);
 
@@ -289,13 +289,13 @@ fn update_js_registry_builder(
 
 fn update_json_registry_builder(
     analyzers: BTreeMap<&'static str, TokenStream>,
-    assists: BTreeMap<&'static str, TokenStream>,
+    assist: BTreeMap<&'static str, TokenStream>,
 ) -> Result<()> {
     let path = project_root().join("crates/biome_json_analyze/src/registry.rs");
 
     let categories = analyzers
         .into_iter()
-        .chain(assists)
+        .chain(assist)
         .map(|(_, tokens)| tokens);
 
     let tokens = xtask::reformat(quote! {

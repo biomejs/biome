@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validFunction.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function Person() {}
 
 function f() {}
@@ -24,5 +25,3 @@ function $() {}
 
 const g = function g() {}
 ```
-
-

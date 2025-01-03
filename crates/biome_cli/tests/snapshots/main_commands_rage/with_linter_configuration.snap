@@ -56,7 +56,7 @@ Biome Configuration:
   Status:                       Loaded successfully
   Formatter disabled:           false
   Linter disabled:              false
-  Organize imports disabled:    false
+  Assist disabled:              false
   VCS disabled:                 true
 
 Linter:
@@ -65,35 +65,34 @@ Linter:
   CSS enabled:                  true
   GraphQL enabled:              false
   Recommended:                  false
-  All:                          false
   Enabled rules:
-  complexity/noBannedTypes
-  complexity/noEmptyTypeParameters
-  complexity/noExcessiveNestedTestSuites
-  complexity/noExtraBooleanCast
-  complexity/noForEach
-  complexity/noMultipleSpacesInRegularExpressionLiterals
-  complexity/noStaticOnlyClass
-  complexity/noThisInStatic
-  complexity/noUselessCatch
-  complexity/noUselessConstructor
-  complexity/noUselessEmptyExport
-  complexity/noUselessFragments
-  complexity/noUselessLabel
-  complexity/noUselessLoneBlockStatements
-  complexity/noUselessRename
-  complexity/noUselessSwitchCase
-  complexity/noUselessTernary
-  complexity/noUselessThisAlias
-  complexity/noUselessTypeConstraint
-  complexity/noWith
-  complexity/useArrowFunction
-  complexity/useFlatMap
-  complexity/useLiteralKeys
-  complexity/useOptionalChain
-  complexity/useRegexLiterals
-  complexity/useSimpleNumberKeys
-  suspicious/noCommentText
+    complexity/noBannedTypes
+    complexity/noEmptyTypeParameters
+    complexity/noExcessiveNestedTestSuites
+    complexity/noExtraBooleanCast
+    complexity/noForEach
+    complexity/noMultipleSpacesInRegularExpressionLiterals
+    complexity/noStaticOnlyClass
+    complexity/noThisInStatic
+    complexity/noUselessCatch
+    complexity/noUselessConstructor
+    complexity/noUselessEmptyExport
+    complexity/noUselessFragments
+    complexity/noUselessLabel
+    complexity/noUselessLoneBlockStatements
+    complexity/noUselessRename
+    complexity/noUselessSwitchCase
+    complexity/noUselessTernary
+    complexity/noUselessThisAlias
+    complexity/noUselessTypeConstraint
+    complexity/noWith
+    complexity/useArrowFunction
+    complexity/useFlatMap
+    complexity/useLiteralKeys
+    complexity/useOptionalChain
+    complexity/useRegexLiterals
+    complexity/useSimpleNumberKeys
+    suspicious/noCommentText
 
 Server:
   Version:                      0.0.0

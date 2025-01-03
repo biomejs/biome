@@ -79,6 +79,7 @@ define_categories! {
     "lint/complexity/useRegexLiterals": "https://biomejs.dev/linter/rules/use-regex-literals",
     "lint/complexity/useSimpleNumberKeys": "https://biomejs.dev/linter/rules/use-simple-number-keys",
     "lint/complexity/useSimplifiedLogicExpression": "https://biomejs.dev/linter/rules/use-simplified-logic-expression",
+    "lint/complexity/useWhile": "https://biomejs.dev/linter/rules/use-while",
     "lint/correctness/noChildrenProp": "https://biomejs.dev/linter/rules/no-children-prop",
     "lint/correctness/noConstAssign": "https://biomejs.dev/linter/rules/no-const-assign",
     "lint/correctness/noConstantCondition": "https://biomejs.dev/linter/rules/no-constant-condition",
@@ -161,6 +162,7 @@ define_categories! {
     "lint/nursery/noMissingVarFunction": "https://biomejs.dev/linter/rules/no-missing-var-function",
     "lint/nursery/noNestedTernary": "https://biomejs.dev/linter/rules/no-nested-ternary",
     "lint/nursery/noOctalEscape": "https://biomejs.dev/linter/rules/no-octal-escape",
+    "lint/nursery/noPackagePrivateImports": "https://biomejs.dev/linter/rules/no-package-private-imports",
     "lint/nursery/noProcessEnv": "https://biomejs.dev/linter/rules/no-process-env",
     "lint/nursery/noProcessGlobal": "https://biomejs.dev/linter/rules/no-process-global",
     "lint/nursery/noReactSpecificProps": "https://biomejs.dev/linter/rules/no-react-specific-props",
@@ -171,6 +173,7 @@ define_categories! {
     "lint/nursery/noStaticElementInteractions": "https://biomejs.dev/linter/rules/no-static-element-interactions",
     "lint/nursery/noSubstr": "https://biomejs.dev/linter/rules/no-substr",
     "lint/nursery/noTemplateCurlyInString": "https://biomejs.dev/linter/rules/no-template-curly-in-string",
+    "lint/nursery/noTsIgnore": "https://biomejs.dev/linter/rules/no-ts-ignore",
     "lint/nursery/noUndeclaredDependencies": "https://biomejs.dev/linter/rules/no-undeclared-dependencies",
     "lint/nursery/noUnknownAtRule": "https://biomejs.dev/linter/rules/no-unknown-at-rule",
     "lint/nursery/noUnknownFunction": "https://biomejs.dev/linter/rules/no-unknown-function",
@@ -184,6 +187,7 @@ define_categories! {
     "lint/nursery/noUnknownUnit": "https://biomejs.dev/linter/rules/no-unknown-unit",
     "lint/nursery/noUnmatchableAnbSelector": "https://biomejs.dev/linter/rules/no-unmatchable-anb-selector",
     "lint/nursery/noUnusedFunctionParameters": "https://biomejs.dev/linter/rules/no-unused-function-parameters",
+    "lint/nursery/noUnwantedPolyfillio": "https://biomejs.dev/linter/rules/no-unwanted-polyfillio",
     "lint/nursery/noUselessEscapeInRegex": "https://biomejs.dev/linter/rules/no-useless-escape-in-regex",
     "lint/nursery/noUselessStringRaw": "https://biomejs.dev/linter/rules/no-useless-string-raw",
     "lint/nursery/noUselessUndefined": "https://biomejs.dev/linter/rules/no-useless-undefined",
@@ -236,7 +240,6 @@ define_categories! {
     "lint/style/noShoutyConstants": "https://biomejs.dev/linter/rules/no-shouty-constants",
     "lint/style/noUnusedTemplateLiteral": "https://biomejs.dev/linter/rules/no-unused-template-literal",
     "lint/style/noUselessElse": "https://biomejs.dev/linter/rules/no-useless-else",
-    "lint/style/noVar": "https://biomejs.dev/linter/rules/no-var",
     "lint/style/noYodaExpression": "https://biomejs.dev/linter/rules/no-yoda-expression",
     "lint/style/useAsConstAssertion": "https://biomejs.dev/linter/rules/use-as-const-assertion",
     "lint/style/useBlockStatements": "https://biomejs.dev/linter/rules/use-block-statements",
@@ -269,7 +272,6 @@ define_categories! {
     "lint/style/useTemplate": "https://biomejs.dev/linter/rules/use-template",
     "lint/style/useThrowNewError": "https://biomejs.dev/linter/rules/use-throw-new-error",
     "lint/style/useThrowOnlyError": "https://biomejs.dev/linter/rules/use-throw-only-error",
-    "lint/style/useWhile": "https://biomejs.dev/linter/rules/use-while",
     "lint/suspicious/noApproximativeNumericConstant": "https://biomejs.dev/linter/rules/no-approximative-numeric-constant",
     "lint/suspicious/noArrayIndexKey": "https://biomejs.dev/linter/rules/no-array-index-key",
     "lint/suspicious/noAssignInExpressions": "https://biomejs.dev/linter/rules/no-assign-in-expressions",
@@ -281,7 +283,6 @@ define_categories! {
     "lint/suspicious/noConfusingLabels": "https://biomejs.dev/linter/rules/no-confusing-labels",
     "lint/suspicious/noConfusingVoidType": "https://biomejs.dev/linter/rules/no-confusing-void-type",
     "lint/suspicious/noConsole": "https://biomejs.dev/linter/rules/no-console",
-    "lint/suspicious/noConsoleLog": "https://biomejs.dev/linter/rules/no-console-log",
     "lint/suspicious/noConstEnum": "https://biomejs.dev/linter/rules/no-const-enum",
     "lint/suspicious/noControlCharactersInRegex": "https://biomejs.dev/linter/rules/no-control-characters-in-regex",
     "lint/suspicious/noDebugger": "https://biomejs.dev/linter/rules/no-debugger",
@@ -329,6 +330,7 @@ define_categories! {
     "lint/suspicious/noThenProperty": "https://biomejs.dev/linter/rules/no-then-property",
     "lint/suspicious/noUnsafeDeclarationMerging": "https://biomejs.dev/linter/rules/no-unsafe-declaration-merging",
     "lint/suspicious/noUnsafeNegation": "https://biomejs.dev/linter/rules/no-unsafe-negation",
+    "lint/suspicious/noVar": "https://biomejs.dev/linter/rules/no-var",
     "lint/suspicious/useAwait": "https://biomejs.dev/linter/rules/use-await",
     "lint/suspicious/useDefaultSwitchClauseLast": "https://biomejs.dev/linter/rules/use-default-switch-clause-last",
     "lint/suspicious/useErrorMessage": "https://biomejs.dev/linter/rules/use-error-message",
@@ -338,9 +340,9 @@ define_categories! {
     "lint/suspicious/useNumberToFixedDigitsArgument": "https://biomejs.dev/linter/rules/use-number-to-fixed-digits-argument",
     "lint/suspicious/useValidTypeof": "https://biomejs.dev/linter/rules/use-valid-typeof",
     // end lint rules
-    // start assists rules
-    "assists/source/useSortedKeys": "https://biomejs.dev/linter/actions/use-sorted-keys",
-    // end assists rules
+    // start assist actions
+    "assist/source/useSortedKeys": "https://biomejs.dev/linter/actions/use-sorted-keys",
+    // end assist actions
     ; // start syntax rules
     "syntax/correctness/noTypeOnlyImportAttributes",
     "syntax/correctness/noSuperWithoutExtends",
@@ -355,10 +357,10 @@ define_categories! {
     "ci",
     "stdin",
     "configuration",
-    "organizeImports",
-    "assists",
+    "assist",
     "migrate",
     "deserialize",
+    "plugin",
     "project",
     "search",
     "internalError/io",
@@ -366,8 +368,8 @@ define_categories! {
     "internalError/panic",
     "reporter/parse",
     "reporter/format",
-    "reporter/analyzer",
-    "reporter/organizeImports",
+    "reporter/assist",
+    "reporter/linter",
     // parse categories
     "parse",
 
@@ -387,7 +389,7 @@ define_categories! {
     "suppressions/unknownGroup",
     "suppressions/unknownRule",
     "suppressions/unused",
-    "suppressions/deprecatedSuppressionComment",
+    "suppressions/incorrect",
 
     // Used in tests and examples
     "args/fileNotFound",
