@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
-assertion_line: 94
 expression: valid.css
 ---
 # Input
@@ -23,8 +22,8 @@ expression: valid.css
 }
 
 .vendor-prefixes {
-  -webkit-margin: 1px;
   -moz-margin: 1px;
+  -webkit-margin: 1px;
   margin: 1px;
 }
 

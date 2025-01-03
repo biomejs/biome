@@ -10,9 +10,10 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssDeclarationOrRule, AnyCssProperty, AnyCssRule,
-    CssDeclarationOrRuleBlock, CssDeclarationWithSemicolon, CssIdentifier, CssLanguage,
+    CssDeclarationOrRuleBlock, CssDeclarationOrRuleList, CssDeclarationWithSemicolon,
+    CssIdentifier, CssLanguage, CssSyntaxKind,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TokenText};
+use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, SyntaxNode, TokenText};
 use biome_string_case::StrOnlyExtension;
 
 use crate::{
@@ -108,20 +109,22 @@ impl Rule for UseSortedProperties {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<CssRuleAction> {
-        if state.is_unsafe_to_sort {
+        if state.is_unsafe_to_sort || state.btree.is_sorted() {
             return None;
         }
 
-        let mut mutation = ctx.root().begin();
+        let new_list = CssDeclarationOrRuleList::cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST,
+            state.btree.0.iter().map(|sort_info| {
+                state
+                    .items
+                    .get(sort_info.original_position)
+                    .map(|node| NodeOrToken::Node(node.clone().into_syntax()))
+            }),
+        ))?;
 
-        for (desired_position, sort_info) in state.btree.0.iter().enumerate() {
-            if sort_info.original_position != desired_position {
-                mutation.replace_node_discard_trivia(
-                    state.items.get(sort_info.original_position)?.clone(),
-                    state.items.get(desired_position)?.clone(),
-                );
-            }
-        }
+        let mut mutation = ctx.root().begin();
+        mutation.replace_node_discard_trivia(state.block.items(), new_list);
 
         return Some(RuleAction::<CssLanguage>::new(
             ActionCategory::QuickFix(Cow::Borrowed("")),
@@ -166,18 +169,21 @@ fn css_identifier_to_prop_text(ident: &CssIdentifier) -> Option<TokenText> {
 fn css_declaration_to_prop_text(
     decl_with_semicolon: &CssDeclarationWithSemicolon,
 ) -> Option<TokenText> {
-    let prop_name = decl_with_semicolon
+    decl_with_semicolon
         .declaration()
         .ok()?
         .property()
         .ok()?
         .as_css_generic_property()?
         .name()
-        .ok();
-    if let Some(AnyCssDeclarationName::CssIdentifier(ident)) = prop_name {
-        return Some(ident.value_token().ok()?.token_text_trimmed());
-    }
-    None
+        .ok()
+        .and_then(|prop_name| -> Option<TokenText> {
+            if let AnyCssDeclarationName::CssIdentifier(ident) = prop_name {
+                Some(ident.value_token().ok()?.token_text_trimmed())
+            } else {
+                None
+            }
+        })
 }
 
 /// Returns a declaration's vendor prefix in lowercase
@@ -208,7 +214,7 @@ fn prop_text_to_unprefixed(tok_text: &TokenText) -> Cow<'_, str> {
     return unprefixed.unwrap_or(prop_lowercase);
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
 enum NodeKindOrder {
     CustomProperty,
     ComposesProperty,
@@ -218,7 +224,7 @@ enum NodeKindOrder {
     UnknownKind,
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
 /// Define sort order using lexographical sorting of this struct
 pub struct SortInfo {
     // First, nodes are sorted by the kind of node (e.g. declarations before at-rules)
@@ -358,38 +364,6 @@ fn contains_shorthand_after_longhand(nodes: &[AnyCssDeclarationOrRule]) -> bool 
     }
 
     false
-
-    // let mut seen_shorthand_properties = HashSet::<String>::with_capacity(nodes.len());
-
-    // // (iterating backwards means we can store a smaller list of seen shorthands instead of seen longhands)
-    // for node in nodes.iter().rev() {
-    //     if let AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(decl_with_semicolon) = node {
-    //         if let Some(prop_text) = &css_declaration_to_prop_text(decl_with_semicolon) {
-    //             let prefix = prop_text_to_prefix(&prop_text);
-    //             let unprefixed = prop_text_to_unprefixed(&prop_text);
-
-    //             let potential_shorthands = [
-    //                 LONGHAND_SUB_PROPERTIES_MAP.get(unprefixed),
-    //                 RESET_TO_INITIAL_PROPERTIES_MAP.get(unprefixed),
-    //             ];
-    //             for shorthand in potential_shorthands.into_iter().flatten() {
-    //                 let key = prefix.to_owned() + shorthand;
-    //                 if seen_shorthand_properties.contains(&key) {
-    //                     return true;
-    //                 }
-    //             }
-
-    //             get_longhand_sub_properties
-
-    //             if property_may_override_others(unprefixed) {
-    //                 let key = prefix.to_owned() + unprefixed;
-    //                 seen_shorthand_properties.insert(key);
-    //             }
-    //         }
-    //     }
-    // }
-
-    // false
 }
 
 /// Check for properties that don't have a defined order. We don't sort anything in that case.

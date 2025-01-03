@@ -80,7 +80,7 @@ expression: invalid.css
 ```
 invalid.css:1:19 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: "display" should be before "color".
+  ! Properties can be sorted.
   
   > 1 │ .not-sorted-basic {
       │                   ^
@@ -107,7 +107,7 @@ invalid.css:1:19 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:6:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: "color" should be before "transition".
+  ! Properties can be sorted.
   
      4 │ }
      5 │ 
@@ -128,10 +128,11 @@ invalid.css:6:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
      6  6 │   .progressive-fixes-1 {
      7    │ - ··margin:·1px;
      8    │ - ··transition:cubic-bezier(1,·0,·0,·1);
+     9    │ - ··color:·red;
+    10    │ - ··display:·block;
         7 │ + ··display:·block;
         8 │ + ··margin:·1px;
-     9  9 │     color: red;
-    10    │ - ··display:·block;
+        9 │ + ··color:·red;
        10 │ + ··transition:cubic-bezier(1,·0,·0,·1);
     11 11 │   }
     12 12 │   
@@ -142,7 +143,7 @@ invalid.css:6:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:13:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: "display" should be before "margin".
+  ! Properties can be sorted.
   
     11 │ }
     12 │ 
@@ -162,12 +163,11 @@ invalid.css:13:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
     12 12 │   
     13 13 │   .progressive-fixes-2 {
     14    │ - ··margin:·1px;
-    15    │ - ··color:·red;
-    16    │ - ··transition:cubic-bezier(1,·0,·0,·1);
-    17    │ - ··display:·block;
        14 │ + ··display:·block;
        15 │ + ··margin:·1px;
-       16 │ + ··color:·red;
+    15 16 │     color: red;
+    16    │ - ··transition:cubic-bezier(1,·0,·0,·1);
+    17    │ - ··display:·block;
        17 │ + ··transition:cubic-bezier(1,·0,·0,·1);
     18 18 │   }
     19 19 │   
@@ -178,7 +178,7 @@ invalid.css:13:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:27:10 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: "display" should be before "color".
+  ! Properties can be sorted.
   
     25 │ }
     26 │ 
@@ -202,7 +202,7 @@ invalid.css:27:10 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:29:15 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: "color" should be before the nested rule at position 2.
+  ! Properties can be sorted.
   
     27 │ .oneline { color: red; display: block; }
     28 │ 
@@ -235,7 +235,7 @@ invalid.css:29:15 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:37:11 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: "color" should be before the at-rule at position 2.
+  ! Properties can be sorted.
   
     35 │ }
     36 │ 
@@ -254,10 +254,12 @@ invalid.css:37:11 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
     37 37 │   .at-rules {
     38 38 │     display: block;
     39    │ - ··@media·(min-width:·100px)·{}
-       39 │ + ··margin:·1px;
-    40 40 │     color: red;
-    41 41 │     @media (min-width: 100px) {}
+    40    │ - ··color:·red;
+    41    │ - ··@media·(min-width:·100px)·{}
     42    │ - ··margin:·1px;
+       39 │ + ··margin:·1px;
+       40 │ + ··color:·red;
+       41 │ + ··@media·(min-width:·100px)·{}
        42 │ + ··@media·(min-width:·100px)·{}
     43 43 │   }
     44 44 │   
@@ -268,7 +270,7 @@ invalid.css:37:11 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:45:14 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: "color" should be before the at-rule at position 2.
+  ! Properties can be sorted.
   
     43 │ }
     44 │ 
@@ -287,10 +289,11 @@ invalid.css:45:14 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
     45 45 │   .mixed-rules {
     46 46 │     display: block;
     47    │ - ··@media·(min-width:·100px)·{}
-       47 │ + ··margin:·1px;
-    48 48 │     color: red;
+    48    │ - ··color:·red;
     49    │ - ··.nested·{}
     50    │ - ··margin:·1px;
+       47 │ + ··margin:·1px;
+       48 │ + ··color:·red;
        49 │ + ··@media·(min-width:·100px)·{}
        50 │ + ··.nested·{}
     51 51 │   }
@@ -302,7 +305,7 @@ invalid.css:45:14 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:53:18 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: "-moz-margin" should be before "margin".
+  ! Properties can be sorted.
   
     51 │ }
     52 │ 
@@ -321,9 +324,10 @@ invalid.css:53:18 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
     52 52 │   
     53 53 │   .vendor-prefixes {
     54    │ - ··margin:·1px;
-       54 │ + ··-webkit-margin:·1px;
-    55 55 │     -moz-margin: 1px;
+    55    │ - ··-moz-margin:·1px;
     56    │ - ··-webkit-margin:·1px;
+       54 │ + ··-moz-margin:·1px;
+       55 │ + ··-webkit-margin:·1px;
        56 │ + ··margin:·1px;
     57 57 │   }
     58 58 │   
@@ -334,7 +338,7 @@ invalid.css:53:18 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:59:19 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: "DISPLAY" should be before "color".
+  ! Properties can be sorted.
   
     57 │ }
     58 │ 
@@ -364,7 +368,7 @@ invalid.css:59:19 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:65:11 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: "display" should be before "color".
+  ! Properties can be sorted.
   
     64 │ .nested-with-content {
   > 65 │   .nested {

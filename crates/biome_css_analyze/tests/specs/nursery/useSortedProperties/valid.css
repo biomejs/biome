@@ -16,8 +16,8 @@
 }
 
 .vendor-prefixes {
-  -webkit-margin: 1px;
   -moz-margin: 1px;
+  -webkit-margin: 1px;
   margin: 1px;
 }
 
