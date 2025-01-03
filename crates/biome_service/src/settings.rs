@@ -1,5 +1,5 @@
-use crate::workspace::{DocumentFileSource, FeatureKind, ProjectKey};
-use crate::{is_dir, Matcher, WorkspaceError};
+use crate::workspace::DocumentFileSource;
+use crate::{Matcher, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules, RuleDomain};
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration};
 use biome_configuration::analyzer::RuleDomainValue;
@@ -33,238 +33,24 @@ use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use biome_project::{NodeJsProject, PackageJson};
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
-use papaya::HashMap;
-use rustc_hash::{FxBuildHasher, FxHashMap};
+use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::num::NonZeroU64;
 use std::ops::Deref;
-use std::sync::RwLock;
 use tracing::trace;
 
-/// The information tracked for each project
-#[derive(Debug, Default)]
-pub struct ProjectData {
-    /// The root path of the project. This path should be **absolute**.
-    path: BiomePath,
-    /// The settings of the project, usually inferred from the configuration file e.g. `biome.json`.
-    settings: Settings,
-    /// Information relative to the current project
-    project: Option<NodeJsProject>,
-}
-
-/// Type that manages different projects inside the workspace.
-#[derive(Debug, Default)]
-pub struct WorkspaceSettings {
-    /// The data of the projects.
-    data: HashMap<ProjectKey, ProjectData, FxBuildHasher>,
-    /// The ID of the current project.
-    current_project: RwLock<ProjectKey>,
-}
-
-impl WorkspaceSettings {
-    /// Returns the key of the current project.
-    pub fn get_current_project_key(&self) -> ProjectKey {
-        *self.current_project.read().unwrap()
-    }
-
-    /// Sets which project is the current one by its key.
-    pub fn set_current_project(&self, key: ProjectKey) {
-        *self.current_project.write().unwrap() = key;
-    }
-
-    /// Retrieves the settings of the current workspace folder
-    pub fn get_current_settings(&self) -> Option<Settings> {
-        trace!("Current key {:?}", self.current_project);
-        self.data
-            .pin()
-            .get(&self.get_current_project_key())
-            .map(|data| data.settings.clone())
-    }
-
-    /// Retrieves the files settings of the current workspace folder
-    pub fn get_current_files_settings(&self) -> Option<FilesSettings> {
-        trace!("Current key {:?}", self.current_project);
-        self.data
-            .pin()
-            .get(&self.get_current_project_key())
-            .map(|data| data.settings.files.clone())
-    }
-
-    /// Sets the settings of the current workspace folder.
-    pub fn set_current_settings(&self, settings: Settings) {
-        let data = self.data.pin();
-        let project_key = self.get_current_project_key();
-        let Some(project_data) = data.get(&project_key) else {
-            return;
-        };
-
-        let project_data = ProjectData {
-            path: project_data.path.clone(),
-            settings,
-            project: project_data.project.clone(),
-        };
-
-        data.insert(project_key, project_data);
-    }
-
-    pub fn get_current_manifest(&self) -> Option<PackageJson> {
-        self.data
-            .pin()
-            .get(&self.get_current_project_key())
-            .and_then(|data| data.project.as_ref())
-            .map(|project| project.manifest.clone())
-    }
-
-    /// Inserts a new project using its folder.
-    pub fn insert_project(&self, workspace_path: impl Into<Utf8PathBuf>) -> ProjectKey {
-        let path = BiomePath::new(workspace_path.into());
-        trace!("Insert workspace folder: {:?}", path);
-        let key = ProjectKey::new();
-        self.data.pin().insert(
-            key,
-            ProjectData {
-                path,
-                settings: Settings::default(),
-                project: None,
-            },
-        );
-        key
-    }
-
-    pub fn insert_manifest(&self, manifest: NodeJsProject) {
-        let data = self.data.pin();
-        let project_key = self.get_current_project_key();
-        let Some(project_data) = data.get(&project_key) else {
-            return;
-        };
-
-        let project_data = ProjectData {
-            path: project_data.path.clone(),
-            settings: project_data.settings.clone(),
-            project: Some(manifest),
-        };
-
-        data.insert(project_key, project_data);
-    }
-
-    /// Remove a project using its folder.
-    pub fn remove_project(&self, project_path: &Utf8Path) {
-        let data = self.data.pin();
-        for (key, project_data) in data.iter() {
-            if project_data.path.as_path() == project_path {
-                data.remove(key);
-            }
-        }
-    }
-
-    /// Checks whether the current path belongs to another registered project.
-    ///
-    /// If there's a match, and the match is for a project **other than** the current project, it
-    /// returns the new key.
-    pub fn path_belongs_to_other_project(&self, path: &BiomePath) -> Option<ProjectKey> {
-        if self.data.is_empty() {
-            return None;
-        }
-
-        let mut belongs_to_current = false;
-        let mut belongs_to_other = None;
-        trace!("Current key: {:?}", self.current_project);
-        for (key, path_to_settings) in self.data.pin().iter() {
-            trace!(
-                "Workspace path {:?}, file path {:?}",
-                path_to_settings.path,
-                path
-            );
-            trace!("Iter key: {key:?}");
-            if *key == self.get_current_project_key() {
-                belongs_to_current = true;
-            } else if path.strip_prefix(path_to_settings.path.as_path()).is_ok() {
-                trace!("Update workspace to {key:?}");
-                belongs_to_other = Some(*key);
-            }
-        }
-        belongs_to_other.filter(|_| !belongs_to_current)
-    }
-
-    /// Checks whether the given `path` belongs to the current project and no
-    /// other project.
-    pub fn path_belongs_only_to_project_with_path(
-        &self,
-        path: &BiomePath,
-        project_path: &Utf8Path,
-    ) -> bool {
-        let mut belongs_to_project = false;
-        let mut belongs_to_other = false;
-        for project_data in self.data.pin().values() {
-            if path.strip_prefix(project_data.path.as_path()).is_ok() {
-                if project_data.path.as_path() == project_path {
-                    belongs_to_project = true;
-                } else {
-                    belongs_to_other = true;
-                }
-            }
-        }
-
-        belongs_to_project && !belongs_to_other
-    }
-
-    /// Returns the maximum file size setting.
-    pub fn get_max_file_size(&self) -> usize {
-        let limit = self
-            .data
-            .pin()
-            .get(&self.get_current_project_key())
-            .map_or(DEFAULT_FILE_SIZE_LIMIT, |data| data.settings.files.max_size)
-            .get();
-        usize::try_from(limit).unwrap_or(usize::MAX)
-    }
-
-    /// Check whether a file is ignored in the feature `ignore`/`include`
-    pub fn is_ignored_by_feature_config(&self, path: &Utf8Path, feature: FeatureKind) -> bool {
-        let data = self.data.pin();
-        let Some(project_data) = data.get(&self.get_current_project_key()) else {
-            return false;
-        };
-
-        let settings = &project_data.settings;
-        let (feature_included_files, feature_ignored_files) = match feature {
-            FeatureKind::Format => {
-                let formatter = &settings.formatter;
-                (&formatter.included_files, &formatter.ignored_files)
-            }
-            FeatureKind::Lint => {
-                let linter = &settings.linter;
-                (&linter.included_files, &linter.ignored_files)
-            }
-
-            FeatureKind::Assist => {
-                let assists = &settings.assist;
-                (&assists.included_files, &assists.ignored_files)
-            }
-            // TODO: enable once the configuration is available
-            FeatureKind::Search => return false, // There is no search-specific config.
-            FeatureKind::Debug => return false,
-        };
-        let is_feature_included = feature_included_files.is_empty()
-            || is_dir(path)
-            || feature_included_files.matches_path(path);
-        !is_feature_included || feature_ignored_files.matches_path(path)
-    }
-}
-
-/// Global settings for the entire workspace
+/// Global settings for the entire project.
 #[derive(Clone, Debug, Default)]
 pub struct Settings {
-    /// Formatter settings applied to all files in the workspaces
+    /// Formatter settings applied to all files in the project.
     pub formatter: FormatSettings,
-    /// Linter settings applied to all files in the workspace
+    /// Linter settings applied to all files in the project.
     pub linter: LinterSettings,
     /// Language specific settings
     pub languages: LanguageListSettings,
-    /// Filesystem settings for the workspace
+    /// Filesystem settings for the project.
     pub files: FilesSettings,
     /// Import sorting settings
     pub organize_imports: OrganizeImportsSettings,
@@ -275,7 +61,7 @@ pub struct Settings {
 }
 
 impl Settings {
-    /// The [PartialConfiguration] is merged into the workspace
+    /// The [PartialConfiguration] is merged into the project.
     #[tracing::instrument(level = "trace", skip(self))]
     pub fn merge_with_configuration(
         &mut self,

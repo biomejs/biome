@@ -5,8 +5,8 @@ use biome_fs::MemoryFileSystem;
 use biome_service::workspace::{
     self, ChangeFileParams, CloseFileParams, FixFileParams, FormatFileParams, FormatOnTypeParams,
     FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams, GetFormatterIRParams,
-    GetSyntaxTreeParams, PullActionsParams, PullDiagnosticsParams, RegisterProjectFolderParams,
-    RenameParams, UpdateSettingsParams,
+    GetSyntaxTreeParams, OpenProjectParams, PullActionsParams, PullDiagnosticsParams, RenameParams,
+    UpdateSettingsParams,
 };
 use biome_service::workspace::{OpenFileParams, SupportsFeatureParams};
 
@@ -56,17 +56,11 @@ impl Workspace {
         self.inner.update_settings(params).map_err(into_error)
     }
 
-    #[wasm_bindgen(js_name = registerProjectFolder)]
-    pub fn register_workspace_folder(
-        &self,
-        params: IRegisterProjectFolderParams,
-    ) -> Result<IProjectKey, Error> {
-        let params: RegisterProjectFolderParams =
+    #[wasm_bindgen(js_name = openProject)]
+    pub fn open_project(&self, params: IOpenProjectParams) -> Result<IProjectKey, Error> {
+        let params: OpenProjectParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
-        let result = self
-            .inner
-            .register_project_folder(params)
-            .map_err(into_error)?;
+        let result = self.inner.open_project(params).map_err(into_error)?;
 
         to_value(&result).map(IProjectKey::from).map_err(into_error)
     }

@@ -9,6 +9,7 @@ use biome_deserialize::Merge;
 use biome_fs::FileSystem;
 use biome_grit_patterns::GritTargetLanguage;
 use biome_service::configuration::LoadedConfiguration;
+use biome_service::projects::ProjectKey;
 use biome_service::workspace::ParsePatternParams;
 use biome_service::{Workspace, WorkspaceError};
 use std::ffi::OsString;
@@ -63,6 +64,7 @@ impl CommandRunner for SearchCommandPayload {
         cli_options: &CliOptions,
         console: &mut dyn Console,
         workspace: &dyn Workspace,
+        project_key: ProjectKey,
     ) -> Result<Execution, CliDiagnostic> {
         let pattern = workspace
             .parse_pattern(ParsePatternParams {
@@ -71,6 +73,7 @@ impl CommandRunner for SearchCommandPayload {
             })?
             .pattern_id;
         Ok(Execution::new(TraversalMode::Search {
+            project_key,
             pattern,
             language: self.language.clone(),
             stdin: self.get_stdin(console)?,

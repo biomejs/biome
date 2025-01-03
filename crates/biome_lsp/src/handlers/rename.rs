@@ -13,7 +13,7 @@ pub(crate) fn rename(
     params: RenameParams,
 ) -> Result<Option<WorkspaceEdit>, LspError> {
     let url = params.text_document_position.text_document.uri;
-    let biome_path = session.file_path(&url)?;
+    let path = session.file_path(&url)?;
 
     trace!("Renaming...");
 
@@ -34,7 +34,8 @@ pub(crate) fn rename(
     let result = session
         .workspace
         .rename(biome_service::workspace::RenameParams {
-            path: biome_path,
+            project_key: doc.project_key,
+            path,
             symbol_at: cursor_range,
             new_name: params.new_name,
         })?;

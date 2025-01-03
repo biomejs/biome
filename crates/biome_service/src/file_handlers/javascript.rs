@@ -6,19 +6,15 @@ use super::{
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
 use crate::file_handlers::{is_diagnostic_error, FixAllParams};
-use crate::settings::{LinterSettings, OverrideSettings, Settings};
-use crate::workspace::DocumentFileSource;
-use crate::{
-    settings::{
-        FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage,
-        WorkspaceSettingsHandle,
-    },
-    workspace::{
-        CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
-        RenameResult,
-    },
-    WorkspaceError,
+use crate::settings::{
+    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
+    ServiceLanguage, Settings, WorkspaceSettingsHandle,
 };
+use crate::workspace::{
+    CodeAction, DocumentFileSource, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
+    PullActionsResult, RenameResult,
+};
+use crate::WorkspaceError;
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
@@ -572,6 +568,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             .with_only(&params.only)
             .with_skip(&params.skip)
             .with_path(params.biome_path.as_path())
+            .with_enabled_rules(&params.enabled_rules)
             .with_manifest(params.manifest.as_ref())
             .finish();
 

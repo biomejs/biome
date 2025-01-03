@@ -27,6 +27,7 @@ biome_service        = { workspace = true }
 biome_text_edit      = { workspace = true }
 camino               = { workspace = true }
 futures              = "0.3.31"
+papaya               = { workspace = true }
 rustc-hash           = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }

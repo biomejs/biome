@@ -34,6 +34,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         let guard = FileGuard::open(
             ctx.workspace,
             OpenFileParams {
+                project_key: ctx.project_key,
                 document_file_source: None,
                 path: path.clone(),
                 version: 0,

@@ -12,6 +12,7 @@ use biome_diagnostics::{category, DiagnosticExt, Error, Resource, Severity};
 use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::dome::Dome;
+use biome_service::projects::ProjectKey;
 use biome_service::workspace::{DropPatternParams, IsPathIgnoredParams};
 use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
 use camino::Utf8PathBuf;
@@ -39,6 +40,7 @@ pub(crate) struct TraverseResult {
 pub(crate) fn traverse(
     execution: &Execution,
     session: &mut CliSession,
+    project_key: ProjectKey,
     cli_options: &CliOptions,
     mut inputs: Vec<OsString>,
 ) -> Result<TraverseResult, CliDiagnostic> {
@@ -101,6 +103,7 @@ pub(crate) fn traverse(
             &TraversalOptions {
                 fs,
                 workspace,
+                project_key,
                 execution,
                 interner,
                 matches: &matches,
@@ -502,6 +505,8 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
     pub(crate) fs: &'app dyn FileSystem,
     /// Instance of [Workspace] used by this instance of the CLI
     pub(crate) workspace: &'ctx dyn Workspace,
+    /// Key of the project in which we're traversing.
+    pub(crate) project_key: ProjectKey,
     /// Determines how the files should be processed
     pub(crate) execution: &'ctx Execution,
     /// File paths interner cache used by the filesystem traversal
@@ -583,7 +588,8 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
             let can_handle = !self
                 .workspace
                 .is_path_ignored(IsPathIgnoredParams {
-                    biome_path: biome_path.clone(),
+                    project_key: self.project_key,
+                    path: biome_path.clone(),
                     features: self.execution.to_feature(),
                 })
                 .unwrap_or_else(|err| {
@@ -599,6 +605,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         }
 
         let file_features = self.workspace.file_features(SupportsFeatureParams {
+            project_key: self.project_key,
             path: biome_path.clone(),
             features: self.execution.to_feature(),
         });

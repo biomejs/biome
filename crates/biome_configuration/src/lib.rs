@@ -90,6 +90,11 @@ pub struct Configuration {
     #[partial(bpaf(hide, pure(Default::default())))]
     pub schema: Box<str>,
 
+    /// Indicates whether this configuration file is at the root of a Biome
+    /// project. By default, this is `true`.
+    #[partial(bpaf(hide, hide_usage))]
+    pub root: bool,
+
     /// A list of paths to other JSON files, used to extends the current configuration.
     #[partial(bpaf(hide, pure(Default::default())))]
     pub extends: Vec<Box<str>>,
