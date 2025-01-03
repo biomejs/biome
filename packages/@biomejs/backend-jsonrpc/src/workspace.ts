@@ -1443,6 +1443,10 @@ export interface Nursery {
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UtilityClassSortingOptions;
 	/**
+	 * Enforce ordering of CSS properties.
+	 */
+	useSortedProperties?: RuleFixConfiguration_for_Null;
+	/**
 	 * Enforce the use of the directive "use strict" in script files.
 	 */
 	useStrictMode?: RuleFixConfiguration_for_Null;
@@ -3161,6 +3165,7 @@ export type Category =
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useParseIntRadix"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useTrimStartEnd"
 	| "lint/nursery/useValidAutocomplete"

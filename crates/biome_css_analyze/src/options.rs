@@ -39,3 +39,5 @@ pub type NoValueAtRule =
     <lint::nursery::no_value_at_rule::NoValueAtRule as biome_analyze::Rule>::Options;
 pub type UseGenericFontNames =
     <lint::a11y::use_generic_font_names::UseGenericFontNames as biome_analyze::Rule>::Options;
+pub type UseSortedProperties =
+    <lint::nursery::use_sorted_properties::UseSortedProperties as biome_analyze::Rule>::Options;
