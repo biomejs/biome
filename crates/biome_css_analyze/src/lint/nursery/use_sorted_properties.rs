@@ -190,28 +190,26 @@ fn css_declaration_to_prop_text(
 fn prop_text_to_prefix(tok_text: &TokenText) -> Option<&'static str> {
     let prop_lowercase = tok_text.text().to_lowercase_cow();
     let prefix = vender_prefix(&prop_lowercase);
-    if prefix == "" {
+    if prefix.is_empty() {
         return None;
     }
-    return Some(prefix);
+    Some(prefix)
 }
 
 /// Returns a declaration's property name without vendor prefix in lowercase.
 fn prop_text_to_unprefixed(tok_text: &TokenText) -> Cow<'_, str> {
     let prop_lowercase = tok_text.text().to_lowercase_cow();
     let prefix = vender_prefix(&prop_lowercase);
-    if prefix == "" {
+    if prefix.is_empty() {
         return prop_lowercase;
     }
     let unprefixed = match &prop_lowercase {
-        Cow::Borrowed(s) => s
-            .strip_prefix(prefix)
-            .and_then(|stripped| Some(Cow::Borrowed(stripped))),
+        Cow::Borrowed(s) => s.strip_prefix(prefix).map(Cow::Borrowed),
         Cow::Owned(s) => s
             .strip_prefix(prefix)
-            .and_then(|stripped| Some(Cow::Owned(stripped.to_owned()))),
+            .map(|stripped| Cow::Owned(stripped.to_owned())),
     };
-    return unprefixed.unwrap_or(prop_lowercase);
+    unprefixed.unwrap_or(prop_lowercase)
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
@@ -283,43 +281,36 @@ impl From<&AnyCssDeclarationOrRule> for SortInfo {
                     .ok()
                     .and_then(|decl| decl.property().ok());
 
-                if let Some(_) = &prop {
-                } else {
-                    return SortInfo::unknown();
-                }
-
                 match prop {
                     Some(AnyCssProperty::CssComposesProperty(_)) => {
                         SortInfo::from_kind(NodeKindOrder::ComposesProperty)
                     }
                     Some(AnyCssProperty::CssGenericProperty(prop)) => match prop.name().ok() {
-                        Some(name) => match name {
-                            AnyCssDeclarationName::CssDashedIdentifier(_) => {
-                                SortInfo::from_kind(NodeKindOrder::CustomProperty)
-                            }
-                            AnyCssDeclarationName::CssIdentifier(ident) => {
-                                if let Some(prop_text) = css_identifier_to_prop_text(&ident) {
-                                    let prefix = prop_text_to_prefix(&prop_text);
-                                    let unprefixed = prop_text_to_unprefixed(&prop_text);
+                        Some(AnyCssDeclarationName::CssDashedIdentifier(_)) => {
+                            SortInfo::from_kind(NodeKindOrder::CustomProperty)
+                        }
+                        Some(AnyCssDeclarationName::CssIdentifier(ident)) => {
+                            if let Some(prop_text) = css_identifier_to_prop_text(&ident) {
+                                let prefix = prop_text_to_prefix(&prop_text);
+                                let unprefixed = prop_text_to_unprefixed(&prop_text);
 
-                                    let vendor_prefix_idx: u32 = match prefix {
-                                        Some(prefix) => VENDOR_PREFIXES
-                                            .iter()
-                                            .position(|vp| vp == &prefix)
-                                            .map_or(u32::MAX, |pos| pos as u32),
-                                        None => u32::MAX,
-                                    };
+                                let vendor_prefix_idx: u32 = match prefix {
+                                    Some(prefix) => VENDOR_PREFIXES
+                                        .iter()
+                                        .position(|vp| vp == &prefix)
+                                        .map_or(u32::MAX, |pos| pos as u32),
+                                    None => u32::MAX,
+                                };
 
-                                    if let Some(idx) = PROPERTY_ORDER_MAP.get(unprefixed.as_ref()) {
-                                        SortInfo::from_declaration(*idx, vendor_prefix_idx)
-                                    } else {
-                                        SortInfo::from_kind(NodeKindOrder::UnknownDeclaration)
-                                    }
+                                if let Some(idx) = PROPERTY_ORDER_MAP.get(unprefixed.as_ref()) {
+                                    SortInfo::from_declaration(*idx, vendor_prefix_idx)
                                 } else {
-                                    SortInfo::unknown()
+                                    SortInfo::from_kind(NodeKindOrder::UnknownDeclaration)
                                 }
+                            } else {
+                                SortInfo::unknown()
                             }
-                        },
+                        }
                         None => SortInfo::unknown(),
                     },
                     _ => SortInfo::unknown(),
@@ -339,8 +330,8 @@ fn contains_shorthand_after_longhand(nodes: &[AnyCssDeclarationOrRule]) -> bool 
     for node in nodes.iter().rev() {
         if let AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(decl_with_semicolon) = node {
             if let Some(prop_text) = &css_declaration_to_prop_text(decl_with_semicolon) {
-                let prefix = prop_text_to_prefix(&prop_text);
-                let unprefixed = prop_text_to_unprefixed(&prop_text);
+                let prefix = prop_text_to_prefix(prop_text);
+                let unprefixed = prop_text_to_unprefixed(prop_text);
 
                 // Check for disallowed properties
                 for disallowed_property in disallowed_longhand_properties.iter() {
@@ -371,7 +362,7 @@ fn contains_unknown_property(nodes: &[AnyCssDeclarationOrRule]) -> bool {
     for node in nodes.iter() {
         if let AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(decl_with_semicolon) = node {
             if let Some(prop_text) = &css_declaration_to_prop_text(decl_with_semicolon) {
-                let unprefixed = prop_text_to_unprefixed(&prop_text);
+                let unprefixed = prop_text_to_unprefixed(prop_text);
                 if !PROPERTY_ORDER_MAP.contains_key(unprefixed.as_ref()) {
                     return true;
                 }

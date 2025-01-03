@@ -1,4 +1,4 @@
-pub const BASIC_KEYWORDS: [&str; 5] = ["initial", "inherit", "revert", "revert-layer", "unset"];
+pub const BASIC_KEYWORDS: [&str; 5] = ["inherit", "initial", "revert", "revert-layer", "unset"];
 
 // https://drafts.csswg.org/css-fonts/#system-family-name-value
 pub const SYSTEM_FAMILY_NAME_KEYWORDS: [&str; 6] = [
