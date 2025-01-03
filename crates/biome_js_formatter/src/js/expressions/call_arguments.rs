@@ -14,8 +14,8 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
     AnyTsReturnType, AnyTsType, JsBinaryExpressionFields, JsCallArgumentList, JsCallArguments,
     JsCallArgumentsFields, JsCallExpression, JsExpressionStatement, JsFunctionExpression,
-    JsImportCallExpression, JsLanguage, JsLogicalExpressionFields, TsAsExpressionFields,
-    TsSatisfiesExpressionFields,
+    JsImportCallExpression, JsLanguage, JsLogicalExpressionFields, JsSyntaxKind,
+    TsAsExpressionFields, TsSatisfiesExpressionFields,
 };
 use biome_rowan::{AstSeparatedElement, AstSeparatedList, SyntaxResult};
 
@@ -53,10 +53,23 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
                     )
                 });
 
+        let is_first_arg_string_literal_or_template = if args.len() != 2 {
+            true
+        } else {
+            matches!(
+            args.iter().next(),
+            Some(Ok(AnyJsCallArgument::AnyJsExpression(first)))
+                if matches!(
+                    first.syntax().kind(),
+                    JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
+                )
+            )
+        };
+
         if is_commonjs_or_amd_call?
             || is_multiline_template_only_args(node)
             || is_react_hook_with_deps_array(node, f.comments())
-            || is_test_call?
+            || (is_test_call? && is_first_arg_string_literal_or_template)
         {
             return write!(
                 f,
