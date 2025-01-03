@@ -3001,12 +3001,6 @@ fn format_package_json() {
         .as_bytes(),
     );
 
-    let expected = r#"{
-  "name": "@foo/package",
-  "dependencies": { "foo": "latest" }
-}
-"#;
-
     let (fs, result) = run_cli(
         fs,
         &mut console,
@@ -3022,8 +3016,6 @@ fn format_package_json() {
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_file_contents(&fs, file_path, expected);
 
     assert_eq!(console.out_buffer.len(), 1);
 

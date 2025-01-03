@@ -1,18 +1,12 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: json/trailing_comma_never/classic.json
+info: json/expand/nested_object.json
 snapshot_kind: text
 ---
 # Input
 
 ```json
-{
-  "list": [],
-  "list1": [],
-  "list2": [],
-  "list3": [],
-  "list4": []
-}
+{"number": 123, "string": "some-string", "object":  { "object":  {"number":  123, "boolean":  false}}}
 
 ```
 
@@ -34,11 +28,9 @@ Expand: Follow Source
 
 ```json
 {
-	"list": [],
-	"list1": [],
-	"list2": [],
-	"list3": [],
-	"list4": []
+	"number": 123,
+	"string": "some-string",
+	"object": { "object": { "number": 123, "boolean": false } }
 }
 ```
 
@@ -49,16 +41,19 @@ Indent style: Tab
 Indent width: 2
 Line ending: LF
 Line width: 80
-Trailing commas: All
-Expand: Follow Source
+Trailing commas: None
+Expand: Always
 -----
 
 ```json
 {
-	"list": [],
-	"list1": [],
-	"list2": [],
-	"list3": [],
-	"list4": []
+	"number": 123,
+	"string": "some-string",
+	"object": {
+		"object": {
+			"number": 123,
+			"boolean": false
+		}
+	}
 }
 ```

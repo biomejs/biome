@@ -1,8 +1,8 @@
 use biome_configuration::{ConfigurationPathHint, Rules};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{
-    fmt, markup, ConsoleExt, DebugDisplay, DebugDisplayOption, HorizontalLine, KeyValuePair,
-    Padding, SOFT_LINE,
+    fmt, markup, ConsoleExt, DebugDisplay, DisplayOption, HorizontalLine, KeyValuePair, Padding,
+    SOFT_LINE,
 };
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
 use biome_diagnostics::{termcolor, PrintDescription};
@@ -271,14 +271,14 @@ impl Display for RageConfiguration<'_> {
                             {KeyValuePair("Trailing commas", markup!({DebugDisplay(javascript_formatter_configuration.trailing_commas)}))}
                             {KeyValuePair("Semicolons", markup!({DebugDisplay(javascript_formatter_configuration.semicolons)}))}
                             {KeyValuePair("Arrow parentheses", markup!({DebugDisplay(javascript_formatter_configuration.arrow_parentheses)}))}
-                            {KeyValuePair("Bracket spacing", markup!({DebugDisplayOption(javascript_formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Bracket same line", markup!({DebugDisplayOption(javascript_formatter_configuration.bracket_same_line)}))}
+                            {KeyValuePair("Bracket spacing", markup!({DisplayOption(javascript_formatter_configuration.bracket_spacing)}))}
+                            {KeyValuePair("Bracket same line", markup!({DisplayOption(javascript_formatter_configuration.bracket_same_line)}))}
                             {KeyValuePair("Quote style", markup!({DebugDisplay(javascript_formatter_configuration.quote_style)}))}
-                            {KeyValuePair("Indent style", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DebugDisplayOption(javascript_formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DebugDisplayOption(javascript_formatter_configuration.line_width.map(|lw| lw.value()))}))}
-                            {KeyValuePair("Attribute position", markup!({DebugDisplayOption(javascript_formatter_configuration.attribute_position)}))}
+                            {KeyValuePair("Indent style", markup!({DisplayOption(javascript_formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent width", markup!({DisplayOption(javascript_formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DisplayOption(javascript_formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DisplayOption(javascript_formatter_configuration.line_width.map(|lw| lw.value()))}))}
+                            {KeyValuePair("Attribute position", markup!({DisplayOption(javascript_formatter_configuration.attribute_position)}))}
                         )
                         .fmt(fmt)?;
 
@@ -287,11 +287,12 @@ impl Display for RageConfiguration<'_> {
                         markup! (
                             {Section("JSON Formatter")}
                             {KeyValuePair("Enabled", markup!({DebugDisplay(json_formatter_configuration.enabled)}))}
-                            {KeyValuePair("Indent style", markup!({DebugDisplayOption(json_formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DebugDisplayOption(json_formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DebugDisplayOption(json_formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DebugDisplayOption(json_formatter_configuration.line_width.map(|lw| lw.value()))}))}
-                            {KeyValuePair("Trailing Commas", markup!({DebugDisplayOption(json_formatter_configuration.trailing_commas)}))}
+                            {KeyValuePair("Indent style", markup!({DisplayOption(json_formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent width", markup!({DisplayOption(json_formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DisplayOption(json_formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DisplayOption(json_formatter_configuration.line_width.map(|lw| lw.value()))}))}
+                            {KeyValuePair("Trailing Commas", markup!({DisplayOption(json_formatter_configuration.trailing_commas)}))}
+                            {KeyValuePair("Expand lists", markup!({DisplayOption(json_formatter_configuration.expand)}))}
                         ).fmt(fmt)?;
 
                         let css_formatter_configuration =
@@ -299,10 +300,10 @@ impl Display for RageConfiguration<'_> {
                         markup! (
                             {Section("CSS Formatter")}
                             {KeyValuePair("Enabled", markup!({DebugDisplay(css_formatter_configuration.enabled)}))}
-                            {KeyValuePair("Indent style", markup!({DebugDisplayOption(css_formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DebugDisplayOption(css_formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DebugDisplayOption(css_formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DebugDisplayOption(css_formatter_configuration.line_width)}))}
+                            {KeyValuePair("Indent style", markup!({DisplayOption(css_formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent width", markup!({DisplayOption(css_formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DisplayOption(css_formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DisplayOption(css_formatter_configuration.line_width)}))}
                             {KeyValuePair("Quote style", markup!({DebugDisplay(css_formatter_configuration.quote_style)}))}
                         ).fmt(fmt)?;
 
@@ -310,13 +311,13 @@ impl Display for RageConfiguration<'_> {
                             configuration.get_graphql_formatter_configuration();
                         markup! (
                             {Section("GraphQL Formatter")}
-                            {KeyValuePair("Enabled", markup!({DebugDisplayOption(graphql_formatter_configuration.enabled)}))}
-                            {KeyValuePair("Indent style", markup!({DebugDisplayOption(graphql_formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DebugDisplayOption(graphql_formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DebugDisplayOption(graphql_formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DebugDisplayOption(graphql_formatter_configuration.line_width)}))}
-                            {KeyValuePair("Bracket spacing", markup!({DebugDisplayOption(graphql_formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Quote style", markup!({DebugDisplayOption(graphql_formatter_configuration.quote_style)}))}
+                            {KeyValuePair("Enabled", markup!({DisplayOption(graphql_formatter_configuration.enabled)}))}
+                            {KeyValuePair("Indent style", markup!({DisplayOption(graphql_formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent width", markup!({DisplayOption(graphql_formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DisplayOption(graphql_formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DisplayOption(graphql_formatter_configuration.line_width)}))}
+                            {KeyValuePair("Bracket spacing", markup!({DisplayOption(graphql_formatter_configuration.bracket_spacing)}))}
+                            {KeyValuePair("Quote style", markup!({DisplayOption(graphql_formatter_configuration.quote_style)}))}
                         ).fmt(fmt)?;
                     }
 
@@ -378,9 +379,7 @@ impl fmt::Display for EnvVarOs {
         let name = self.0;
         match env::var_os(name) {
             None => KeyValuePair(name, markup! { <Dim>"unset"</Dim> }).fmt(fmt),
-            Some(value) => {
-                KeyValuePair(name, markup! {{DebugDisplayOption(value.to_str())}}).fmt(fmt)
-            }
+            Some(value) => KeyValuePair(name, markup! {{DisplayOption(value.to_str())}}).fmt(fmt),
         }
     }
 }

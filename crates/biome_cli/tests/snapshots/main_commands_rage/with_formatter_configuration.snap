@@ -112,6 +112,7 @@ JSON Formatter:
   Line ending:                  LF
   Line width:                   100
   Trailing Commas:              unset
+  Expand lists:                 unset
 
 CSS Formatter:
   Enabled:                      true

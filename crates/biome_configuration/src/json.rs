@@ -1,6 +1,6 @@
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
-use biome_json_formatter::context::TrailingCommas;
+use biome_json_formatter::context::{Expand, TrailingCommas};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -70,6 +70,15 @@ pub struct JsonFormatter {
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
     #[partial(bpaf(long("json-formatter-trailing-commas"), argument("none|all"), optional))]
     pub trailing_commas: Option<TrailingCommas>,
+
+    /// Whether to expand arrays and objects on multiple lines. When set to `always`, these literals are formatted on multiple lines,
+    /// regardless of length of the list. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "followSource".
+    #[partial(bpaf(
+        long("json-formatter-expand"),
+        argument("always|follow-source"),
+        optional
+    ))]
+    pub expand: Option<Expand>,
 }
 
 impl PartialJsonFormatter {
@@ -81,6 +90,7 @@ impl PartialJsonFormatter {
             line_ending: self.line_ending,
             line_width: self.line_width,
             trailing_commas: self.trailing_commas,
+            expand: self.expand,
         }
     }
 }
@@ -94,6 +104,7 @@ impl Default for JsonFormatter {
             line_ending: Default::default(),
             line_width: Default::default(),
             trailing_commas: Default::default(),
+            expand: Default::default(),
         }
     }
 }

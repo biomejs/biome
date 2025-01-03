@@ -29,7 +29,7 @@ use biome_diagnostics::Applicability;
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::analyze;
-use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
+use biome_json_formatter::context::{Expand, JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
@@ -46,6 +46,7 @@ pub struct JsonFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub trailing_commas: Option<TrailingCommas>,
+    pub expand: Option<Expand>,
     pub enabled: Option<bool>,
 }
 
@@ -106,6 +107,14 @@ impl ServiceLanguage for JsonLanguage {
             language.and_then(|l| l.trailing_commas).unwrap_or_default()
         };
 
+        let expand_lists = language.and_then(|l| l.expand).unwrap_or_else(|| {
+            if path.file_name() == Some("package.json") {
+                Expand::Always
+            } else {
+                Expand::default()
+            }
+        });
+
         let file_source = document_file_source
             .to_json_file_source()
             .unwrap_or_default();
@@ -115,7 +124,8 @@ impl ServiceLanguage for JsonLanguage {
             .with_indent_style(indent_style)
             .with_indent_width(indent_width)
             .with_line_width(line_width)
-            .with_trailing_commas(trailing_commas);
+            .with_trailing_commas(trailing_commas)
+            .with_expand(expand_lists);
 
         if let Some(overrides) = overrides {
             overrides.to_override_json_format_options(path, options)

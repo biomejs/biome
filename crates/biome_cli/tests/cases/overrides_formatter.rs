@@ -776,6 +776,43 @@ fn disallow_comments_on_well_known_files() {
 }
 
 #[test]
+fn overrides_default_formatter_for_package_json() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let biome_json = Utf8Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+            "overrides": [
+                {
+                    "include": ["package.json"],
+                    "json": { "formatter": { "expand": "followSource" } }
+                }
+            ]
+        }"#,
+    );
+    let file_path = Utf8Path::new("package.json");
+    fs.insert(
+        file_path.into(),
+        r#"{ "name": "foo", "dependencies": { "foo": "latest" } }"#.as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "overrides_default_formatter_for_package_json",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn overrides_grit_formatting_options() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();

@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: json/array/nested.json
+info: json/expand/nested_array.json
 snapshot_kind: text
 ---
 # Input
@@ -33,6 +33,44 @@ Expand: Follow Source
 	"array": [
 		111111,
 		[1, 2, "a"],
+		4444444444444444444444444444,
+		666666666666666,
+		"abababababababababababababababababab"
+	],
+	"long": [
+		11111,
+		[
+			"nestedddddddddddd",
+			22222222222222222222222222,
+			true,
+			5555555555555555555555,
+			"indenteddddddddddddddddddddddddddddd"
+		],
+		"Element"
+	]
+}
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Trailing commas: None
+Expand: Always
+-----
+
+```json
+{
+	"array": [
+		111111,
+		[
+			1,
+			2,
+			"a"
+		],
 		4444444444444444444444444444,
 		666666666666666,
 		"abababababababababababababababababab"

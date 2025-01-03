@@ -16,9 +16,9 @@ where
 }
 
 /// It displays a `Option<T>`, where `T` implements [std::fmt::Display]
-pub struct DebugDisplayOption<T>(pub Option<T>);
+pub struct DisplayOption<T>(pub Option<T>);
 
-impl<T> Display for DebugDisplayOption<T>
+impl<T> Display for DisplayOption<T>
 where
     T: std::fmt::Display,
 {
