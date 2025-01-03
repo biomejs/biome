@@ -11,6 +11,7 @@ use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
+use biome_service::projects::ProjectKey;
 use biome_service::{Workspace, WorkspaceError};
 use std::ffi::OsString;
 
@@ -134,8 +135,10 @@ impl CommandRunner for FormatCommandPayload {
         cli_options: &CliOptions,
         console: &mut dyn Console,
         _workspace: &dyn Workspace,
+        project_key: ProjectKey,
     ) -> Result<Execution, CliDiagnostic> {
         Ok(Execution::new(TraversalMode::Format {
+            project_key,
             ignore_errors: cli_options.skip_errors,
             write: self.should_write(),
             stdin: self.get_stdin(console)?,

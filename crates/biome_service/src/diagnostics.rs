@@ -67,6 +67,10 @@ impl WorkspaceError {
         Self::CantReadFile(CantReadFile { path })
     }
 
+    pub fn invalid_pattern() -> Self {
+        Self::SearchError(SearchError::InvalidPattern(InvalidPattern))
+    }
+
     pub fn not_found() -> Self {
         Self::NotFound(NotFound)
     }

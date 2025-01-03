@@ -8,6 +8,7 @@ use biome_diagnostics::Diagnostic;
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::BiomePath;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
+use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     ChangeFileParams, DropPatternParams, FeaturesBuilder, FileContent, FixFileParams,
     FormatFileParams, OpenFileParams, SupportsFeatureParams,
@@ -17,6 +18,7 @@ use std::borrow::Cow;
 
 pub(crate) fn run<'a>(
     session: CliSession,
+    project_key: ProjectKey,
     mode: &'a Execution,
     biome_path: BiomePath,
     content: &'a str,
@@ -28,6 +30,7 @@ pub(crate) fn run<'a>(
 
     if mode.is_format() {
         let file_features = workspace.file_features(SupportsFeatureParams {
+            project_key,
             path: biome_path.clone(),
             features: FeaturesBuilder::new().with_formatter().build(),
         })?;
@@ -45,6 +48,7 @@ pub(crate) fn run<'a>(
         };
         if file_features.supports_format() {
             workspace.open_file(OpenFileParams {
+                project_key,
                 path: biome_path.clone(),
                 version: 0,
                 content: FileContent::FromClient(content.into()),
@@ -52,6 +56,7 @@ pub(crate) fn run<'a>(
                 persist_node_cache: false,
             })?;
             let printed = workspace.format_file(FormatFileParams {
+                project_key,
                 path: biome_path.clone(),
             })?;
 
@@ -78,6 +83,7 @@ pub(crate) fn run<'a>(
         let mut new_content = Cow::Borrowed(content);
 
         workspace.open_file(OpenFileParams {
+            project_key,
             path: biome_path.clone(),
             version: 0,
             content: FileContent::FromClient(content.into()),
@@ -86,6 +92,7 @@ pub(crate) fn run<'a>(
         })?;
         // apply fix file of the linter
         let file_features = workspace.file_features(SupportsFeatureParams {
+            project_key,
             path: biome_path.clone(),
             features: FeaturesBuilder::new()
                 .with_linter()
@@ -126,6 +133,7 @@ pub(crate) fn run<'a>(
                 }
 
                 let fix_file_result = workspace.fix_file(FixFileParams {
+                    project_key,
                     fix_file_mode: *fix_file_mode,
                     path: biome_path.clone(),
                     should_format: mode.is_check() && file_features.supports_format(),
@@ -145,6 +153,7 @@ pub(crate) fn run<'a>(
                 if output != new_content {
                     version += 1;
                     workspace.change_file(ChangeFileParams {
+                        project_key,
                         content: output.clone(),
                         path: biome_path.clone(),
                         version,
@@ -156,6 +165,7 @@ pub(crate) fn run<'a>(
 
         if file_features.supports_format() && mode.is_check() {
             let printed = workspace.format_file(FormatFileParams {
+                project_key,
                 path: biome_path.clone(),
             })?;
             let code = printed.into_code();
