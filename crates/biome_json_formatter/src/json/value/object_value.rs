@@ -10,7 +10,7 @@ impl FormatNodeRule<JsonObjectValue> for FormatJsonObjectValue {
     fn fmt_fields(&self, node: &JsonObjectValue, f: &mut JsonFormatter) -> FormatResult<()> {
         let should_expand = node.json_member_list().syntax().has_leading_newline()
             || f.comments().has_dangling_comments(node.syntax())
-            || f.context().options().expand_lists();
+            || f.context().options().expand();
 
         let list = format_with(|f| {
             write!(

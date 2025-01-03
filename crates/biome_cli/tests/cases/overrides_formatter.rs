@@ -786,7 +786,7 @@ fn overrides_default_formatter_for_package_json() {
             "overrides": [
                 {
                     "include": ["package.json"],
-                    "json": { "formatter": { "expandLists": "followSource" } }
+                    "json": { "formatter": { "expand": "followSource" } }
                 }
             ]
         }"#,

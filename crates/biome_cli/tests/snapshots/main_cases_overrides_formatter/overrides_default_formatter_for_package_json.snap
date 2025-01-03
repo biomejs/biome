@@ -10,7 +10,7 @@ snapshot_kind: text
   "overrides": [
     {
       "include": ["package.json"],
-      "json": { "formatter": { "expandLists": "followSource" } }
+      "json": { "formatter": { "expand": "followSource" } }
     }
   ]
 }

@@ -126,9 +126,9 @@ Available options:
                               super languages) files. Defaults to 80.
         --json-formatter-trailing-commas=<none|all>  Print trailing commas wherever possible in
                               multi-line comma-separated syntactic structures. Defaults to "none".
-        --json-formatter-expand-lists=<always|follow-source>  Whether to expand lists (arrays and
-                              objects) on multiple lines. When set to `always`, lists are formatted
-                              on multiple lines, regardless of length of the list. When formatting
+        --json-formatter-expand=<always|follow-source>  Whether to expand arrays and objects on
+                              multiple lines. When set to `always`, these literals are formatted on
+                              multiple lines, regardless of length of the list. When formatting
                               `package.json`, Biome will use `always` unless configured otherwise.
                               Defaults to "followSource".
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and

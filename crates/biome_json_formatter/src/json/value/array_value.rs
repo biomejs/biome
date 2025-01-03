@@ -12,8 +12,8 @@ impl FormatNodeRule<JsonArrayValue> for FormatJsonArrayValue {
             r_brack_token,
         } = node.as_fields();
 
-        let should_expand = f.comments().has_dangling_comments(node.syntax())
-            || f.context().options().expand_lists();
+        let should_expand =
+            f.comments().has_dangling_comments(node.syntax()) || f.context().options().expand();
 
         write!(
             f,

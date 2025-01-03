@@ -67,8 +67,7 @@ pub struct JsonFormatOptions {
     attribute_position: AttributePosition,
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
     trailing_commas: TrailingCommas,
-    expand_lists: ExpandLists,
-
+    expand: Expand,
     /// The kind of file
     file_source: JsonFileSource,
 }
@@ -116,13 +115,13 @@ impl fmt::Display for TrailingCommas {
     serde(rename_all = "camelCase")
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub enum ExpandLists {
+pub enum Expand {
     Always,
     #[default]
     FollowSource,
 }
 
-impl FromStr for ExpandLists {
+impl FromStr for Expand {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
@@ -133,11 +132,11 @@ impl FromStr for ExpandLists {
     }
 }
 
-impl fmt::Display for ExpandLists {
+impl fmt::Display for Expand {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            ExpandLists::Always => std::write!(f, "Always"),
-            ExpandLists::FollowSource => std::write!(f, "Follow Source"),
+            Expand::Always => std::write!(f, "Always"),
+            Expand::FollowSource => std::write!(f, "Follow Source"),
         }
     }
 }
@@ -175,8 +174,8 @@ impl JsonFormatOptions {
         self
     }
 
-    pub fn with_expand_lists(mut self, expand_lists: ExpandLists) -> Self {
-        self.expand_lists = expand_lists;
+    pub fn with_expand(mut self, expand: Expand) -> Self {
+        self.expand = expand;
         self
     }
 
@@ -201,8 +200,8 @@ impl JsonFormatOptions {
     }
 
     /// Set `expand_lists`
-    pub fn set_expand_lists(&mut self, expand_lists: ExpandLists) {
-        self.expand_lists = expand_lists;
+    pub fn set_expand(&mut self, expand: Expand) {
+        self.expand = expand;
     }
 
     pub(crate) fn to_trailing_separator(&self) -> TrailingSeparator {
@@ -216,8 +215,8 @@ impl JsonFormatOptions {
         &self.file_source
     }
 
-    pub(crate) const fn expand_lists(&self) -> bool {
-        matches!(self.expand_lists, ExpandLists::Always)
+    pub(crate) const fn expand(&self) -> bool {
+        matches!(self.expand, Expand::Always)
     }
 }
 
@@ -262,7 +261,7 @@ impl fmt::Display for JsonFormatOptions {
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
         writeln!(f, "Trailing commas: {}", self.trailing_commas)?;
-        writeln!(f, "Expand lists: {}", self.expand_lists)?;
+        writeln!(f, "Expand: {}", self.expand)?;
 
         Ok(())
     }
