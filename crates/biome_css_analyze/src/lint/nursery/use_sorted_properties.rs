@@ -1,4 +1,7 @@
-use std::{cmp::Ordering, collections::HashSet};
+use std::{
+    borrow::Cow,
+    collections::{BTreeSet, HashSet},
+};
 
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleAction,
@@ -9,12 +12,13 @@ use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssDeclarationOrRule, AnyCssProperty, AnyCssRule,
     CssDeclarationOrRuleBlock, CssDeclarationWithSemicolon, CssIdentifier, CssLanguage,
 };
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText};
+use biome_string_case::StrOnlyExtension;
 
 use crate::{
-    keywords::{LONGHAND_SUB_PROPERTIES_MAP, RESET_TO_INITIAL_PROPERTIES_MAP, VENDOR_PREFIXES},
+    keywords::VENDOR_PREFIXES,
     order::PROPERTY_ORDER_MAP,
-    utils::{property_may_override_others, vender_prefix},
+    utils::{get_longhand_sub_properties, get_reset_to_initial_properties, vender_prefix},
     CssRuleAction,
 };
 
@@ -24,15 +28,15 @@ declare_lint_rule! {
     /// This rule checks if the properties and nested rules are in a consistent order.
     ///
     /// The expected ordering is roughly:
-    ///  - Custom properties
-    ///  - Layout properties (display, flex, grid)
-    ///  - Margin & padding properties
-    ///  - Typography properties (font, color)
-    ///  - Interaction properties (pointer-events, visibility)
-    ///  - Background & border properties
-    ///  - Transition & animation properties
-    ///  - Nested rules
-    ///  - Nested media queries & at-rules
+    /// 1. Custom properties
+    /// 1. Layout properties (display, flex, grid)
+    /// 1. Margin & padding properties
+    /// 1. Typography properties (font, color)
+    /// 1. Interaction properties (pointer-events, visibility)
+    /// 1. Background & border properties
+    /// 1. Transition & animation properties
+    /// 1. Nested rules
+    /// 1. Nested media queries & at-rules
     ///
     /// ## Examples
     ///
@@ -59,8 +63,9 @@ declare_lint_rule! {
 
 pub struct UseSortedPropertiesState {
     block: CssDeclarationOrRuleBlock,
-    can_be_sorted: bool,
-    first_out_of_order_pair: Option<(NodeWithPosition, NodeWithPosition)>,
+    items: Vec<AnyCssDeclarationOrRule>,
+    btree: SortableRuleOrDeclarationTree,
+    is_unsafe_to_sort: bool,
 }
 
 impl Rule for UseSortedProperties {
@@ -71,63 +76,55 @@ impl Rule for UseSortedProperties {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let query_result = ctx.query();
-        let items = to_block_items_with_position(query_result);
 
-        let first_out_of_order_pair = get_first_out_of_order_pair(&items);
-        first_out_of_order_pair.as_ref()?;
+        let items = query_result
+            .items()
+            .into_iter()
+            .collect::<Vec<AnyCssDeclarationOrRule>>();
+        let is_unsafe_to_sort =
+            contains_shorthand_after_longhand(&items) || contains_unknown_property(&items);
+        let btree = SortableRuleOrDeclarationTree::new(&items);
 
         Some(UseSortedPropertiesState {
             block: query_result.clone(),
-            can_be_sorted: !contains_shorthand_after_longhand(&items)
-                && !contains_unknown_property(&items),
-            first_out_of_order_pair,
+            items,
+            btree,
+            is_unsafe_to_sort,
         })
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        if !state.can_be_sorted || state.first_out_of_order_pair.is_none() {
+        if state.is_unsafe_to_sort || state.btree.is_sorted() {
             return None;
         }
 
-        if let Some((a, b)) = &state.first_out_of_order_pair {
-            let a_description = node_short_description(a);
-            let b_description = node_short_description(b);
-            return Some(RuleDiagnostic::new(
-                rule_category!(),
-                state.block.range(),
-                markup! {
-                    "Properties should be sorted: "<Emphasis>{ a_description }</Emphasis>" should be before "<Emphasis>{ b_description }</Emphasis>"."
-                },
-            ));
-        }
-
-        None
+        return Some(RuleDiagnostic::new(
+            rule_category!(),
+            state.block.range(),
+            markup! {
+                "Properties can be sorted."
+            },
+        ));
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<CssRuleAction> {
-        if !state.can_be_sorted || state.first_out_of_order_pair.is_none() {
+        if state.is_unsafe_to_sort {
             return None;
         }
 
         let mut mutation = ctx.root().begin();
 
-        let original_items = to_block_items_with_position(&state.block);
-        let mut sorted_items = original_items.clone();
-        sorted_items.sort_by(|a, b| sort_info(&a.node).cmp(&sort_info(&b.node)));
-
-        let pairs = original_items.iter().zip(sorted_items.iter());
-
-        for (item_to_replace, replacement) in pairs {
-            if item_to_replace.position != replacement.position {
+        for (desired_position, sort_info) in state.btree.0.iter().enumerate() {
+            if sort_info.original_position != desired_position {
                 mutation.replace_node_discard_trivia(
-                    item_to_replace.node.clone(),
-                    replacement.node.clone(),
+                    state.items.get(sort_info.original_position)?.clone(),
+                    state.items.get(desired_position)?.clone(),
                 );
             }
         }
 
         return Some(RuleAction::<CssLanguage>::new(
-            ActionCategory::QuickFix,
+            ActionCategory::QuickFix(Cow::Borrowed("")),
             ctx.metadata().applicability(),
             markup! { "Sort these properties" }.to_owned(),
             mutation,
@@ -135,81 +132,40 @@ impl Rule for UseSortedProperties {
     }
 }
 
-#[derive(Clone)]
-struct NodeWithPosition {
-    position: usize,
-    node: AnyCssDeclarationOrRule,
-}
+pub struct SortableRuleOrDeclarationTree(pub BTreeSet<SortInfo>);
 
-fn to_block_items_with_position(block: &CssDeclarationOrRuleBlock) -> Vec<NodeWithPosition> {
-    block
-        .items()
-        .into_iter()
-        .enumerate()
-        .map(|(position, item)| NodeWithPosition {
-            position,
-            node: item,
-        })
-        .collect()
-}
-
-// takes the unsorted list and returns the first item that is out of order, and the item it should be placed before
-// returns None if the list is sorted
-fn get_first_out_of_order_pair(
-    items: &[NodeWithPosition],
-) -> Option<(NodeWithPosition, NodeWithPosition)> {
-    if items.is_empty() {
-        return None;
+impl SortableRuleOrDeclarationTree {
+    pub fn new(items: &[AnyCssDeclarationOrRule]) -> Self {
+        SortableRuleOrDeclarationTree(
+            items
+                .iter()
+                .enumerate()
+                .map(|(position, node)| {
+                    let mut sort_info = SortInfo::from(node);
+                    sort_info.original_position = position;
+                    sort_info
+                })
+                .collect::<BTreeSet<SortInfo>>(),
+        )
     }
 
-    let mut first_out_of_order_node: Option<NodeWithPosition> = None;
-
-    // find the first node that's 'less than' the previous node
-    let mut prev_item_info = sort_info(&items[0].node);
-    for item in items.iter() {
-        let item_info = sort_info(&item.node);
-        if item_info.cmp(&prev_item_info) == Ordering::Less {
-            first_out_of_order_node = Some(item.clone());
-            break;
-        }
-        prev_item_info = item_info;
+    pub fn is_sorted(&self) -> bool {
+        // The list is sorted if the original_position field equals the actual position for every item
+        self.0
+            .iter()
+            .enumerate()
+            .all(|(position, item)| position == item.original_position)
     }
-
-    // find where that node belongs
-    if let Some(first_out_of_order_node) = first_out_of_order_node {
-        let first_out_of_order_node_info = sort_info(&first_out_of_order_node.node);
-        for item in items.iter() {
-            let item_info = sort_info(&item.node);
-            if item_info.cmp(&first_out_of_order_node_info) == Ordering::Greater {
-                return Some((first_out_of_order_node.clone(), item.clone()));
-            }
-        }
-    }
-
-    None
 }
 
-// returns (vendor prefix, name without vendor prefix) in lowercase for a CssIdentifier
-fn css_identifier_to_prop_name(ident: &CssIdentifier) -> Option<(String, String)> {
+fn css_identifier_to_prop_text(ident: &CssIdentifier) -> Option<TokenText> {
     let tok = ident.value_token().ok()?;
-    let raw_prop_name = tok.token_text_trimmed().text().to_string();
-
-    let prop_lowercase = raw_prop_name.to_lowercase();
-    let prop_prefix = vender_prefix(&prop_lowercase).to_string();
-    let unprefixed_prop = if let Some(unprefixed_slice) = prop_lowercase.strip_prefix(&prop_prefix)
-    {
-        unprefixed_slice.to_string()
-    } else {
-        prop_lowercase
-    };
-
-    Some((prop_prefix, unprefixed_prop))
+    Some(tok.token_text_trimmed())
 }
 
-// returns (vendor prefix, name without vendor prefix) in lowercase for a CssDeclarationWithSemicolon
-fn css_declaration_to_prop_name(
+fn css_declaration_to_prop_text(
     decl_with_semicolon: &CssDeclarationWithSemicolon,
-) -> Option<(String, String)> {
+) -> Option<TokenText> {
     let prop_name = decl_with_semicolon
         .declaration()
         .ok()?
@@ -219,90 +175,139 @@ fn css_declaration_to_prop_name(
         .name()
         .ok();
     if let Some(AnyCssDeclarationName::CssIdentifier(ident)) = prop_name {
-        return css_identifier_to_prop_name(&ident);
+        return Some(ident.value_token().ok()?.token_text_trimmed());
     }
     None
 }
 
-const SORT_INFO_KIND_CUSTOM_PROPERTY: u32 = 1;
-const SORT_INFO_KIND_COMPOSES_PROPERTY: u32 = 2;
-const SORT_INFO_KIND_DECLARATION: u32 = 3;
-const SORT_INFO_KIND_UNKNOWN_DECLARATION: u32 = 4;
-const SORT_INFO_KIND_NESTED_RULE_OR_AT_RULE: u32 = 5;
+/// Returns a declaration's vendor prefix in lowercase
+fn prop_text_to_prefix(tok_text: &TokenText) -> Option<&'static str> {
+    let prop_lowercase = tok_text.text().to_lowercase_cow();
+    let prefix = vender_prefix(&prop_lowercase);
+    if prefix == "" {
+        return None;
+    }
+    return Some(prefix);
+}
 
-// this struct can be directly sorted using the default cmp implementation
+/// Returns a declaration's property name without vendor prefix in lowercase.
+fn prop_text_to_unprefixed(tok_text: &TokenText) -> Cow<'_, str> {
+    let prop_lowercase = tok_text.text().to_lowercase_cow();
+    let prefix = vender_prefix(&prop_lowercase);
+    if prefix == "" {
+        return prop_lowercase;
+    }
+    let unprefixed = match &prop_lowercase {
+        Cow::Borrowed(s) => s
+            .strip_prefix(prefix)
+            .and_then(|stripped| Some(Cow::Borrowed(stripped))),
+        Cow::Owned(s) => s
+            .strip_prefix(prefix)
+            .and_then(|stripped| Some(Cow::Owned(stripped.to_owned()))),
+    };
+    return unprefixed.unwrap_or(prop_lowercase);
+}
+
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
-struct SortInfo {
-    kind: u32,
+enum NodeKindOrder {
+    CustomProperty,
+    ComposesProperty,
+    Declaration,
+    UnknownDeclaration,
+    NestedRuleOrAtRule,
+    UnknownKind,
+}
+
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+/// Define sort order using lexographical sorting of this struct
+pub struct SortInfo {
+    // First, nodes are sorted by the kind of node (e.g. declarations before at-rules)
+    kind: NodeKindOrder,
+    // Property nodes are sorted by a predefined desired order
     property: u32,
+    // Vendor prefixed properties should be before the non-prefixed version of the same property
     vendor_prefix: u32,
+    original_position: usize,
 }
 
 impl SortInfo {
-    fn from_kind(kind: u32) -> Self {
+    fn from_kind(kind: NodeKindOrder) -> Self {
         Self {
             kind,
             property: 0,
             vendor_prefix: 0,
+            original_position: 0,
         }
     }
     fn from_declaration(property: u32, vendor_prefix: u32) -> Self {
         Self {
-            kind: SORT_INFO_KIND_DECLARATION,
+            kind: NodeKindOrder::Declaration,
             property,
             vendor_prefix,
+            original_position: 0,
         }
     }
     fn unknown() -> Self {
         Self {
-            kind: u32::MAX,
+            kind: NodeKindOrder::UnknownKind,
             property: 0,
             vendor_prefix: 0,
+            original_position: 0,
         }
     }
 }
 
-fn sort_info(item: &AnyCssDeclarationOrRule) -> SortInfo {
-    match item {
-        AnyCssDeclarationOrRule::CssBogus(_) => SortInfo::unknown(),
-        AnyCssDeclarationOrRule::CssMetavariable(_) => SortInfo::unknown(),
-        AnyCssDeclarationOrRule::AnyCssRule(rule) => match rule {
-            AnyCssRule::CssAtRule(_) => SortInfo::from_kind(SORT_INFO_KIND_NESTED_RULE_OR_AT_RULE),
-            AnyCssRule::CssBogusRule(_) => SortInfo::unknown(),
-            AnyCssRule::CssNestedQualifiedRule(_) => {
-                SortInfo::from_kind(SORT_INFO_KIND_NESTED_RULE_OR_AT_RULE)
-            }
-            AnyCssRule::CssQualifiedRule(_) => SortInfo::unknown(),
-        },
-        AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(decl_with_semicolon) => {
-            let prop = decl_with_semicolon
-                .declaration()
-                .ok()
-                .and_then(|decl| decl.property().ok());
+impl From<&AnyCssDeclarationOrRule> for SortInfo {
+    fn from(node: &AnyCssDeclarationOrRule) -> SortInfo {
+        match node {
+            AnyCssDeclarationOrRule::CssEmptyDeclaration(_) => SortInfo::unknown(),
+            AnyCssDeclarationOrRule::CssBogus(_) => SortInfo::unknown(),
+            AnyCssDeclarationOrRule::CssMetavariable(_) => SortInfo::unknown(),
+            AnyCssDeclarationOrRule::AnyCssRule(rule) => match rule {
+                AnyCssRule::CssAtRule(_) => SortInfo::from_kind(NodeKindOrder::NestedRuleOrAtRule),
+                AnyCssRule::CssBogusRule(_) => SortInfo::unknown(),
+                AnyCssRule::CssNestedQualifiedRule(_) => {
+                    SortInfo::from_kind(NodeKindOrder::NestedRuleOrAtRule)
+                }
+                AnyCssRule::CssQualifiedRule(_) => SortInfo::unknown(),
+            },
+            AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(decl_with_semicolon) => {
+                let prop = decl_with_semicolon
+                    .declaration()
+                    .ok()
+                    .and_then(|decl| decl.property().ok());
 
-            if let Some(prop) = prop {
+                if let Some(_) = &prop {
+                } else {
+                    return SortInfo::unknown();
+                }
+
                 match prop {
-                    AnyCssProperty::CssComposesProperty(_) => {
-                        SortInfo::from_kind(SORT_INFO_KIND_COMPOSES_PROPERTY)
+                    Some(AnyCssProperty::CssComposesProperty(_)) => {
+                        SortInfo::from_kind(NodeKindOrder::ComposesProperty)
                     }
-                    AnyCssProperty::CssGenericProperty(prop) => match prop.name().ok() {
+                    Some(AnyCssProperty::CssGenericProperty(prop)) => match prop.name().ok() {
                         Some(name) => match name {
                             AnyCssDeclarationName::CssDashedIdentifier(_) => {
-                                SortInfo::from_kind(SORT_INFO_KIND_CUSTOM_PROPERTY)
+                                SortInfo::from_kind(NodeKindOrder::CustomProperty)
                             }
                             AnyCssDeclarationName::CssIdentifier(ident) => {
-                                if let Some(sanitized_prop) = css_identifier_to_prop_name(&ident) {
-                                    let (vendor_prefix, plain_prop) = sanitized_prop;
+                                if let Some(prop_text) = css_identifier_to_prop_text(&ident) {
+                                    let prefix = prop_text_to_prefix(&prop_text);
+                                    let unprefixed = prop_text_to_unprefixed(&prop_text);
 
-                                    let vendor_prefix_idx: u32 = VENDOR_PREFIXES
-                                        .iter()
-                                        .position(|vp| vp == &vendor_prefix.as_str())
-                                        .map_or(u32::MAX, |pos| pos as u32);
+                                    let vendor_prefix_idx: u32 = match prefix {
+                                        Some(prefix) => VENDOR_PREFIXES
+                                            .iter()
+                                            .position(|vp| vp == &prefix)
+                                            .map_or(u32::MAX, |pos| pos as u32),
+                                        None => u32::MAX,
+                                    };
 
-                                    if let Some(idx) = PROPERTY_ORDER_MAP.get(&plain_prop) {
+                                    if let Some(idx) = PROPERTY_ORDER_MAP.get(unprefixed.as_ref()) {
                                         SortInfo::from_declaration(*idx, vendor_prefix_idx)
                                     } else {
-                                        SortInfo::from_kind(SORT_INFO_KIND_UNKNOWN_DECLARATION)
+                                        SortInfo::from_kind(NodeKindOrder::UnknownDeclaration)
                                     }
                                 } else {
                                     SortInfo::unknown()
@@ -313,55 +318,87 @@ fn sort_info(item: &AnyCssDeclarationOrRule) -> SortInfo {
                     },
                     _ => SortInfo::unknown(),
                 }
-            } else {
-                SortInfo::unknown()
             }
         }
     }
 }
 
-fn contains_shorthand_after_longhand(items: &[NodeWithPosition]) -> bool {
-    let mut seen_shorthand_properties = HashSet::<String>::with_capacity(items.len());
+/// Check if any shortand property (e.g. margin) appears after any of its longhand sub properties (e.g. margin-top).
+/// Sorting such properties would be unsafe, so we need to bail out. The no_shorthand_property_overrides rule will catch that case instead.
+fn contains_shorthand_after_longhand(nodes: &[AnyCssDeclarationOrRule]) -> bool {
+    let mut disallowed_longhand_properties = HashSet::<(Option<&str>, &str)>::new();
 
-    // (iterating backwards means we can store a smaller list of seen shorthands instead of seen longhands)
-    for item in items.iter().rev() {
-        let node = &item.node;
+    // This works backwards.
+    // Starting from the bottom, when we see a shorthand property, record the set of longhand properties that are no longer allowed to appear above it.
+    for node in nodes.iter().rev() {
         if let AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(decl_with_semicolon) = node {
-            if let Some(sanitized_prop) = &css_declaration_to_prop_name(decl_with_semicolon) {
-                let (vendor_prefix, plain_prop) = sanitized_prop;
+            if let Some(prop_text) = &css_declaration_to_prop_text(decl_with_semicolon) {
+                let prefix = prop_text_to_prefix(&prop_text);
+                let unprefixed = prop_text_to_unprefixed(&prop_text);
 
-                // Check if longhand properties appear above shorthand properties
-                // these would trigger another rule, no_shorthand_property_overrides, but this rule
-                // would attempt to autofix it which would be unsafe, so we should suppress this rule here.
-                let potential_shorthands = [
-                    LONGHAND_SUB_PROPERTIES_MAP.get(plain_prop),
-                    RESET_TO_INITIAL_PROPERTIES_MAP.get(plain_prop),
-                ];
-                for shorthand in potential_shorthands.into_iter().flatten() {
-                    let key = vendor_prefix.to_owned() + shorthand;
-                    if seen_shorthand_properties.contains(&key) {
+                // Check for disallowed properties
+                for disallowed_property in disallowed_longhand_properties.iter() {
+                    if (prefix, unprefixed.as_ref()) == *disallowed_property {
                         return true;
                     }
                 }
 
-                if property_may_override_others(plain_prop) {
-                    let key = vendor_prefix.to_owned() + plain_prop;
-                    seen_shorthand_properties.insert(key);
+                // Disallow sub properties to appear above this property
+                for longhand_child_property in [
+                    get_longhand_sub_properties(&unprefixed),
+                    get_reset_to_initial_properties(&unprefixed),
+                ]
+                .into_iter()
+                .flatten()
+                {
+                    disallowed_longhand_properties.insert((prefix, longhand_child_property));
                 }
             }
         }
     }
 
     false
+
+    // let mut seen_shorthand_properties = HashSet::<String>::with_capacity(nodes.len());
+
+    // // (iterating backwards means we can store a smaller list of seen shorthands instead of seen longhands)
+    // for node in nodes.iter().rev() {
+    //     if let AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(decl_with_semicolon) = node {
+    //         if let Some(prop_text) = &css_declaration_to_prop_text(decl_with_semicolon) {
+    //             let prefix = prop_text_to_prefix(&prop_text);
+    //             let unprefixed = prop_text_to_unprefixed(&prop_text);
+
+    //             let potential_shorthands = [
+    //                 LONGHAND_SUB_PROPERTIES_MAP.get(unprefixed),
+    //                 RESET_TO_INITIAL_PROPERTIES_MAP.get(unprefixed),
+    //             ];
+    //             for shorthand in potential_shorthands.into_iter().flatten() {
+    //                 let key = prefix.to_owned() + shorthand;
+    //                 if seen_shorthand_properties.contains(&key) {
+    //                     return true;
+    //                 }
+    //             }
+
+    //             get_longhand_sub_properties
+
+    //             if property_may_override_others(unprefixed) {
+    //                 let key = prefix.to_owned() + unprefixed;
+    //                 seen_shorthand_properties.insert(key);
+    //             }
+    //         }
+    //     }
+    // }
+
+    // false
 }
 
-fn contains_unknown_property(items: &[NodeWithPosition]) -> bool {
-    for item in items.iter() {
-        let node = &item.node;
+/// Check for properties that don't have a defined order. We don't sort anything in that case.
+fn contains_unknown_property(nodes: &[AnyCssDeclarationOrRule]) -> bool {
+    for node in nodes.iter() {
         if let AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(decl_with_semicolon) = node {
-            if let Some(sanitized_prop) = &css_declaration_to_prop_name(decl_with_semicolon) {
-                let (_, plain_prop) = sanitized_prop;
-                if !PROPERTY_ORDER_MAP.contains_key(plain_prop) {
+            if let Some(prop_text) = &css_declaration_to_prop_text(decl_with_semicolon) {
+                let unprefixed = prop_text_to_unprefixed(&prop_text);
+                if !PROPERTY_ORDER_MAP.contains_key(unprefixed.as_ref()) {
                     return true;
                 }
             }
@@ -369,41 +406,4 @@ fn contains_unknown_property(items: &[NodeWithPosition]) -> bool {
     }
 
     false
-}
-
-fn node_short_description(node_with_position: &NodeWithPosition) -> String {
-    let position = node_with_position.position + 1; // one-based
-
-    let short_desciption = match &node_with_position.node {
-        AnyCssDeclarationOrRule::AnyCssRule(rule) => match rule {
-            AnyCssRule::CssAtRule(_) => Some(format!("the at-rule at position {}", position)),
-            AnyCssRule::CssNestedQualifiedRule(_) => {
-                Some(format!("the nested rule at position {}", position))
-            }
-            _ => None,
-        },
-        AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(decl_with_semicolon) => {
-            decl_with_semicolon
-                .declaration()
-                .ok()
-                .and_then(|decl| decl.property().ok())
-                .and_then(|prop| match prop {
-                    AnyCssProperty::CssComposesProperty(_) => Some("\"composes\"".to_string()),
-                    AnyCssProperty::CssGenericProperty(prop) => match prop.name().ok() {
-                        Some(name) => match name {
-                            AnyCssDeclarationName::CssIdentifier(ident) => ident.value_token().ok(),
-                            AnyCssDeclarationName::CssDashedIdentifier(ident) => {
-                                ident.value_token().ok()
-                            }
-                        }
-                        .map(|tok| "\"".to_owned() + tok.token_text_trimmed().text() + "\""),
-                        None => None,
-                    },
-                    _ => None,
-                })
-        }
-        _ => None,
-    };
-
-    short_desciption.unwrap_or_else(|| format!("the unknown item at position {}", position))
 }

@@ -124,7 +124,7 @@ pub fn is_custom_function(value: &str) -> bool {
 }
 
 // Returns the vendor prefix extracted from an input string.
-pub fn vender_prefix(prop: &str) -> &str {
+pub fn vender_prefix(prop: &str) -> &'static str {
     for prefix in VENDOR_PREFIXES.iter() {
         if prop.starts_with(prefix) {
             return prefix;
@@ -228,14 +228,6 @@ pub fn get_reset_to_initial_properties(shorthand_property: &str) -> &'static [&'
         "font" => &RESET_TO_INITIAL_PROPERTIES_BY_FONT,
         _ => &[],
     }
-}
-
-/// Returns true if a property can override prior properties in the same block.
-///
-/// Takes a lowercase property name with vendor prefix removed.
-pub fn property_may_override_others(prop: &str) -> bool {
-    !get_longhand_sub_properties(prop).is_empty()
-        || !get_reset_to_initial_properties(prop).is_empty()
 }
 
 fn is_custom_element(prop: &str) -> bool {
