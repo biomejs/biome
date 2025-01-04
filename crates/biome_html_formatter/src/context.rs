@@ -1,5 +1,6 @@
 use std::{fmt, rc::Rc, str::FromStr};
 
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     printer::PrinterOptions, AttributePosition, BracketSameLine, BracketSpacing, CstFormatContext,
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
@@ -223,7 +224,7 @@ impl FormatOptions for HtmlFormatOptions {
 /// | without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |
 ///
 /// This happens because whitespace is significant in inline elements.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserializable, Merge)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -272,7 +273,7 @@ impl FromStr for WhitespaceSensitivity {
 /// Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).
 ///
 /// When true, the content of `<script>` and `<style>` tags will be indented one level.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserializable, Merge)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),

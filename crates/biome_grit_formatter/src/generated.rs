@@ -2029,7 +2029,6 @@ impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternUntilClause {
         crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause,
     >;
     fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
             crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause::default(),
@@ -2042,7 +2041,6 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternUntilClause
         crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause,
     >;
     fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
             crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause::default(),

@@ -53,6 +53,10 @@ export interface PartialConfiguration {
 	 */
 	grit?: PartialGritConfiguration;
 	/**
+	 * Specific configuration for the HTML language
+	 */
+	html?: PartialHtmlConfiguration;
+	/**
 	 * Specific configuration for the JavaScript language
 	 */
 	javascript?: PartialJavascriptConfiguration;
@@ -205,6 +209,19 @@ export interface PartialGritConfiguration {
 	 * Formatting options
 	 */
 	formatter?: PartialGritFormatter;
+}
+/**
+ * Options applied to HTML files
+ */
+export interface PartialHtmlConfiguration {
+	/**
+	 * HTML formatter options
+	 */
+	formatter?: PartialHtmlFormatter;
+	/**
+	 * HTML parsing options
+	 */
+	parser?: PartialHtmlParser;
 }
 /**
  * A set of options applied to the JavaScript files
@@ -457,6 +474,51 @@ export interface PartialGritFormatter {
 	lineWidth?: LineWidth;
 }
 /**
+ * Options that changes how the HTML formatter behaves
+ */
+export interface PartialHtmlFormatter {
+	/**
+	 * The attribute position style in HTML elements. Defaults to auto.
+	 */
+	attributePosition?: AttributePosition;
+	/**
+	 * Whether to hug the closing bracket of multiline HTMLtags to the end of the last line, rather than being alone on the following line. Defaults to false.
+	 */
+	bracketSameLine?: BracketSameLine;
+	/**
+	 * Control the formatter for HTML (and its super languages) files.
+	 */
+	enabled?: boolean;
+	/**
+	 * Whether or not to indent the `<script>` and `<style>` tags for HTML (and its super languages). Defaults to false.
+	 */
+	indentScriptAndStyle?: IndentScriptAndStyle;
+	/**
+	 * The indent style applied to HTML (and its super languages) files.
+	 */
+	indentStyle?: IndentStyle;
+	/**
+	 * The size of the indentation applied to HTML (and its super languages) files. Default to 2.
+	 */
+	indentWidth?: IndentWidth;
+	/**
+	 * The type of line ending applied to HTML (and its super languages) files.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * What's the max width of a line applied to HTML (and its super languages) files. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
+	/**
+	 * Whether or not to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "strict".
+	 */
+	whitespaceSensitivity?: WhitespaceSensitivity;
+}
+/**
+ * Options that changes how the HTML parser behaves
+ */
+export interface PartialHtmlParser {}
+/**
  * Linter options specific to the JavaScript linter
  */
 export interface PartialJavascriptAssists {
@@ -700,6 +762,22 @@ export interface Source {
 	useSortedKeys?: RuleAssistConfiguration_for_Null;
 }
 export type QuoteStyle = "double" | "single";
+/**
+	* Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).
+
+When true, the content of `<script>` and `<style>` tags will be indented one level. 
+	 */
+export type IndentScriptAndStyle = boolean;
+/**
+	* Whitespace sensitivity for HTML formatting.
+
+The following two cases won't produce the same output:
+
+|                |      html      |    output    | | -------------- | :------------: | :----------: | | with spaces    | `1<b> 2 </b>3` | 1<b> 2 </b>3 | | without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |
+
+This happens because whitespace is significant in inline elements. 
+	 */
+export type WhitespaceSensitivity = "strict" | "ignore";
 export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteProperties = "asNeeded" | "preserve";
 export type Semicolons = "always" | "asNeeded";

@@ -228,6 +228,7 @@ dependencies = [
  "biome_formatter",
  "biome_graphql_analyze",
  "biome_graphql_syntax",
+ "biome_html_formatter",
  "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_formatter",
@@ -729,6 +730,8 @@ dependencies = [
 name = "biome_html_formatter"
 version = "0.0.0"
 dependencies = [
+ "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_diagnostics_categories",
  "biome_formatter",
  "biome_formatter_test",
