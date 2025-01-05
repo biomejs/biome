@@ -143,6 +143,7 @@ export class Biome {
 	openProject(path?: string): ProjectKey {
 		return this.workspace.openProject({
 			path: path || "",
+			openUninitialized: true,
 		});
 	}
 
