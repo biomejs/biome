@@ -1,5 +1,7 @@
 use biome_analyze::AnalyzerOptions;
-use biome_formatter::{BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
+use biome_formatter::{
+    AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+};
 use biome_fs::BiomePath;
 use biome_html_formatter::{
     context::{IndentScriptAndStyle, WhitespaceSensitivity},
@@ -29,6 +31,7 @@ pub struct HtmlFormatterSettings {
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
+    pub attribute_position: Option<AttributePosition>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub whitespace_sensitivity: Option<WhitespaceSensitivity>,
     pub indent_script_and_style: Option<IndentScriptAndStyle>,
@@ -42,6 +45,7 @@ impl Default for HtmlFormatterSettings {
             indent_width: Default::default(),
             line_ending: Default::default(),
             line_width: Default::default(),
+            attribute_position: Default::default(),
             bracket_same_line: Default::default(),
             whitespace_sensitivity: Default::default(),
             indent_script_and_style: Default::default(),
@@ -86,6 +90,10 @@ impl ServiceLanguage for HtmlLanguage {
             .and_then(|l| l.line_ending)
             .or(global.and_then(|g| g.line_ending))
             .unwrap_or_default();
+        let attribute_position = language
+            .and_then(|l| l.attribute_position)
+            .or(global.and_then(|g| g.attribute_position))
+            .unwrap_or_default();
         let bracket_same_line = language
             .and_then(|l| l.bracket_same_line)
             .or(global.and_then(|g| g.bracket_same_line))
@@ -102,6 +110,7 @@ impl ServiceLanguage for HtmlLanguage {
             .with_indent_width(indent_width)
             .with_line_width(line_width)
             .with_line_ending(line_ending)
+            .with_attribute_position(attribute_position)
             .with_bracket_same_line(bracket_same_line)
             .with_whitespace_sensitivity(whitespace_sensitivity)
             .with_indent_script_and_style(indent_script_and_style);

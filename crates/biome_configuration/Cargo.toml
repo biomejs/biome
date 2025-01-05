@@ -24,6 +24,7 @@ biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true, features = ["serde"] }
 biome_graphql_analyze    = { workspace = true }
 biome_graphql_syntax     = { workspace = true }
+biome_html_formatter     = { workspace = true, features = ["serde"] }
 biome_html_syntax        = { workspace = true }
 biome_js_analyze         = { workspace = true }
 biome_js_formatter       = { workspace = true, features = ["serde"] }

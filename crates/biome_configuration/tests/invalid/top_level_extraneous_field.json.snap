@@ -1,7 +1,6 @@
 ---
 source: crates/biome_configuration/tests/spec_tests.rs
 expression: top_level_extraneous_field.json
-snapshot_kind: text
 ---
 top_level_extraneous_field.json:2:2 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -26,6 +25,7 @@ top_level_extraneous_field.json:2:2 deserialize ━━━━━━━━━━�
   - css
   - graphql
   - grit
+  - html
   - overrides
   - plugins
   - assist
