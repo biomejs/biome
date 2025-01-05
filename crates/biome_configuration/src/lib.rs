@@ -10,6 +10,7 @@ pub mod formatter;
 pub mod generated;
 pub mod graphql;
 pub mod grit;
+pub mod html;
 pub mod javascript;
 pub mod json;
 mod overrides;
@@ -51,6 +52,7 @@ pub use graphql::{
     partial_graphql_configuration, GraphqlConfiguration, GraphqlFormatter, GraphqlLinter,
     PartialGraphqlConfiguration, PartialGraphqlFormatter, PartialGraphqlLinter,
 };
+use html::{partial_html_configuration, HtmlConfiguration, PartialHtmlConfiguration};
 pub use javascript::{
     partial_javascript_configuration, JavascriptConfiguration, JavascriptFormatter,
     PartialJavascriptConfiguration, PartialJavascriptFormatter,
@@ -137,6 +139,11 @@ pub struct Configuration {
     /// Specific configuration for the GraphQL language
     #[partial(type, bpaf(external(partial_grit_configuration), optional))]
     pub grit: GritConfiguration,
+
+    // hidden for now. show when it's to be shown to end users.
+    /// Specific configuration for the HTML language
+    #[partial(type, bpaf(external(partial_html_configuration), optional, hide))]
+    pub html: HtmlConfiguration,
 
     /// A list of granular patterns that should be applied only to a sub set of files
     #[partial(bpaf(hide))]
