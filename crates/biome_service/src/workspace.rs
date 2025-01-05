@@ -985,7 +985,7 @@ pub struct CloseProjectParams {
 }
 
 pub trait Workspace: Send + Sync + RefUnwindSafe {
-    // --- PROJECT-LEVEL METHODS ---
+    // #region PROJECT-LEVEL METHODS
 
     /// Opens a project within the workspace.
     ///
@@ -1057,7 +1057,9 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// `scan_project_folder()`, it will also be unregistered.
     fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError>;
 
-    // --- FILE-LEVEL METHODS ---
+    // #endregion
+
+    // #region FILE-LEVEL METHODS
 
     /// Opens a new file in the workspace.
     ///
@@ -1153,7 +1155,9 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// This may be an in-memory file system.
     fn fs(&self) -> &dyn FileSystem;
 
-    // --- SEARCH-RELATED METHODS ---
+    // #endregion
+
+    // #region SEARCH-RELATED METHODS
 
     /// Parses a pattern to be used in follow-up [`Self::search_pattern`]
     /// requests.
@@ -1171,7 +1175,9 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Used to indicate a client no longer needs a specific pattern.
     fn drop_pattern(&self, params: DropPatternParams) -> Result<(), WorkspaceError>;
 
-    // --- MISC METHODS ---
+    // #endregion
+
+    // #region MISC METHODS
 
     /// Returns debug information about this workspace.
     fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError>;
@@ -1179,6 +1185,8 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Returns information about the server this workspace is connected to or
     /// `None` if the workspace isn't connected to a server.
     fn server_info(&self) -> Option<&ServerInfo>;
+
+    // #endregion
 }
 
 /// Convenience function for constructing a server instance of [Workspace]
