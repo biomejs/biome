@@ -27,6 +27,15 @@ expression: valid.css
   margin: 1px;
 }
 
+.case-insensitive-vendor-prefixes {
+  -MOZ-margin: 1px;
+  -Moz-margin: 1px;
+  -moz-margin: 1px;
+  -moz-MARGIN: 1px;
+  -moz-Margin: 1px;
+  margin: 1px;
+}
+
 .should-ignore-shorthand-after-longhand {
   padding-right: 10px;
   padding: 20px;

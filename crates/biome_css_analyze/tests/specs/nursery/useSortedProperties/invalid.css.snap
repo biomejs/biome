@@ -74,6 +74,12 @@ expression: invalid.css
   }
 }
 
+.shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
+  padding: 5px;
+  -webkit-padding-right: 10px;
+  -moz-padding: 20px;
+}
+
 ```
 
 # Diagnostics
@@ -390,6 +396,38 @@ invalid.css:65:11 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
        67 │ + ····color:·red;
     68 68 │     }
     69 69 │   }
+  
+
+```
+
+```
+invalid.css:71:66 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Properties can be sorted.
+  
+    69 │ }
+    70 │ 
+  > 71 │ .shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
+       │                                                                  ^
+  > 72 │   padding: 5px;
+  > 73 │   -webkit-padding-right: 10px;
+  > 74 │   -moz-padding: 20px;
+  > 75 │ }
+       │ ^
+    76 │ 
+  
+  i Safe fix: Sort these properties
+  
+    70 70 │   
+    71 71 │   .shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
+    72    │ - ··padding:·5px;
+    73    │ - ··-webkit-padding-right:·10px;
+    74    │ - ··-moz-padding:·20px;
+       72 │ + ··-moz-padding:·20px;
+       73 │ + ··padding:·5px;
+       74 │ + ··-webkit-padding-right:·10px;
+    75 75 │   }
+    76 76 │   
   
 
 ```

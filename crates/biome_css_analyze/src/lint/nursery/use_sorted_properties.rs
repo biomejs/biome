@@ -36,8 +36,7 @@ declare_lint_rule! {
     /// 1. Interaction properties (pointer-events, visibility)
     /// 1. Background & border properties
     /// 1. Transition & animation properties
-    /// 1. Nested rules
-    /// 1. Nested media queries & at-rules
+    /// 1. Nested rules, media queries & other at-rules
     ///
     /// ## Examples
     ///
@@ -64,8 +63,8 @@ declare_lint_rule! {
 
 pub struct UseSortedPropertiesState {
     block: CssDeclarationOrRuleBlock,
-    items: Vec<AnyCssDeclarationOrRule>,
-    btree: SortableRuleOrDeclarationTree,
+    original_properties: Vec<AnyCssDeclarationOrRule>,
+    sorted_properties: RecessOrderProperties,
     is_unsafe_to_sort: bool,
 }
 
@@ -78,24 +77,24 @@ impl Rule for UseSortedProperties {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let query_result = ctx.query();
 
-        let items = query_result
+        let original_properties = query_result
             .items()
             .into_iter()
             .collect::<Vec<AnyCssDeclarationOrRule>>();
-        let is_unsafe_to_sort =
-            contains_shorthand_after_longhand(&items) || contains_unknown_property(&items);
-        let btree = SortableRuleOrDeclarationTree::new(&items);
+        let is_unsafe_to_sort = contains_shorthand_after_longhand(&original_properties)
+            || contains_unknown_property(&original_properties);
+        let sorted_properties = RecessOrderProperties::new(&original_properties);
 
         Some(UseSortedPropertiesState {
             block: query_result.clone(),
-            items,
-            btree,
+            original_properties,
+            sorted_properties,
             is_unsafe_to_sort,
         })
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        if state.is_unsafe_to_sort || state.btree.is_sorted() {
+        if state.is_unsafe_to_sort || state.sorted_properties.is_sorted() {
             return None;
         }
 
@@ -109,22 +108,17 @@ impl Rule for UseSortedProperties {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<CssRuleAction> {
-        if state.is_unsafe_to_sort || state.btree.is_sorted() {
+        if state.is_unsafe_to_sort || state.sorted_properties.is_sorted() {
             return None;
         }
 
-        let new_list = CssDeclarationOrRuleList::cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST,
-            state.btree.0.iter().map(|sort_info| {
-                state
-                    .items
-                    .get(sort_info.original_position)
-                    .map(|node| NodeOrToken::Node(node.clone().into_syntax()))
-            }),
-        ))?;
-
         let mut mutation = ctx.root().begin();
-        mutation.replace_node_discard_trivia(state.block.items(), new_list);
+        mutation.replace_node_discard_trivia(
+            state.block.items(),
+            state
+                .sorted_properties
+                .as_sorted(&state.original_properties)?,
+        );
 
         return Some(RuleAction::<CssLanguage>::new(
             ActionCategory::QuickFix(Cow::Borrowed("")),
@@ -135,11 +129,14 @@ impl Rule for UseSortedProperties {
     }
 }
 
-pub struct SortableRuleOrDeclarationTree(pub BTreeSet<SortInfo>);
+/// "Recess order" is a semantic ordering that mimics the behavior of [stylelint-config-recess-order](https://github.com/stormwarning/stylelint-config-recess-order).
+///
+/// Which in turn mimics the behavior of twitter's [RECESS](https://github.com/twitter-archive/recess/blob/29bccc870b7b4ccaa0a138e504caf608a6606b59/lib/lint/strict-property-order.js).
+pub struct RecessOrderProperties(pub BTreeSet<SortInfo>);
 
-impl SortableRuleOrDeclarationTree {
+impl RecessOrderProperties {
     pub fn new(items: &[AnyCssDeclarationOrRule]) -> Self {
-        SortableRuleOrDeclarationTree(
+        RecessOrderProperties(
             items
                 .iter()
                 .enumerate()
@@ -158,6 +155,20 @@ impl SortableRuleOrDeclarationTree {
             .iter()
             .enumerate()
             .all(|(position, item)| position == item.original_position)
+    }
+
+    pub fn as_sorted(
+        &self,
+        original_items: &[AnyCssDeclarationOrRule],
+    ) -> Option<CssDeclarationOrRuleList> {
+        CssDeclarationOrRuleList::cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST,
+            self.0.iter().map(|sort_info| {
+                original_items
+                    .get(sort_info.original_position)
+                    .map(|node| NodeOrToken::Node(node.clone().into_syntax()))
+            }),
+        ))
     }
 }
 
@@ -294,7 +305,7 @@ impl From<&AnyCssDeclarationOrRule> for SortInfo {
                                 let prefix = prop_text_to_prefix(&prop_text);
                                 let unprefixed = prop_text_to_unprefixed(&prop_text);
 
-                                let vendor_prefix_idx: u32 = match prefix {
+                                let vendor_prefix_idx = match prefix {
                                     Some(prefix) => VENDOR_PREFIXES
                                         .iter()
                                         .position(|vp| vp == &prefix)
@@ -302,8 +313,10 @@ impl From<&AnyCssDeclarationOrRule> for SortInfo {
                                     None => u32::MAX,
                                 };
 
-                                if let Some(idx) = PROPERTY_ORDER_MAP.get(unprefixed.as_ref()) {
-                                    SortInfo::from_declaration(*idx, vendor_prefix_idx)
+                                if let Some(property_idx) =
+                                    PROPERTY_ORDER_MAP.get(unprefixed.as_ref())
+                                {
+                                    SortInfo::from_declaration(*property_idx, vendor_prefix_idx)
                                 } else {
                                     SortInfo::from_kind(NodeKindOrder::UnknownDeclaration)
                                 }

@@ -67,3 +67,9 @@
     display: block;
   }
 }
+
+.shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
+  padding: 5px;
+  -webkit-padding-right: 10px;
+  -moz-padding: 20px;
+}
