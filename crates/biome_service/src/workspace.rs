@@ -58,6 +58,7 @@ mod server;
 pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 use crate::file_handlers::Capabilities;
 pub use crate::file_handlers::DocumentFileSource;
+use crate::projects::ProjectKey;
 use crate::settings::Settings;
 use crate::{Deserialize, Serialize, WorkspaceError};
 use biome_analyze::ActionCategory;
@@ -79,20 +80,22 @@ use enumflags2::{bitflags, BitFlags};
 use schemars::{gen::SchemaGenerator, schema::Schema};
 use smallvec::SmallVec;
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 use tracing::{debug, instrument};
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct SupportsFeatureParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
     pub features: FeatureName,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct SupportsFeatureResult {
     pub reason: Option<SupportKind>,
 }
@@ -489,6 +492,7 @@ impl FeaturesBuilder {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateSettingsParams {
+    pub project_key: ProjectKey,
     pub configuration: PartialConfiguration,
     // @ematipico TODO: have a better data structure for this
     pub vcs_base_path: Option<BiomePath>,
@@ -512,6 +516,7 @@ pub struct ProjectFeaturesResult {}
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct OpenFileParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
     pub content: FileContent,
     pub version: i32,
@@ -541,14 +546,16 @@ pub enum FileContent {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct SetManifestForProjectParams {
+    pub project_key: ProjectKey,
     pub manifest_path: BiomePath,
     pub content: String,
     pub version: i32,
 }
 
-impl From<(BiomePath, String)> for SetManifestForProjectParams {
-    fn from((manifest_path, content): (BiomePath, String)) -> Self {
+impl From<(ProjectKey, BiomePath, String)> for SetManifestForProjectParams {
+    fn from((project_key, manifest_path, content): (ProjectKey, BiomePath, String)) -> Self {
         Self {
+            project_key,
             manifest_path,
             content,
             version: 0,
@@ -560,6 +567,7 @@ impl From<(BiomePath, String)> for SetManifestForProjectParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GetSyntaxTreeParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
 }
 
@@ -575,13 +583,16 @@ pub struct GetSyntaxTreeResult {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GetControlFlowGraphParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
     pub cursor: TextSize,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetFormatterIRParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
 }
 
@@ -589,12 +600,15 @@ pub struct GetFormatterIRParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct GetFileContentParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
 }
+
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct CheckFileSizeParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
 }
 
@@ -616,6 +630,7 @@ impl CheckFileSizeResult {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct ChangeFileParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
     pub content: String,
     pub version: i32,
@@ -625,6 +640,7 @@ pub struct ChangeFileParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct CloseFileParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
 }
 
@@ -632,6 +648,7 @@ pub struct CloseFileParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct PullDiagnosticsParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
     pub categories: RuleCategories,
     pub max_diagnostics: u64,
@@ -657,6 +674,7 @@ pub struct PullDiagnosticsResult {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct PullActionsParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
     pub range: Option<TextRange>,
     pub suppression_reason: Option<String>,
@@ -688,6 +706,7 @@ pub struct CodeAction {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct FormatFileParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
 }
 
@@ -695,6 +714,7 @@ pub struct FormatFileParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct FormatRangeParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
     pub range: TextRange,
 }
@@ -703,6 +723,7 @@ pub struct FormatRangeParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct FormatOnTypeParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
     pub offset: TextSize,
 }
@@ -724,6 +745,7 @@ pub enum FixFileMode {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct FixFileParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
     pub fix_file_mode: FixFileMode,
     pub should_format: bool,
@@ -768,6 +790,7 @@ pub struct FixAction {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct RenameParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
     pub symbol_at: TextSize,
     pub new_name: String,
@@ -867,6 +890,7 @@ pub struct ParsePatternResult {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct SearchPatternParams {
+    pub project_key: ProjectKey,
     pub path: BiomePath,
     pub pattern: PatternId,
 }
@@ -875,7 +899,7 @@ pub struct SearchPatternParams {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct SearchResults {
-    pub file: BiomePath,
+    pub path: BiomePath,
     pub matches: Vec<TextRange>,
 }
 
@@ -919,30 +943,133 @@ impl From<&str> for PatternId {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct IsPathIgnoredParams {
-    pub biome_path: BiomePath,
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
     pub features: FeatureName,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
-pub struct RegisterProjectFolderParams {
-    pub path: Option<BiomePath>,
-    pub set_as_current_workspace: bool,
+pub struct OpenProjectParams {
+    /// The path to open
+    pub path: BiomePath,
+
+    /// Whether the folder should be opened as a project, even if no
+    /// `biome.json` can be found.
+    pub open_uninitialized: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
-pub struct UnregisterProjectFolderParams {
-    pub path: BiomePath,
+pub struct ScanProjectFolderParams {
+    pub project_key: ProjectKey,
+
+    /// Optional path within the project to scan.
+    ///
+    /// If omitted, the project is scanned from its root folder.
+    ///
+    /// This is a potential optimization that allows scanning to be limited to
+    /// a subset of the full project. Clients should specify it to indicate
+    /// which part of the project they are interested in. The server may or may
+    /// not use this to avoid scanning parts that are irrelevant to clients.
+    pub path: Option<BiomePath>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct CloseProjectParams {
+    pub project_key: ProjectKey,
 }
 
 pub trait Workspace: Send + Sync + RefUnwindSafe {
-    /// Returns the filesystem implementation to open files with.
-    fn fs(&self) -> &dyn FileSystem;
+    // #region PROJECT-LEVEL METHODS
 
-    /// Checks whether a certain feature is supported. There are different conditions:
+    /// Opens a project within the workspace.
+    ///
+    /// The path given as part of the `params` is used to determine the root of
+    /// the Biome project, but it may not have to be the root itself. The first
+    /// ancestor directory of the path (including the path itself) that contains
+    /// a **top-level** `biome.json` is determined to be the project root and
+    /// will be used for opening the project.
+    ///
+    /// If no `biome.json` file can be found in any of the ancestors, and
+    /// `open_uninitialized` is `true` the directory will be opened as a Biome
+    /// project will default settings.
+    ///
+    /// Note: Opening a project does not mean the project is ready for use. You
+    /// probably want to follow it up with a call to `scan_project_folder()` or
+    /// explicitly load settings into the project using `update_settings()`.
+    ///
+    /// Returns the key of the opened project. This key can be used with
+    /// follow-up methods to perform actions related to the project, such as
+    /// opening files or querying them.
+    fn open_project(&self, params: OpenProjectParams) -> Result<ProjectKey, WorkspaceError>;
+
+    /// Scans the given project from a given path, and initializes all settings
+    /// and service data.
+    ///
+    /// The first time you call this method, it may take a long time since it
+    /// will traverse the entire project folder recursively, parse all included
+    /// files (and possibly their dependencies), and perform processing for
+    /// extracting the service data.
+    ///
+    /// Follow-up calls may be much faster as they can reuse cached data.
+    ///
+    /// TODO: This method also registers file watchers to make sure the cache
+    ///       remains up-to-date.
+    fn scan_project_folder(
+        &self,
+        params: ScanProjectFolderParams,
+    ) -> Result<ScanProjectFolderResult, WorkspaceError>;
+
+    /// Updates the global settings for the given project.
+    ///
+    /// This method should not be used in combination with
+    /// `scan_project_folder()`. When scanning is enabled, the server will
+    /// manage project settings on its own.
+    fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError>;
+
+    /// Sets a new package manifest for the given project.
+    ///
+    /// This method should not be used in combination with
+    /// `scan_project_folder()`. When scanning is enabled, the server will
+    /// manage packages on its own.
+    fn set_manifest_for_project(
+        &self,
+        params: SetManifestForProjectParams,
+    ) -> Result<(), WorkspaceError>;
+
+    /// Closes the project with the given key.
+    ///
+    /// Any settings related to the project are unloaded, and any open files
+    /// that belong to the project are also closed.
+    ///
+    /// Projects should normally **not** be closed, so that follow-up
+    /// invocations to Biome can reuse the loaded settings and open files. Only
+    /// when the user explicitly asks for a project to be closed, will we do so
+    /// in order to allow the user to reclaim memory. (Although in reality
+    /// they'll probably just kill the daemon anyway.)
+    ///
+    /// If a file watcher was registered as a result of a call to
+    /// `scan_project_folder()`, it will also be unregistered.
+    fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError>;
+
+    // #endregion
+
+    // #region FILE-LEVEL METHODS
+
+    /// Opens a new file in the workspace.
+    ///
+    /// If the file path is under a folder that belongs to an opened project
+    /// other than the current one, the current project is changed accordingly.
+    fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError>;
+
+    /// Checks whether a certain feature is supported for the given file path.
+    ///
+    /// There are different conditions:
     /// - Biome doesn't recognize a file, so it can't provide the feature;
     /// - the feature is disabled inside the configuration;
     /// - the file is ignored
@@ -951,129 +1078,92 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
         params: SupportsFeatureParams,
     ) -> Result<FileFeaturesResult, WorkspaceError>;
 
-    /// Checks if the current path is ignored by the workspace, against a particular feature.
+    /// Checks if the given path is ignored by the project for a specific
+    /// feature.
     ///
-    /// Takes as input the path of the file that workspace is currently processing and
-    /// a list of paths to match against.
-    ///
-    /// If the file path matches, then `true` is returned, and it should be considered ignored.
+    /// If the file path matches, `true` is returned, and it should be
+    /// considered ignored.
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError>;
 
-    /// Update the global settings for this workspace
-    fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError>;
-
-    /// Add a new file to the workspace.
-    ///
-    /// If the file path is under a folder that belongs to a registered project other than the
-    /// current one, the current project is changed accordingly.
-    fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError>;
-
-    /// Add a new project to the workspace
-    fn set_manifest_for_project(
-        &self,
-        params: SetManifestForProjectParams,
-    ) -> Result<(), WorkspaceError>;
-
-    /// Registers a possible workspace project folder.
-    ///
-    /// The newly registered project becomes the new current project.
-    ///
-    /// Returns the key of said project. Use this key later if you want to switch back to this
-    /// project after switching to another.
-    fn register_project_folder(
-        &self,
-        params: RegisterProjectFolderParams,
-    ) -> Result<ProjectKey, WorkspaceError>;
-
-    /// Scans the folder of the current project and populates service data.
-    ///
-    /// The first time you call this method, it may take a long data since it will traverse the
-    /// entire project folder recursively, parse all included files (and possibly their
-    /// dependencies), and perform processing for extracting the service data.
-    ///
-    /// Follow-up calls may be much faster as they can reuse cached data.
-    ///
-    /// TODO: This method also registers file watchers to make sure the cache remains up-to-date.
-    fn scan_current_project_folder(
-        &self,
-        params: (), // workspace methods must have 1 argument...
-    ) -> Result<ScanProjectFolderResult, WorkspaceError>;
-
-    /// Unregisters a workspace project folder.
-    ///
-    /// The settings that belong to that project are deleted. Any open files that belong to the
-    /// project are also closed.
-    ///
-    /// If a file watcher was registered as a result of a call to `scan_project_folder()`, it will
-    /// also be unregistered.
-    fn unregister_project_folder(
-        &self,
-        params: UnregisterProjectFolderParams,
-    ) -> Result<(), WorkspaceError>;
-
-    // Return a textual, debug representation of the syntax tree for a given document
+    /// Returns a textual, debug representation of the syntax tree for a given
+    /// document.
     fn get_syntax_tree(
         &self,
         params: GetSyntaxTreeParams,
     ) -> Result<GetSyntaxTreeResult, WorkspaceError>;
 
-    // Return a textual, debug representation of the control flow graph at a given position in the document
+    /// Returns a textual, debug representation of the control flow graph at a
+    /// given position in the document.
     fn get_control_flow_graph(
         &self,
         params: GetControlFlowGraphParams,
     ) -> Result<String, WorkspaceError>;
 
-    // Return a textual, debug representation of the formatter IR for a given document
+    /// Returns a textual, debug representation of the formatter IR for a given
+    /// document.
     fn get_formatter_ir(&self, params: GetFormatterIRParams) -> Result<String, WorkspaceError>;
 
-    /// Return the content of a file
+    /// Returns the content of a given file.
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError>;
 
-    /// Returns `true` if the size of the file is smaller than the configured limit, `false` if equals or greater.
+    /// Returns the size of a given file, as well as the allowed maximum file
+    /// size for that file.
     fn check_file_size(
         &self,
         params: CheckFileSizeParams,
     ) -> Result<CheckFileSizeResult, WorkspaceError>;
 
-    /// Change the content of an open file
+    /// Changes the content of an open file.
     fn change_file(&self, params: ChangeFileParams) -> Result<(), WorkspaceError>;
 
-    /// Removes a file from the workspace.
-    fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError>;
-
-    /// Retrieves the list of diagnostics associated to a file
+    /// Retrieves the list of diagnostics associated with a file.
     fn pull_diagnostics(
         &self,
         params: PullDiagnosticsParams,
     ) -> Result<PullDiagnosticsResult, WorkspaceError>;
 
     /// Retrieves the list of code actions available for a given cursor
-    /// position within a file
+    /// position within a file.
     fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
 
     /// Runs the given file through the formatter using the provided options
-    /// and returns the resulting source code
+    /// and returns the resulting source code.
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError>;
 
-    /// Runs a range of an open document through the formatter
+    /// Runs a range of an open document through the formatter.
     fn format_range(&self, params: FormatRangeParams) -> Result<Printed, WorkspaceError>;
 
     /// Runs a "block" ending at the specified character of an open document
-    /// through the formatter
+    /// through the formatter.
     fn format_on_type(&self, params: FormatOnTypeParams) -> Result<Printed, WorkspaceError>;
 
-    /// Return the content of the file with all safe code actions applied
+    /// Returns the content of the file with all safe code actions applied.
     fn fix_file(&self, params: FixFileParams) -> Result<FixFileResult, WorkspaceError>;
 
-    /// Return the content of the file after renaming a symbol
+    /// Returns the content of the file after renaming a symbol.
     fn rename(&self, params: RenameParams) -> Result<RenameResult, WorkspaceError>;
 
-    /// Returns debug information about this workspace.
-    fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError>;
-
-    /// Parses a pattern to be used in follow-up [`Self::search_pattern`] requests.
+    /// Closes a file that is opened in the workspace.
     ///
-    /// Clients should call [`Self::drop_pattern()`] when they no need longer need it.
+    /// This only unloads the document from the workspace if the file is NOT
+    /// opened by the scanner as well. If the scanner has opened the file, it
+    /// may still be required for multi-file analysis.
+    fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError>;
+
+    /// Returns the filesystem implementation to open files with.
+    ///
+    /// This may be an in-memory file system.
+    fn fs(&self) -> &dyn FileSystem;
+
+    // #endregion
+
+    // #region SEARCH-RELATED METHODS
+
+    /// Parses a pattern to be used in follow-up [`Self::search_pattern`]
+    /// requests.
+    ///
+    /// Clients should call [`Self::drop_pattern()`] when they no need longer
+    /// need it.
     fn parse_pattern(
         &self,
         params: ParsePatternParams,
@@ -1085,8 +1175,18 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Used to indicate a client no longer needs a specific pattern.
     fn drop_pattern(&self, params: DropPatternParams) -> Result<(), WorkspaceError>;
 
-    /// Returns information about the server this workspace is connected to or `None` if the workspace isn't connected to a server.
+    // #endregion
+
+    // #region MISC METHODS
+
+    /// Returns debug information about this workspace.
+    fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError>;
+
+    /// Returns information about the server this workspace is connected to or
+    /// `None` if the workspace isn't connected to a server.
     fn server_info(&self) -> Option<&ServerInfo>;
+
+    // #endregion
 }
 
 /// Convenience function for constructing a server instance of [Workspace]
@@ -1115,18 +1215,25 @@ where
 /// automatically on drop
 pub struct FileGuard<'app, W: Workspace + ?Sized> {
     workspace: &'app W,
+    project_key: ProjectKey,
     path: BiomePath,
 }
 
 impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn open(workspace: &'app W, params: OpenFileParams) -> Result<Self, WorkspaceError> {
+        let project_key = params.project_key;
         let path = params.path.clone();
         workspace.open_file(params)?;
-        Ok(Self { workspace, path })
+        Ok(Self {
+            workspace,
+            project_key,
+            path,
+        })
     }
 
     pub fn get_syntax_tree(&self) -> Result<GetSyntaxTreeResult, WorkspaceError> {
         self.workspace.get_syntax_tree(GetSyntaxTreeParams {
+            project_key: self.project_key,
             path: self.path.clone(),
         })
     }
@@ -1134,6 +1241,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn get_control_flow_graph(&self, cursor: TextSize) -> Result<String, WorkspaceError> {
         self.workspace
             .get_control_flow_graph(GetControlFlowGraphParams {
+                project_key: self.project_key,
                 path: self.path.clone(),
                 cursor,
             })
@@ -1141,6 +1249,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
 
     pub fn change_file(&self, version: i32, content: String) -> Result<(), WorkspaceError> {
         self.workspace.change_file(ChangeFileParams {
+            project_key: self.project_key,
             path: self.path.clone(),
             version,
             content,
@@ -1149,6 +1258,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
 
     pub fn get_file_content(&self) -> Result<String, WorkspaceError> {
         self.workspace.get_file_content(GetFileContentParams {
+            project_key: self.project_key,
             path: self.path.clone(),
         })
     }
@@ -1161,6 +1271,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         skip: Vec<RuleSelector>,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         self.workspace.pull_diagnostics(PullDiagnosticsParams {
+            project_key: self.project_key,
             path: self.path.clone(),
             categories,
             max_diagnostics: max_diagnostics.into(),
@@ -1179,6 +1290,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         enabled_rules: Vec<RuleSelector>,
     ) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
+            project_key: self.project_key,
             path: self.path.clone(),
             range,
             only,
@@ -1190,18 +1302,21 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
 
     pub fn format_file(&self) -> Result<Printed, WorkspaceError> {
         self.workspace.format_file(FormatFileParams {
+            project_key: self.project_key,
             path: self.path.clone(),
         })
     }
 
     pub fn check_file_size(&self) -> Result<CheckFileSizeResult, WorkspaceError> {
         self.workspace.check_file_size(CheckFileSizeParams {
+            project_key: self.project_key,
             path: self.path.clone(),
         })
     }
 
     pub fn format_range(&self, range: TextRange) -> Result<Printed, WorkspaceError> {
         self.workspace.format_range(FormatRangeParams {
+            project_key: self.project_key,
             path: self.path.clone(),
             range,
         })
@@ -1209,6 +1324,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
 
     pub fn format_on_type(&self, offset: TextSize) -> Result<Printed, WorkspaceError> {
         self.workspace.format_on_type(FormatOnTypeParams {
+            project_key: self.project_key,
             path: self.path.clone(),
             offset,
         })
@@ -1224,6 +1340,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         suppression_reason: Option<String>,
     ) -> Result<FixFileResult, WorkspaceError> {
         self.workspace.fix_file(FixFileParams {
+            project_key: self.project_key,
             path: self.path.clone(),
             fix_file_mode,
             should_format,
@@ -1237,6 +1354,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
 
     pub fn search_pattern(&self, pattern: &PatternId) -> Result<SearchResults, WorkspaceError> {
         self.workspace.search_pattern(SearchPatternParams {
+            project_key: self.project_key,
             path: self.path.clone(),
             pattern: pattern.clone(),
         })
@@ -1247,24 +1365,13 @@ impl<'app, W: Workspace + ?Sized> Drop for FileGuard<'app, W> {
     fn drop(&mut self) {
         self.workspace
             .close_file(CloseFileParams {
+                project_key: self.project_key,
                 path: self.path.clone(),
             })
             // `close_file` can only error if the file was already closed, in
             // this case it's generally better to silently matcher the error
             // than panic (especially in a drop handler)
             .ok();
-    }
-}
-
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct ProjectKey(usize);
-
-impl ProjectKey {
-    pub fn new() -> Self {
-        static KEY: AtomicUsize = AtomicUsize::new(1);
-        let key = KEY.fetch_add(1, Ordering::Relaxed);
-        Self(key)
     }
 }
 

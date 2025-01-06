@@ -22,6 +22,7 @@ use biome_diagnostics::SerdeJsonError;
 use biome_diagnostics::{category, Category};
 use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
+use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     FeatureName, FeaturesBuilder, FileContent, FixFileMode, FormatFileParams, OpenFileParams,
     PatternId,
@@ -45,9 +46,10 @@ pub struct Execution {
 }
 
 impl Execution {
-    pub fn new_format(vcs_targeted: VcsTargeted) -> Self {
+    pub fn new_format(project_key: ProjectKey, vcs_targeted: VcsTargeted) -> Self {
         Self {
             traversal_mode: TraversalMode::Format {
+                project_key,
                 ignore_errors: false,
                 write: false,
                 stdin: None,
@@ -125,6 +127,8 @@ impl From<(bool, bool)> for VcsTargeted {
 pub enum TraversalMode {
     /// This mode is enabled when running the command `biome check`
     Check {
+        /// Key of the project to check.
+        project_key: ProjectKey,
         /// The type of fixes that should be applied when analyzing a file.
         ///
         /// It's [None] if the `check` command is called without `--apply` or `--apply-suggested`
@@ -139,9 +143,11 @@ pub enum TraversalMode {
     },
     /// This mode is enabled when running the command `biome lint`
     Lint {
+        /// Key of the project to lint.
+        project_key: ProjectKey,
         /// The type of fixes that should be applied when analyzing a file.
         ///
-        /// It's [None] if the `check` command is called without `--apply` or `--apply-suggested`
+        /// It's [None] if the `lint` command is called without `--apply` or `--apply-suggested`
         /// arguments.
         fix_file_mode: Option<FixFileMode>,
         /// An optional tuple.
@@ -164,6 +170,8 @@ pub enum TraversalMode {
     },
     /// This mode is enabled when running the command `biome ci`
     CI {
+        /// Key of the project to run the CI checks for.
+        project_key: ProjectKey,
         /// Whether the CI is running in a specific environment, e.g. GitHub, GitLab, etc.
         environment: Option<ExecutionEnvironment>,
         /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
@@ -171,6 +179,8 @@ pub enum TraversalMode {
     },
     /// This mode is enabled when running the command `biome format`
     Format {
+        /// Key of the project to format.
+        project_key: ProjectKey,
         /// It ignores parse errors
         ignore_errors: bool,
         /// It writes the new content on file
@@ -184,6 +194,8 @@ pub enum TraversalMode {
     },
     /// This mode is enabled when running the command `biome migrate`
     Migrate {
+        /// Key of the project to execute the migration in.
+        project_key: ProjectKey,
         /// Write result to disk
         write: bool,
         /// The path to `biome.json`
@@ -194,6 +206,9 @@ pub enum TraversalMode {
     },
     /// This mode is enabled when running the command `biome search`
     Search {
+        /// Key of the project to search in.
+        project_key: ProjectKey,
+
         /// The GritQL pattern to search for.
         ///
         /// Note that the search command does not support rewrites.
@@ -229,12 +244,26 @@ impl Display for TraversalMode {
 }
 
 impl TraversalMode {
+    pub fn project_key(&self) -> ProjectKey {
+        match self {
+            Self::Check { project_key, .. }
+            | Self::CI { project_key, .. }
+            | Self::Format { project_key, .. }
+            | Self::Lint { project_key, .. }
+            | Self::Migrate { project_key, .. }
+            | Self::Search { project_key, .. } => *project_key,
+        }
+    }
+
     pub fn should_scan_project(&self) -> bool {
-        matches!(self, Self::CI { .. })
-            || matches!(
-                self,
-                Self::Check { stdin,.. } | Self::Lint { stdin, .. } if stdin.is_none()
-            )
+        match self {
+            Self::CI { .. } => true,
+            Self::Check { stdin, .. }
+            | Self::Format { stdin, .. }
+            | Self::Lint { stdin, .. }
+            | Self::Search { stdin, .. } => stdin.is_none(),
+            Self::Migrate { .. } => false,
+        }
     }
 }
 
@@ -287,7 +316,7 @@ impl Execution {
         }
     }
 
-    pub(crate) fn new_ci(vcs_targeted: VcsTargeted) -> Self {
+    pub(crate) fn new_ci(project_key: ProjectKey, vcs_targeted: VcsTargeted) -> Self {
         // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
         let is_github = std::env::var("GITHUB_ACTIONS")
             .ok()
@@ -296,6 +325,7 @@ impl Execution {
         Self {
             report_mode: ReportMode::default(),
             traversal_mode: TraversalMode::CI {
+                project_key,
                 environment: if is_github {
                     Some(ExecutionEnvironment::GitHub)
                 } else {
@@ -451,17 +481,9 @@ pub fn execute_mode(
         u32::MAX
     };
 
-    // don't do any traversal if there's some content coming from stdin
-    if let Some(stdin) = execution.as_stdin_file() {
-        let biome_path = BiomePath::new(stdin.as_path());
-        std_in::run(
-            session,
-            &execution,
-            biome_path,
-            stdin.as_content(),
-            cli_options.verbose,
-        )
-    } else if let TraversalMode::Migrate {
+    // migrate command doesn't do any traversal.
+    if let TraversalMode::Migrate {
+        project_key,
         write,
         configuration_file_path,
         configuration_directory_path,
@@ -470,150 +492,168 @@ pub fn execute_mode(
     {
         let payload = MigratePayload {
             session,
+            project_key,
             write,
             configuration_file_path,
             configuration_directory_path,
             verbose: cli_options.verbose,
             sub_command,
         };
-        migrate::run(payload)
-    } else {
-        let TraverseResult {
-            summary,
-            evaluated_paths,
-            diagnostics,
-        } = traverse(&execution, &mut session, cli_options, paths)?;
-        let console = session.app.console;
-        let errors = summary.errors;
-        let skipped = summary.skipped;
-        let processed = summary.changed + summary.unchanged;
-        let should_exit_on_warnings = summary.warnings > 0 && cli_options.error_on_warnings;
+        return migrate::run(payload);
+    }
 
-        match execution.report_mode {
-            ReportMode::Terminal { with_summary } => {
-                if with_summary {
-                    let reporter = SummaryReporter {
-                        summary,
-                        diagnostics_payload: DiagnosticsPayload {
-                            verbose: cli_options.verbose,
-                            diagnostic_level: cli_options.diagnostic_level,
-                            diagnostics,
-                        },
-                        execution: execution.clone(),
-                    };
-                    reporter.write(&mut SummaryReporterVisitor(console))?;
-                } else {
-                    let reporter = ConsoleReporter {
-                        summary,
-                        diagnostics_payload: DiagnosticsPayload {
-                            verbose: cli_options.verbose,
-                            diagnostic_level: cli_options.diagnostic_level,
-                            diagnostics,
-                        },
-                        execution: execution.clone(),
-                        evaluated_paths,
-                    };
-                    reporter.write(&mut ConsoleReporterVisitor(console))?;
-                }
+    let project_key = execution.traversal_mode.project_key();
+
+    // don't do any traversal if there's some content coming from stdin
+    if let Some(stdin) = execution.as_stdin_file() {
+        let biome_path = BiomePath::new(stdin.as_path());
+        return std_in::run(
+            session,
+            project_key,
+            &execution,
+            biome_path,
+            stdin.as_content(),
+            cli_options.verbose,
+        );
+    }
+
+    let TraverseResult {
+        summary,
+        evaluated_paths,
+        diagnostics,
+    } = traverse(&execution, &mut session, project_key, cli_options, paths)?;
+    let console = session.app.console;
+    let errors = summary.errors;
+    let skipped = summary.skipped;
+    let processed = summary.changed + summary.unchanged;
+    let should_exit_on_warnings = summary.warnings > 0 && cli_options.error_on_warnings;
+
+    match execution.report_mode {
+        ReportMode::Terminal { with_summary } => {
+            if with_summary {
+                let reporter = SummaryReporter {
+                    summary,
+                    diagnostics_payload: DiagnosticsPayload {
+                        verbose: cli_options.verbose,
+                        diagnostic_level: cli_options.diagnostic_level,
+                        diagnostics,
+                    },
+                    execution: execution.clone(),
+                };
+                reporter.write(&mut SummaryReporterVisitor(console))?;
+            } else {
+                let reporter = ConsoleReporter {
+                    summary,
+                    diagnostics_payload: DiagnosticsPayload {
+                        verbose: cli_options.verbose,
+                        diagnostic_level: cli_options.diagnostic_level,
+                        diagnostics,
+                    },
+                    execution: execution.clone(),
+                    evaluated_paths,
+                };
+                reporter.write(&mut ConsoleReporterVisitor(console))?;
             }
-            ReportMode::Json { pretty } => {
-                console.error(markup!{
+        }
+        ReportMode::Json { pretty } => {
+            console.error(markup!{
                     <Warn>"The "<Emphasis>"--json"</Emphasis>" option is "<Underline>"unstable/experimental"</Underline>" and its output might change between patches/minor releases."</Warn>
                 });
-                let reporter = JsonReporter {
-                    summary,
-                    diagnostics: DiagnosticsPayload {
-                        verbose: cli_options.verbose,
-                        diagnostic_level: cli_options.diagnostic_level,
-                        diagnostics,
-                    },
-                    execution: execution.clone(),
-                };
-                let mut buffer = JsonReporterVisitor::new(summary);
-                reporter.write(&mut buffer)?;
-                if pretty {
-                    let content = serde_json::to_string(&buffer).map_err(|error| {
-                        CliDiagnostic::Report(ReportDiagnostic::Serialization(
-                            SerdeJsonError::from(error),
-                        ))
-                    })?;
-                    let report_file = BiomePath::new("_report_output.json");
-                    session.app.workspace.open_file(OpenFileParams {
-                        content: FileContent::FromClient(content),
-                        path: report_file.clone(),
-                        version: 0,
-                        document_file_source: None,
-                        persist_node_cache: false,
-                    })?;
-                    let code = session.app.workspace.format_file(FormatFileParams {
-                        path: report_file.clone(),
-                    })?;
-                    console.log(markup! {
-                        {code.as_code()}
-                    });
-                } else {
-                    console.log(markup! {
-                        {buffer}
-                    });
-                }
-            }
-            ReportMode::GitHub => {
-                let reporter = GithubReporter {
-                    diagnostics_payload: DiagnosticsPayload {
-                        verbose: cli_options.verbose,
-                        diagnostic_level: cli_options.diagnostic_level,
-                        diagnostics,
-                    },
-                    execution: execution.clone(),
-                };
-                reporter.write(&mut GithubReporterVisitor(console))?;
-            }
-            ReportMode::GitLab => {
-                let reporter = GitLabReporter {
-                    diagnostics: DiagnosticsPayload {
-                        verbose: cli_options.verbose,
-                        diagnostic_level: cli_options.diagnostic_level,
-                        diagnostics,
-                    },
-                    execution: execution.clone(),
-                };
-                reporter.write(&mut GitLabReporterVisitor::new(
-                    console,
-                    session.app.workspace.fs().working_directory(),
-                ))?;
-            }
-            ReportMode::Junit => {
-                let reporter = JunitReporter {
-                    summary,
-                    diagnostics_payload: DiagnosticsPayload {
-                        verbose: cli_options.verbose,
-                        diagnostic_level: cli_options.diagnostic_level,
-                        diagnostics,
-                    },
-                    execution: execution.clone(),
-                };
-                reporter.write(&mut JunitReporterVisitor::new(console))?;
-            }
-        }
-
-        // Processing emitted error diagnostics, exit with a non-zero code
-        if processed.saturating_sub(skipped) == 0 && !cli_options.no_errors_on_unmatched {
-            Err(CliDiagnostic::no_files_processed())
-        } else if errors > 0 || should_exit_on_warnings {
-            let category = execution.as_diagnostic_category();
-            if should_exit_on_warnings {
-                if execution.is_check_apply() {
-                    Err(CliDiagnostic::apply_warnings(category))
-                } else {
-                    Err(CliDiagnostic::check_warnings(category))
-                }
-            } else if execution.is_check_apply() {
-                Err(CliDiagnostic::apply_error(category))
+            let reporter = JsonReporter {
+                summary,
+                diagnostics: DiagnosticsPayload {
+                    verbose: cli_options.verbose,
+                    diagnostic_level: cli_options.diagnostic_level,
+                    diagnostics,
+                },
+                execution: execution.clone(),
+            };
+            let mut buffer = JsonReporterVisitor::new(summary);
+            reporter.write(&mut buffer)?;
+            if pretty {
+                let content = serde_json::to_string(&buffer).map_err(|error| {
+                    CliDiagnostic::Report(ReportDiagnostic::Serialization(SerdeJsonError::from(
+                        error,
+                    )))
+                })?;
+                let report_file = BiomePath::new("_report_output.json");
+                session.app.workspace.open_file(OpenFileParams {
+                    project_key,
+                    content: FileContent::FromClient(content),
+                    path: report_file.clone(),
+                    version: 0,
+                    document_file_source: None,
+                    persist_node_cache: false,
+                })?;
+                let code = session.app.workspace.format_file(FormatFileParams {
+                    project_key,
+                    path: report_file.clone(),
+                })?;
+                console.log(markup! {
+                    {code.as_code()}
+                });
             } else {
-                Err(CliDiagnostic::check_error(category))
+                console.log(markup! {
+                    {buffer}
+                });
             }
-        } else {
-            Ok(())
         }
+        ReportMode::GitHub => {
+            let reporter = GithubReporter {
+                diagnostics_payload: DiagnosticsPayload {
+                    verbose: cli_options.verbose,
+                    diagnostic_level: cli_options.diagnostic_level,
+                    diagnostics,
+                },
+                execution: execution.clone(),
+            };
+            reporter.write(&mut GithubReporterVisitor(console))?;
+        }
+        ReportMode::GitLab => {
+            let reporter = GitLabReporter {
+                diagnostics: DiagnosticsPayload {
+                    verbose: cli_options.verbose,
+                    diagnostic_level: cli_options.diagnostic_level,
+                    diagnostics,
+                },
+                execution: execution.clone(),
+            };
+            reporter.write(&mut GitLabReporterVisitor::new(
+                console,
+                session.app.workspace.fs().working_directory(),
+            ))?;
+        }
+        ReportMode::Junit => {
+            let reporter = JunitReporter {
+                summary,
+                diagnostics_payload: DiagnosticsPayload {
+                    verbose: cli_options.verbose,
+                    diagnostic_level: cli_options.diagnostic_level,
+                    diagnostics,
+                },
+                execution: execution.clone(),
+            };
+            reporter.write(&mut JunitReporterVisitor::new(console))?;
+        }
+    }
+
+    // Processing emitted error diagnostics, exit with a non-zero code
+    if processed.saturating_sub(skipped) == 0 && !cli_options.no_errors_on_unmatched {
+        Err(CliDiagnostic::no_files_processed())
+    } else if errors > 0 || should_exit_on_warnings {
+        let category = execution.as_diagnostic_category();
+        if should_exit_on_warnings {
+            if execution.is_check_apply() {
+                Err(CliDiagnostic::apply_warnings(category))
+            } else {
+                Err(CliDiagnostic::check_warnings(category))
+            }
+        } else if execution.is_check_apply() {
+            Err(CliDiagnostic::apply_error(category))
+        } else {
+            Err(CliDiagnostic::check_error(category))
+        }
+    } else {
+        Ok(())
     }
 }

@@ -22,6 +22,10 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
+Scanned project folder in <TIME>.
+```
+
+```block
 format.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Formatter would have printed the following content:

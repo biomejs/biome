@@ -15,16 +15,20 @@ use biome_service::configuration::{
     load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
+use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
-    FeaturesBuilder, GetFileContentParams, PullDiagnosticsParams, RegisterProjectFolderParams,
+    FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
     SetManifestForProjectParams, SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::Workspace;
 use biome_service::WorkspaceError;
+use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
+use papaya::HashMap;
+use rustc_hash::FxBuildHasher;
 use rustc_hash::FxHashMap;
 use serde_json::Value;
 use std::sync::atomic::Ordering;
@@ -73,7 +77,12 @@ pub(crate) struct Session {
     /// to update the diagnostics
     notified_broken_configuration: AtomicBool,
 
-    documents: RwLock<FxHashMap<lsp_types::Url, Document>>,
+    /// Projects opened in this session, mapped from the project's root path to
+    /// the associated project key.
+    projects: HashMap<BiomePath, ProjectKey>,
+
+    /// Documents opened in this session.
+    documents: HashMap<lsp_types::Url, Document, FxBuildHasher>,
 
     pub(crate) cancellation: Arc<Notify>,
 
@@ -161,7 +170,6 @@ impl Session {
         workspace: Arc<dyn Workspace>,
         cancellation: Arc<Notify>,
     ) -> Self {
-        let documents = Default::default();
         let config = RwLock::new(ExtensionSettings::new());
         Self {
             key,
@@ -169,7 +177,8 @@ impl Session {
             initialize_params: OnceCell::default(),
             workspace,
             configuration_status: AtomicU8::new(ConfigurationStatus::Missing as u8),
-            documents,
+            projects: Default::default(),
+            documents: Default::default(),
             extension_settings: config,
             cancellation,
             config_path: None,
@@ -253,13 +262,26 @@ impl Session {
         }
     }
 
+    /// Returns the key for the project that should be used for a given path.
+    pub(crate) fn project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey> {
+        self.projects
+            .pin()
+            .iter()
+            .find(|(project_path, _project_key)| path.starts_with(project_path.as_path()))
+            .map(|(_project_path, project_key)| *project_key)
+    }
+
+    /// Registers an open project with its root path.
+    pub(crate) fn insert_project(&self, path: BiomePath, project_key: ProjectKey) {
+        self.projects.pin().insert(path, project_key);
+    }
+
     /// Get a [`Document`] matching the provided [`lsp_types::Url`]
     ///
     /// If document does not exist, result is [WorkspaceError::NotFound]
     pub(crate) fn document(&self, url: &lsp_types::Url) -> Result<Document, Error> {
         self.documents
-            .read()
-            .unwrap()
+            .pin()
             .get(url)
             .cloned()
             .ok_or_else(|| WorkspaceError::not_found().with_file_path(url.to_string()))
@@ -269,12 +291,12 @@ impl Session {
     ///
     /// Used by [`handlers::text_document] to synchronize documents with the client.
     pub(crate) fn insert_document(&self, url: lsp_types::Url, document: Document) {
-        self.documents.write().unwrap().insert(url, document);
+        self.documents.pin().insert(url, document);
     }
 
     /// Remove the [`Document`] matching the provided [`lsp_types::Url`]
-    pub(crate) fn remove_document(&self, url: &lsp_types::Url) {
-        self.documents.write().unwrap().remove(url);
+    pub(crate) fn remove_document(&self, url: &lsp_types::Url) -> Option<ProjectKey> {
+        self.documents.pin().remove(url).map(|doc| doc.project_key)
     }
 
     pub(crate) fn file_path(&self, url: &lsp_types::Url) -> Result<BiomePath> {
@@ -295,15 +317,29 @@ impl Session {
     /// contents changes.
     #[tracing::instrument(level = "trace", skip_all, fields(url = display(&url), diagnostic_count), err)]
     pub(crate) async fn update_diagnostics(&self, url: lsp_types::Url) -> Result<(), LspError> {
-        let biome_path = self.file_path(&url)?;
         let doc = self.document(&url)?;
+        self.update_diagnostics_for_document(url, doc).await
+    }
+
+    /// Computes diagnostics for the file matching the provided url and publishes
+    /// them to the client. Called from [`handlers::text_document`] when a file's
+    /// contents changes.
+    #[tracing::instrument(level = "trace", skip_all, fields(url = display(&url), diagnostic_count), err)]
+    async fn update_diagnostics_for_document(
+        &self,
+        url: lsp_types::Url,
+        doc: Document,
+    ) -> Result<(), LspError> {
+        let biome_path = self.file_path(&url)?;
+
         if self.configuration_status().is_error() && !self.notified_broken_configuration() {
             self.set_notified_broken_configuration();
             self.client
-                    .show_message(MessageType::WARNING, "The configuration file has errors. Biome will report only parsing errors until the configuration is fixed.")
-                    .await;
+                .show_message(MessageType::WARNING, "The configuration file has errors. Biome will report only parsing errors until the configuration is fixed.")
+                .await;
         }
         let file_features = self.workspace.file_features(SupportsFeatureParams {
+            project_key: doc.project_key,
             features: FeaturesBuilder::new().with_linter().with_assist().build(),
             path: biome_path.clone(),
         })?;
@@ -326,6 +362,7 @@ impl Session {
                 }
             }
             let result = self.workspace.pull_diagnostics(PullDiagnosticsParams {
+                project_key: doc.project_key,
                 path: biome_path.clone(),
                 categories: categories.build(),
                 max_diagnostics: u64::MAX,
@@ -336,6 +373,7 @@ impl Session {
 
             tracing::trace!("biome diagnostics: {:#?}", result.diagnostics);
             let content = self.workspace.get_file_content(GetFileContentParams {
+                project_key: doc.project_key,
                 path: biome_path.clone(),
             })?;
             let offset = match biome_path.extension() {
@@ -379,10 +417,9 @@ impl Session {
     pub(crate) async fn update_all_diagnostics(&self) {
         let mut futures: FuturesUnordered<_> = self
             .documents
-            .read()
-            .unwrap()
-            .keys()
-            .map(|url| self.update_diagnostics(url.clone()))
+            .pin()
+            .iter()
+            .map(|(url, doc)| self.update_diagnostics_for_document(url.clone(), doc.clone()))
             .collect();
 
         while let Some(result) = futures.next().await {
@@ -535,31 +572,33 @@ impl Session {
 
                     match result {
                         Ok((vcs_base_path, gitignore_matches)) => {
-                            let register_result =
-                                if let ConfigurationPathHint::FromWorkspace(path) = &base_path {
-                                    // We don't need the key
-                                    self.workspace
-                                        .register_project_folder(RegisterProjectFolderParams {
-                                            path: Some(path.as_path().into()),
-                                            // This is naive, but we don't know if the user has a file already open or not, so we register every project as the current one.
-                                            // The correct one is actually set when the LSP calls `textDocument/didOpen`
-                                            set_as_current_workspace: true,
-                                        })
-                                        .err()
-                                } else {
-                                    self.workspace
-                                        .register_project_folder(RegisterProjectFolderParams {
-                                            path: fs.working_directory().map(BiomePath::from),
-                                            set_as_current_workspace: true,
-                                        })
-                                        .err()
-                                };
-                            if let Some(error) = register_result {
-                                error!("Failed to register the project folder: {}", error);
-                                self.client.log_message(MessageType::ERROR, &error).await;
-                                return ConfigurationStatus::Error;
-                            }
+                            let register_result = match &base_path {
+                                ConfigurationPathHint::FromLsp(path)
+                                | ConfigurationPathHint::FromWorkspace(path) => {
+                                    self.workspace.open_project(OpenProjectParams {
+                                        path: path.as_path().into(),
+                                        open_uninitialized: true,
+                                    })
+                                }
+                                _ => self.workspace.open_project(OpenProjectParams {
+                                    path: fs
+                                        .working_directory()
+                                        .map(BiomePath::from)
+                                        .unwrap_or_default(),
+                                    open_uninitialized: true,
+                                }),
+                            };
+                            let project_key = match register_result {
+                                Ok(result) => result,
+                                Err(error) => {
+                                    error!("Failed to register the project folder: {error}");
+                                    self.client.log_message(MessageType::ERROR, &error).await;
+                                    return ConfigurationStatus::Error;
+                                }
+                            };
+
                             let result = self.workspace.update_settings(UpdateSettingsParams {
+                                project_key,
                                 workspace_directory: configuration_path.map(BiomePath::from),
                                 configuration,
                                 vcs_base_path: vcs_base_path.map(BiomePath::from),
@@ -593,33 +632,39 @@ impl Session {
 
     #[tracing::instrument(level = "trace", skip(self))]
     pub(crate) async fn load_manifest(&self) {
-        let base_path = self
+        let Some(base_path) = self
             .manifest_path
             .as_deref()
             .map(Utf8PathBuf::from)
-            .or(self.base_path());
-        if let Some(base_path) = base_path {
-            let fs = self.workspace.fs();
-            let result = fs.auto_search(&base_path, &["package.json"], false);
-            match result {
-                Ok(result) => {
-                    if let Some(result) = result {
-                        let biome_path = BiomePath::new(result.file_path);
-                        let result =
-                            self.workspace
-                                .set_manifest_for_project(SetManifestForProjectParams {
-                                    manifest_path: biome_path.clone(),
-                                    content: result.content,
-                                    version: 0,
-                                });
-                        if let Err(err) = result {
-                            error!("{}", err);
-                        }
-                    }
+            .or(self.base_path())
+        else {
+            return;
+        };
+
+        let fs = self.workspace.fs();
+        match fs.auto_search(&base_path, &["package.json"], false) {
+            Ok(Some(result)) => {
+                let biome_path = BiomePath::new(result.file_path);
+                let Some(project_key) = self.project_for_path(&biome_path) else {
+                    error!("Cannot determine project for package.json file at {biome_path:?}");
+                    return;
+                };
+
+                let result = self
+                    .workspace
+                    .set_manifest_for_project(SetManifestForProjectParams {
+                        project_key,
+                        manifest_path: biome_path.clone(),
+                        content: result.content,
+                        version: 0,
+                    });
+                if let Err(err) = result {
+                    error!("{err}");
                 }
-                Err(err) => {
-                    error!("Couldn't load the package.json file, reason:\n {}", err);
-                }
+            }
+            Ok(None) => {}
+            Err(err) => {
+                error!("Couldn't load the package.json file, reason:\n {err}");
             }
         }
     }

@@ -7,13 +7,11 @@ pub use crate::file_handlers::astro::{AstroFileHandler, ASTRO_FENCE};
 use crate::file_handlers::graphql::GraphqlFileHandler;
 pub use crate::file_handlers::svelte::{SvelteFileHandler, SVELTE_FENCE};
 pub use crate::file_handlers::vue::{VueFileHandler, VUE_FENCE};
-use crate::settings::Settings;
-use crate::workspace::FixFileMode;
-use crate::{
-    settings::WorkspaceSettingsHandle,
-    workspace::{FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult},
-    WorkspaceError,
+use crate::settings::{Settings, WorkspaceSettingsHandle};
+use crate::workspace::{
+    FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult,
 };
+use crate::WorkspaceError;
 use biome_analyze::{
     AnalyzerDiagnostic, AnalyzerOptions, AnalyzerSignal, ControlFlow, GroupCategory, Never,
     Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
@@ -395,6 +393,7 @@ pub struct FixAllParams<'a> {
     pub(crate) skip: Vec<RuleSelector>,
     pub(crate) rule_categories: RuleCategories,
     pub(crate) suppression_reason: Option<String>,
+    pub(crate) enabled_rules: Vec<RuleSelector>,
 }
 
 #[derive(Default)]

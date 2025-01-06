@@ -10,9 +10,10 @@ use biome_formatter::{FormatLanguage, FormatOptions, Printed};
 use biome_fs::BiomePath;
 use biome_parser::AnyParse;
 use biome_rowan::{TextRange, TextSize};
+use biome_service::projects::ProjectKey;
 use biome_service::settings::Settings;
 use biome_service::workspace::{
-    DocumentFileSource, FeaturesBuilder, RegisterProjectFolderParams, SupportsFeatureParams,
+    DocumentFileSource, FeaturesBuilder, OpenProjectParams, SupportsFeatureParams,
     UpdateSettingsParams,
 };
 use biome_service::App;
@@ -34,7 +35,7 @@ impl<'a> SpecTestFile<'a> {
     pub fn try_from_file(
         input_file: &'a str,
         root_path: &'a Utf8Path,
-        settings: Option<UpdateSettingsParams>,
+        settings_fn: impl FnOnce(ProjectKey) -> Option<UpdateSettingsParams>,
     ) -> Option<SpecTestFile<'a>> {
         if input_file.ends_with("options.json") {
             return None;
@@ -46,24 +47,25 @@ impl<'a> SpecTestFile<'a> {
 
         assert!(
             spec_input_file.is_file(),
-            "The input '{}' must exist and be a file.",
-            spec_input_file
+            "The input '{spec_input_file}' must exist and be a file.",
         );
 
-        app.workspace
-            .register_project_folder(RegisterProjectFolderParams {
-                set_as_current_workspace: true,
-                path: None,
+        let project_key = app
+            .workspace
+            .open_project(OpenProjectParams {
+                path: BiomePath::new(""),
+                open_uninitialized: true,
             })
             .unwrap();
 
-        if let Some(settings) = settings {
+        if let Some(settings) = settings_fn(project_key) {
             app.workspace.update_settings(settings).unwrap();
         }
         let mut input_file = BiomePath::new(file_path);
         let can_format = app
             .workspace
             .file_features(SupportsFeatureParams {
+                project_key,
                 path: input_file.clone(),
                 features: FeaturesBuilder::new().with_formatter().build(),
             })

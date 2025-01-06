@@ -28,7 +28,10 @@ use biome_service::configuration::{
     load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::documentation::Doc;
-use biome_service::workspace::{FixFileMode, RegisterProjectFolderParams, UpdateSettingsParams};
+use biome_service::projects::ProjectKey;
+use biome_service::workspace::{
+    FixFileMode, OpenProjectParams, ScanProjectFolderParams, UpdateSettingsParams,
+};
 use biome_service::{Workspace, WorkspaceError};
 use bpaf::Bpaf;
 use camino::Utf8PathBuf;
@@ -795,27 +798,35 @@ pub(crate) trait CommandRunner: Sized {
         let (vcs_base_path, gitignore_matches) =
             configuration.retrieve_gitignore_matches(fs, vcs_base_path.as_deref())?;
         let paths = self.get_files_to_process(fs, &configuration)?;
-        workspace.register_project_folder(RegisterProjectFolderParams {
-            path: fs.working_directory().map(BiomePath::from),
-            set_as_current_workspace: true,
+        let project_path = fs
+            .working_directory()
+            .map(BiomePath::from)
+            .unwrap_or_default();
+        let project_key = workspace.open_project(OpenProjectParams {
+            path: project_path.clone(),
+            open_uninitialized: true,
         })?;
 
         let manifest_data = resolve_manifest(fs)?;
 
-        if let Some(manifest_data) = manifest_data {
-            workspace.set_manifest_for_project(manifest_data.into())?;
+        if let Some((path, content)) = manifest_data {
+            workspace.set_manifest_for_project((project_key, path, content).into())?;
         }
         workspace.update_settings(UpdateSettingsParams {
+            project_key,
             workspace_directory: configuration_path.map(BiomePath::from),
             configuration,
             vcs_base_path: vcs_base_path.map(BiomePath::from),
             gitignore_matches,
         })?;
 
-        let execution = self.get_execution(cli_options, console, workspace)?;
+        let execution = self.get_execution(cli_options, console, workspace, project_key)?;
 
         if execution.traversal_mode().should_scan_project() {
-            let result = workspace.scan_current_project_folder(())?;
+            let result = workspace.scan_project_folder(ScanProjectFolderParams {
+                project_key,
+                path: Some(project_path),
+            })?;
             if cli_options.verbose && matches!(execution.report_mode(), ReportMode::Terminal { .. })
             {
                 console.log(markup! {
@@ -879,6 +890,7 @@ pub(crate) trait CommandRunner: Sized {
         cli_options: &CliOptions,
         console: &mut dyn Console,
         workspace: &dyn Workspace,
+        project_key: ProjectKey,
     ) -> Result<Execution, CliDiagnostic>;
 
     // Below, methods that consumers can implement

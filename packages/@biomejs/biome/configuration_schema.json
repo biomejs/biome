@@ -91,6 +91,10 @@
 			"description": "List of plugins to load.",
 			"anyOf": [{ "$ref": "#/definitions/Plugins" }, { "type": "null" }]
 		},
+		"root": {
+			"description": "Indicates whether this configuration file is at the root of a Biome project. By default, this is `true`.",
+			"type": ["boolean", "null"]
+		},
 		"vcs": {
 			"description": "The configuration of the VCS integration",
 			"anyOf": [

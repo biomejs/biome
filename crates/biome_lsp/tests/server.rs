@@ -7,6 +7,7 @@ use biome_lsp::LSPServer;
 use biome_lsp::ServerFactory;
 use biome_lsp::WorkspaceSettings;
 use biome_service::workspace::GetSyntaxTreeResult;
+use biome_service::workspace::OpenProjectParams;
 use biome_service::workspace::{GetFileContentParams, GetSyntaxTreeParams};
 use camino::Utf8PathBuf;
 use futures::channel::mpsc::{channel, Sender};
@@ -491,11 +492,26 @@ async fn document_lifecycle() -> Result<()> {
         )
         .await?;
 
+    // `open_project()` will return an existing key if called with a path
+    // for an existing project.
+    let project_key = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: BiomePath::new(""),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+
     let res: GetSyntaxTreeResult = server
         .request(
             "biome/get_syntax_tree",
             "get_syntax_tree",
             GetSyntaxTreeParams {
+                project_key,
                 path: BiomePath::try_from(url!("document.js").to_file_path().unwrap()).unwrap(),
             },
         )
@@ -2188,11 +2204,26 @@ isSpreadAssignment;
         )
         .await?;
 
+    // `open_project()` will return an existing key if called with a path
+    // for an existing project.
+    let project_key = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: BiomePath::new(""),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+
     let actual: String = server
         .request(
             "biome/get_file_content",
             "get_file_content",
             GetFileContentParams {
+                project_key,
                 path: BiomePath::new(
                     Utf8PathBuf::from_path_buf(url!("document.js").to_file_path().unwrap())
                         .unwrap(),
