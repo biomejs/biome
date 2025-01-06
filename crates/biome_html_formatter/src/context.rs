@@ -224,6 +224,19 @@ impl FormatOptions for HtmlFormatOptions {
 /// | without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |
 ///
 /// This happens because whitespace is significant in inline elements.
+///
+/// As a consequence of this, the formatter must format blocks that look like this (assume a small line width, <20):
+/// ```html
+/// <span>really long content</span>
+/// ```
+/// as this, where the content hugs the tags:
+/// ```html
+/// <span
+///    >really long content</span
+/// >
+/// ```
+///
+/// Note that this is only necessary for inline elements. Block elements do not have this restriction.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserializable, Merge)]
 #[cfg_attr(
     feature = "serde",
@@ -267,6 +280,12 @@ impl FromStr for WhitespaceSensitivity {
             "ignore" => Ok(Self::Ignore),
             _ => Err("Value not supported for WhitespaceSensitivity. Supported values are 'strict' and 'ignore'."),
         }
+    }
+}
+
+impl WhitespaceSensitivity {
+    pub const fn is_strict(&self) -> bool {
+        matches!(self, Self::Strict)
     }
 }
 
