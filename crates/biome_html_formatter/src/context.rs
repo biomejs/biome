@@ -1,5 +1,6 @@
 use std::{fmt, rc::Rc, str::FromStr};
 
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     printer::PrinterOptions, AttributePosition, BracketSameLine, BracketSpacing, CstFormatContext,
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
@@ -223,7 +224,20 @@ impl FormatOptions for HtmlFormatOptions {
 /// | without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |
 ///
 /// This happens because whitespace is significant in inline elements.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+///
+/// As a consequence of this, the formatter must format blocks that look like this (assume a small line width, <20):
+/// ```html
+/// <span>really long content</span>
+/// ```
+/// as this, where the content hugs the tags:
+/// ```html
+/// <span
+///    >really long content</span
+/// >
+/// ```
+///
+/// Note that this is only necessary for inline elements. Block elements do not have this restriction.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserializable, Merge)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -269,10 +283,16 @@ impl FromStr for WhitespaceSensitivity {
     }
 }
 
+impl WhitespaceSensitivity {
+    pub const fn is_strict(&self) -> bool {
+        matches!(self, Self::Strict)
+    }
+}
+
 /// Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).
 ///
 /// When true, the content of `<script>` and `<style>` tags will be indented one level.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserializable, Merge)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),

@@ -10,7 +10,7 @@ use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
 use biome_fs::{ConfigName, FileSystem, OsFileSystem};
 use biome_service::workspace::{
-    RageEntry, RageParams, RageResult, RegisterProjectFolderParams, UnregisterProjectFolderParams,
+    CloseProjectParams, OpenProjectParams, RageEntry, RageParams, RageResult,
 };
 use biome_service::{workspace, Workspace};
 use camino::Utf8PathBuf;
@@ -30,7 +30,7 @@ use tower_lsp::{LanguageServer, LspService, Server};
 use tracing::{error, info, trace, warn};
 
 pub struct LSPServer {
-    session: SessionHandle,
+    pub(crate) session: SessionHandle,
     /// Map of all sessions connected to the same [ServerFactory] as this [LSPServer].
     sessions: Sessions,
     /// If this is true the server will broadcast a shutdown signal once the
@@ -368,11 +368,16 @@ impl LanguageServer for LSPServer {
 
     async fn did_change_workspace_folders(&self, params: DidChangeWorkspaceFoldersParams) {
         for removed in &params.event.removed {
-            if let Ok(project_path) = self.session.file_path(&removed.uri) {
+            if let Some(project_key) = self
+                .session
+                .file_path(&removed.uri)
+                .ok()
+                .and_then(|project_path| self.session.project_for_path(&project_path))
+            {
                 let result = self
                     .session
                     .workspace
-                    .unregister_project_folder(UnregisterProjectFolderParams { path: project_path })
+                    .close_project(CloseProjectParams { project_key })
                     .map_err(into_lsp_error);
 
                 if let Err(err) = result {
@@ -390,18 +395,23 @@ impl LanguageServer for LSPServer {
                 let result = self
                     .session
                     .workspace
-                    .register_project_folder(RegisterProjectFolderParams {
-                        path: Some(project_path),
-                        set_as_current_workspace: true,
+                    .open_project(OpenProjectParams {
+                        path: project_path.clone(),
+                        open_uninitialized: true,
                     })
                     .map_err(into_lsp_error);
 
-                if let Err(err) = result {
-                    error!("Failed to add project to the workspace: {}", err);
-                    self.session
-                        .client
-                        .log_message(MessageType::ERROR, err)
-                        .await;
+                match result {
+                    Ok(project_key) => {
+                        self.session.insert_project(project_path, project_key);
+                    }
+                    Err(err) => {
+                        error!("Failed to add project to the workspace: {}", err);
+                        self.session
+                            .client
+                            .log_message(MessageType::ERROR, err)
+                            .await;
+                    }
                 }
             }
         }
@@ -608,9 +618,9 @@ impl ServerFactory {
         workspace_method!(builder, file_features);
         workspace_method!(builder, is_path_ignored);
         workspace_method!(builder, update_settings);
-        workspace_method!(builder, register_project_folder);
-        workspace_method!(builder, scan_current_project_folder);
-        workspace_method!(builder, unregister_project_folder);
+        workspace_method!(builder, open_project);
+        workspace_method!(builder, scan_project_folder);
+        workspace_method!(builder, close_project);
         workspace_method!(builder, open_file);
         workspace_method!(builder, set_manifest_for_project);
         workspace_method!(builder, get_syntax_tree);

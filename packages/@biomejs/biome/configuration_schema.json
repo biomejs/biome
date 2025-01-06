@@ -55,6 +55,13 @@
 				{ "type": "null" }
 			]
 		},
+		"html": {
+			"description": "Specific configuration for the HTML language",
+			"anyOf": [
+				{ "$ref": "#/definitions/HtmlConfiguration" },
+				{ "type": "null" }
+			]
+		},
 		"javascript": {
 			"description": "Specific configuration for the JavaScript language",
 			"anyOf": [
@@ -83,6 +90,10 @@
 		"plugins": {
 			"description": "List of plugins to load.",
 			"anyOf": [{ "$ref": "#/definitions/Plugins" }, { "type": "null" }]
+		},
+		"root": {
+			"description": "Indicates whether this configuration file is at the root of a Biome project. By default, this is `true`.",
+			"type": ["boolean", "null"]
 		},
 		"vcs": {
 			"description": "The configuration of the VCS integration",
@@ -1604,11 +1615,93 @@
 			},
 			"additionalProperties": false
 		},
+		"HtmlConfiguration": {
+			"description": "Options applied to HTML files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"description": "HTML formatter options",
+					"anyOf": [
+						{ "$ref": "#/definitions/HtmlFormatter" },
+						{ "type": "null" }
+					]
+				},
+				"parser": {
+					"description": "HTML parsing options",
+					"anyOf": [{ "$ref": "#/definitions/HtmlParser" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"HtmlFormatter": {
+			"description": "Options that changes how the HTML formatter behaves",
+			"type": "object",
+			"properties": {
+				"attributePosition": {
+					"description": "The attribute position style in HTML elements. Defaults to auto.",
+					"anyOf": [
+						{ "$ref": "#/definitions/AttributePosition" },
+						{ "type": "null" }
+					]
+				},
+				"bracketSameLine": {
+					"description": "Whether to hug the closing bracket of multiline HTMLtags to the end of the last line, rather than being alone on the following line. Defaults to false.",
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSameLine" },
+						{ "type": "null" }
+					]
+				},
+				"enabled": {
+					"description": "Control the formatter for HTML (and its super languages) files.",
+					"type": ["boolean", "null"]
+				},
+				"indentScriptAndStyle": {
+					"description": "Whether or not to indent the `<script>` and `<style>` tags for HTML (and its super languages). Defaults to false.",
+					"anyOf": [
+						{ "$ref": "#/definitions/IndentScriptAndStyle" },
+						{ "type": "null" }
+					]
+				},
+				"indentStyle": {
+					"description": "The indent style applied to HTML (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to HTML (and its super languages) files. Default to 2.",
+					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to HTML (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to HTML (and its super languages) files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"whitespaceSensitivity": {
+					"description": "Whether or not to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to \"strict\".",
+					"anyOf": [
+						{ "$ref": "#/definitions/WhitespaceSensitivity" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"HtmlParser": {
+			"description": "Options that changes how the HTML parser behaves",
+			"type": "object",
+			"additionalProperties": false
+		},
 		"ImportGroup": {
 			"anyOf": [
 				{ "$ref": "#/definitions/PredefinedImportGroup" },
 				{ "$ref": "#/definitions/Regex" }
 			]
+		},
+		"IndentScriptAndStyle": {
+			"description": "Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).\n\nWhen true, the content of `<script>` and `<style>` tags will be indented one level.",
+			"type": "boolean"
 		},
 		"IndentStyle": {
 			"oneOf": [
@@ -4677,6 +4770,21 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"WhitespaceSensitivity": {
+			"description": "Whitespace sensitivity for HTML formatting.\n\nThe following two cases won't produce the same output:\n\n|                |      html      |    output    | | -------------- | :------------: | :----------: | | with spaces    | `1<b> 2 </b>3` | 1<b> 2 </b>3 | | without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |\n\nThis happens because whitespace is significant in inline elements.\n\nAs a consequence of this, the formatter must format blocks that look like this (assume a small line width, <20): ```html <span>really long content</span> ``` as this, where the content hugs the tags: ```html <span >really long content</span > ```\n\nNote that this is only necessary for inline elements. Block elements do not have this restriction.",
+			"oneOf": [
+				{
+					"description": "Leading and trailing whitespace in content is considered significant for inline elements.\n\nThe formatter should leave at least one whitespace character if whitespace is present. Otherwise, if there is no whitespace, it should not add any after `>` or before `<`. In other words, if there's no whitespace, the text content should hug the tags.\n\nExample of text hugging the tags: ```html <b >content</b > ```",
+					"type": "string",
+					"enum": ["strict"]
+				},
+				{
+					"description": "Whitespace is considered insignificant. The formatter is free to remove or add whitespace as it sees fit.",
+					"type": "string",
+					"enum": ["ignore"]
+				}
+			]
 		}
 	}
 }

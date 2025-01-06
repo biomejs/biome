@@ -6,7 +6,7 @@ use biome_analyze::{
     ActionCategory, RuleCategoriesBuilder, SourceActionKind, SUPPRESSION_INLINE_ACTION_CATEGORY,
 };
 use biome_configuration::analyzer::RuleSelector;
-use biome_diagnostics::Applicability;
+use biome_diagnostics::{Applicability, Error};
 use biome_fs::BiomePath;
 use biome_lsp_converters::from_proto;
 use biome_lsp_converters::line_index::LineIndex;
@@ -43,10 +43,12 @@ pub(crate) fn code_actions(
     params: CodeActionParams,
 ) -> Result<Option<CodeActionResponse>, LspError> {
     let url = params.text_document.uri.clone();
-    let biome_path = session.file_path(&url)?;
+    let path = session.file_path(&url)?;
+    let doc = session.document(&url)?;
 
     let file_features = &session.workspace.file_features(SupportsFeatureParams {
-        path: biome_path.clone(),
+        project_key: doc.project_key,
+        path: path.clone(),
         features: FeaturesBuilder::new().with_linter().with_assist().build(),
     })?;
 
@@ -55,9 +57,10 @@ pub(crate) fn code_actions(
         return Ok(Some(Vec::new()));
     }
 
-    let size_limit_result = session
-        .workspace
-        .check_file_size(CheckFileSizeParams { path: biome_path })?;
+    let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
+        project_key: doc.project_key,
+        path: path.clone(),
+    })?;
     if size_limit_result.is_too_large() {
         return Ok(None);
     }
@@ -78,16 +81,14 @@ pub(crate) fn code_actions(
         }
     }
 
-    let url = params.text_document.uri.clone();
-    let biome_path = session.file_path(&url)?;
-    let doc = session.document(&url)?;
     let position_encoding = session.position_encoding();
 
     let diagnostics = params.context.diagnostics;
     let content = session.workspace.get_file_content(GetFileContentParams {
-        path: biome_path.clone(),
+        project_key: doc.project_key,
+        path: path.clone(),
     })?;
-    let offset = match biome_path.extension() {
+    let offset = match path.extension() {
         Some("vue") => VueFileHandler::start(content.as_str()),
         Some("astro") => AstroFileHandler::start(content.as_str()),
         Some("svelte") => SvelteFileHandler::start(content.as_str()),
@@ -115,7 +116,8 @@ pub(crate) fn code_actions(
 
     debug!("Cursor range {:?}", &cursor_range);
     let result = match session.workspace.pull_actions(PullActionsParams {
-        path: biome_path.clone(),
+        project_key: doc.project_key,
+        path: path.clone(),
         range: Some(cursor_range),
         // TODO: compute skip and only based on configuration
         skip: vec![],
@@ -142,14 +144,7 @@ pub(crate) fn code_actions(
     // document if the action category "source.fixAll" was explicitly requested
     // by the language client
     let fix_all = if has_fix_all {
-        fix_all(
-            session,
-            &url,
-            biome_path.clone(),
-            &doc.line_index,
-            &diagnostics,
-            offset,
-        )?
+        fix_all(session, &url, path, &doc.line_index, &diagnostics, offset)?
     } else {
         None
     };
@@ -244,31 +239,36 @@ pub(crate) fn code_actions(
 }
 
 /// Generate a "fix all" code action for the given document
-#[tracing::instrument(level = "debug", skip(session), err)]
+#[tracing::instrument(level = "debug", skip(session))]
 fn fix_all(
     session: &Session,
     url: &lsp::Url,
-    biome_path: BiomePath,
+    path: BiomePath,
     line_index: &LineIndex,
     diagnostics: &[lsp::Diagnostic],
     offset: Option<u32>,
-) -> Result<Option<CodeActionOrCommand>, WorkspaceError> {
+) -> Result<Option<CodeActionOrCommand>, Error> {
+    let doc = session.document(url)?;
+
     let should_format = session
         .workspace
         .file_features(SupportsFeatureParams {
-            path: biome_path.clone(),
+            project_key: doc.project_key,
+            path: path.clone(),
             features: FeaturesBuilder::new().with_formatter().build(),
         })?
         .supports_format();
     let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
-        path: biome_path.clone(),
+        project_key: doc.project_key,
+        path: path.clone(),
     })?;
     if size_limit_result.is_too_large() {
         return Ok(None);
     }
 
     let fixed = session.workspace.fix_file(FixFileParams {
-        path: biome_path,
+        project_key: doc.project_key,
+        path,
         fix_file_mode: FixFileMode::SafeFixes,
         should_format,
         only: vec![],

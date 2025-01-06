@@ -45,6 +45,7 @@ use camino::Utf8PathBuf;
 pub use css::{css_configuration, CssConfiguration};
 pub use formatter::{formatter_configuration, FormatterConfiguration};
 pub use graphql::{graphql_configuration, GraphqlConfiguration};
+use html::{partial_html_configuration, HtmlConfiguration, PartialHtmlConfiguration};
 pub use javascript::{javascript_configuration, JavascriptConfiguration};
 pub use json::{json_configuration, JsonConfiguration};
 pub use overrides::{
@@ -79,6 +80,11 @@ pub struct Configuration {
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub schema: Option<Box<str>>,
+
+    /// Indicates whether this configuration file is at the root of a Biome
+    /// project. By default, this is `true`.
+    #[partial(bpaf(hide, hide_usage))]
+    pub root: bool,
 
     /// A list of paths to other JSON files, used to extends the current configuration.
     #[bpaf(hide, pure(Default::default()))]
@@ -134,6 +140,11 @@ pub struct Configuration {
     #[bpaf(external(html_configuration), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub html: Option<HtmlConfiguration>,
+
+    // hidden for now. show when it's to be shown to end users.
+    /// Specific configuration for the HTML language
+    #[partial(type, bpaf(external(partial_html_configuration), optional, hide))]
+    pub html: HtmlConfiguration,
 
     /// A list of granular patterns that should be applied only to a sub set of files
     #[bpaf(hide, pure(Default::default()))]

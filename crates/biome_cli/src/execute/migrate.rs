@@ -15,6 +15,7 @@ use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::{JsonFileSource, JsonRoot};
 use biome_migrate::{migrate_configuration, ControlFlow};
 use biome_rowan::{AstNode, NodeCache};
+use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     ChangeFileParams, FileContent, FixAction, FormatFileParams, OpenFileParams,
 };
@@ -34,6 +35,7 @@ mod prettier;
 
 pub(crate) struct MigratePayload<'a> {
     pub(crate) session: CliSession<'a>,
+    pub(crate) project_key: ProjectKey,
     pub(crate) write: bool,
     pub(crate) configuration_file_path: Utf8PathBuf,
     pub(crate) configuration_directory_path: Utf8PathBuf,
@@ -44,6 +46,7 @@ pub(crate) struct MigratePayload<'a> {
 pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> {
     let MigratePayload {
         session,
+        project_key,
         write,
         configuration_file_path,
         configuration_directory_path,
@@ -67,6 +70,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
 
     let biome_path = BiomePath::new(configuration_file_path.as_path());
     workspace.open_file(OpenFileParams {
+        project_key,
         path: biome_path.clone(),
         content: FileContent::FromClient(biome_config_content.to_string()),
         version: 0,
@@ -130,11 +134,15 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     })
                 })?;
                 workspace.change_file(ChangeFileParams {
+                    project_key,
                     path: biome_path.clone(),
                     content: new_content,
                     version: 1,
                 })?;
-                let printed = workspace.format_file(FormatFileParams { path: biome_path })?;
+                let printed = workspace.format_file(FormatFileParams {
+                    project_key,
+                    path: biome_path,
+                })?;
                 if write {
                     biome_config_file.set_content(printed.as_code().as_bytes())?;
                     console.log(markup!{
@@ -206,11 +214,15 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     })
                 })?;
                 workspace.change_file(ChangeFileParams {
+                    project_key,
                     path: biome_path.clone(),
                     content: new_content,
                     version: 1,
                 })?;
-                let printed = workspace.format_file(FormatFileParams { path: biome_path })?;
+                let printed = workspace.format_file(FormatFileParams {
+                    project_key,
+                    path: biome_path,
+                })?;
                 if write {
                     biome_config_file.set_content(printed.as_code().as_bytes())?;
                     console.log(markup!{

@@ -130,6 +130,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
     let file_features = ctx
         .workspace
         .file_features(SupportsFeatureParams {
+            project_key: ctx.project_key,
             path: biome_path.clone(),
             features: ctx.execution.to_feature(),
         })

@@ -3,9 +3,11 @@ import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
 	features: FeatureName;
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export type FeatureName = FeatureKind[];
 export type BiomePath = string;
+export type ProjectKey = number;
 export type FeatureKind = "format" | "lint" | "search" | "assist" | "debug";
 export interface FileFeaturesResult {
 	featuresSupported: {};
@@ -13,6 +15,7 @@ export interface FileFeaturesResult {
 export interface UpdateSettingsParams {
 	configuration: PartialConfiguration;
 	gitignoreMatches: string[];
+	projectKey: ProjectKey;
 	vcsBasePath?: BiomePath;
 	workspaceDirectory?: BiomePath;
 }
@@ -53,6 +56,10 @@ export interface PartialConfiguration {
 	 */
 	grit?: PartialGritConfiguration;
 	/**
+	 * Specific configuration for the HTML language
+	 */
+	html?: PartialHtmlConfiguration;
+	/**
 	 * Specific configuration for the JavaScript language
 	 */
 	javascript?: PartialJavascriptConfiguration;
@@ -72,6 +79,10 @@ export interface PartialConfiguration {
 	 * List of plugins to load.
 	 */
 	plugins?: Plugins;
+	/**
+	 * Indicates whether this configuration file is at the root of a Biome project. By default, this is `true`.
+	 */
+	root?: boolean;
 	/**
 	 * The configuration of the VCS integration
 	 */
@@ -205,6 +216,19 @@ export interface PartialGritConfiguration {
 	 * Formatting options
 	 */
 	formatter?: PartialGritFormatter;
+}
+/**
+ * Options applied to HTML files
+ */
+export interface PartialHtmlConfiguration {
+	/**
+	 * HTML formatter options
+	 */
+	formatter?: PartialHtmlFormatter;
+	/**
+	 * HTML parsing options
+	 */
+	parser?: PartialHtmlParser;
 }
 /**
  * A set of options applied to the JavaScript files
@@ -457,6 +481,51 @@ export interface PartialGritFormatter {
 	lineWidth?: LineWidth;
 }
 /**
+ * Options that changes how the HTML formatter behaves
+ */
+export interface PartialHtmlFormatter {
+	/**
+	 * The attribute position style in HTML elements. Defaults to auto.
+	 */
+	attributePosition?: AttributePosition;
+	/**
+	 * Whether to hug the closing bracket of multiline HTMLtags to the end of the last line, rather than being alone on the following line. Defaults to false.
+	 */
+	bracketSameLine?: BracketSameLine;
+	/**
+	 * Control the formatter for HTML (and its super languages) files.
+	 */
+	enabled?: boolean;
+	/**
+	 * Whether or not to indent the `<script>` and `<style>` tags for HTML (and its super languages). Defaults to false.
+	 */
+	indentScriptAndStyle?: IndentScriptAndStyle;
+	/**
+	 * The indent style applied to HTML (and its super languages) files.
+	 */
+	indentStyle?: IndentStyle;
+	/**
+	 * The size of the indentation applied to HTML (and its super languages) files. Default to 2.
+	 */
+	indentWidth?: IndentWidth;
+	/**
+	 * The type of line ending applied to HTML (and its super languages) files.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * What's the max width of a line applied to HTML (and its super languages) files. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
+	/**
+	 * Whether or not to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "strict".
+	 */
+	whitespaceSensitivity?: WhitespaceSensitivity;
+}
+/**
+ * Options that changes how the HTML parser behaves
+ */
+export interface PartialHtmlParser {}
+/**
  * Linter options specific to the JavaScript linter
  */
 export interface PartialJavascriptAssists {
@@ -700,6 +769,26 @@ export interface Source {
 	useSortedKeys?: RuleAssistConfiguration_for_Null;
 }
 export type QuoteStyle = "double" | "single";
+/**
+	* Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).
+
+When true, the content of `<script>` and `<style>` tags will be indented one level. 
+	 */
+export type IndentScriptAndStyle = boolean;
+/**
+	* Whitespace sensitivity for HTML formatting.
+
+The following two cases won't produce the same output:
+
+|                |      html      |    output    | | -------------- | :------------: | :----------: | | with spaces    | `1<b> 2 </b>3` | 1<b> 2 </b>3 | | without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |
+
+This happens because whitespace is significant in inline elements.
+
+As a consequence of this, the formatter must format blocks that look like this (assume a small line width, <20): ```html <span>really long content</span> ``` as this, where the content hugs the tags: ```html <span >really long content</span > ```
+
+Note that this is only necessary for inline elements. Block elements do not have this restriction. 
+	 */
+export type WhitespaceSensitivity = "strict" | "ignore";
 export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteProperties = "asNeeded" | "preserve";
 export type Semicolons = "always" | "asNeeded";
@@ -2806,14 +2895,20 @@ export type RestrictedModifier =
 	| "protected"
 	| "readonly"
 	| "static";
-export interface RegisterProjectFolderParams {
-	path?: BiomePath;
-	setAsCurrentWorkspace: boolean;
+export interface OpenProjectParams {
+	/**
+	 * Whether the folder should be opened as a project, even if no `biome.json` can be found.
+	 */
+	openUninitialized: boolean;
+	/**
+	 * The path to open
+	 */
+	path: BiomePath;
 }
-export type ProjectKey = number;
 export interface SetManifestForProjectParams {
 	content: string;
 	manifestPath: BiomePath;
+	projectKey: ProjectKey;
 	version: number;
 }
 export interface OpenFileParams {
@@ -2826,6 +2921,7 @@ export interface OpenFileParams {
 This should only be enabled if reparsing is to be expected, such as when the file is opened through the LSP Proxy. 
 	 */
 	persistNodeCache?: boolean;
+	projectKey: ProjectKey;
 	version: number;
 }
 export type FileContent =
@@ -2900,13 +2996,16 @@ export type GritVariant = "Standard";
 export interface ChangeFileParams {
 	content: string;
 	path: BiomePath;
+	projectKey: ProjectKey;
 	version: number;
 }
 export interface CloseFileParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export interface GetSyntaxTreeParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export interface GetSyntaxTreeResult {
 	ast: string;
@@ -2914,6 +3013,7 @@ export interface GetSyntaxTreeResult {
 }
 export interface CheckFileSizeParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export interface CheckFileSizeResult {
 	fileSize: number;
@@ -2921,14 +3021,17 @@ export interface CheckFileSizeResult {
 }
 export interface GetFileContentParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export interface GetControlFlowGraphParams {
 	cursor: TextSize;
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export type TextSize = number;
 export interface GetFormatterIRParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
@@ -2939,6 +3042,7 @@ export interface PullDiagnosticsParams {
 	maxDiagnostics: number;
 	only?: RuleCode[];
 	path: BiomePath;
+	projectKey: ProjectKey;
 	skip?: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];
@@ -3432,6 +3536,7 @@ export interface PullActionsParams {
 	enabledRules?: RuleCode[];
 	only?: RuleCode[];
 	path: BiomePath;
+	projectKey: ProjectKey;
 	range?: TextRange;
 	skip?: RuleCode[];
 	suppressionReason?: string;
@@ -3493,6 +3598,7 @@ export type OtherActionCategory =
 export type Applicability = "always" | "maybeIncorrect";
 export interface FormatFileParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export interface Printed {
 	code: string;
@@ -3515,11 +3621,13 @@ export interface SourceMarker {
 }
 export interface FormatRangeParams {
 	path: BiomePath;
+	projectKey: ProjectKey;
 	range: TextRange;
 }
 export interface FormatOnTypeParams {
 	offset: TextSize;
 	path: BiomePath;
+	projectKey: ProjectKey;
 }
 export interface FixFileParams {
 	/**
@@ -3529,6 +3637,7 @@ export interface FixFileParams {
 	fixFileMode: FixFileMode;
 	only?: RuleCode[];
 	path: BiomePath;
+	projectKey: ProjectKey;
 	ruleCategories: RuleCategories;
 	shouldFormat: boolean;
 	skip?: RuleCode[];
@@ -3572,6 +3681,7 @@ export interface FixAction {
 export interface RenameParams {
 	newName: string;
 	path: BiomePath;
+	projectKey: ProjectKey;
 	symbolAt: TextSize;
 }
 export interface RenameResult {
@@ -3596,10 +3706,11 @@ export type PatternId = string;
 export interface SearchPatternParams {
 	path: BiomePath;
 	pattern: PatternId;
+	projectKey: ProjectKey;
 }
 export interface SearchResults {
-	file: BiomePath;
 	matches: TextRange[];
+	path: BiomePath;
 }
 export interface DropPatternParams {
 	pattern: PatternId;
@@ -3608,9 +3719,7 @@ export type Configuration = PartialConfiguration;
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;
-	registerProjectFolder(
-		params: RegisterProjectFolderParams,
-	): Promise<ProjectKey>;
+	openProject(params: OpenProjectParams): Promise<ProjectKey>;
 	setManifestForProject(params: SetManifestForProjectParams): Promise<void>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
@@ -3642,8 +3751,8 @@ export function createWorkspace(transport: Transport): Workspace {
 		updateSettings(params) {
 			return transport.request("biome/update_settings", params);
 		},
-		registerProjectFolder(params) {
-			return transport.request("biome/register_project_folder", params);
+		openProject(params) {
+			return transport.request("biome/open_project", params);
 		},
 		setManifestForProject(params) {
 			return transport.request("biome/set_manifest_for_project", params);

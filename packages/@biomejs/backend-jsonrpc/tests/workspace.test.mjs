@@ -14,22 +14,26 @@ describe("Workspace API", () => {
 		);
 
 		const workspace = await createWorkspaceWithBinary(command);
-		workspace.registerProjectFolder({
-			setAsCurrentWorkspace: true,
+		const projectKey = await workspace.openProject({
+			path: "",
+			openUninitialized: true,
 		});
 		await workspace.openFile({
+			projectKey,
 			path: "test.js",
 			content: { type: "fromClient", content: "statement()" },
 			version: 0,
 		});
 
 		const printed = await workspace.formatFile({
+			projectKey,
 			path: "test.js",
 		});
 
 		expect(printed.code).toBe("statement();\n");
 
 		await workspace.closeFile({
+			projectKey,
 			path: "test.js",
 		});
 

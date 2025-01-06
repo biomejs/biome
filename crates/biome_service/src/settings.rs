@@ -1,5 +1,5 @@
-use crate::workspace::{DocumentFileSource, FeatureKind, ProjectKey};
-use crate::{is_dir, Matcher, WorkspaceError};
+use crate::workspace::DocumentFileSource;
+use crate::{Matcher, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules, RuleDomain};
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration, AssistEnabled};
 use biome_configuration::analyzer::{LinterEnabled, RuleDomainValue};
@@ -37,15 +37,12 @@ use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use biome_project::{NodeJsProject, PackageJson};
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
-use papaya::HashMap;
-use rustc_hash::{FxBuildHasher, FxHashMap};
+use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::num::NonZeroU64;
 use std::ops::Deref;
-use std::sync::RwLock;
 use tracing::trace;
 
 /// The information tracked for each project
@@ -275,13 +272,13 @@ impl WorkspaceSettings {
 /// Global settings for the entire workspace
 #[derive(Clone, Debug, Default)]
 pub struct Settings {
-    /// Formatter settings applied to all files in the workspaces
+    /// Formatter settings applied to all files in the project.
     pub formatter: FormatSettings,
-    /// Linter settings applied to all files in the workspace
+    /// Linter settings applied to all files in the project.
     pub linter: LinterSettings,
     /// Language specific settings
     pub languages: LanguageListSettings,
-    /// Filesystem settings for the workspace
+    /// Filesystem settings for the project.
     pub files: FilesSettings,
     /// Assist settings
     pub assist: AssistSettings,
@@ -290,7 +287,7 @@ pub struct Settings {
 }
 
 impl Settings {
-    /// The [Configuration] is merged into the workspace
+    /// The [Configuration] is merged into the project.
     #[tracing::instrument(level = "trace", skip(self))]
     pub fn merge_with_configuration(
         &mut self,
