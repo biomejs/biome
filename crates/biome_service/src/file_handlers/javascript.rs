@@ -178,7 +178,6 @@ impl ServiceLanguage for JsLanguage {
         path: &BiomePath,
         document_file_source: &DocumentFileSource,
     ) -> JsFormatOptions {
-        dbg!(&language);
         let options = JsFormatOptions::new(
             document_file_source
                 .to_js_file_source()
@@ -242,7 +241,6 @@ impl ServiceLanguage for JsLanguage {
                 .unwrap_or_default(),
         );
 
-        dbg!("resolve_format_options: options = {:#?}", &options);
         if let Some(overrides) = overrides {
             overrides.override_js_format_options(path, options)
         } else {
@@ -920,7 +918,6 @@ pub(crate) fn format(
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
 
     debug!("Options used for format: \n{}", options);
-    dbg!("here");
 
     let tree = parse.syntax();
     info!("Format file {}", biome_path.as_str());

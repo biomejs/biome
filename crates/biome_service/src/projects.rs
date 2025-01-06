@@ -187,7 +187,7 @@ impl Projects {
             .and_then(|data| data.settings.files.max_size)
             .unwrap_or_default();
 
-        usize::try_from(limit).unwrap_or(usize::MAX)
+        usize::from(limit)
     }
 
     /// Checks whether a file is ignored through the feature's

@@ -631,7 +631,6 @@ impl WorkspaceSettingsHandle {
     where
         L: ServiceLanguage,
     {
-        dbg!("format_options:");
         let settings = self.settings();
         let formatter = settings.map(|s| &s.formatter);
         let overrides = settings.map(|s| &s.override_settings);

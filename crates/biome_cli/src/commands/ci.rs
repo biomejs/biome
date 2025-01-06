@@ -122,9 +122,9 @@ impl CommandRunner for CiCommandPayload {
     }
 
     fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
-        if self.formatter_enabled.is_some_and(|v| v.value() == false)
-            && self.linter_enabled.is_some_and(|v| v.value() == false)
-            && self.assist_enabled.is_some_and(|v| v.value() == false)
+        if self.formatter_enabled.is_some_and(|v| !v.value())
+            && self.linter_enabled.is_some_and(|v| !v.value())
+            && self.assist_enabled.is_some_and(|v| !v.value())
         {
             return Err(CliDiagnostic::incompatible_end_configuration("Formatter, linter and assist are disabled, can't perform the command. At least one feature needs to be enabled. This is probably and error."));
         }

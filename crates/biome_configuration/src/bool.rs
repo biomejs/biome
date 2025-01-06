@@ -1,5 +1,7 @@
 use biome_console::fmt::Formatter;
 use biome_deserialize::{Deserializable, DeserializableValue, DeserializationContext, Merge};
+use schemars::gen::SchemaGenerator;
+use schemars::schema::Schema;
 use std::{
     fmt,
     str::{FromStr, ParseBoolError},
@@ -9,7 +11,6 @@ use std::{
 ///
 /// The const generic indicates the default bool value of this wrapper type
 #[derive(Clone, Copy, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Bool<const D: bool>(pub bool);
 
 impl<const D: bool> Merge for Bool<D> {
@@ -98,5 +99,16 @@ impl From<Bool<false>> for Bool<true> {
 impl From<Bool<true>> for Bool<false> {
     fn from(value: Bool<true>) -> Self {
         Self(value.value())
+    }
+}
+
+#[cfg(feature = "schema")]
+impl<const D: bool> schemars::JsonSchema for Bool<D> {
+    fn schema_name() -> String {
+        "boolean".to_string()
+    }
+
+    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+        bool::json_schema(gen)
     }
 }
