@@ -389,3 +389,40 @@ pub(crate) fn run_cli_with_dyn_fs(
         }
     }
 }
+
+/// Create an [App] instance using the provided [FileSystem] and [Console]
+/// instance, and using an in-process server instance of the workspace
+pub(crate) fn run_cli_with_server_workspace(
+    fs: MemoryFileSystem,
+    console: &mut dyn Console,
+    args: bpaf::Args,
+) -> (MemoryFileSystem, Result<(), CliDiagnostic>) {
+    use biome_service::{workspace, WorkspaceRef};
+
+    let files = fs.files.clone();
+
+    let workspace = workspace::server(Box::new(fs));
+    let app = App::new(console, WorkspaceRef::Owned(workspace));
+
+    let mut session = CliSession { app };
+    let command = biome_command().run_inner(args);
+    let result = match command {
+        Ok(command) => session.run(command),
+        Err(failure) => {
+            if let ParseFailure::Stdout(help, _) = &failure {
+                let console = &mut session.app.console;
+                console.log(markup! {{help.to_string()}});
+                Ok(())
+            } else {
+                Err(CliDiagnostic::parse_error_bpaf(failure))
+            }
+        }
+    };
+
+    // This is a little bit of a workaround to allow us to easily create
+    // a snapshot of the files even though the original file system was
+    // consumed by the workspace.
+    let fs = MemoryFileSystem::from_files(files);
+
+    (fs, result)
+}

@@ -7,7 +7,8 @@ use crate::configs::{
 };
 use crate::snap_test::{assert_file_contents, markup_to_string, SnapshotPayload};
 use crate::{
-    assert_cli_snapshot, run_cli, run_cli_with_dyn_fs, FORMATTED, LINT_ERROR, PARSE_ERROR,
+    assert_cli_snapshot, run_cli, run_cli_with_dyn_fs, run_cli_with_server_workspace, FORMATTED,
+    LINT_ERROR, PARSE_ERROR,
 };
 use biome_console::{markup, BufferConsole, LogLevel, MarkupBuf};
 use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
@@ -3836,6 +3837,161 @@ fn linter_shows_the_default_severity_of_rule_on() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "linter_shows_the_default_severity_of_rule_on",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn linter_finds_package_json_for_no_undeclared_dependencies() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "linter": {
+        "rules": {
+            "correctness": {
+                "noUndeclaredDependencies": "on"
+            }
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("frontend/package.json").into(),
+        r#"{
+    "dependencies": {
+        "react": "19.0.0"
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let file = Utf8Path::new("frontend/file1.js");
+    fs.insert(file.into(), r#"import 'react-dom'"#.as_bytes());
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_finds_package_json_for_no_undeclared_dependencies",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn linter_finds_nested_package_json_for_no_undeclared_dependencies() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "linter": {
+        "rules": {
+            "correctness": {
+                "noUndeclaredDependencies": "on"
+            }
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("package.json").into(),
+        r#"{
+    "dependencies": {
+        "react-dom": "19.0.0"
+    }
+}"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("frontend/package.json").into(),
+        r#"{
+    "dependencies": {
+        "react": "19.0.0"
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let file = Utf8Path::new("frontend/file1.js");
+    fs.insert(file.into(), r#"import 'react-dom'"#.as_bytes());
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_finds_nested_package_json_for_no_undeclared_dependencies",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn linter_finds_nested_package_json_for_no_undeclared_dependencies_inversed() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "linter": {
+        "rules": {
+            "correctness": {
+                "noUndeclaredDependencies": "on"
+            }
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("package.json").into(),
+        r#"{
+    "dependencies": {
+        "react": "19.0.0"
+    }
+}"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("frontend/package.json").into(),
+        r#"{
+    "dependencies": {
+        "react-dom": "19.0.0"
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let file = Utf8Path::new("frontend/file1.js");
+    fs.insert(file.into(), r#"import 'react-dom'"#.as_bytes());
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_finds_nested_package_json_for_no_undeclared_dependencies_inversed",
         fs,
         console,
         result,

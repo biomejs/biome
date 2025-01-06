@@ -520,9 +520,13 @@ impl WorkspaceServer {
             .file_name()
             .is_some_and(|filename| filename == "package.json")
         {
+            let package_path = path
+                .parent()
+                .map(|parent| parent.to_path_buf())
+                .ok_or_else(WorkspaceError::not_found)?;
             let parsed = self.get_parse(path)?;
             self.project_layout
-                .insert_node_manifest(path.to_path_buf(), parsed);
+                .insert_node_manifest(package_path, parsed);
         }
 
         Ok(())
