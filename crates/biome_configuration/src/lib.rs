@@ -29,7 +29,6 @@ use crate::file_size::FileSize;
 pub use crate::generated::{push_to_analyzer_assist, push_to_analyzer_rules};
 use crate::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
 pub use crate::grit::{grit_configuration, GritConfiguration};
-use crate::html::{html_configuration, HtmlConfiguration};
 use crate::javascript::{JavascriptFormatterConfiguration, JavascriptLinterConfiguration};
 use crate::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
 use crate::vcs::{vcs_configuration, VcsConfiguration};
@@ -45,7 +44,7 @@ use camino::Utf8PathBuf;
 pub use css::{css_configuration, CssConfiguration};
 pub use formatter::{formatter_configuration, FormatterConfiguration};
 pub use graphql::{graphql_configuration, GraphqlConfiguration};
-use html::{partial_html_configuration, HtmlConfiguration, PartialHtmlConfiguration};
+pub use html::{html_configuration, HtmlConfiguration};
 pub use javascript::{javascript_configuration, JavascriptConfiguration};
 pub use json::{json_configuration, JsonConfiguration};
 pub use overrides::{
@@ -83,8 +82,9 @@ pub struct Configuration {
 
     /// Indicates whether this configuration file is at the root of a Biome
     /// project. By default, this is `true`.
-    #[partial(bpaf(hide, hide_usage))]
-    pub root: bool,
+    #[bpaf(hide, hide_usage)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub root: Option<Bool<false>>,
 
     /// A list of paths to other JSON files, used to extends the current configuration.
     #[bpaf(hide, pure(Default::default()))]
@@ -140,11 +140,6 @@ pub struct Configuration {
     #[bpaf(external(html_configuration), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub html: Option<HtmlConfiguration>,
-
-    // hidden for now. show when it's to be shown to end users.
-    /// Specific configuration for the HTML language
-    #[partial(type, bpaf(external(partial_html_configuration), optional, hide))]
-    pub html: HtmlConfiguration,
 
     /// A list of granular patterns that should be applied only to a sub set of files
     #[bpaf(hide, pure(Default::default()))]

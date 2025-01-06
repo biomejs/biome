@@ -19,11 +19,6 @@ use crate::{
     },
     WorkspaceError,
 };
-use crate::workspace::{
-    CodeAction, DocumentFileSource, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
-    PullActionsResult, RenameResult,
-};
-use crate::WorkspaceError;
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,

@@ -1,6 +1,6 @@
-use crate::is_dir;
-use crate::settings::{FilesSettings, Settings, DEFAULT_FILE_SIZE_LIMIT};
+use crate::settings::{FilesSettings, Settings};
 use crate::workspace::FeatureKind;
+use crate::{is_dir, WorkspaceError};
 use biome_fs::BiomePath;
 use biome_project::{NodeJsProject, PackageJson};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -96,6 +96,15 @@ impl Projects {
             .map(|data| data.settings.clone())
     }
 
+    /// Unsafe version of [Projects::get_settings] that return an error
+    pub fn unwrap_settings(&self, project_key: ProjectKey) -> Result<Settings, WorkspaceError> {
+        self.0
+            .pin()
+            .get(&project_key)
+            .map(|data| data.settings.clone())
+            .ok_or(WorkspaceError::no_project())
+    }
+
     /// Retrieves the `files` settings for the given project.
     pub fn get_files_settings(&self, project_key: ProjectKey) -> Option<FilesSettings> {
         self.0
@@ -175,8 +184,9 @@ impl Projects {
             .0
             .pin()
             .get(&project_key)
-            .map_or(DEFAULT_FILE_SIZE_LIMIT, |data| data.settings.files.max_size)
-            .get();
+            .and_then(|data| data.settings.files.max_size)
+            .unwrap_or_default();
+
         usize::try_from(limit).unwrap_or(usize::MAX)
     }
 

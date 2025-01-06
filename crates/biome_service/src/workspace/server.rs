@@ -14,15 +14,15 @@ use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
 use crate::is_dir;
-use crate::settings::{WorkspaceSettings, WorkspaceSettingsHandle};
 use crate::projects::Projects;
+use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, RageEntry, RageParams,
     RageResult, ServerInfo,
 };
 use crate::{file_handlers::Features, Workspace, WorkspaceError};
 use append_only_vec::AppendOnlyVec;
-use biome_configuration::{BiomeDiagnostic, PartialConfiguration};
+use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Deserialized;
 use biome_diagnostics::print_diagnostic_to_string;
@@ -50,8 +50,8 @@ pub(super) struct WorkspaceServer {
     /// features available throughout the application
     features: Features,
 
-    /// global settings object for this workspace
-    settings: Projects,
+    /// projects held by the workspace
+    projects: Projects,
 
     /// Stores the document (text content + version number) associated with a URL
     documents: HashMap<BiomePath, Document, FxBuildHasher>,
@@ -124,7 +124,7 @@ impl WorkspaceServer {
     pub(crate) fn new(fs: Box<dyn FileSystem>) -> Self {
         Self {
             features: Features::new(),
-            settings: Default::default(),
+            projects: Default::default(),
             documents: Default::default(),
             file_sources: AppendOnlyVec::default(),
             patterns: Default::default(),
@@ -156,7 +156,7 @@ impl WorkspaceServer {
             let file_source = JsonFileSource::try_from_extension(extension)
                 .map_err(|err| BiomeDiagnostic::invalid_configuration(err.to_string()))?;
             let parser_options = JsonParserOptions::from(&file_source);
-            let deserialized: Deserialized<PartialConfiguration> =
+            let deserialized: Deserialized<Configuration> =
                 deserialize_from_json_str(&content, parser_options, "config");
             if let Some(error) = deserialized
                 .diagnostics()
@@ -172,7 +172,7 @@ impl WorkspaceServer {
             if deserialized
                 .into_deserialized()
                 .and_then(|config| config.root)
-                .is_none_or(|root| root)
+                .is_none_or(|root| root.value())
             {
                 // Found our root config!
                 return Ok(ancestor.to_path_buf());
@@ -244,7 +244,7 @@ impl WorkspaceServer {
     ///   [WorkspaceServer::set_manifest_for_project] to store said document.
     #[tracing::instrument(level = "trace", skip(self))]
     fn get_manifest(&self, project_key: ProjectKey) -> Result<Option<PackageJson>, WorkspaceError> {
-        Ok(self.settings.get_manifest(project_key))
+        Ok(self.projects.get_manifest(project_key))
     }
 
     /// Returns a previously inserted file source by index.
@@ -311,7 +311,7 @@ impl WorkspaceServer {
         let mut index = self.insert_source(source);
 
         let size = content.as_bytes().len();
-        let limit = self.settings.get_max_file_size(project_key);
+        let limit = self.projects.get_max_file_size(project_key);
         if size > limit {
             self.documents.pin().insert(
                 path,
@@ -441,12 +441,12 @@ impl WorkspaceServer {
             .parse
             .ok_or_else(self.build_capability_error(biome_path))?;
 
-        let settings = self.settings.unwrap_current_settings()?;
+        let settings = self.projects.unwrap_settings(project_key)?;
         let parsed = parse(
             biome_path,
             file_source,
             content,
-            self.settings.get_settings(project_key).as_ref(),
+            settings.into(),
             node_cache,
         );
         Ok(parsed)
@@ -462,7 +462,7 @@ impl WorkspaceServer {
             for feature in features.iter() {
                 // a path is ignored if it's ignored by all features
                 ignored &= self
-                    .settings
+                    .projects
                     .is_ignored_by_feature_config(project_key, path, feature)
             }
             ignored
@@ -477,7 +477,7 @@ impl WorkspaceServer {
 
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
     fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        let Some(files_settings) = self.settings.get_files_settings(project_key) else {
+        let Some(files_settings) = self.projects.get_files_settings(project_key) else {
             return false;
         };
 
@@ -519,7 +519,7 @@ impl Workspace for WorkspaceServer {
         };
 
         let file_size = document.content.as_bytes().len();
-        let limit = self.settings.get_max_file_size(params.project_key);
+        let limit = self.projects.get_max_file_size(params.project_key);
         Ok(CheckFileSizeResult { file_size, limit })
     }
 
@@ -529,10 +529,11 @@ impl Workspace for WorkspaceServer {
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         let project_key = params.project_key;
         let path = params.path.as_path();
-        let handle = WorkspaceSettingsHandle::from(self.settings.unwrap_current_settings()?);
+        let capabilities = self.get_file_capabilities(&params.path);
+
+        let handle = WorkspaceSettingsHandle::from(self.projects.unwrap_settings(project_key)?);
         let mut file_features = FileFeaturesResult::new();
         let language = DocumentFileSource::from_path(path);
-
         let file_name = path.file_name();
         file_features = file_features.with_capabilities(&capabilities);
         file_features = file_features.with_settings_and_language(&handle, path, &capabilities);
@@ -554,7 +555,7 @@ impl Workspace for WorkspaceServer {
         } else {
             for feature in params.features.iter() {
                 if self
-                    .settings
+                    .projects
                     .is_ignored_by_feature_config(project_key, path, feature)
                 {
                     file_features.ignored(feature);
@@ -582,7 +583,7 @@ impl Workspace for WorkspaceServer {
     /// by another thread having previously panicked while holding the lock
     #[tracing::instrument(level = "trace", skip(self))]
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
-        let mut settings = self.settings.unwrap_current_settings()?;
+        let mut settings = self.projects.unwrap_settings(params.project_key)?;
 
         settings.merge_with_configuration(
             params.configuration,
@@ -591,7 +592,7 @@ impl Workspace for WorkspaceServer {
             params.gitignore_matches.as_slice(),
         )?;
 
-        self.settings.set_settings(params.project_key, settings);
+        self.projects.set_settings(params.project_key, settings);
 
         Ok(())
     }
@@ -610,7 +611,7 @@ impl Workspace for WorkspaceServer {
 
         let mut node_js_project = NodeJsProject::default();
         node_js_project.deserialize_manifest(&parsed.tree());
-        self.settings
+        self.projects
             .insert_manifest(params.project_key, node_js_project);
 
         self.documents.pin().insert(
@@ -634,7 +635,7 @@ impl Workspace for WorkspaceServer {
             self.find_project_root(params.path)?
         };
 
-        Ok(self.settings.insert_project(path))
+        Ok(self.projects.insert_project(path))
     }
 
     fn scan_project_folder(
@@ -643,7 +644,7 @@ impl Workspace for WorkspaceServer {
     ) -> Result<ScanProjectFolderResult, WorkspaceError> {
         let path = params
             .path
-            .or_else(|| self.settings.get_project_path(params.project_key))
+            .or_else(|| self.projects.get_project_path(params.project_key))
             .ok_or_else(WorkspaceError::no_project)?;
 
         // TODO: Need to register a file watcher. This should happen before we
@@ -664,7 +665,7 @@ impl Workspace for WorkspaceServer {
 
     fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError> {
         let project_path = self
-            .settings
+            .projects
             .get_project_path(params.project_key)
             .ok_or_else(WorkspaceError::no_project)?;
 
@@ -675,7 +676,7 @@ impl Workspace for WorkspaceServer {
             for (path, document) in documents.iter() {
                 if document.opened_by_scanner
                     && self
-                        .settings
+                        .projects
                         .path_belongs_only_to_project_with_path(path, &project_path)
                 {
                     documents.remove(path);
@@ -684,7 +685,7 @@ impl Workspace for WorkspaceServer {
             }
         }
 
-        self.settings.remove_project(params.project_key);
+        self.projects.remove_project(params.project_key);
 
         Ok(())
     }
@@ -728,7 +729,8 @@ impl Workspace for WorkspaceServer {
             .debug
             .debug_formatter_ir
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let handle = WorkspaceSettingsHandle::from(self.settings.unwrap_current_settings()?);
+        let handle =
+            WorkspaceSettingsHandle::from(self.projects.unwrap_settings(params.project_key)?);
         let parse = self.get_parse(&params.path)?;
         if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
         {
@@ -843,16 +845,16 @@ impl Workspace for WorkspaceServer {
         let manifest = self.get_manifest(project_key)?;
         let (diagnostics, errors, skipped_diagnostics) =
             if let Some(lint) = self.get_file_capabilities(&path).analyzer.lint {
-                let settings = self.settings.unwrap_current_settings()?;
+                let settings = self.projects.unwrap_settings(project_key)?;
                 info_span!("Pulling diagnostics", categories =? categories).in_scope(|| {
                     let results = lint(LintParams {
                         parse,
                         workspace: &settings.into(),
-                        max_diagnostics: params.max_diagnostics as u32,
+                        max_diagnostics: max_diagnostics as u32,
                         path: &path,
                         only,
                         skip,
-                        language: self.get_file_source(&params.path),
+                        language: self.get_file_source(&path),
                         categories,
                         manifest,
                         suppression_reason: None,
@@ -913,7 +915,7 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(&path)?;
         let manifest = self.get_manifest(project_key)?;
         let language = self.get_file_source(&path);
-        let settings = self.settings.unwrap_current_settings()?;
+        let settings = self.projects.unwrap_settings(project_key)?;
         Ok(code_actions(CodeActionsParams {
             parse,
             range,
@@ -936,7 +938,8 @@ impl Workspace for WorkspaceServer {
             .formatter
             .format
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let handle = WorkspaceSettingsHandle::from(self.settings.unwrap_current_settings()?);
+        let handle =
+            WorkspaceSettingsHandle::from(self.projects.unwrap_settings(params.project_key)?);
         let parse = self.get_parse(&params.path)?;
 
         if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
@@ -953,7 +956,8 @@ impl Workspace for WorkspaceServer {
             .formatter
             .format_range
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let settings = WorkspaceSettingsHandle::from(self.settings.unwrap_current_settings()?);
+        let settings =
+            WorkspaceSettingsHandle::from(self.projects.unwrap_settings(params.project_key)?);
         let parse = self.get_parse(&params.path)?;
         if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
             && parse.has_errors()
@@ -977,7 +981,8 @@ impl Workspace for WorkspaceServer {
             .format_on_type
             .ok_or_else(self.build_capability_error(&params.path))?;
 
-        let handle = WorkspaceSettingsHandle::from(self.settings.unwrap_current_settings()?);
+        let handle =
+            WorkspaceSettingsHandle::from(self.projects.unwrap_settings(params.project_key)?);
         let parse = self.get_parse(&params.path)?;
         if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
         {
@@ -1017,7 +1022,7 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(&path)?;
 
         let manifest = self.get_manifest(project_key)?;
-        let settings = self.settings.unwrap_current_settings()?;
+        let settings = self.projects.unwrap_settings(project_key)?;
         let language = self.get_file_source(&path);
         fix_all(FixAllParams {
             parse,
@@ -1088,7 +1093,7 @@ impl Workspace for WorkspaceServer {
             .search
             .search
             .ok_or_else(self.build_capability_error(&path))?;
-        let settings = self.settings.unwrap_current_settings()?;
+        let settings = self.projects.unwrap_settings(project_key)?;
         let parse = self.get_parse(&path)?;
 
         let document_file_source = self.get_file_source(&path);
