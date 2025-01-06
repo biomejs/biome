@@ -10,7 +10,7 @@ use biome_js_formatter::context::{
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
-pub type JavascriptFormatterEnabled = Bool<true>;
+pub type JsFormatterEnabled = Bool<true>;
 pub type BracketSameLineEnabled = Bool<false>;
 
 /// Formatting options specific to the JavaScript files
@@ -19,11 +19,11 @@ pub type BracketSameLineEnabled = Bool<false>;
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
-pub struct JavascriptFormatterConfiguration {
+pub struct JsFormatterConfiguration {
     /// Control the formatter for JavaScript (and its super languages) files.
     #[bpaf(long("javascript-formatter-enabled"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub enabled: Option<JavascriptFormatterEnabled>,
+    pub enabled: Option<JsFormatterEnabled>,
 
     /// The type of quotes used in JSX. Defaults to double.
     #[bpaf(long("jsx-quote-style"), argument("double|single"))]
@@ -105,7 +105,7 @@ pub struct JavascriptFormatterConfiguration {
     pub bracket_spacing: Option<BracketSpacing>,
 }
 
-impl JavascriptFormatterConfiguration {
+impl JsFormatterConfiguration {
     pub fn enabled_resolved(&self) -> bool {
         self.enabled.unwrap_or_default().into()
     }

@@ -66,7 +66,7 @@ impl eslint_eslint::FlatConfigData {
                             .globals
                             .enabled()
                             .collect::<rustc_hash::FxHashSet<_>>();
-                        let js_config = biome_config::JavascriptConfiguration {
+                        let js_config = biome_config::JsConfiguration {
                             globals: Some(globals),
                             ..Default::default()
                         };
@@ -105,7 +105,7 @@ impl eslint_eslint::FlatConfigData {
                 .globals
                 .enabled()
                 .collect::<rustc_hash::FxHashSet<_>>();
-            let js_config = biome_config::JavascriptConfiguration {
+            let js_config = biome_config::JsConfiguration {
                 globals: Some(globals),
                 ..Default::default()
             };
@@ -133,7 +133,7 @@ impl eslint_eslint::LegacyConfigData {
         let mut biome_config = biome_config::Configuration::default();
         if !self.globals.is_empty() {
             let globals = self.globals.enabled().collect::<rustc_hash::FxHashSet<_>>();
-            let js_config = biome_config::JavascriptConfiguration {
+            let js_config = biome_config::JsConfiguration {
                 globals: Some(globals),
                 ..Default::default()
             };
@@ -160,7 +160,7 @@ impl eslint_eslint::LegacyConfigData {
                         .globals
                         .enabled()
                         .collect::<rustc_hash::FxHashSet<_>>();
-                    let js_config = biome_config::JavascriptConfiguration {
+                    let js_config = biome_config::JsConfiguration {
                         globals: Some(globals),
                         ..Default::default()
                     };

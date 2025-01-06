@@ -12,26 +12,26 @@ use std::str::FromStr;
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
-pub struct JavascriptConfiguration {
+pub struct JsConfiguration {
     /// Parsing options
-    #[bpaf(external(javascript_parser_configuration), optional)]
+    #[bpaf(external(js_parser_configuration), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub parser: Option<JavascriptParserConfiguration>,
+    pub parser: Option<JsParserConfiguration>,
 
     /// Formatting options
-    #[bpaf(external(javascript_formatter_configuration), optional)]
+    #[bpaf(external(js_formatter_configuration), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub formatter: Option<JavascriptFormatterConfiguration>,
+    pub formatter: Option<JsFormatterConfiguration>,
 
     /// Linter options
-    #[bpaf(external(javascript_linter_configuration), optional)]
+    #[bpaf(external(js_linter_configuration), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub linter: Option<JavascriptLinterConfiguration>,
+    pub linter: Option<JsLinterConfiguration>,
 
     /// Assist options
-    #[bpaf(external(javascript_assist_configuration), optional)]
+    #[bpaf(external(js_assist_configuration), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub assist: Option<JavascriptAssistConfiguration>,
+    pub assist: Option<JsAssistConfiguration>,
 
     /// A list of global bindings that should be ignored by the analyzers
     ///
@@ -48,7 +48,7 @@ pub struct JavascriptConfiguration {
 
 pub type UnsafeParameterDecoratorsEnabled = Bool<false>;
 pub type JsxEverywhere = Bool<true>;
-pub type JavascriptGritMetavariable = Bool<false>;
+pub type JsGritMetavariable = Bool<false>;
 
 /// Options that changes how the JavaScript parser behaves
 #[derive(
@@ -56,7 +56,7 @@ pub type JavascriptGritMetavariable = Bool<false>;
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
-pub struct JavascriptParserConfiguration {
+pub struct JsParserConfiguration {
     /// It enables the experimental and unsafe parsing of parameter decorators
     ///
     /// These decorators belong to an old proposal, and they are subject to change.
@@ -68,7 +68,7 @@ pub struct JavascriptParserConfiguration {
     /// Defaults to `false`.
     #[bpaf(hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub grit_metavariables: Option<JavascriptGritMetavariable>,
+    pub grit_metavariables: Option<JsGritMetavariable>,
 
     /// When enabled, files like `.js`/`.ts` can contain JSX syntax. Defaults to `true`.
     #[bpaf(long("jsx-everywhere"), argument("true|false"), optional)]
@@ -111,7 +111,7 @@ impl FromStr for JsxRuntime {
     }
 }
 
-pub type JavascriptLinterEnabled = Bool<true>;
+pub type JsLinterEnabled = Bool<true>;
 
 /// Linter options specific to the JavaScript linter
 #[derive(
@@ -119,14 +119,14 @@ pub type JavascriptLinterEnabled = Bool<true>;
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
-pub struct JavascriptLinterConfiguration {
+pub struct JsLinterConfiguration {
     /// Control the linter for JavaScript (and its super languages) files.
     #[bpaf(long("javascript-linter-enabled"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub enabled: Option<JavascriptLinterEnabled>,
+    pub enabled: Option<JsLinterEnabled>,
 }
 
-pub type JavascriptAssistEnabled = Bool<true>;
+pub type JsAssistEnabled = Bool<true>;
 
 /// Assist options specific to the JavaScript assist
 #[derive(
@@ -134,14 +134,14 @@ pub type JavascriptAssistEnabled = Bool<true>;
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
-pub struct JavascriptAssistConfiguration {
+pub struct JsAssistConfiguration {
     /// Control the assist for JavaScript (and its super languages) files.
     #[bpaf(long("javascript-assist-enabled"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub enabled: Option<JavascriptAssistEnabled>,
+    pub enabled: Option<JsAssistEnabled>,
 }
 
-impl JavascriptLinterConfiguration {
+impl JsLinterConfiguration {
     pub fn enabled_resolved(&self) -> bool {
         self.enabled.unwrap_or_default().into()
     }

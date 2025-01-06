@@ -1,7 +1,5 @@
 use biome_console::fmt::Formatter;
 use biome_deserialize::{Deserializable, DeserializableValue, DeserializationContext, Merge};
-use schemars::gen::SchemaGenerator;
-use schemars::schema::Schema;
 use std::{
     fmt,
     str::{FromStr, ParseBoolError},
@@ -108,7 +106,7 @@ impl<const D: bool> schemars::JsonSchema for Bool<D> {
         "boolean".to_string()
     }
 
-    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
         bool::json_schema(gen)
     }
 }

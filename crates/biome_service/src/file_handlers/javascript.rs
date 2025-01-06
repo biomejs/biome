@@ -25,10 +25,9 @@ use biome_analyze::{
     RuleCategoriesBuilder, RuleError, RuleFilter,
 };
 use biome_configuration::javascript::{
-    JavascriptAssistConfiguration, JavascriptAssistEnabled, JavascriptFormatterConfiguration,
-    JavascriptFormatterEnabled, JavascriptGritMetavariable, JavascriptLinterConfiguration,
-    JavascriptLinterEnabled, JavascriptParserConfiguration, JsxEverywhere, JsxRuntime,
-    UnsafeParameterDecoratorsEnabled,
+    JsAssistConfiguration, JsAssistEnabled, JsFormatterConfiguration, JsFormatterEnabled,
+    JsGritMetavariable, JsLinterConfiguration, JsLinterEnabled, JsParserConfiguration,
+    JsxEverywhere, JsxRuntime, UnsafeParameterDecoratorsEnabled,
 };
 use biome_diagnostics::Applicability;
 use biome_formatter::{
@@ -70,12 +69,12 @@ pub struct JsFormatterSettings {
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
-    pub enabled: Option<JavascriptFormatterEnabled>,
+    pub enabled: Option<JsFormatterEnabled>,
     pub attribute_position: Option<AttributePosition>,
 }
 
-impl From<JavascriptFormatterConfiguration> for JsFormatterSettings {
-    fn from(value: JavascriptFormatterConfiguration) -> Self {
+impl From<JsFormatterConfiguration> for JsFormatterSettings {
+    fn from(value: JsFormatterConfiguration) -> Self {
         Self {
             quote_style: value.quote_style,
             jsx_quote_style: value.jsx_quote_style,
@@ -99,12 +98,12 @@ impl From<JavascriptFormatterConfiguration> for JsFormatterSettings {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsParserSettings {
     pub parse_class_parameter_decorators: Option<UnsafeParameterDecoratorsEnabled>,
-    pub grit_metavariables: Option<JavascriptGritMetavariable>,
+    pub grit_metavariables: Option<JsGritMetavariable>,
     pub jsx_everywhere: Option<JsxEverywhere>,
 }
 
-impl From<JavascriptParserConfiguration> for JsParserSettings {
-    fn from(value: JavascriptParserConfiguration) -> Self {
+impl From<JsParserConfiguration> for JsParserSettings {
+    fn from(value: JsParserConfiguration) -> Self {
         Self {
             parse_class_parameter_decorators: value.unsafe_parameter_decorators_enabled,
             grit_metavariables: value.grit_metavariables,
@@ -116,12 +115,12 @@ impl From<JavascriptParserConfiguration> for JsParserSettings {
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsLinterSettings {
-    pub enabled: Option<JavascriptLinterEnabled>,
+    pub enabled: Option<JsLinterEnabled>,
     pub suppression_reason: Option<String>,
 }
 
-impl From<JavascriptLinterConfiguration> for JsLinterSettings {
-    fn from(value: JavascriptLinterConfiguration) -> Self {
+impl From<JsLinterConfiguration> for JsLinterSettings {
+    fn from(value: JsLinterConfiguration) -> Self {
         Self {
             enabled: value.enabled,
             suppression_reason: None,
@@ -132,12 +131,12 @@ impl From<JavascriptLinterConfiguration> for JsLinterSettings {
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsAssistSettings {
-    pub enabled: Option<JavascriptAssistEnabled>,
+    pub enabled: Option<JsAssistEnabled>,
     pub suppression_reason: Option<String>,
 }
 
-impl From<JavascriptAssistConfiguration> for JsAssistSettings {
-    fn from(value: JavascriptAssistConfiguration) -> Self {
+impl From<JsAssistConfiguration> for JsAssistSettings {
+    fn from(value: JsAssistConfiguration) -> Self {
         Self {
             enabled: value.enabled,
             suppression_reason: None,

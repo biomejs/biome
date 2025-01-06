@@ -3,7 +3,7 @@ use crate::commands::{get_files_to_process_with_cli_options, CommandRunner, Load
 use crate::{CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::css::CssFormatterConfiguration;
 use biome_configuration::graphql::GraphqlFormatterConfiguration;
-use biome_configuration::javascript::JavascriptFormatterConfiguration;
+use biome_configuration::javascript::JsFormatterConfiguration;
 use biome_configuration::json::JsonFormatterConfiguration;
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration, FormatterConfiguration};
@@ -16,7 +16,7 @@ use biome_service::{Workspace, WorkspaceError};
 use std::ffi::OsString;
 
 pub(crate) struct FormatCommandPayload {
-    pub(crate) javascript_formatter: Option<JavascriptFormatterConfiguration>,
+    pub(crate) javascript_formatter: Option<JsFormatterConfiguration>,
     pub(crate) json_formatter: Option<JsonFormatterConfiguration>,
     pub(crate) css_formatter: Option<CssFormatterConfiguration>,
     pub(crate) graphql_formatter: Option<GraphqlFormatterConfiguration>,

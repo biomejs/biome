@@ -1,7 +1,7 @@
 use super::{eslint_eslint::ShorthandVec, node};
 use crate::diagnostics::MigrationDiagnostic;
 use crate::CliDiagnostic;
-use biome_configuration::javascript::JavascriptFormatterConfiguration;
+use biome_configuration::javascript::JsFormatterConfiguration;
 use biome_console::{markup, Console, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize_macros::Deserializable;
@@ -231,7 +231,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
         } else {
             QuoteStyle::Double
         };
-        let js_formatter = JavascriptFormatterConfiguration {
+        let js_formatter = JsFormatterConfiguration {
             indent_width: None,
             line_width: None,
             indent_style: None,
@@ -248,7 +248,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             jsx_quote_style: Some(jsx_quote_style),
             attribute_position: Some(AttributePosition::default()),
         };
-        let js_config = biome_configuration::JavascriptConfiguration {
+        let js_config = biome_configuration::JsConfiguration {
             formatter: Some(js_formatter),
             ..Default::default()
         };
@@ -338,7 +338,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
                 QuoteStyle::Double
             }
         });
-        let js_formatter = JavascriptFormatterConfiguration {
+        let js_formatter = JsFormatterConfiguration {
             bracket_same_line: options.bracket_line.map(Into::into),
             arrow_parentheses: options.arrow_parens.map(|arrow_parens| arrow_parens.into()),
             semicolons,
@@ -350,7 +350,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
             jsx_quote_style,
             ..Default::default()
         };
-        let js_config = biome_configuration::JavascriptConfiguration {
+        let js_config = biome_configuration::JsConfiguration {
             formatter: Some(js_formatter),
             ..Default::default()
         };

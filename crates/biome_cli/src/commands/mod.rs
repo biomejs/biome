@@ -10,16 +10,14 @@ use biome_configuration::analyzer::{LinterEnabled, RuleSelector};
 use biome_configuration::css::{CssFormatterConfiguration, CssLinterConfiguration};
 use biome_configuration::formatter::FormatterEnabled;
 use biome_configuration::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
-use biome_configuration::javascript::{
-    JavascriptFormatterConfiguration, JavascriptLinterConfiguration,
-};
+use biome_configuration::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use biome_configuration::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{
     configuration, css::css_formatter_configuration, css::css_linter_configuration,
     files_configuration, formatter_configuration, graphql::graphql_formatter_configuration,
-    graphql::graphql_linter_configuration, javascript::javascript_formatter_configuration,
-    javascript::javascript_linter_configuration, json::json_formatter_configuration,
+    graphql::graphql_linter_configuration, javascript::js_formatter_configuration,
+    javascript::js_linter_configuration, json::json_formatter_configuration,
     json::json_linter_configuration, linter_configuration, vcs::vcs_configuration,
     FilesConfiguration, FormatterConfiguration, LinterConfiguration,
 };
@@ -203,8 +201,8 @@ pub enum BiomeCommand {
         #[bpaf(external(files_configuration), optional, hide_usage)]
         files_configuration: Option<FilesConfiguration>,
 
-        #[bpaf(external(javascript_linter_configuration), optional, hide_usage)]
-        javascript_linter: Option<JavascriptLinterConfiguration>,
+        #[bpaf(external(js_linter_configuration), optional, hide_usage)]
+        javascript_linter: Option<JsLinterConfiguration>,
 
         #[bpaf(external(json_linter_configuration), optional, hide_usage)]
         json_linter: Option<JsonLinterConfiguration>,
@@ -262,8 +260,8 @@ pub enum BiomeCommand {
         #[bpaf(external(formatter_configuration), optional, hide_usage)]
         formatter_configuration: Option<FormatterConfiguration>,
 
-        #[bpaf(external(javascript_formatter_configuration), optional, hide_usage)]
-        javascript_formatter: Option<JavascriptFormatterConfiguration>,
+        #[bpaf(external(js_formatter_configuration), optional, hide_usage)]
+        javascript_formatter: Option<JsFormatterConfiguration>,
 
         #[bpaf(external(json_formatter_configuration), optional, hide_usage)]
         json_formatter: Option<JsonFormatterConfiguration>,

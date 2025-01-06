@@ -5,7 +5,7 @@ use crate::{CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::css::CssLinterConfiguration;
 use biome_configuration::graphql::GraphqlLinterConfiguration;
-use biome_configuration::javascript::JavascriptLinterConfiguration;
+use biome_configuration::javascript::JsLinterConfiguration;
 use biome_configuration::json::JsonLinterConfiguration;
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration, LinterConfiguration};
@@ -33,7 +33,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
-    pub(crate) javascript_linter: Option<JavascriptLinterConfiguration>,
+    pub(crate) javascript_linter: Option<JsLinterConfiguration>,
     pub(crate) json_linter: Option<JsonLinterConfiguration>,
     pub(crate) css_linter: Option<CssLinterConfiguration>,
     pub(crate) graphql_linter: Option<GraphqlLinterConfiguration>,

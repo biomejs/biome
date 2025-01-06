@@ -12,7 +12,7 @@ use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::{
     push_to_analyzer_assist, push_to_analyzer_rules, BiomeDiagnostic, Configuration,
     CssConfiguration, FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration,
-    GraphqlConfiguration, GritConfiguration, JavascriptConfiguration, JsonConfiguration,
+    GraphqlConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration,
     LinterConfiguration, OverrideAssistConfiguration, OverrideFormatterConfiguration,
     OverrideLinterConfiguration, Overrides, Rules,
 };
@@ -332,8 +332,8 @@ pub struct LanguageListSettings {
     pub grit: LanguageSettings<GritLanguage>,
 }
 
-impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
-    fn from(javascript: JavascriptConfiguration) -> Self {
+impl From<JsConfiguration> for LanguageSettings<JsLanguage> {
+    fn from(javascript: JsConfiguration) -> Self {
         let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
 
         if let Some(formatter) = javascript.formatter {
@@ -1292,7 +1292,7 @@ pub fn to_override_settings(
 }
 
 fn to_javascript_language_settings(
-    mut conf: JavascriptConfiguration,
+    mut conf: JsConfiguration,
     parent_settings: &LanguageSettings<JsLanguage>,
 ) -> LanguageSettings<JsLanguage> {
     let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();

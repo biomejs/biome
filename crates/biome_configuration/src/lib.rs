@@ -29,7 +29,7 @@ use crate::file_size::FileSize;
 pub use crate::generated::{push_to_analyzer_assist, push_to_analyzer_rules};
 use crate::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
 pub use crate::grit::{grit_configuration, GritConfiguration};
-use crate::javascript::{JavascriptFormatterConfiguration, JavascriptLinterConfiguration};
+use crate::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use crate::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
 use crate::vcs::{vcs_configuration, VcsConfiguration};
 pub use analyzer::{
@@ -45,7 +45,7 @@ pub use css::{css_configuration, CssConfiguration};
 pub use formatter::{formatter_configuration, FormatterConfiguration};
 pub use graphql::{graphql_configuration, GraphqlConfiguration};
 pub use html::{html_configuration, HtmlConfiguration};
-pub use javascript::{javascript_configuration, JavascriptConfiguration};
+pub use javascript::{js_configuration, JsConfiguration};
 pub use json::{json_configuration, JsonConfiguration};
 pub use overrides::{
     OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideLinterConfiguration,
@@ -112,9 +112,9 @@ pub struct Configuration {
     pub linter: Option<LinterConfiguration>,
 
     /// Specific configuration for the JavaScript language
-    #[bpaf(external(javascript_configuration), optional)]
+    #[bpaf(external(js_configuration), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub javascript: Option<JavascriptConfiguration>,
+    pub javascript: Option<JsConfiguration>,
 
     /// Specific configuration for the Json language
     #[bpaf(external(json_configuration), optional)]
@@ -199,8 +199,8 @@ impl Configuration {
                 }),
                 ..Default::default()
             }),
-            javascript: Some(JavascriptConfiguration {
-                formatter: Some(JavascriptFormatterConfiguration {
+            javascript: Some(JsConfiguration {
+                formatter: Some(JsFormatterConfiguration {
                     quote_style: Some(QuoteStyle::Double),
                     ..Default::default()
                 }),
@@ -218,7 +218,7 @@ impl Configuration {
         self.formatter.clone().unwrap_or_default()
     }
 
-    pub fn get_javascript_formatter_configuration(&self) -> JavascriptFormatterConfiguration {
+    pub fn get_javascript_formatter_configuration(&self) -> JsFormatterConfiguration {
         self.javascript
             .as_ref()
             .and_then(|lang| lang.formatter.as_ref())
@@ -226,7 +226,7 @@ impl Configuration {
             .unwrap_or_default()
     }
 
-    pub fn get_javascript_linter_configuration(&self) -> JavascriptLinterConfiguration {
+    pub fn get_javascript_linter_configuration(&self) -> JsLinterConfiguration {
         self.javascript
             .as_ref()
             .and_then(|lang| lang.linter.as_ref())

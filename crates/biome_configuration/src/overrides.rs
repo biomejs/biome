@@ -3,8 +3,8 @@ use crate::analyzer::{LinterEnabled, RuleDomainValue};
 use crate::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use crate::html::HtmlConfiguration;
 use crate::{
-    CssConfiguration, GraphqlConfiguration, GritConfiguration, JavascriptConfiguration,
-    JsonConfiguration, Rules,
+    CssConfiguration, GraphqlConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration,
+    Rules,
 };
 use biome_analyze::RuleDomain;
 use biome_deserialize_macros::{Deserializable, Merge};
@@ -46,7 +46,7 @@ pub struct OverridePattern {
 
     /// Specific configuration for the JavaScript language
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub javascript: Option<JavascriptConfiguration>,
+    pub javascript: Option<JsConfiguration>,
 
     /// Specific configuration for the Json language
     #[serde(skip_serializing_if = "Option::is_none")]
