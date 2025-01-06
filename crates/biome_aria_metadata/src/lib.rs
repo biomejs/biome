@@ -129,7 +129,7 @@ fn is_valid_html_id(id: &str) -> bool {
 }
 
 impl AriaRole {
-    /// Returns the first valid role from `values`, a space-separated list of roles.
+    /// Returns the first valid role from `roles`, a space-separated list of roles.
     ///
     /// If a role attribute has multiple values, the first valid role (specified role) will be used.
     /// See <https://www.w3.org/TR/2014/REC-wai-aria-implementation-20140320/#mapping_role>
