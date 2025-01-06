@@ -635,20 +635,6 @@ pub(crate) fn validate_configuration_diagnostics(
     Ok(())
 }
 
-fn resolve_manifest(fs: &dyn FileSystem) -> Result<Option<(BiomePath, String)>, WorkspaceError> {
-    let result = fs.auto_search(
-        &fs.working_directory().unwrap_or_default(),
-        &["package.json"],
-        false,
-    )?;
-
-    if let Some(result) = result {
-        return Ok(Some((BiomePath::new(result.file_path), result.content)));
-    }
-
-    Ok(None)
-}
-
 fn get_files_to_process_with_cli_options(
     since: Option<&str>,
     changed: bool,
@@ -774,7 +760,6 @@ pub(crate) trait CommandRunner: Sized {
     /// - Configure the VCS integration
     /// - Computes the paths to traverse/handle. This changes based on the VCS arguments that were passed.
     /// - Register a project folder using the working directory.
-    /// - Resolves the closets manifest AKA `package.json` and registers it.
     /// - Updates the settings that belong to the project registered
     fn configure_workspace(
         &mut self,
@@ -807,11 +792,6 @@ pub(crate) trait CommandRunner: Sized {
             open_uninitialized: true,
         })?;
 
-        let manifest_data = resolve_manifest(fs)?;
-
-        if let Some((path, content)) = manifest_data {
-            workspace.set_manifest_for_project((project_key, path, content).into())?;
-        }
         workspace.update_settings(UpdateSettingsParams {
             project_key,
             workspace_directory: configuration_path.map(BiomePath::from),

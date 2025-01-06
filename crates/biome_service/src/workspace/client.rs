@@ -1,7 +1,7 @@
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
     GetFileContentParams, IsPathIgnoredParams, OpenProjectParams, ProjectKey, RageParams,
-    RageResult, ServerInfo, SetManifestForProjectParams,
+    RageResult, ServerInfo,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -126,13 +126,6 @@ where
 
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
         self.request("biome/open_file", params)
-    }
-
-    fn set_manifest_for_project(
-        &self,
-        params: SetManifestForProjectParams,
-    ) -> Result<(), WorkspaceError> {
-        self.request("biome/set_manifest_for_project", params)
     }
 
     fn open_project(&self, params: OpenProjectParams) -> Result<ProjectKey, WorkspaceError> {

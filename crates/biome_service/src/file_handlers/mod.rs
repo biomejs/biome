@@ -37,8 +37,8 @@ use biome_js_syntax::{
 };
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_package::PackageJson;
 use biome_parser::AnyParse;
-use biome_project::PackageJson;
 use biome_rowan::{FileSourceError, NodeCache};
 use biome_string_case::StrLikeExtension;
 
@@ -684,10 +684,10 @@ impl Features {
     /// Returns the [Capabilities] associated with a [BiomePath]
     pub(crate) fn get_capabilities(
         &self,
-        biome_path: &BiomePath,
+        path: &Utf8Path,
         language_hint: DocumentFileSource,
     ) -> Capabilities {
-        match DocumentFileSource::from_path(biome_path).or(language_hint) {
+        match DocumentFileSource::from_path(path).or(language_hint) {
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
                 EmbeddingKind::Astro => self.astro.capabilities(),
                 EmbeddingKind::Vue => self.vue.capabilities(),

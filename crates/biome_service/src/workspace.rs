@@ -545,27 +545,6 @@ pub enum FileContent {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
-pub struct SetManifestForProjectParams {
-    pub project_key: ProjectKey,
-    pub manifest_path: BiomePath,
-    pub content: String,
-    pub version: i32,
-}
-
-impl From<(ProjectKey, BiomePath, String)> for SetManifestForProjectParams {
-    fn from((project_key, manifest_path, content): (ProjectKey, BiomePath, String)) -> Self {
-        Self {
-            project_key,
-            manifest_path,
-            content,
-            version: 0,
-        }
-    }
-}
-
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase")]
 pub struct GetSyntaxTreeParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
@@ -1031,16 +1010,6 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// `scan_project_folder()`. When scanning is enabled, the server will
     /// manage project settings on its own.
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError>;
-
-    /// Sets a new package manifest for the given project.
-    ///
-    /// This method should not be used in combination with
-    /// `scan_project_folder()`. When scanning is enabled, the server will
-    /// manage packages on its own.
-    fn set_manifest_for_project(
-        &self,
-        params: SetManifestForProjectParams,
-    ) -> Result<(), WorkspaceError>;
 
     /// Closes the project with the given key.
     ///

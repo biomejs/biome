@@ -3,7 +3,7 @@ use biome_analyze::{
     RuleKey, ServiceBag, SyntaxVisitor,
 };
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
-use biome_project::PackageJson;
+use biome_package::PackageJson;
 use biome_rowan::AstNode;
 use std::sync::Arc;
 

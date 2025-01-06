@@ -12,11 +12,11 @@ pub(crate) struct VersionServices {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct TheVersion(pub(crate) biome_project::Version);
+pub(crate) struct TheVersion(pub(crate) biome_package::Version);
 
 impl TheVersion {
     pub fn new(range: &str) -> Self {
-        Self(biome_project::Version::from(range))
+        Self(biome_package::Version::from(range))
     }
 }
 

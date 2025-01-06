@@ -284,7 +284,6 @@ impl LanguageServer for LSPServer {
         futures::join!(
             self.session.load_extension_settings(),
             self.session.load_workspace_settings(),
-            self.session.load_manifest()
         );
 
         let msg = format!("Server initialized with PID: {}", std::process::id());
@@ -323,14 +322,13 @@ impl LanguageServer for LSPServer {
                 Ok(file_path) => {
                     let base_path = self.session.base_path();
                     if let Some(base_path) = base_path {
-                        let possible_rome_json = file_path.strip_prefix(&base_path);
-                        if let Ok(watched_file) = possible_rome_json {
+                        let possible_biome_json = file_path.strip_prefix(&base_path);
+                        if let Ok(watched_file) = possible_biome_json {
                             if ConfigName::file_names()
                                 .contains(&&*watched_file.display().to_string())
                                 || watched_file.ends_with(".editorconfig")
                             {
                                 self.session.load_workspace_settings().await;
-                                self.session.load_manifest().await;
                                 self.setup_capabilities().await;
                                 self.session.update_all_diagnostics().await;
                                 // for now we are only interested to the configuration file,
@@ -403,10 +401,17 @@ impl LanguageServer for LSPServer {
 
                 match result {
                     Ok(project_key) => {
-                        self.session.insert_project(project_path, project_key);
+                        self.session
+                            .insert_project(project_path.clone(), project_key);
+
+                        self.session
+                            .scan_project_folder(project_key, project_path)
+                            .await;
+
+                        self.session.update_all_diagnostics().await;
                     }
                     Err(err) => {
-                        error!("Failed to add project to the workspace: {}", err);
+                        error!("Failed to add project to the workspace: {err}");
                         self.session
                             .client
                             .log_message(MessageType::ERROR, err)
@@ -622,7 +627,6 @@ impl ServerFactory {
         workspace_method!(builder, scan_project_folder);
         workspace_method!(builder, close_project);
         workspace_method!(builder, open_file);
-        workspace_method!(builder, set_manifest_for_project);
         workspace_method!(builder, get_syntax_tree);
         workspace_method!(builder, get_control_flow_graph);
         workspace_method!(builder, get_formatter_ir);

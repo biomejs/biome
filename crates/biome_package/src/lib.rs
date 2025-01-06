@@ -1,6 +1,6 @@
 mod diagnostics;
 mod license;
-mod node_js_project;
+mod node_js_package;
 
 pub use crate::diagnostics::{ProjectAnalyzeDiagnostic, ProjectDiagnostic};
 use biome_deserialize::{DeserializationDiagnostic, Deserialized};
@@ -8,43 +8,39 @@ use biome_diagnostics::serde::Diagnostic;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::Language;
 pub use license::generated::*;
-pub use node_js_project::{Dependencies, NodeJsProject, PackageJson, PackageType, Version};
+pub use node_js_package::{Dependencies, NodeJsPackage, PackageJson, PackageType, Version};
 use std::any::TypeId;
 use std::fmt::Debug;
-use std::path::Path;
 
 pub(crate) type LanguageRoot<L> = <L as Language>::Root;
 
-pub(crate) type ProjectRoot<P> =
-    <<<P as Project>::Manifest as Manifest>::Language as Language>::Root;
+pub(crate) type PackageRoot<P> =
+    <<<P as Package>::Manifest as Manifest>::Language as Language>::Root;
 
 pub trait Manifest: Default + Debug {
     type Language: Language;
 
-    /// It loads the manifest of the project. It accepts the path where the manifest should be
+    /// It loads the manifest of the package. It accepts the path where the manifest should be
     fn deserialize_manifest(root: &LanguageRoot<Self::Language>) -> Deserialized<Self>;
 }
 
-/// An internal representation of a project.
-pub trait Project {
+/// An internal representation of a package.
+pub trait Package {
     type Manifest: Manifest;
 
-    /// Use this function to prepare the project, like loading the manifest.
-    fn deserialize_manifest(&mut self, root: &ProjectRoot<Self>);
-
-    /// The home directory of the project
-    fn project_path(&self) -> &Path;
+    /// Use this function to prepare the package, like loading the manifest.
+    fn deserialize_manifest(&mut self, root: &PackageRoot<Self>);
 
     fn manifest(&self) -> Option<&Self::Manifest> {
         None
     }
 
-    fn analyze(&self) -> ProjectAnalyzeResult;
+    fn analyze(&self) -> PackageAnalyzeResult;
 
     fn has_errors(&self) -> bool;
 }
 
-pub struct ProjectAnalyzeResult {
+pub struct PackageAnalyzeResult {
     pub diagnostics: Vec<ProjectAnalyzeDiagnostic>,
 }
 

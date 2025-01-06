@@ -797,8 +797,8 @@ dependencies = [
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",
+ "biome_package",
  "biome_plugin_loader",
- "biome_project",
  "biome_rowan",
  "biome_string_case",
  "biome_suppression",
@@ -1114,12 +1114,32 @@ dependencies = [
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
- "biome_project",
+ "biome_package",
  "biome_rowan",
  "biome_test_utils",
  "camino",
  "insta",
  "rustc-hash 2.1.0",
+ "tests_macros",
+]
+
+[[package]]
+name = "biome_package"
+version = "0.5.7"
+dependencies = [
+ "biome_console",
+ "biome_deserialize",
+ "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_json_parser",
+ "biome_json_syntax",
+ "biome_parser",
+ "biome_rowan",
+ "biome_text_size",
+ "insta",
+ "node-semver",
+ "rustc-hash 2.1.0",
+ "serde",
  "tests_macros",
 ]
 
@@ -1155,26 +1175,6 @@ dependencies = [
  "grit-util",
  "insta",
  "serde",
-]
-
-[[package]]
-name = "biome_project"
-version = "0.5.7"
-dependencies = [
- "biome_console",
- "biome_deserialize",
- "biome_deserialize_macros",
- "biome_diagnostics",
- "biome_json_parser",
- "biome_json_syntax",
- "biome_parser",
- "biome_rowan",
- "biome_text_size",
- "insta",
- "node-semver",
- "rustc-hash 2.1.0",
- "serde",
- "tests_macros",
 ]
 
 [[package]]
@@ -1232,8 +1232,8 @@ dependencies = [
  "biome_json_formatter",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_package",
  "biome_parser",
- "biome_project",
  "biome_rowan",
  "biome_string_case",
  "biome_text_edit",
@@ -1290,7 +1290,7 @@ dependencies = [
  "biome_diagnostics",
  "biome_formatter",
  "biome_json_parser",
- "biome_project",
+ "biome_package",
  "biome_rowan",
  "biome_service",
  "camino",
