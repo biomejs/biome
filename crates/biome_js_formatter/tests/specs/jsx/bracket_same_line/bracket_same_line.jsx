@@ -29,5 +29,15 @@ const a = <div></div>;
 	Hi
 </Foo>;
 
+<Foo
+	className={style}
+	reallyLongAttributeName1={longComplexValue}
+	reallyLongAttributeName2={anotherLongValue}
+	// comment
+	reallyLongAttributeName3={yetAnotherLongValue}
+>
+	Hi
+</Foo>;
+
 <div className="hi" />;
 <div className="hi"></div>;

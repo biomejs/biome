@@ -89,6 +89,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - `noDuplicateProperties` now throws lint errors properly when we use `@supports` (fix [#4756](https://github.com/biomejs/biome/issues/4756)) Contributed by @mehm8128
 
+- Fix [#4719](https://github.com/biomejs/biome/issues/4719), `bracketSameLine` now performs as expected when a comment is placed before the last JSX attribute. Contributed by @bushuai
+
 ### JavaScript APIs
 
 ### Linter
