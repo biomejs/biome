@@ -417,24 +417,32 @@ impl<'src> HtmlLexer<'src> {
     /// See: https://html.spec.whatwg.org/#space-separated-tokens
     /// See: https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace
     fn consume_html_text(&mut self) -> HtmlSyntaxKind {
-        let mut saw_space = false;
+        let mut whitespace_started = None;
         while let Some(current) = self.current_byte() {
             match current {
-                b'<' => break,
+                b'<' => {
+                    if let Some(checkpoint) = whitespace_started {
+                        // avoid treating the last space as part of the token if there is one
+                        self.rewind(checkpoint);
+                    }
+                    break;
+                }
                 b'\n' | b'\r' => {
                     self.after_newline = true;
                     break;
                 }
                 b' ' => {
-                    if saw_space {
+                    if let Some(checkpoint) = whitespace_started {
+                        // avoid treating the last space as part of the token
+                        self.rewind(checkpoint);
                         break;
                     }
+                    whitespace_started = Some(self.checkpoint());
                     self.advance(1);
-                    saw_space = true;
                 }
                 _ => {
                     self.advance(1);
-                    saw_space = false;
+                    whitespace_started = None;
                 }
             }
         }

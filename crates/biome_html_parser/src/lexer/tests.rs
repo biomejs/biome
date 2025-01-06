@@ -264,6 +264,28 @@ fn long_text() {
 }
 
 #[test]
+fn text_trailing_whitespace() {
+    assert_lex! {
+        HtmlLexContext::OutsideTag,
+        "Lorem ipsum dolor <",
+        HTML_LITERAL: 17,
+        WHITESPACE: 1,
+        L_ANGLE: 1,
+    }
+}
+
+#[test]
+fn text_trailing_whitespace_multiple() {
+    assert_lex! {
+        HtmlLexContext::OutsideTag,
+        "Lorem ipsum dolor  <",
+        HTML_LITERAL: 17,
+        WHITESPACE: 2,
+        L_ANGLE: 1,
+    }
+}
+
+#[test]
 fn unquoted_attribute_value_1() {
     assert_lex! {
         HtmlLexContext::AttributeValue,
