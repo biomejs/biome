@@ -1,9 +1,9 @@
 use crate::file_handlers::{
     javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
-    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities,
+    EnabledForPath, ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults,
+    ParseResult, ParserCapabilities,
 };
-use crate::settings::{Settings, WorkspaceSettingsHandle};
+use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use crate::WorkspaceError;
 use biome_formatter::Printed;
@@ -82,6 +82,12 @@ impl SvelteFileHandler {
 impl ExtensionHandler for SvelteFileHandler {
     fn capabilities(&self) -> Capabilities {
         Capabilities {
+            enabled_for_path: EnabledForPath {
+                formatter: Some(javascript::formatter_enabled),
+                search: Some(javascript::search_enabled),
+                assist: Some(javascript::assist_enabled),
+                linter: Some(javascript::linter_enabled),
+            },
             parser: ParserCapabilities { parse: Some(parse) },
             debug: DebugCapabilities {
                 debug_syntax_tree: None,
@@ -109,7 +115,7 @@ fn parse(
     _rome_path: &BiomePath,
     _file_source: DocumentFileSource,
     text: &str,
-    _settings: Option<&Settings>,
+    _settings: WorkspaceSettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let script = SvelteFileHandler::input(text);

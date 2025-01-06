@@ -2,7 +2,7 @@ use crate::check_reformat::CheckReformat;
 use crate::snapshot_builder::{SnapshotBuilder, SnapshotOutput};
 use crate::utils::strip_rome_placeholders;
 use crate::TestFormatLanguage;
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_console::EnvConsole;
 use biome_deserialize::json::deserialize_from_str;
 use biome_diagnostics::print_diagnostic_to_string;
@@ -243,10 +243,9 @@ where
 
             let mut settings = Settings::default();
             // SAFETY: we checked its existence already, we assume we have rights to read it
-            let (test_options, diagnostics) = deserialize_from_str::<PartialConfiguration>(
-                options_path.get_buffer_from_file().as_str(),
-            )
-            .consume();
+            let (test_options, diagnostics) =
+                deserialize_from_str::<Configuration>(options_path.get_buffer_from_file().as_str())
+                    .consume();
             settings
                 .merge_with_configuration(test_options.unwrap_or_default(), None, None, &[])
                 .unwrap();

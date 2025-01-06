@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -8,7 +9,6 @@ expression: content
 {
   "formatter": {
     "enabled": true,
-    "useEditorconfig": true,
     "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
@@ -16,7 +16,8 @@ expression: content
     "lineWidth": 80,
     "attributePosition": "auto",
     "bracketSameLine": false,
-    "bracketSpacing": true
+    "bracketSpacing": true,
+    "useEditorconfig": true
   },
   "linter": { "enabled": true },
   "javascript": {
@@ -26,9 +27,9 @@ expression: content
       "trailingCommas": "all",
       "semicolons": "always",
       "arrowParentheses": "always",
+      "bracketSameLine": false,
       "quoteStyle": "single",
       "attributePosition": "auto",
-      "bracketSameLine": false,
       "bracketSpacing": true
     }
   }

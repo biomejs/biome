@@ -14,7 +14,7 @@ use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
 use crate::is_dir;
-use crate::settings::WorkspaceSettings;
+use crate::settings::{WorkspaceSettings, WorkspaceSettingsHandle};
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, RageEntry, RageParams,
     RageResult, ServerInfo,
@@ -399,11 +399,12 @@ impl WorkspaceServer {
             .parse
             .ok_or_else(self.build_capability_error(biome_path))?;
 
+        let settings = self.settings.unwrap_current_settings()?;
         let parsed = parse(
             biome_path,
             file_source,
             content,
-            self.settings.get_current_settings().as_ref(),
+            settings.into(),
             node_cache,
         );
         Ok(parsed)
@@ -443,6 +444,7 @@ impl WorkspaceServer {
         !is_included
             || files_settings.ignored_files.matches_path(path)
             || files_settings.git_ignore.as_ref().is_some_and(|ignore| {
+                dbg!("check this");
                 // `matched_path_or_any_parents` panics if `source` is not under the gitignore root.
                 // This checks excludes absolute paths that are not a prefix of the base root.
                 if !path.has_root() || path.starts_with(ignore.path()) {
@@ -484,17 +486,17 @@ impl Workspace for WorkspaceServer {
         let capabilities = self.get_file_capabilities(&params.path);
         let language = DocumentFileSource::from_path(&params.path);
         let path = params.path.as_path();
-        let settings = self.settings.get_current_settings();
+        let handle = WorkspaceSettingsHandle::from(self.settings.unwrap_current_settings()?);
         let mut file_features = FileFeaturesResult::new();
 
         let file_name = path.file_name();
         file_features = file_features.with_capabilities(&capabilities);
-        let Some(settings) = settings else {
+        file_features = file_features.with_settings_and_language(&handle, path, &capabilities);
+
+        let Some(settings) = handle.settings() else {
             return Ok(file_features);
         };
-        file_features = file_features.with_settings_and_language(&settings, &language, path);
-
-        if settings.files.ignore_unknown
+        if settings.ignore_unknown_enabled()
             && language == DocumentFileSource::Unknown
             && self.get_file_source(&params.path) == DocumentFileSource::Unknown
         {
@@ -533,9 +535,7 @@ impl Workspace for WorkspaceServer {
     /// by another thread having previously panicked while holding the lock
     #[tracing::instrument(level = "trace", skip(self))]
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
-        let Some(mut settings) = self.settings.get_current_settings() else {
-            return Err(WorkspaceError::no_project());
-        };
+        let mut settings = self.settings.unwrap_current_settings()?;
 
         settings.merge_with_configuration(
             params.configuration,
@@ -696,17 +696,15 @@ impl Workspace for WorkspaceServer {
             .debug
             .debug_formatter_ir
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let settings = self.settings.get_current_settings();
+        let handle = WorkspaceSettingsHandle::from(self.settings.unwrap_current_settings()?);
         let parse = self.get_parse(&params.path)?;
-
-        if let Some(settings) = &settings {
-            if !settings.formatter().format_with_errors && parse.has_errors() {
-                return Err(WorkspaceError::format_with_errors_disabled());
-            }
+        if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
+        {
+            return Err(WorkspaceError::format_with_errors_disabled());
         }
         let document_file_source = self.get_file_source(&params.path);
 
-        debug_formatter_ir(&params.path, &document_file_source, parse, settings.into())
+        debug_formatter_ir(&params.path, &document_file_source, parse, handle)
     }
 
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError> {
@@ -801,10 +799,11 @@ impl Workspace for WorkspaceServer {
         let manifest = self.get_current_manifest()?;
         let (diagnostics, errors, skipped_diagnostics) =
             if let Some(lint) = self.get_file_capabilities(&params.path).analyzer.lint {
+                let settings = self.settings.unwrap_current_settings()?;
                 info_span!("Pulling diagnostics", categories =? params.categories).in_scope(|| {
                     let results = lint(LintParams {
                         parse,
-                        workspace: &self.settings.get_current_settings().into(),
+                        workspace: &settings.into(),
                         max_diagnostics: params.max_diagnostics as u32,
                         path: &params.path,
                         only: params.only,
@@ -859,10 +858,11 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(&params.path)?;
         let manifest = self.get_current_manifest()?;
         let language = self.get_file_source(&params.path);
+        let settings = self.settings.unwrap_current_settings()?;
         Ok(code_actions(CodeActionsParams {
             parse,
             range: params.range,
-            workspace: &self.settings.get_current_settings().into(),
+            workspace: &settings.into(),
             path: &params.path,
             manifest,
             language,
@@ -881,16 +881,16 @@ impl Workspace for WorkspaceServer {
             .formatter
             .format
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let settings = self.settings.get_current_settings();
+        dbg!("here");
+        let handle = WorkspaceSettingsHandle::from(self.settings.unwrap_current_settings()?);
         let parse = self.get_parse(&params.path)?;
 
-        if let Some(settings) = &settings {
-            if !settings.formatter().format_with_errors && parse.has_errors() {
-                return Err(WorkspaceError::format_with_errors_disabled());
-            }
+        if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
+        {
+            return Err(WorkspaceError::format_with_errors_disabled());
         }
         let document_file_source = self.get_file_source(&params.path);
-        format(&params.path, &document_file_source, parse, settings.into())
+        format(&params.path, &document_file_source, parse, handle)
     }
 
     fn format_range(&self, params: FormatRangeParams) -> Result<Printed, WorkspaceError> {
@@ -899,20 +899,19 @@ impl Workspace for WorkspaceServer {
             .formatter
             .format_range
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let settings = self.settings.get_current_settings();
+        let settings = WorkspaceSettingsHandle::from(self.settings.unwrap_current_settings()?);
         let parse = self.get_parse(&params.path)?;
-
-        if let Some(settings) = &settings {
-            if !settings.formatter().format_with_errors && parse.has_errors() {
-                return Err(WorkspaceError::format_with_errors_disabled());
-            }
+        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+            && parse.has_errors()
+        {
+            return Err(WorkspaceError::format_with_errors_disabled());
         }
         let document_file_source = self.get_file_source(&params.path);
         format_range(
             &params.path,
             &document_file_source,
             parse,
-            settings.into(),
+            settings,
             params.range,
         )
     }
@@ -924,12 +923,11 @@ impl Workspace for WorkspaceServer {
             .format_on_type
             .ok_or_else(self.build_capability_error(&params.path))?;
 
-        let settings = self.settings.get_current_settings();
+        let handle = WorkspaceSettingsHandle::from(self.settings.unwrap_current_settings()?);
         let parse = self.get_parse(&params.path)?;
-        if let Some(settings) = &settings {
-            if !settings.formatter().format_with_errors && parse.has_errors() {
-                return Err(WorkspaceError::format_with_errors_disabled());
-            }
+        if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
+        {
+            return Err(WorkspaceError::format_with_errors_disabled());
         }
         let document_file_source = self.get_file_source(&params.path);
 
@@ -937,7 +935,7 @@ impl Workspace for WorkspaceServer {
             &params.path,
             &document_file_source,
             parse,
-            settings.into(),
+            handle,
             params.offset,
         )
     }
@@ -952,13 +950,13 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(&params.path)?;
 
         let manifest = self.get_current_manifest()?;
+        let settings = self.settings.unwrap_current_settings()?;
         let language = self.get_file_source(&params.path);
         fix_all(FixAllParams {
             parse,
             // rules: rules.as_ref().map(|x| x.borrow()),
             fix_file_mode: params.fix_file_mode,
-            // filter,
-            workspace: self.settings.get_current_settings().into(),
+            workspace: settings.into(),
             should_format: params.should_format,
             biome_path: &params.path,
             manifest,
@@ -1018,7 +1016,7 @@ impl Workspace for WorkspaceServer {
             .search
             .search
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let settings = self.settings.get_current_settings();
+        let settings = self.settings.unwrap_current_settings()?;
         let parse = self.get_parse(&params.path)?;
 
         let document_file_source = self.get_file_source(&params.path);

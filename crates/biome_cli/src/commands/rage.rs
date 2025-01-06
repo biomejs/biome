@@ -227,53 +227,53 @@ impl Display for RageConfiguration<'_> {
 
                     markup! (
                         {KeyValuePair("Status", status)}
-                        {KeyValuePair("Formatter disabled", markup!({DebugDisplay(configuration.is_formatter_disabled())}))}
-                        {KeyValuePair("Linter disabled", markup!({DebugDisplay(configuration.is_linter_disabled())}))}
-                        {KeyValuePair("Assist disabled", markup!({DebugDisplay(configuration.is_assist_disabled())}))}
-                        {KeyValuePair("VCS disabled", markup!({DebugDisplay(configuration.is_vcs_disabled())}))}
+                        {KeyValuePair("Formatter disabled", markup!({DebugDisplay(!configuration.is_formatter_enabled())}))}
+                        {KeyValuePair("Linter disabled", markup!({DebugDisplay(!configuration.is_linter_enabled())}))}
+                        {KeyValuePair("Assist disabled", markup!({DebugDisplay(!configuration.is_assist_enabled())}))}
+                        {KeyValuePair("VCS disabled", markup!({DebugDisplay(!configuration.is_assist_enabled())}))}
                     ).fmt(fmt)?;
 
                     // Print formatter configuration if --formatter option is true
                     if self.formatter {
                         let formatter_configuration = configuration.get_formatter_configuration();
-                        let ignore = formatter_configuration
-                            .ignore
-                            .iter()
-                            .map(|s| s.to_string())
-                            .collect::<Vec<_>>()
-                            .join(", ");
-                        let include = formatter_configuration
-                            .include
-                            .iter()
-                            .map(|s| s.to_string())
-                            .collect::<Vec<_>>()
-                            .join(", ");
+                        let ignore = formatter_configuration.ignore.map(|s| {
+                            s.iter()
+                                .map(|s| s.to_string())
+                                .collect::<Vec<_>>()
+                                .join(", ")
+                        });
+                        let include = formatter_configuration.include.map(|s| {
+                            s.iter()
+                                .map(|s| s.to_string())
+                                .collect::<Vec<_>>()
+                                .join(", ")
+                        });
                         markup! (
                             {Section("Formatter")}
-                            {KeyValuePair("Format with errors", markup!({DebugDisplay(configuration.get_formatter_configuration().format_with_errors)}))}
-                            {KeyValuePair("Indent style", markup!({DebugDisplay(formatter_configuration.indent_style)}))}
-                            {KeyValuePair("Indent width", markup!({DebugDisplay(formatter_configuration.indent_width)}))}
-                            {KeyValuePair("Line ending", markup!({DebugDisplay(formatter_configuration.line_ending)}))}
-                            {KeyValuePair("Line width", markup!({DebugDisplay(formatter_configuration.line_width.value())}))}
-                            {KeyValuePair("Attribute position", markup!({DebugDisplay(formatter_configuration.attribute_position)}))}
-                            {KeyValuePair("Bracket spacing", markup!({DebugDisplay(formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Ignore", markup!({DebugDisplay(ignore)}))}
-                            {KeyValuePair("Include", markup!({DebugDisplay(include)}))}
+                            {KeyValuePair("Format with errors", markup!({DisplayOption(configuration.get_formatter_configuration().format_with_errors)}))}
+                            {KeyValuePair("Indent style", markup!({DisplayOption(formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent width", markup!({DisplayOption(formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DisplayOption(formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DisplayOption(formatter_configuration.line_width)}))}
+                            {KeyValuePair("Attribute position", markup!({DisplayOption(formatter_configuration.attribute_position)}))}
+                            {KeyValuePair("Bracket spacing", markup!({DisplayOption(formatter_configuration.bracket_spacing)}))}
+                            {KeyValuePair("Ignore", markup!({DisplayOption(ignore)}))}
+                            {KeyValuePair("Include", markup!({DisplayOption(include)}))}
                         ).fmt(fmt)?;
 
                         let javascript_formatter_configuration =
                             configuration.get_javascript_formatter_configuration();
                         markup! (
                             {Section("JavaScript Formatter")}
-                            {KeyValuePair("Enabled", markup!({DebugDisplay(javascript_formatter_configuration.enabled)}))}
-                            {KeyValuePair("JSX quote style", markup!({DebugDisplay(javascript_formatter_configuration.jsx_quote_style)}))}
-                            {KeyValuePair("Quote properties", markup!({DebugDisplay(javascript_formatter_configuration.quote_properties)}))}
-                            {KeyValuePair("Trailing commas", markup!({DebugDisplay(javascript_formatter_configuration.trailing_commas)}))}
-                            {KeyValuePair("Semicolons", markup!({DebugDisplay(javascript_formatter_configuration.semicolons)}))}
-                            {KeyValuePair("Arrow parentheses", markup!({DebugDisplay(javascript_formatter_configuration.arrow_parentheses)}))}
+                            {KeyValuePair("Enabled", markup!({DisplayOption(javascript_formatter_configuration.enabled)}))}
+                            {KeyValuePair("JSX quote style", markup!({DisplayOption(javascript_formatter_configuration.jsx_quote_style)}))}
+                            {KeyValuePair("Quote properties", markup!({DisplayOption(javascript_formatter_configuration.quote_properties)}))}
+                            {KeyValuePair("Trailing commas", markup!({DisplayOption(javascript_formatter_configuration.trailing_commas)}))}
+                            {KeyValuePair("Semicolons", markup!({DisplayOption(javascript_formatter_configuration.semicolons)}))}
+                            {KeyValuePair("Arrow parentheses", markup!({DisplayOption(javascript_formatter_configuration.arrow_parentheses)}))}
                             {KeyValuePair("Bracket spacing", markup!({DisplayOption(javascript_formatter_configuration.bracket_spacing)}))}
                             {KeyValuePair("Bracket same line", markup!({DisplayOption(javascript_formatter_configuration.bracket_same_line)}))}
-                            {KeyValuePair("Quote style", markup!({DebugDisplay(javascript_formatter_configuration.quote_style)}))}
+                            {KeyValuePair("Quote style", markup!({DisplayOption(javascript_formatter_configuration.quote_style)}))}
                             {KeyValuePair("Indent style", markup!({DisplayOption(javascript_formatter_configuration.indent_style)}))}
                             {KeyValuePair("Indent width", markup!({DisplayOption(javascript_formatter_configuration.indent_width)}))}
                             {KeyValuePair("Line ending", markup!({DisplayOption(javascript_formatter_configuration.line_ending)}))}
@@ -286,7 +286,7 @@ impl Display for RageConfiguration<'_> {
                             configuration.get_json_formatter_configuration();
                         markup! (
                             {Section("JSON Formatter")}
-                            {KeyValuePair("Enabled", markup!({DebugDisplay(json_formatter_configuration.enabled)}))}
+                            {KeyValuePair("Enabled", markup!({DisplayOption(json_formatter_configuration.enabled)}))}
                             {KeyValuePair("Indent style", markup!({DisplayOption(json_formatter_configuration.indent_style)}))}
                             {KeyValuePair("Indent width", markup!({DisplayOption(json_formatter_configuration.indent_width)}))}
                             {KeyValuePair("Line ending", markup!({DisplayOption(json_formatter_configuration.line_ending)}))}
@@ -299,12 +299,12 @@ impl Display for RageConfiguration<'_> {
                             configuration.get_css_formatter_configuration();
                         markup! (
                             {Section("CSS Formatter")}
-                            {KeyValuePair("Enabled", markup!({DebugDisplay(css_formatter_configuration.enabled)}))}
+                            {KeyValuePair("Enabled", markup!({DisplayOption(css_formatter_configuration.enabled)}))}
                             {KeyValuePair("Indent style", markup!({DisplayOption(css_formatter_configuration.indent_style)}))}
                             {KeyValuePair("Indent width", markup!({DisplayOption(css_formatter_configuration.indent_width)}))}
                             {KeyValuePair("Line ending", markup!({DisplayOption(css_formatter_configuration.line_ending)}))}
                             {KeyValuePair("Line width", markup!({DisplayOption(css_formatter_configuration.line_width)}))}
-                            {KeyValuePair("Quote style", markup!({DebugDisplay(css_formatter_configuration.quote_style)}))}
+                            {KeyValuePair("Quote style", markup!({DisplayOption(css_formatter_configuration.quote_style)}))}
                         ).fmt(fmt)?;
 
                         let graphql_formatter_configuration =
@@ -331,11 +331,11 @@ impl Display for RageConfiguration<'_> {
                         let graphql_linter = configuration.get_graphql_linter_configuration();
                         markup! (
                             {Section("Linter")}
-                            {KeyValuePair("JavaScript enabled", markup!({DebugDisplay(javascript_linter.enabled)}))}
-                            {KeyValuePair("JSON enabled", markup!({DebugDisplay(json_linter.enabled)}))}
-                            {KeyValuePair("CSS enabled", markup!({DebugDisplay(css_linter.enabled)}))}
-                            {KeyValuePair("GraphQL enabled", markup!({DebugDisplay(graphql_linter.enabled)}))}
-                            {KeyValuePair("Recommended", markup!({DebugDisplay(linter_configuration.recommended.unwrap_or_default())}))}
+                            {KeyValuePair("JavaScript enabled", markup!({DisplayOption(javascript_linter.enabled)}))}
+                            {KeyValuePair("JSON enabled", markup!({DisplayOption(json_linter.enabled)}))}
+                            {KeyValuePair("CSS enabled", markup!({DisplayOption(css_linter.enabled)}))}
+                            {KeyValuePair("GraphQL enabled", markup!({DisplayOption(graphql_linter.enabled)}))}
+                            {KeyValuePair("Recommended", markup!({DisplayOption(linter_configuration.recommended)}))}
                             {RageConfigurationLintRules("Enabled rules", linter_configuration)}
                         ).fmt(fmt)?;
                     }

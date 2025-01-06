@@ -2,10 +2,10 @@ use super::{determine_fix_file_mode, FixFileModeOptions, LoadEditorConfig};
 use crate::cli_options::CliOptions;
 use crate::commands::{get_files_to_process_with_cli_options, CommandRunner};
 use crate::{CliDiagnostic, Execution, TraversalMode};
-use biome_configuration::analyzer::assist::PartialAssistConfiguration;
-use biome_configuration::{
-    PartialConfiguration, PartialFormatterConfiguration, PartialLinterConfiguration,
-};
+use biome_configuration::analyzer::assist::{AssistConfiguration, AssistEnabled};
+use biome_configuration::analyzer::LinterEnabled;
+use biome_configuration::formatter::FormatterEnabled;
+use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
 use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
@@ -16,23 +16,23 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) write: bool,
     pub(crate) fix: bool,
     pub(crate) unsafe_: bool,
-    pub(crate) configuration: Option<PartialConfiguration>,
+    pub(crate) configuration: Option<Configuration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) stdin_file_path: Option<String>,
-    pub(crate) formatter_enabled: Option<bool>,
-    pub(crate) linter_enabled: Option<bool>,
-    pub(crate) assist_enabled: Option<bool>,
+    pub(crate) formatter_enabled: Option<FormatterEnabled>,
+    pub(crate) linter_enabled: Option<LinterEnabled>,
+    pub(crate) assist_enabled: Option<AssistEnabled>,
     pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
 }
 
 impl LoadEditorConfig for CheckCommandPayload {
-    fn should_load_editor_config(&self, fs_configuration: &PartialConfiguration) -> bool {
+    fn should_load_editor_config(&self, fs_configuration: &Configuration) -> bool {
         self.configuration
             .as_ref()
-            .and_then(|c| c.use_editorconfig())
-            .unwrap_or(fs_configuration.use_editorconfig().unwrap_or_default())
+            .is_some_and(|c| c.use_editorconfig())
+            || fs_configuration.use_editorconfig()
     }
 }
 
@@ -44,7 +44,7 @@ impl CommandRunner for CheckCommandPayload {
         loaded_configuration: LoadedConfiguration,
         fs: &dyn FileSystem,
         console: &mut dyn Console,
-    ) -> Result<PartialConfiguration, WorkspaceError> {
+    ) -> Result<Configuration, WorkspaceError> {
         let editorconfig_search_path = loaded_configuration.directory_path.clone();
         let LoadedConfiguration {
             configuration: biome_configuration,
@@ -57,7 +57,7 @@ impl CommandRunner for CheckCommandPayload {
 
         let formatter = fs_configuration
             .formatter
-            .get_or_insert_with(PartialFormatterConfiguration::default);
+            .get_or_insert_with(FormatterConfiguration::default);
 
         if self.formatter_enabled.is_some() {
             formatter.enabled = self.formatter_enabled;
@@ -65,7 +65,7 @@ impl CommandRunner for CheckCommandPayload {
 
         let linter = fs_configuration
             .linter
-            .get_or_insert_with(PartialLinterConfiguration::default);
+            .get_or_insert_with(LinterConfiguration::default);
 
         if self.linter_enabled.is_some() {
             linter.enabled = self.linter_enabled;
@@ -73,7 +73,7 @@ impl CommandRunner for CheckCommandPayload {
 
         let assist = fs_configuration
             .assist
-            .get_or_insert_with(PartialAssistConfiguration::default);
+            .get_or_insert_with(AssistConfiguration::default);
 
         if self.assist_enabled.is_some() {
             assist.enabled = self.assist_enabled;
@@ -96,7 +96,7 @@ impl CommandRunner for CheckCommandPayload {
     fn get_files_to_process(
         &self,
         fs: &dyn FileSystem,
-        configuration: &PartialConfiguration,
+        configuration: &Configuration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
         let paths = get_files_to_process_with_cli_options(
             self.since.as_deref(),

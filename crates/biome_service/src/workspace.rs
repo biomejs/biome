@@ -58,12 +58,12 @@ mod server;
 pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 use crate::file_handlers::Capabilities;
 pub use crate::file_handlers::DocumentFileSource;
-use crate::settings::Settings;
+use crate::settings::WorkspaceSettingsHandle;
 use crate::{Deserialize, Serialize, WorkspaceError};
 use biome_analyze::ActionCategory;
 pub use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::RuleSelector;
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::CodeSuggestion;
@@ -139,6 +139,7 @@ impl FileFeaturesResult {
         }
     }
 
+    /// Check if **Biome** supports certain features
     pub fn with_capabilities(mut self, capabilities: &Capabilities) -> Self {
         if capabilities.formatter.format.is_some() {
             self.features_supported
@@ -170,63 +171,58 @@ impl FileFeaturesResult {
         self
     }
 
-    #[instrument(level = "debug", skip(self, settings))]
+    /// Checks if a feature is enabled for the current path.
+    ///
+    /// The method checks the configuration enables a certain feature for the given path.
+    #[instrument(level = "debug", skip(self, handle, capabilities))]
     pub(crate) fn with_settings_and_language(
         mut self,
-        settings: &Settings,
-        file_source: &DocumentFileSource,
+        handle: &WorkspaceSettingsHandle,
         path: &Utf8Path,
+        capabilities: &Capabilities,
     ) -> Self {
-        let formatter_disabled =
-            if let Some(disabled) = settings.override_settings.formatter_disabled(path) {
-                disabled
-            } else if file_source.is_javascript_like() {
-                !settings.formatter().enabled || settings.javascript_formatter_disabled()
-            } else if file_source.is_json_like() {
-                !settings.formatter().enabled || settings.json_formatter_disabled()
-            } else if file_source.is_css_like() {
-                !settings.formatter().enabled || settings.css_formatter_disabled()
-            } else {
-                !settings.formatter().enabled
-            };
-        if formatter_disabled {
-            self.features_supported
-                .insert(FeatureKind::Format, SupportKind::FeatureNotEnabled);
-        }
-        // linter
-        let linter_disabled = {
-            if let Some(disabled) = settings.override_settings.linter_disabled(path) {
-                disabled
-            } else if file_source.is_javascript_like() {
-                !settings.linter().enabled || settings.javascript_linter_disabled()
-            } else if file_source.is_json_like() {
-                !settings.linter().enabled || settings.json_linter_disabled()
-            } else if file_source.is_css_like() {
-                !settings.linter().enabled || settings.css_linter_disabled()
-            } else {
-                !settings.linter().enabled
+        // formatter
+        let formatter_enabled = capabilities.enabled_for_path.formatter;
+        if let Some(formatter_enabled) = formatter_enabled {
+            let formatter_enabled = formatter_enabled(path, handle);
+
+            if !formatter_enabled {
+                self.features_supported
+                    .insert(FeatureKind::Format, SupportKind::FeatureNotEnabled);
             }
-        };
-
-        if linter_disabled {
-            self.features_supported
-                .insert(FeatureKind::Lint, SupportKind::FeatureNotEnabled);
         }
 
-        // assists
-        if let Some(disabled) = settings.override_settings.assist_disabled(path) {
-            if disabled {
+        // linter
+        let linter_enabled = capabilities.enabled_for_path.linter;
+        if let Some(linter_enabled) = linter_enabled {
+            let linter_enabled = linter_enabled(path, handle);
+            if !linter_enabled {
+                self.features_supported
+                    .insert(FeatureKind::Lint, SupportKind::FeatureNotEnabled);
+            }
+        }
+        // assist
+        let assist_enabled = capabilities.enabled_for_path.assist;
+        if let Some(assist_enabled) = assist_enabled {
+            let assist_enabled = assist_enabled(path, handle);
+            if !assist_enabled {
                 self.features_supported
                     .insert(FeatureKind::Assist, SupportKind::FeatureNotEnabled);
             }
-        } else if !settings.assist().enabled {
-            self.features_supported
-                .insert(FeatureKind::Assist, SupportKind::FeatureNotEnabled);
+        }
+
+        // search
+        let search_enabled = capabilities.enabled_for_path.search;
+        if let Some(search_enabled) = search_enabled {
+            let search_enabled = search_enabled(path, handle);
+            if !search_enabled {
+                self.features_supported
+                    .insert(FeatureKind::Search, SupportKind::FeatureNotEnabled);
+            }
         }
 
         debug!(
-            "The file {} has the following feature sets: \n{:?}",
-            path.to_string(),
+            "The file has the following feature sets: \n{:?}",
             &self.features_supported
         );
 
@@ -489,7 +485,7 @@ impl FeaturesBuilder {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateSettingsParams {
-    pub configuration: PartialConfiguration,
+    pub configuration: Configuration,
     // @ematipico TODO: have a better data structure for this
     pub vcs_base_path: Option<BiomePath>,
     // @ematipico TODO: have a better data structure for this

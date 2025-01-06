@@ -38,8 +38,8 @@ Biome Configuration:
   Error:                        Expected an array, an object, or a literal but instead found '}'.
   Status:                       Loaded with errors
   Formatter disabled:           false
-  Linter disabled:              false
-  Assist disabled:              false
+  Linter disabled:              true
+  Assist disabled:              true
   VCS disabled:                 true
 
 Server:

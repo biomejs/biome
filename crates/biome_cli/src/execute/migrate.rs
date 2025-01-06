@@ -3,7 +3,7 @@ use crate::diagnostics::MigrationDiagnostic;
 use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
 use biome_analyze::AnalysisFilter;
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_deserialize::Merge;
@@ -86,8 +86,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                 data: prettier_config,
             } = prettier::read_config_file(fs, console)?;
             let biome_config =
-                deserialize_from_json_ast::<PartialConfiguration>(&parsed.tree(), "")
-                    .into_deserialized();
+                deserialize_from_json_ast::<Configuration>(&parsed.tree(), "").into_deserialized();
             let Some(mut biome_config) = biome_config else {
                 return Ok(());
             };
@@ -166,8 +165,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                 data: eslint_config,
             } = eslint::read_eslint_config(fs, console)?;
             let biome_config =
-                deserialize_from_json_ast::<PartialConfiguration>(&parsed.tree(), "")
-                    .into_deserialized();
+                deserialize_from_json_ast::<Configuration>(&parsed.tree(), "").into_deserialized();
             let Some(mut biome_config) = biome_config else {
                 return Ok(());
             };

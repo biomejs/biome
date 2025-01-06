@@ -1,160 +1,149 @@
-use biome_deserialize_macros::{Deserializable, Merge, Partial};
+use crate::bool::Bool;
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
 use biome_json_formatter::context::{Expand, TrailingCommas};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 /// Options applied to JSON files
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(default, deny_unknown_fields)]
 pub struct JsonConfiguration {
     /// Parsing options
-    #[partial(type, bpaf(external(partial_json_parser), optional))]
-    pub parser: JsonParser,
+    #[bpaf(external(json_parser_configuration), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parser: Option<JsonParserConfiguration>,
 
     /// Formatting options
-    #[partial(type, bpaf(external(partial_json_formatter), optional))]
-    pub formatter: JsonFormatter,
+    #[bpaf(external(json_formatter_configuration), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub formatter: Option<JsonFormatterConfiguration>,
 
     /// Linting options
-    #[partial(type, bpaf(external(partial_json_linter), optional))]
-    pub linter: JsonLinter,
+    #[bpaf(external(json_linter_configuration), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub linter: Option<JsonLinterConfiguration>,
 
-    /// Assists options
-    #[partial(type, bpaf(external(partial_json_assist), optional))]
-    pub assists: JsonAssist,
+    /// Assist options
+    #[bpaf(external(json_assist_configuration), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub assist: Option<JsonAssistConfiguration>,
 }
+
+pub type JsonAllowCommentsEnabled = Bool<false>;
+pub type JsonAllowTrailingCommasEnabled = Bool<false>;
 
 /// Options that changes how the JSON parser behaves
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct JsonParser {
-    #[partial(bpaf(hide))]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct JsonParserConfiguration {
+    #[bpaf(hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Allow parsing comments in `.json` files
-    pub allow_comments: bool,
+    pub allow_comments: Option<JsonAllowCommentsEnabled>,
 
-    #[partial(bpaf(hide))]
+    #[bpaf(hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     /// Allow parsing trailing commas in `.json` files
-    pub allow_trailing_commas: bool,
+    pub allow_trailing_commas: Option<JsonAllowTrailingCommasEnabled>,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct JsonFormatter {
+pub type JsonFormatterEnabled = Bool<true>;
+
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct JsonFormatterConfiguration {
     /// Control the formatter for JSON (and its super languages) files.
-    #[partial(bpaf(long("json-formatter-enabled"), argument("true|false"), optional))]
-    pub enabled: bool,
+    #[bpaf(long("json-formatter-enabled"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<JsonFormatterEnabled>,
 
     /// The indent style applied to JSON (and its super languages) files.
-    #[partial(bpaf(long("json-formatter-indent-style"), argument("tab|space"), optional))]
+    #[bpaf(long("json-formatter-indent-style"), argument("tab|space"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation applied to JSON (and its super languages) files. Default to 2.
-    #[partial(bpaf(long("json-formatter-indent-width"), argument("NUMBER"), optional))]
+    #[bpaf(long("json-formatter-indent-width"), argument("NUMBER"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
     /// The type of line ending applied to JSON (and its super languages) files.
-    #[partial(bpaf(long("json-formatter-line-ending"), argument("lf|crlf|cr"), optional))]
+    #[bpaf(long("json-formatter-line-ending"), argument("lf|crlf|cr"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
-    #[partial(bpaf(long("json-formatter-line-width"), argument("NUMBER"), optional))]
+    #[bpaf(long("json-formatter-line-width"), argument("NUMBER"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
-    #[partial(bpaf(long("json-formatter-trailing-commas"), argument("none|all"), optional))]
+    #[bpaf(long("json-formatter-trailing-commas"), argument("none|all"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_commas: Option<TrailingCommas>,
 
     /// Whether to expand arrays and objects on multiple lines. When set to `always`, these literals are formatted on multiple lines,
     /// regardless of length of the list. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "followSource".
-    #[partial(bpaf(
+    #[bpaf(
         long("json-formatter-expand"),
         argument("always|follow-source"),
         optional
-    ))]
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub expand: Option<Expand>,
 }
 
-impl PartialJsonFormatter {
-    pub fn get_formatter_configuration(&self) -> JsonFormatter {
-        JsonFormatter {
-            enabled: self.enabled.unwrap_or_default(),
-            indent_style: self.indent_style,
-            indent_width: self.indent_width,
-            line_ending: self.line_ending,
-            line_width: self.line_width,
-            trailing_commas: self.trailing_commas,
-            expand: self.expand,
-        }
+impl JsonFormatterConfiguration {
+    pub fn enabled_resolved(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
+    }
+
+    pub fn trailing_commas_resolved(&self) -> TrailingCommas {
+        self.trailing_commas.unwrap_or_default()
     }
 }
 
-impl Default for JsonFormatter {
-    fn default() -> Self {
-        Self {
-            enabled: true,
-            indent_style: Default::default(),
-            indent_width: Default::default(),
-            line_ending: Default::default(),
-            line_width: Default::default(),
-            trailing_commas: Default::default(),
-            expand: Default::default(),
-        }
-    }
-}
-
-impl PartialJsonFormatter {
-    pub fn get_linter_configuration(&self) -> JsonLinter {
-        JsonLinter {
-            enabled: self.enabled.unwrap_or_default(),
-        }
-    }
-}
+pub type JsonLinterEnabled = Bool<true>;
 
 /// Linter options specific to the JSON linter
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct JsonLinter {
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct JsonLinterConfiguration {
     /// Control the linter for JSON (and its super languages) files.
-    #[partial(bpaf(long("json-linter-enabled"), argument("true|false"), optional))]
-    pub enabled: bool,
+    #[bpaf(long("json-linter-enabled"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<JsonLinterEnabled>,
 }
 
-impl Default for JsonLinter {
-    fn default() -> Self {
-        Self { enabled: true }
-    }
-}
-
-impl PartialJsonLinter {
-    pub fn get_linter_configuration(&self) -> JsonLinter {
-        JsonLinter {
-            enabled: self.enabled.unwrap_or_default(),
-        }
-    }
-}
-
+pub type JsonAssistEnabled = Bool<true>;
 /// Linter options specific to the JSON linter
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct JsonAssist {
-    /// Control the linter for JSON (and its super languages) files.
-    #[partial(bpaf(long("json-assist-enabled"), argument("true|false"), optional))]
-    pub enabled: bool,
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct JsonAssistConfiguration {
+    /// Control the assist for JSON (and its super languages) files.
+    #[bpaf(long("json-assist-enabled"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<JsonAssistEnabled>,
 }
 
-impl Default for JsonAssist {
-    fn default() -> Self {
-        Self { enabled: true }
+impl JsonLinterConfiguration {
+    pub fn enabled_resolved(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
     }
 }

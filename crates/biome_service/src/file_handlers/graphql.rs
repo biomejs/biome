@@ -1,15 +1,15 @@
 use super::{
     is_diagnostic_error, AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource,
-    ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult, ProcessLint,
-    SearchCapabilities,
+    EnabledForPath, ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult,
+    ProcessLint, SearchCapabilities,
 };
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
-    ServiceLanguage, Settings, WorkspaceSettingsHandle,
+    check_feature_activity, FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings,
+    OverrideSettings, ServiceLanguage, Settings, WorkspaceSettingsHandle,
 };
 use crate::workspace::{
     CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
@@ -17,6 +17,10 @@ use crate::workspace::{
 use crate::WorkspaceError;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategoriesBuilder, RuleError,
+};
+use biome_configuration::graphql::{
+    GraphqlAssistConfiguration, GraphqlAssistEnabled, GraphqlFormatterConfiguration,
+    GraphqlFormatterEnabled, GraphqlLinterConfiguration, GraphqlLinterEnabled,
 };
 use biome_diagnostics::Applicability;
 use biome_formatter::{
@@ -31,10 +35,11 @@ use biome_graphql_parser::parse_graphql_with_cache;
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache, TokenAtOffset};
+use camino::Utf8Path;
 use std::borrow::Cow;
 use tracing::{debug_span, error, info, trace_span};
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct GraphqlFormatterSettings {
     pub line_ending: Option<LineEnding>,
@@ -43,33 +48,47 @@ pub struct GraphqlFormatterSettings {
     pub indent_style: Option<IndentStyle>,
     pub quote_style: Option<QuoteStyle>,
     pub bracket_spacing: Option<BracketSpacing>,
-    pub enabled: Option<bool>,
+    pub enabled: Option<GraphqlFormatterEnabled>,
 }
 
-impl Default for GraphqlFormatterSettings {
-    fn default() -> Self {
+impl From<GraphqlFormatterConfiguration> for GraphqlFormatterSettings {
+    fn from(configuration: GraphqlFormatterConfiguration) -> Self {
         Self {
-            enabled: Some(false),
-            indent_style: Default::default(),
-            indent_width: Default::default(),
-            line_ending: Default::default(),
-            line_width: Default::default(),
-            quote_style: Default::default(),
-            bracket_spacing: Default::default(),
+            line_ending: configuration.line_ending,
+            line_width: configuration.line_width,
+            indent_width: configuration.indent_width,
+            indent_style: configuration.indent_style,
+            quote_style: configuration.quote_style,
+            bracket_spacing: configuration.bracket_spacing,
+            enabled: configuration.enabled,
         }
     }
 }
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct GraphqlLinterSettings {
-    pub enabled: Option<bool>,
+    pub enabled: Option<GraphqlLinterEnabled>,
 }
 
-impl Default for GraphqlLinterSettings {
-    fn default() -> Self {
+impl From<GraphqlLinterConfiguration> for GraphqlLinterSettings {
+    fn from(configuration: GraphqlLinterConfiguration) -> Self {
         Self {
-            enabled: Some(false),
+            enabled: configuration.enabled,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct GraphqlAssistSettings {
+    pub enabled: Option<GraphqlAssistEnabled>,
+}
+
+impl From<GraphqlAssistConfiguration> for GraphqlAssistSettings {
+    fn from(configuration: GraphqlAssistConfiguration) -> Self {
+        Self {
+            enabled: configuration.enabled,
         }
     }
 }
@@ -77,10 +96,10 @@ impl Default for GraphqlLinterSettings {
 impl ServiceLanguage for GraphqlLanguage {
     type FormatterSettings = GraphqlFormatterSettings;
     type LinterSettings = GraphqlLinterSettings;
-    type OrganizeImportsSettings = ();
     type FormatOptions = GraphqlFormatOptions;
     type ParserSettings = ();
     type EnvironmentSettings = ();
+    type AssistSettings = GraphqlAssistSettings;
 
     fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
         &language.graphql
@@ -147,6 +166,117 @@ impl ServiceLanguage for GraphqlLanguage {
             .with_file_path(path.as_path())
             .with_suppression_reason(suppression_reason)
     }
+
+    fn formatter_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_feature_activity(
+                                pattern.languages.graphql.formatter.enabled,
+                                pattern.formatter.enabled,
+                                true,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    settings.languages.graphql.formatter.enabled,
+                    settings.formatter.enabled,
+                    false,
+                ))
+            })
+            .unwrap_or_default()
+            .into()
+    }
+
+    fn assist_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_feature_activity(
+                                pattern.languages.graphql.assist.enabled,
+                                pattern.assist.enabled,
+                                true,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    settings.languages.graphql.assist.enabled,
+                    settings.assist.enabled,
+                    false,
+                ))
+            })
+            .unwrap_or_default()
+            .into()
+    }
+
+    fn linter_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_feature_activity(
+                                pattern.languages.graphql.linter.enabled,
+                                pattern.linter.enabled,
+                                true,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    settings.languages.graphql.linter.enabled,
+                    settings.linter.enabled,
+                    false,
+                ))
+            })
+            .unwrap_or_default()
+            .into()
+    }
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -155,6 +285,12 @@ pub(crate) struct GraphqlFileHandler;
 impl ExtensionHandler for GraphqlFileHandler {
     fn capabilities(&self) -> Capabilities {
         Capabilities {
+            enabled_for_path: EnabledForPath {
+                formatter: Some(formatter_enabled),
+                assist: Some(assist_enabled),
+                linter: Some(linter_enabled),
+                search: Some(search_enabled),
+            },
             parser: ParserCapabilities { parse: Some(parse) },
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
@@ -177,11 +313,27 @@ impl ExtensionHandler for GraphqlFileHandler {
     }
 }
 
+fn formatter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
+    handle.formatter_enabled_for_this_file_path::<GraphqlLanguage>(path)
+}
+
+fn linter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
+    handle.linter_enabled_for_this_file_path::<GraphqlLanguage>(path)
+}
+
+fn assist_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
+    handle.assist_enabled_for_this_file_path::<GraphqlLanguage>(path)
+}
+
+fn search_enabled(_path: &Utf8Path, _handle: &WorkspaceSettingsHandle) -> bool {
+    true
+}
+
 fn parse(
     _biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    _settings: Option<&Settings>,
+    _settings: WorkspaceSettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let parse = parse_graphql_with_cache(text, cache);

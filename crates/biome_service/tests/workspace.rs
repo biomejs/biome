@@ -2,7 +2,7 @@
 mod test {
     use biome_analyze::RuleCategories;
     use biome_configuration::analyzer::{RuleGroup, RuleSelector};
-    use biome_configuration::{PartialConfiguration, PartialFilesConfiguration};
+    use biome_configuration::{Configuration, FilesConfiguration};
     use biome_fs::{BiomePath, MemoryFileSystem};
     use biome_js_syntax::{JsFileSource, TextSize};
     use biome_service::file_handlers::DocumentFileSource;
@@ -13,7 +13,7 @@ mod test {
     };
     use biome_service::{Workspace, WorkspaceError};
     use camino::Utf8PathBuf;
-    use std::num::NonZero;
+    use std::num::NonZeroU64;
 
     fn create_server() -> Box<dyn Workspace> {
         let workspace = server(Box::new(MemoryFileSystem::default()));
@@ -383,9 +383,9 @@ type User {
 
         workspace
             .update_settings(UpdateSettingsParams {
-                configuration: PartialConfiguration {
-                    files: Some(PartialFilesConfiguration {
-                        max_size: NonZero::new(10),
+                configuration: Configuration {
+                    files: Some(FilesConfiguration {
+                        max_size: Some(NonZeroU64::new(10).unwrap().into()),
                         ..Default::default()
                     }),
                     ..Default::default()

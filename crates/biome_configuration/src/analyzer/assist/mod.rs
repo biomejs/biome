@@ -1,51 +1,46 @@
 mod actions;
 
 pub use crate::analyzer::assist::actions::*;
-use biome_deserialize_macros::{Deserializable, Merge, Partial};
+use crate::bool::Bool;
+use biome_deserialize_macros::{Deserializable, Merge};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(deny_unknown_fields, rename_all = "camelCase"))]
+pub type AssistEnabled = Bool<true>;
+#[derive(
+    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct AssistConfiguration {
     /// Whether Biome should enable assist via LSP.
-    #[partial(bpaf(long("assist-enabled"), argument("true|false")))]
-    pub enabled: bool,
+    #[bpaf(long("assist-enabled"), argument("true|false"))]
+    pub enabled: Option<AssistEnabled>,
 
     /// Whether Biome should fail in CLI if the assist were not applied to the code.
-    #[partial(bpaf(pure(Default::default()), optional, hide))]
-    pub actions: Actions,
+    #[bpaf(pure(Default::default()), optional, hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub actions: Option<Actions>,
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide, pure(Default::default())))]
-    pub ignore: Vec<Box<str>>,
+    #[bpaf(hide, pure(Default::default()))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ignore: Option<Vec<Box<str>>>,
 
     /// A list of Unix shell style patterns. The formatter will include files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide, pure(Default::default())))]
-    pub include: Vec<Box<str>>,
+    #[bpaf(hide, pure(Default::default()))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub include: Option<Vec<Box<str>>>,
 }
 
-impl PartialAssistConfiguration {
-    pub const fn is_disabled(&self) -> bool {
-        matches!(self.enabled, Some(false))
+impl AssistConfiguration {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
     }
 
     pub fn get_actions(&self) -> Actions {
         self.actions.clone().unwrap_or_default()
-    }
-}
-
-impl Default for AssistConfiguration {
-    fn default() -> Self {
-        Self {
-            enabled: true,
-            actions: Default::default(),
-            ignore: Default::default(),
-            include: Default::default(),
-        }
     }
 }

@@ -554,7 +554,15 @@ fn applies_custom_configuration_over_config_file_issue_3175_v1() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--quote-style", "single", file_path.as_str()].as_slice()),
+        Args::from(
+            [
+                "format",
+                "--javascript-formatter-quote-style",
+                "single",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -657,7 +665,7 @@ fn applies_custom_quote_style() {
         Args::from(
             [
                 "format",
-                "--quote-style",
+                "--javascript-formatter-quote-style",
                 "single",
                 "--quote-properties",
                 "preserve",

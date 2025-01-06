@@ -1,4 +1,5 @@
-use biome_configuration::{PartialConfiguration, PartialCssConfiguration, PartialCssFormatter};
+use biome_configuration::css::CssFormatterConfiguration;
+use biome_configuration::{Configuration, CssConfiguration};
 use biome_css_formatter::{context::CssFormatOptions, CssFormatLanguage};
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_service::workspace::UpdateSettingsParams;
@@ -28,10 +29,10 @@ mod language {
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _file_type: &str) {
     let root_path = Utf8Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
     let settings = UpdateSettingsParams {
-        configuration: PartialConfiguration {
-            css: Some(PartialCssConfiguration {
-                formatter: Some(PartialCssFormatter {
-                    enabled: Some(true),
+        configuration: Configuration {
+            css: Some(CssConfiguration {
+                formatter: Some(CssFormatterConfiguration {
+                    enabled: Some(true.into()),
                     ..Default::default()
                 }),
                 ..Default::default()

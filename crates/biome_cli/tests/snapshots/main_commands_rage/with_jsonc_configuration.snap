@@ -38,8 +38,8 @@ Environment:
 Biome Configuration:
   Status:                       Loaded successfully
   Formatter disabled:           true
-  Linter disabled:              false
-  Assist disabled:              false
+  Linter disabled:              true
+  Assist disabled:              true
   VCS disabled:                 true
 
 Server:

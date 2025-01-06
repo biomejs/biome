@@ -1,4 +1,5 @@
-use biome_deserialize_macros::{Deserializable, Merge, Partial};
+use crate::bool::Bool;
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
     LineWidth, QuoteStyle,
@@ -9,127 +10,131 @@ use biome_js_formatter::context::{
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
+pub type JavascriptFormatterEnabled = Bool<true>;
+pub type BracketSameLineEnabled = Bool<false>;
+
 /// Formatting options specific to the JavaScript files
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct JavascriptFormatter {
+#[derive(
+    Bpaf, Clone, Default, Debug, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct JavascriptFormatterConfiguration {
+    /// Control the formatter for JavaScript (and its super languages) files.
+    #[bpaf(long("javascript-formatter-enabled"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<JavascriptFormatterEnabled>,
+
     /// The type of quotes used in JSX. Defaults to double.
-    #[partial(bpaf(long("jsx-quote-style"), argument("double|single"), optional))]
-    pub jsx_quote_style: QuoteStyle,
+    #[bpaf(long("jsx-quote-style"), argument("double|single"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub jsx_quote_style: Option<QuoteStyle>,
 
     /// When properties in objects are quoted. Defaults to asNeeded.
-    #[partial(bpaf(long("quote-properties"), argument("preserve|as-needed"), optional))]
-    pub quote_properties: QuoteProperties,
+    #[bpaf(long("quote-properties"), argument("preserve|as-needed"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quote_properties: Option<QuoteProperties>,
 
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
-    #[partial(bpaf(long("trailing-commas"), argument("all|es5|none"), optional))]
-    pub trailing_commas: TrailingCommas,
+    #[bpaf(long("trailing-commas"), argument("all|es5|none"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trailing_commas: Option<TrailingCommas>,
 
     /// Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.
-    #[partial(bpaf(long("semicolons"), argument("always|as-needed"), optional))]
-    pub semicolons: Semicolons,
+    #[bpaf(long("semicolons"), argument("always|as-needed"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub semicolons: Option<Semicolons>,
 
     /// Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
-    #[partial(bpaf(long("arrow-parentheses"), argument("always|as-needed"), optional))]
-    pub arrow_parentheses: ArrowParentheses,
+    #[bpaf(long("arrow-parentheses"), argument("always|as-needed"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub arrow_parentheses: Option<ArrowParentheses>,
 
-    /// Control the formatter for JavaScript (and its super languages) files.
-    #[partial(bpaf(long("javascript-formatter-enabled"), argument("true|false"), optional))]
-    pub enabled: bool,
+    /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+    #[bpaf(long("bracket-same-line"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bracket_same_line: Option<BracketSameLine>,
 
     /// The indent style applied to JavaScript (and its super languages) files.
-    #[partial(bpaf(
+    #[bpaf(
         long("javascript-formatter-indent-style"),
         argument("tab|space"),
         optional
-    ))]
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
-    #[partial(bpaf(
+    #[bpaf(
         long("javascript-formatter-indent-width"),
         argument("NUMBER"),
         optional
-    ))]
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
     /// The type of line ending applied to JavaScript (and its super languages) files.
-    #[partial(bpaf(
+    #[bpaf(
         long("javascript-formatter-line-ending"),
         argument("lf|crlf|cr"),
         optional
-    ))]
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
-    #[partial(bpaf(long("javascript-formatter-line-width"), argument("NUMBER"), optional))]
+    #[bpaf(long("javascript-formatter-line-width"), argument("NUMBER"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
-    // TODO: Rename the argument to `javascript-formatter-quote-style` once
-    // it's also a top-level configurable property.
     /// The type of quotes used in JavaScript code. Defaults to double.
-    #[partial(bpaf(long("quote-style"), argument("double|single"), optional))]
-    pub quote_style: QuoteStyle,
+    #[bpaf(long("javascript-formatter-quote-style"), argument("double|single"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quote_style: Option<QuoteStyle>,
 
     // it's also a top-level configurable property.
     /// The attribute position style in jsx elements. Defaults to auto.
-    #[partial(bpaf(
-        long("javascript-attribute-position"),
-        argument("multiline|auto"),
-        optional
-    ))]
+    #[bpaf(long("javascript-attribute-position"), argument("multiline|auto"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub attribute_position: Option<AttributePosition>,
-
-    /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
-    #[partial(bpaf(long("javascript-bracket-same-line"), argument("true|false"), optional))]
-    pub bracket_same_line: Option<BracketSameLine>,
 
     // it's also a top-level configurable property.
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
-    #[partial(bpaf(long("bracket-spacing"), argument("true|false"), optional))]
+    #[bpaf(long("bracket-spacing"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
 }
 
-impl PartialJavascriptFormatter {
-    pub fn get_formatter_configuration(&self) -> JavascriptFormatter {
-        JavascriptFormatter {
-            enabled: self.enabled.unwrap_or_default(),
-            jsx_quote_style: self.jsx_quote_style.unwrap_or_default(),
-            quote_properties: self.quote_properties.unwrap_or_default(),
-            trailing_commas: self.trailing_commas.unwrap_or_default(),
-            semicolons: self.semicolons.unwrap_or_default(),
-            arrow_parentheses: self.arrow_parentheses.unwrap_or_default(),
-            bracket_spacing: self.bracket_spacing,
-            bracket_same_line: self.bracket_same_line,
-            indent_style: self.indent_style,
-            indent_width: self.indent_width,
-            line_ending: self.line_ending,
-            line_width: self.line_width,
-            quote_style: self.quote_style.unwrap_or_default(),
-            attribute_position: self.attribute_position,
-        }
+impl JavascriptFormatterConfiguration {
+    pub fn enabled_resolved(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
     }
-}
 
-impl Default for JavascriptFormatter {
-    fn default() -> Self {
-        Self {
-            enabled: true,
-            jsx_quote_style: Default::default(),
-            quote_properties: Default::default(),
-            trailing_commas: Default::default(),
-            semicolons: Default::default(),
-            arrow_parentheses: Default::default(),
-            bracket_spacing: Default::default(),
-            bracket_same_line: Default::default(),
-            indent_style: Default::default(),
-            indent_width: Default::default(),
-            line_ending: Default::default(),
-            line_width: Default::default(),
-            quote_style: Default::default(),
-            attribute_position: Default::default(),
-        }
+    pub fn jsx_quote_style_resolved(&self) -> QuoteStyle {
+        self.jsx_quote_style.unwrap_or_default()
+    }
+
+    pub fn quote_properties_resolved(&self) -> QuoteProperties {
+        self.quote_properties.unwrap_or_default()
+    }
+
+    pub fn trailing_commas_resolved(&self) -> TrailingCommas {
+        self.trailing_commas.unwrap_or_default()
+    }
+
+    pub fn semicolons_resolved(&self) -> Semicolons {
+        self.semicolons.unwrap_or_default()
+    }
+
+    pub fn arrow_parentheses_resolved(&self) -> ArrowParentheses {
+        self.arrow_parentheses.unwrap_or_default()
+    }
+
+    pub fn bracket_same_line_resolved(&self) -> BracketSameLine {
+        self.bracket_same_line.unwrap_or_default()
+    }
+
+    pub fn quote_style_resolved(&self) -> QuoteStyle {
+        self.quote_style.unwrap_or_default()
     }
 }

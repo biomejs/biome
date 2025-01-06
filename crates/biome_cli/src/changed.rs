@@ -1,11 +1,11 @@
 use crate::CliDiagnostic;
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_fs::FileSystem;
 use std::ffi::OsString;
 
 pub(crate) fn get_changed_files(
     fs: &dyn FileSystem,
-    configuration: &PartialConfiguration,
+    configuration: &Configuration,
     since: Option<&str>,
 ) -> Result<Vec<OsString>, CliDiagnostic> {
     let default_branch = configuration

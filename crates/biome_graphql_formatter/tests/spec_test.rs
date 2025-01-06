@@ -1,6 +1,5 @@
-use biome_configuration::{
-    PartialConfiguration, PartialGraphqlConfiguration, PartialGraphqlFormatter,
-};
+use biome_configuration::graphql::GraphqlFormatterConfiguration;
+use biome_configuration::{Configuration, GraphqlConfiguration};
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_graphql_formatter::{context::GraphqlFormatOptions, GraphqlFormatLanguage};
 use biome_service::workspace::UpdateSettingsParams;
@@ -30,10 +29,10 @@ mod language {
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _file_type: &str) {
     let root_path = Utf8Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
     let settings = UpdateSettingsParams {
-        configuration: PartialConfiguration {
-            graphql: Some(PartialGraphqlConfiguration {
-                formatter: Some(PartialGraphqlFormatter {
-                    enabled: Some(true),
+        configuration: Configuration {
+            graphql: Some(GraphqlConfiguration {
+                formatter: Some(GraphqlFormatterConfiguration {
+                    enabled: Some(true.into()),
                     ..Default::default()
                 }),
                 ..Default::default()
