@@ -10,6 +10,7 @@ use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
 pub type LinterEnabled = Bool<true>;
+
 #[derive(
     Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,
 )]
