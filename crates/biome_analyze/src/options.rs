@@ -98,7 +98,7 @@ pub struct AnalyzerOptions {
     pub(crate) configuration: AnalyzerConfiguration,
 
     /// The file that is being analyzed
-    pub(crate) file_path: Utf8PathBuf,
+    pub file_path: Utf8PathBuf,
 
     /// Suppression reason used when applying a suppression code action
     pub(crate) suppression_reason: Option<String>,

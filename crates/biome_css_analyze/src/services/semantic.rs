@@ -6,7 +6,6 @@ use biome_css_semantic::builder::SemanticModelBuilder;
 use biome_css_semantic::{model::SemanticModel, SemanticEventExtractor};
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 use biome_rowan::{AstNode, TextRange, WalkEvent};
-use camino::Utf8Path;
 
 /// The [SemanticServices] types can be used as a queryable to get an instance
 /// of the whole [SemanticModel] without matching on a specific AST node
@@ -41,7 +40,6 @@ impl FromServices for SemanticServices {
     fn from_services(
         rule_key: &RuleKey,
         services: &ServiceBag,
-        _file_path: &Utf8Path,
     ) -> Result<Self, MissingServicesDiagnostic> {
         let model: &SemanticModel = services.get_service().ok_or_else(|| {
             MissingServicesDiagnostic::new(rule_key.rule_name(), &["SemanticModel"])

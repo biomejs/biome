@@ -4,10 +4,8 @@ use biome_analyze::{
 };
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
 use biome_package::PackageJson;
-use biome_project_layout::ProjectLayout;
 use biome_rowan::AstNode;
-use camino::{Utf8Path, Utf8PathBuf};
-use std::sync::Arc;
+use camino::Utf8PathBuf;
 
 #[derive(Debug, Clone)]
 pub struct ManifestServices {
@@ -49,14 +47,14 @@ impl FromServices for ManifestServices {
     fn from_services(
         rule_key: &RuleKey,
         services: &ServiceBag,
-        file_path: &Utf8Path,
     ) -> biome_diagnostics::Result<Self, MissingServicesDiagnostic> {
-        let project_layout: &Arc<ProjectLayout> = services.get_service().ok_or_else(|| {
-            MissingServicesDiagnostic::new(rule_key.rule_name(), &["ProjectLayout"])
-        })?;
+        let manifest_info: &Option<(Utf8PathBuf, PackageJson)> =
+            services.get_service().ok_or_else(|| {
+                MissingServicesDiagnostic::new(rule_key.rule_name(), &["PackageJson"])
+            })?;
 
-        let (package_path, manifest) = match project_layout.get_node_manifest_for_path(file_path) {
-            Some((package_path, manifest)) => (Some(package_path), Some(manifest)),
+        let (package_path, manifest) = match manifest_info {
+            Some((package_path, manifest)) => (Some(package_path.clone()), Some(manifest.clone())),
             None => (None, None),
         };
 
@@ -73,7 +71,7 @@ impl Phase for ManifestServices {
     }
 }
 
-/// Query type usable by lint rules **that uses the semantic model** to match on specific [AstNode] types
+/// Query type usable by lint rules **that uses the package manifest** and matches on specific [AstNode] types.
 #[derive(Clone)]
 pub struct Manifest<N>(pub N);
 

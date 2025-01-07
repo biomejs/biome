@@ -51,30 +51,29 @@ impl ProjectLayout {
         &self,
         path: &Utf8Path,
     ) -> Option<(Utf8PathBuf, PackageJson)> {
-        self.0
-            .pin()
-            .iter()
-            .fold(
-                None::<(&Utf8PathBuf, PackageJson)>,
-                |result, (package_path, data)| {
-                    let node_manifest = data
-                        .node_package
-                        .as_ref()
-                        .map(|node_package| &node_package.manifest)?;
-                    if path.strip_prefix(package_path).is_err() {
-                        return None;
-                    }
+        let mut result: Option<(&Utf8PathBuf, &PackageJson)> = None;
 
-                    result
-                        .is_none_or(|(matched_package_path, _)| {
-                            package_path.as_str().len() > matched_package_path.as_str().len()
-                        })
-                        .then(|| (package_path, node_manifest.clone()))
-                },
-            )
-            .map(|(matched_package_path, package_json)| {
-                (matched_package_path.clone(), package_json)
-            })
+        let packages = self.0.pin();
+        for (package_path, data) in packages.iter() {
+            let Some(node_manifest) = data
+                .node_package
+                .as_ref()
+                .map(|node_package| &node_package.manifest)
+            else {
+                continue;
+            };
+
+            let is_best_match = path.strip_prefix(package_path).is_ok()
+                && result.is_none_or(|(matched_package_path, _)| {
+                    package_path.as_str().len() > matched_package_path.as_str().len()
+                });
+
+            if is_best_match {
+                result = Some((package_path, node_manifest));
+            }
+        }
+
+        result.map(|(package_path, package_json)| (package_path.clone(), package_json.clone()))
     }
 
     pub fn insert_node_manifest(&self, path: Utf8PathBuf, manifest: PackageJson) {

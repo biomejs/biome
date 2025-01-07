@@ -285,7 +285,16 @@ impl WorkspaceServer {
     ) -> Result<(), WorkspaceError> {
         let path: Utf8PathBuf = path.into();
         let mut source = document_file_source.unwrap_or(DocumentFileSource::from_path(&path));
-        let manifest = self.project_layout.get_node_manifest_for_path(&path);
+        let manifest = if opened_by_scanner {
+            // FIXME: It doesn't make sense to retrieve the manifest when the
+            //        file is opened by the scanner, because it means the
+            //        project layout isn't yet initialized anyway. But that
+            //        highlights an issue with the CommonJS check below, since
+            //        we can't seem to set this correctly now.
+            None
+        } else {
+            self.project_layout.get_node_manifest_for_path(&path)
+        };
 
         if let DocumentFileSource::Js(js) = &mut source {
             if let Some((_, manifest)) = manifest {

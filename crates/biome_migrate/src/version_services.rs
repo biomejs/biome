@@ -4,7 +4,6 @@ use biome_analyze::{
 };
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_rowan::AstNode;
-use camino::Utf8Path;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
@@ -31,7 +30,6 @@ impl FromServices for VersionServices {
     fn from_services(
         rule_key: &RuleKey,
         services: &ServiceBag,
-        _file_path: &Utf8Path,
     ) -> Result<Self, MissingServicesDiagnostic> {
         let version: &Arc<TheVersion> = services
             .get_service()
