@@ -47,7 +47,7 @@ import 'react-dom'
 ```block
 frontend/file1.js:1:8 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The current dependency isn't specified in your package.json.
+  i Dependency react-dom isn't specified in frontend/package.json.
   
   > 1 │ import 'react-dom'
       │        ^^^^^^^^^^^
