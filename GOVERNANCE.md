@@ -240,8 +240,9 @@ conditions:
   the same benefits as a project sponsor. Their sponsorship benefits will be based on the monthly
   fee paid to the Core Contributor.
 - If the work that is expected to be delivered does not contribute to Biome's last-published
-  roadmap, Biome asks for a 30% fee over the total amount earned through the contract. This is to
-  cover review, project upkeep and continued maintenance of the functionality after merging.
+  roadmap, Biome asks for a 30% fee over the total net amount (excluding VAT) earned through the
+  contract. This is to cover review, project upkeep and continued maintenance of the functionality
+  after merging.
   - For work that directly benefits the Biome roadmap, no such fee is required. For work that partly
     or indirectly benefits the roadmap, a customized fee may be negotiated.
   - If the last-published roadmap is more than 12 months old, the Core Contributor is asked to
@@ -253,10 +254,11 @@ conditions:
   [its values](https://biomejs.dev/internals/philosophy/).
 - When a Core Contributor starts or ends a paid contract, it should be announced in the
   `Core > #core-team` channel.
-- Biome cannot be held responsible for the performance of any individual contributor. We may help
-  clients who are interested in hiring a Biome contributor for a contract to get in contact with
-  them, but we cannot guarantee their performance. It is the client's responsibility to do due
-  diligence and determine whether the contributor is suitable for the assigned contract.
+- Biome and its members cannot be held responsible for the performance of any individual
+  contributor. We may help clients who are interested in hiring a Biome contributor for a contract
+  to get in contact with them, but we cannot guarantee their performance. It is the client's
+  responsibility to do due diligence and determine whether the contributor is suitable for the
+  assigned contract.
 
 ### Fund Allocation
 
