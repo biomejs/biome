@@ -542,7 +542,9 @@ pub trait ServiceLanguage: biome_rowan::Language {
         suppression_reason: Option<&str>,
     ) -> AnalyzerOptions;
 
-    /// Responsible to check whether this file has linter enabled. The language is responsible to check this
+    /// Checks whether this file has the linter enabled.
+    ///
+    /// The language is responsible for checking this.
     fn linter_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool;
 
     /// Responsible to check whether this file has formatter enabled. The language is responsible to check this
