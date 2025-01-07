@@ -103,6 +103,7 @@ impl CssFormatterConfiguration {
 }
 
 pub type CssLinterEnabled = Bool<true>;
+
 /// Options that changes how the CSS linter behaves
 #[derive(
     Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
@@ -121,7 +122,9 @@ impl CssLinterConfiguration {
         self.enabled.unwrap_or_default().into()
     }
 }
+
 pub type CssAssistEnabled = Bool<false>;
+
 /// Options that changes how the CSS assist behaves
 #[derive(
     Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,

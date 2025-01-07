@@ -80,7 +80,7 @@ impl GraphqlFormatterConfiguration {
 
 pub type GraphqlLinterEnabled = Bool<true>;
 
-/// Options that changes how the GraphQL linter behaves
+/// Options that change how the GraphQL linter behaves.
 #[derive(
     Bpaf, Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize,
 )]
