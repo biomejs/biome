@@ -1,16 +1,15 @@
 import type {
 	BiomePath,
+	Configuration,
 	Diagnostic,
 	FixFileMode,
-	Configuration,
 	ProjectKey,
 	Workspace,
 } from "@biomejs/wasm-nodejs";
 import { Distribution, type WasmModule, loadModule, wrapError } from "./wasm";
 
 // Re-export of some useful types for users
-export type Configuration = Configuration;
-export type { Diagnostic };
+export type { Diagnostic, Configuration };
 export { Distribution };
 
 export interface FormatContentDebugOptions extends FormatContentOptions {
