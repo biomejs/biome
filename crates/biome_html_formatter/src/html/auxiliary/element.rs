@@ -54,8 +54,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             || opening_element
                 .r_angle_token()
                 .ok()
-                .map(|tok| tok.has_trailing_whitespace())
-                .unwrap_or_default();
+                .is_some_and(|tok| tok.has_trailing_whitespace());
         let content_has_trailing_whitespace = children
             .syntax()
             .last_token()
@@ -63,8 +62,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             || closing_element
                 .l_angle_token()
                 .ok()
-                .map(|tok| tok.has_leading_whitespace_or_newline())
-                .unwrap_or_default();
+                .is_some_and(|tok| tok.has_leading_whitespace_or_newline());
 
         // "Borrowing" in this context refers to tokens in nodes that would normally be
         // formatted by that node's formatter, but are instead formatted by a sibling
