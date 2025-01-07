@@ -886,7 +886,7 @@ impl OverrideSettings {
         options
     }
 
-    /// It scans the current override rules and return the parser options that of the first override is matched
+    /// Scans the override rules and returns the parser options of the first matching override.
     pub fn to_override_css_parser_options(
         &self,
         path: &Utf8Path,
