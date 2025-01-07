@@ -106,7 +106,7 @@ pub struct JsFormatterConfiguration {
 }
 
 impl JsFormatterConfiguration {
-    pub fn enabled_resolved(&self) -> bool {
+    pub fn is_enabled(&self) -> bool {
         self.enabled.unwrap_or_default().into()
     }
 

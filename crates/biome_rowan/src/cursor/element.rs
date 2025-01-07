@@ -110,7 +110,7 @@ impl SyntaxElement {
     }
 }
 
-// region: impls
+// #region: impls
 
 impl From<SyntaxNode> for SyntaxElement {
     #[inline]
@@ -126,4 +126,4 @@ impl From<SyntaxToken> for SyntaxElement {
     }
 }
 
-// endregion
+// #endregion

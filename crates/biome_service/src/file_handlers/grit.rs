@@ -3,7 +3,7 @@ use super::{
     ExtensionHandler, FormatterCapabilities, LintParams, LintResults, ParseResult,
     ParserCapabilities, SearchCapabilities,
 };
-use crate::settings::check_feature_activity;
+use crate::settings::{check_feature_activity, check_override_feature_activity};
 use crate::workspace::GetSyntaxTreeResult;
 use crate::{
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
@@ -139,7 +139,7 @@ impl ServiceLanguage for GritLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
-    fn formatter_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
         settings
             .and_then(|settings| {
                 let overrides_activity =
@@ -149,10 +149,9 @@ impl ServiceLanguage for GritLanguage {
                         .iter()
                         .rev()
                         .find_map(|pattern| {
-                            check_feature_activity(
+                            check_override_feature_activity(
                                 pattern.languages.grit.formatter.enabled,
                                 pattern.formatter.enabled,
-                                true,
                             )
                             .and_then(|enabled| {
                                 // Then check whether the path satisfies
@@ -169,14 +168,13 @@ impl ServiceLanguage for GritLanguage {
                 overrides_activity.or(check_feature_activity(
                     settings.languages.grit.formatter.enabled,
                     settings.formatter.enabled,
-                    false,
                 ))
             })
             .unwrap_or_default()
             .into()
     }
 
-    fn assist_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+    fn assist_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
         settings
             .and_then(|settings| {
                 let overrides_activity =
@@ -186,10 +184,9 @@ impl ServiceLanguage for GritLanguage {
                         .iter()
                         .rev()
                         .find_map(|pattern| {
-                            check_feature_activity(
+                            check_override_feature_activity(
                                 pattern.languages.grit.assist.enabled,
                                 pattern.assist.enabled,
-                                true,
                             )
                             .and_then(|enabled| {
                                 // Then check whether the path satisfies
@@ -206,14 +203,13 @@ impl ServiceLanguage for GritLanguage {
                 overrides_activity.or(check_feature_activity(
                     settings.languages.grit.assist.enabled,
                     settings.assist.enabled,
-                    false,
                 ))
             })
             .unwrap_or_default()
             .into()
     }
 
-    fn linter_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+    fn linter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
         settings
             .and_then(|settings| {
                 let overrides_activity =
@@ -223,10 +219,9 @@ impl ServiceLanguage for GritLanguage {
                         .iter()
                         .rev()
                         .find_map(|pattern| {
-                            check_feature_activity(
+                            check_override_feature_activity(
                                 pattern.languages.grit.linter.enabled,
                                 pattern.linter.enabled,
-                                true,
                             )
                             .and_then(|enabled| {
                                 // Then check whether the path satisfies
@@ -243,7 +238,6 @@ impl ServiceLanguage for GritLanguage {
                 overrides_activity.or(check_feature_activity(
                     settings.languages.grit.linter.enabled,
                     settings.linter.enabled,
-                    false,
                 ))
             })
             .unwrap_or_default()
@@ -286,15 +280,15 @@ impl ExtensionHandler for GritFileHandler {
 }
 
 fn formatter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.formatter_enabled_for_this_file_path::<GritLanguage>(path)
+    handle.formatter_enabled_for_file_path::<GritLanguage>(path)
 }
 
 fn linter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.linter_enabled_for_this_file_path::<GritLanguage>(path)
+    handle.linter_enabled_for_file_path::<GritLanguage>(path)
 }
 
 fn assist_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.assist_enabled_for_this_file_path::<GritLanguage>(path)
+    handle.assist_enabled_for_file_path::<GritLanguage>(path)
 }
 
 fn search_enabled(_path: &Utf8Path, _handle: &WorkspaceSettingsHandle) -> bool {

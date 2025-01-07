@@ -104,7 +104,7 @@ pub struct JsonFormatterConfiguration {
 }
 
 impl JsonFormatterConfiguration {
-    pub fn enabled_resolved(&self) -> bool {
+    pub fn is_enabled(&self) -> bool {
         self.enabled.unwrap_or_default().into()
     }
 
@@ -143,7 +143,7 @@ pub struct JsonAssistConfiguration {
 }
 
 impl JsonLinterConfiguration {
-    pub fn enabled_resolved(&self) -> bool {
+    pub fn is_enabled(&self) -> bool {
         self.enabled.unwrap_or_default().into()
     }
 }

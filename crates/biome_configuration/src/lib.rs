@@ -7,7 +7,6 @@ pub mod bool;
 pub mod css;
 pub mod diagnostics;
 pub mod editorconfig;
-pub mod file_size;
 pub mod formatter;
 pub mod generated;
 pub mod graphql;
@@ -15,6 +14,7 @@ pub mod grit;
 pub mod html;
 pub mod javascript;
 pub mod json;
+pub mod max_limit;
 mod overrides;
 pub mod plugins;
 pub mod vcs;
@@ -25,12 +25,12 @@ use crate::bool::Bool;
 use crate::css::{CssFormatterConfiguration, CssLinterConfiguration, CssParserConfiguration};
 pub use crate::diagnostics::BiomeDiagnostic;
 pub use crate::diagnostics::CantLoadExtendFile;
-use crate::file_size::FileSize;
 pub use crate::generated::{push_to_analyzer_assist, push_to_analyzer_rules};
 use crate::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
 pub use crate::grit::{grit_configuration, GritConfiguration};
 use crate::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use crate::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
+use crate::max_limit::MaxLimit;
 use crate::vcs::{vcs_configuration, VcsConfiguration};
 pub use analyzer::{
     linter_configuration, LinterConfiguration, RuleConfiguration, RuleFixConfiguration,
@@ -337,7 +337,7 @@ pub struct FilesConfiguration {
     /// this limit will be ignored for performance reasons. Defaults to 1 MiB
     #[bpaf(long("files-max-size"), argument("NUMBER"))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub max_size: Option<FileSize>,
+    pub max_size: Option<MaxLimit>,
 
     /// Tells Biome to not emit diagnostics when handling files that doesn't know
     #[bpaf(long("files-ignore-unknown"), argument("true|false"), optional)]

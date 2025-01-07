@@ -9,8 +9,9 @@ use crate::file_handlers::{
     LintResults, ParserCapabilities,
 };
 use crate::settings::{
-    check_feature_activity, FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings,
-    OverrideSettings, ServiceLanguage, Settings, WorkspaceSettingsHandle,
+    check_feature_activity, check_override_feature_activity, FormatSettings, LanguageListSettings,
+    LanguageSettings, LinterSettings, OverrideSettings, ServiceLanguage, Settings,
+    WorkspaceSettingsHandle,
 };
 use crate::workspace::{
     CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
@@ -206,7 +207,7 @@ impl ServiceLanguage for JsonLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
-    fn formatter_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
         settings
             .and_then(|settings| {
                 let overrides_activity =
@@ -216,10 +217,9 @@ impl ServiceLanguage for JsonLanguage {
                         .iter()
                         .rev()
                         .find_map(|pattern| {
-                            check_feature_activity(
+                            check_override_feature_activity(
                                 pattern.languages.json.formatter.enabled,
                                 pattern.formatter.enabled,
-                                true,
                             )
                             .and_then(|enabled| {
                                 // Then check whether the path satisfies
@@ -236,14 +236,13 @@ impl ServiceLanguage for JsonLanguage {
                 overrides_activity.or(check_feature_activity(
                     settings.languages.json.formatter.enabled,
                     settings.formatter.enabled,
-                    false,
                 ))
             })
             .unwrap_or_default()
             .into()
     }
 
-    fn assist_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+    fn assist_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
         settings
             .and_then(|settings| {
                 let overrides_activity =
@@ -253,10 +252,9 @@ impl ServiceLanguage for JsonLanguage {
                         .iter()
                         .rev()
                         .find_map(|pattern| {
-                            check_feature_activity(
+                            check_override_feature_activity(
                                 pattern.languages.json.assist.enabled,
                                 pattern.assist.enabled,
-                                true,
                             )
                             .and_then(|enabled| {
                                 // Then check whether the path satisfies
@@ -273,14 +271,13 @@ impl ServiceLanguage for JsonLanguage {
                 overrides_activity.or(check_feature_activity(
                     settings.languages.json.assist.enabled,
                     settings.assist.enabled,
-                    false,
                 ))
             })
             .unwrap_or_default()
             .into()
     }
 
-    fn linter_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+    fn linter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
         settings
             .and_then(|settings| {
                 let overrides_activity =
@@ -290,10 +287,9 @@ impl ServiceLanguage for JsonLanguage {
                         .iter()
                         .rev()
                         .find_map(|pattern| {
-                            check_feature_activity(
+                            check_override_feature_activity(
                                 pattern.languages.json.linter.enabled,
                                 pattern.linter.enabled,
-                                true,
                             )
                             .and_then(|enabled| {
                                 // Then check whether the path satisfies
@@ -310,7 +306,6 @@ impl ServiceLanguage for JsonLanguage {
                 overrides_activity.or(check_feature_activity(
                     settings.languages.json.linter.enabled,
                     settings.linter.enabled,
-                    false,
                 ))
             })
             .unwrap_or_default()
@@ -353,15 +348,15 @@ impl ExtensionHandler for JsonFileHandler {
 }
 
 fn formatter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.formatter_enabled_for_this_file_path::<JsonLanguage>(path)
+    handle.formatter_enabled_for_file_path::<JsonLanguage>(path)
 }
 
 fn linter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.linter_enabled_for_this_file_path::<JsonLanguage>(path)
+    handle.linter_enabled_for_file_path::<JsonLanguage>(path)
 }
 
 fn assist_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.assist_enabled_for_this_file_path::<JsonLanguage>(path)
+    handle.assist_enabled_for_file_path::<JsonLanguage>(path)
 }
 
 fn search_enabled(_path: &Utf8Path, _handle: &WorkspaceSettingsHandle) -> bool {

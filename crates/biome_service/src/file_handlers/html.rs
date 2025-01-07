@@ -18,7 +18,7 @@ use super::{
     AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, EnabledForPath,
     ExtensionHandler, FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
 };
-use crate::settings::check_feature_activity;
+use crate::settings::{check_feature_activity, check_override_feature_activity};
 use crate::{
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
     workspace::GetSyntaxTreeResult,
@@ -139,7 +139,7 @@ impl ServiceLanguage for HtmlLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
-    fn formatter_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
         settings
             .and_then(|settings| {
                 let overrides_activity =
@@ -149,10 +149,9 @@ impl ServiceLanguage for HtmlLanguage {
                         .iter()
                         .rev()
                         .find_map(|pattern| {
-                            check_feature_activity(
+                            check_override_feature_activity(
                                 pattern.languages.html.formatter.enabled,
                                 pattern.formatter.enabled,
-                                true,
                             )
                             .and_then(|enabled| {
                                 // Then check whether the path satisfies
@@ -169,18 +168,17 @@ impl ServiceLanguage for HtmlLanguage {
                 overrides_activity.or(check_feature_activity(
                     settings.languages.html.formatter.enabled,
                     settings.formatter.enabled,
-                    false,
                 ))
             })
             .unwrap_or_default()
             .into()
     }
 
-    fn assist_enabled_for_this_file_path(_settings: Option<&Settings>, _path: &Utf8Path) -> bool {
+    fn assist_enabled_for_file_path(_settings: Option<&Settings>, _path: &Utf8Path) -> bool {
         false
     }
 
-    fn linter_enabled_for_this_file_path(_settings: Option<&Settings>, _path: &Utf8Path) -> bool {
+    fn linter_enabled_for_file_path(_settings: Option<&Settings>, _path: &Utf8Path) -> bool {
         false
     }
 }
@@ -220,15 +218,15 @@ impl ExtensionHandler for HtmlFileHandler {
 }
 
 fn formatter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.formatter_enabled_for_this_file_path::<HtmlLanguage>(path)
+    handle.formatter_enabled_for_file_path::<HtmlLanguage>(path)
 }
 
 fn linter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.linter_enabled_for_this_file_path::<HtmlLanguage>(path)
+    handle.linter_enabled_for_file_path::<HtmlLanguage>(path)
 }
 
 fn assist_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.assist_enabled_for_this_file_path::<HtmlLanguage>(path)
+    handle.assist_enabled_for_file_path::<HtmlLanguage>(path)
 }
 
 fn search_enabled(_path: &Utf8Path, _handle: &WorkspaceSettingsHandle) -> bool {

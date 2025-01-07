@@ -204,7 +204,7 @@ impl Display for RageConfiguration<'_> {
         match load_configuration(self.fs, ConfigurationPathHint::default()) {
             Ok(loaded_configuration) => {
                 if loaded_configuration.directory_path.is_none() {
-                    KeyValuePair("Status", markup!(<Dim>"unset"</Dim>)).fmt(fmt)?;
+                    KeyValuePair("Status", markup!(<Dim>"Not set"</Dim>)).fmt(fmt)?;
                 } else {
                     let LoadedConfiguration {
                         configuration,
@@ -242,14 +242,14 @@ impl Display for RageConfiguration<'_> {
                     // Print formatter configuration if --formatter option is true
                     if self.formatter {
                         let formatter_configuration = configuration.get_formatter_configuration();
-                        let ignore = formatter_configuration.ignore.map(|s| {
-                            s.iter()
+                        let ignore = formatter_configuration.ignore.map(|list| {
+                            list.iter()
                                 .map(|s| s.to_string())
                                 .collect::<Vec<_>>()
                                 .join(", ")
                         });
-                        let include = formatter_configuration.include.map(|s| {
-                            s.iter()
+                        let include = formatter_configuration.include.map(|list| {
+                            list.iter()
                                 .map(|s| s.to_string())
                                 .collect::<Vec<_>>()
                                 .join(", ")

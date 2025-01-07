@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/commands/rage.rs
 expression: content
+snapshot_kind: text
 ---
 # Emitted Messages
 
@@ -24,7 +25,7 @@ Environment:
   NODE_PACKAGE_MANAGER:         unset
 
 Biome Configuration:
-  Status:                       unset
+  Status:                       Not set
 
 Server:
   Version:                      0.0.0

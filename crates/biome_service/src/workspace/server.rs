@@ -441,7 +441,10 @@ impl WorkspaceServer {
             .parse
             .ok_or_else(self.build_capability_error(biome_path))?;
 
-        let settings = self.projects.unwrap_settings(project_key)?;
+        let settings = self
+            .projects
+            .get_settings(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
         let parsed = parse(
             biome_path,
             file_source,
@@ -530,7 +533,11 @@ impl Workspace for WorkspaceServer {
         let path = params.path.as_path();
         let capabilities = self.get_file_capabilities(&params.path);
 
-        let handle = WorkspaceSettingsHandle::from(self.projects.unwrap_settings(project_key)?);
+        let handle = WorkspaceSettingsHandle::from(
+            self.projects
+                .get_settings(project_key)
+                .ok_or_else(WorkspaceError::no_project)?,
+        );
         let mut file_features = FileFeaturesResult::new();
         let language = DocumentFileSource::from_path(path);
         let file_name = path.file_name();
@@ -582,7 +589,10 @@ impl Workspace for WorkspaceServer {
     /// by another thread having previously panicked while holding the lock
     #[tracing::instrument(level = "trace", skip(self))]
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
-        let mut settings = self.projects.unwrap_settings(params.project_key)?;
+        let mut settings = self
+            .projects
+            .get_settings(params.project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
 
         settings.merge_with_configuration(
             params.configuration,
@@ -728,8 +738,11 @@ impl Workspace for WorkspaceServer {
             .debug
             .debug_formatter_ir
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let handle =
-            WorkspaceSettingsHandle::from(self.projects.unwrap_settings(params.project_key)?);
+        let handle = WorkspaceSettingsHandle::from(
+            self.projects
+                .get_settings(params.project_key)
+                .ok_or_else(WorkspaceError::no_project)?,
+        );
         let parse = self.get_parse(&params.path)?;
         if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
         {
@@ -844,7 +857,10 @@ impl Workspace for WorkspaceServer {
         let manifest = self.get_manifest(project_key)?;
         let (diagnostics, errors, skipped_diagnostics) =
             if let Some(lint) = self.get_file_capabilities(&path).analyzer.lint {
-                let settings = self.projects.unwrap_settings(project_key)?;
+                let settings = self
+                    .projects
+                    .get_settings(project_key)
+                    .ok_or_else(WorkspaceError::no_project)?;
                 info_span!("Pulling diagnostics", categories =? categories).in_scope(|| {
                     let results = lint(LintParams {
                         parse,
@@ -914,7 +930,10 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(&path)?;
         let manifest = self.get_manifest(project_key)?;
         let language = self.get_file_source(&path);
-        let settings = self.projects.unwrap_settings(project_key)?;
+        let settings = self
+            .projects
+            .get_settings(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
         Ok(code_actions(CodeActionsParams {
             parse,
             range,
@@ -937,8 +956,11 @@ impl Workspace for WorkspaceServer {
             .formatter
             .format
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let handle =
-            WorkspaceSettingsHandle::from(self.projects.unwrap_settings(params.project_key)?);
+        let handle = WorkspaceSettingsHandle::from(
+            self.projects
+                .get_settings(params.project_key)
+                .ok_or_else(WorkspaceError::no_project)?,
+        );
         let parse = self.get_parse(&params.path)?;
 
         if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
@@ -955,8 +977,11 @@ impl Workspace for WorkspaceServer {
             .formatter
             .format_range
             .ok_or_else(self.build_capability_error(&params.path))?;
-        let settings =
-            WorkspaceSettingsHandle::from(self.projects.unwrap_settings(params.project_key)?);
+        let settings = WorkspaceSettingsHandle::from(
+            self.projects
+                .get_settings(params.project_key)
+                .ok_or_else(WorkspaceError::no_project)?,
+        );
         let parse = self.get_parse(&params.path)?;
         if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
             && parse.has_errors()
@@ -980,8 +1005,11 @@ impl Workspace for WorkspaceServer {
             .format_on_type
             .ok_or_else(self.build_capability_error(&params.path))?;
 
-        let handle =
-            WorkspaceSettingsHandle::from(self.projects.unwrap_settings(params.project_key)?);
+        let handle = WorkspaceSettingsHandle::from(
+            self.projects
+                .get_settings(params.project_key)
+                .ok_or_else(WorkspaceError::no_project)?,
+        );
         let parse = self.get_parse(&params.path)?;
         if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
         {
@@ -1021,7 +1049,10 @@ impl Workspace for WorkspaceServer {
         let parse = self.get_parse(&path)?;
 
         let manifest = self.get_manifest(project_key)?;
-        let settings = self.projects.unwrap_settings(project_key)?;
+        let settings = self
+            .projects
+            .get_settings(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
         let language = self.get_file_source(&path);
         fix_all(FixAllParams {
             parse,
@@ -1092,7 +1123,10 @@ impl Workspace for WorkspaceServer {
             .search
             .search
             .ok_or_else(self.build_capability_error(&path))?;
-        let settings = self.projects.unwrap_settings(project_key)?;
+        let settings = self
+            .projects
+            .get_settings(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
         let parse = self.get_parse(&path)?;
 
         let document_file_source = self.get_file_source(&path);

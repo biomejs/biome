@@ -458,7 +458,7 @@ impl fmt::Display for SyntaxNode {
     }
 }
 
-// region: iterators
+// #region: iterators
 
 #[derive(Clone, Debug)]
 pub(crate) struct SyntaxNodeChildren {
@@ -900,7 +900,7 @@ impl<'a> Siblings<'a> {
     }
 }
 
-// endregion
+// #endregion
 
 #[cfg(test)]
 mod tests {

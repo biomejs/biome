@@ -93,7 +93,7 @@ pub struct CssFormatterConfiguration {
 }
 
 impl CssFormatterConfiguration {
-    pub fn enabled_resolved(&self) -> bool {
+    pub fn is_enabled(&self) -> bool {
         self.enabled.unwrap_or_default().into()
     }
 
@@ -118,7 +118,7 @@ pub struct CssLinterConfiguration {
 }
 
 impl CssLinterConfiguration {
-    pub fn enabled(&self) -> bool {
+    pub fn is_enabled(&self) -> bool {
         self.enabled.unwrap_or_default().into()
     }
 }
@@ -139,7 +139,7 @@ pub struct CssAssistConfiguration {
 }
 
 impl CssAssistConfiguration {
-    pub fn enabled_resolved(&self) -> bool {
+    pub fn is_enabled(&self) -> bool {
         self.enabled.unwrap_or_default().into()
     }
 }
@@ -148,7 +148,7 @@ impl CssAssistConfiguration {
 fn default_css() {
     let css_configuration = CssFormatterConfiguration::default();
 
-    assert!(css_configuration.enabled_resolved());
+    assert!(css_configuration.is_enabled());
     assert_eq!(css_configuration.indent_style, None);
     assert_eq!(css_configuration.indent_width, None);
     assert_eq!(css_configuration.line_ending, None);

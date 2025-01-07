@@ -6,7 +6,10 @@ use super::{
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
 use crate::file_handlers::{is_diagnostic_error, FixAllParams};
-use crate::settings::{check_feature_activity, LinterSettings, OverrideSettings, Settings};
+use crate::settings::{
+    check_feature_activity, check_override_feature_activity, LinterSettings, OverrideSettings,
+    Settings,
+};
 use crate::workspace::DocumentFileSource;
 use crate::{
     settings::{
@@ -350,7 +353,7 @@ impl ServiceLanguage for JsLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
-    fn formatter_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
         settings
             .and_then(|settings| {
                 let overrides_activity =
@@ -360,10 +363,9 @@ impl ServiceLanguage for JsLanguage {
                         .iter()
                         .rev()
                         .find_map(|pattern| {
-                            check_feature_activity(
+                            check_override_feature_activity(
                                 pattern.languages.javascript.formatter.enabled,
                                 pattern.formatter.enabled,
-                                true,
                             )
                             .and_then(|enabled| {
                                 // Then check whether the path satisfies
@@ -380,14 +382,13 @@ impl ServiceLanguage for JsLanguage {
                 overrides_activity.or(check_feature_activity(
                     settings.languages.javascript.formatter.enabled,
                     settings.formatter.enabled,
-                    false,
                 ))
             })
             .unwrap_or_default()
             .into()
     }
 
-    fn assist_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+    fn assist_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
         settings
             .and_then(|settings| {
                 let overrides_activity =
@@ -397,10 +398,9 @@ impl ServiceLanguage for JsLanguage {
                         .iter()
                         .rev()
                         .find_map(|pattern| {
-                            check_feature_activity(
+                            check_override_feature_activity(
                                 pattern.languages.javascript.assist.enabled,
                                 pattern.assist.enabled,
-                                true,
                             )
                             .and_then(|enabled| {
                                 // Then check whether the path satisfies
@@ -417,14 +417,13 @@ impl ServiceLanguage for JsLanguage {
                 overrides_activity.or(check_feature_activity(
                     settings.languages.javascript.assist.enabled,
                     settings.assist.enabled,
-                    false,
                 ))
             })
             .unwrap_or_default()
             .into()
     }
 
-    fn linter_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+    fn linter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
         settings
             .and_then(|settings| {
                 let overrides_activity =
@@ -434,10 +433,9 @@ impl ServiceLanguage for JsLanguage {
                         .iter()
                         .rev()
                         .find_map(|pattern| {
-                            check_feature_activity(
+                            check_override_feature_activity(
                                 pattern.languages.javascript.linter.enabled,
                                 pattern.linter.enabled,
-                                true,
                             )
                             .and_then(|enabled| {
                                 // Then check whether the path satisfies
@@ -454,7 +452,6 @@ impl ServiceLanguage for JsLanguage {
                 overrides_activity.or(check_feature_activity(
                     settings.languages.javascript.linter.enabled,
                     settings.linter.enabled,
-                    false,
                 ))
             })
             .unwrap_or_default()
@@ -499,15 +496,15 @@ impl ExtensionHandler for JsFileHandler {
 }
 
 pub fn formatter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.formatter_enabled_for_this_file_path::<JsLanguage>(path)
+    handle.formatter_enabled_for_file_path::<JsLanguage>(path)
 }
 
 pub fn linter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.linter_enabled_for_this_file_path::<JsLanguage>(path)
+    handle.linter_enabled_for_file_path::<JsLanguage>(path)
 }
 
 pub fn assist_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.assist_enabled_for_this_file_path::<JsLanguage>(path)
+    handle.assist_enabled_for_file_path::<JsLanguage>(path)
 }
 
 pub fn search_enabled(_path: &Utf8Path, _handle: &WorkspaceSettingsHandle) -> bool {

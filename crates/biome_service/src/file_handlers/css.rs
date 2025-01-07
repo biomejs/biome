@@ -9,8 +9,9 @@ use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
 };
 use crate::settings::{
-    check_feature_activity, FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings,
-    OverrideSettings, ServiceLanguage, Settings, WorkspaceSettingsHandle,
+    check_feature_activity, check_override_feature_activity, FormatSettings, LanguageListSettings,
+    LanguageSettings, LinterSettings, OverrideSettings, ServiceLanguage, Settings,
+    WorkspaceSettingsHandle,
 };
 use crate::workspace::{
     CodeAction, DocumentFileSource, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
@@ -224,7 +225,7 @@ impl ServiceLanguage for CssLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
-    fn formatter_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
         settings
             .and_then(|settings| {
                 let overrides_activity =
@@ -234,10 +235,9 @@ impl ServiceLanguage for CssLanguage {
                         .iter()
                         .rev()
                         .find_map(|pattern| {
-                            check_feature_activity(
+                            check_override_feature_activity(
                                 pattern.languages.css.formatter.enabled,
                                 pattern.formatter.enabled,
-                                true,
                             )
                             .and_then(|enabled| {
                                 // Then check whether the path satisfies
@@ -254,14 +254,13 @@ impl ServiceLanguage for CssLanguage {
                 overrides_activity.or(check_feature_activity(
                     settings.languages.css.formatter.enabled,
                     settings.formatter.enabled,
-                    false,
                 ))
             })
             .unwrap_or_default()
             .into()
     }
 
-    fn assist_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+    fn assist_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
         settings
             .and_then(|settings| {
                 let overrides_activity =
@@ -271,10 +270,9 @@ impl ServiceLanguage for CssLanguage {
                         .iter()
                         .rev()
                         .find_map(|pattern| {
-                            check_feature_activity(
+                            check_override_feature_activity(
                                 pattern.languages.css.assist.enabled,
                                 pattern.assist.enabled,
-                                true,
                             )
                             .and_then(|enabled| {
                                 // Then check whether the path satisfies
@@ -291,14 +289,13 @@ impl ServiceLanguage for CssLanguage {
                 overrides_activity.or(check_feature_activity(
                     settings.languages.css.assist.enabled,
                     settings.assist.enabled,
-                    false,
                 ))
             })
             .unwrap_or_default()
             .into()
     }
 
-    fn linter_enabled_for_this_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+    fn linter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
         settings
             .and_then(|settings| {
                 let overrides_activity =
@@ -308,10 +305,9 @@ impl ServiceLanguage for CssLanguage {
                         .iter()
                         .rev()
                         .find_map(|pattern| {
-                            check_feature_activity(
+                            check_override_feature_activity(
                                 pattern.languages.css.linter.enabled,
                                 pattern.linter.enabled,
-                                true,
                             )
                             .and_then(|enabled| {
                                 // Then check whether the path satisfies
@@ -328,7 +324,6 @@ impl ServiceLanguage for CssLanguage {
                 overrides_activity.or(check_feature_activity(
                     settings.languages.css.linter.enabled,
                     settings.linter.enabled,
-                    false,
                 ))
             })
             .unwrap_or_default()
@@ -373,15 +368,15 @@ impl ExtensionHandler for CssFileHandler {
 }
 
 fn formatter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.formatter_enabled_for_this_file_path::<CssLanguage>(path)
+    handle.formatter_enabled_for_file_path::<CssLanguage>(path)
 }
 
 fn linter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.linter_enabled_for_this_file_path::<CssLanguage>(path)
+    handle.linter_enabled_for_file_path::<CssLanguage>(path)
 }
 
 fn assist_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
-    handle.assist_enabled_for_this_file_path::<CssLanguage>(path)
+    handle.assist_enabled_for_file_path::<CssLanguage>(path)
 }
 
 fn search_enabled(_path: &Utf8Path, _handle: &WorkspaceSettingsHandle) -> bool {

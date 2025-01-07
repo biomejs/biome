@@ -1,6 +1,6 @@
+use crate::is_dir;
 use crate::settings::{FilesSettings, Settings};
 use crate::workspace::FeatureKind;
-use crate::{is_dir, WorkspaceError};
 use biome_fs::BiomePath;
 use biome_project::{NodeJsProject, PackageJson};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -89,20 +89,15 @@ impl Projects {
     }
 
     /// Retrieves the settings for the given project.
+    ///
+    /// ## Error
+    ///
+    /// If the project doesn't contain any [Settings]
     pub fn get_settings(&self, project_key: ProjectKey) -> Option<Settings> {
         self.0
             .pin()
             .get(&project_key)
             .map(|data| data.settings.clone())
-    }
-
-    /// Unsafe version of [Projects::get_settings] that return an error
-    pub fn unwrap_settings(&self, project_key: ProjectKey) -> Result<Settings, WorkspaceError> {
-        self.0
-            .pin()
-            .get(&project_key)
-            .map(|data| data.settings.clone())
-            .ok_or(WorkspaceError::no_project())
     }
 
     /// Retrieves the `files` settings for the given project.

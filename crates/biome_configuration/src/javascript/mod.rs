@@ -142,7 +142,7 @@ pub struct JsAssistConfiguration {
 }
 
 impl JsLinterConfiguration {
-    pub fn enabled_resolved(&self) -> bool {
+    pub fn is_enabled(&self) -> bool {
         self.enabled.unwrap_or_default().into()
     }
 }
