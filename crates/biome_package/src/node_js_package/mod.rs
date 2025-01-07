@@ -1,17 +1,17 @@
 mod package_json;
 mod tsconfig_json;
 
-pub use crate::node_js_project::package_json::{Dependencies, PackageJson, PackageType, Version};
-use crate::node_js_project::tsconfig_json::TsConfigJson;
-use crate::{Manifest, Project, ProjectAnalyzeDiagnostic, ProjectAnalyzeResult, LICENSE_LIST};
+pub use package_json::{Dependencies, PackageJson, PackageType, Version};
+
 use biome_rowan::Language;
-use std::path::{Path, PathBuf};
+
+use crate::{Manifest, Package, PackageAnalyzeResult, ProjectAnalyzeDiagnostic, LICENSE_LIST};
+
+use tsconfig_json::TsConfigJson;
 
 #[derive(Default, Debug, Clone)]
 /// A Node.js project.
-pub struct NodeJsProject {
-    /// The path where the project
-    pub manifest_path: PathBuf,
+pub struct NodeJsPackage {
     /// The `package.json` manifest
     pub manifest: PackageJson,
     /// Diagnostics emitted during the operations
@@ -20,7 +20,7 @@ pub struct NodeJsProject {
     pub tsconfig: TsConfigJson,
 }
 
-impl NodeJsProject {
+impl NodeJsPackage {
     pub fn deserialize_tsconfig(&mut self, content: &ProjectLanguageRoot<TsConfigJson>) {
         let tsconfig = TsConfigJson::deserialize_manifest(content);
         let (tsconfig, deserialize_diagnostics) = tsconfig.consume();
@@ -34,7 +34,7 @@ impl NodeJsProject {
 
 pub(crate) type ProjectLanguageRoot<M> = <<M as Manifest>::Language as Language>::Root;
 
-impl Project for NodeJsProject {
+impl Package for NodeJsPackage {
     type Manifest = PackageJson;
 
     fn deserialize_manifest(&mut self, content: &ProjectLanguageRoot<Self::Manifest>) {
@@ -47,15 +47,11 @@ impl Project for NodeJsProject {
             .collect();
     }
 
-    fn project_path(&self) -> &Path {
-        self.manifest_path.as_path()
-    }
-
     fn manifest(&self) -> Option<&Self::Manifest> {
         Some(&self.manifest)
     }
 
-    fn analyze(&self) -> ProjectAnalyzeResult {
+    fn analyze(&self) -> PackageAnalyzeResult {
         let mut diagnostics = vec![];
         if let Some((license, range)) = &self.manifest.license {
             if !LICENSE_LIST.is_valid(license) {
@@ -68,7 +64,7 @@ impl Project for NodeJsProject {
             }
         }
 
-        ProjectAnalyzeResult { diagnostics }
+        PackageAnalyzeResult { diagnostics }
     }
 
     fn has_errors(&self) -> bool {

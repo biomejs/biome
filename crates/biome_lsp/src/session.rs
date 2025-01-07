@@ -16,9 +16,10 @@ use biome_service::configuration::{
 };
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::projects::ProjectKey;
+use biome_service::workspace::ScanProjectFolderParams;
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
-    SetManifestForProjectParams, SupportsFeatureParams,
+    SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::Workspace;
@@ -37,6 +38,7 @@ use std::sync::Arc;
 use std::sync::RwLock;
 use tokio::sync::Notify;
 use tokio::sync::OnceCell;
+use tokio::task::spawn_blocking;
 use tower_lsp::lsp_types;
 use tower_lsp::lsp_types::{Diagnostic, Url};
 use tower_lsp::lsp_types::{MessageType, Registration};
@@ -87,7 +89,6 @@ pub(crate) struct Session {
     pub(crate) cancellation: Arc<Notify>,
 
     pub(crate) config_path: Option<Utf8PathBuf>,
-    pub(crate) manifest_path: Option<Utf8PathBuf>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -182,7 +183,6 @@ impl Session {
             extension_settings: config,
             cancellation,
             config_path: None,
-            manifest_path: None,
             notified_broken_configuration: AtomicBool::new(false),
         }
     }
@@ -472,7 +472,7 @@ impl Session {
     /// This function attempts to read the `biome.json` configuration file from
     /// the root URI and update the workspace settings accordingly
     #[tracing::instrument(level = "trace", skip(self))]
-    pub(crate) async fn load_workspace_settings(&self) {
+    pub(crate) async fn load_workspace_settings(self: &Arc<Self>) {
         // Providing a custom configuration path will not allow to support workspaces
         if let Some(config_path) = &self.config_path {
             let base_path = ConfigurationPathHint::FromUser(config_path.clone());
@@ -514,157 +514,133 @@ impl Session {
         }
     }
 
-    async fn load_biome_configuration_file(
-        &self,
-        base_path: ConfigurationPathHint,
-    ) -> ConfigurationStatus {
-        match load_configuration(self.workspace.fs(), base_path.clone()) {
-            Ok(loaded_configuration) => {
-                if loaded_configuration.has_errors() {
-                    error!("Couldn't load the configuration file, reasons:");
-                    for diagnostic in loaded_configuration.as_diagnostics_iter() {
-                        let message = PrintDescription(diagnostic).to_string();
-                        self.client.log_message(MessageType::ERROR, message).await;
-                    }
-                    ConfigurationStatus::Error
-                } else {
-                    let LoadedConfiguration {
-                        configuration: fs_configuration,
-                        directory_path: configuration_path,
-                        ..
-                    } = loaded_configuration;
-                    info!("Configuration loaded successfully from disk.");
-                    info!("Update workspace settings.");
-
-                    let fs = self.workspace.fs();
-                    let should_use_editorconfig = fs_configuration.use_editorconfig();
-                    let mut configuration = if should_use_editorconfig {
-                        let (editorconfig, editorconfig_diagnostics) = {
-                            let search_path = configuration_path
-                                .clone()
-                                .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
-                            match load_editorconfig(fs, search_path) {
-                                Ok(result) => result,
-                                Err(error) => {
-                                    error!(
-                                        "Failed load the `.editorconfig` file. Reason: {}",
-                                        error
-                                    );
-                                    self.client.log_message(MessageType::ERROR, &error).await;
-                                    return ConfigurationStatus::Error;
-                                }
-                            }
-                        };
-                        for diagnostic in editorconfig_diagnostics {
-                            let message = PrintDescription(&diagnostic).to_string();
-                            self.client.log_message(MessageType::ERROR, message).await;
-                        }
-                        editorconfig.unwrap_or_default()
-                    } else {
-                        Default::default()
-                    };
-
-                    configuration.merge_with(fs_configuration);
-
-                    let result =
-                        configuration.retrieve_gitignore_matches(fs, configuration_path.as_deref());
-
-                    match result {
-                        Ok((vcs_base_path, gitignore_matches)) => {
-                            let register_result = match &base_path {
-                                ConfigurationPathHint::FromLsp(path)
-                                | ConfigurationPathHint::FromWorkspace(path) => {
-                                    self.workspace.open_project(OpenProjectParams {
-                                        path: path.as_path().into(),
-                                        open_uninitialized: true,
-                                    })
-                                }
-                                _ => self.workspace.open_project(OpenProjectParams {
-                                    path: fs
-                                        .working_directory()
-                                        .map(BiomePath::from)
-                                        .unwrap_or_default(),
-                                    open_uninitialized: true,
-                                }),
-                            };
-                            let project_key = match register_result {
-                                Ok(result) => result,
-                                Err(error) => {
-                                    error!("Failed to register the project folder: {error}");
-                                    self.client.log_message(MessageType::ERROR, &error).await;
-                                    return ConfigurationStatus::Error;
-                                }
-                            };
-
-                            let result = self.workspace.update_settings(UpdateSettingsParams {
-                                project_key,
-                                workspace_directory: configuration_path.map(BiomePath::from),
-                                configuration,
-                                vcs_base_path: vcs_base_path.map(BiomePath::from),
-                                gitignore_matches,
-                            });
-
-                            if let Err(error) = result {
-                                error!("Failed to set workspace settings: {}", error);
-                                self.client.log_message(MessageType::ERROR, &error).await;
-                                ConfigurationStatus::Error
-                            } else {
-                                ConfigurationStatus::Loaded
-                            }
-                        }
-                        Err(err) => {
-                            error!("Couldn't load the configuration file, reason:\n {}", err);
-                            self.client.log_message(MessageType::ERROR, &err).await;
-                            ConfigurationStatus::Error
-                        }
-                    }
-                }
+    pub(crate) async fn scan_project_folder(
+        self: &Arc<Self>,
+        project_key: ProjectKey,
+        project_path: BiomePath,
+    ) {
+        let session = self.clone();
+        let _ = spawn_blocking(move || {
+            let result = session
+                .workspace
+                .scan_project_folder(ScanProjectFolderParams {
+                    project_key,
+                    path: Some(project_path),
+                });
+            if let Err(err) = result {
+                error!("Failed to scan project: {err}");
             }
-
-            Err(err) => {
-                error!("Couldn't load the configuration file, reason:\n {}", err);
-                self.client.log_message(MessageType::ERROR, &err).await;
-                ConfigurationStatus::Error
-            }
-        }
+        })
+        .await;
     }
 
-    #[tracing::instrument(level = "trace", skip(self))]
-    pub(crate) async fn load_manifest(&self) {
-        let Some(base_path) = self
-            .manifest_path
-            .as_deref()
-            .map(Utf8PathBuf::from)
-            .or(self.base_path())
-        else {
-            return;
+    async fn load_biome_configuration_file(
+        self: &Arc<Self>,
+        base_path: ConfigurationPathHint,
+    ) -> ConfigurationStatus {
+        let loaded_configuration = match load_configuration(self.workspace.fs(), base_path.clone())
+        {
+            Ok(loaded_configuration) => loaded_configuration,
+            Err(err) => {
+                error!("Couldn't load the configuration file, reason:\n {err}");
+                self.client.log_message(MessageType::ERROR, &err).await;
+                return ConfigurationStatus::Error;
+            }
         };
 
-        let fs = self.workspace.fs();
-        match fs.auto_search(&base_path, &["package.json"], false) {
-            Ok(Some(result)) => {
-                let biome_path = BiomePath::new(result.file_path);
-                let Some(project_key) = self.project_for_path(&biome_path) else {
-                    error!("Cannot determine project for package.json file at {biome_path:?}");
-                    return;
-                };
+        if loaded_configuration.has_errors() {
+            error!("Couldn't load the configuration file, reasons:");
+            for diagnostic in loaded_configuration.as_diagnostics_iter() {
+                let message = PrintDescription(diagnostic).to_string();
+                self.client.log_message(MessageType::ERROR, message).await;
+            }
+            return ConfigurationStatus::Error;
+        }
 
-                let result = self
-                    .workspace
-                    .set_manifest_for_project(SetManifestForProjectParams {
-                        project_key,
-                        manifest_path: biome_path.clone(),
-                        content: result.content,
-                        version: 0,
-                    });
-                if let Err(err) = result {
-                    error!("{err}");
+        info!("Configuration loaded successfully from disk.");
+        info!("Update workspace settings.");
+
+        let LoadedConfiguration {
+            configuration: fs_configuration,
+            directory_path: configuration_path,
+            ..
+        } = loaded_configuration;
+
+        let fs = self.workspace.fs();
+        let should_use_editorconfig = fs_configuration.use_editorconfig();
+        let mut configuration = if should_use_editorconfig {
+            let (editorconfig, editorconfig_diagnostics) = {
+                let search_path = configuration_path
+                    .clone()
+                    .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
+                match load_editorconfig(fs, search_path) {
+                    Ok(result) => result,
+                    Err(error) => {
+                        error!("Failed load the `.editorconfig` file. Reason: {error}");
+                        self.client.log_message(MessageType::ERROR, &error).await;
+                        return ConfigurationStatus::Error;
+                    }
                 }
+            };
+            for diagnostic in editorconfig_diagnostics {
+                let message = PrintDescription(&diagnostic).to_string();
+                self.client.log_message(MessageType::ERROR, message).await;
             }
-            Ok(None) => {}
+            editorconfig.unwrap_or_default()
+        } else {
+            Default::default()
+        };
+
+        configuration.merge_with(fs_configuration);
+
+        let result = configuration.retrieve_gitignore_matches(fs, configuration_path.as_deref());
+        let (vcs_base_path, gitignore_matches) = match result {
+            Ok(result) => result,
             Err(err) => {
-                error!("Couldn't load the package.json file, reason:\n {err}");
+                error!("Couldn't load the configuration file, reason:\n {err}");
+                self.client.log_message(MessageType::ERROR, &err).await;
+                return ConfigurationStatus::Error;
             }
+        };
+
+        let path = match &base_path {
+            ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path) => {
+                path.as_path().into()
+            }
+            _ => fs
+                .working_directory()
+                .map(BiomePath::from)
+                .unwrap_or_default(),
+        };
+        let register_result = self.workspace.open_project(OpenProjectParams {
+            path: path.clone(),
+            open_uninitialized: true,
+        });
+        let project_key = match register_result {
+            Ok(result) => result,
+            Err(error) => {
+                error!("Failed to register the project folder: {error}");
+                self.client.log_message(MessageType::ERROR, &error).await;
+                return ConfigurationStatus::Error;
+            }
+        };
+
+        let result = self.workspace.update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: configuration_path.map(BiomePath::from),
+            configuration,
+            vcs_base_path: vcs_base_path.map(BiomePath::from),
+            gitignore_matches,
+        });
+
+        self.scan_project_folder(project_key, path).await;
+
+        if let Err(error) = result {
+            error!("Failed to set workspace settings: {error}");
+            self.client.log_message(MessageType::ERROR, &error).await;
+            ConfigurationStatus::Error
+        } else {
+            ConfigurationStatus::Loaded
         }
     }
 

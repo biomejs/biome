@@ -1,6 +1,6 @@
 use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt};
 use biome_json_parser::{parse_json, JsonParserOptions};
-use biome_project::{NodeJsProject, Project};
+use biome_package::{NodeJsPackage, Package};
 use std::ffi::OsStr;
 use std::fs::read_to_string;
 use std::path::Path;
@@ -20,25 +20,25 @@ fn run_invalid_manifests(input: &'static str, _: &str, _: &str, _: &str) {
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
-    let mut project = NodeJsProject::default();
+    let mut package = NodeJsPackage::default();
     match input_file.extension().map(OsStr::as_encoded_bytes) {
         Some(b"json") => {
             let parsed = parse_json(input_code.as_str(), JsonParserOptions::default());
-            project.deserialize_manifest(&parsed.tree());
+            package.deserialize_manifest(&parsed.tree());
         }
         _ => {
             panic!("Extension not supported");
         }
     };
 
-    let result = project.analyze();
+    let result = package.analyze();
 
     assert!(
-        project.has_errors() || !result.diagnostics.is_empty(),
+        package.has_errors() || !result.diagnostics.is_empty(),
         "The file {input} should have diagnostics, but it doesn't have any"
     );
 
-    let mut diagnostics_string = project
+    let mut diagnostics_string = package
         .diagnostics
         .into_iter()
         .map(|diagnostic| {
@@ -74,7 +74,7 @@ fn run_invalid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
-    let mut project = NodeJsProject::default();
+    let mut project = NodeJsPackage::default();
     match input_file.extension().map(OsStr::as_encoded_bytes) {
         Some(b"json") => {
             let parsed = parse_json(
@@ -131,7 +131,7 @@ fn run_valid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
-    let mut project = NodeJsProject::default();
+    let mut project = NodeJsPackage::default();
     match input_file.extension().map(OsStr::as_encoded_bytes) {
         Some(b"json") => {
             let parsed = parse_json(

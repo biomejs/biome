@@ -1,5 +1,5 @@
 ---
-source: crates/biome_project/tests/manifest_spec_tests.rs
+source: crates/biome_package/tests/manifest_spec_tests.rs
 expression: name.json
 ---
 name.json:2:10 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

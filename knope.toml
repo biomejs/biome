@@ -164,9 +164,9 @@ versioned_files = ["crates/biome_markup/Cargo.toml"]
 [packages.biome_parser]
 changelog       = "crates/biome_parser/CHANGELOG.md"
 versioned_files = ["crates/biome_parser/Cargo.toml"]
-[packages.biome_project]
-changelog       = "crates/biome_project/CHANGELOG.md"
-versioned_files = ["crates/biome_project/Cargo.toml"]
+[packages.biome_package]
+changelog       = "crates/biome_package/CHANGELOG.md"
+versioned_files = ["crates/biome_package/Cargo.toml"]
 [packages.biome_rowan]
 changelog       = "crates/biome_rowan/CHANGELOG.md"
 versioned_files = ["crates/biome_rowan/Cargo.toml"]

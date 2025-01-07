@@ -1,12 +1,12 @@
 [package]
 authors.workspace    = true
 categories.workspace = true
-description          = "Workspace project handler"
+description          = "Workspace package handler"
 edition.workspace    = true
 homepage.workspace   = true
 keywords.workspace   = true
 license.workspace    = true
-name                 = "biome_project"
+name                 = "biome_package"
 publish              = true
 repository.workspace = true
 version              = "0.5.7"

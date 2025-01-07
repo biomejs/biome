@@ -28,45 +28,41 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             closing_element,
         } = node.as_fields();
 
-        let tag_name = opening_element
-            .clone()
-            .and_then(|e| e.name())
-            .map(|e| e.trim_trivia().map(|t| t.to_string()).unwrap_or_default())
-            .unwrap_or_default();
+        let closing_element = closing_element?;
+        let opening_element = opening_element?;
+        let tag_name = opening_element.name()?;
+        let tag_name = tag_name
+            .trim_trivia()
+            .map(|t| t.value_token())
+            .transpose()?;
 
-        let should_be_verbatim = HTML_VERBATIM_TAGS
-            .iter()
-            .any(|tag| tag_name.eq_ignore_ascii_case(tag));
-        let is_inline_tag = HTML_INLINE_TAGS
-            .iter()
-            .any(|tag| tag_name.eq_ignore_ascii_case(tag));
+        let should_be_verbatim = HTML_VERBATIM_TAGS.iter().any(|tag| {
+            tag_name
+                .as_ref()
+                .is_some_and(|tag_name| tag_name.text().eq_ignore_ascii_case(tag))
+        });
+        let is_inline_tag = HTML_INLINE_TAGS.iter().any(|tag| {
+            tag_name
+                .as_ref()
+                .is_some_and(|tag_name| tag_name.text().eq_ignore_ascii_case(tag))
+        });
 
         let content_has_leading_whitespace = children
             .syntax()
             .first_token()
             .is_some_and(|tok| tok.has_leading_whitespace_or_newline())
             || opening_element
-                .as_ref()
+                .r_angle_token()
                 .ok()
-                .and_then(|elem| {
-                    elem.r_angle_token()
-                        .ok()
-                        .map(|tok| tok.has_trailing_whitespace())
-                })
-                .unwrap_or_default();
+                .is_some_and(|tok| tok.has_trailing_whitespace());
         let content_has_trailing_whitespace = children
             .syntax()
             .last_token()
             .is_some_and(|tok| tok.has_trailing_whitespace())
             || closing_element
-                .as_ref()
+                .l_angle_token()
                 .ok()
-                .and_then(|elem| {
-                    elem.l_angle_token()
-                        .ok()
-                        .map(|tok| tok.has_leading_whitespace_or_newline())
-                })
-                .unwrap_or_default();
+                .is_some_and(|tok| tok.has_leading_whitespace_or_newline());
 
         // "Borrowing" in this context refers to tokens in nodes that would normally be
         // formatted by that node's formatter, but are instead formatted by a sibling
@@ -99,15 +95,12 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             && !content_has_trailing_whitespace;
 
         let borrowed_r_angle = if should_borrow_opening_r_angle {
-            opening_element
-                .as_ref()
-                .ok()
-                .and_then(|elem| elem.r_angle_token().ok())
+            opening_element.r_angle_token().ok()
         } else {
             None
         };
         let borrowed_closing_tag = if should_borrow_closing_tag {
-            closing_element.clone().ok()
+            Some(closing_element.clone())
         } else {
             None
         };
@@ -116,7 +109,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             &FormatHtmlOpeningElement::default().with_options(FormatHtmlOpeningElementOptions {
                 r_angle_is_borrowed: borrowed_r_angle.is_some(),
             }),
-            &opening_element?,
+            &opening_element,
             f,
         )?;
         if should_be_verbatim {
@@ -152,7 +145,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             &FormatHtmlClosingElement::default().with_options(FormatHtmlClosingElementOptions {
                 tag_borrowed: should_borrow_closing_tag,
             }),
-            &closing_element?,
+            &closing_element,
             f,
         )?;
 

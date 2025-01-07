@@ -1,8 +1,6 @@
 use crate::is_dir;
 use crate::settings::{FilesSettings, Settings};
 use crate::workspace::FeatureKind;
-use biome_fs::BiomePath;
-use biome_project::{NodeJsProject, PackageJson};
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
@@ -41,18 +39,13 @@ impl ProjectKey {
 #[derive(Debug, Default)]
 struct ProjectData {
     /// The root path of the project. This path should be **absolute**.
-    path: BiomePath,
+    path: Utf8PathBuf,
 
-    /// The settings of the project, usually inferred from the configuration
-    /// file e.g. `biome.json`.
-    settings: Settings,
-
-    /// Optional Node.js-specific package information, if relevant for the
-    /// project.
+    /// The "root" settings of the project.
     ///
-    /// TODO: This should be moved into the upcoming `ProjectLayout` service
-    ///       data.
-    package: Option<NodeJsProject>,
+    /// Usually inferred from the **top-level** configuration file,
+    /// e.g. `biome.json`.
+    settings: Settings,
 }
 
 impl Projects {
@@ -61,7 +54,6 @@ impl Projects {
     /// Returns the key of the newly inserted project, or returns an existing
     /// project key if a project with the given path already existed.
     pub fn insert_project(&self, path: Utf8PathBuf) -> ProjectKey {
-        let path = BiomePath::new(path);
         trace!("Insert workspace folder: {path:?}");
 
         let data = self.0.pin();
@@ -77,7 +69,6 @@ impl Projects {
             ProjectData {
                 path,
                 settings: Settings::default(),
-                package: None,
             },
         );
         key
@@ -118,44 +109,20 @@ impl Projects {
         let project_data = ProjectData {
             path: project_data.path.clone(),
             settings,
-            package: project_data.package.clone(),
         };
 
         data.insert(project_key, project_data);
     }
 
-    pub fn get_manifest(&self, project_key: ProjectKey) -> Option<PackageJson> {
-        self.0
-            .pin()
-            .get(&project_key)
-            .and_then(|data| data.package.as_ref())
-            .map(|project| project.manifest.clone())
-    }
-
-    pub fn get_project_path(&self, project_key: ProjectKey) -> Option<BiomePath> {
+    pub fn get_project_path(&self, project_key: ProjectKey) -> Option<Utf8PathBuf> {
         self.0.pin().get(&project_key).map(|data| data.path.clone())
-    }
-
-    pub fn insert_manifest(&self, project_key: ProjectKey, manifest: NodeJsProject) {
-        let data = self.0.pin();
-        let Some(project_data) = data.get(&project_key) else {
-            return;
-        };
-
-        let project_data = ProjectData {
-            path: project_data.path.clone(),
-            settings: project_data.settings.clone(),
-            package: Some(manifest),
-        };
-
-        data.insert(project_key, project_data);
     }
 
     /// Checks whether the given `path` belongs to project with the given path
     /// and no other project.
     pub fn path_belongs_only_to_project_with_path(
         &self,
-        path: &BiomePath,
+        path: &Utf8Path,
         project_path: &Utf8Path,
     ) -> bool {
         let mut belongs_to_project = false;
