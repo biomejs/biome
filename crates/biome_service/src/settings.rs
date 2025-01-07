@@ -1492,21 +1492,23 @@ impl TryFrom<OverrideAssistConfiguration> for AssistSettings {
 /// Checks the feature activity according to language-specific
 /// and top level feature activities.
 ///
-/// ```markdown
-/// | Top-Level \ Language | Some(true) | Some(false) |    None    |
-/// |:---------------------:|:----------:|:-----------:|:----------:|
-/// |      Some(true)       | Some(true) | Some(false) |    None / Some(true)    |
-/// |      Some(false)      | Some(true) | Some(false) | Some(false)|
-/// |         None          | Some(true) | Some(false) |    None    |
-/// ```
+/// | Top-Level \ Language  | Some(true)   | Some(false) | None              |
+/// |:---------------------:|:------------:|:-----------:|:-----------------:|
+/// | Some(true)            | Some(true)   | Some(false) | None / Some(true) |
+/// | Some(false)           | Some(true)   | Some(false) | Some(false)       |
+/// | None                  | Some(true)   | Some(false) | None              |
 ///
-/// The reason for the notice is that we don't want a top level
+/// The case `Some(true)` (top-level) / `None` (language) varies based on `is_override`.
+///
+/// - If `is_override` is `false` we don't want a top level
 /// feature to override the language-specific feature whose default
 /// value is false but in an "unset" state (`None`). So that we can
 /// still use `.unwrap_or_default()` to retrieve the correct
 /// fallback value. This happens when we want to mark the features
 /// of some languages as opt-in.
 ///
+/// - If `is_override` is `true`, we don't care if a feature is meant to be opt-in, so we fall back
+/// to the top-level configuration.
 pub(crate) fn check_feature_activity<const LANG: bool, const TOP: bool>(
     language_specific_feature_activity: Option<Bool<LANG>>,
     top_level_feature_activity: Option<Bool<TOP>>,

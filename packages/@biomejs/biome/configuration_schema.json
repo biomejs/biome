@@ -64,10 +64,7 @@
 		},
 		"javascript": {
 			"description": "Specific configuration for the JavaScript language",
-			"anyOf": [
-				{ "$ref": "#/definitions/JavascriptConfiguration" },
-				{ "type": "null" }
-			]
+			"anyOf": [{ "$ref": "#/definitions/JsConfiguration" }, { "type": "null" }]
 		},
 		"json": {
 			"description": "Specific configuration for the Json language",
@@ -93,7 +90,7 @@
 		},
 		"root": {
 			"description": "Indicates whether this configuration file is at the root of a Biome project. By default, this is `true`.",
-			"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+			"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 		},
 		"vcs": {
 			"description": "The configuration of the VCS integration",
@@ -398,7 +395,7 @@
 				},
 				"enabled": {
 					"description": "Whether Biome should enable assist via LSP.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
@@ -414,6 +411,7 @@
 			"additionalProperties": false
 		},
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
+		"Bool": { "type": "boolean" },
 		"BracketSameLine": {
 			"description": "Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
 			"type": "boolean"
@@ -1133,7 +1131,7 @@
 			"properties": {
 				"enabled": {
 					"description": "Control the assist for CSS files.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1189,7 +1187,7 @@
 			"properties": {
 				"enabled": {
 					"description": "Control the formatter for CSS (and its super languages) files.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"indentStyle": {
 					"description": "The indent style applied to CSS (and its super languages) files.",
@@ -1220,7 +1218,7 @@
 			"properties": {
 				"enabled": {
 					"description": "Control the linter for CSS files.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1232,12 +1230,12 @@
 				"allowWrongLineComments": {
 					"description": "Allow comments to appear on incorrect lines in `.css` files",
 					"default": null,
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"cssModules": {
 					"description": "Enables parsing of CSS Modules specific features.",
 					"default": null,
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1391,7 +1389,7 @@
 				},
 				"ignoreUnknown": {
 					"description": "Tells Biome to not emit diagnostics when handling files that doesn't know",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.",
@@ -1461,11 +1459,11 @@
 					]
 				},
 				"enabled": {
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
@@ -1495,7 +1493,7 @@
 				},
 				"useEditorconfig": {
 					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration. Default: false.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1507,7 +1505,7 @@
 				"enabled": {
 					"description": "Control the formatter for GraphQL files.",
 					"default": null,
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1554,7 +1552,7 @@
 				"enabled": {
 					"description": "Control the formatter for GraphQL files.",
 					"default": null,
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"indentStyle": {
 					"description": "The indent style applied to GraphQL files.",
@@ -1591,7 +1589,7 @@
 				"enabled": {
 					"description": "Control the formatter for GraphQL files.",
 					"default": null,
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1601,7 +1599,7 @@
 			"properties": {
 				"enabled": {
 					"description": "Control the assist functionality for Grit files.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1639,7 +1637,7 @@
 			"properties": {
 				"enabled": {
 					"description": "Control the formatter for Grit files.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"indentStyle": {
 					"description": "The indent style applied to Grit files.",
@@ -1665,7 +1663,7 @@
 			"properties": {
 				"enabled": {
 					"description": "Control the linter for Grit files.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1744,7 +1742,7 @@
 				},
 				"enabled": {
 					"description": "Control the formatter for HTML (and its super languages) files.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"indentScriptAndStyle": {
 					"description": "Whether to indent the `<script>` and `<style>` tags for HTML (and its super languages). Defaults to false.",
@@ -1800,32 +1798,32 @@
 			]
 		},
 		"IndentWidth": { "type": "integer", "format": "uint8", "minimum": 0.0 },
-		"JavascriptAssistConfiguration": {
+		"JsAssistConfiguration": {
 			"description": "Assist options specific to the JavaScript assist",
 			"type": "object",
 			"properties": {
 				"enabled": {
 					"description": "Control the assist for JavaScript (and its super languages) files.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
-		"JavascriptConfiguration": {
+		"JsConfiguration": {
 			"description": "A set of options applied to the JavaScript files",
 			"type": "object",
 			"properties": {
 				"assist": {
 					"description": "Assist options",
 					"anyOf": [
-						{ "$ref": "#/definitions/JavascriptAssistConfiguration" },
+						{ "$ref": "#/definitions/JsAssistConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"formatter": {
 					"description": "Formatting options",
 					"anyOf": [
-						{ "$ref": "#/definitions/JavascriptFormatterConfiguration" },
+						{ "$ref": "#/definitions/JsFormatterConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1842,21 +1840,21 @@
 				"linter": {
 					"description": "Linter options",
 					"anyOf": [
-						{ "$ref": "#/definitions/JavascriptLinterConfiguration" },
+						{ "$ref": "#/definitions/JsLinterConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"parser": {
 					"description": "Parsing options",
 					"anyOf": [
-						{ "$ref": "#/definitions/JavascriptParserConfiguration" },
+						{ "$ref": "#/definitions/JsParserConfiguration" },
 						{ "type": "null" }
 					]
 				}
 			},
 			"additionalProperties": false
 		},
-		"JavascriptFormatterConfiguration": {
+		"JsFormatterConfiguration": {
 			"description": "Formatting options specific to the JavaScript files",
 			"type": "object",
 			"properties": {
@@ -1890,7 +1888,7 @@
 				},
 				"enabled": {
 					"description": "Control the formatter for JavaScript (and its super languages) files.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"indentStyle": {
 					"description": "The indent style applied to JavaScript (and its super languages) files.",
@@ -1937,32 +1935,32 @@
 			},
 			"additionalProperties": false
 		},
-		"JavascriptLinterConfiguration": {
+		"JsLinterConfiguration": {
 			"description": "Linter options specific to the JavaScript linter",
 			"type": "object",
 			"properties": {
 				"enabled": {
 					"description": "Control the linter for JavaScript (and its super languages) files.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
-		"JavascriptParserConfiguration": {
+		"JsParserConfiguration": {
 			"description": "Options that changes how the JavaScript parser behaves",
 			"type": "object",
 			"properties": {
 				"gritMetavariables": {
 					"description": "Enables parsing of Grit metavariables. Defaults to `false`.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"jsxEverywhere": {
 					"description": "When enabled, files like `.js`/`.ts` can contain JSX syntax. Defaults to `true`.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"unsafeParameterDecoratorsEnabled": {
 					"description": "It enables the experimental and unsafe parsing of parameter decorators\n\nThese decorators belong to an old proposal, and they are subject to change.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1973,7 +1971,7 @@
 			"properties": {
 				"enabled": {
 					"description": "Control the assist for JSON (and its super languages) files.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -2018,7 +2016,7 @@
 			"properties": {
 				"enabled": {
 					"description": "Control the formatter for JSON (and its super languages) files.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"expand": {
 					"description": "Whether to expand arrays and objects on multiple lines. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"followSource\".",
@@ -2056,7 +2054,7 @@
 			"properties": {
 				"enabled": {
 					"description": "Control the linter for JSON (and its super languages) files.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -2067,11 +2065,11 @@
 			"properties": {
 				"allowComments": {
 					"description": "Allow parsing comments in `.json` files",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"allowTrailingCommas": {
 					"description": "Allow parsing trailing commas in `.json` files",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -2229,7 +2227,7 @@
 				},
 				"enabled": {
 					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
@@ -2872,7 +2870,7 @@
 				},
 				"enabled": {
 					"description": "if `false`, it disables the feature and the assist won't be executed. `true` by default",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -2902,11 +2900,11 @@
 					]
 				},
 				"enabled": {
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"indentSize": {
 					"description": "The size of the indentation, 2 by default (deprecated, use `indent-width`)",
@@ -2941,7 +2939,7 @@
 				},
 				"enabled": {
 					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"rules": {
 					"description": "List of rules",
@@ -3008,7 +3006,7 @@
 				"javascript": {
 					"description": "Specific configuration for the JavaScript language",
 					"anyOf": [
-						{ "$ref": "#/definitions/JavascriptConfiguration" },
+						{ "$ref": "#/definitions/JsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4860,7 +4858,7 @@
 				},
 				"enabled": {
 					"description": "Whether Biome should integrate itself with the VCS client",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"root": {
 					"description": "The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.\n\nIf Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted",
@@ -4868,7 +4866,7 @@
 				},
 				"useIgnoreFile": {
 					"description": "Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.",
-					"anyOf": [{ "$ref": "#/definitions/boolean" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -4887,7 +4885,6 @@
 					"enum": ["ignore"]
 				}
 			]
-		},
-		"boolean": { "type": "boolean" }
+		}
 	}
 }

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_configuration/tests/spec_tests.rs
 expression: formatter_quote_style.json
+snapshot_kind: text
 ---
 formatter_quote_style.json:3:9 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -16,7 +17,6 @@ formatter_quote_style.json:3:9 deserialize ━━━━━━━━━━━━�
   i Known keys:
   
   - enabled
-  - useEditorconfig
   - formatWithErrors
   - indentStyle
   - indentWidth
@@ -25,5 +25,6 @@ formatter_quote_style.json:3:9 deserialize ━━━━━━━━━━━━�
   - attributePosition
   - bracketSameLine
   - bracketSpacing
+  - useEditorconfig
   - ignore
   - include

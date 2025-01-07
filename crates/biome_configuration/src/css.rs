@@ -145,7 +145,7 @@ impl CssAssistConfiguration {
 fn default_css() {
     let css_configuration = CssFormatterConfiguration::default();
 
-    assert!(!css_configuration.enabled_resolved());
+    assert!(css_configuration.enabled_resolved());
     assert_eq!(css_configuration.indent_style, None);
     assert_eq!(css_configuration.indent_width, None);
     assert_eq!(css_configuration.line_ending, None);

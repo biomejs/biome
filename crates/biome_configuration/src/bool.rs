@@ -103,7 +103,7 @@ impl From<Bool<true>> for Bool<false> {
 #[cfg(feature = "schema")]
 impl<const D: bool> schemars::JsonSchema for Bool<D> {
     fn schema_name() -> String {
-        "boolean".to_string()
+        "Bool".to_string()
     }
 
     fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {

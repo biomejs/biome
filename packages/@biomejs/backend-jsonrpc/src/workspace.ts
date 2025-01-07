@@ -62,7 +62,7 @@ export interface Configuration {
 	/**
 	 * Specific configuration for the JavaScript language
 	 */
-	javascript?: JavascriptConfiguration;
+	javascript?: JsConfiguration;
 	/**
 	 * Specific configuration for the Json language
 	 */
@@ -82,7 +82,7 @@ export interface Configuration {
 	/**
 	 * Indicates whether this configuration file is at the root of a Biome project. By default, this is `true`.
 	 */
-	root?: boolean;
+	root?: Bool;
 	/**
 	 * The configuration of the VCS integration
 	 */
@@ -96,7 +96,7 @@ export interface AssistConfiguration {
 	/**
 	 * Whether Biome should enable assist via LSP.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
@@ -142,7 +142,7 @@ export interface FilesConfiguration {
 	/**
 	 * Tells Biome to not emit diagnostics when handling files that doesn't know
 	 */
-	ignoreUnknown?: boolean;
+	ignoreUnknown?: Bool;
 	/**
 	 * A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.
 	 */
@@ -168,11 +168,11 @@ export interface FormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
-	enabled?: boolean;
+	enabled?: Bool;
 	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
 	 */
-	formatWithErrors?: boolean;
+	formatWithErrors?: Bool;
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
@@ -200,7 +200,7 @@ export interface FormatterConfiguration {
 	/**
 	 * Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration. Default: false.
 	 */
-	useEditorconfig?: boolean;
+	useEditorconfig?: Bool;
 }
 /**
  * Options applied to GraphQL files
@@ -249,15 +249,15 @@ export interface HtmlConfiguration {
 /**
  * A set of options applied to the JavaScript files
  */
-export interface JavascriptConfiguration {
+export interface JsConfiguration {
 	/**
 	 * Assist options
 	 */
-	assist?: JavascriptAssistConfiguration;
+	assist?: JsAssistConfiguration;
 	/**
 	 * Formatting options
 	 */
-	formatter?: JavascriptFormatterConfiguration;
+	formatter?: JsFormatterConfiguration;
 	/**
 	* A list of global bindings that should be ignored by the analyzers
 
@@ -271,11 +271,11 @@ If defined here, they should not emit diagnostics.
 	/**
 	 * Linter options
 	 */
-	linter?: JavascriptLinterConfiguration;
+	linter?: JsLinterConfiguration;
 	/**
 	 * Parsing options
 	 */
-	parser?: JavascriptParserConfiguration;
+	parser?: JsParserConfiguration;
 }
 /**
  * Options applied to JSON files
@@ -306,7 +306,7 @@ export interface LinterConfiguration {
 	/**
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
@@ -322,7 +322,7 @@ export interface LinterConfiguration {
 }
 export type Overrides = OverridePattern[];
 export type Plugins = PluginConfiguration[];
-export type boolean = boolean;
+export type Bool = boolean;
 /**
  * Set of properties to integrate Biome with a VCS software.
  */
@@ -338,7 +338,7 @@ export interface VcsConfiguration {
 	/**
 	 * Whether Biome should integrate itself with the VCS client
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 	/**
 	* The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
 
@@ -348,7 +348,7 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	/**
 	 * Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
 	 */
-	useIgnoreFile?: boolean;
+	useIgnoreFile?: Bool;
 }
 export interface Actions {
 	/**
@@ -364,7 +364,7 @@ export interface CssAssistConfiguration {
 	/**
 	 * Control the assist for CSS files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 }
 /**
  * Options that changes how the CSS formatter behaves
@@ -373,7 +373,7 @@ export interface CssFormatterConfiguration {
 	/**
 	 * Control the formatter for CSS (and its super languages) files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 	/**
 	 * The indent style applied to CSS (and its super languages) files.
 	 */
@@ -402,7 +402,7 @@ export interface CssLinterConfiguration {
 	/**
 	 * Control the linter for CSS files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 }
 /**
  * Options that changes how the CSS parser behaves
@@ -411,11 +411,11 @@ export interface CssParserConfiguration {
 	/**
 	 * Allow comments to appear on incorrect lines in `.css` files
 	 */
-	allowWrongLineComments?: boolean;
+	allowWrongLineComments?: Bool;
 	/**
 	 * Enables parsing of CSS Modules specific features.
 	 */
-	cssModules?: boolean;
+	cssModules?: Bool;
 }
 /**
  * A `bool` type wrapper with a configurable default value (`true` or `false`)
@@ -443,7 +443,7 @@ export interface GraphqlAssistConfiguration {
 	/**
 	 * Control the formatter for GraphQL files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 }
 /**
  * Options that changes how the GraphQL formatter behaves
@@ -456,7 +456,7 @@ export interface GraphqlFormatterConfiguration {
 	/**
 	 * Control the formatter for GraphQL files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 	/**
 	 * The indent style applied to GraphQL files.
 	 */
@@ -485,19 +485,19 @@ export interface GraphqlLinterConfiguration {
 	/**
 	 * Control the formatter for GraphQL files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 }
 export interface GritAssistConfiguration {
 	/**
 	 * Control the assist functionality for Grit files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 }
 export interface GritFormatterConfiguration {
 	/**
 	 * Control the formatter for Grit files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 	/**
 	 * The indent style applied to Grit files.
 	 */
@@ -519,7 +519,7 @@ export interface GritLinterConfiguration {
 	/**
 	 * Control the linter for Grit files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 }
 /**
  * Options that changes how the HTML formatter behaves
@@ -536,7 +536,7 @@ export interface HtmlFormatterConfiguration {
 	/**
 	 * Control the formatter for HTML (and its super languages) files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 	/**
 	 * Whether to indent the `<script>` and `<style>` tags for HTML (and its super languages). Defaults to false.
 	 */
@@ -569,16 +569,16 @@ export type HtmlParserConfiguration = null;
 /**
  * Assist options specific to the JavaScript assist
  */
-export interface JavascriptAssistConfiguration {
+export interface JsAssistConfiguration {
 	/**
 	 * Control the assist for JavaScript (and its super languages) files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 }
 /**
  * Formatting options specific to the JavaScript files
  */
-export interface JavascriptFormatterConfiguration {
+export interface JsFormatterConfiguration {
 	/**
 	 * Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
 	 */
@@ -598,7 +598,7 @@ export interface JavascriptFormatterConfiguration {
 	/**
 	 * Control the formatter for JavaScript (and its super languages) files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 	/**
 	 * The indent style applied to JavaScript (and its super languages) files.
 	 */
@@ -643,30 +643,30 @@ export type JsxRuntime = "transparent" | "reactClassic";
 /**
  * Linter options specific to the JavaScript linter
  */
-export interface JavascriptLinterConfiguration {
+export interface JsLinterConfiguration {
 	/**
 	 * Control the linter for JavaScript (and its super languages) files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 }
 /**
  * Options that changes how the JavaScript parser behaves
  */
-export interface JavascriptParserConfiguration {
+export interface JsParserConfiguration {
 	/**
 	 * Enables parsing of Grit metavariables. Defaults to `false`.
 	 */
-	gritMetavariables?: boolean;
+	gritMetavariables?: Bool;
 	/**
 	 * When enabled, files like `.js`/`.ts` can contain JSX syntax. Defaults to `true`.
 	 */
-	jsxEverywhere?: boolean;
+	jsxEverywhere?: Bool;
 	/**
 	* It enables the experimental and unsafe parsing of parameter decorators
 
 These decorators belong to an old proposal, and they are subject to change. 
 	 */
-	unsafeParameterDecoratorsEnabled?: boolean;
+	unsafeParameterDecoratorsEnabled?: Bool;
 }
 /**
  * Linter options specific to the JSON linter
@@ -675,13 +675,13 @@ export interface JsonAssistConfiguration {
 	/**
 	 * Control the assist for JSON (and its super languages) files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 }
 export interface JsonFormatterConfiguration {
 	/**
 	 * Control the formatter for JSON (and its super languages) files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 	/**
 	 * Whether to expand arrays and objects on multiple lines. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "followSource".
 	 */
@@ -714,7 +714,7 @@ export interface JsonLinterConfiguration {
 	/**
 	 * Control the linter for JSON (and its super languages) files.
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 }
 /**
  * Options that changes how the JSON parser behaves
@@ -723,11 +723,11 @@ export interface JsonParserConfiguration {
 	/**
 	 * Allow parsing comments in `.json` files
 	 */
-	allowComments?: boolean;
+	allowComments?: Bool;
 	/**
 	 * Allow parsing trailing commas in `.json` files
 	 */
-	allowTrailingCommas?: boolean;
+	allowTrailingCommas?: Bool;
 }
 export interface Rules {
 	a11y?: A11y;
@@ -779,7 +779,7 @@ export interface OverridePattern {
 	/**
 	 * Specific configuration for the JavaScript language
 	 */
-	javascript?: JavascriptConfiguration;
+	javascript?: JsConfiguration;
 	/**
 	 * Specific configuration for the Json language
 	 */
@@ -2126,7 +2126,7 @@ export interface OverrideAssistConfiguration {
 	/**
 	 * if `false`, it disables the feature and the assist won't be executed. `true` by default
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 }
 export interface OverrideFormatterConfiguration {
 	/**
@@ -2141,11 +2141,11 @@ export interface OverrideFormatterConfiguration {
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
 	bracketSpacing?: BracketSpacing;
-	enabled?: boolean;
+	enabled?: Bool;
 	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
 	 */
-	formatWithErrors?: boolean;
+	formatWithErrors?: Bool;
 	/**
 	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
 	 */
@@ -2175,7 +2175,7 @@ export interface OverrideLinterConfiguration {
 	/**
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
-	enabled?: boolean;
+	enabled?: Bool;
 	/**
 	 * List of rules
 	 */
@@ -3763,7 +3763,6 @@ export interface SearchResults {
 export interface DropPatternParams {
 	pattern: PatternId;
 }
-export type Configuration = Configuration;
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;

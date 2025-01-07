@@ -116,7 +116,7 @@ impl GraphqlLinterConfiguration {
 fn default_graphql_formatter() {
     let graphql_configuration = GraphqlFormatterConfiguration::default();
 
-    assert!(!graphql_configuration.enabled_resolved());
+    assert!(graphql_configuration.enabled_resolved());
     assert_eq!(graphql_configuration.indent_style, None);
     assert_eq!(graphql_configuration.indent_width, None);
     assert_eq!(graphql_configuration.line_ending, None);
@@ -128,5 +128,5 @@ fn default_graphql_formatter() {
 fn default_graphql_linter() {
     let graphql_configuration = GraphqlLinterConfiguration::default();
 
-    assert!(!graphql_configuration.enabled_resolved());
+    assert!(graphql_configuration.enabled_resolved());
 }
