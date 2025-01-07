@@ -1312,12 +1312,6 @@
 			"additionalProperties": false
 		},
 		"Expand": { "type": "string", "enum": ["always", "followSource"] },
-		"FileSize": {
-			"description": "A `bool` type wrapper with a configurable default value (`true` or `false`)",
-			"type": "integer",
-			"format": "uint64",
-			"minimum": 1.0
-		},
 		"FilenameCase": {
 			"description": "Supported cases for file names.",
 			"oneOf": [
@@ -1398,7 +1392,7 @@
 				},
 				"maxSize": {
 					"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB",
-					"anyOf": [{ "$ref": "#/definitions/FileSize" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/MaxLimit" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1492,7 +1486,7 @@
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
 				"useEditorconfig": {
-					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration. Default: false.",
+					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.\n\nDefault: `false`.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
@@ -1583,7 +1577,7 @@
 			"additionalProperties": false
 		},
 		"GraphqlLinterConfiguration": {
-			"description": "Options that changes how the GraphQL linter behaves",
+			"description": "Options that change how the GraphQL linter behaves.",
 			"type": "object",
 			"properties": {
 				"enabled": {
@@ -2246,6 +2240,7 @@
 			},
 			"additionalProperties": false
 		},
+		"MaxLimit": { "type": "integer", "format": "uint64", "minimum": 1.0 },
 		"Modifiers": {
 			"type": "array",
 			"items": { "$ref": "#/definitions/RestrictedModifier" },

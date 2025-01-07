@@ -14,7 +14,7 @@ pub mod grit;
 pub mod html;
 pub mod javascript;
 pub mod json;
-pub mod max_limit;
+pub mod max_size;
 mod overrides;
 pub mod plugins;
 pub mod vcs;
@@ -30,7 +30,7 @@ use crate::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
 pub use crate::grit::{grit_configuration, GritConfiguration};
 use crate::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use crate::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
-use crate::max_limit::MaxLimit;
+use crate::max_size::MazSize;
 use crate::vcs::{vcs_configuration, VcsConfiguration};
 pub use analyzer::{
     linter_configuration, LinterConfiguration, RuleConfiguration, RuleFixConfiguration,
@@ -337,7 +337,7 @@ pub struct FilesConfiguration {
     /// this limit will be ignored for performance reasons. Defaults to 1 MiB
     #[bpaf(long("files-max-size"), argument("NUMBER"))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub max_size: Option<MaxLimit>,
+    pub max_size: Option<MazSize>,
 
     /// Tells Biome to not emit diagnostics when handling files that doesn't know
     #[bpaf(long("files-ignore-unknown"), argument("true|false"), optional)]

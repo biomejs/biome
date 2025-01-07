@@ -8,7 +8,7 @@ use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::html::HtmlConfiguration;
 use biome_configuration::javascript::JsxRuntime;
-use biome_configuration::max_limit::MaxLimit;
+use biome_configuration::max_size::MazSize;
 use biome_configuration::{
     push_to_analyzer_assist, push_to_analyzer_rules, BiomeDiagnostic, Configuration,
     CssConfiguration, FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration,
@@ -579,7 +579,7 @@ pub struct LanguageSettings<L: ServiceLanguage> {
 #[derive(Clone, Default, Debug)]
 pub struct FilesSettings {
     /// File size limit in bytes
-    pub max_size: Option<MaxLimit>,
+    pub max_size: Option<MazSize>,
 
     /// gitignore file patterns
     pub git_ignore: Option<Gitignore>,
@@ -1559,7 +1559,6 @@ pub(crate) fn check_override_feature_activity<const LANG: bool, const TOP: bool>
 ) -> Option<Bool<LANG>> {
     // Check the language-specific feature first
     language_specific_feature_activity
-        .map(|activity| activity)
         // Then check the top level feature
-        .or(top_level_feature_activity.and_then(|v| Some(v.value().into())))
+        .or(top_level_feature_activity.map(|v| v.value().into()))
 }

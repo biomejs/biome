@@ -150,7 +150,7 @@ export interface FilesConfiguration {
 	/**
 	 * The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB
 	 */
-	maxSize?: FileSize;
+	maxSize?: MaxLimit;
 }
 /**
  * Generic options applied to all files
@@ -198,7 +198,9 @@ export interface FormatterConfiguration {
 	 */
 	lineWidth?: LineWidth;
 	/**
-	 * Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration. Default: false.
+	* Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.
+
+Default: `false`. 
 	 */
 	useEditorconfig?: Bool;
 }
@@ -417,10 +419,7 @@ export interface CssParserConfiguration {
 	 */
 	cssModules?: Bool;
 }
-/**
- * A `bool` type wrapper with a configurable default value (`true` or `false`)
- */
-export type FileSize = number;
+export type MaxLimit = number;
 export type AttributePosition = "auto" | "multiline";
 /**
  * Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
@@ -479,7 +478,7 @@ export interface GraphqlFormatterConfiguration {
 	quoteStyle?: QuoteStyle;
 }
 /**
- * Options that changes how the GraphQL linter behaves
+ * Options that change how the GraphQL linter behaves.
  */
 export interface GraphqlLinterConfiguration {
 	/**

@@ -13,22 +13,22 @@ pub const DEFAULT_FILE_SIZE_LIMIT: NonZeroU64 =
 
 #[derive(Clone, Copy, Eq, Merge, PartialEq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct MaxLimit(pub NonZeroU64);
+pub struct MazSize(pub NonZeroU64);
 
-impl Default for MaxLimit {
+impl Default for MazSize {
     fn default() -> Self {
         Self(DEFAULT_FILE_SIZE_LIMIT)
     }
 }
 
-impl FromStr for MaxLimit {
+impl FromStr for MazSize {
     type Err = ParseIntError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self(NonZeroU64::from_str(s)?))
     }
 }
 
-impl Deserializable for MaxLimit {
+impl Deserializable for MazSize {
     fn deserialize(
         ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
@@ -38,26 +38,26 @@ impl Deserializable for MaxLimit {
     }
 }
 
-impl fmt::Debug for MaxLimit {
+impl fmt::Debug for MazSize {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
     }
 }
 
-impl From<NonZeroU64> for MaxLimit {
+impl From<NonZeroU64> for MazSize {
     fn from(value: NonZeroU64) -> Self {
         Self(value)
     }
 }
 
-impl From<MaxLimit> for NonZeroU64 {
-    fn from(value: MaxLimit) -> Self {
+impl From<MazSize> for NonZeroU64 {
+    fn from(value: MazSize) -> Self {
         value.0
     }
 }
 
-impl From<MaxLimit> for usize {
-    fn from(value: MaxLimit) -> Self {
+impl From<MazSize> for usize {
+    fn from(value: MazSize) -> Self {
         Self::try_from(NonZeroU64::from(value).get()).unwrap_or(Self::MAX)
     }
 }
