@@ -231,8 +231,8 @@ changelog       = "crates/biome_syntax_codegen/CHANGELOG.md"
 versioned_files = ["crates/biome_syntax_codegen/Cargo.toml"]
 
 [packages.biome_project_layout]
+changelog       = "crates/biome_project_layout/CHANGELOG.md"
 versioned_files = ["crates/biome_project_layout/Cargo.toml"]
-changelog = "crates/biome_project_layout/CHANGELOG.md"
 
 ## End of crates. DO NOT CHANGE!
 
