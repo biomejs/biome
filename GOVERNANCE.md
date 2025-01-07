@@ -244,6 +244,8 @@ conditions:
   cover review, project upkeep and continued maintenance of the functionality after merging.
   - For work that directly benefits the Biome roadmap, no such fee is required. For work that partly
     or indirectly benefits the roadmap, a customized fee may be negotiated.
+  - If the last-published roadmap is more than 12 months old, the Core Contributor is asked to
+    consult with the Core team about alignment with the project goals.
   - Fee negotiation may happen either publically in the `Community > #funding` channel, or privately
     in the `Core > #core-team` channel.
   - Custom fees require the approval of at least one Lead.
