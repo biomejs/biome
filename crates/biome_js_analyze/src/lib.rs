@@ -9,7 +9,7 @@ use biome_analyze::{
 use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_js_syntax::{JsFileSource, JsLanguage};
-use biome_project::PackageJson;
+use biome_package::PackageJson;
 use biome_rowan::TextRange;
 use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
 use std::ops::Deref;
@@ -164,7 +164,7 @@ mod tests {
     use biome_diagnostics::{print_diagnostic_to_string, Diagnostic, DiagnosticExt, Severity};
     use biome_js_parser::{parse, JsParserOptions};
     use biome_js_syntax::{JsFileSource, TextRange, TextSize};
-    use biome_project::{Dependencies, PackageJson};
+    use biome_package::{Dependencies, PackageJson};
     use std::slice;
 
     use crate::{analyze, AnalysisFilter, ControlFlow};

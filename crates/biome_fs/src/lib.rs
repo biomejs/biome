@@ -9,5 +9,5 @@ pub use fs::{
     FileSystemExt, FsErrorKind, MemoryFileSystem, OpenOptions, OsFileSystem, TraversalContext,
     TraversalScope,
 };
-pub use interner::PathInterner;
+pub use interner::{PathInterner, PathInternerSet};
 pub use path::BiomePath;

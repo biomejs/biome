@@ -3,11 +3,13 @@ use crossbeam::channel::{unbounded, Receiver, Sender};
 use papaya::HashSet;
 use rustc_hash::FxBuildHasher;
 
+pub type PathInternerSet = HashSet<Utf8PathBuf, FxBuildHasher>;
+
 /// File paths interner cache
 ///
 /// The path interner stores an instance of [PathBuf]
 pub struct PathInterner {
-    storage: HashSet<Utf8PathBuf, FxBuildHasher>,
+    storage: PathInternerSet,
     handler: Sender<Utf8PathBuf>,
 }
 
@@ -31,5 +33,9 @@ impl PathInterner {
             self.handler.send(path).ok();
         }
         result
+    }
+
+    pub fn into_paths(self) -> PathInternerSet {
+        self.storage
     }
 }

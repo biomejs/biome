@@ -6,7 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
-use biome_project::PackageJson;
+use biome_package::PackageJson;
 use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
 use biome_service::file_handlers::DocumentFileSource;

@@ -61,7 +61,7 @@ pub struct Settings {
 }
 
 impl Settings {
-    /// The [PartialConfiguration] is merged into the project.
+    /// Merges the [PartialConfiguration] into the settings.
     #[tracing::instrument(level = "trace", skip(self))]
     pub fn merge_with_configuration(
         &mut self,

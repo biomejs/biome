@@ -154,8 +154,8 @@ biome_yaml_parser            = { version = "0.0.1", path = "./crates/biome_yaml_
 biome_yaml_syntax            = { version = "0.0.1", path = "./crates/biome_yaml_syntax" }
 
 biome_markup        = { version = "0.5.7", path = "./crates/biome_markup" }
+biome_package       = { version = "0.5.7", path = "./crates/biome_package" }
 biome_parser        = { version = "0.5.7", path = "./crates/biome_parser" }
-biome_project       = { version = "0.5.7", path = "./crates/biome_project" }
 biome_rowan         = { version = "0.5.7", path = "./crates/biome_rowan" }
 biome_string_case   = { version = "0.5.7", path = "./crates/biome_string_case" }
 biome_suppression   = { version = "0.5.7", path = "./crates/biome_suppression" }

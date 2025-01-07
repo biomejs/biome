@@ -2905,12 +2905,6 @@ export interface OpenProjectParams {
 	 */
 	path: BiomePath;
 }
-export interface SetManifestForProjectParams {
-	content: string;
-	manifestPath: BiomePath;
-	projectKey: ProjectKey;
-	version: number;
-}
 export interface OpenFileParams {
 	content: FileContent;
 	documentFileSource?: DocumentFileSource;
@@ -3720,7 +3714,6 @@ export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;
 	openProject(params: OpenProjectParams): Promise<ProjectKey>;
-	setManifestForProject(params: SetManifestForProjectParams): Promise<void>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
@@ -3753,9 +3746,6 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		openProject(params) {
 			return transport.request("biome/open_project", params);
-		},
-		setManifestForProject(params) {
-			return transport.request("biome/set_manifest_for_project", params);
 		},
 		openFile(params) {
 			return transport.request("biome/open_file", params);
