@@ -279,8 +279,7 @@ impl Configuration {
     pub fn get_json_linter_configuration(&self) -> JsonLinterConfiguration {
         self.json
             .as_ref()
-            .and_then(|lang| lang.linter.as_ref())
-            .cloned()
+            .and_then(|lang| lang.linter.clone())
             .unwrap_or_default()
     }
 
@@ -326,6 +325,7 @@ impl Configuration {
 }
 
 pub type FilesIgnoreUnknownEnabled = Bool<false>;
+
 /// The configuration of the filesystem
 #[derive(
     Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,

@@ -29,6 +29,7 @@ pub struct GritConfiguration {
 
 pub type GritFormatterEnabled = Bool<true>;
 
+
 #[derive(
     Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,
 )]
@@ -62,6 +63,7 @@ pub struct GritFormatterConfiguration {
 }
 
 pub type GritLinterEnabled = Bool<true>;
+
 
 #[derive(
     Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,

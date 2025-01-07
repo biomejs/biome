@@ -118,7 +118,7 @@ pub struct CssLinterConfiguration {
 }
 
 impl CssLinterConfiguration {
-    pub fn enabled_resolved(&self) -> bool {
+    pub fn enabled(&self) -> bool {
         self.enabled.unwrap_or_default().into()
     }
 }
