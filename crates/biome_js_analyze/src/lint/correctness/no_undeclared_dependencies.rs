@@ -269,11 +269,24 @@ impl Rule for NoUndeclaredDependencies {
             is_optional_dependency_available,
         } = state;
 
+        let Some(package_path) = ctx.package_path.as_ref() else {
+            return Some(RuleDiagnostic::new(
+                rule_category!(),
+                ctx.query().range(),
+                markup! {
+                    "Dependency "<Emphasis>{package_name}</Emphasis>" cannot be verified because no package.json file was found."
+                },
+            ));
+        };
+
+        let mut manifest_path = package_path.clone();
+        manifest_path.push("package.json");
+
         let diag = RuleDiagnostic::new(
             rule_category!(),
             ctx.query().range(),
             markup! {
-                "The current dependency isn't specified in your package.json."
+                "Dependency "<Emphasis>{package_name}</Emphasis>" isn't specified in "<Emphasis>{manifest_path.as_str()}</Emphasis>"."
             },
         );
 

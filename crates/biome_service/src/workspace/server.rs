@@ -34,7 +34,7 @@ use biome_grit_patterns::{compile_pattern_with_options, CompilePatternOptions, G
 use biome_js_syntax::ModuleKind;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
-use biome_package::{PackageJson, PackageType};
+use biome_package::PackageType;
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::NodeCache;
@@ -238,20 +238,6 @@ impl WorkspaceServer {
         }
     }
 
-    /// Returns the parsed `package.json` for a given path.
-    ///
-    /// ## Errors
-    ///
-    /// - If no document is found in the workspace. Usually, you'll have to call
-    ///   [WorkspaceServer::set_manifest_for_project] to store said document.
-    #[tracing::instrument(level = "trace", skip(self))]
-    fn get_node_manifest_for_path(
-        &self,
-        path: &Utf8Path,
-    ) -> Result<Option<PackageJson>, WorkspaceError> {
-        Ok(self.project_layout.get_node_manifest_for_path(path))
-    }
-
     /// Returns a previously inserted file source by index.
     ///
     /// File sources can be inserted using `insert_source()`.
@@ -299,10 +285,10 @@ impl WorkspaceServer {
     ) -> Result<(), WorkspaceError> {
         let path: Utf8PathBuf = path.into();
         let mut source = document_file_source.unwrap_or(DocumentFileSource::from_path(&path));
-        let manifest = self.get_node_manifest_for_path(&path)?;
+        let manifest = self.project_layout.get_node_manifest_for_path(&path);
 
         if let DocumentFileSource::Js(js) = &mut source {
-            if let Some(manifest) = manifest {
+            if let Some((_, manifest)) = manifest {
                 if manifest.r#type == Some(PackageType::Commonjs) && js.file_extension() == "js" {
                     js.set_module_kind(ModuleKind::Script);
                 }

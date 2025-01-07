@@ -6,25 +6,22 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
 use biome_package::PackageJson;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::AstNode;
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct ManifestServices {
+    pub(crate) package_path: Option<Utf8PathBuf>,
     pub(crate) manifest: Option<PackageJson>,
 }
 
 impl ManifestServices {
     pub(crate) fn name(&self) -> Option<&str> {
-        self.manifest
-            .as_ref()
-            .as_ref()
-            .and_then(|pkg| pkg.name.as_deref())
+        self.manifest.as_ref().and_then(|pkg| pkg.name.as_deref())
     }
 
     pub(crate) fn is_dependency(&self, specifier: &str) -> bool {
         self.manifest
-            .as_ref()
             .as_ref()
             .is_some_and(|pkg| pkg.dependencies.contains(specifier))
     }
@@ -32,20 +29,17 @@ impl ManifestServices {
     pub(crate) fn is_dev_dependency(&self, specifier: &str) -> bool {
         self.manifest
             .as_ref()
-            .as_ref()
             .is_some_and(|pkg| pkg.dev_dependencies.contains(specifier))
     }
 
     pub(crate) fn is_peer_dependency(&self, specifier: &str) -> bool {
         self.manifest
             .as_ref()
-            .as_ref()
             .is_some_and(|pkg| pkg.peer_dependencies.contains(specifier))
     }
 
     pub(crate) fn is_optional_dependency(&self, specifier: &str) -> bool {
         self.manifest
-            .as_ref()
             .as_ref()
             .is_some_and(|pkg| pkg.optional_dependencies.contains(specifier))
     }
@@ -61,8 +55,14 @@ impl FromServices for ManifestServices {
             MissingServicesDiagnostic::new(rule_key.rule_name(), &["ProjectLayout"])
         })?;
 
+        let (package_path, manifest) = match project_layout.get_node_manifest_for_path(file_path) {
+            Some((package_path, manifest)) => (Some(package_path), Some(manifest)),
+            None => (None, None),
+        };
+
         Ok(Self {
-            manifest: project_layout.get_node_manifest_for_path(file_path),
+            package_path,
+            manifest,
         })
     }
 }

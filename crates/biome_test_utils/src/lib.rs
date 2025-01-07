@@ -182,7 +182,7 @@ pub fn project_layout_with_node_manifest(
         } else {
             let project_layout = ProjectLayout::default();
             project_layout.insert_node_manifest(
-                "/".into(),
+                Utf8PathBuf::new(),
                 deserialized.into_deserialized().unwrap_or_default(),
             );
             return Arc::new(project_layout);

@@ -978,7 +978,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             .is_none_or(|d| d.is_empty());
 
         if no_only && no_domains {
-            if let Some(manifest) = self
+            if let Some((_, manifest)) = self
                 .path
                 .and_then(|path| self.project_layout.get_node_manifest_for_path(path))
             {

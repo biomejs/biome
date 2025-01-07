@@ -45,7 +45,12 @@ pub struct PackageData {
 }
 
 impl ProjectLayout {
-    pub fn get_node_manifest_for_path(&self, path: &Utf8Path) -> Option<PackageJson> {
+    /// Returns the `package.json` that should be used for the given `path`,
+    /// together with the absolute path of the manifest file.
+    pub fn get_node_manifest_for_path(
+        &self,
+        path: &Utf8Path,
+    ) -> Option<(Utf8PathBuf, PackageJson)> {
         self.0
             .pin()
             .iter()
@@ -67,7 +72,9 @@ impl ProjectLayout {
                         .then(|| (package_path, node_manifest.clone()))
                 },
             )
-            .map(|(_, package_json)| package_json)
+            .map(|(matched_package_path, package_json)| {
+                (matched_package_path.clone(), package_json)
+            })
     }
 
     pub fn insert_node_manifest(&self, path: Utf8PathBuf, manifest: PackageJson) {
