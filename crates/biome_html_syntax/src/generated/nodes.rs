@@ -100,6 +100,51 @@ pub struct HtmlAttributeInitializerClauseFields {
     pub value: SyntaxResult<HtmlString>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct HtmlCdataSection {
+    pub(crate) syntax: SyntaxNode,
+}
+impl HtmlCdataSection {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> HtmlCdataSectionFields {
+        HtmlCdataSectionFields {
+            cdata_start_token: self.cdata_start_token(),
+            content_token: self.content_token(),
+            cdata_end_token: self.cdata_end_token(),
+        }
+    }
+    pub fn cdata_start_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn content_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn cdata_end_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for HtmlCdataSection {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct HtmlCdataSectionFields {
+    pub cdata_start_token: SyntaxResult<SyntaxToken>,
+    pub content_token: SyntaxResult<SyntaxToken>,
+    pub cdata_end_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlClosingElement {
     pub(crate) syntax: SyntaxNode,
 }
@@ -591,6 +636,7 @@ impl AnyHtmlAttribute {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyHtmlElement {
     HtmlBogusElement(HtmlBogusElement),
+    HtmlCdataSection(HtmlCdataSection),
     HtmlComment(HtmlComment),
     HtmlContent(HtmlContent),
     HtmlElement(HtmlElement),
@@ -600,6 +646,12 @@ impl AnyHtmlElement {
     pub fn as_html_bogus_element(&self) -> Option<&HtmlBogusElement> {
         match &self {
             AnyHtmlElement::HtmlBogusElement(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_cdata_section(&self) -> Option<&HtmlCdataSection> {
+        match &self {
+            AnyHtmlElement::HtmlCdataSection(item) => Some(item),
             _ => None,
         }
     }
@@ -724,6 +776,64 @@ impl From<HtmlAttributeInitializerClause> for SyntaxNode {
 }
 impl From<HtmlAttributeInitializerClause> for SyntaxElement {
     fn from(n: HtmlAttributeInitializerClause) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for HtmlCdataSection {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(HTML_CDATA_SECTION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == HTML_CDATA_SECTION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for HtmlCdataSection {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("HtmlCdataSection")
+                .field(
+                    "cdata_start_token",
+                    &support::DebugSyntaxResult(self.cdata_start_token()),
+                )
+                .field(
+                    "content_token",
+                    &support::DebugSyntaxResult(self.content_token()),
+                )
+                .field(
+                    "cdata_end_token",
+                    &support::DebugSyntaxResult(self.cdata_end_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlCdataSection").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
+    }
+}
+impl From<HtmlCdataSection> for SyntaxNode {
+    fn from(n: HtmlCdataSection) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<HtmlCdataSection> for SyntaxElement {
+    fn from(n: HtmlCdataSection) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -1363,6 +1473,11 @@ impl From<HtmlBogusElement> for AnyHtmlElement {
         AnyHtmlElement::HtmlBogusElement(node)
     }
 }
+impl From<HtmlCdataSection> for AnyHtmlElement {
+    fn from(node: HtmlCdataSection) -> AnyHtmlElement {
+        AnyHtmlElement::HtmlCdataSection(node)
+    }
+}
 impl From<HtmlComment> for AnyHtmlElement {
     fn from(node: HtmlComment) -> AnyHtmlElement {
         AnyHtmlElement::HtmlComment(node)
@@ -1386,6 +1501,7 @@ impl From<HtmlSelfClosingElement> for AnyHtmlElement {
 impl AstNode for AnyHtmlElement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = HtmlBogusElement::KIND_SET
+        .union(HtmlCdataSection::KIND_SET)
         .union(HtmlComment::KIND_SET)
         .union(HtmlContent::KIND_SET)
         .union(HtmlElement::KIND_SET)
@@ -1394,6 +1510,7 @@ impl AstNode for AnyHtmlElement {
         matches!(
             kind,
             HTML_BOGUS_ELEMENT
+                | HTML_CDATA_SECTION
                 | HTML_COMMENT
                 | HTML_CONTENT
                 | HTML_ELEMENT
@@ -1403,6 +1520,7 @@ impl AstNode for AnyHtmlElement {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             HTML_BOGUS_ELEMENT => AnyHtmlElement::HtmlBogusElement(HtmlBogusElement { syntax }),
+            HTML_CDATA_SECTION => AnyHtmlElement::HtmlCdataSection(HtmlCdataSection { syntax }),
             HTML_COMMENT => AnyHtmlElement::HtmlComment(HtmlComment { syntax }),
             HTML_CONTENT => AnyHtmlElement::HtmlContent(HtmlContent { syntax }),
             HTML_ELEMENT => AnyHtmlElement::HtmlElement(HtmlElement { syntax }),
@@ -1416,6 +1534,7 @@ impl AstNode for AnyHtmlElement {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyHtmlElement::HtmlBogusElement(it) => &it.syntax,
+            AnyHtmlElement::HtmlCdataSection(it) => &it.syntax,
             AnyHtmlElement::HtmlComment(it) => &it.syntax,
             AnyHtmlElement::HtmlContent(it) => &it.syntax,
             AnyHtmlElement::HtmlElement(it) => &it.syntax,
@@ -1425,6 +1544,7 @@ impl AstNode for AnyHtmlElement {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyHtmlElement::HtmlBogusElement(it) => it.syntax,
+            AnyHtmlElement::HtmlCdataSection(it) => it.syntax,
             AnyHtmlElement::HtmlComment(it) => it.syntax,
             AnyHtmlElement::HtmlContent(it) => it.syntax,
             AnyHtmlElement::HtmlElement(it) => it.syntax,
@@ -1436,6 +1556,7 @@ impl std::fmt::Debug for AnyHtmlElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyHtmlElement::HtmlBogusElement(it) => std::fmt::Debug::fmt(it, f),
+            AnyHtmlElement::HtmlCdataSection(it) => std::fmt::Debug::fmt(it, f),
             AnyHtmlElement::HtmlComment(it) => std::fmt::Debug::fmt(it, f),
             AnyHtmlElement::HtmlContent(it) => std::fmt::Debug::fmt(it, f),
             AnyHtmlElement::HtmlElement(it) => std::fmt::Debug::fmt(it, f),
@@ -1447,6 +1568,7 @@ impl From<AnyHtmlElement> for SyntaxNode {
     fn from(n: AnyHtmlElement) -> SyntaxNode {
         match n {
             AnyHtmlElement::HtmlBogusElement(it) => it.into(),
+            AnyHtmlElement::HtmlCdataSection(it) => it.into(),
             AnyHtmlElement::HtmlComment(it) => it.into(),
             AnyHtmlElement::HtmlContent(it) => it.into(),
             AnyHtmlElement::HtmlElement(it) => it.into(),
@@ -1476,6 +1598,11 @@ impl std::fmt::Display for HtmlAttribute {
     }
 }
 impl std::fmt::Display for HtmlAttributeInitializerClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for HtmlCdataSection {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

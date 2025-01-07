@@ -347,3 +347,14 @@ fn comment_full() {
         COMMENT_END: 3,
     }
 }
+
+#[test]
+fn cdata_full() {
+    assert_lex! {
+        HtmlLexContext::CdataSection,
+        "<![CDATA[1]]>",
+        CDATA_START: 9,
+        HTML_LITERAL: 1,
+        CDATA_END: 3,
+    }
+}

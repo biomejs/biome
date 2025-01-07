@@ -35,6 +35,8 @@ pub(crate) enum HtmlLexContext {
     EmbeddedLanguage(HtmlEmbededLanguage),
     /// Comments are treated as text until the closing comment tag is encountered.
     Comment,
+    /// CDATA Sections are treated as text until the closing CDATA token is encountered.
+    CdataSection,
 }
 
 #[derive(Copy, Clone, Debug)]

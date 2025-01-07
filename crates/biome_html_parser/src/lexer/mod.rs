@@ -159,6 +159,24 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consume a token in the [HtmlLexContext::CdataSection] context.
+    fn consume_inside_cdata(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'<' if self.at_start_cdata() => self.consume_cdata_start(),
+            b']' if self.at_end_cdata() => self.consume_cdata_end(),
+            _ => {
+                while let Some(char) = self.current_byte() {
+                    if self.at_end_cdata() {
+                        // eat ]]>
+                        break;
+                    }
+                    self.advance_byte_or_char(char);
+                }
+                HTML_LITERAL
+            }
+        }
+    }
+
     /// Bumps the current byte and creates a lexed token of the passed in kind.
     #[inline]
     fn consume_byte(&mut self, tok: HtmlSyntaxKind) -> HtmlSyntaxKind {
@@ -358,6 +376,8 @@ impl<'src> HtmlLexer<'src> {
 
         if self.at_start_comment() {
             self.consume_comment_start()
+        } else if self.at_start_cdata() {
+            self.consume_cdata_start()
         } else {
             self.consume_byte(T![<])
         }
@@ -376,6 +396,24 @@ impl<'src> HtmlLexer<'src> {
             && self.byte_at(2) == Some(b'>')
     }
 
+    fn at_start_cdata(&mut self) -> bool {
+        self.current_byte() == Some(b'<')
+            && self.byte_at(1) == Some(b'!')
+            && self.byte_at(2) == Some(b'[')
+            && self.byte_at(3) == Some(b'C')
+            && self.byte_at(4) == Some(b'D')
+            && self.byte_at(5) == Some(b'A')
+            && self.byte_at(6) == Some(b'T')
+            && self.byte_at(7) == Some(b'A')
+            && self.byte_at(8) == Some(b'[')
+    }
+
+    fn at_end_cdata(&mut self) -> bool {
+        self.current_byte() == Some(b']')
+            && self.byte_at(1) == Some(b']')
+            && self.byte_at(2) == Some(b'>')
+    }
+
     fn consume_comment_start(&mut self) -> HtmlSyntaxKind {
         debug_assert!(self.at_start_comment());
 
@@ -388,6 +426,20 @@ impl<'src> HtmlLexer<'src> {
 
         self.advance(3);
         T![-->]
+    }
+
+    fn consume_cdata_start(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.at_start_cdata());
+
+        self.advance(9);
+        T!["<![CDATA["]
+    }
+
+    fn consume_cdata_end(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.at_end_cdata());
+
+        self.advance(3);
+        T!["]]>"]
     }
 
     /// Lexes a `\u0000` escape sequence. Assumes that the lexer is positioned at the `u` token.
@@ -517,6 +569,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                         self.consume_token_embedded_language(current, lang)
                     }
                     HtmlLexContext::Comment => self.consume_inside_comment(current),
+                    HtmlLexContext::CdataSection => self.consume_inside_cdata(current),
                 },
                 None => EOF,
             }

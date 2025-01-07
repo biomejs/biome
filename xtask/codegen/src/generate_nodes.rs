@@ -989,9 +989,9 @@ pub(crate) fn token_kind_to_code(name: &str, language_kind: LanguageKind) -> Tok
         let token: TokenStream = token.parse().unwrap();
         quote! { T![#token] }
     } else {
-        // $ is valid syntax in rust and it's part of macros,
+        // `$`, `[`, and `]` is valid syntax in rust and it's part of macros,
         // so we need to decorate the tokens with quotes
-        if matches!(name, "$=" | "$_") {
+        if matches!(name, "$=" | "$_" | "<![CDATA[" | "]]>") {
             let token = Literal::string(name);
             quote! { T![#token] }
         } else {
