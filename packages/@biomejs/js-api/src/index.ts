@@ -2,14 +2,14 @@ import type {
 	BiomePath,
 	Diagnostic,
 	FixFileMode,
-	PartialConfiguration,
+	Configuration,
 	ProjectKey,
 	Workspace,
 } from "@biomejs/wasm-nodejs";
 import { Distribution, type WasmModule, loadModule, wrapError } from "./wasm";
 
 // Re-export of some useful types for users
-export type Configuration = PartialConfiguration;
+export type Configuration = Configuration;
 export type { Diagnostic };
 export { Distribution };
 
