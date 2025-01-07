@@ -73,10 +73,10 @@ Environment:
 
 Biome Configuration:
   Status:                       Loaded successfully
-  Formatter disabled:           false
-  Linter disabled:              true
-  Assist disabled:              true
-  VCS disabled:                 true
+  Formatter enabled:            true
+  Linter enabled:               true
+  Assist enabled:               true
+  VCS enabled:                  false
 
 Formatter:
   Format with errors:           true

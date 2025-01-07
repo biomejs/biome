@@ -207,6 +207,18 @@ impl Settings {
         }
         result
     }
+
+    pub fn is_formatter_enabled(&self) -> bool {
+        self.formatter.is_enabled()
+    }
+
+    pub fn is_linter_enabled(&self) -> bool {
+        self.linter.is_enabled()
+    }
+
+    pub fn is_assist_enabled(&self) -> bool {
+        self.assist.is_enabled()
+    }
 }
 
 /// Formatter settings for the entire workspace
@@ -228,6 +240,12 @@ pub struct FormatSettings {
     pub ignored_files: Matcher,
     /// List of included paths/files
     pub included_files: Matcher,
+}
+
+impl FormatSettings {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
+    }
 }
 
 /// Formatter settings for the entire workspace
@@ -282,6 +300,12 @@ pub struct LinterSettings {
     pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
 }
 
+impl LinterSettings {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
+    }
+}
+
 /// Linter settings for the entire workspace
 #[derive(Clone, Debug, Default)]
 pub struct OverrideLinterSettings {
@@ -309,6 +333,12 @@ pub struct AssistSettings {
 
     /// List of included paths/files to match
     pub included_files: Matcher,
+}
+
+impl AssistSettings {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
+    }
 }
 
 /// Assist settings for the entire workspace

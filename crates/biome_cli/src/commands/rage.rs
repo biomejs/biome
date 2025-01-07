@@ -1,3 +1,6 @@
+use crate::commands::daemon::read_most_recent_log_file;
+use crate::service::enumerate_pipes;
+use crate::{service, CliDiagnostic, CliSession, VERSION};
 use biome_configuration::{ConfigurationPathHint, Rules};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{
@@ -9,16 +12,13 @@ use biome_diagnostics::{termcolor, PrintDescription};
 use biome_flags::biome_env;
 use biome_fs::{FileSystem, OsFileSystem};
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
+use biome_service::settings::Settings;
 use biome_service::workspace::{client, RageEntry, RageParams};
 use biome_service::Workspace;
 use camino::Utf8PathBuf;
 use std::{env, io, ops::Deref};
 use terminal_size::terminal_size;
 use tokio::runtime::Runtime;
-
-use crate::commands::daemon::read_most_recent_log_file;
-use crate::service::enumerate_pipes;
-use crate::{service, CliDiagnostic, CliSession, VERSION};
 
 /// Handler for the `rage` command
 pub(crate) fn rage(
@@ -211,6 +211,12 @@ impl Display for RageConfiguration<'_> {
                         diagnostics,
                         ..
                     } = loaded_configuration;
+                    let vcs_enabled = configuration.is_vcs_enabled();
+                    let mut settings = Settings::default();
+                    settings
+                        .merge_with_configuration(configuration.clone(), None, None, &[])
+                        .unwrap();
+
                     let status = if !diagnostics.is_empty() {
                         for diagnostic in diagnostics {
                             (markup! {
@@ -227,10 +233,10 @@ impl Display for RageConfiguration<'_> {
 
                     markup! (
                         {KeyValuePair("Status", status)}
-                        {KeyValuePair("Formatter disabled", markup!({DebugDisplay(!configuration.is_formatter_enabled())}))}
-                        {KeyValuePair("Linter disabled", markup!({DebugDisplay(!configuration.is_linter_enabled())}))}
-                        {KeyValuePair("Assist disabled", markup!({DebugDisplay(!configuration.is_assist_enabled())}))}
-                        {KeyValuePair("VCS disabled", markup!({DebugDisplay(!configuration.is_assist_enabled())}))}
+                        {KeyValuePair("Formatter enabled", markup!({DebugDisplay(settings.is_formatter_enabled())}))}
+                        {KeyValuePair("Linter enabled", markup!({DebugDisplay(settings.is_linter_enabled())}))}
+                        {KeyValuePair("Assist enabled", markup!({DebugDisplay(settings.is_assist_enabled())}))}
+                        {KeyValuePair("VCS enabled", markup!({DebugDisplay(vcs_enabled)}))}
                     ).fmt(fmt)?;
 
                     // Print formatter configuration if --formatter option is true

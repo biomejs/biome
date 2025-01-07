@@ -210,10 +210,6 @@ impl Configuration {
         }
     }
 
-    pub fn is_formatter_enabled(&self) -> bool {
-        self.formatter.as_ref().map_or(false, |f| f.is_enabled())
-    }
-
     pub fn get_formatter_configuration(&self) -> FormatterConfiguration {
         self.formatter.clone().unwrap_or_default()
     }
@@ -240,6 +236,10 @@ impl Configuration {
             .and_then(|lang| lang.formatter.as_ref())
             .cloned()
             .unwrap_or_default()
+    }
+
+    pub fn is_formatter_enabled(&self) -> bool {
+        self.formatter.as_ref().map_or(false, |f| f.is_enabled())
     }
 
     pub fn is_linter_enabled(&self) -> bool {

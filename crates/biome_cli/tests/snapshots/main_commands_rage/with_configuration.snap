@@ -36,10 +36,10 @@ Environment:
 
 Biome Configuration:
   Status:                       Loaded successfully
-  Formatter disabled:           true
-  Linter disabled:              true
-  Assist disabled:              true
-  VCS disabled:                 true
+  Formatter enabled:            false
+  Linter enabled:               true
+  Assist enabled:               true
+  VCS enabled:                  false
 
 Server:
   Version:                      0.0.0
