@@ -142,7 +142,7 @@ impl FileFeaturesResult {
         }
     }
 
-    /// Check if **Biome** supports certain features
+    /// Adds the features that are enabled in `capabilities` to this result.
     pub fn with_capabilities(mut self, capabilities: &Capabilities) -> Self {
         if capabilities.formatter.format.is_some() {
             self.features_supported
