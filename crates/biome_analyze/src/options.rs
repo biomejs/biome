@@ -1,9 +1,9 @@
+use camino::Utf8PathBuf;
 use rustc_hash::FxHashMap;
 
 use crate::{FixKind, Rule, RuleKey};
 use std::any::{Any, TypeId};
 use std::fmt::Debug;
-use std::path::PathBuf;
 
 /// A convenient new type data structure to store the options that belong to a rule
 #[derive(Debug)]
@@ -98,14 +98,14 @@ pub struct AnalyzerOptions {
     pub(crate) configuration: AnalyzerConfiguration,
 
     /// The file that is being analyzed
-    pub(crate) file_path: PathBuf,
+    pub(crate) file_path: Utf8PathBuf,
 
     /// Suppression reason used when applying a suppression code action
     pub(crate) suppression_reason: Option<String>,
 }
 
 impl AnalyzerOptions {
-    pub fn with_file_path(mut self, file_path: impl Into<PathBuf>) -> Self {
+    pub fn with_file_path(mut self, file_path: impl Into<Utf8PathBuf>) -> Self {
         self.file_path = file_path.into();
         self
     }

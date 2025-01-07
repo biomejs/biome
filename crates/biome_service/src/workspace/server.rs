@@ -14,7 +14,6 @@ use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
 use crate::is_dir;
-use crate::project_layout::ProjectLayout;
 use crate::projects::Projects;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, RageEntry, RageParams,
@@ -37,13 +36,14 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_package::{PackageJson, PackageType};
 use biome_parser::AnyParse;
+use biome_project_layout::ProjectLayout;
 use biome_rowan::NodeCache;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use tracing::{debug, info, info_span, warn};
 
 pub(super) struct WorkspaceServer {
@@ -55,7 +55,7 @@ pub(super) struct WorkspaceServer {
     projects: Projects,
 
     /// The layout of projects and their internal packages.
-    project_layout: ProjectLayout,
+    project_layout: Arc<ProjectLayout>,
 
     /// Stores the document (text content + version number) associated with a URL
     documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
@@ -526,7 +526,7 @@ impl WorkspaceServer {
                 .ok_or_else(WorkspaceError::not_found)?;
             let parsed = self.get_parse(path)?;
             self.project_layout
-                .insert_node_manifest(package_path, parsed);
+                .insert_serialized_node_manifest(package_path, parsed);
         }
 
         Ok(())
@@ -853,7 +853,6 @@ impl Workspace for WorkspaceServer {
         }: PullDiagnosticsParams,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         let parse = self.get_parse(&path)?;
-        let manifest = self.get_node_manifest_for_path(&path)?;
         let (diagnostics, errors, skipped_diagnostics) =
             if let Some(lint) = self.get_file_capabilities(&path).analyzer.lint {
                 info_span!("Pulling diagnostics", categories =? categories).in_scope(|| {
@@ -866,7 +865,7 @@ impl Workspace for WorkspaceServer {
                         skip,
                         language: self.get_file_source(&path),
                         categories,
-                        manifest,
+                        project_layout: self.project_layout.clone(),
                         suppression_reason: None,
                         enabled_rules,
                     });
@@ -923,14 +922,13 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&path))?;
 
         let parse = self.get_parse(&path)?;
-        let manifest = self.get_node_manifest_for_path(&path)?;
         let language = self.get_file_source(&path);
         Ok(code_actions(CodeActionsParams {
             parse,
             range,
             workspace: &self.projects.get_settings(project_key).into(),
             path: &path,
-            manifest,
+            project_layout: self.project_layout.clone(),
             language,
             only,
             skip,
@@ -1030,7 +1028,6 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&path))?;
         let parse = self.get_parse(&path)?;
 
-        let manifest = self.get_node_manifest_for_path(&path)?;
         let language = self.get_file_source(&path);
         fix_all(FixAllParams {
             parse,
@@ -1038,7 +1035,7 @@ impl Workspace for WorkspaceServer {
             workspace: self.projects.get_settings(project_key).into(),
             should_format,
             biome_path: &path,
-            manifest,
+            project_layout: self.project_layout.clone(),
             document_file_source: language,
             only,
             skip,

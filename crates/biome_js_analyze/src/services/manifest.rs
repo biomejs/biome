@@ -4,12 +4,14 @@ use biome_analyze::{
 };
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
 use biome_package::PackageJson;
+use biome_project_layout::ProjectLayout;
 use biome_rowan::AstNode;
+use camino::Utf8Path;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct ManifestServices {
-    pub(crate) manifest: Arc<Option<PackageJson>>,
+    pub(crate) manifest: Option<PackageJson>,
 }
 
 impl ManifestServices {
@@ -53,13 +55,14 @@ impl FromServices for ManifestServices {
     fn from_services(
         rule_key: &RuleKey,
         services: &ServiceBag,
+        file_path: &Utf8Path,
     ) -> biome_diagnostics::Result<Self, MissingServicesDiagnostic> {
-        let manifest: &Arc<Option<PackageJson>> = services.get_service().ok_or_else(|| {
-            MissingServicesDiagnostic::new(rule_key.rule_name(), &["PackageJson"])
+        let project_layout: &Arc<ProjectLayout> = services.get_service().ok_or_else(|| {
+            MissingServicesDiagnostic::new(rule_key.rule_name(), &["ProjectLayout"])
         })?;
 
         Ok(Self {
-            manifest: manifest.clone(),
+            manifest: project_layout.get_node_manifest_for_path(file_path),
         })
     }
 }

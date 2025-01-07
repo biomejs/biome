@@ -70,8 +70,8 @@ impl Rule for NoDocumentImportInPage {
             return None;
         }
 
-        let file_name = path.file_stem()?.to_str()?;
-        let parent_name = path.parent()?.file_stem()?.to_str()?;
+        let file_name = path.file_stem()?;
+        let parent_name = path.parent()?.file_stem()?;
 
         if parent_name == "_document" || file_name == "_document" {
             return None;

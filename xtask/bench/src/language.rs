@@ -200,7 +200,7 @@ impl Analyze {
                     &options,
                     Vec::new(),
                     JsFileSource::default(),
-                    None,
+                    Default::default(),
                     |event| {
                         black_box(event.diagnostic());
                         black_box(event.actions());

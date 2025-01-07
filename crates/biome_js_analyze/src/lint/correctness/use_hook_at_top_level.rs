@@ -20,6 +20,7 @@ use biome_js_syntax::{
     JsTryFinallyStatement, TextRange,
 };
 use biome_rowan::{declare_node_union, AstNode, Language, SyntaxNode, WalkEvent};
+use camino::Utf8Path;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
@@ -354,13 +355,14 @@ impl FromServices for FunctionCallServices {
     fn from_services(
         rule_key: &RuleKey,
         services: &ServiceBag,
+        file_path: &Utf8Path,
     ) -> Result<Self, MissingServicesDiagnostic> {
         let early_returns: &EarlyReturnsModel = services.get_service().ok_or_else(|| {
             MissingServicesDiagnostic::new(rule_key.rule_name(), &["EarlyReturnsModel"])
         })?;
         Ok(Self {
             early_returns: early_returns.clone(),
-            semantic_services: SemanticServices::from_services(rule_key, services)?,
+            semantic_services: SemanticServices::from_services(rule_key, services, file_path)?,
         })
     }
 }

@@ -9,7 +9,7 @@ use biome_analyze::{
 use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_js_syntax::{JsFileSource, JsLanguage};
-use biome_package::PackageJson;
+use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
 use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
 use std::ops::Deref;
@@ -53,7 +53,7 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     options: &'a AnalyzerOptions,
     plugins: Vec<Box<dyn AnalyzerPlugin>>,
     source_type: JsFileSource,
-    manifest: Option<PackageJson>,
+    project_layout: Arc<ProjectLayout>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
 where
@@ -116,7 +116,7 @@ where
     }
 
     services.insert_service(Arc::new(AriaRoles));
-    services.insert_service(Arc::new(manifest));
+    services.insert_service(project_layout);
     services.insert_service(source_type);
     (
         analyzer.run(AnalyzerContext {
@@ -138,7 +138,7 @@ pub fn analyze<'a, F, B>(
     options: &'a AnalyzerOptions,
     plugins: Vec<Box<dyn AnalyzerPlugin>>,
     source_type: JsFileSource,
-    manifest: Option<&'a PackageJson>,
+    project_layout: Arc<ProjectLayout>,
     emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
 where
@@ -152,7 +152,7 @@ where
         options,
         plugins,
         source_type,
-        manifest.cloned(),
+        project_layout,
         emit_signal,
     )
 }
@@ -167,7 +167,7 @@ mod tests {
     use biome_package::{Dependencies, PackageJson};
     use std::slice;
 
-    use crate::{analyze, AnalysisFilter, ControlFlow};
+    use super::*;
 
     // #[ignore]
     #[test]
@@ -191,6 +191,7 @@ let bar = 33;
 
         let mut dependencies = Dependencies::default();
         dependencies.add("buffer", "latest");
+
         analyze(
             &parsed.tree(),
             AnalysisFilter {
@@ -200,10 +201,7 @@ let bar = 33;
             &options,
             Vec::new(),
             JsFileSource::tsx(),
-            Some(&PackageJson {
-                dependencies,
-                ..Default::default()
-            }),
+            project_layout_with_top_level_dependencies(dependencies),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     error_ranges.push(diag.location().span.unwrap());
@@ -252,7 +250,7 @@ let bar = 33;
             &options,
             Vec::new(),
             JsFileSource::js_module(),
-            None,
+            Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let error = diag
@@ -338,7 +336,7 @@ let bar = 33;
             &options,
             Vec::new(),
             JsFileSource::js_module(),
-            None,
+            Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let span = diag.get_span();
@@ -410,7 +408,7 @@ let bar = 33;
             &options,
             Vec::new(),
             JsFileSource::js_module(),
-            None,
+            Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let code = diag.category().unwrap();
@@ -455,7 +453,7 @@ let bar = 33;
             &options,
             Vec::new(),
             JsFileSource::js_module(),
-            None,
+            Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let error = diag
@@ -507,7 +505,7 @@ debugger;
             &options,
             Vec::new(),
             JsFileSource::js_module(),
-            None,
+            Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let error = diag
@@ -554,7 +552,7 @@ debugger;
             &options,
             Vec::new(),
             JsFileSource::js_module(),
-            None,
+            Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let error = diag
@@ -603,7 +601,7 @@ debugger;
             &options,
             Vec::new(),
             JsFileSource::js_module(),
-            None,
+            Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let error = diag
@@ -653,7 +651,7 @@ let bar = 33;
             &options,
             Vec::new(),
             JsFileSource::js_module(),
-            None,
+            Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let code = diag.category().unwrap();
@@ -701,7 +699,7 @@ let bar = 33;
             &options,
             Vec::new(),
             JsFileSource::js_module(),
-            None,
+            Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let error = diag
@@ -752,7 +750,7 @@ let c;
             &options,
             Vec::new(),
             JsFileSource::js_module(),
-            None,
+            Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let code = diag.category().unwrap();
@@ -804,7 +802,7 @@ debugger;
             &options,
             Vec::new(),
             JsFileSource::js_module(),
-            None,
+            Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     has_diagnostics = true;
@@ -857,7 +855,7 @@ let d;
             &options,
             Vec::new(),
             JsFileSource::js_module(),
-            None,
+            Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let error = diag
@@ -905,7 +903,7 @@ a == b;
             &options,
             Vec::new(),
             JsFileSource::js_module(),
-            None,
+            Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     has_diagnostics = true;
@@ -919,5 +917,19 @@ a == b;
             },
         );
         assert!(has_diagnostics, "must have diagnostics");
+    }
+
+    fn project_layout_with_top_level_dependencies(
+        dependencies: Dependencies,
+    ) -> Arc<ProjectLayout> {
+        let manifest = PackageJson {
+            dependencies,
+            ..Default::default()
+        };
+
+        let project_layout = ProjectLayout::default();
+        project_layout.insert_node_manifest("/".into(), manifest);
+
+        Arc::new(project_layout)
     }
 }

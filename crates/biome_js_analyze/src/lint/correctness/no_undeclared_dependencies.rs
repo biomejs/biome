@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize::{
@@ -8,6 +6,7 @@ use biome_deserialize::{
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
 use biome_rowan::AstNode;
+use camino::Utf8Path;
 
 use crate::{globals::is_node_builtin_module, services::manifest::Manifest};
 
@@ -164,7 +163,7 @@ impl schemars::JsonSchema for DependencyAvailability {
 }
 
 impl DependencyAvailability {
-    fn is_available(&self, path: &Path) -> bool {
+    fn is_available(&self, path: &Utf8Path) -> bool {
         match self {
             Self::Bool(b) => *b,
             Self::Patterns(globs) => {

@@ -5,6 +5,7 @@ use biome_analyze::{
 use biome_aria::AriaRoles;
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
 use biome_rowan::AstNode;
+use camino::Utf8Path;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
@@ -22,6 +23,7 @@ impl FromServices for AriaServices {
     fn from_services(
         rule_key: &RuleKey,
         services: &ServiceBag,
+        _file_path: &Utf8Path,
     ) -> Result<Self, MissingServicesDiagnostic> {
         let roles: &Arc<AriaRoles> = services
             .get_service()

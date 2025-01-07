@@ -5,6 +5,7 @@ use biome_analyze::{
 use biome_js_semantic::{SemanticEventExtractor, SemanticModel, SemanticModelBuilder};
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
 use biome_rowan::AstNode;
+use camino::Utf8Path;
 
 pub struct SemanticServices {
     model: SemanticModel,
@@ -20,6 +21,7 @@ impl FromServices for SemanticServices {
     fn from_services(
         rule_key: &RuleKey,
         services: &ServiceBag,
+        _file_path: &Utf8Path,
     ) -> Result<Self, MissingServicesDiagnostic> {
         let model: &SemanticModel = services.get_service().ok_or_else(|| {
             MissingServicesDiagnostic::new(rule_key.rule_name(), &["SemanticModel"])

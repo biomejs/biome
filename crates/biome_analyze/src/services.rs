@@ -1,5 +1,6 @@
 use crate::{RuleKey, TextRange};
 use biome_diagnostics::{Diagnostic, LineIndexBuf, Resource, Result, SourceCode};
+use camino::Utf8Path;
 use rustc_hash::FxHashMap;
 use std::any::{Any, TypeId};
 
@@ -36,6 +37,7 @@ pub trait FromServices: Sized {
     fn from_services(
         rule_key: &RuleKey,
         services: &ServiceBag,
+        file_path: &Utf8Path,
     ) -> Result<Self, MissingServicesDiagnostic>;
 }
 
@@ -58,7 +60,11 @@ impl ServiceBag {
 }
 
 impl FromServices for () {
-    fn from_services(_: &RuleKey, _: &ServiceBag) -> Result<Self, MissingServicesDiagnostic> {
+    fn from_services(
+        _: &RuleKey,
+        _: &ServiceBag,
+        _: &Utf8Path,
+    ) -> Result<Self, MissingServicesDiagnostic> {
         Ok(())
     }
 }

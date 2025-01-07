@@ -2,7 +2,6 @@ pub mod documentation;
 pub mod file_handlers;
 
 pub mod matcher;
-pub mod project_layout;
 pub mod projects;
 pub mod settings;
 pub mod workspace;

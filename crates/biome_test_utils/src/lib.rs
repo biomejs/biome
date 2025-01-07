@@ -7,6 +7,7 @@ use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_package::PackageJson;
+use biome_project_layout::ProjectLayout;
 use biome_rowan::{SyntaxKind, SyntaxNode, SyntaxSlot};
 use biome_service::configuration::to_analyzer_rules;
 use biome_service::file_handlers::DocumentFileSource;
@@ -17,7 +18,7 @@ use json_comments::StripComments;
 use similar::{DiffableStr, TextDiff};
 use std::ffi::c_int;
 use std::fmt::Write;
-use std::sync::Once;
+use std::sync::{Arc, Once};
 
 pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String>> {
     if extension == "json" || extension == "jsonc" {
@@ -157,7 +158,10 @@ where
     }
 }
 
-pub fn load_manifest(input_file: &Utf8Path, diagnostics: &mut Vec<String>) -> Option<PackageJson> {
+pub fn project_layout_with_node_manifest(
+    input_file: &Utf8Path,
+    diagnostics: &mut Vec<String>,
+) -> Arc<ProjectLayout> {
     let options_file = input_file.with_extension("package.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
         let deserialized = biome_deserialize::json::deserialize_from_json_str::<PackageJson>(
@@ -176,10 +180,15 @@ pub fn load_manifest(input_file: &Utf8Path, diagnostics: &mut Vec<String>) -> Op
                     .collect::<Vec<_>>(),
             );
         } else {
-            return deserialized.into_deserialized();
+            let project_layout = ProjectLayout::default();
+            project_layout.insert_node_manifest(
+                "/".into(),
+                deserialized.into_deserialized().unwrap_or_default(),
+            );
+            return Arc::new(project_layout);
         }
     }
-    None
+    Default::default()
 }
 
 pub fn diagnostic_to_string(name: &str, source: &str, diag: Error) -> String {
