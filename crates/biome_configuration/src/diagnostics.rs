@@ -328,7 +328,7 @@ pub struct InvalidGlobPatternDiagnostic {
 
 #[cfg(test)]
 mod test {
-    use crate::{BiomeDiagnostic, PartialConfiguration};
+    use crate::{BiomeDiagnostic, Configuration};
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
     use biome_json_parser::JsonParserOptions;
@@ -359,11 +359,8 @@ mod test {
     #[test]
     fn deserialization_error() {
         let content = "{ \n\n\"formatter\" }";
-        let result = deserialize_from_json_str::<PartialConfiguration>(
-            content,
-            JsonParserOptions::default(),
-            "",
-        );
+        let result =
+            deserialize_from_json_str::<Configuration>(content, JsonParserOptions::default(), "");
 
         assert!(result.has_errors());
         for diagnostic in result.into_diagnostics() {
@@ -386,12 +383,9 @@ mod test {
     }
   }
 }"#;
-        let _result = deserialize_from_json_str::<PartialConfiguration>(
-            content,
-            JsonParserOptions::default(),
-            "",
-        )
-        .into_deserialized()
-        .unwrap_or_default();
+        let _result =
+            deserialize_from_json_str::<Configuration>(content, JsonParserOptions::default(), "")
+                .into_deserialized()
+                .unwrap_or_default();
     }
 }

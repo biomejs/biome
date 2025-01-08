@@ -1,26 +1,37 @@
 use super::{
     search, AnalyzerCapabilities, AnalyzerVisitorBuilder, CodeActionsParams, DebugCapabilities,
-    ExtensionHandler, FormatterCapabilities, LintParams, LintResults, ParseResult,
+    EnabledForPath, ExtensionHandler, FormatterCapabilities, LintParams, LintResults, ParseResult,
     ParserCapabilities, ProcessLint, SearchCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
 use crate::file_handlers::{is_diagnostic_error, FixAllParams};
 use crate::settings::{
-    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
-    ServiceLanguage, Settings, WorkspaceSettingsHandle,
+    check_feature_activity, check_override_feature_activity, LinterSettings, OverrideSettings,
+    Settings,
 };
-use crate::workspace::{
-    CodeAction, DocumentFileSource, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
-    PullActionsResult, RenameResult,
+use crate::workspace::DocumentFileSource;
+use crate::{
+    settings::{
+        FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage,
+        WorkspaceSettingsHandle,
+    },
+    workspace::{
+        CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
+        RenameResult,
+    },
+    WorkspaceError,
 };
-use crate::WorkspaceError;
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
     RuleCategoriesBuilder, RuleError, RuleFilter,
 };
-use biome_configuration::javascript::JsxRuntime;
+use biome_configuration::javascript::{
+    JsAssistConfiguration, JsAssistEnabled, JsFormatterConfiguration, JsFormatterEnabled,
+    JsGritMetavariable, JsLinterConfiguration, JsLinterEnabled, JsParserConfiguration,
+    JsxEverywhere, JsxRuntime, UnsafeParameterDecoratorsEnabled,
+};
 use biome_diagnostics::Applicability;
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, FormatError, IndentStyle, IndentWidth,
@@ -40,6 +51,7 @@ use biome_js_syntax::{
 };
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache};
+use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt::Debug;
@@ -60,38 +72,92 @@ pub struct JsFormatterSettings {
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
-    pub enabled: Option<bool>,
+    pub enabled: Option<JsFormatterEnabled>,
     pub attribute_position: Option<AttributePosition>,
+}
+
+impl From<JsFormatterConfiguration> for JsFormatterSettings {
+    fn from(value: JsFormatterConfiguration) -> Self {
+        Self {
+            quote_style: value.quote_style,
+            jsx_quote_style: value.jsx_quote_style,
+            quote_properties: value.quote_properties,
+            trailing_commas: value.trailing_commas,
+            semicolons: value.semicolons,
+            arrow_parentheses: value.arrow_parentheses,
+            bracket_same_line: value.bracket_same_line,
+            enabled: value.enabled,
+            line_width: value.line_width,
+            bracket_spacing: value.bracket_spacing,
+            attribute_position: value.attribute_position,
+            indent_width: value.indent_width,
+            indent_style: value.indent_style,
+            line_ending: value.line_ending,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsParserSettings {
-    pub parse_class_parameter_decorators: bool,
-    pub grit_metavariables: bool,
-    pub jsx_everywhere: bool,
+    pub parse_class_parameter_decorators: Option<UnsafeParameterDecoratorsEnabled>,
+    pub grit_metavariables: Option<JsGritMetavariable>,
+    pub jsx_everywhere: Option<JsxEverywhere>,
+}
+
+impl From<JsParserConfiguration> for JsParserSettings {
+    fn from(value: JsParserConfiguration) -> Self {
+        Self {
+            parse_class_parameter_decorators: value.unsafe_parameter_decorators_enabled,
+            grit_metavariables: value.grit_metavariables,
+            jsx_everywhere: value.jsx_everywhere,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsLinterSettings {
-    pub enabled: Option<bool>,
+    pub enabled: Option<JsLinterEnabled>,
     pub suppression_reason: Option<String>,
+}
+
+impl From<JsLinterConfiguration> for JsLinterSettings {
+    fn from(value: JsLinterConfiguration) -> Self {
+        Self {
+            enabled: value.enabled,
+            suppression_reason: None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct JsOrganizeImportsSettings {}
+pub struct JsAssistSettings {
+    pub enabled: Option<JsAssistEnabled>,
+    pub suppression_reason: Option<String>,
+}
+
+impl From<JsAssistConfiguration> for JsAssistSettings {
+    fn from(value: JsAssistConfiguration) -> Self {
+        Self {
+            enabled: value.enabled,
+            suppression_reason: None,
+        }
+    }
+}
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsEnvironmentSettings {
-    pub jsx_runtime: JsxRuntime,
+    pub jsx_runtime: Option<JsxRuntime>,
 }
 
 impl From<JsxRuntime> for JsEnvironmentSettings {
     fn from(jsx_runtime: JsxRuntime) -> Self {
-        Self { jsx_runtime }
+        Self {
+            jsx_runtime: Some(jsx_runtime),
+        }
     }
 }
 
@@ -99,9 +165,9 @@ impl ServiceLanguage for JsLanguage {
     type FormatterSettings = JsFormatterSettings;
     type LinterSettings = JsLinterSettings;
     type FormatOptions = JsFormatOptions;
-    type OrganizeImportsSettings = JsOrganizeImportsSettings;
     type ParserSettings = JsParserSettings;
     type EnvironmentSettings = JsEnvironmentSettings;
+    type AssistSettings = JsAssistSettings;
 
     fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self> {
         &languages.javascript
@@ -212,9 +278,15 @@ impl ServiceLanguage for JsLanguage {
         let mut globals = Vec::new();
 
         if let (Some(overrides), Some(global)) = (overrides, global) {
-            let jsx_runtime = match overrides
-                .override_jsx_runtime(path, global.languages.javascript.environment.jsx_runtime)
-            {
+            let jsx_runtime = match overrides.override_jsx_runtime(
+                path,
+                global
+                    .languages
+                    .javascript
+                    .environment
+                    .jsx_runtime
+                    .unwrap_or_default(),
+            ) {
                 // In the future, we may wish to map an `Auto` variant to a concrete
                 // analyzer value for easy access by the analyzer.
                 JsxRuntime::Transparent => biome_analyze::options::JsxRuntime::Transparent,
@@ -280,6 +352,111 @@ impl ServiceLanguage for JsLanguage {
             .with_configuration(configuration)
             .with_suppression_reason(suppression_reason)
     }
+
+    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_override_feature_activity(
+                                pattern.languages.javascript.formatter.enabled,
+                                pattern.formatter.enabled,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    settings.languages.javascript.formatter.enabled,
+                    settings.formatter.enabled,
+                ))
+            })
+            .unwrap_or_default()
+            .into()
+    }
+
+    fn assist_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_override_feature_activity(
+                                pattern.languages.javascript.assist.enabled,
+                                pattern.assist.enabled,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    settings.languages.javascript.assist.enabled,
+                    settings.assist.enabled,
+                ))
+            })
+            .unwrap_or_default()
+            .into()
+    }
+
+    fn linter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_override_feature_activity(
+                                pattern.languages.javascript.linter.enabled,
+                                pattern.linter.enabled,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    settings.languages.javascript.linter.enabled,
+                    settings.linter.enabled,
+                ))
+            })
+            .unwrap_or_default()
+            .into()
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -288,6 +465,12 @@ pub(crate) struct JsFileHandler;
 impl ExtensionHandler for JsFileHandler {
     fn capabilities(&self) -> super::Capabilities {
         super::Capabilities {
+            enabled_for_path: EnabledForPath {
+                formatter: Some(formatter_enabled),
+                linter: Some(linter_enabled),
+                assist: Some(assist_enabled),
+                search: Some(search_enabled),
+            },
             parser: ParserCapabilities { parse: Some(parse) },
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
@@ -312,13 +495,30 @@ impl ExtensionHandler for JsFileHandler {
     }
 }
 
+pub fn formatter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
+    handle.formatter_enabled_for_file_path::<JsLanguage>(path)
+}
+
+pub fn linter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
+    handle.linter_enabled_for_file_path::<JsLanguage>(path)
+}
+
+pub fn assist_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
+    handle.assist_enabled_for_file_path::<JsLanguage>(path)
+}
+
+pub fn search_enabled(_path: &Utf8Path, _handle: &WorkspaceSettingsHandle) -> bool {
+    true
+}
+
 fn parse(
     biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    settings: Option<&Settings>,
+    handle: WorkspaceSettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
+    let settings = handle.settings();
     let mut options = JsParserOptions {
         grit_metavariables: false,
         parse_class_parameter_decorators: settings.is_some_and(|settings| {
@@ -327,10 +527,19 @@ fn parse(
                 .javascript
                 .parser
                 .parse_class_parameter_decorators
+                .unwrap_or_default()
+                .into()
         }),
     };
-    let jsx_everywhere =
-        settings.is_some_and(|settings| settings.languages.javascript.parser.jsx_everywhere);
+    let jsx_everywhere = settings.is_some_and(|settings| {
+        settings
+            .languages
+            .javascript
+            .parser
+            .jsx_everywhere
+            .unwrap_or_default()
+            .into()
+    });
     if let Some(settings) = settings {
         options = settings
             .override_settings
@@ -438,7 +647,6 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         &params.language,
         params.suppression_reason.as_deref(),
     );
-
     let (enabled_rules, disabled_rules, analyzer_options) =
         AnalyzerVisitorBuilder::new(params.workspace.settings(), analyzer_options)
             .with_only(&params.only)

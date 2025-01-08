@@ -1,40 +1,49 @@
 #[rustfmt::skip]
 mod rules;
 
+use crate::bool::Bool;
 use biome_analyze::RuleDomain;
-use biome_deserialize_macros::{Deserializable, Merge, Partial};
+use biome_deserialize_macros::{Deserializable, Merge};
 use bpaf::Bpaf;
 pub use rules::*;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
+pub type LinterEnabled = Bool<true>;
+
+#[derive(
+    Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct LinterConfiguration {
     /// if `false`, it disables the feature and the linter won't be executed. `true` by default
-    #[partial(bpaf(hide))]
-    pub enabled: bool,
+    #[bpaf(hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<LinterEnabled>,
 
     /// List of rules
-    #[partial(bpaf(pure(Default::default()), optional, hide))]
-    pub rules: Rules,
+    #[bpaf(pure(Default::default()), optional, hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rules: Option<Rules>,
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide, pure(Default::default())))]
-    pub ignore: Vec<Box<str>>,
+    #[bpaf(hide, pure(Default::default()))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ignore: Option<Vec<Box<str>>>,
 
     /// A list of Unix shell style patterns. The formatter will include files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide, pure(Default::default())))]
-    pub include: Vec<Box<str>>,
+    #[bpaf(hide, pure(Default::default()))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub include: Option<Vec<Box<str>>>,
 
     /// An object where the keys are the names of the domains, and the values are boolean. `true` to turn-on the rules that
     /// belong to that domain, `false` to turn them off
-    #[partial(bpaf(hide, pure(Default::default())))]
-    pub domains: FxHashMap<RuleDomain, RuleDomainValue>,
+    #[bpaf(hide, pure(Default::default()))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize, Merge)]
@@ -43,33 +52,15 @@ pub struct LinterConfiguration {
 pub enum RuleDomainValue {
     /// Enables all the rules that belong to this domain
     All,
-    /// Disables all the rules that belong to this domain  
+    /// Disables all the rules that belong to this domain
     None,
     /// It enables only the recommended rules for this domain
     Recommended,
 }
 
 impl LinterConfiguration {
-    pub const fn is_disabled(&self) -> bool {
-        !self.enabled
-    }
-}
-
-impl Default for LinterConfiguration {
-    fn default() -> Self {
-        Self {
-            enabled: true,
-            rules: Default::default(),
-            ignore: Default::default(),
-            include: Default::default(),
-            domains: Default::default(),
-        }
-    }
-}
-
-impl PartialLinterConfiguration {
-    pub const fn is_disabled(&self) -> bool {
-        matches!(self.enabled, Some(false))
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
     }
 
     pub fn get_rules(&self) -> Rules {

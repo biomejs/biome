@@ -5,7 +5,7 @@ use crate::cli_options::CliOptions;
 use crate::diagnostics::MigrationDiagnostic;
 use crate::execute::{Execution, TraversalMode};
 use crate::CliDiagnostic;
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_console::{markup, Console, ConsoleExt};
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
@@ -30,7 +30,7 @@ impl CommandRunner for MigrateCommandPayload {
         loaded_configuration: LoadedConfiguration,
         _fs: &dyn FileSystem,
         _console: &mut dyn Console,
-    ) -> Result<PartialConfiguration, WorkspaceError> {
+    ) -> Result<Configuration, WorkspaceError> {
         self.configuration_file_path = loaded_configuration.file_path;
         self.configuration_directory_path = loaded_configuration.directory_path;
         Ok(loaded_configuration.configuration)
@@ -39,7 +39,7 @@ impl CommandRunner for MigrateCommandPayload {
     fn get_files_to_process(
         &self,
         _fs: &dyn FileSystem,
-        _configuration: &PartialConfiguration,
+        _configuration: &Configuration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
         Ok(vec![])
     }

@@ -23,6 +23,7 @@ incorrect_key.json:4:4 deserialize ━━━━━━━━━━━━━━━
   - css
   - graphql
   - grit
+  - html
   - formatter
   - linter
   - assist

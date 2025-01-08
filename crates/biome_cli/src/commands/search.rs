@@ -1,9 +1,8 @@
 use crate::cli_options::CliOptions;
 use crate::commands::CommandRunner;
 use crate::{CliDiagnostic, Execution, TraversalMode};
-use biome_configuration::{
-    vcs::PartialVcsConfiguration, PartialConfiguration, PartialFilesConfiguration,
-};
+use biome_configuration::vcs::VcsConfiguration;
+use biome_configuration::{Configuration, FilesConfiguration};
 use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
@@ -15,12 +14,12 @@ use biome_service::{Workspace, WorkspaceError};
 use std::ffi::OsString;
 
 pub(crate) struct SearchCommandPayload {
-    pub(crate) files_configuration: Option<PartialFilesConfiguration>,
+    pub(crate) files_configuration: Option<FilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) pattern: String,
     pub(crate) language: Option<GritTargetLanguage>,
     pub(crate) stdin_file_path: Option<String>,
-    pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
+    pub(crate) vcs_configuration: Option<VcsConfiguration>,
 }
 
 impl CommandRunner for SearchCommandPayload {
@@ -31,7 +30,7 @@ impl CommandRunner for SearchCommandPayload {
         loaded_configuration: LoadedConfiguration,
         _fs: &dyn FileSystem,
         _console: &mut dyn Console,
-    ) -> Result<PartialConfiguration, WorkspaceError> {
+    ) -> Result<Configuration, WorkspaceError> {
         let LoadedConfiguration {
             mut configuration, ..
         } = loaded_configuration;
@@ -46,7 +45,7 @@ impl CommandRunner for SearchCommandPayload {
     fn get_files_to_process(
         &self,
         _fs: &dyn FileSystem,
-        _configuration: &PartialConfiguration,
+        _configuration: &Configuration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
         Ok(self.paths.clone())
     }

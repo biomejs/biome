@@ -12,7 +12,7 @@ use biome_diagnostics::{DiagnosticExt, Error, PrintDescription};
 use biome_fs::BiomePath;
 use biome_lsp_converters::{negotiated_encoding, PositionEncoding, WideEncoding};
 use biome_service::configuration::{
-    load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
+    load_configuration, load_editorconfig, ConfigurationExt, LoadedConfiguration,
 };
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::projects::ProjectKey;
@@ -567,7 +567,7 @@ impl Session {
         } = loaded_configuration;
 
         let fs = self.workspace.fs();
-        let should_use_editorconfig = fs_configuration.use_editorconfig().unwrap_or_default();
+        let should_use_editorconfig = fs_configuration.use_editorconfig();
         let mut configuration = if should_use_editorconfig {
             let (editorconfig, editorconfig_diagnostics) = {
                 let search_path = configuration_path

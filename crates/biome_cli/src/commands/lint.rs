@@ -3,14 +3,12 @@ use crate::cli_options::CliOptions;
 use crate::commands::{get_files_to_process_with_cli_options, CommandRunner};
 use crate::{CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::analyzer::RuleSelector;
-use biome_configuration::css::PartialCssLinter;
-use biome_configuration::javascript::PartialJavascriptLinter;
-use biome_configuration::json::PartialJsonLinter;
-use biome_configuration::vcs::PartialVcsConfiguration;
-use biome_configuration::{
-    PartialConfiguration, PartialFilesConfiguration, PartialGraphqlLinter,
-    PartialLinterConfiguration,
-};
+use biome_configuration::css::CssLinterConfiguration;
+use biome_configuration::graphql::GraphqlLinterConfiguration;
+use biome_configuration::javascript::JsLinterConfiguration;
+use biome_configuration::json::JsonLinterConfiguration;
+use biome_configuration::vcs::VcsConfiguration;
+use biome_configuration::{Configuration, FilesConfiguration, LinterConfiguration};
 use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
@@ -25,9 +23,9 @@ pub(crate) struct LintCommandPayload {
     pub(crate) unsafe_: bool,
     pub(crate) suppress: bool,
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) linter_configuration: Option<PartialLinterConfiguration>,
-    pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
-    pub(crate) files_configuration: Option<PartialFilesConfiguration>,
+    pub(crate) linter_configuration: Option<LinterConfiguration>,
+    pub(crate) vcs_configuration: Option<VcsConfiguration>,
+    pub(crate) files_configuration: Option<FilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
@@ -35,10 +33,10 @@ pub(crate) struct LintCommandPayload {
     pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
-    pub(crate) javascript_linter: Option<PartialJavascriptLinter>,
-    pub(crate) json_linter: Option<PartialJsonLinter>,
-    pub(crate) css_linter: Option<PartialCssLinter>,
-    pub(crate) graphql_linter: Option<PartialGraphqlLinter>,
+    pub(crate) javascript_linter: Option<JsLinterConfiguration>,
+    pub(crate) json_linter: Option<JsonLinterConfiguration>,
+    pub(crate) css_linter: Option<CssLinterConfiguration>,
+    pub(crate) graphql_linter: Option<GraphqlLinterConfiguration>,
 }
 
 impl CommandRunner for LintCommandPayload {
@@ -49,17 +47,17 @@ impl CommandRunner for LintCommandPayload {
         loaded_configuration: LoadedConfiguration,
         _fs: &dyn FileSystem,
         _console: &mut dyn Console,
-    ) -> Result<PartialConfiguration, WorkspaceError> {
+    ) -> Result<Configuration, WorkspaceError> {
         let LoadedConfiguration {
             configuration: mut fs_configuration,
             ..
         } = loaded_configuration;
 
-        fs_configuration.merge_with(PartialConfiguration {
+        fs_configuration.merge_with(Configuration {
             linter: if fs_configuration
                 .linter
                 .as_ref()
-                .is_some_and(PartialLinterConfiguration::is_disabled)
+                .is_some_and(LinterConfiguration::is_enabled)
             {
                 None
             } else {
@@ -102,7 +100,7 @@ impl CommandRunner for LintCommandPayload {
     fn get_files_to_process(
         &self,
         fs: &dyn FileSystem,
-        configuration: &PartialConfiguration,
+        configuration: &Configuration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
         let paths = get_files_to_process_with_cli_options(
             self.since.as_deref(),

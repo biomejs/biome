@@ -1,6 +1,6 @@
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
 use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_diagnostics::termcolor::Buffer;
@@ -45,7 +45,7 @@ pub fn create_analyzer_options(
     let Ok(json) = std::fs::read_to_string(options_file.clone()) else {
         return options.with_configuration(analyzer_configuration);
     };
-    let deserialized = biome_deserialize::json::deserialize_from_json_str::<PartialConfiguration>(
+    let deserialized = biome_deserialize::json::deserialize_from_json_str::<Configuration>(
         json.as_str(),
         JsonParserOptions::default(),
         "",
@@ -128,7 +128,7 @@ where
     let Ok(json) = std::fs::read_to_string(options_file.clone()) else {
         return Default::default();
     };
-    let deserialized = biome_deserialize::json::deserialize_from_json_str::<PartialConfiguration>(
+    let deserialized = biome_deserialize::json::deserialize_from_json_str::<Configuration>(
         json.as_str(),
         JsonParserOptions::default(),
         "",

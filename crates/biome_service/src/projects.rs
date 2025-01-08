@@ -1,5 +1,5 @@
 use crate::is_dir;
-use crate::settings::{FilesSettings, Settings, DEFAULT_FILE_SIZE_LIMIT};
+use crate::settings::{FilesSettings, Settings};
 use crate::workspace::FeatureKind;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
@@ -80,6 +80,10 @@ impl Projects {
     }
 
     /// Retrieves the settings for the given project.
+    ///
+    /// ## Error
+    ///
+    /// If the project doesn't contain any [Settings]
     pub fn get_settings(&self, project_key: ProjectKey) -> Option<Settings> {
         self.0
             .pin()
@@ -142,9 +146,10 @@ impl Projects {
             .0
             .pin()
             .get(&project_key)
-            .map_or(DEFAULT_FILE_SIZE_LIMIT, |data| data.settings.files.max_size)
-            .get();
-        usize::try_from(limit).unwrap_or(usize::MAX)
+            .and_then(|data| data.settings.files.max_size)
+            .unwrap_or_default();
+
+        usize::from(limit)
     }
 
     /// Checks whether a file is ignored through the feature's

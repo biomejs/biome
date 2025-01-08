@@ -1,8 +1,6 @@
-use std::borrow::Cow;
-
 use super::{
     is_diagnostic_error, AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource,
-    ExtensionHandler, ParseResult, ProcessLint, SearchCapabilities,
+    EnabledForPath, ExtensionHandler, ParseResult, ProcessLint, SearchCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -11,8 +9,9 @@ use crate::file_handlers::{
     LintResults, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
-    ServiceLanguage, Settings, WorkspaceSettingsHandle,
+    check_feature_activity, check_override_feature_activity, FormatSettings, LanguageListSettings,
+    LanguageSettings, LinterSettings, OverrideSettings, ServiceLanguage, Settings,
+    WorkspaceSettingsHandle,
 };
 use crate::workspace::{
     CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
@@ -23,7 +22,12 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder, RuleError,
 };
-use biome_configuration::PartialConfiguration;
+use biome_configuration::json::{
+    JsonAllowCommentsEnabled, JsonAllowTrailingCommasEnabled, JsonAssistConfiguration,
+    JsonAssistEnabled, JsonFormatterConfiguration, JsonFormatterEnabled, JsonLinterConfiguration,
+    JsonLinterEnabled, JsonParserConfiguration,
+};
+use biome_configuration::Configuration;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::Applicability;
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
@@ -36,6 +40,8 @@ use biome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
+use camino::Utf8Path;
+use std::borrow::Cow;
 use tracing::{debug_span, error, instrument, trace};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -47,28 +53,73 @@ pub struct JsonFormatterSettings {
     pub indent_style: Option<IndentStyle>,
     pub trailing_commas: Option<TrailingCommas>,
     pub expand: Option<Expand>,
-    pub enabled: Option<bool>,
+    pub enabled: Option<JsonFormatterEnabled>,
+}
+
+impl From<JsonFormatterConfiguration> for JsonFormatterSettings {
+    fn from(configuration: JsonFormatterConfiguration) -> Self {
+        Self {
+            line_ending: configuration.line_ending,
+            line_width: configuration.line_width,
+            indent_width: configuration.indent_width,
+            indent_style: configuration.indent_style,
+            trailing_commas: configuration.trailing_commas,
+            expand: configuration.expand,
+            enabled: configuration.enabled,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsonParserSettings {
-    pub allow_comments: Option<bool>,
-    pub allow_trailing_commas: Option<bool>,
+    pub allow_comments: Option<JsonAllowCommentsEnabled>,
+    pub allow_trailing_commas: Option<JsonAllowTrailingCommasEnabled>,
+}
+
+impl From<JsonParserConfiguration> for JsonParserSettings {
+    fn from(configuration: JsonParserConfiguration) -> Self {
+        Self {
+            allow_comments: configuration.allow_comments,
+            allow_trailing_commas: configuration.allow_trailing_commas,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsonLinterSettings {
-    pub enabled: Option<bool>,
+    pub enabled: Option<JsonLinterEnabled>,
+}
+
+impl From<JsonLinterConfiguration> for JsonLinterSettings {
+    fn from(configuration: JsonLinterConfiguration) -> Self {
+        Self {
+            enabled: configuration.enabled,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct JsonAssistSettings {
+    pub enabled: Option<JsonAssistEnabled>,
+}
+
+impl From<JsonAssistConfiguration> for JsonAssistSettings {
+    fn from(configuration: JsonAssistConfiguration) -> Self {
+        Self {
+            enabled: configuration.enabled,
+        }
+    }
 }
 
 impl ServiceLanguage for JsonLanguage {
     type FormatterSettings = JsonFormatterSettings;
     type LinterSettings = JsonLinterSettings;
-    type OrganizeImportsSettings = ();
     type FormatOptions = JsonFormatOptions;
     type ParserSettings = JsonParserSettings;
+    type AssistSettings = JsonAssistSettings;
     type EnvironmentSettings = ();
 
     fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
@@ -155,6 +206,111 @@ impl ServiceLanguage for JsonLanguage {
             .with_configuration(configuration)
             .with_suppression_reason(suppression_reason)
     }
+
+    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_override_feature_activity(
+                                pattern.languages.json.formatter.enabled,
+                                pattern.formatter.enabled,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    settings.languages.json.formatter.enabled,
+                    settings.formatter.enabled,
+                ))
+            })
+            .unwrap_or_default()
+            .into()
+    }
+
+    fn assist_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_override_feature_activity(
+                                pattern.languages.json.assist.enabled,
+                                pattern.assist.enabled,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    settings.languages.json.assist.enabled,
+                    settings.assist.enabled,
+                ))
+            })
+            .unwrap_or_default()
+            .into()
+    }
+
+    fn linter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_override_feature_activity(
+                                pattern.languages.json.linter.enabled,
+                                pattern.linter.enabled,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    settings.languages.json.linter.enabled,
+                    settings.linter.enabled,
+                ))
+            })
+            .unwrap_or_default()
+            .into()
+    }
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -163,6 +319,12 @@ pub(crate) struct JsonFileHandler;
 impl ExtensionHandler for JsonFileHandler {
     fn capabilities(&self) -> Capabilities {
         Capabilities {
+            enabled_for_path: EnabledForPath {
+                formatter: Some(formatter_enabled),
+                search: Some(search_enabled),
+                assist: Some(assist_enabled),
+                linter: Some(linter_enabled),
+            },
             parser: ParserCapabilities { parse: Some(parse) },
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
@@ -185,13 +347,30 @@ impl ExtensionHandler for JsonFileHandler {
     }
 }
 
+fn formatter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
+    handle.formatter_enabled_for_file_path::<JsonLanguage>(path)
+}
+
+fn linter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
+    handle.linter_enabled_for_file_path::<JsonLanguage>(path)
+}
+
+fn assist_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
+    handle.assist_enabled_for_file_path::<JsonLanguage>(path)
+}
+
+fn search_enabled(_path: &Utf8Path, _handle: &WorkspaceSettingsHandle) -> bool {
+    true
+}
+
 fn parse(
     biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    settings: Option<&Settings>,
+    handle: WorkspaceSettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
+    let settings = handle.settings();
     let options = if biome_path.ends_with(ConfigName::biome_jsonc()) {
         JsonParserOptions::default()
             .with_allow_comments()
@@ -203,11 +382,11 @@ fn parse(
         let options = JsonParserOptions {
             allow_comments: parser.and_then(|p| p.allow_comments).map_or_else(
                 || optional_json_file_source.map_or(false, |x| x.allow_comments()),
-                |value| value,
+                |value| value.value(),
             ),
             allow_trailing_commas: parser.and_then(|p| p.allow_trailing_commas).map_or_else(
                 || optional_json_file_source.map_or(false, |x| x.allow_trailing_commas()),
-                |value| value,
+                |value| value.value(),
             ),
         };
         if let Some(overrides) = overrides {
@@ -371,7 +550,7 @@ fn lint(params: LintParams) -> LintResults {
     if params.path.ends_with(ConfigName::biome_json())
         || params.path.ends_with(ConfigName::biome_jsonc())
     {
-        let deserialized = deserialize_from_json_ast::<PartialConfiguration>(&root, "");
+        let deserialized = deserialize_from_json_ast::<Configuration>(&root, "");
         diagnostics.extend(
             deserialized
                 .into_diagnostics()

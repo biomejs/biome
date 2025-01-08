@@ -1,4 +1,4 @@
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
 use biome_css_parser::{parse_css, CssParserOptions};
@@ -53,10 +53,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
         let mut settings = Settings::default();
         // SAFETY: we checked its existence already, we assume we have rights to read it
-        let (test_options, diagnostics) = deserialize_from_str::<PartialConfiguration>(
-            options_path.get_buffer_from_file().as_str(),
-        )
-        .consume();
+        let (test_options, diagnostics) =
+            deserialize_from_str::<Configuration>(options_path.get_buffer_from_file().as_str())
+                .consume();
 
         settings
             .merge_with_configuration(test_options.unwrap_or_default(), None, None, &[])
@@ -64,11 +63,11 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
         let settings = settings.languages.css.parser;
 
-        if settings.css_modules.unwrap_or_default() {
+        if settings.css_modules_enabled() {
             options = options.allow_css_modules();
         }
 
-        if settings.allow_wrong_line_comments.unwrap_or_default() {
+        if settings.allow_wrong_line_comments() {
             options = options.allow_wrong_line_comments();
         }
 

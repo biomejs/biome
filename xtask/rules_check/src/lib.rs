@@ -6,7 +6,7 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule,
     RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
 };
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_console::{markup, Console};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
@@ -356,7 +356,7 @@ fn assert_lint(
     rule: &'static str,
     test: &CodeBlockTest,
     code: &str,
-    config: &Option<PartialConfiguration>,
+    config: &Option<Configuration>,
 ) -> anyhow::Result<()> {
     let file_path = format!("code-block.{}", test.tag);
 
@@ -658,7 +658,7 @@ fn parse_rule_options(
     rule: &'static str,
     test: &CodeBlockTest,
     code: &str,
-) -> anyhow::Result<Option<PartialConfiguration>> {
+) -> anyhow::Result<Option<Configuration>> {
     let file_path = format!("code-block.{}", test.tag);
 
     // Record the diagnostics emitted during configuration parsing to later check
@@ -768,7 +768,7 @@ fn parse_rule_options(
 
             // Deserialize the configuration from the partially-synthetic AST,
             // and report any errors encountered during deserialization.
-            let deserialized = deserialize_from_json_ast::<PartialConfiguration>(&root, "");
+            let deserialized = deserialize_from_json_ast::<Configuration>(&root, "");
             let (partial_configuration, deserialize_diagnostics) = deserialized.consume();
 
             if !deserialize_diagnostics.is_empty() {
@@ -802,7 +802,7 @@ fn parse_documentation(
     let parser = Parser::new(docs);
 
     // Track the last configuration options block that was encountered
-    let mut last_options: Option<PartialConfiguration> = None;
+    let mut last_options: Option<Configuration> = None;
 
     // Tracks the content of the current code block if it's using a
     // language supported for analysis

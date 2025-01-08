@@ -30,7 +30,7 @@ impl eslint_eslint::AnyConfigData {
     pub(crate) fn into_biome_config(
         self,
         options: &MigrationOptions,
-    ) -> (biome_config::PartialConfiguration, MigrationResults) {
+    ) -> (biome_config::Configuration, MigrationResults) {
         match self {
             Self::Flat(config) => config.into_biome_config(options),
             Self::Legacy(config) => config.into_biome_config(options),
@@ -42,10 +42,10 @@ impl eslint_eslint::FlatConfigData {
     pub(crate) fn into_biome_config(
         self,
         options: &MigrationOptions,
-    ) -> (biome_config::PartialConfiguration, MigrationResults) {
+    ) -> (biome_config::Configuration, MigrationResults) {
         let mut results = MigrationResults::default();
-        let mut biome_config = biome_config::PartialConfiguration::default();
-        let mut linter = biome_config::PartialLinterConfiguration::default();
+        let mut biome_config = biome_config::Configuration::default();
+        let mut linter = biome_config::LinterConfiguration::default();
         let mut overrides = biome_config::Overrides::default();
         let global_config_object = if self.0.len() == 1 {
             // If there is a single config object, then we use it as the global config
@@ -66,7 +66,7 @@ impl eslint_eslint::FlatConfigData {
                             .globals
                             .enabled()
                             .collect::<rustc_hash::FxHashSet<_>>();
-                        let js_config = biome_config::PartialJavascriptConfiguration {
+                        let js_config = biome_config::JsConfiguration {
                             globals: Some(globals),
                             ..Default::default()
                         };
@@ -105,7 +105,7 @@ impl eslint_eslint::FlatConfigData {
                 .globals
                 .enabled()
                 .collect::<rustc_hash::FxHashSet<_>>();
-            let js_config = biome_config::PartialJavascriptConfiguration {
+            let js_config = biome_config::JsConfiguration {
                 globals: Some(globals),
                 ..Default::default()
             };
@@ -128,18 +128,18 @@ impl eslint_eslint::LegacyConfigData {
     pub(crate) fn into_biome_config(
         self,
         options: &MigrationOptions,
-    ) -> (biome_config::PartialConfiguration, MigrationResults) {
+    ) -> (biome_config::Configuration, MigrationResults) {
         let mut results = MigrationResults::default();
-        let mut biome_config = biome_config::PartialConfiguration::default();
+        let mut biome_config = biome_config::Configuration::default();
         if !self.globals.is_empty() {
             let globals = self.globals.enabled().collect::<rustc_hash::FxHashSet<_>>();
-            let js_config = biome_config::PartialJavascriptConfiguration {
+            let js_config = biome_config::JsConfiguration {
                 globals: Some(globals),
                 ..Default::default()
             };
             biome_config.javascript = Some(js_config)
         }
-        let mut linter = biome_config::PartialLinterConfiguration::default();
+        let mut linter = biome_config::LinterConfiguration::default();
         let mut rules = self.rules.into_biome_rules(options, &mut results);
         rules.recommended = Some(false);
         linter.rules = Some(rules);
@@ -160,7 +160,7 @@ impl eslint_eslint::LegacyConfigData {
                         .globals
                         .enabled()
                         .collect::<rustc_hash::FxHashSet<_>>();
-                    let js_config = biome_config::PartialJavascriptConfiguration {
+                    let js_config = biome_config::JsConfiguration {
                         globals: Some(globals),
                         ..Default::default()
                     };

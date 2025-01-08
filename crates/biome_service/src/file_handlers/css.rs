@@ -1,6 +1,7 @@
 use super::{
-    is_diagnostic_error, search, AnalyzerVisitorBuilder, CodeActionsParams, ExtensionHandler,
-    FixAllParams, LintParams, LintResults, ParseResult, ProcessLint, SearchCapabilities,
+    is_diagnostic_error, search, AnalyzerVisitorBuilder, CodeActionsParams, EnabledForPath,
+    ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult, ProcessLint,
+    SearchCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -8,8 +9,9 @@ use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FormatterCapabilities, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
-    ServiceLanguage, Settings, WorkspaceSettingsHandle,
+    check_feature_activity, check_override_feature_activity, FormatSettings, LanguageListSettings,
+    LanguageSettings, LinterSettings, OverrideSettings, ServiceLanguage, Settings,
+    WorkspaceSettingsHandle,
 };
 use crate::workspace::{
     CodeAction, DocumentFileSource, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult,
@@ -20,6 +22,11 @@ use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder, RuleError,
+};
+use biome_configuration::css::{
+    CssAllowWrongLineCommentsEnabled, CssAssistConfiguration, CssAssistEnabled,
+    CssFormatterConfiguration, CssFormatterEnabled, CssLinterConfiguration, CssLinterEnabled,
+    CssModulesEnabled, CssParserConfiguration,
 };
 use biome_css_analyze::analyze;
 use biome_css_formatter::context::CssFormatOptions;
@@ -34,6 +41,7 @@ use biome_fs::BiomePath;
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
+use camino::Utf8Path;
 use std::borrow::Cow;
 use tracing::{debug_span, error, info, trace_span};
 
@@ -45,28 +53,90 @@ pub struct CssFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub quote_style: Option<QuoteStyle>,
-    pub enabled: Option<bool>,
+    pub enabled: Option<CssFormatterEnabled>,
+}
+
+impl From<CssFormatterConfiguration> for CssFormatterSettings {
+    fn from(configuration: CssFormatterConfiguration) -> Self {
+        Self {
+            enabled: configuration.enabled,
+            line_width: configuration.line_width,
+            indent_width: configuration.indent_width,
+            indent_style: configuration.indent_style,
+            quote_style: configuration.quote_style,
+            line_ending: configuration.line_ending,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CssLinterSettings {
-    pub enabled: Option<bool>,
+    pub enabled: Option<CssLinterEnabled>,
+    pub suppression_reason: Option<String>,
+}
+
+impl From<CssLinterConfiguration> for CssLinterSettings {
+    fn from(value: CssLinterConfiguration) -> Self {
+        Self {
+            enabled: value.enabled,
+            suppression_reason: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct CssAssistSettings {
+    pub enabled: Option<CssAssistEnabled>,
+}
+
+impl From<CssAssistConfiguration> for CssAssistSettings {
+    fn from(configuration: CssAssistConfiguration) -> Self {
+        Self {
+            enabled: configuration.enabled,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CssParserSettings {
-    pub allow_wrong_line_comments: Option<bool>,
-    pub css_modules: Option<bool>,
+    pub allow_wrong_line_comments: Option<CssAllowWrongLineCommentsEnabled>,
+    pub css_modules_enabled: Option<CssModulesEnabled>,
+}
+
+impl From<CssParserConfiguration> for CssParserSettings {
+    fn from(configuration: CssParserConfiguration) -> Self {
+        Self {
+            allow_wrong_line_comments: configuration.allow_wrong_line_comments,
+            css_modules_enabled: configuration.css_modules,
+        }
+    }
+}
+
+impl CssFormatterSettings {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
+    }
+}
+
+impl CssParserSettings {
+    pub fn css_modules_enabled(&self) -> bool {
+        self.css_modules_enabled.unwrap_or_default().into()
+    }
+
+    pub fn allow_wrong_line_comments(&self) -> bool {
+        self.allow_wrong_line_comments.unwrap_or_default().into()
+    }
 }
 
 impl ServiceLanguage for CssLanguage {
     type FormatterSettings = CssFormatterSettings;
     type LinterSettings = CssLinterSettings;
-    type OrganizeImportsSettings = ();
     type FormatOptions = CssFormatOptions;
     type ParserSettings = CssParserSettings;
+    type AssistSettings = CssAssistSettings;
     type EnvironmentSettings = ();
 
     fn lookup_settings(language: &LanguageListSettings) -> &LanguageSettings<Self> {
@@ -154,6 +224,111 @@ impl ServiceLanguage for CssLanguage {
             .with_configuration(configuration)
             .with_suppression_reason(suppression_reason)
     }
+
+    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_override_feature_activity(
+                                pattern.languages.css.formatter.enabled,
+                                pattern.formatter.enabled,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    settings.languages.css.formatter.enabled,
+                    settings.formatter.enabled,
+                ))
+            })
+            .unwrap_or_default()
+            .into()
+    }
+
+    fn assist_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_override_feature_activity(
+                                pattern.languages.css.assist.enabled,
+                                pattern.assist.enabled,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    settings.languages.css.assist.enabled,
+                    settings.assist.enabled,
+                ))
+            })
+            .unwrap_or_default()
+            .into()
+    }
+
+    fn linter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_override_feature_activity(
+                                pattern.languages.css.linter.enabled,
+                                pattern.linter.enabled,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    settings.languages.css.linter.enabled,
+                    settings.linter.enabled,
+                ))
+            })
+            .unwrap_or_default()
+            .into()
+    }
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -182,24 +357,49 @@ impl ExtensionHandler for CssFileHandler {
             search: SearchCapabilities {
                 search: Some(search),
             },
+            enabled_for_path: EnabledForPath {
+                formatter: Some(formatter_enabled),
+                linter: Some(linter_enabled),
+                assist: Some(assist_enabled),
+                search: Some(search_enabled),
+            },
         }
     }
+}
+
+fn formatter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
+    handle.formatter_enabled_for_file_path::<CssLanguage>(path)
+}
+
+fn linter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
+    handle.linter_enabled_for_file_path::<CssLanguage>(path)
+}
+
+fn assist_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
+    handle.assist_enabled_for_file_path::<CssLanguage>(path)
+}
+
+fn search_enabled(_path: &Utf8Path, _handle: &WorkspaceSettingsHandle) -> bool {
+    true
 }
 
 fn parse(
     biome_path: &BiomePath,
     _file_source: DocumentFileSource,
     text: &str,
-    settings: Option<&Settings>,
+    handle: WorkspaceSettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
+    let settings = handle.settings();
     let mut options = CssParserOptions {
         allow_wrong_line_comments: settings
             .and_then(|s| s.languages.css.parser.allow_wrong_line_comments)
-            .unwrap_or_default(),
+            .unwrap_or_default()
+            .into(),
         css_modules: settings
-            .and_then(|s| s.languages.css.parser.css_modules)
-            .unwrap_or_default(),
+            .and_then(|s| s.languages.css.parser.css_modules_enabled)
+            .unwrap_or_default()
+            .into(),
         grit_metavariables: false,
     };
     if let Some(settings) = settings {

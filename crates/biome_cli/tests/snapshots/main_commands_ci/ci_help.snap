@@ -29,20 +29,25 @@ The configuration that is contained inside the file `biome.json`
                               1 MiB
         --files-ignore-unknown=<true|false>  Tells Biome to not emit diagnostics when handling files
                               that doesn't know
-        --use-editorconfig=<true|false>  Use any `.editorconfig` files to configure the formatter.
-                              Configuration in `biome.json` will override `.editorconfig`
-                              configuration. Default: false.
         --indent-style=<tab|space>  The indent style.
         --indent-width=NUMBER  The size of the indentation, 2 by default
         --line-ending=<lf|crlf|cr>  The type of line ending.
         --line-width=NUMBER   What's the max width of a line. Defaults to 80.
-        --attribute-position=<multiline|auto>  The attribute position style in HTMLish languages. By
-                              default auto.
+        --attribute-position=<multiline|auto>  The attribute position style in HTML-ish languages.
+                              Defaults to auto.
         --bracket-same-line=<true|false>  Put the `>` of a multi-line HTML or JSX element at the end
                               of the last line instead of being alone on the next line (does not
                               apply to self closing elements).
         --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
                               Defaults to true.
+        --use-editorconfig=<true|false>  Use any `.editorconfig` files to configure the formatter.
+                              Configuration in `biome.json` will override `.editorconfig`
+                              configuration.
+                              Default: `false`.
+        --jsx-everywhere=<true|false>  When enabled, files like `.js`/`.ts` can contain JSX syntax.
+                              Defaults to `true`.
+        --javascript-formatter-enabled=<true|false>  Control the formatter for JavaScript (and its
+                              super languages) files.
         --jsx-quote-style=<double|single>  The type of quotes used in JSX. Defaults to double.
         --quote-properties=<preserve|as-needed>  When properties in objects are quoted. Defaults to
                               asNeeded.
@@ -52,8 +57,9 @@ The configuration that is contained inside the file `biome.json`
                               or only in for statements where it is necessary because of ASI.
         --arrow-parentheses=<always|as-needed>  Whether to add non-necessary parentheses to arrow
                               functions. Defaults to "always".
-        --javascript-formatter-enabled=<true|false>  Control the formatter for JavaScript (and its
-                              super languages) files.
+        --bracket-same-line=<true|false>  Whether to hug the closing bracket of multiline HTML/JSX
+                              tags to the end of the last line, rather than being alone on the
+                              following line. Defaults to false.
         --javascript-formatter-indent-style=<tab|space>  The indent style applied to JavaScript (and
                               its super languages) files.
         --javascript-formatter-indent-width=NUMBER  The size of the indentation applied to
@@ -62,16 +68,13 @@ The configuration that is contained inside the file `biome.json`
                               JavaScript (and its super languages) files.
         --javascript-formatter-line-width=NUMBER  What's the max width of a line applied to
                               JavaScript (and its super languages) files. Defaults to 80.
-        --quote-style=<double|single>  The type of quotes used in JavaScript code. Defaults to
-                              double.
+        --javascript-formatter-quote-style=<double|single>  The type of quotes used in JavaScript
+                              code. Defaults to double.
         --javascript-attribute-position=<multiline|auto>  The attribute position style in jsx
                               elements. Defaults to auto.
-        --javascript-bracket-same-line=<true|false>  Whether to hug the closing bracket of multiline
-                              HTML/JSX tags to the end of the last line, rather than being alone on
-                              the following line. Defaults to false.
         --javascript-linter-enabled=<true|false>  Control the linter for JavaScript (and its super
                               languages) files.
-        --javascript-assists-enabled=<true|false>  Control the linter for JavaScript (and its super
+        --javascript-assist-enabled=<true|false>  Control the assist for JavaScript (and its super
                               languages) files.
         --json-formatter-enabled=<true|false>  Control the formatter for JSON (and its super
                               languages) files.
@@ -92,7 +95,7 @@ The configuration that is contained inside the file `biome.json`
                               Defaults to "followSource".
         --json-linter-enabled=<true|false>  Control the linter for JSON (and its super languages)
                               files.
-        --json-assist-enabled=<true|false>  Control the linter for JSON (and its super languages)
+        --json-assist-enabled=<true|false>  Control the assist for JSON (and its super languages)
                               files.
         --css-formatter-enabled=<true|false>  Control the formatter for CSS (and its super
                               languages) files.
@@ -107,7 +110,7 @@ The configuration that is contained inside the file `biome.json`
         --css-formatter-quote-style=<double|single>  The type of quotes used in CSS code. Defaults
                               to double.
         --css-linter-enabled=<true|false>  Control the linter for CSS files.
-        --css-assist-enabled=<true|false>  Control the assists for CSS files.
+        --css-assist-enabled=<true|false>  Control the assist for CSS files.
         --graphql-formatter-enabled=<true|false>  Control the formatter for GraphQL files.
         --graphql-formatter-indent-style=<tab|space>  The indent style applied to GraphQL files.
         --graphql-formatter-indent-width=NUMBER  The size of the indentation applied to GraphQL
@@ -119,6 +122,7 @@ The configuration that is contained inside the file `biome.json`
         --graphql-formatter-quote-style=<double|single>  The type of quotes used in GraphQL code.
                               Defaults to double.
         --graphql-linter-enabled=<true|false>  Control the formatter for GraphQL files.
+        --graphql-assist-enabled=<true|false>  Control the formatter for GraphQL files.
         --grit-formatter-enabled=<true|false>  Control the formatter for Grit files.
         --grit-formatter-indent-style=<tab|space>  The indent style applied to Grit files.
         --grit-formatter-indent-width=NUMBER  The size of the indentation applied to Grit files.
@@ -126,6 +130,28 @@ The configuration that is contained inside the file `biome.json`
         --grit-formatter-line-ending=<lf|crlf|cr>  The type of line ending applied to Grit files.
         --grit-formatter-line-width=NUMBER  What's the max width of a line applied to Grit files.
                               Defaults to 80.
+        --grit-linter-enabled=<true|false>  Control the linter for Grit files.
+        --grit-assist-enabled=<true|false>  Control the assist functionality for Grit files.
+        --html-formatter-enabled=<true|false>  Control the formatter for HTML (and its super
+                              languages) files.
+        --html-formatter-indent-style=<tab|space>  The indent style applied to HTML (and its super
+                              languages) files.
+        --html-formatter-indent-width=NUMBER  The size of the indentation applied to HTML (and its
+                              super languages) files. Default to 2.
+        --html-formatter-line-ending=<lf|crlf|cr>  The type of line ending applied to HTML (and its
+                              super languages) files.
+        --html-formatter-line-width=NUMBER  What's the max width of a line applied to HTML (and its
+                              super languages) files. Defaults to 80.
+        --html-formatter-attribute-position=<multiline|auto>  The attribute position style in HTML
+                              elements. Defaults to auto.
+        --html-formatter-bracket-same-line=<true|false>  Whether to hug the closing bracket of
+                              multiline HTML tags to the end of the last line, rather than being
+                              alone on the following line. Defaults to false.
+        --html-formatter-whitespace-sensitivity=<strict|ignore>  Whether to account for whitespace
+                              sensitivity when formatting HTML (and its super languages). Defaults
+                              to "strict".
+        --html-formatter-indent-script-and-style=<true|false>  Whether to indent the `<script>` and
+                              `<style>` tags for HTML (and its super languages). Defaults to false.
         --assist-enabled=<true|false>  Whether Biome should enable assist via LSP.
 
 Global options applied to all commands

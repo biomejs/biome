@@ -54,16 +54,16 @@ Environment:
 
 Biome Configuration:
   Status:                       Loaded successfully
-  Formatter disabled:           false
-  Linter disabled:              false
-  Assist disabled:              false
-  VCS disabled:                 true
+  Formatter enabled:            true
+  Linter enabled:               true
+  Assist enabled:               true
+  VCS enabled:                  false
 
 Linter:
-  JavaScript enabled:           true
-  JSON enabled:                 true
-  CSS enabled:                  true
-  GraphQL enabled:              false
+  JavaScript enabled:           unset
+  JSON enabled:                 unset
+  CSS enabled:                  unset
+  GraphQL enabled:              unset
   Recommended:                  false
   Enabled rules:
     complexity/noBannedTypes

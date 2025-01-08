@@ -52,12 +52,12 @@ use std::sync::Arc;
 use tracing::instrument;
 
 mod astro;
-mod css;
-mod graphql;
-mod grit;
-mod html;
-mod javascript;
-mod json;
+pub(crate) mod css;
+pub(crate) mod graphql;
+pub(crate) mod grit;
+pub(crate) mod html;
+pub(crate) mod javascript;
+pub(crate) mod json;
 mod svelte;
 mod unknown;
 mod vue;
@@ -405,6 +405,7 @@ pub struct Capabilities {
     pub(crate) analyzer: AnalyzerCapabilities,
     pub(crate) formatter: FormatterCapabilities,
     pub(crate) search: SearchCapabilities,
+    pub(crate) enabled_for_path: EnabledForPath,
 }
 
 #[derive(Clone)]
@@ -413,8 +414,13 @@ pub struct ParseResult {
     pub(crate) language: Option<DocumentFileSource>,
 }
 
-type Parse =
-    fn(&BiomePath, DocumentFileSource, &str, Option<&Settings>, &mut NodeCache) -> ParseResult;
+type Parse = fn(
+    &BiomePath,
+    DocumentFileSource,
+    &str,
+    WorkspaceSettingsHandle,
+    &mut NodeCache,
+) -> ParseResult;
 
 #[derive(Default)]
 pub struct ParserCapabilities {
@@ -630,6 +636,8 @@ pub(crate) struct FormatterCapabilities {
     pub(crate) format_on_type: Option<FormatOnType>,
 }
 
+type Enabled = fn(&Utf8Path, &WorkspaceSettingsHandle) -> bool;
+
 type Search = fn(
     &BiomePath,
     &DocumentFileSource,
@@ -642,6 +650,14 @@ type Search = fn(
 pub(crate) struct SearchCapabilities {
     /// It searches through a file
     pub(crate) search: Option<Search>,
+}
+
+#[derive(Default)]
+pub(crate) struct EnabledForPath {
+    pub(crate) formatter: Option<Enabled>,
+    pub(crate) linter: Option<Enabled>,
+    pub(crate) assist: Option<Enabled>,
+    pub(crate) search: Option<Enabled>,
 }
 
 /// Main trait to use to add a new language to Biome
@@ -1070,19 +1086,11 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         let has_only_filter = self.only.map_or(true, |only| !only.is_empty());
         let rules = self
             .settings
-            .and_then(|settings| settings.as_linter_rules(self.path.expect("Path to be set")));
+            .and_then(|settings| settings.as_linter_rules(self.path.expect("Path to be set")))
+            .unwrap_or_default();
         if !has_only_filter {
-            let enabled_rules = rules
-                .as_ref()
-                .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default();
-            self.enabled_rules.extend(enabled_rules);
-            self.disabled_rules.extend(
-                rules
-                    .as_ref()
-                    .map(|rules| rules.as_disabled_rules())
-                    .unwrap_or_default(),
-            );
+            self.enabled_rules.extend(rules.as_enabled_rules());
+            self.disabled_rules.extend(rules.as_disabled_rules());
         }
         (self.enabled_rules, self.disabled_rules)
     }
@@ -1278,19 +1286,11 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         let has_only_filter = self.only.map_or(true, |only| !only.is_empty());
         let rules = self
             .settings
-            .and_then(|settings| settings.as_assist_actions(self.path.expect("Path to be set")));
+            .and_then(|settings| settings.as_assist_actions(self.path.expect("Path to be set")))
+            .unwrap_or_default();
         if !has_only_filter {
-            let enabled_rules = rules
-                .as_ref()
-                .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default();
-            self.enabled_rules.extend(enabled_rules);
-            self.disabled_rules.extend(
-                rules
-                    .as_ref()
-                    .map(|rules| rules.as_disabled_rules())
-                    .unwrap_or_default(),
-            );
+            self.enabled_rules.extend(rules.as_enabled_rules());
+            self.disabled_rules.extend(rules.as_disabled_rules());
         }
         (self.enabled_rules, self.disabled_rules)
     }

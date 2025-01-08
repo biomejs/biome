@@ -1,4 +1,5 @@
 use biome_analyze::AnalyzerOptions;
+use biome_configuration::html::{HtmlFormatterConfiguration, HtmlFormatterEnabled};
 use biome_formatter::{
     AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
 };
@@ -11,22 +12,23 @@ use biome_html_parser::parse_html_with_cache;
 use biome_html_syntax::{HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
+use camino::Utf8Path;
 
+use super::{
+    AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, EnabledForPath,
+    ExtensionHandler, FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
+};
+use crate::settings::{check_feature_activity, check_override_feature_activity};
 use crate::{
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
     workspace::GetSyntaxTreeResult,
     WorkspaceError,
 };
 
-use super::{
-    AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, ExtensionHandler,
-    FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
-};
-
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct HtmlFormatterSettings {
-    pub enabled: Option<bool>,
+    pub enabled: Option<HtmlFormatterEnabled>,
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
@@ -37,18 +39,20 @@ pub struct HtmlFormatterSettings {
     pub indent_script_and_style: Option<IndentScriptAndStyle>,
 }
 
-impl Default for HtmlFormatterSettings {
-    fn default() -> Self {
-        Self {
-            enabled: Some(false),
-            indent_style: Default::default(),
-            indent_width: Default::default(),
-            line_ending: Default::default(),
-            line_width: Default::default(),
-            attribute_position: Default::default(),
-            bracket_same_line: Default::default(),
-            whitespace_sensitivity: Default::default(),
-            indent_script_and_style: Default::default(),
+impl From<HtmlFormatterConfiguration> for HtmlFormatterSettings {
+    fn from(config: HtmlFormatterConfiguration) -> Self {
+        HtmlFormatterSettings {
+            // TODO
+            // uncomment once ready
+            // bracket_same_line: config.bracket_same_line,
+            // whitespace_sensitivity: config.whitespace_sensitivity,
+            // indent_script_and_style: config.indent_script_and_style,
+            enabled: config.enabled,
+            line_ending: config.line_ending,
+            line_width: config.line_width,
+            indent_width: config.indent_width,
+            indent_style: config.indent_style,
+            ..Default::default()
         }
     }
 }
@@ -56,10 +60,10 @@ impl Default for HtmlFormatterSettings {
 impl ServiceLanguage for HtmlLanguage {
     type FormatterSettings = HtmlFormatterSettings;
     type LinterSettings = ();
-    type OrganizeImportsSettings = ();
     type FormatOptions = HtmlFormatOptions;
     type ParserSettings = ();
     type EnvironmentSettings = ();
+    type AssistSettings = ();
 
     fn lookup_settings(
         languages: &crate::settings::LanguageListSettings,
@@ -122,7 +126,7 @@ impl ServiceLanguage for HtmlLanguage {
     }
 
     fn resolve_analyzer_options(
-        _global: Option<&crate::settings::Settings>,
+        _global: Option<&Settings>,
         _linter: Option<&crate::settings::LinterSettings>,
         _overrides: Option<&crate::settings::OverrideSettings>,
         _language: Option<&Self::LinterSettings>,
@@ -134,6 +138,49 @@ impl ServiceLanguage for HtmlLanguage {
             .with_file_path(path.as_path())
             .with_suppression_reason(suppression_reason)
     }
+
+    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_override_feature_activity(
+                                pattern.languages.html.formatter.enabled,
+                                pattern.formatter.enabled,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    settings.languages.html.formatter.enabled,
+                    settings.formatter.enabled,
+                ))
+            })
+            .unwrap_or_default()
+            .into()
+    }
+
+    fn assist_enabled_for_file_path(_settings: Option<&Settings>, _path: &Utf8Path) -> bool {
+        false
+    }
+
+    fn linter_enabled_for_file_path(_settings: Option<&Settings>, _path: &Utf8Path) -> bool {
+        false
+    }
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -142,6 +189,12 @@ pub(crate) struct HtmlFileHandler;
 impl ExtensionHandler for HtmlFileHandler {
     fn capabilities(&self) -> Capabilities {
         Capabilities {
+            enabled_for_path: EnabledForPath {
+                formatter: Some(formatter_enabled),
+                linter: Some(linter_enabled),
+                assist: Some(assist_enabled),
+                search: Some(search_enabled),
+            },
             parser: ParserCapabilities { parse: Some(parse) },
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
@@ -164,11 +217,27 @@ impl ExtensionHandler for HtmlFileHandler {
     }
 }
 
+fn formatter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
+    handle.formatter_enabled_for_file_path::<HtmlLanguage>(path)
+}
+
+fn linter_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
+    handle.linter_enabled_for_file_path::<HtmlLanguage>(path)
+}
+
+fn assist_enabled(path: &Utf8Path, handle: &WorkspaceSettingsHandle) -> bool {
+    handle.assist_enabled_for_file_path::<HtmlLanguage>(path)
+}
+
+fn search_enabled(_path: &Utf8Path, _handle: &WorkspaceSettingsHandle) -> bool {
+    true
+}
+
 fn parse(
     _biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
-    _settings: Option<&Settings>,
+    _handle: WorkspaceSettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let parse = parse_html_with_cache(text, cache);
