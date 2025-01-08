@@ -513,116 +513,69 @@ fn parse_binary_or_logical_expression(
     left_precedence: OperatorPrecedence,
     context: ExpressionContext,
 ) -> ParsedSyntax {
-    // test js private_name_presence_check
-    // class A {
-    // 	#prop;
-    // 	test() {
-    //    #prop in this
-    //  }
-    // }
-    let left = parse_unary_expr(p, context).or_else(|| parse_private_name(p));
+    let mut left = parse_unary_expr(p, context).or_else(|| parse_private_name(p));
 
-    parse_binary_or_logical_expression_recursive(p, left, left_precedence, context)
-}
+    let mut stack: Vec<(OperatorPrecedence, Option<(JsSyntaxKind, Marker)>)> =
+        vec![(left_precedence, None)];
 
-// test js binary_expressions
-// 5 * 5
-// 6 ** 6 ** 7
-// 1 + 2 * 3
-// (1 + 2) * 3
-// 1 / 2
-// 74 in foo
-// foo instanceof Array
-// foo ?? bar
-// a >> b
-// a >>> b
-// 1 + 1 + 1 + 1
-// 5 + 6 - 1 * 2 / 1 ** 6
-// class Test { #name; test() { true && #name in {} } }
+    while let Some((mut left_precedence, previous_marker)) = stack.pop() {
+        if let Some((expression_kind, m)) = previous_marker {
+            left.or_add_diagnostic(p, expected_expression);
 
-// test_err js binary_expressions_err
-// foo(foo +);
-// foo + * 2;
-// !foo * bar;
-fn parse_binary_or_logical_expression_recursive(
-    p: &mut JsParser,
-    mut left: ParsedSyntax,
-    left_precedence: OperatorPrecedence,
-    context: ExpressionContext,
-) -> ParsedSyntax {
-    // Use a loop to eat all binary expressions with the same precedence.
-    // At first, the algorithm makes the impression that it recurse for every right-hand side expression.
-    // This is true, but `parse_binary_or_logical_expression` immediately returns if the
-    // current operator has the same or a lower precedence than the left-hand side expression. Thus,
-    // the algorithm goes at most `count(OperatorPrecedence)` levels deep.
-    loop {
-        // test_err js js_right_shift_comments
-        // 1 >> /* a comment */ > 2;
-        let op = p.re_lex(JsReLexContext::BinaryOperator);
-
-        if (op == T![as] && p.has_preceding_line_break())
-            || (op == T![satisfies] && p.has_preceding_line_break())
-            || (op == T![in] && !context.is_in_included())
-        {
-            break;
+            left = Present(m.complete(p, expression_kind));
         }
 
-        // This isn't spec compliant but improves error recovery in case the `}` is missing
-        // inside of a JSX attribute expression value or an expression child.
-        // Prevents that it parses `</` as less than followed by a RegEx if JSX is enabled and only if
-        // there's no whitespace between the two tokens.
-        // The downside of this is that `a </test/` will be incorrectly left unparsed. I think this is
-        // a worth compromise and compatible with what TypeScript's doing.
-        if Jsx.is_supported(p)
-            && op == T![<]
-            && p.nth_at(1, T![/])
-            && !p.source_mut().has_next_preceding_trivia()
-        {
-            // test_err jsx jsx_child_expression_missing_r_curly
-            // <test>{ 4 + 3</test>
-            break;
-        }
+        // Use a loop to eat all binary expressions with the same precedence.
+        // At first, the algorithm makes the impression that it recurse for every right-hand side expression.
+        // This is true, but `parse_binary_or_logical_expression` immediately returns if the
+        // current operator has the same or a lower precedence than the left-hand side expression. Thus,
+        // the algorithm goes at most `count(OperatorPrecedence)` levels deep.
+        loop {
+            let op = p.re_lex(JsReLexContext::BinaryOperator);
 
-        let new_precedence = match OperatorPrecedence::try_from_binary_operator(op) {
-            Some(precedence) => precedence,
-            // Not a binary operator
-            None => break,
-        };
+            if (op == T![as] && p.has_preceding_line_break())
+                || (op == T![satisfies] && p.has_preceding_line_break())
+                || (op == T![in] && !context.is_in_included())
+            {
+                break;
+            }
 
-        let stop_at_current_operator = if new_precedence.is_right_to_left() {
-            new_precedence < left_precedence
-        } else {
-            new_precedence <= left_precedence
-        };
+            // This isn't spec compliant but improves error recovery in case the `}` is missing
+            // inside of a JSX attribute expression value or an expression child.
+            // Prevents that it parses `</` as less than followed by a RegEx if JSX is enabled and only if
+            // there's no whitespace between the two tokens.
+            // The downside of this is that `a </test/` will be incorrectly left unparsed. I think this is
+            // a worth compromise and compatible with what TypeScript's doing.
+            if Jsx.is_supported(p)
+                && op == T![<]
+                && p.nth_at(1, T![/])
+                && !p.source_mut().has_next_preceding_trivia()
+            {
+                break;
+            }
 
-        if stop_at_current_operator {
-            break;
-        }
+            let new_precedence = match OperatorPrecedence::try_from_binary_operator(op) {
+                Some(precedence) => precedence,
+                // Not a binary operator
+                None => break,
+            };
 
-        let op_range = p.cur_range();
+            let stop_at_current_operator = if new_precedence.is_right_to_left() {
+                new_precedence < left_precedence
+            } else {
+                new_precedence <= left_precedence
+            };
 
-        let mut is_bogus = false;
-        if let Present(left) = &mut left {
-            // test js exponent_unary_parenthesized
-            // (delete a.b) ** 2;
-            // (void ident) ** 2;
-            // (typeof ident) ** 2;
-            // (-3) ** 2;
-            // (+3) ** 2;
-            // (~3) ** 2;
-            // (!true) ** 2;
+            if stop_at_current_operator {
+                break;
+            }
 
-            // test_err js exponent_unary_unparenthesized
-            // delete a.b ** 2;
-            // void ident ** 2;
-            // typeof ident ** 2;
-            // -3 ** 2;
-            // +3 ** 2;
-            // ~3 ** 2;
-            // !true ** 2;
+            let op_range = p.cur_range();
 
-            if op == T![**] && left.kind(p) == JS_UNARY_EXPRESSION {
-                let err = p
+            let mut is_bogus = false;
+            if let Present(left) = &mut left {
+                if op == T![**] && left.kind(p) == JS_UNARY_EXPRESSION {
+                    let err = p
 					.err_builder(
 						"unparenthesized unary expression can't appear on the left-hand side of '**'",
                         left.range(p)
@@ -630,129 +583,91 @@ fn parse_binary_or_logical_expression_recursive(
 					.with_detail(op_range, "The operation")
 					.with_detail(left.range(p), "The left-hand side");
 
+                    p.error(err);
+                    is_bogus = true;
+                } else if op != T![in] && left.kind(p) == JS_PRIVATE_NAME {
+                    p.error(private_names_only_allowed_on_left_side_of_in_expression(
+                        p,
+                        left.range(p),
+                    ));
+                    left.change_kind(p, JS_BOGUS_EXPRESSION);
+                }
+            } else {
+                let err = p
+                    .err_builder(
+                        format!(
+                            "Expected an expression for the left hand side of the `{}` operator.",
+                            p.text(op_range),
+                        ),
+                        op_range,
+                    )
+                    .with_hint("This operator requires a left hand side value");
                 p.error(err);
-                is_bogus = true;
-            } else if op != T![in] && left.kind(p) == JS_PRIVATE_NAME {
+            }
+
+            let m = left.precede(p);
+            p.bump(op);
+
+            if op == T![as] {
+                parse_ts_type(p, TypeContext::default()).or_add_diagnostic(p, expected_ts_type);
+                let mut as_expression = m.complete(p, TS_AS_EXPRESSION);
+
+                if TypeScript.is_unsupported(p) {
+                    p.error(ts_only_syntax_error(
+                        p,
+                        "'as' expression",
+                        as_expression.range(p),
+                    ));
+                    as_expression.change_to_bogus(p);
+                }
+                left = Present(as_expression);
+                continue;
+            }
+
+            if op == T![satisfies] {
+                parse_ts_type(p, TypeContext::default()).or_add_diagnostic(p, expected_ts_type);
+                let mut satisfies_expression = m.complete(p, TS_SATISFIES_EXPRESSION);
+
+                if TypeScript.is_unsupported(p) {
+                    p.error(ts_only_syntax_error(
+                        p,
+                        "'satisfies' expression",
+                        satisfies_expression.range(p),
+                    ));
+                    satisfies_expression.change_to_bogus(p);
+                }
+                left = Present(satisfies_expression);
+                continue;
+            }
+
+            let expression_kind = if is_bogus {
+                JS_BOGUS_EXPRESSION
+            } else {
+                match op {
+                    T![??] | T![||] | T![&&] => JS_LOGICAL_EXPRESSION,
+                    T![instanceof] => JS_INSTANCEOF_EXPRESSION,
+                    T![in] => JS_IN_EXPRESSION,
+                    _ => JS_BINARY_EXPRESSION,
+                }
+            };
+
+            stack.push((left_precedence, Some((expression_kind, m))));
+
+            left_precedence = new_precedence;
+            left = parse_unary_expr(p, context).or_else(|| parse_private_name(p));
+        }
+
+        if let Present(left) = &mut left {
+            // Left at this point becomes the right-hand side of a binary expression
+            // or is a standalone expression. Private names aren't allowed as standalone expressions
+            // nor on the right-hand side
+            if left.kind(p) == JS_PRIVATE_NAME {
+                left.change_kind(p, JS_BOGUS_EXPRESSION);
                 p.error(private_names_only_allowed_on_left_side_of_in_expression(
                     p,
                     left.range(p),
                 ));
-                left.change_kind(p, JS_BOGUS_EXPRESSION);
             }
-        } else {
-            let err = p
-                .err_builder(
-                    format!(
-                        "Expected an expression for the left hand side of the `{}` operator.",
-                        p.text(op_range),
-                    ),
-                    op_range,
-                )
-                .with_hint("This operator requires a left hand side value");
-            p.error(err);
-        }
-
-        let m = left.precede(p);
-        p.bump(op);
-
-        // test ts ts_as_expression
-        // let x: any = "string";
-        // let y = x as string;
-        // let z = x as const;
-        // let not_an_as_expression = x
-        // as;
-        // let precedence = "hello" as const + 3 as number as number;
-        if op == T![as] {
-            parse_ts_type(p, TypeContext::default()).or_add_diagnostic(p, expected_ts_type);
-            let mut as_expression = m.complete(p, TS_AS_EXPRESSION);
-
-            if TypeScript.is_unsupported(p) {
-                p.error(ts_only_syntax_error(
-                    p,
-                    "'as' expression",
-                    as_expression.range(p),
-                ));
-                as_expression.change_to_bogus(p);
-            }
-            left = Present(as_expression);
-            continue;
-        }
-
-        // test ts ts_satisfies_expression
-        // interface A {
-        //    a: string
-        // };
-        // let x = { a: 'test' } satisfies A;
-        // let y = { a: 'test', b: 'test' } satisfies A;
-        // const z = undefined satisfies 1;
-        // let not_a_satisfies_expression = undefined
-        // satisfies;
-        // let precedence = "hello" satisfies string + 3 satisfies number satisfies number;
-
-        // test_err js ts_satisfies_expression
-        // let x = "hello" satisfies string;
-        if op == T![satisfies] {
-            parse_ts_type(p, TypeContext::default()).or_add_diagnostic(p, expected_ts_type);
-            let mut satisfies_expression = m.complete(p, TS_SATISFIES_EXPRESSION);
-
-            if TypeScript.is_unsupported(p) {
-                p.error(ts_only_syntax_error(
-                    p,
-                    "'satisfies' expression",
-                    satisfies_expression.range(p),
-                ));
-                satisfies_expression.change_to_bogus(p);
-            }
-            left = Present(satisfies_expression);
-            continue;
-        }
-
-        parse_binary_or_logical_expression(p, new_precedence, context)
-            .or_add_diagnostic(p, expected_expression);
-
-        let expression_kind = if is_bogus {
-            JS_BOGUS_EXPRESSION
-        } else {
-            match op {
-                // test js logical_expressions
-                // foo ?? bar
-                // a || b
-                // a && b
-                //
-                // test_err js logical_expressions_err
-                // foo ?? * 2;
-                // !foo && bar;
-                // foo(foo ||)
-                T![??] | T![||] | T![&&] => JS_LOGICAL_EXPRESSION,
-                T![instanceof] => JS_INSTANCEOF_EXPRESSION,
-                T![in] => JS_IN_EXPRESSION,
-                _ => JS_BINARY_EXPRESSION,
-            }
-        };
-
-        left = Present(m.complete(p, expression_kind));
-    }
-
-    if let Present(left) = &mut left {
-        // Left at this point becomes the right-hand side of a binary expression
-        // or is a standalone expression. Private names aren't allowed as standalone expressions
-        // nor on the right-hand side
-        if left.kind(p) == JS_PRIVATE_NAME {
-            // test_err js private_name_presence_check_recursive
-            // class A {
-            // 	#prop;
-            // 	test() {
-            //    #prop in #prop in this;
-            //    5 + #prop;
-            //    #prop
-            //    #prop + 5;
-            //  }
-            // }
-            left.change_kind(p, JS_BOGUS_EXPRESSION);
-            p.error(private_names_only_allowed_on_left_side_of_in_expression(
-                p,
-                left.range(p),
-            ));
         }
     }
 

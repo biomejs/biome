@@ -238,6 +238,27 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 Default::default()
             };
 
+            let debug_fmt_impl = if fields.len() > 0 {
+                quote! {
+                    use std::sync::atomic::{AtomicUsize, Ordering};
+                    static DEPTH: AtomicUsize = AtomicUsize::new(0);
+                    let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+                    let result = if current_depth < 16 {
+                        f.debug_struct(#string_name)
+                            #(#fields)*
+                            .finish()
+                    } else {
+                        f.debug_struct(#string_name).finish()
+                    };
+                    DEPTH.fetch_sub(1, Ordering::Relaxed);
+                    result
+                }
+            } else {
+                quote! {
+                    f.debug_struct(#string_name).finish()
+                }
+            };
+
             (
                 quote! {
                     // TODO: review documentation
@@ -295,9 +316,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
                     impl std::fmt::Debug for #name {
                         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                            f.debug_struct(#string_name)
-                                #(#fields)*
-                                .finish()
+                            #debug_fmt_impl
                         }
                     }
 
