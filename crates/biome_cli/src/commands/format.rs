@@ -1,7 +1,7 @@
 use crate::cli_options::CliOptions;
 use crate::commands::{get_files_to_process_with_cli_options, CommandRunner, LoadEditorConfig};
 use crate::diagnostics::DeprecatedArgument;
-use crate::{CliDiagnostic, Execution, TraversalMode};
+use crate::{check_schema_version, CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::vcs::PartialVcsConfiguration;
 use biome_configuration::{
     PartialConfiguration, PartialCssFormatter, PartialFilesConfiguration,
@@ -161,6 +161,8 @@ impl CommandRunner for FormatCommandPayload {
             .files
             .merge_with(self.files_configuration.clone());
         configuration.vcs.merge_with(self.vcs_configuration.clone());
+
+        check_schema_version(&configuration, console);
 
         Ok(configuration)
     }
