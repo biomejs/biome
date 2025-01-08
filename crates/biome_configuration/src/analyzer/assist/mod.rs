@@ -7,6 +7,7 @@ use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 pub type AssistEnabled = Bool<true>;
+
 #[derive(
     Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,
 )]

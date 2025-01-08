@@ -76,6 +76,7 @@ pub struct GritLinterConfiguration {
 }
 
 pub type GritAssistEnabled = Bool<true>;
+
 #[derive(
     Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Merge,
 )]

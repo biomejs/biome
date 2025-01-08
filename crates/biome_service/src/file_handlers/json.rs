@@ -9,9 +9,8 @@ use crate::file_handlers::{
     LintResults, ParserCapabilities,
 };
 use crate::settings::{
-    check_feature_activity, check_override_feature_activity, FormatSettings, LanguageListSettings,
-    LanguageSettings, LinterSettings, OverrideSettings, ServiceLanguage, Settings,
-    WorkspaceSettingsHandle,
+    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettingPattern,
+    OverrideSettings, ServiceLanguage, Settings, WorkspaceSettingsHandle,
 };
 use crate::workspace::{
     CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
@@ -207,109 +206,28 @@ impl ServiceLanguage for JsonLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
-    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
-        settings
-            .and_then(|settings| {
-                let overrides_activity =
-                    settings
-                        .override_settings
-                        .patterns
-                        .iter()
-                        .rev()
-                        .find_map(|pattern| {
-                            check_override_feature_activity(
-                                pattern.languages.json.formatter.enabled,
-                                pattern.formatter.enabled,
-                            )
-                            .and_then(|enabled| {
-                                // Then check whether the path satisfies
-                                if pattern.include.matches_path(path)
-                                    && !pattern.exclude.matches_path(path)
-                                {
-                                    Some(enabled)
-                                } else {
-                                    None
-                                }
-                            })
-                        });
-
-                overrides_activity.or(check_feature_activity(
-                    settings.languages.json.formatter.enabled,
-                    settings.formatter.enabled,
-                ))
-            })
-            .unwrap_or_default()
-            .into()
+    fn formatter_enabled_for_language(settings: &Settings) -> Option<bool> {
+        settings.languages.json.formatter.enabled.map(Into::into)
     }
 
-    fn assist_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
-        settings
-            .and_then(|settings| {
-                let overrides_activity =
-                    settings
-                        .override_settings
-                        .patterns
-                        .iter()
-                        .rev()
-                        .find_map(|pattern| {
-                            check_override_feature_activity(
-                                pattern.languages.json.assist.enabled,
-                                pattern.assist.enabled,
-                            )
-                            .and_then(|enabled| {
-                                // Then check whether the path satisfies
-                                if pattern.include.matches_path(path)
-                                    && !pattern.exclude.matches_path(path)
-                                {
-                                    Some(enabled)
-                                } else {
-                                    None
-                                }
-                            })
-                        });
-
-                overrides_activity.or(check_feature_activity(
-                    settings.languages.json.assist.enabled,
-                    settings.assist.enabled,
-                ))
-            })
-            .unwrap_or_default()
-            .into()
+    fn formatter_enabled_in_language_override(pattern: &OverrideSettingPattern) -> Option<bool> {
+        pattern.languages.json.formatter.enabled.map(Into::into)
     }
 
-    fn linter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
-        settings
-            .and_then(|settings| {
-                let overrides_activity =
-                    settings
-                        .override_settings
-                        .patterns
-                        .iter()
-                        .rev()
-                        .find_map(|pattern| {
-                            check_override_feature_activity(
-                                pattern.languages.json.linter.enabled,
-                                pattern.linter.enabled,
-                            )
-                            .and_then(|enabled| {
-                                // Then check whether the path satisfies
-                                if pattern.include.matches_path(path)
-                                    && !pattern.exclude.matches_path(path)
-                                {
-                                    Some(enabled)
-                                } else {
-                                    None
-                                }
-                            })
-                        });
+    fn assist_enabled_for_language(settings: &Settings) -> Option<bool> {
+        settings.languages.json.assist.enabled.map(Into::into)
+    }
 
-                overrides_activity.or(check_feature_activity(
-                    settings.languages.json.linter.enabled,
-                    settings.linter.enabled,
-                ))
-            })
-            .unwrap_or_default()
-            .into()
+    fn assist_enabled_in_language_override(pattern: &OverrideSettingPattern) -> Option<bool> {
+        pattern.languages.json.assist.enabled.map(Into::into)
+    }
+
+    fn linter_enabled_for_language(settings: &Settings) -> Option<bool> {
+        settings.languages.json.linter.enabled.map(Into::into)
+    }
+
+    fn linter_enabled_in_language_override(pattern: &OverrideSettingPattern) -> Option<bool> {
+        pattern.languages.json.linter.enabled.map(Into::into)
     }
 }
 

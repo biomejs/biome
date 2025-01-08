@@ -3,7 +3,7 @@ use super::{
     ExtensionHandler, FormatterCapabilities, LintParams, LintResults, ParseResult,
     ParserCapabilities, SearchCapabilities,
 };
-use crate::settings::{check_feature_activity, check_override_feature_activity};
+use crate::settings::OverrideSettingPattern;
 use crate::workspace::GetSyntaxTreeResult;
 use crate::{
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
@@ -139,109 +139,28 @@ impl ServiceLanguage for GritLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
-    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
-        settings
-            .and_then(|settings| {
-                let overrides_activity =
-                    settings
-                        .override_settings
-                        .patterns
-                        .iter()
-                        .rev()
-                        .find_map(|pattern| {
-                            check_override_feature_activity(
-                                pattern.languages.grit.formatter.enabled,
-                                pattern.formatter.enabled,
-                            )
-                            .and_then(|enabled| {
-                                // Then check whether the path satisfies
-                                if pattern.include.matches_path(path)
-                                    && !pattern.exclude.matches_path(path)
-                                {
-                                    Some(enabled)
-                                } else {
-                                    None
-                                }
-                            })
-                        });
-
-                overrides_activity.or(check_feature_activity(
-                    settings.languages.grit.formatter.enabled,
-                    settings.formatter.enabled,
-                ))
-            })
-            .unwrap_or_default()
-            .into()
+    fn formatter_enabled_for_language(settings: &Settings) -> Option<bool> {
+        settings.languages.grit.formatter.enabled.map(Into::into)
     }
 
-    fn assist_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
-        settings
-            .and_then(|settings| {
-                let overrides_activity =
-                    settings
-                        .override_settings
-                        .patterns
-                        .iter()
-                        .rev()
-                        .find_map(|pattern| {
-                            check_override_feature_activity(
-                                pattern.languages.grit.assist.enabled,
-                                pattern.assist.enabled,
-                            )
-                            .and_then(|enabled| {
-                                // Then check whether the path satisfies
-                                if pattern.include.matches_path(path)
-                                    && !pattern.exclude.matches_path(path)
-                                {
-                                    Some(enabled)
-                                } else {
-                                    None
-                                }
-                            })
-                        });
-
-                overrides_activity.or(check_feature_activity(
-                    settings.languages.grit.assist.enabled,
-                    settings.assist.enabled,
-                ))
-            })
-            .unwrap_or_default()
-            .into()
+    fn formatter_enabled_in_language_override(pattern: &OverrideSettingPattern) -> Option<bool> {
+        pattern.languages.grit.formatter.enabled.map(Into::into)
     }
 
-    fn linter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
-        settings
-            .and_then(|settings| {
-                let overrides_activity =
-                    settings
-                        .override_settings
-                        .patterns
-                        .iter()
-                        .rev()
-                        .find_map(|pattern| {
-                            check_override_feature_activity(
-                                pattern.languages.grit.linter.enabled,
-                                pattern.linter.enabled,
-                            )
-                            .and_then(|enabled| {
-                                // Then check whether the path satisfies
-                                if pattern.include.matches_path(path)
-                                    && !pattern.exclude.matches_path(path)
-                                {
-                                    Some(enabled)
-                                } else {
-                                    None
-                                }
-                            })
-                        });
+    fn assist_enabled_for_language(settings: &Settings) -> Option<bool> {
+        settings.languages.grit.assist.enabled.map(Into::into)
+    }
 
-                overrides_activity.or(check_feature_activity(
-                    settings.languages.grit.linter.enabled,
-                    settings.linter.enabled,
-                ))
-            })
-            .unwrap_or_default()
-            .into()
+    fn assist_enabled_in_language_override(pattern: &OverrideSettingPattern) -> Option<bool> {
+        pattern.languages.grit.assist.enabled.map(Into::into)
+    }
+
+    fn linter_enabled_for_language(settings: &Settings) -> Option<bool> {
+        settings.languages.grit.linter.enabled.map(Into::into)
+    }
+
+    fn linter_enabled_in_language_override(pattern: &OverrideSettingPattern) -> Option<bool> {
+        pattern.languages.grit.linter.enabled.map(Into::into)
     }
 }
 

@@ -6,10 +6,7 @@ use super::{
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
 use crate::file_handlers::{is_diagnostic_error, FixAllParams};
-use crate::settings::{
-    check_feature_activity, check_override_feature_activity, LinterSettings, OverrideSettings,
-    Settings,
-};
+use crate::settings::{LinterSettings, OverrideSettingPattern, OverrideSettings, Settings};
 use crate::workspace::DocumentFileSource;
 use crate::{
     settings::{
@@ -353,109 +350,38 @@ impl ServiceLanguage for JsLanguage {
             .with_suppression_reason(suppression_reason)
     }
 
-    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+    fn formatter_enabled_for_language(settings: &Settings) -> Option<bool> {
         settings
-            .and_then(|settings| {
-                let overrides_activity =
-                    settings
-                        .override_settings
-                        .patterns
-                        .iter()
-                        .rev()
-                        .find_map(|pattern| {
-                            check_override_feature_activity(
-                                pattern.languages.javascript.formatter.enabled,
-                                pattern.formatter.enabled,
-                            )
-                            .and_then(|enabled| {
-                                // Then check whether the path satisfies
-                                if pattern.include.matches_path(path)
-                                    && !pattern.exclude.matches_path(path)
-                                {
-                                    Some(enabled)
-                                } else {
-                                    None
-                                }
-                            })
-                        });
-
-                overrides_activity.or(check_feature_activity(
-                    settings.languages.javascript.formatter.enabled,
-                    settings.formatter.enabled,
-                ))
-            })
-            .unwrap_or_default()
-            .into()
+            .languages
+            .javascript
+            .formatter
+            .enabled
+            .map(Into::into)
     }
 
-    fn assist_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
-        settings
-            .and_then(|settings| {
-                let overrides_activity =
-                    settings
-                        .override_settings
-                        .patterns
-                        .iter()
-                        .rev()
-                        .find_map(|pattern| {
-                            check_override_feature_activity(
-                                pattern.languages.javascript.assist.enabled,
-                                pattern.assist.enabled,
-                            )
-                            .and_then(|enabled| {
-                                // Then check whether the path satisfies
-                                if pattern.include.matches_path(path)
-                                    && !pattern.exclude.matches_path(path)
-                                {
-                                    Some(enabled)
-                                } else {
-                                    None
-                                }
-                            })
-                        });
-
-                overrides_activity.or(check_feature_activity(
-                    settings.languages.javascript.assist.enabled,
-                    settings.assist.enabled,
-                ))
-            })
-            .unwrap_or_default()
-            .into()
+    fn formatter_enabled_in_language_override(pattern: &OverrideSettingPattern) -> Option<bool> {
+        pattern
+            .languages
+            .javascript
+            .formatter
+            .enabled
+            .map(Into::into)
     }
 
-    fn linter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
-        settings
-            .and_then(|settings| {
-                let overrides_activity =
-                    settings
-                        .override_settings
-                        .patterns
-                        .iter()
-                        .rev()
-                        .find_map(|pattern| {
-                            check_override_feature_activity(
-                                pattern.languages.javascript.linter.enabled,
-                                pattern.linter.enabled,
-                            )
-                            .and_then(|enabled| {
-                                // Then check whether the path satisfies
-                                if pattern.include.matches_path(path)
-                                    && !pattern.exclude.matches_path(path)
-                                {
-                                    Some(enabled)
-                                } else {
-                                    None
-                                }
-                            })
-                        });
+    fn assist_enabled_for_language(settings: &Settings) -> Option<bool> {
+        settings.languages.javascript.assist.enabled.map(Into::into)
+    }
 
-                overrides_activity.or(check_feature_activity(
-                    settings.languages.javascript.linter.enabled,
-                    settings.linter.enabled,
-                ))
-            })
-            .unwrap_or_default()
-            .into()
+    fn assist_enabled_in_language_override(pattern: &OverrideSettingPattern) -> Option<bool> {
+        pattern.languages.javascript.assist.enabled.map(Into::into)
+    }
+
+    fn linter_enabled_for_language(settings: &Settings) -> Option<bool> {
+        settings.languages.javascript.linter.enabled.map(Into::into)
+    }
+
+    fn linter_enabled_in_language_override(pattern: &OverrideSettingPattern) -> Option<bool> {
+        pattern.languages.javascript.linter.enabled.map(Into::into)
     }
 }
 

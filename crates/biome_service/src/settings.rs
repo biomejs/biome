@@ -545,13 +545,121 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Checks whether this file has the linter enabled.
     ///
     /// The language is responsible for checking this.
-    fn linter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool;
+    fn linter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_override_feature_activity(
+                                Self::linter_enabled_in_language_override(pattern),
+                                pattern.linter.enabled,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    Self::linter_enabled_for_language(settings),
+                    settings.linter.enabled,
+                ))
+            })
+            .unwrap_or_default()
+    }
+
+    fn linter_enabled_for_language(settings: &Settings) -> Option<bool>;
+
+    fn linter_enabled_in_language_override(pattern: &OverrideSettingPattern) -> Option<bool>;
 
     /// Responsible to check whether this file has formatter enabled. The language is responsible to check this
-    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool;
+    fn formatter_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_override_feature_activity(
+                                Self::formatter_enabled_in_language_override(pattern),
+                                pattern.formatter.enabled,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    Self::formatter_enabled_for_language(settings),
+                    settings.formatter.enabled,
+                ))
+            })
+            .unwrap_or_default()
+    }
+
+    fn formatter_enabled_for_language(settings: &Settings) -> Option<bool>;
+
+    fn formatter_enabled_in_language_override(pattern: &OverrideSettingPattern) -> Option<bool>;
 
     /// Responsible to check whether this file has assist enabled. The language is responsible to check this
-    fn assist_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool;
+    fn assist_enabled_for_file_path(settings: Option<&Settings>, path: &Utf8Path) -> bool {
+        settings
+            .and_then(|settings| {
+                let overrides_activity =
+                    settings
+                        .override_settings
+                        .patterns
+                        .iter()
+                        .rev()
+                        .find_map(|pattern| {
+                            check_override_feature_activity(
+                                Self::assist_enabled_in_language_override(pattern),
+                                pattern.assist.enabled,
+                            )
+                            .and_then(|enabled| {
+                                // Then check whether the path satisfies
+                                if pattern.include.matches_path(path)
+                                    && !pattern.exclude.matches_path(path)
+                                {
+                                    Some(enabled)
+                                } else {
+                                    None
+                                }
+                            })
+                        });
+
+                overrides_activity.or(check_feature_activity(
+                    Self::assist_enabled_for_language(settings),
+                    settings.assist.enabled,
+                ))
+            })
+            .unwrap_or_default()
+    }
+
+    fn assist_enabled_for_language(settings: &Settings) -> Option<bool>;
+
+    fn assist_enabled_in_language_override(pattern: &OverrideSettingPattern) -> Option<bool>;
 }
 
 #[derive(Clone, Debug, Default)]
@@ -1529,19 +1637,16 @@ impl TryFrom<OverrideAssistConfiguration> for AssistSettings {
 /// | Some(true)           | Some(true) | Some(false) | None       |
 /// | Some(false)          | Some(true) | Some(false) | Some(false)|
 /// | None                 | Some(true) | Some(false) | None       |
-pub(crate) fn check_feature_activity<const LANG: bool, const TOP: bool>(
-    language_specific_feature_activity: Option<Bool<LANG>>,
+pub(crate) fn check_feature_activity<const TOP: bool>(
+    language_specific_feature_activity: Option<bool>,
     top_level_feature_activity: Option<Bool<TOP>>,
-) -> Option<Bool<LANG>> {
+) -> Option<bool> {
     // Check the language-specific feature first
     language_specific_feature_activity
         // Then check the top level feature
         .or(top_level_feature_activity.and_then(|v| {
-            if v.into() {
-                None
-            } else {
-                Some(v.value().into())
-            }
+            let value = v.value();
+            (!value).then_some(value)
         }))
 }
 
@@ -1553,12 +1658,12 @@ pub(crate) fn check_feature_activity<const LANG: bool, const TOP: bool>(
 /// | Some(true)            | Some(true) | Some(false) | Some(true) |
 /// | Some(false)           | Some(true) | Some(false) | Some(false)|
 /// | None                  | Some(true) | Some(false) | None       |
-pub(crate) fn check_override_feature_activity<const LANG: bool, const TOP: bool>(
-    language_specific_feature_activity: Option<Bool<LANG>>,
+pub(crate) fn check_override_feature_activity<const TOP: bool>(
+    language_specific_feature_activity: Option<bool>,
     top_level_feature_activity: Option<Bool<TOP>>,
-) -> Option<Bool<LANG>> {
+) -> Option<bool> {
     // Check the language-specific feature first
     language_specific_feature_activity
         // Then check the top level feature
-        .or(top_level_feature_activity.map(|v| v.value().into()))
+        .or(top_level_feature_activity.map(|v| v.value()))
 }
