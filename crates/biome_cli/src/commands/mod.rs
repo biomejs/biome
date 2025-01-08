@@ -809,6 +809,9 @@ pub(crate) trait CommandRunner: Sized {
                 project_key,
                 path: Some(project_path),
             })?;
+            for diagnostic in result.diagnostics {
+                console.log(markup! {{PrintDiagnostic::simple(&diagnostic)}});
+            }
             if cli_options.verbose && matches!(execution.report_mode(), ReportMode::Terminal { .. })
             {
                 console.log(markup! {
