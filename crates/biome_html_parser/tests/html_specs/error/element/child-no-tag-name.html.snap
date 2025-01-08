@@ -27,25 +27,18 @@ HtmlRoot {
                 r_angle_token: R_ANGLE@4..5 ">" [] [],
             },
             children: HtmlElementList [
-                HtmlElement {
-                    opening_element: HtmlOpeningElement {
-                        l_angle_token: L_ANGLE@5..6 "<" [] [],
-                        name: missing (required),
-                        attributes: HtmlAttributeList [],
-                        r_angle_token: missing (required),
-                    },
-                    children: HtmlElementList [],
-                    closing_element: HtmlClosingElement {
-                        l_angle_token: L_ANGLE@6..7 "<" [] [],
-                        slash_token: SLASH@7..8 "/" [] [],
-                        name: HtmlName {
-                            value_token: HTML_LITERAL@8..11 "div" [] [],
-                        },
-                        r_angle_token: R_ANGLE@11..12 ">" [] [],
-                    },
+                HtmlContent {
+                    value_token: HTML_LITERAL@5..6 "<" [] [],
                 },
             ],
-            closing_element: missing (required),
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@6..7 "<" [] [],
+                slash_token: SLASH@7..8 "/" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@8..11 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@11..12 ">" [] [],
+            },
         },
     ],
     eof_token: EOF@12..13 "" [Newline("\n")] [],
@@ -66,21 +59,15 @@ HtmlRoot {
           0: HTML_LITERAL@1..4 "div" [] []
         2: HTML_ATTRIBUTE_LIST@4..4
         3: R_ANGLE@4..5 ">" [] []
-      1: HTML_ELEMENT_LIST@5..12
-        0: HTML_ELEMENT@5..12
-          0: HTML_OPENING_ELEMENT@5..6
-            0: L_ANGLE@5..6 "<" [] []
-            1: (empty)
-            2: HTML_ATTRIBUTE_LIST@6..6
-            3: (empty)
-          1: HTML_ELEMENT_LIST@6..6
-          2: HTML_CLOSING_ELEMENT@6..12
-            0: L_ANGLE@6..7 "<" [] []
-            1: SLASH@7..8 "/" [] []
-            2: HTML_NAME@8..11
-              0: HTML_LITERAL@8..11 "div" [] []
-            3: R_ANGLE@11..12 ">" [] []
-      2: (empty)
+      1: HTML_ELEMENT_LIST@5..6
+        0: HTML_CONTENT@5..6
+          0: HTML_LITERAL@5..6 "<" [] []
+      2: HTML_CLOSING_ELEMENT@6..12
+        0: L_ANGLE@6..7 "<" [] []
+        1: SLASH@7..8 "/" [] []
+        2: HTML_NAME@8..11
+          0: HTML_LITERAL@8..11 "div" [] []
+        3: R_ANGLE@11..12 ">" [] []
   3: EOF@12..13 "" [Newline("\n")] []
 
 ```
@@ -88,32 +75,14 @@ HtmlRoot {
 ## Diagnostics
 
 ```
-child-no-tag-name.html:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+child-no-tag-name.html:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an element name but instead found '<'.
+  × Unescaped `<` bracket character. Expected a tag or escaped character.
   
   > 1 │ <div><</div>
-      │       ^
+      │      ^
     2 │ 
   
-  i Expected an element name here.
-  
-  > 1 │ <div><</div>
-      │       ^
-    2 │ 
-  
-child-no-tag-name.html:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a closing tag but instead found the end of the file.
-  
-    1 │ <div><</div>
-  > 2 │ 
-      │ 
-  
-  i Expected a closing tag here.
-  
-    1 │ <div><</div>
-  > 2 │ 
-      │ 
+  i Replace this character with `&lt;` to escape it.
   
 ```

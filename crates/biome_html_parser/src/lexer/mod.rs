@@ -84,7 +84,25 @@ impl<'src> HtmlLexer<'src> {
     fn consume_token_outside_tag(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
-            b'<' => self.consume_l_angle(),
+            b'<' => {
+                // if this truly is the start of a tag, it *must* be immediately followed by a tag name. Whitespace is not allowed.
+                // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
+                if self
+                    .peek_byte()
+                    .is_some_and(|b| is_tag_name_byte(b) || b == b'!' || b == b'/')
+                {
+                    self.consume_l_angle()
+                } else {
+                    self.push_diagnostic(
+                        ParseDiagnostic::new(
+                            "Unescaped `<` bracket character. Expected a tag or escaped character.",
+                            self.text_position()..self.text_position() + TextSize::from(1),
+                        )
+                        .with_hint("Replace this character with `&lt;` to escape it."),
+                    );
+                    self.consume_byte(HTML_LITERAL)
+                }
+            }
             _ => self.consume_html_text(),
         }
     }
@@ -123,13 +141,17 @@ impl<'src> HtmlLexer<'src> {
     ) -> HtmlSyntaxKind {
         let start = self.text_position();
         let end_tag = lang.end_tag();
-        while self.current_byte().is_some() {
-            if self.source[self.position..(self.position + end_tag.len())]
-                .eq_ignore_ascii_case(end_tag)
+        self.assert_current_char_boundary();
+        while let Some(byte) = self.current_byte() {
+            let end = self.position + end_tag.len();
+            let both_ends_at_char_boundaries =
+                self.source.is_char_boundary(self.position) && self.source.is_char_boundary(end);
+            if both_ends_at_char_boundaries
+                && self.source[self.position..end].eq_ignore_ascii_case(end_tag)
             {
                 break;
             }
-            self.advance(1);
+            self.advance_byte_or_char(byte);
         }
 
         if self.text_position() != start {
