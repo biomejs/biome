@@ -16,12 +16,11 @@ use rustc_hash::FxBuildHasher;
 ///
 /// As a data structure, the project layout is simply a flat mapping from paths
 /// to package data. This means that in order to lookup the package that is
-/// most relevant for a given file, we may need to do a dumb iteration over all
-/// entries to find which is the closest match. This means performance becomes
-/// O(N) with the number of open packages, so if this becomes a bottleneck, we
-/// may want to reconsider this approach. For now though, it makes sense because
-/// it makes it very easy for us to invalidate part of the layout when there are
-/// file system changes.
+/// most relevant for a given file, we may need to do multiple lookups from the
+/// most-specific possible package path to the least. This means performance
+/// degrades linearly with the depth of the path of a file. For now though, this
+/// approach makes it very easy for us to invalidate part of the layout when
+/// there are file system changes.
 #[derive(Debug, Default)]
 pub struct ProjectLayout(HashMap<Utf8PathBuf, PackageData, FxBuildHasher>);
 
@@ -51,6 +50,23 @@ impl ProjectLayout {
         &self,
         path: &Utf8Path,
     ) -> Option<(Utf8PathBuf, PackageJson)> {
+        // Note I also tried an alternative approach where instead of iterating
+        // over all entries and finding the closest match, I would do repeated
+        // lookups like this:
+        //
+        // ```rs
+        // let packages = self.0.pin();
+        // path.ancestors().skip(1).find_map(|package_path| {
+        //     packages
+        //         .get(package_path)
+        //         .and_then(|data| data.node_package.as_ref())
+        //         .map(|node_package| (package_path.to_path_buf(), node_package.manifest.clone()))
+        // })
+        // ```
+        //
+        // Contrary to what I expected however, the below implementation
+        // appeared significantly faster (tested on the `unleash` repository).
+
         let mut result: Option<(&Utf8PathBuf, &PackageJson)> = None;
 
         let packages = self.0.pin();
@@ -63,12 +79,12 @@ impl ProjectLayout {
                 continue;
             };
 
-            let is_best_match = path.strip_prefix(package_path).is_ok()
+            let is_closest_match = path.strip_prefix(package_path).is_ok()
                 && result.is_none_or(|(matched_package_path, _)| {
                     package_path.as_str().len() > matched_package_path.as_str().len()
                 });
 
-            if is_best_match {
+            if is_closest_match {
                 result = Some((package_path, node_manifest));
             }
         }
