@@ -3176,13 +3176,22 @@ impl AstNode for GraphqlAlias {
 }
 impl std::fmt::Debug for GraphqlAlias {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlAlias")
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlAlias")
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlAlias").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlAlias> for SyntaxNode {
@@ -3218,14 +3227,23 @@ impl AstNode for GraphqlArgument {
 }
 impl std::fmt::Debug for GraphqlArgument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlArgument")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlArgument")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("GraphqlArgument").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlArgument> for SyntaxNode {
@@ -3261,17 +3279,26 @@ impl AstNode for GraphqlArguments {
 }
 impl std::fmt::Debug for GraphqlArguments {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlArguments")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("arguments", &self.arguments())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlArguments")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("arguments", &self.arguments())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlArguments").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlArguments> for SyntaxNode {
@@ -3307,17 +3334,26 @@ impl AstNode for GraphqlArgumentsDefinition {
 }
 impl std::fmt::Debug for GraphqlArgumentsDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlArgumentsDefinition")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("arguments", &self.arguments())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlArgumentsDefinition")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("arguments", &self.arguments())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlArgumentsDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlArgumentsDefinition> for SyntaxNode {
@@ -3353,12 +3389,21 @@ impl AstNode for GraphqlBooleanValue {
 }
 impl std::fmt::Debug for GraphqlBooleanValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlBooleanValue")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlBooleanValue")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlBooleanValue").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlBooleanValue> for SyntaxNode {
@@ -3394,10 +3439,19 @@ impl AstNode for GraphqlDefaultValue {
 }
 impl std::fmt::Debug for GraphqlDefaultValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlDefaultValue")
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlDefaultValue")
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("GraphqlDefaultValue").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlDefaultValue> for SyntaxNode {
@@ -3433,12 +3487,21 @@ impl AstNode for GraphqlDescription {
 }
 impl std::fmt::Debug for GraphqlDescription {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlDescription")
-            .field(
-                "graphql_string_value",
-                &support::DebugSyntaxResult(self.graphql_string_value()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlDescription")
+                .field(
+                    "graphql_string_value",
+                    &support::DebugSyntaxResult(self.graphql_string_value()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlDescription").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlDescription> for SyntaxNode {
@@ -3474,14 +3537,23 @@ impl AstNode for GraphqlDirective {
 }
 impl std::fmt::Debug for GraphqlDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlDirective")
-            .field("at_token", &support::DebugSyntaxResult(self.at_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "arguments",
-                &support::DebugOptionalElement(self.arguments()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlDirective")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "arguments",
+                    &support::DebugOptionalElement(self.arguments()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlDirective").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlDirective> for SyntaxNode {
@@ -3517,32 +3589,41 @@ impl AstNode for GraphqlDirectiveDefinition {
 }
 impl std::fmt::Debug for GraphqlDirectiveDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlDirectiveDefinition")
-            .field(
-                "description",
-                &support::DebugOptionalElement(self.description()),
-            )
-            .field(
-                "directive_token",
-                &support::DebugSyntaxResult(self.directive_token()),
-            )
-            .field("at_token", &support::DebugSyntaxResult(self.at_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "arguments",
-                &support::DebugOptionalElement(self.arguments()),
-            )
-            .field(
-                "repeatable_token",
-                &support::DebugOptionalElement(self.repeatable_token()),
-            )
-            .field("on_token", &support::DebugSyntaxResult(self.on_token()))
-            .field(
-                "bitwise_or_token",
-                &support::DebugOptionalElement(self.bitwise_or_token()),
-            )
-            .field("locations", &self.locations())
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlDirectiveDefinition")
+                .field(
+                    "description",
+                    &support::DebugOptionalElement(self.description()),
+                )
+                .field(
+                    "directive_token",
+                    &support::DebugSyntaxResult(self.directive_token()),
+                )
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "arguments",
+                    &support::DebugOptionalElement(self.arguments()),
+                )
+                .field(
+                    "repeatable_token",
+                    &support::DebugOptionalElement(self.repeatable_token()),
+                )
+                .field("on_token", &support::DebugSyntaxResult(self.on_token()))
+                .field(
+                    "bitwise_or_token",
+                    &support::DebugOptionalElement(self.bitwise_or_token()),
+                )
+                .field("locations", &self.locations())
+                .finish()
+        } else {
+            f.debug_struct("GraphqlDirectiveDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlDirectiveDefinition> for SyntaxNode {
@@ -3578,12 +3659,21 @@ impl AstNode for GraphqlDirectiveLocation {
 }
 impl std::fmt::Debug for GraphqlDirectiveLocation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlDirectiveLocation")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlDirectiveLocation")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlDirectiveLocation").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlDirectiveLocation> for SyntaxNode {
@@ -3619,19 +3709,28 @@ impl AstNode for GraphqlEnumTypeDefinition {
 }
 impl std::fmt::Debug for GraphqlEnumTypeDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlEnumTypeDefinition")
-            .field(
-                "description",
-                &support::DebugOptionalElement(self.description()),
-            )
-            .field("enum_token", &support::DebugSyntaxResult(self.enum_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("directives", &self.directives())
-            .field(
-                "enum_values",
-                &support::DebugOptionalElement(self.enum_values()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlEnumTypeDefinition")
+                .field(
+                    "description",
+                    &support::DebugOptionalElement(self.description()),
+                )
+                .field("enum_token", &support::DebugSyntaxResult(self.enum_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("directives", &self.directives())
+                .field(
+                    "enum_values",
+                    &support::DebugOptionalElement(self.enum_values()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlEnumTypeDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlEnumTypeDefinition> for SyntaxNode {
@@ -3667,19 +3766,28 @@ impl AstNode for GraphqlEnumTypeExtension {
 }
 impl std::fmt::Debug for GraphqlEnumTypeExtension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlEnumTypeExtension")
-            .field(
-                "extend_token",
-                &support::DebugSyntaxResult(self.extend_token()),
-            )
-            .field("enum_token", &support::DebugSyntaxResult(self.enum_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("directives", &self.directives())
-            .field(
-                "enum_values",
-                &support::DebugOptionalElement(self.enum_values()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlEnumTypeExtension")
+                .field(
+                    "extend_token",
+                    &support::DebugSyntaxResult(self.extend_token()),
+                )
+                .field("enum_token", &support::DebugSyntaxResult(self.enum_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("directives", &self.directives())
+                .field(
+                    "enum_values",
+                    &support::DebugOptionalElement(self.enum_values()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlEnumTypeExtension").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlEnumTypeExtension> for SyntaxNode {
@@ -3715,9 +3823,18 @@ impl AstNode for GraphqlEnumValue {
 }
 impl std::fmt::Debug for GraphqlEnumValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlEnumValue")
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlEnumValue")
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("GraphqlEnumValue").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlEnumValue> for SyntaxNode {
@@ -3753,14 +3870,23 @@ impl AstNode for GraphqlEnumValueDefinition {
 }
 impl std::fmt::Debug for GraphqlEnumValueDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlEnumValueDefinition")
-            .field(
-                "description",
-                &support::DebugOptionalElement(self.description()),
-            )
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .field("directives", &self.directives())
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlEnumValueDefinition")
+                .field(
+                    "description",
+                    &support::DebugOptionalElement(self.description()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field("directives", &self.directives())
+                .finish()
+        } else {
+            f.debug_struct("GraphqlEnumValueDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlEnumValueDefinition> for SyntaxNode {
@@ -3796,17 +3922,26 @@ impl AstNode for GraphqlEnumValuesDefinition {
 }
 impl std::fmt::Debug for GraphqlEnumValuesDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlEnumValuesDefinition")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("values", &self.values())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlEnumValuesDefinition")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("values", &self.values())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlEnumValuesDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlEnumValuesDefinition> for SyntaxNode {
@@ -3842,19 +3977,28 @@ impl AstNode for GraphqlField {
 }
 impl std::fmt::Debug for GraphqlField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlField")
-            .field("alias", &support::DebugOptionalElement(self.alias()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "arguments",
-                &support::DebugOptionalElement(self.arguments()),
-            )
-            .field("directives", &self.directives())
-            .field(
-                "selection_set",
-                &support::DebugOptionalElement(self.selection_set()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlField")
+                .field("alias", &support::DebugOptionalElement(self.alias()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "arguments",
+                    &support::DebugOptionalElement(self.arguments()),
+                )
+                .field("directives", &self.directives())
+                .field(
+                    "selection_set",
+                    &support::DebugOptionalElement(self.selection_set()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlField").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlField> for SyntaxNode {
@@ -3890,23 +4034,32 @@ impl AstNode for GraphqlFieldDefinition {
 }
 impl std::fmt::Debug for GraphqlFieldDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlFieldDefinition")
-            .field(
-                "description",
-                &support::DebugOptionalElement(self.description()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "arguments",
-                &support::DebugOptionalElement(self.arguments()),
-            )
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .field("directives", &self.directives())
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlFieldDefinition")
+                .field(
+                    "description",
+                    &support::DebugOptionalElement(self.description()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "arguments",
+                    &support::DebugOptionalElement(self.arguments()),
+                )
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .field("directives", &self.directives())
+                .finish()
+        } else {
+            f.debug_struct("GraphqlFieldDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlFieldDefinition> for SyntaxNode {
@@ -3942,17 +4095,26 @@ impl AstNode for GraphqlFieldsDefinition {
 }
 impl std::fmt::Debug for GraphqlFieldsDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlFieldsDefinition")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("fields", &self.fields())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlFieldsDefinition")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("fields", &self.fields())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlFieldsDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlFieldsDefinition> for SyntaxNode {
@@ -3988,12 +4150,21 @@ impl AstNode for GraphqlFloatValue {
 }
 impl std::fmt::Debug for GraphqlFloatValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlFloatValue")
-            .field(
-                "graphql_float_literal_token",
-                &support::DebugSyntaxResult(self.graphql_float_literal_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlFloatValue")
+                .field(
+                    "graphql_float_literal_token",
+                    &support::DebugSyntaxResult(self.graphql_float_literal_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlFloatValue").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlFloatValue> for SyntaxNode {
@@ -4029,22 +4200,31 @@ impl AstNode for GraphqlFragmentDefinition {
 }
 impl std::fmt::Debug for GraphqlFragmentDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlFragmentDefinition")
-            .field(
-                "fragment_token",
-                &support::DebugSyntaxResult(self.fragment_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "type_condition",
-                &support::DebugSyntaxResult(self.type_condition()),
-            )
-            .field("directives", &self.directives())
-            .field(
-                "selection_set",
-                &support::DebugSyntaxResult(self.selection_set()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlFragmentDefinition")
+                .field(
+                    "fragment_token",
+                    &support::DebugSyntaxResult(self.fragment_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "type_condition",
+                    &support::DebugSyntaxResult(self.type_condition()),
+                )
+                .field("directives", &self.directives())
+                .field(
+                    "selection_set",
+                    &support::DebugSyntaxResult(self.selection_set()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlFragmentDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlFragmentDefinition> for SyntaxNode {
@@ -4080,14 +4260,23 @@ impl AstNode for GraphqlFragmentSpread {
 }
 impl std::fmt::Debug for GraphqlFragmentSpread {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlFragmentSpread")
-            .field(
-                "dotdotdot_token",
-                &support::DebugSyntaxResult(self.dotdotdot_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("directives", &self.directives())
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlFragmentSpread")
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugSyntaxResult(self.dotdotdot_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("directives", &self.directives())
+                .finish()
+        } else {
+            f.debug_struct("GraphqlFragmentSpread").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlFragmentSpread> for SyntaxNode {
@@ -4123,17 +4312,26 @@ impl AstNode for GraphqlImplementsInterfaces {
 }
 impl std::fmt::Debug for GraphqlImplementsInterfaces {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlImplementsInterfaces")
-            .field(
-                "implements_token",
-                &support::DebugSyntaxResult(self.implements_token()),
-            )
-            .field(
-                "amp_token",
-                &support::DebugOptionalElement(self.amp_token()),
-            )
-            .field("interfaces", &self.interfaces())
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlImplementsInterfaces")
+                .field(
+                    "implements_token",
+                    &support::DebugSyntaxResult(self.implements_token()),
+                )
+                .field(
+                    "amp_token",
+                    &support::DebugOptionalElement(self.amp_token()),
+                )
+                .field("interfaces", &self.interfaces())
+                .finish()
+        } else {
+            f.debug_struct("GraphqlImplementsInterfaces").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlImplementsInterfaces> for SyntaxNode {
@@ -4169,21 +4367,30 @@ impl AstNode for GraphqlInlineFragment {
 }
 impl std::fmt::Debug for GraphqlInlineFragment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlInlineFragment")
-            .field(
-                "dotdotdot_token",
-                &support::DebugSyntaxResult(self.dotdotdot_token()),
-            )
-            .field(
-                "type_condition",
-                &support::DebugOptionalElement(self.type_condition()),
-            )
-            .field("directives", &self.directives())
-            .field(
-                "selection_set",
-                &support::DebugSyntaxResult(self.selection_set()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlInlineFragment")
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugSyntaxResult(self.dotdotdot_token()),
+                )
+                .field(
+                    "type_condition",
+                    &support::DebugOptionalElement(self.type_condition()),
+                )
+                .field("directives", &self.directives())
+                .field(
+                    "selection_set",
+                    &support::DebugSyntaxResult(self.selection_set()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlInlineFragment").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlInlineFragment> for SyntaxNode {
@@ -4219,17 +4426,26 @@ impl AstNode for GraphqlInputFieldsDefinition {
 }
 impl std::fmt::Debug for GraphqlInputFieldsDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlInputFieldsDefinition")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("fields", &self.fields())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlInputFieldsDefinition")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("fields", &self.fields())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlInputFieldsDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlInputFieldsDefinition> for SyntaxNode {
@@ -4265,22 +4481,31 @@ impl AstNode for GraphqlInputObjectTypeDefinition {
 }
 impl std::fmt::Debug for GraphqlInputObjectTypeDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlInputObjectTypeDefinition")
-            .field(
-                "description",
-                &support::DebugOptionalElement(self.description()),
-            )
-            .field(
-                "input_token",
-                &support::DebugSyntaxResult(self.input_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("directives", &self.directives())
-            .field(
-                "input_fields",
-                &support::DebugOptionalElement(self.input_fields()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlInputObjectTypeDefinition")
+                .field(
+                    "description",
+                    &support::DebugOptionalElement(self.description()),
+                )
+                .field(
+                    "input_token",
+                    &support::DebugSyntaxResult(self.input_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("directives", &self.directives())
+                .field(
+                    "input_fields",
+                    &support::DebugOptionalElement(self.input_fields()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlInputObjectTypeDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlInputObjectTypeDefinition> for SyntaxNode {
@@ -4316,22 +4541,31 @@ impl AstNode for GraphqlInputObjectTypeExtension {
 }
 impl std::fmt::Debug for GraphqlInputObjectTypeExtension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlInputObjectTypeExtension")
-            .field(
-                "extend_token",
-                &support::DebugSyntaxResult(self.extend_token()),
-            )
-            .field(
-                "input_token",
-                &support::DebugSyntaxResult(self.input_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("directives", &self.directives())
-            .field(
-                "input_fields",
-                &support::DebugOptionalElement(self.input_fields()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlInputObjectTypeExtension")
+                .field(
+                    "extend_token",
+                    &support::DebugSyntaxResult(self.extend_token()),
+                )
+                .field(
+                    "input_token",
+                    &support::DebugSyntaxResult(self.input_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("directives", &self.directives())
+                .field(
+                    "input_fields",
+                    &support::DebugOptionalElement(self.input_fields()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlInputObjectTypeExtension").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlInputObjectTypeExtension> for SyntaxNode {
@@ -4367,20 +4601,29 @@ impl AstNode for GraphqlInputValueDefinition {
 }
 impl std::fmt::Debug for GraphqlInputValueDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlInputValueDefinition")
-            .field(
-                "description",
-                &support::DebugOptionalElement(self.description()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .field("default", &support::DebugOptionalElement(self.default()))
-            .field("directives", &self.directives())
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlInputValueDefinition")
+                .field(
+                    "description",
+                    &support::DebugOptionalElement(self.description()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .field("default", &support::DebugOptionalElement(self.default()))
+                .field("directives", &self.directives())
+                .finish()
+        } else {
+            f.debug_struct("GraphqlInputValueDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlInputValueDefinition> for SyntaxNode {
@@ -4416,12 +4659,21 @@ impl AstNode for GraphqlIntValue {
 }
 impl std::fmt::Debug for GraphqlIntValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlIntValue")
-            .field(
-                "graphql_int_literal_token",
-                &support::DebugSyntaxResult(self.graphql_int_literal_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlIntValue")
+                .field(
+                    "graphql_int_literal_token",
+                    &support::DebugSyntaxResult(self.graphql_int_literal_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlIntValue").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlIntValue> for SyntaxNode {
@@ -4457,23 +4709,32 @@ impl AstNode for GraphqlInterfaceTypeDefinition {
 }
 impl std::fmt::Debug for GraphqlInterfaceTypeDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlInterfaceTypeDefinition")
-            .field(
-                "description",
-                &support::DebugOptionalElement(self.description()),
-            )
-            .field(
-                "interface_token",
-                &support::DebugSyntaxResult(self.interface_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "implements",
-                &support::DebugOptionalElement(self.implements()),
-            )
-            .field("directives", &self.directives())
-            .field("fields", &support::DebugOptionalElement(self.fields()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlInterfaceTypeDefinition")
+                .field(
+                    "description",
+                    &support::DebugOptionalElement(self.description()),
+                )
+                .field(
+                    "interface_token",
+                    &support::DebugSyntaxResult(self.interface_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "implements",
+                    &support::DebugOptionalElement(self.implements()),
+                )
+                .field("directives", &self.directives())
+                .field("fields", &support::DebugOptionalElement(self.fields()))
+                .finish()
+        } else {
+            f.debug_struct("GraphqlInterfaceTypeDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlInterfaceTypeDefinition> for SyntaxNode {
@@ -4509,23 +4770,32 @@ impl AstNode for GraphqlInterfaceTypeExtension {
 }
 impl std::fmt::Debug for GraphqlInterfaceTypeExtension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlInterfaceTypeExtension")
-            .field(
-                "extend_token",
-                &support::DebugSyntaxResult(self.extend_token()),
-            )
-            .field(
-                "interface_token",
-                &support::DebugSyntaxResult(self.interface_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "implements",
-                &support::DebugOptionalElement(self.implements()),
-            )
-            .field("directives", &self.directives())
-            .field("fields", &support::DebugOptionalElement(self.fields()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlInterfaceTypeExtension")
+                .field(
+                    "extend_token",
+                    &support::DebugSyntaxResult(self.extend_token()),
+                )
+                .field(
+                    "interface_token",
+                    &support::DebugSyntaxResult(self.interface_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "implements",
+                    &support::DebugOptionalElement(self.implements()),
+                )
+                .field("directives", &self.directives())
+                .field("fields", &support::DebugOptionalElement(self.fields()))
+                .finish()
+        } else {
+            f.debug_struct("GraphqlInterfaceTypeExtension").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlInterfaceTypeExtension> for SyntaxNode {
@@ -4561,17 +4831,26 @@ impl AstNode for GraphqlListType {
 }
 impl std::fmt::Debug for GraphqlListType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlListType")
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("element", &support::DebugSyntaxResult(self.element()))
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlListType")
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("element", &support::DebugSyntaxResult(self.element()))
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlListType").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlListType> for SyntaxNode {
@@ -4607,17 +4886,26 @@ impl AstNode for GraphqlListValue {
 }
 impl std::fmt::Debug for GraphqlListValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlListValue")
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("elements", &self.elements())
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlListValue")
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("elements", &self.elements())
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlListValue").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlListValue> for SyntaxNode {
@@ -4653,12 +4941,21 @@ impl AstNode for GraphqlLiteralName {
 }
 impl std::fmt::Debug for GraphqlLiteralName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlLiteralName")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlLiteralName")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlLiteralName").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlLiteralName> for SyntaxNode {
@@ -4694,12 +4991,21 @@ impl AstNode for GraphqlNameBinding {
 }
 impl std::fmt::Debug for GraphqlNameBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlNameBinding")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlNameBinding")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlNameBinding").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlNameBinding> for SyntaxNode {
@@ -4735,12 +5041,21 @@ impl AstNode for GraphqlNameReference {
 }
 impl std::fmt::Debug for GraphqlNameReference {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlNameReference")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlNameReference")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlNameReference").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlNameReference> for SyntaxNode {
@@ -4776,10 +5091,19 @@ impl AstNode for GraphqlNonNullType {
 }
 impl std::fmt::Debug for GraphqlNonNullType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlNonNullType")
-            .field("base", &support::DebugSyntaxResult(self.base()))
-            .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlNonNullType")
+                .field("base", &support::DebugSyntaxResult(self.base()))
+                .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
+                .finish()
+        } else {
+            f.debug_struct("GraphqlNonNullType").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlNonNullType> for SyntaxNode {
@@ -4815,9 +5139,18 @@ impl AstNode for GraphqlNullValue {
 }
 impl std::fmt::Debug for GraphqlNullValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlNullValue")
-            .field("null_token", &support::DebugSyntaxResult(self.null_token()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlNullValue")
+                .field("null_token", &support::DebugSyntaxResult(self.null_token()))
+                .finish()
+        } else {
+            f.debug_struct("GraphqlNullValue").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlNullValue> for SyntaxNode {
@@ -4853,14 +5186,23 @@ impl AstNode for GraphqlObjectField {
 }
 impl std::fmt::Debug for GraphqlObjectField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlObjectField")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlObjectField")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("GraphqlObjectField").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlObjectField> for SyntaxNode {
@@ -4896,20 +5238,29 @@ impl AstNode for GraphqlObjectTypeDefinition {
 }
 impl std::fmt::Debug for GraphqlObjectTypeDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlObjectTypeDefinition")
-            .field(
-                "description",
-                &support::DebugOptionalElement(self.description()),
-            )
-            .field("type_token", &support::DebugSyntaxResult(self.type_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "implements",
-                &support::DebugOptionalElement(self.implements()),
-            )
-            .field("directives", &self.directives())
-            .field("fields", &support::DebugOptionalElement(self.fields()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlObjectTypeDefinition")
+                .field(
+                    "description",
+                    &support::DebugOptionalElement(self.description()),
+                )
+                .field("type_token", &support::DebugSyntaxResult(self.type_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "implements",
+                    &support::DebugOptionalElement(self.implements()),
+                )
+                .field("directives", &self.directives())
+                .field("fields", &support::DebugOptionalElement(self.fields()))
+                .finish()
+        } else {
+            f.debug_struct("GraphqlObjectTypeDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlObjectTypeDefinition> for SyntaxNode {
@@ -4945,20 +5296,29 @@ impl AstNode for GraphqlObjectTypeExtension {
 }
 impl std::fmt::Debug for GraphqlObjectTypeExtension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlObjectTypeExtension")
-            .field(
-                "extend_token",
-                &support::DebugSyntaxResult(self.extend_token()),
-            )
-            .field("type_token", &support::DebugSyntaxResult(self.type_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "implements",
-                &support::DebugOptionalElement(self.implements()),
-            )
-            .field("directives", &self.directives())
-            .field("fields", &support::DebugOptionalElement(self.fields()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlObjectTypeExtension")
+                .field(
+                    "extend_token",
+                    &support::DebugSyntaxResult(self.extend_token()),
+                )
+                .field("type_token", &support::DebugSyntaxResult(self.type_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "implements",
+                    &support::DebugOptionalElement(self.implements()),
+                )
+                .field("directives", &self.directives())
+                .field("fields", &support::DebugOptionalElement(self.fields()))
+                .finish()
+        } else {
+            f.debug_struct("GraphqlObjectTypeExtension").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlObjectTypeExtension> for SyntaxNode {
@@ -4994,17 +5354,26 @@ impl AstNode for GraphqlObjectValue {
 }
 impl std::fmt::Debug for GraphqlObjectValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlObjectValue")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("members", &self.members())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlObjectValue")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("members", &self.members())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlObjectValue").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlObjectValue> for SyntaxNode {
@@ -5040,19 +5409,28 @@ impl AstNode for GraphqlOperationDefinition {
 }
 impl std::fmt::Debug for GraphqlOperationDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlOperationDefinition")
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .field("name", &support::DebugOptionalElement(self.name()))
-            .field(
-                "variables",
-                &support::DebugOptionalElement(self.variables()),
-            )
-            .field("directives", &self.directives())
-            .field(
-                "selection_set",
-                &support::DebugSyntaxResult(self.selection_set()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlOperationDefinition")
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .field("name", &support::DebugOptionalElement(self.name()))
+                .field(
+                    "variables",
+                    &support::DebugOptionalElement(self.variables()),
+                )
+                .field("directives", &self.directives())
+                .field(
+                    "selection_set",
+                    &support::DebugSyntaxResult(self.selection_set()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlOperationDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlOperationDefinition> for SyntaxNode {
@@ -5088,12 +5466,21 @@ impl AstNode for GraphqlOperationType {
 }
 impl std::fmt::Debug for GraphqlOperationType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlOperationType")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlOperationType")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlOperationType").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlOperationType> for SyntaxNode {
@@ -5129,14 +5516,23 @@ impl AstNode for GraphqlRoot {
 }
 impl std::fmt::Debug for GraphqlRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlRoot")
-            .field(
-                "bom_token",
-                &support::DebugOptionalElement(self.bom_token()),
-            )
-            .field("definitions", &self.definitions())
-            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlRoot")
+                .field(
+                    "bom_token",
+                    &support::DebugOptionalElement(self.bom_token()),
+                )
+                .field("definitions", &self.definitions())
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("GraphqlRoot").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlRoot> for SyntaxNode {
@@ -5172,17 +5568,27 @@ impl AstNode for GraphqlRootOperationTypeDefinition {
 }
 impl std::fmt::Debug for GraphqlRootOperationTypeDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlRootOperationTypeDefinition")
-            .field(
-                "operation_type",
-                &support::DebugSyntaxResult(self.operation_type()),
-            )
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("named_type", &support::DebugSyntaxResult(self.named_type()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlRootOperationTypeDefinition")
+                .field(
+                    "operation_type",
+                    &support::DebugSyntaxResult(self.operation_type()),
+                )
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("named_type", &support::DebugSyntaxResult(self.named_type()))
+                .finish()
+        } else {
+            f.debug_struct("GraphqlRootOperationTypeDefinition")
+                .finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlRootOperationTypeDefinition> for SyntaxNode {
@@ -5218,17 +5624,26 @@ impl AstNode for GraphqlRootOperationTypes {
 }
 impl std::fmt::Debug for GraphqlRootOperationTypes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlRootOperationTypes")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("root_operation_type", &self.root_operation_type())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlRootOperationTypes")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("root_operation_type", &self.root_operation_type())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlRootOperationTypes").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlRootOperationTypes> for SyntaxNode {
@@ -5264,18 +5679,27 @@ impl AstNode for GraphqlScalarTypeDefinition {
 }
 impl std::fmt::Debug for GraphqlScalarTypeDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlScalarTypeDefinition")
-            .field(
-                "description",
-                &support::DebugOptionalElement(self.description()),
-            )
-            .field(
-                "scalar_token",
-                &support::DebugSyntaxResult(self.scalar_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("directives", &self.directives())
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlScalarTypeDefinition")
+                .field(
+                    "description",
+                    &support::DebugOptionalElement(self.description()),
+                )
+                .field(
+                    "scalar_token",
+                    &support::DebugSyntaxResult(self.scalar_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("directives", &self.directives())
+                .finish()
+        } else {
+            f.debug_struct("GraphqlScalarTypeDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlScalarTypeDefinition> for SyntaxNode {
@@ -5311,18 +5735,27 @@ impl AstNode for GraphqlScalarTypeExtension {
 }
 impl std::fmt::Debug for GraphqlScalarTypeExtension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlScalarTypeExtension")
-            .field(
-                "extend_token",
-                &support::DebugSyntaxResult(self.extend_token()),
-            )
-            .field(
-                "scalar_token",
-                &support::DebugSyntaxResult(self.scalar_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("directives", &self.directives())
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlScalarTypeExtension")
+                .field(
+                    "extend_token",
+                    &support::DebugSyntaxResult(self.extend_token()),
+                )
+                .field(
+                    "scalar_token",
+                    &support::DebugSyntaxResult(self.scalar_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("directives", &self.directives())
+                .finish()
+        } else {
+            f.debug_struct("GraphqlScalarTypeExtension").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlScalarTypeExtension> for SyntaxNode {
@@ -5358,21 +5791,30 @@ impl AstNode for GraphqlSchemaDefinition {
 }
 impl std::fmt::Debug for GraphqlSchemaDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlSchemaDefinition")
-            .field(
-                "description",
-                &support::DebugOptionalElement(self.description()),
-            )
-            .field(
-                "schema_token",
-                &support::DebugSyntaxResult(self.schema_token()),
-            )
-            .field("directives", &self.directives())
-            .field(
-                "root_operation_types",
-                &support::DebugSyntaxResult(self.root_operation_types()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlSchemaDefinition")
+                .field(
+                    "description",
+                    &support::DebugOptionalElement(self.description()),
+                )
+                .field(
+                    "schema_token",
+                    &support::DebugSyntaxResult(self.schema_token()),
+                )
+                .field("directives", &self.directives())
+                .field(
+                    "root_operation_types",
+                    &support::DebugSyntaxResult(self.root_operation_types()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlSchemaDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlSchemaDefinition> for SyntaxNode {
@@ -5408,21 +5850,30 @@ impl AstNode for GraphqlSchemaExtension {
 }
 impl std::fmt::Debug for GraphqlSchemaExtension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlSchemaExtension")
-            .field(
-                "extend_token",
-                &support::DebugSyntaxResult(self.extend_token()),
-            )
-            .field(
-                "schema_token",
-                &support::DebugSyntaxResult(self.schema_token()),
-            )
-            .field("directives", &self.directives())
-            .field(
-                "root_operation_types",
-                &support::DebugOptionalElement(self.root_operation_types()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlSchemaExtension")
+                .field(
+                    "extend_token",
+                    &support::DebugSyntaxResult(self.extend_token()),
+                )
+                .field(
+                    "schema_token",
+                    &support::DebugSyntaxResult(self.schema_token()),
+                )
+                .field("directives", &self.directives())
+                .field(
+                    "root_operation_types",
+                    &support::DebugOptionalElement(self.root_operation_types()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlSchemaExtension").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlSchemaExtension> for SyntaxNode {
@@ -5458,17 +5909,26 @@ impl AstNode for GraphqlSelectionSet {
 }
 impl std::fmt::Debug for GraphqlSelectionSet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlSelectionSet")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("selections", &self.selections())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlSelectionSet")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("selections", &self.selections())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlSelectionSet").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlSelectionSet> for SyntaxNode {
@@ -5504,12 +5964,21 @@ impl AstNode for GraphqlStringValue {
 }
 impl std::fmt::Debug for GraphqlStringValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlStringValue")
-            .field(
-                "graphql_string_literal_token",
-                &support::DebugSyntaxResult(self.graphql_string_literal_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlStringValue")
+                .field(
+                    "graphql_string_literal_token",
+                    &support::DebugSyntaxResult(self.graphql_string_literal_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlStringValue").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlStringValue> for SyntaxNode {
@@ -5545,10 +6014,19 @@ impl AstNode for GraphqlTypeCondition {
 }
 impl std::fmt::Debug for GraphqlTypeCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlTypeCondition")
-            .field("on_token", &support::DebugSyntaxResult(self.on_token()))
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlTypeCondition")
+                .field("on_token", &support::DebugSyntaxResult(self.on_token()))
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("GraphqlTypeCondition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlTypeCondition> for SyntaxNode {
@@ -5584,14 +6062,23 @@ impl AstNode for GraphqlUnionMemberTypes {
 }
 impl std::fmt::Debug for GraphqlUnionMemberTypes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlUnionMemberTypes")
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field(
-                "bitwise_or_token",
-                &support::DebugOptionalElement(self.bitwise_or_token()),
-            )
-            .field("members", &self.members())
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlUnionMemberTypes")
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field(
+                    "bitwise_or_token",
+                    &support::DebugOptionalElement(self.bitwise_or_token()),
+                )
+                .field("members", &self.members())
+                .finish()
+        } else {
+            f.debug_struct("GraphqlUnionMemberTypes").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlUnionMemberTypes> for SyntaxNode {
@@ -5627,22 +6114,31 @@ impl AstNode for GraphqlUnionTypeDefinition {
 }
 impl std::fmt::Debug for GraphqlUnionTypeDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlUnionTypeDefinition")
-            .field(
-                "description",
-                &support::DebugOptionalElement(self.description()),
-            )
-            .field(
-                "union_token",
-                &support::DebugSyntaxResult(self.union_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("directives", &self.directives())
-            .field(
-                "union_members",
-                &support::DebugOptionalElement(self.union_members()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlUnionTypeDefinition")
+                .field(
+                    "description",
+                    &support::DebugOptionalElement(self.description()),
+                )
+                .field(
+                    "union_token",
+                    &support::DebugSyntaxResult(self.union_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("directives", &self.directives())
+                .field(
+                    "union_members",
+                    &support::DebugOptionalElement(self.union_members()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlUnionTypeDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlUnionTypeDefinition> for SyntaxNode {
@@ -5678,22 +6174,31 @@ impl AstNode for GraphqlUnionTypeExtension {
 }
 impl std::fmt::Debug for GraphqlUnionTypeExtension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlUnionTypeExtension")
-            .field(
-                "extend_token",
-                &support::DebugSyntaxResult(self.extend_token()),
-            )
-            .field(
-                "union_token",
-                &support::DebugSyntaxResult(self.union_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("directives", &self.directives())
-            .field(
-                "union_members",
-                &support::DebugOptionalElement(self.union_members()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlUnionTypeExtension")
+                .field(
+                    "extend_token",
+                    &support::DebugSyntaxResult(self.extend_token()),
+                )
+                .field(
+                    "union_token",
+                    &support::DebugSyntaxResult(self.union_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("directives", &self.directives())
+                .field(
+                    "union_members",
+                    &support::DebugOptionalElement(self.union_members()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlUnionTypeExtension").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlUnionTypeExtension> for SyntaxNode {
@@ -5729,13 +6234,22 @@ impl AstNode for GraphqlVariableBinding {
 }
 impl std::fmt::Debug for GraphqlVariableBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlVariableBinding")
-            .field(
-                "dollar_token",
-                &support::DebugSyntaxResult(self.dollar_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlVariableBinding")
+                .field(
+                    "dollar_token",
+                    &support::DebugSyntaxResult(self.dollar_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("GraphqlVariableBinding").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlVariableBinding> for SyntaxNode {
@@ -5771,16 +6285,25 @@ impl AstNode for GraphqlVariableDefinition {
 }
 impl std::fmt::Debug for GraphqlVariableDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlVariableDefinition")
-            .field("variable", &support::DebugSyntaxResult(self.variable()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .field("default", &support::DebugOptionalElement(self.default()))
-            .field("directives", &self.directives())
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlVariableDefinition")
+                .field("variable", &support::DebugSyntaxResult(self.variable()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .field("default", &support::DebugOptionalElement(self.default()))
+                .field("directives", &self.directives())
+                .finish()
+        } else {
+            f.debug_struct("GraphqlVariableDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlVariableDefinition> for SyntaxNode {
@@ -5816,17 +6339,26 @@ impl AstNode for GraphqlVariableDefinitions {
 }
 impl std::fmt::Debug for GraphqlVariableDefinitions {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlVariableDefinitions")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("elements", &self.elements())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlVariableDefinitions")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("elements", &self.elements())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GraphqlVariableDefinitions").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlVariableDefinitions> for SyntaxNode {
@@ -5862,13 +6394,22 @@ impl AstNode for GraphqlVariableReference {
 }
 impl std::fmt::Debug for GraphqlVariableReference {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphqlVariableReference")
-            .field(
-                "dollar_token",
-                &support::DebugSyntaxResult(self.dollar_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GraphqlVariableReference")
+                .field(
+                    "dollar_token",
+                    &support::DebugSyntaxResult(self.dollar_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("GraphqlVariableReference").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GraphqlVariableReference> for SyntaxNode {

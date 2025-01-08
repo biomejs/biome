@@ -1007,9 +1007,18 @@ impl AstNode for MdBulletListItem {
 }
 impl std::fmt::Debug for MdBulletListItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdBulletListItem")
-            .field("md_bullet_list", &self.md_bullet_list())
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdBulletListItem")
+                .field("md_bullet_list", &self.md_bullet_list())
+                .finish()
+        } else {
+            f.debug_struct("MdBulletListItem").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdBulletListItem> for SyntaxNode {
@@ -1045,14 +1054,23 @@ impl AstNode for MdDocument {
 }
 impl std::fmt::Debug for MdDocument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdDocument")
-            .field(
-                "bom_token",
-                &support::DebugOptionalElement(self.bom_token()),
-            )
-            .field("value", &self.value())
-            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdDocument")
+                .field(
+                    "bom_token",
+                    &support::DebugOptionalElement(self.bom_token()),
+                )
+                .field("value", &self.value())
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("MdDocument").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdDocument> for SyntaxNode {
@@ -1088,9 +1106,18 @@ impl AstNode for MdFencedCodeBlock {
 }
 impl std::fmt::Debug for MdFencedCodeBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdFencedCodeBlock")
-            .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdFencedCodeBlock")
+                .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
+                .finish()
+        } else {
+            f.debug_struct("MdFencedCodeBlock").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdFencedCodeBlock> for SyntaxNode {
@@ -1126,12 +1153,21 @@ impl AstNode for MdHardLine {
 }
 impl std::fmt::Debug for MdHardLine {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdHardLine")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdHardLine")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdHardLine").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdHardLine> for SyntaxNode {
@@ -1167,9 +1203,18 @@ impl AstNode for MdHash {
 }
 impl std::fmt::Debug for MdHash {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdHash")
-            .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdHash")
+                .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
+                .finish()
+        } else {
+            f.debug_struct("MdHash").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdHash> for SyntaxNode {
@@ -1205,14 +1250,23 @@ impl AstNode for MdHeader {
 }
 impl std::fmt::Debug for MdHeader {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdHeader")
-            .field("before", &self.before())
-            .field(
-                "md_paragraph",
-                &support::DebugOptionalElement(self.md_paragraph()),
-            )
-            .field("after", &self.after())
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdHeader")
+                .field("before", &self.before())
+                .field(
+                    "md_paragraph",
+                    &support::DebugOptionalElement(self.md_paragraph()),
+                )
+                .field("after", &self.after())
+                .finish()
+        } else {
+            f.debug_struct("MdHeader").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdHeader> for SyntaxNode {
@@ -1248,9 +1302,18 @@ impl AstNode for MdHtmlBlock {
 }
 impl std::fmt::Debug for MdHtmlBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdHtmlBlock")
-            .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdHtmlBlock")
+                .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
+                .finish()
+        } else {
+            f.debug_struct("MdHtmlBlock").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdHtmlBlock> for SyntaxNode {
@@ -1286,12 +1349,21 @@ impl AstNode for MdIndent {
 }
 impl std::fmt::Debug for MdIndent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdIndent")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdIndent")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdIndent").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdIndent> for SyntaxNode {
@@ -1327,9 +1399,18 @@ impl AstNode for MdIndentCodeBlock {
 }
 impl std::fmt::Debug for MdIndentCodeBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdIndentCodeBlock")
-            .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdIndentCodeBlock")
+                .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
+                .finish()
+        } else {
+            f.debug_struct("MdIndentCodeBlock").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdIndentCodeBlock> for SyntaxNode {
@@ -1365,9 +1446,18 @@ impl AstNode for MdInlineCode {
 }
 impl std::fmt::Debug for MdInlineCode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdInlineCode")
-            .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdInlineCode")
+                .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
+                .finish()
+        } else {
+            f.debug_struct("MdInlineCode").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdInlineCode> for SyntaxNode {
@@ -1403,9 +1493,18 @@ impl AstNode for MdInlineEmphasis {
 }
 impl std::fmt::Debug for MdInlineEmphasis {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdInlineEmphasis")
-            .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdInlineEmphasis")
+                .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
+                .finish()
+        } else {
+            f.debug_struct("MdInlineEmphasis").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdInlineEmphasis> for SyntaxNode {
@@ -1441,11 +1540,20 @@ impl AstNode for MdInlineImage {
 }
 impl std::fmt::Debug for MdInlineImage {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdInlineImage")
-            .field("alt", &support::DebugSyntaxResult(self.alt()))
-            .field("src", &support::DebugSyntaxResult(self.src()))
-            .field("title", &support::DebugOptionalElement(self.title()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdInlineImage")
+                .field("alt", &support::DebugSyntaxResult(self.alt()))
+                .field("src", &support::DebugSyntaxResult(self.src()))
+                .field("title", &support::DebugOptionalElement(self.title()))
+                .finish()
+        } else {
+            f.debug_struct("MdInlineImage").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdInlineImage> for SyntaxNode {
@@ -1481,11 +1589,20 @@ impl AstNode for MdInlineLink {
 }
 impl std::fmt::Debug for MdInlineLink {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdInlineLink")
-            .field("label", &support::DebugSyntaxResult(self.label()))
-            .field("url", &support::DebugSyntaxResult(self.url()))
-            .field("title", &support::DebugOptionalElement(self.title()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdInlineLink")
+                .field("label", &support::DebugSyntaxResult(self.label()))
+                .field("url", &support::DebugSyntaxResult(self.url()))
+                .field("title", &support::DebugOptionalElement(self.title()))
+                .finish()
+        } else {
+            f.debug_struct("MdInlineLink").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdInlineLink> for SyntaxNode {
@@ -1521,11 +1638,20 @@ impl AstNode for MdLinkBlock {
 }
 impl std::fmt::Debug for MdLinkBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdLinkBlock")
-            .field("label", &support::DebugSyntaxResult(self.label()))
-            .field("url", &support::DebugSyntaxResult(self.url()))
-            .field("title", &support::DebugOptionalElement(self.title()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdLinkBlock")
+                .field("label", &support::DebugSyntaxResult(self.label()))
+                .field("url", &support::DebugSyntaxResult(self.url()))
+                .field("title", &support::DebugOptionalElement(self.title()))
+                .finish()
+        } else {
+            f.debug_struct("MdLinkBlock").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdLinkBlock> for SyntaxNode {
@@ -1561,9 +1687,18 @@ impl AstNode for MdOrderListItem {
 }
 impl std::fmt::Debug for MdOrderListItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdOrderListItem")
-            .field("md_bullet_list", &self.md_bullet_list())
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdOrderListItem")
+                .field("md_bullet_list", &self.md_bullet_list())
+                .finish()
+        } else {
+            f.debug_struct("MdOrderListItem").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdOrderListItem> for SyntaxNode {
@@ -1599,9 +1734,18 @@ impl AstNode for MdParagraph {
 }
 impl std::fmt::Debug for MdParagraph {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdParagraph")
-            .field("md_paragraph_item_list", &self.md_paragraph_item_list())
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdParagraph")
+                .field("md_paragraph_item_list", &self.md_paragraph_item_list())
+                .finish()
+        } else {
+            f.debug_struct("MdParagraph").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdParagraph> for SyntaxNode {
@@ -1637,12 +1781,21 @@ impl AstNode for MdQuote {
 }
 impl std::fmt::Debug for MdQuote {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdQuote")
-            .field(
-                "any_md_block",
-                &support::DebugSyntaxResult(self.any_md_block()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdQuote")
+                .field(
+                    "any_md_block",
+                    &support::DebugSyntaxResult(self.any_md_block()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdQuote").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdQuote> for SyntaxNode {
@@ -1678,12 +1831,21 @@ impl AstNode for MdSetextHeader {
 }
 impl std::fmt::Debug for MdSetextHeader {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdSetextHeader")
-            .field(
-                "md_paragraph",
-                &support::DebugSyntaxResult(self.md_paragraph()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdSetextHeader")
+                .field(
+                    "md_paragraph",
+                    &support::DebugSyntaxResult(self.md_paragraph()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdSetextHeader").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdSetextHeader> for SyntaxNode {
@@ -1719,12 +1881,21 @@ impl AstNode for MdSoftBreak {
 }
 impl std::fmt::Debug for MdSoftBreak {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdSoftBreak")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdSoftBreak")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdSoftBreak").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdSoftBreak> for SyntaxNode {
@@ -1760,12 +1931,21 @@ impl AstNode for MdTextual {
 }
 impl std::fmt::Debug for MdTextual {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdTextual")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdTextual")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdTextual").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdTextual> for SyntaxNode {
@@ -1801,12 +1981,21 @@ impl AstNode for MdThematicBreakBlock {
 }
 impl std::fmt::Debug for MdThematicBreakBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdThematicBreakBlock")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("MdThematicBreakBlock")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdThematicBreakBlock").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<MdThematicBreakBlock> for SyntaxNode {

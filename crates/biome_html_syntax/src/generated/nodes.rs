@@ -651,13 +651,22 @@ impl AstNode for HtmlAttribute {
 }
 impl std::fmt::Debug for HtmlAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlAttribute")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "initializer",
-                &support::DebugOptionalElement(self.initializer()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("HtmlAttribute")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlAttribute").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<HtmlAttribute> for SyntaxNode {
@@ -693,10 +702,19 @@ impl AstNode for HtmlAttributeInitializerClause {
 }
 impl std::fmt::Debug for HtmlAttributeInitializerClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlAttributeInitializerClause")
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("HtmlAttributeInitializerClause")
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("HtmlAttributeInitializerClause").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<HtmlAttributeInitializerClause> for SyntaxNode {
@@ -732,21 +750,30 @@ impl AstNode for HtmlClosingElement {
 }
 impl std::fmt::Debug for HtmlClosingElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlClosingElement")
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field(
-                "slash_token",
-                &support::DebugSyntaxResult(self.slash_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("HtmlClosingElement")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field(
+                    "slash_token",
+                    &support::DebugSyntaxResult(self.slash_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlClosingElement").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<HtmlClosingElement> for SyntaxNode {
@@ -782,20 +809,29 @@ impl AstNode for HtmlComment {
 }
 impl std::fmt::Debug for HtmlComment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlComment")
-            .field(
-                "comment_start_token",
-                &support::DebugSyntaxResult(self.comment_start_token()),
-            )
-            .field(
-                "content_token",
-                &support::DebugSyntaxResult(self.content_token()),
-            )
-            .field(
-                "comment_end_token",
-                &support::DebugSyntaxResult(self.comment_end_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("HtmlComment")
+                .field(
+                    "comment_start_token",
+                    &support::DebugSyntaxResult(self.comment_start_token()),
+                )
+                .field(
+                    "content_token",
+                    &support::DebugSyntaxResult(self.content_token()),
+                )
+                .field(
+                    "comment_end_token",
+                    &support::DebugSyntaxResult(self.comment_end_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlComment").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<HtmlComment> for SyntaxNode {
@@ -831,12 +867,21 @@ impl AstNode for HtmlContent {
 }
 impl std::fmt::Debug for HtmlContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlContent")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("HtmlContent")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlContent").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<HtmlContent> for SyntaxNode {
@@ -872,37 +917,46 @@ impl AstNode for HtmlDirective {
 }
 impl std::fmt::Debug for HtmlDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlDirective")
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
-            .field(
-                "doctype_token",
-                &support::DebugSyntaxResult(self.doctype_token()),
-            )
-            .field(
-                "html_token",
-                &support::DebugOptionalElement(self.html_token()),
-            )
-            .field(
-                "quirk_token",
-                &support::DebugOptionalElement(self.quirk_token()),
-            )
-            .field(
-                "public_id_token",
-                &support::DebugOptionalElement(self.public_id_token()),
-            )
-            .field(
-                "system_id_token",
-                &support::DebugOptionalElement(self.system_id_token()),
-            )
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("HtmlDirective")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
+                .field(
+                    "doctype_token",
+                    &support::DebugSyntaxResult(self.doctype_token()),
+                )
+                .field(
+                    "html_token",
+                    &support::DebugOptionalElement(self.html_token()),
+                )
+                .field(
+                    "quirk_token",
+                    &support::DebugOptionalElement(self.quirk_token()),
+                )
+                .field(
+                    "public_id_token",
+                    &support::DebugOptionalElement(self.public_id_token()),
+                )
+                .field(
+                    "system_id_token",
+                    &support::DebugOptionalElement(self.system_id_token()),
+                )
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlDirective").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<HtmlDirective> for SyntaxNode {
@@ -938,17 +992,26 @@ impl AstNode for HtmlElement {
 }
 impl std::fmt::Debug for HtmlElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlElement")
-            .field(
-                "opening_element",
-                &support::DebugSyntaxResult(self.opening_element()),
-            )
-            .field("children", &self.children())
-            .field(
-                "closing_element",
-                &support::DebugSyntaxResult(self.closing_element()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("HtmlElement")
+                .field(
+                    "opening_element",
+                    &support::DebugSyntaxResult(self.opening_element()),
+                )
+                .field("children", &self.children())
+                .field(
+                    "closing_element",
+                    &support::DebugSyntaxResult(self.closing_element()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlElement").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<HtmlElement> for SyntaxNode {
@@ -984,12 +1047,21 @@ impl AstNode for HtmlName {
 }
 impl std::fmt::Debug for HtmlName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlName")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("HtmlName")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlName").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<HtmlName> for SyntaxNode {
@@ -1025,18 +1097,27 @@ impl AstNode for HtmlOpeningElement {
 }
 impl std::fmt::Debug for HtmlOpeningElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlOpeningElement")
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("attributes", &self.attributes())
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("HtmlOpeningElement")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("attributes", &self.attributes())
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlOpeningElement").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<HtmlOpeningElement> for SyntaxNode {
@@ -1072,18 +1153,27 @@ impl AstNode for HtmlRoot {
 }
 impl std::fmt::Debug for HtmlRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlRoot")
-            .field(
-                "bom_token",
-                &support::DebugOptionalElement(self.bom_token()),
-            )
-            .field(
-                "directive",
-                &support::DebugOptionalElement(self.directive()),
-            )
-            .field("html", &self.html())
-            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("HtmlRoot")
+                .field(
+                    "bom_token",
+                    &support::DebugOptionalElement(self.bom_token()),
+                )
+                .field(
+                    "directive",
+                    &support::DebugOptionalElement(self.directive()),
+                )
+                .field("html", &self.html())
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("HtmlRoot").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<HtmlRoot> for SyntaxNode {
@@ -1119,22 +1209,31 @@ impl AstNode for HtmlSelfClosingElement {
 }
 impl std::fmt::Debug for HtmlSelfClosingElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlSelfClosingElement")
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("attributes", &self.attributes())
-            .field(
-                "slash_token",
-                &support::DebugOptionalElement(self.slash_token()),
-            )
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("HtmlSelfClosingElement")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("attributes", &self.attributes())
+                .field(
+                    "slash_token",
+                    &support::DebugOptionalElement(self.slash_token()),
+                )
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlSelfClosingElement").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<HtmlSelfClosingElement> for SyntaxNode {
@@ -1170,12 +1269,21 @@ impl AstNode for HtmlString {
 }
 impl std::fmt::Debug for HtmlString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HtmlString")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("HtmlString")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("HtmlString").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<HtmlString> for SyntaxNode {
