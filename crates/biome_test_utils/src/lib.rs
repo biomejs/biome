@@ -42,6 +42,7 @@ pub fn create_analyzer_options(
         rules: AnalyzerRules::default(),
         globals: vec![],
         preferred_quote: PreferredQuote::Double,
+        preferred_jsx_quote: Some(PreferredQuote::Double),
         jsx_runtime: Some(JsxRuntime::Transparent),
     };
     let options_file = input_file.with_extension("options.json");

@@ -147,6 +147,7 @@ impl ServiceLanguage for CssLanguage {
                 .unwrap_or_default(),
             globals: Vec::new(),
             preferred_quote,
+            preferred_jsx_quote: None,
             jsx_runtime: None,
         };
 

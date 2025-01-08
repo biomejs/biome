@@ -210,6 +210,18 @@ impl ServiceLanguage for JsLanguage {
                     )
                 })
                 .unwrap_or_default();
+        let preferred_jsx_quote =
+            global.and_then(|global| {
+                global.languages.javascript.formatter.jsx_quote_style.map(
+                    |quote_style: QuoteStyle| {
+                        if quote_style == QuoteStyle::Single {
+                            PreferredQuote::Single
+                        } else {
+                            PreferredQuote::Double
+                        }
+                    },
+                )
+            });
 
         let mut jsx_runtime = None;
         let mut globals = Vec::new();
@@ -276,6 +288,7 @@ impl ServiceLanguage for JsLanguage {
                 .unwrap_or_default(),
             globals,
             preferred_quote,
+            preferred_jsx_quote,
             jsx_runtime,
         };
 
