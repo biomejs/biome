@@ -15,6 +15,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### New features
+
+- The analyzer now infers the correct JSX quote style from `javascript.formatter.jsxQuoteStyle`, so code fixes will use the same quote style as the formatter. Contributed by @lucasweng
+
 #### Bug fixes
 
 - Fix CSS parser case error, `@-moz-document url-prefix(https://example.com)` and `@-moz-document domain(example.com)` are now valid. Contributed by @eryue0220
@@ -351,6 +355,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - [noLabelWithoutControl](https://biomejs.dev/linter/rules/no-label-without-control/) detects button tags as input ([#4511])(https://github.com/biomejs/biome/issues/4511). Contributed by @unvalley
 
 - [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) now handles `JsxAttributeInitializerClause`, ensuring that fragments inside expressions like `<A b=<></> />` are preserved. ([#4208](https://github.com/biomejs/biome/issues/4208)). Contributed by @MaxtuneLee
+
+- [useSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes/) now suggests code fixes that match the JSX quote style of the formatter ([#4855](https://github.com/biomejs/biome/issues/4855)). Contributed by @lucasweng
 
 ### Parser
 
