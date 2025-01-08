@@ -132,6 +132,7 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_suppression",
+ "camino",
  "enumflags2",
  "indexmap",
  "rustc-hash 2.1.0",
@@ -799,6 +800,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_package",
  "biome_plugin_loader",
+ "biome_project_layout",
  "biome_rowan",
  "biome_string_case",
  "biome_suppression",
@@ -1178,6 +1180,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_project_layout"
+version = "0.0.1"
+dependencies = [
+ "biome_package",
+ "biome_parser",
+ "camino",
+ "papaya",
+ "rustc-hash 2.1.0",
+]
+
+[[package]]
 name = "biome_rowan"
 version = "0.5.7"
 dependencies = [
@@ -1234,6 +1247,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_package",
  "biome_parser",
+ "biome_project_layout",
  "biome_rowan",
  "biome_string_case",
  "biome_text_edit",
@@ -1291,6 +1305,7 @@ dependencies = [
  "biome_formatter",
  "biome_json_parser",
  "biome_package",
+ "biome_project_layout",
  "biome_rowan",
  "biome_service",
  "camino",

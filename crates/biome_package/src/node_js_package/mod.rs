@@ -37,11 +37,11 @@ pub(crate) type ProjectLanguageRoot<M> = <<M as Manifest>::Language as Language>
 impl Package for NodeJsPackage {
     type Manifest = PackageJson;
 
-    fn deserialize_manifest(&mut self, content: &ProjectLanguageRoot<Self::Manifest>) {
-        let manifest = Self::Manifest::deserialize_manifest(content);
-        let (package, deserialize_diagnostics) = manifest.consume();
-        self.manifest = package.unwrap_or_default();
-        self.diagnostics = deserialize_diagnostics
+    fn insert_serialized_manifest(&mut self, content: &ProjectLanguageRoot<Self::Manifest>) {
+        let deserialized = Self::Manifest::deserialize_manifest(content);
+        let (manifest, diagnostics) = deserialized.consume();
+        self.manifest = manifest.unwrap_or_default();
+        self.diagnostics = diagnostics
             .into_iter()
             .map(biome_diagnostics::serde::Diagnostic::new)
             .collect();

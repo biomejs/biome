@@ -11,8 +11,8 @@ use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use biome_test_utils::{
     assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, load_manifest, parse_test_path, register_leak_checker,
-    scripts_from_json, write_analyzer_snapshot, CheckActionType,
+    has_bogus_nodes_or_empty_slots, parse_test_path, project_layout_with_node_manifest,
+    register_leak_checker, scripts_from_json, write_analyzer_snapshot, CheckActionType,
 };
 use camino::Utf8Path;
 use std::ops::Deref;
@@ -113,9 +113,9 @@ pub(crate) fn analyze_and_snap(
 ) -> usize {
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
-    let manifest = load_manifest(input_file, &mut diagnostics);
+    let project_layout = project_layout_with_node_manifest(input_file, &mut diagnostics);
 
-    if let Some(manifest) = &manifest {
+    if let Some((_, manifest)) = project_layout.get_node_manifest_for_path(input_file) {
         if manifest.r#type == Some(PackageType::Commonjs) &&
             // At the moment we treat JS and JSX at the same way
             (source_type.file_extension() == "js" || source_type.file_extension() == "jsx" )
@@ -123,6 +123,7 @@ pub(crate) fn analyze_and_snap(
             source_type.set_module_kind(ModuleKind::Script)
         }
     }
+
     let parsed = parse(input_code, source_type, parser_options.clone());
     let root = parsed.tree();
 
@@ -134,7 +135,7 @@ pub(crate) fn analyze_and_snap(
         &options,
         plugins,
         source_type,
-        manifest.as_ref(),
+        project_layout,
         |event| {
             if let Some(mut diag) = event.diagnostic() {
                 for action in event.actions() {

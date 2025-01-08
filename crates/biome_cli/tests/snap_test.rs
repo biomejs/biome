@@ -12,6 +12,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use regex::Regex;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
+use std::convert::identity;
 use std::env::{current_exe, temp_dir};
 use std::fmt::Write as _;
 use std::path::MAIN_SEPARATOR;
@@ -405,6 +406,17 @@ impl<'a> SnapshotPayload<'a> {
 
 /// Function used to snapshot a session test of the a CLI run.
 pub fn assert_cli_snapshot(payload: SnapshotPayload<'_>) {
+    assert_cli_snapshot_with_redactor(payload, identity)
+}
+
+/// Used to snapshot a session test of the a CLI run.
+///
+/// Takes a custom `redactor` that allows the snapshotted content to be
+/// normalized so it remains stable across test runs.
+pub fn assert_cli_snapshot_with_redactor(
+    payload: SnapshotPayload<'_>,
+    redactor: impl FnOnce(String) -> String,
+) {
     let module_path = payload.module_path.to_owned();
     let test_name = payload.test_name;
     let cli_snapshot = CliSnapshot::from(payload);
@@ -416,9 +428,9 @@ pub fn assert_cli_snapshot(payload: SnapshotPayload<'_>) {
 
     insta::with_settings!({
         prepend_module_to_snapshot => false,
-        snapshot_path => snapshot_path
+        snapshot_path => snapshot_path,
     }, {
-        insta::assert_snapshot!(test_name, content);
+        insta::assert_snapshot!(test_name, redactor(content));
 
     });
 }

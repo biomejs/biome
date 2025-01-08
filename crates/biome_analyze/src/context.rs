@@ -2,8 +2,8 @@ use crate::options::{JsxRuntime, PreferredQuote};
 use crate::{registry::RuleRoot, FromServices, Queryable, Rule, RuleKey, ServiceBag};
 use crate::{GroupCategory, RuleCategory, RuleGroup, RuleMetadata};
 use biome_diagnostics::{Error, Result};
+use camino::Utf8Path;
 use std::ops::Deref;
-use std::path::Path;
 
 type RuleQueryResult<R> = <<R as Rule>::Query as Queryable>::Output;
 type RuleServiceBag<R> = <<R as Rule>::Query as Queryable>::Services;
@@ -14,7 +14,7 @@ pub struct RuleContext<'a, R: Rule> {
     bag: &'a ServiceBag,
     services: RuleServiceBag<R>,
     globals: &'a [&'a str],
-    file_path: &'a Path,
+    file_path: &'a Utf8Path,
     options: &'a R::Options,
     preferred_quote: &'a PreferredQuote,
     jsx_runtime: Option<JsxRuntime>,
@@ -30,7 +30,7 @@ where
         root: &'a RuleRoot<R>,
         services: &'a ServiceBag,
         globals: &'a [&'a str],
-        file_path: &'a Path,
+        file_path: &'a Utf8Path,
         options: &'a R::Options,
         preferred_quote: &'a PreferredQuote,
         jsx_runtime: Option<JsxRuntime>,
@@ -159,7 +159,7 @@ where
     }
 
     /// The file path of the current file
-    pub fn file_path(&self) -> &Path {
+    pub fn file_path(&self) -> &Utf8Path {
         self.file_path
     }
 

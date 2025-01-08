@@ -185,7 +185,7 @@ impl<'app> TraversalContext for ScanContext<'app> {
     }
 
     fn can_handle(&self, path: &BiomePath) -> bool {
-        DocumentFileSource::try_from_path(path).is_ok()
+        path.is_dir() || DocumentFileSource::try_from_path(path).is_ok()
     }
 
     fn handle_path(&self, path: BiomePath) {

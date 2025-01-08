@@ -52,6 +52,9 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "correctness": {
+        "noUndeclaredDependencies": "error"
+      },
       "style": {
         "noNonNullAssertion": "off",
         "useNodejsImportProtocol": "error"

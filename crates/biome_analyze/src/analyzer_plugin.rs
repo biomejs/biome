@@ -1,10 +1,11 @@
 use crate::RuleDiagnostic;
 use biome_parser::AnyParse;
-use std::{fmt::Debug, path::PathBuf};
+use camino::Utf8PathBuf;
+use std::fmt::Debug;
 
 /// Definition of an analyzer plugin.
 pub trait AnalyzerPlugin: Debug {
-    fn evaluate(&self, root: AnyParse, path: PathBuf) -> Vec<RuleDiagnostic>;
+    fn evaluate(&self, root: AnyParse, path: Utf8PathBuf) -> Vec<RuleDiagnostic>;
 
     fn supports_css(&self) -> bool;
 

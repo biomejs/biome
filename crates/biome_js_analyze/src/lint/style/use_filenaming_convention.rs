@@ -156,7 +156,7 @@ impl Rule for UseFilenamingConvention {
     type Options = Box<FilenamingConventionOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let file_name = ctx.file_path().file_name()?.to_str()?;
+        let file_name = ctx.file_path().file_name()?;
         let options = ctx.options();
         if options.require_ascii && !file_name.is_ascii() {
             return Some(FileNamingConventionState::Ascii);
@@ -273,7 +273,7 @@ impl Rule for UseFilenamingConvention {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let file_name = ctx.file_path().file_name()?.to_str()?;
+        let file_name = ctx.file_path().file_name()?;
         let options = ctx.options();
         match state {
             FileNamingConventionState::Ascii => {

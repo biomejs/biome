@@ -314,7 +314,7 @@ fn new_file_owner(
 /// that can use the Biome workspace.
 #[derive(Clone, Debug)]
 pub struct GritTargetFile {
-    pub path: PathBuf,
+    pub path: Utf8PathBuf,
     pub parse: AnyParse,
 }
 
@@ -323,9 +323,6 @@ impl GritTargetFile {
         let parser = target_language.get_parser();
         let parse = parser.parse_with_path(source, &path);
 
-        Self {
-            parse,
-            path: path.into(),
-        }
+        Self { parse, path }
     }
 }

@@ -348,7 +348,7 @@ fn lint(params: LintParams) -> LintResults {
             .with_skip(&params.skip)
             .with_path(params.path.as_path())
             .with_enabled_rules(&params.enabled_rules)
-            .with_manifest(params.manifest.as_ref())
+            .with_project_layout(params.project_layout.clone())
             .finish();
 
     let filter = AnalysisFilter {
@@ -390,7 +390,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         workspace,
         path,
-        manifest,
+        project_layout,
         language,
         skip,
         only,
@@ -412,7 +412,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .with_skip(&skip)
             .with_path(path.as_path())
             .with_enabled_rules(&rules)
-            .with_manifest(manifest.as_ref())
+            .with_project_layout(project_layout)
             .finish();
 
     let filter = AnalysisFilter {
@@ -474,7 +474,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
             .with_skip(&params.skip)
             .with_path(params.biome_path.as_path())
             .with_enabled_rules(&params.enabled_rules)
-            .with_manifest(params.manifest.as_ref())
+            .with_project_layout(params.project_layout)
             .finish();
 
     let filter = AnalysisFilter {

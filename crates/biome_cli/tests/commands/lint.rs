@@ -5,7 +5,9 @@ use crate::configs::{
     CONFIG_LINTER_SUPPRESSED_GROUP, CONFIG_LINTER_SUPPRESSED_RULE,
     CONFIG_LINTER_UPGRADE_DIAGNOSTIC, CONFIG_RECOMMENDED_GROUP,
 };
-use crate::snap_test::{assert_file_contents, markup_to_string, SnapshotPayload};
+use crate::snap_test::{
+    assert_cli_snapshot_with_redactor, assert_file_contents, markup_to_string, SnapshotPayload,
+};
 use crate::{
     assert_cli_snapshot, run_cli, run_cli_with_dyn_fs, run_cli_with_server_workspace, FORMATTED,
     LINT_ERROR, PARSE_ERROR,
@@ -3879,13 +3881,16 @@ fn linter_finds_package_json_for_no_undeclared_dependencies() {
         &mut console,
         Args::from(["lint", file.as_str()].as_slice()),
     );
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "linter_finds_package_json_for_no_undeclared_dependencies",
-        fs,
-        console,
-        result,
-    ));
+    assert_cli_snapshot_with_redactor(
+        SnapshotPayload::new(
+            module_path!(),
+            "linter_finds_package_json_for_no_undeclared_dependencies",
+            fs,
+            console,
+            result,
+        ),
+        |content| content.replace("frontend\\", "frontend/"),
+    );
 }
 
 #[test]
@@ -3934,13 +3939,16 @@ fn linter_finds_nested_package_json_for_no_undeclared_dependencies() {
         &mut console,
         Args::from(["lint", file.as_str()].as_slice()),
     );
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "linter_finds_nested_package_json_for_no_undeclared_dependencies",
-        fs,
-        console,
-        result,
-    ));
+    assert_cli_snapshot_with_redactor(
+        SnapshotPayload::new(
+            module_path!(),
+            "linter_finds_nested_package_json_for_no_undeclared_dependencies",
+            fs,
+            console,
+            result,
+        ),
+        |content| content.replace("frontend\\", "frontend/"),
+    );
 }
 
 #[test]

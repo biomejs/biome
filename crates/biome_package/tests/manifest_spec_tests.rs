@@ -24,7 +24,7 @@ fn run_invalid_manifests(input: &'static str, _: &str, _: &str, _: &str) {
     match input_file.extension().map(OsStr::as_encoded_bytes) {
         Some(b"json") => {
             let parsed = parse_json(input_code.as_str(), JsonParserOptions::default());
-            package.deserialize_manifest(&parsed.tree());
+            package.insert_serialized_manifest(&parsed.tree());
         }
         _ => {
             panic!("Extension not supported");
