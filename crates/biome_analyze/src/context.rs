@@ -17,7 +17,7 @@ pub struct RuleContext<'a, R: Rule> {
     file_path: &'a Path,
     options: &'a R::Options,
     preferred_quote: &'a PreferredQuote,
-    preferred_jsx_quote: Option<&'a PreferredQuote>,
+    preferred_jsx_quote: &'a PreferredQuote,
     jsx_runtime: Option<JsxRuntime>,
 }
 
@@ -34,7 +34,7 @@ where
         file_path: &'a Path,
         options: &'a R::Options,
         preferred_quote: &'a PreferredQuote,
-        preferred_jsx_quote: Option<&'a PreferredQuote>,
+        preferred_jsx_quote: &'a PreferredQuote,
         jsx_runtime: Option<JsxRuntime>,
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
@@ -174,7 +174,6 @@ where
     /// Returns the preferred JSX quote that should be used when providing code actions
     pub fn as_preferred_jsx_quote(&self) -> &PreferredQuote {
         self.preferred_jsx_quote
-            .expect("preferred_jsx_quote should be provided")
     }
 
     /// Attempts to retrieve a service from the current context

@@ -15,10 +15,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
-#### New features
-
-- The analyzer now infers the correct JSX quote style from `javascript.formatter.jsxQuoteStyle`, so code fixes will use the same quote style as the formatter. Contributed by @lucasweng
-
 #### Bug fixes
 
 - Fix CSS parser case error, `@-moz-document url-prefix(https://example.com)` and `@-moz-document domain(example.com)` are now valid. Contributed by @eryue0220
