@@ -114,7 +114,7 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
         loop {
             ElementList.parse_list(p);
             if let Some(mut closing) =
-                parse_closing_element(p).or_add_diagnostic(p, expected_closing_tag)
+                parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag)
             {
                 if !closing.text(p).contains(opening_tag_name.as_str()) {
                     p.error(expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p));
@@ -130,7 +130,7 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     }
 }
 
-fn parse_closing_element(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![<]) || !p.nth_at(1, T![/]) {
         return Absent;
     }
@@ -271,7 +271,9 @@ fn parse_comment(p: &mut HtmlParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.bump_with_context(T![<!--], HtmlLexContext::Comment);
-    p.bump_with_context(HTML_LITERAL, HtmlLexContext::Comment);
+    while !p.at(T![-->]) && !p.at(EOF) {
+        p.bump_with_context(HTML_LITERAL, HtmlLexContext::Comment);
+    }
     p.expect(T![-->]);
     Present(m.complete(p, HTML_COMMENT))
 }

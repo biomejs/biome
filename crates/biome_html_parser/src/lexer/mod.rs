@@ -60,8 +60,12 @@ impl<'src> HtmlLexer<'src> {
             b'=' => self.consume_byte(T![=]),
             b'!' => self.consume_byte(T![!]),
             b'\'' | b'"' => self.consume_string_literal(current),
-            // TODO: differentiate between attribute names and identifiers
-            _ if is_identifier_byte(current) || is_attribute_name_byte(current) => {
+            _ if self.current_kind == T![<] && is_tag_name_byte(current) => {
+                // tag names must immediately follow a `<`
+                // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
+                self.consume_tag_name(current)
+            }
+            _ if self.current_kind != T![<] && is_attribute_name_byte(current) => {
                 self.consume_identifier(current, false)
             }
             _ => {
@@ -104,7 +108,7 @@ impl<'src> HtmlLexer<'src> {
             b'>' => self.consume_byte(T![>]),
             b'!' => self.consume_byte(T![!]),
             b'\'' | b'"' => self.consume_string_literal(current),
-            _ if is_identifier_byte(current) || is_attribute_name_byte(current) => {
+            _ if is_tag_name_byte(current) || is_attribute_name_byte(current) => {
                 self.consume_identifier(current, true)
             }
             _ => self.consume_unexpected_character(),
@@ -193,7 +197,7 @@ impl<'src> HtmlLexer<'src> {
         self.advance_byte_or_char(first);
 
         while let Some(byte) = self.current_byte() {
-            if is_identifier_byte(byte) || is_attribute_name_byte(byte) {
+            if is_attribute_name_byte(byte) {
                 if len < BUFFER_SIZE {
                     buffer[len] = byte;
                     len += 1;
@@ -210,6 +214,32 @@ impl<'src> HtmlLexer<'src> {
             b"html" | b"HTML" if doctype_context => HTML_KW,
             _ => HTML_LITERAL,
         }
+    }
+
+    fn consume_tag_name(&mut self, first: u8) -> HtmlSyntaxKind {
+        self.assert_current_char_boundary();
+
+        const BUFFER_SIZE: usize = 14;
+        let mut buffer = [0u8; BUFFER_SIZE];
+        buffer[0] = first;
+        let mut len = 1;
+
+        self.advance_byte_or_char(first);
+
+        while let Some(byte) = self.current_byte() {
+            if is_tag_name_byte(byte) {
+                if len < BUFFER_SIZE {
+                    buffer[len] = byte;
+                    len += 1;
+                }
+
+                self.advance(1)
+            } else {
+                break;
+            }
+        }
+
+        HTML_LITERAL
     }
 
     fn consume_string_literal(&mut self, quote: u8) -> HtmlSyntaxKind {
@@ -554,8 +584,9 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
     }
 }
 
-fn is_identifier_byte(byte: u8) -> bool {
+fn is_tag_name_byte(byte: u8) -> bool {
     // https://html.spec.whatwg.org/#elements-2
+    // https://html.spec.whatwg.org/multipage/syntax.html#syntax-tag-name
     byte.is_ascii_alphanumeric()
 }
 
