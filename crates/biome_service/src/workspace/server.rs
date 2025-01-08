@@ -30,7 +30,7 @@ use biome_diagnostics::{
     serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
 };
 use biome_formatter::Printed;
-use biome_fs::{BiomePath, ConfigName, FileSystem, PathInternerSet};
+use biome_fs::{BiomePath, ConfigName, FileSystem};
 use biome_grit_patterns::{compile_pattern_with_options, CompilePatternOptions, GritQuery};
 use biome_js_syntax::ModuleKind;
 use biome_json_parser::JsonParserOptions;
@@ -286,18 +286,9 @@ impl WorkspaceServer {
     ) -> Result<(), WorkspaceError> {
         let path: Utf8PathBuf = path.into();
         let mut source = document_file_source.unwrap_or(DocumentFileSource::from_path(&path));
-        let manifest = if opened_by_scanner {
-            // FIXME: It doesn't make sense to retrieve the manifest when the
-            //        file is opened by the scanner, because it means the
-            //        project layout isn't yet initialized anyway. But that
-            //        highlights an issue with the CommonJS check below, since
-            //        we can't seem to set this correctly now.
-            None
-        } else {
-            self.project_layout.get_node_manifest_for_path(&path)
-        };
 
         if let DocumentFileSource::Js(js) = &mut source {
+            let manifest = self.project_layout.get_node_manifest_for_path(&path);
             if let Some((_, manifest)) = manifest {
                 if manifest.r#type == Some(PackageType::Commonjs) && js.file_extension() == "js" {
                     js.set_module_kind(ModuleKind::Script);
@@ -507,8 +498,8 @@ impl WorkspaceServer {
             })
     }
 
-    fn update_project_layout_for_paths(&self, paths: PathInternerSet) {
-        for path in paths.pin().iter() {
+    pub(super) fn update_project_layout_for_paths(&self, paths: &[BiomePath]) {
+        for path in paths {
             if let Err(error) = self.update_project_layout_for_path(path) {
                 warn!("Error while updating project layout: {error}");
             }
@@ -667,8 +658,6 @@ impl Workspace for WorkspaceServer {
         //       probably want to force a poll at this moment.
 
         let result = scan(self, params.project_key, &path)?;
-
-        self.update_project_layout_for_paths(result.paths);
 
         Ok(ScanProjectFolderResult {
             diagnostics: result.diagnostics,
@@ -1153,3 +1142,7 @@ fn make_search_pattern_id() -> PatternId {
     let counter = COUNTER.fetch_add(1, Ordering::AcqRel);
     format!("p{counter}").into()
 }
+
+#[cfg(test)]
+#[path = "server.tests.rs"]
+mod tests;
