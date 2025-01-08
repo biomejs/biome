@@ -1050,7 +1050,6 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&path))?;
         let parse = self.get_parse(&path)?;
 
-        let manifest = self.get_node_manifest_for_path(&path)?;
         let settings = self
             .projects
             .get_settings(project_key)

@@ -150,7 +150,7 @@ export interface FilesConfiguration {
 	/**
 	 * The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB
 	 */
-	maxSize?: MaxLimit;
+	maxSize?: MaxSize;
 }
 /**
  * Generic options applied to all files
@@ -419,7 +419,7 @@ export interface CssParserConfiguration {
 	 */
 	cssModules?: Bool;
 }
-export type MaxLimit = number;
+export type MaxSize = number;
 export type AttributePosition = "auto" | "multiline";
 /**
  * Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).

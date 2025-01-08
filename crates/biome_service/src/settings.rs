@@ -8,7 +8,7 @@ use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::html::HtmlConfiguration;
 use biome_configuration::javascript::JsxRuntime;
-use biome_configuration::max_size::MazSize;
+use biome_configuration::max_size::MaxSize;
 use biome_configuration::{
     push_to_analyzer_assist, push_to_analyzer_rules, BiomeDiagnostic, Configuration,
     CssConfiguration, FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration,
@@ -579,7 +579,7 @@ pub struct LanguageSettings<L: ServiceLanguage> {
 #[derive(Clone, Default, Debug)]
 pub struct FilesSettings {
     /// File size limit in bytes
-    pub max_size: Option<MazSize>,
+    pub max_size: Option<MaxSize>,
 
     /// gitignore file patterns
     pub git_ignore: Option<Gitignore>,
