@@ -346,6 +346,7 @@ where
     fn diagnostic(&self) -> Option<AnalyzerDiagnostic> {
         let globals = self.options.globals();
         let preferred_quote = self.options.preferred_quote();
+        let preferred_jsx_quote = self.options.preferred_jsx_quote();
         let options = self.options.rule_options::<R>().unwrap_or_default();
         let ctx = RuleContext::new(
             &self.query_result,
@@ -355,6 +356,7 @@ where
             &self.options.file_path,
             &options,
             preferred_quote,
+            preferred_jsx_quote,
             self.options.jsx_runtime(),
         )
         .ok()?;
@@ -386,6 +388,7 @@ where
             &self.options.file_path,
             &options,
             self.options.preferred_quote(),
+            self.options.preferred_jsx_quote(),
             self.options.jsx_runtime(),
         )
         .ok();
@@ -435,6 +438,7 @@ where
             &self.options.file_path,
             &options,
             self.options.preferred_quote(),
+            self.options.preferred_jsx_quote(),
             self.options.jsx_runtime(),
         )
         .ok();

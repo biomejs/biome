@@ -352,6 +352,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) now handles `JsxAttributeInitializerClause`, ensuring that fragments inside expressions like `<A b=<></> />` are preserved. ([#4208](https://github.com/biomejs/biome/issues/4208)). Contributed by @MaxtuneLee
 
+- [useSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes/) now suggests code fixes that match the JSX quote style of the formatter ([#4855](https://github.com/biomejs/biome/issues/4855)). Contributed by @lucasweng
+
 ### Parser
 
 #### Bug fixes
