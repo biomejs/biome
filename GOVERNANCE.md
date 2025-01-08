@@ -236,11 +236,11 @@ conditions:
 
 - Core Contributors that are open to contracts may be advertised on the project website if they
   please.
-- Clients that hire a Core Contributor for an extended period (3 months or more) are eligible to
-  the same benefits as a project sponsor. Their sponsorship benefits will be based on the monthly
-  fee paid to the Core Contributor.
+- Clients that hire a Core Contributor to work on Biome for an extended period (3 months or more)
+  are eligible to the same benefits as a project sponsor. Their sponsorship benefits will be based
+  on the monthly fee paid to the Core Contributor.
 - If the work that is expected to be delivered does not contribute to Biome's last-published
-  roadmap, Biome asks for a 30% fee over the total net amount (excluding VAT) earned through the
+  roadmap, Biome asks for a 30% fee over the total gross amount, excluding VAT, earned through the
   contract. This is to cover review, project upkeep and continued maintenance of the functionality
   after merging.
   - For work that directly benefits the Biome roadmap, no such fee is required. For work that partly
