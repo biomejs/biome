@@ -83,14 +83,14 @@ impl Rule for NoHeadImportInDocument {
             return None;
         }
 
-        let file_name = path.file_stem()?.to_str()?;
+        let file_name = path.file_stem()?;
 
         // pages/_document.(jsx|tsx)
         if file_name == "_document" {
             return Some(());
         }
 
-        let parent_name = path.parent()?.file_stem()?.to_str()?;
+        let parent_name = path.parent()?.file_stem()?;
 
         // pages/_document/index.(jsx|tsx)
         if parent_name == "_document" && file_name == "index" {
@@ -101,7 +101,7 @@ impl Rule for NoHeadImportInDocument {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let path = ctx.file_path().to_str()?.split("pages").nth(1)?;
+        let path = ctx.file_path().as_str().split("pages").nth(1)?;
         let path = if cfg!(debug_assertions) {
             path.replace(MAIN_SEPARATOR, "/")
         } else {

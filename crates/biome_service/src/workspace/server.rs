@@ -14,7 +14,6 @@ use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
 use crate::is_dir;
-use crate::project_layout::ProjectLayout;
 use crate::projects::Projects;
 use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{
@@ -36,15 +35,16 @@ use biome_grit_patterns::{compile_pattern_with_options, CompilePatternOptions, G
 use biome_js_syntax::ModuleKind;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
-use biome_package::{PackageJson, PackageType};
+use biome_package::PackageType;
 use biome_parser::AnyParse;
+use biome_project_layout::ProjectLayout;
 use biome_rowan::NodeCache;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use tracing::{debug, info, info_span, warn};
 
 pub(super) struct WorkspaceServer {
@@ -56,7 +56,7 @@ pub(super) struct WorkspaceServer {
     projects: Projects,
 
     /// The layout of projects and their internal packages.
-    project_layout: ProjectLayout,
+    project_layout: Arc<ProjectLayout>,
 
     /// Stores the document (text content + version number) associated with a URL
     documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
@@ -239,20 +239,6 @@ impl WorkspaceServer {
         }
     }
 
-    /// Returns the parsed `package.json` for a given path.
-    ///
-    /// ## Errors
-    ///
-    /// - If no document is found in the workspace. Usually, you'll have to call
-    ///   [WorkspaceServer::set_manifest_for_project] to store said document.
-    #[tracing::instrument(level = "trace", skip(self))]
-    fn get_node_manifest_for_path(
-        &self,
-        path: &Utf8Path,
-    ) -> Result<Option<PackageJson>, WorkspaceError> {
-        Ok(self.project_layout.get_node_manifest_for_path(path))
-    }
-
     /// Returns a previously inserted file source by index.
     ///
     /// File sources can be inserted using `insert_source()`.
@@ -300,10 +286,19 @@ impl WorkspaceServer {
     ) -> Result<(), WorkspaceError> {
         let path: Utf8PathBuf = path.into();
         let mut source = document_file_source.unwrap_or(DocumentFileSource::from_path(&path));
-        let manifest = self.get_node_manifest_for_path(&path)?;
+        let manifest = if opened_by_scanner {
+            // FIXME: It doesn't make sense to retrieve the manifest when the
+            //        file is opened by the scanner, because it means the
+            //        project layout isn't yet initialized anyway. But that
+            //        highlights an issue with the CommonJS check below, since
+            //        we can't seem to set this correctly now.
+            None
+        } else {
+            self.project_layout.get_node_manifest_for_path(&path)
+        };
 
         if let DocumentFileSource::Js(js) = &mut source {
-            if let Some(manifest) = manifest {
+            if let Some((_, manifest)) = manifest {
                 if manifest.r#type == Some(PackageType::Commonjs) && js.file_extension() == "js" {
                     js.set_module_kind(ModuleKind::Script);
                 }
@@ -531,7 +526,7 @@ impl WorkspaceServer {
                 .ok_or_else(WorkspaceError::not_found)?;
             let parsed = self.get_parse(path)?;
             self.project_layout
-                .insert_node_manifest(package_path, parsed);
+                .insert_serialized_node_manifest(package_path, parsed);
         }
 
         Ok(())
@@ -863,7 +858,6 @@ impl Workspace for WorkspaceServer {
         }: PullDiagnosticsParams,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         let parse = self.get_parse(&path)?;
-        let manifest = self.get_node_manifest_for_path(&path)?;
         let (diagnostics, errors, skipped_diagnostics) =
             if let Some(lint) = self.get_file_capabilities(&path).analyzer.lint {
                 let settings = self
@@ -880,7 +874,7 @@ impl Workspace for WorkspaceServer {
                         skip,
                         language: self.get_file_source(&path),
                         categories,
-                        manifest,
+                        project_layout: self.project_layout.clone(),
                         suppression_reason: None,
                         enabled_rules,
                     });
@@ -937,7 +931,6 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&path))?;
 
         let parse = self.get_parse(&path)?;
-        let manifest = self.get_node_manifest_for_path(&path)?;
         let language = self.get_file_source(&path);
         let settings = self
             .projects
@@ -948,7 +941,7 @@ impl Workspace for WorkspaceServer {
             range,
             workspace: &settings.into(),
             path: &path,
-            manifest,
+            project_layout: self.project_layout.clone(),
             language,
             only,
             skip,
@@ -1069,7 +1062,7 @@ impl Workspace for WorkspaceServer {
             workspace: settings.into(),
             should_format,
             biome_path: &path,
-            manifest,
+            project_layout: self.project_layout.clone(),
             document_file_source: language,
             only,
             skip,

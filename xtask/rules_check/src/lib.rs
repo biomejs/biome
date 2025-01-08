@@ -432,7 +432,7 @@ fn assert_lint(
                     &options,
                     vec![],
                     file_source,
-                    None,
+                    Default::default(),
                     |signal| {
                         if let Some(mut diag) = signal.diagnostic() {
                             for action in signal.actions() {

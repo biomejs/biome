@@ -141,7 +141,7 @@ impl Rule for UseComponentExportOnlyModules {
     type Options = UseComponentExportOnlyModulesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if let Some(file_name) = ctx.file_path().file_name().and_then(|x| x.to_str()) {
+        if let Some(file_name) = ctx.file_path().file_name() {
             if !JSX_FILE_EXT.iter().any(|ext| file_name.ends_with(ext)) {
                 return Vec::new().into_boxed_slice();
             }

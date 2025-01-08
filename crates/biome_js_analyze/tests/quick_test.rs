@@ -4,8 +4,8 @@ use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::JsFileSource;
 use biome_test_utils::{
-    code_fix_to_string, create_analyzer_options, diagnostic_to_string, load_manifest,
-    parse_test_path, scripts_from_json,
+    code_fix_to_string, create_analyzer_options, diagnostic_to_string, parse_test_path,
+    project_layout_with_node_manifest, scripts_from_json,
 };
 use camino::Utf8Path;
 use std::ops::Deref;
@@ -71,7 +71,7 @@ fn analyze(
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
     let options = create_analyzer_options(input_file, &mut diagnostics);
-    let manifest = load_manifest(input_file, &mut diagnostics);
+    let project_layout = project_layout_with_node_manifest(input_file, &mut diagnostics);
 
     let (_, errors) = biome_js_analyze::analyze(
         &root,
@@ -79,7 +79,7 @@ fn analyze(
         &options,
         Vec::new(),
         source_type,
-        manifest.as_ref(),
+        project_layout,
         |event| {
             if let Some(mut diag) = event.diagnostic() {
                 for action in event.actions() {

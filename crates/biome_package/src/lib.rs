@@ -28,8 +28,8 @@ pub trait Manifest: Default + Debug {
 pub trait Package {
     type Manifest: Manifest;
 
-    /// Use this function to prepare the package, like loading the manifest.
-    fn deserialize_manifest(&mut self, root: &PackageRoot<Self>);
+    /// Inserts a manifest into the package, taking care of deserialization.
+    fn insert_serialized_manifest(&mut self, root: &PackageRoot<Self>);
 
     fn manifest(&self) -> Option<&Self::Manifest> {
         None

@@ -149,7 +149,7 @@ impl Rule for UseImportExtensions {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let file_ext = ctx.file_path().extension().and_then(|ext| ext.to_str())?;
+        let file_ext = ctx.file_path().extension()?;
 
         let custom_suggested_imports = &ctx.options().suggested_extensions;
 

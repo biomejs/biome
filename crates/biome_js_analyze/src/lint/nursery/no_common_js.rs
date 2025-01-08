@@ -70,7 +70,7 @@ impl Rule for NoCommonJs {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let file_ext = ctx.file_path().extension();
         // cjs and cts files can only use CommonJs modules
-        if file_ext.is_some_and(|file_ext| matches!(file_ext.as_encoded_bytes(), b"cjs" | b"cts")) {
+        if file_ext.is_some_and(|file_ext| matches!(file_ext.as_bytes(), b"cjs" | b"cts")) {
             return None;
         }
 

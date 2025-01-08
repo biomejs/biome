@@ -37,8 +37,8 @@ use biome_js_syntax::{
 };
 use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
-use biome_package::PackageJson;
 use biome_parser::AnyParse;
+use biome_project_layout::ProjectLayout;
 use biome_rowan::{FileSourceError, NodeCache};
 use biome_string_case::StrLikeExtension;
 
@@ -48,6 +48,7 @@ use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
 use rustc_hash::FxHashSet;
 use std::borrow::Cow;
+use std::sync::Arc;
 use tracing::instrument;
 
 mod astro;
@@ -387,7 +388,7 @@ pub struct FixAllParams<'a> {
     /// Whether it should format the code action
     pub(crate) should_format: bool,
     pub(crate) biome_path: &'a BiomePath,
-    pub(crate) manifest: Option<PackageJson>,
+    pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) document_file_source: DocumentFileSource,
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
@@ -456,7 +457,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
     pub(crate) categories: RuleCategories,
-    pub(crate) manifest: Option<PackageJson>,
+    pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: Vec<RuleSelector>,
 }
@@ -579,7 +580,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) range: Option<TextRange>,
     pub(crate) workspace: &'a WorkspaceSettingsHandle,
     pub(crate) path: &'a BiomePath,
-    pub(crate) manifest: Option<PackageJson>,
+    pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) language: DocumentFileSource,
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
@@ -807,7 +808,7 @@ pub(crate) fn search(
 ) -> Result<Vec<TextRange>, WorkspaceError> {
     let result = query
         .execute(GritTargetFile {
-            path: path.as_std_path().to_path_buf(),
+            path: path.to_path_buf(),
             parse,
         })
         .map_err(|err| {
@@ -952,7 +953,7 @@ struct LintVisitor<'a, 'b> {
     skip: Option<&'b [RuleSelector]>,
     settings: Option<&'b Settings>,
     path: Option<&'b Utf8Path>,
-    manifest: Option<&'b PackageJson>,
+    project_layout: Arc<ProjectLayout>,
     analyzer_options: &'b mut AnalyzerOptions,
 }
 
@@ -962,7 +963,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         skip: Option<&'b [RuleSelector]>,
         settings: Option<&'b Settings>,
         path: Option<&'b Utf8Path>,
-        manifest: Option<&'b PackageJson>,
+        project_layout: Arc<ProjectLayout>,
         analyzer_options: &'b mut AnalyzerOptions,
     ) -> Self {
         Self {
@@ -972,7 +973,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             skip,
             settings,
             path,
-            manifest,
+            project_layout,
             analyzer_options,
         }
     }
@@ -993,7 +994,10 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             .is_none_or(|d| d.is_empty());
 
         if no_only && no_domains {
-            if let Some(manifest) = self.manifest {
+            if let Some((_, manifest)) = self
+                .path
+                .and_then(|path| self.project_layout.get_node_manifest_for_path(path))
+            {
                 for domain in R::METADATA.domains {
                     self.analyzer_options
                         .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
@@ -1361,7 +1365,7 @@ pub(crate) struct AnalyzerVisitorBuilder<'a> {
     skip: Option<&'a [RuleSelector]>,
     path: Option<&'a Utf8Path>,
     enabled_rules: Option<&'a [RuleSelector]>,
-    manifest: Option<&'a PackageJson>,
+    project_layout: Arc<ProjectLayout>,
     analyzer_options: AnalyzerOptions,
 }
 
@@ -1373,7 +1377,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             skip: None,
             path: None,
             enabled_rules: None,
-            manifest: None,
+            project_layout: Default::default(),
             analyzer_options,
         }
     }
@@ -1403,8 +1407,8 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     }
 
     #[must_use]
-    pub(crate) fn with_manifest(mut self, manifest: Option<&'b PackageJson>) -> Self {
-        self.manifest = manifest;
+    pub(crate) fn with_project_layout(mut self, project_layout: Arc<ProjectLayout>) -> Self {
+        self.project_layout = project_layout;
         self
     }
 
@@ -1434,7 +1438,7 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             self.skip,
             self.settings,
             self.path,
-            self.manifest,
+            self.project_layout,
             &mut analyzer_options,
         );
 

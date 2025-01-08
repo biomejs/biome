@@ -604,7 +604,7 @@ fn debug_control_flow(parse: AnyParse, cursor: TextSize) -> String {
         &options,
         Vec::new(),
         JsFileSource::default(),
-        None,
+        Default::default(),
         |_| ControlFlow::<Never>::Continue(()),
     );
 
@@ -653,7 +653,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             .with_skip(&params.skip)
             .with_path(params.path.as_path())
             .with_enabled_rules(&params.enabled_rules)
-            .with_manifest(params.manifest.as_ref())
+            .with_project_layout(params.project_layout.clone())
             .finish();
 
     let filter = AnalysisFilter {
@@ -671,7 +671,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         &analyzer_options,
         Vec::new(),
         file_source,
-        params.manifest.as_ref(),
+        params.project_layout,
         |signal| process_lint.process_signal(signal),
     );
 
@@ -685,7 +685,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         workspace,
         path,
-        manifest,
+        project_layout,
         language,
         only,
         skip,
@@ -704,7 +704,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             .with_skip(&skip)
             .with_path(path.as_path())
             .with_enabled_rules(&rules)
-            .with_manifest(manifest.as_ref())
+            .with_project_layout(project_layout.clone())
             .finish();
 
     let filter = AnalysisFilter {
@@ -732,7 +732,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         &analyzer_options,
         Vec::new(),
         source_type,
-        manifest.as_ref(),
+        project_layout,
         |signal| {
             actions.extend(signal.actions().into_code_action_iter().map(|item| {
                 trace!("Pulled action category {:?}", item.category);
@@ -777,7 +777,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             .with_skip(&params.skip)
             .with_path(params.biome_path.as_path())
             .with_enabled_rules(&params.enabled_rules)
-            .with_manifest(params.manifest.as_ref())
+            .with_project_layout(params.project_layout.clone())
             .finish();
 
     let filter = AnalysisFilter {
@@ -806,7 +806,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             &analyzer_options,
             Vec::new(),
             file_source,
-            params.manifest.as_ref(),
+            params.project_layout.clone(),
             |signal| {
                 let current_diagnostic = signal.diagnostic();
 
