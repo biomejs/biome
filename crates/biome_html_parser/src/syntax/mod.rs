@@ -159,6 +159,7 @@ impl ParseNodeList for ElementList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         match p.cur() {
             T![<!--] => parse_comment(p),
+            T!["<![CDATA["] => parse_cdata_section(p),
             T![<] => parse_element(p),
             HTML_LITERAL => {
                 let m = p.start();
@@ -276,4 +277,17 @@ fn parse_comment(p: &mut HtmlParser) -> ParsedSyntax {
     }
     p.expect(T![-->]);
     Present(m.complete(p, HTML_COMMENT))
+}
+
+fn parse_cdata_section(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T!["<![CDATA["]) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump_with_context(T!["<![CDATA["], HtmlLexContext::CdataSection);
+    while !p.at(T!["]]>"]) && !p.at(EOF) {
+        p.bump_with_context(HTML_LITERAL, HtmlLexContext::CdataSection);
+    }
+    p.expect(T!["]]>"]);
+    Present(m.complete(p, HTML_CDATA_SECTION))
 }

@@ -25,6 +25,10 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::HtmlAttributeInitializerClause::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_CDATA_SECTION => {
+                    let $pattern = unsafe { $crate::HtmlCdataSection::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_CLOSING_ELEMENT => {
                     let $pattern = unsafe { $crate::HtmlClosingElement::new_unchecked(node) };
                     $body
