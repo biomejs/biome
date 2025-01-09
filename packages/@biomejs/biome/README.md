@@ -1,3 +1,7 @@
+> [!IMPORTANT]
+> This the README of the `next` branch. The `main` branch is only used for maintenance.
+> All new developments should be directed to `next`
+
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg">
