@@ -602,7 +602,7 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
         | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
         | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
-        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => true,
+        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => false,
 
         // This should be unreachable because of the test if the capture is imported
         AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
