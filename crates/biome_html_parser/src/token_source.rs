@@ -43,6 +43,7 @@ pub(crate) enum HtmlLexContext {
 pub(crate) enum HtmlEmbededLanguage {
     Script,
     Style,
+    Preformatted,
 }
 
 impl HtmlEmbededLanguage {
@@ -50,6 +51,7 @@ impl HtmlEmbededLanguage {
         match self {
             Self::Script => "</script>",
             Self::Style => "</style>",
+            Self::Preformatted => "</pre>",
         }
     }
 }

@@ -21,7 +21,7 @@ static VOID_ELEMENTS: &[&str] = &[
 ];
 
 /// For these elements, the content is treated as raw text and no parsing is done inside them. This is so that the contents of these tags can be parsed by a different parser.
-pub(crate) static EMBEDDED_LANGUAGE_ELEMENTS: &[&str] = &["script", "style"];
+pub(crate) static EMBEDDED_LANGUAGE_ELEMENTS: &[&str] = &["script", "style", "pre"];
 
 pub(crate) fn parse_root(p: &mut HtmlParser) {
     let m = p.start();
@@ -104,6 +104,7 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
                 HtmlLexContext::EmbeddedLanguage(match opening_tag_name.as_str() {
                     tag if tag.eq_ignore_ascii_case("script") => HtmlEmbededLanguage::Script,
                     tag if tag.eq_ignore_ascii_case("style") => HtmlEmbededLanguage::Style,
+                    tag if tag.eq_ignore_ascii_case("pre") => HtmlEmbededLanguage::Preformatted,
                     _ => unreachable!(),
                 })
             } else {

@@ -113,10 +113,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             f,
         )?;
         if should_be_verbatim {
-            write!(
-                f,
-                [&block_indent(&format_verbatim_skipped(children.syntax()))]
-            )?;
+            write!(f, [&format_verbatim_skipped(children.syntax())])?;
         } else {
             let format_children = FormatHtmlElementList::default()
                 .with_options(FormatHtmlElementListOptions {

@@ -267,10 +267,11 @@ fn long_text() {
 fn text_trailing_whitespace() {
     assert_lex! {
         HtmlLexContext::OutsideTag,
-        "Lorem ipsum dolor <",
+        "Lorem ipsum dolor <a",
         HTML_LITERAL: 17,
         WHITESPACE: 1,
         L_ANGLE: 1,
+        HTML_LITERAL: 1,
     }
 }
 
@@ -278,10 +279,11 @@ fn text_trailing_whitespace() {
 fn text_trailing_whitespace_multiple() {
     assert_lex! {
         HtmlLexContext::OutsideTag,
-        "Lorem ipsum dolor  <",
+        "Lorem ipsum dolor  <a",
         HTML_LITERAL: 17,
         WHITESPACE: 2,
         L_ANGLE: 1,
+        HTML_LITERAL: 1,
     }
 }
 
