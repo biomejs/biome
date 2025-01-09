@@ -184,7 +184,7 @@ impl From<WorkspaceError> for biome_diagnostics::serde::Diagnostic {
 pub struct NotFound;
 
 #[derive(Debug, Diagnostic, Deserialize, Serialize)]
-#[diagnostic(category = "internalError/panic", tags(INTERNAL))]
+#[diagnostic(category = "internalError/panic", severity = Fatal, tags(INTERNAL))]
 pub struct Panic {
     #[message]
     #[description]
