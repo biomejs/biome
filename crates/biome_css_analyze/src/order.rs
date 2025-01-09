@@ -395,6 +395,7 @@ pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     "widows",
 ];
 
+/// A map from CSS property names to the index at which they appear in the [PROPERTY_ORDER] array.
 pub(crate) static PROPERTY_ORDER_MAP: LazyLock<HashMap<&'static str, usize>> =
     LazyLock::new(|| {
         let mut map = HashMap::with_capacity(PROPERTY_ORDER.len());

@@ -868,6 +868,8 @@ pub const OTHER_PSEUDO_ELEMENTS: [&str; 18] = [
     "view-transition-old",
 ];
 
+/// List of known vendor prefixes
+// The order of this affects the behavior of the useSortedProperties rule.
 pub const VENDOR_PREFIXES: [&str; 4] = ["-moz-", "-ms-", "-o-", "-webkit-"];
 
 pub const AT_RULE_PAGE_PSEUDO_CLASSES: [&str; 4] = ["blank", "first", "left", "right"];
