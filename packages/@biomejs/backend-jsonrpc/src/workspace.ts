@@ -729,18 +729,18 @@ export interface JsonParserConfiguration {
 	allowTrailingCommas?: Bool;
 }
 export interface Rules {
-	a11y?: A11y;
-	complexity?: Complexity;
-	correctness?: Correctness;
-	nursery?: Nursery;
-	performance?: Performance;
+	a11y?: SeverityOrGroup_for_A11y;
+	complexity?: SeverityOrGroup_for_Complexity;
+	correctness?: SeverityOrGroup_for_Correctness;
+	nursery?: SeverityOrGroup_for_Nursery;
+	performance?: SeverityOrGroup_for_Performance;
 	/**
 	 * It enables the lint rules recommended by Biome. `true` by default.
 	 */
 	recommended?: boolean;
-	security?: Security;
-	style?: Style;
-	suspicious?: Suspicious;
+	security?: SeverityOrGroup_for_Security;
+	style?: SeverityOrGroup_for_Style;
+	suspicious?: SeverityOrGroup_for_Suspicious;
 }
 export interface OverridePattern {
 	/**
@@ -841,6 +841,92 @@ export type Semicolons = "always" | "asNeeded";
 export type TrailingCommas = "all" | "es5" | "none";
 export type Expand = "always" | "followSource";
 export type TrailingCommas2 = "none" | "all";
+export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
+export type SeverityOrGroup_for_Complexity =
+	| GroupPlainConfiguration
+	| Complexity;
+export type SeverityOrGroup_for_Correctness =
+	| GroupPlainConfiguration
+	| Correctness;
+export type SeverityOrGroup_for_Nursery = GroupPlainConfiguration | Nursery;
+export type SeverityOrGroup_for_Performance =
+	| GroupPlainConfiguration
+	| Performance;
+export type SeverityOrGroup_for_Security = GroupPlainConfiguration | Security;
+export type SeverityOrGroup_for_Style = GroupPlainConfiguration | Style;
+export type SeverityOrGroup_for_Suspicious =
+	| GroupPlainConfiguration
+	| Suspicious;
+export interface OverrideAssistConfiguration {
+	/**
+	 * List of actions
+	 */
+	actions?: Actions;
+	/**
+	 * if `false`, it disables the feature and the assist won't be executed. `true` by default
+	 */
+	enabled?: Bool;
+}
+export interface OverrideFormatterConfiguration {
+	/**
+	 * The attribute position style.
+	 */
+	attributePosition?: AttributePosition;
+	/**
+	 * Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+	 */
+	bracketSameLine?: BracketSameLine;
+	/**
+	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	 */
+	bracketSpacing?: BracketSpacing;
+	enabled?: Bool;
+	/**
+	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
+	 */
+	formatWithErrors?: Bool;
+	/**
+	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
+	 */
+	indentSize?: IndentWidth;
+	/**
+	 * The indent style.
+	 */
+	indentStyle?: IndentStyle;
+	/**
+	 * The size of the indentation, 2 by default
+	 */
+	indentWidth?: IndentWidth;
+	/**
+	 * The type of line ending.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * What's the max width of a line. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
+}
+export interface OverrideLinterConfiguration {
+	/**
+	 * List of rules
+	 */
+	domains?: {};
+	/**
+	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
+	 */
+	enabled?: Bool;
+	/**
+	 * List of rules
+	 */
+	rules?: Rules;
+}
+export type RuleAssistConfiguration_for_Options =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithOptions_for_Options;
+export type RuleAssistConfiguration_for_Null =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithOptions_for_Null;
+export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 /**
  * A list of rules that belong to this group
  */
@@ -2117,75 +2203,27 @@ export interface Suspicious {
 	 */
 	useValidTypeof?: RuleFixConfiguration_for_Null;
 }
-export interface OverrideAssistConfiguration {
+export type RuleAssistPlainConfiguration = "off" | "on";
+export interface RuleAssistWithOptions_for_Options {
 	/**
-	 * List of actions
+	 * The severity of the emitted diagnostics by the rule
 	 */
-	actions?: Actions;
+	level: RuleAssistPlainConfiguration;
 	/**
-	 * if `false`, it disables the feature and the assist won't be executed. `true` by default
+	 * Rule's options
 	 */
-	enabled?: Bool;
+	options: Options;
 }
-export interface OverrideFormatterConfiguration {
+export interface RuleAssistWithOptions_for_Null {
 	/**
-	 * The attribute position style.
+	 * The severity of the emitted diagnostics by the rule
 	 */
-	attributePosition?: AttributePosition;
+	level: RuleAssistPlainConfiguration;
 	/**
-	 * Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+	 * Rule's options
 	 */
-	bracketSameLine?: BracketSameLine;
-	/**
-	 * Whether to insert spaces around brackets in object literals. Defaults to true.
-	 */
-	bracketSpacing?: BracketSpacing;
-	enabled?: Bool;
-	/**
-	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
-	 */
-	formatWithErrors?: Bool;
-	/**
-	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
-	 */
-	indentSize?: IndentWidth;
-	/**
-	 * The indent style.
-	 */
-	indentStyle?: IndentStyle;
-	/**
-	 * The size of the indentation, 2 by default
-	 */
-	indentWidth?: IndentWidth;
-	/**
-	 * The type of line ending.
-	 */
-	lineEnding?: LineEnding;
-	/**
-	 * What's the max width of a line. Defaults to 80.
-	 */
-	lineWidth?: LineWidth;
+	options: null;
 }
-export interface OverrideLinterConfiguration {
-	/**
-	 * List of rules
-	 */
-	domains?: {};
-	/**
-	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
-	 */
-	enabled?: Bool;
-	/**
-	 * List of rules
-	 */
-	rules?: Rules;
-}
-export type RuleAssistConfiguration_for_Options =
-	| RuleAssistPlainConfiguration
-	| RuleAssistWithOptions_for_Options;
-export type RuleAssistConfiguration_for_Null =
-	| RuleAssistPlainConfiguration
-	| RuleAssistWithOptions_for_Null;
 export type RuleFixConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_Null;
@@ -2264,26 +2302,9 @@ export type RuleFixConfiguration_for_NoConsoleOptions =
 export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
-export type RuleAssistPlainConfiguration = "off" | "on";
-export interface RuleAssistWithOptions_for_Options {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RuleAssistPlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: Options;
-}
-export interface RuleAssistWithOptions_for_Null {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RuleAssistPlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: null;
+export interface Options {
+	importGroups?: ImportGroup[];
+	legacy?: boolean;
 }
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithFixOptions_for_Null {
@@ -2590,10 +2611,7 @@ export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
 	 */
 	options: NoDoubleEqualsOptions;
 }
-export interface Options {
-	importGroups?: ImportGroup[];
-	legacy?: boolean;
-}
+export type ImportGroup = PredefinedImportGroup | Regex;
 /**
  * Used to identify the kind of code action emitted by a rule
  */
@@ -2811,7 +2829,12 @@ If `false`, no such exception will be made.
 	 */
 	ignoreNull: boolean;
 }
-export type ImportGroup = PredefinedImportGroup | Regex;
+export type PredefinedImportGroup =
+	| ":blank-line:"
+	| ":bun:"
+	| ":node:"
+	| ":types:";
+export type Regex = string;
 export type DependencyAvailability = boolean | string[];
 export interface Hook {
 	/**
@@ -2842,7 +2865,6 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 export type Accessibility = "noPublic" | "explicit" | "none";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
-export type Regex = string;
 export interface Convention {
 	/**
 	 * String cases to enforce
@@ -2865,11 +2887,6 @@ export type Format =
 	| "CONSTANT_CASE"
 	| "PascalCase"
 	| "snake_case";
-export type PredefinedImportGroup =
-	| ":blank-line:"
-	| ":bun:"
-	| ":node:"
-	| ":types:";
 export type StableHookResult = boolean | number[];
 /**
  * Supported cases for file names.

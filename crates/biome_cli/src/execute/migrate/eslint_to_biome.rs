@@ -1,3 +1,4 @@
+use biome_configuration::analyzer::SeverityOrGroup;
 use biome_configuration::{self as biome_config};
 use biome_deserialize::Merge;
 use biome_js_analyze::lint::style::no_restricted_globals;
@@ -220,13 +221,15 @@ fn migrate_eslint_rule(
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
                     let group = rules.suspicious.get_or_insert_with(Default::default);
-                    group.no_console = Some(biome_config::RuleFixConfiguration::WithOptions(
-                        biome_config::RuleWithFixOptions {
-                            level: severity.into(),
-                            fix: None,
-                            options: Box::new((*rule_options).into()),
-                        },
-                    ));
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.no_console = Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: severity.into(),
+                                fix: None,
+                                options: Box::new((*rule_options).into()),
+                            },
+                        ));
+                    }
                 }
             }
         }
@@ -238,28 +241,37 @@ fn migrate_eslint_rule(
                     .into_iter()
                     .map(|g| g.into_name().into_boxed_str());
                 let group = rules.style.get_or_insert_with(Default::default);
-                group.no_restricted_globals = Some(biome_config::RuleConfiguration::WithOptions(
-                    biome_config::RuleWithOptions {
-                        level: severity.into(),
-                        options: Box::new(no_restricted_globals::RestrictedGlobalsOptions {
-                            denied_globals: globals.collect::<Vec<_>>().into_boxed_slice(),
-                        }),
-                    },
-                ));
+                if let SeverityOrGroup::Group(group) = group {
+                    group.no_restricted_globals =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: severity.into(),
+                                options: Box::new(
+                                    no_restricted_globals::RestrictedGlobalsOptions {
+                                        denied_globals: globals
+                                            .collect::<Vec<_>>()
+                                            .into_boxed_slice(),
+                                    },
+                                ),
+                            },
+                        ));
+                }
             }
         }
         eslint_eslint::Rule::Jsxa11yArioaRoles(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
                     let group = rules.a11y.get_or_insert_with(Default::default);
-                    group.use_valid_aria_role =
-                        Some(biome_config::RuleFixConfiguration::WithOptions(
-                            biome_config::RuleWithFixOptions {
-                                level: severity.into(),
-                                fix: None,
-                                options: Box::new((*rule_options).into()),
-                            },
-                        ));
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.use_valid_aria_role =
+                            Some(biome_config::RuleFixConfiguration::WithOptions(
+                                biome_config::RuleWithFixOptions {
+                                    level: severity.into(),
+                                    fix: None,
+                                    options: Box::new((*rule_options).into()),
+                                },
+                            ));
+                    }
                 }
             }
         }
@@ -267,14 +279,16 @@ fn migrate_eslint_rule(
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
                     let group = rules.style.get_or_insert_with(Default::default);
-                    group.use_consistent_array_type =
-                        Some(biome_config::RuleFixConfiguration::WithOptions(
-                            biome_config::RuleWithFixOptions {
-                                level: severity.into(),
-                                fix: None,
-                                options: rule_options.into(),
-                            },
-                        ));
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.use_consistent_array_type =
+                            Some(biome_config::RuleFixConfiguration::WithOptions(
+                                biome_config::RuleWithFixOptions {
+                                    level: severity.into(),
+                                    fix: None,
+                                    options: rule_options.into(),
+                                },
+                            ));
+                    }
                 }
             }
         }
@@ -282,13 +296,15 @@ fn migrate_eslint_rule(
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
                     let group = rules.nursery.get_or_insert_with(Default::default);
-                    group.use_consistent_member_accessibility =
-                        Some(biome_config::RuleConfiguration::WithOptions(
-                            biome_config::RuleWithOptions {
-                                level: severity.into(),
-                                options: rule_options.into(),
-                            },
-                        ));
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.use_consistent_member_accessibility =
+                            Some(biome_config::RuleConfiguration::WithOptions(
+                                biome_config::RuleWithOptions {
+                                    level: severity.into(),
+                                    options: rule_options.into(),
+                                },
+                            ));
+                    }
                 }
             }
         }
@@ -299,25 +315,30 @@ fn migrate_eslint_rule(
                     conf.into_vec().into_iter().map(|v| *v),
                 );
                 let group = rules.style.get_or_insert_with(Default::default);
-                group.use_naming_convention =
-                    Some(biome_config::RuleFixConfiguration::WithOptions(
-                        biome_config::RuleWithFixOptions {
-                            level: severity.into(),
-                            fix: None,
-                            options: options.into(),
-                        },
-                    ));
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_naming_convention =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: severity.into(),
+                                fix: None,
+                                options: options.into(),
+                            },
+                        ));
+                }
             }
         }
         eslint_eslint::Rule::UnicornFilenameCase(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let group = rules.style.get_or_insert_with(Default::default);
-                group.use_filenaming_convention = Some(
-                    biome_config::RuleConfiguration::WithOptions(biome_config::RuleWithOptions {
-                        level: conf.severity().into(),
-                        options: Box::new(conf.option_or_default().into()),
-                    }),
-                );
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_filenaming_convention =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: conf.severity().into(),
+                                options: Box::new(conf.option_or_default().into()),
+                            },
+                        ));
+                }
             }
         }
     }
@@ -401,7 +422,13 @@ mod tests {
             ["*.test.js".into(), "*.spec.js".into()]
         );
         assert_eq!(
-            linter.rules.unwrap().suspicious.unwrap().no_double_equals,
+            linter
+                .rules
+                .unwrap()
+                .suspicious
+                .unwrap()
+                .unwrap_group()
+                .no_double_equals,
             Some(biome_config::RuleFixConfiguration::Plain(
                 biome_config::RulePlainConfiguration::Error
             ))
@@ -419,6 +446,7 @@ mod tests {
                 .unwrap()
                 .suspicious
                 .unwrap()
+                .unwrap_group()
                 .no_double_equals,
             Some(biome_config::RuleFixConfiguration::Plain(
                 biome_config::RulePlainConfiguration::Off

@@ -334,7 +334,7 @@ fn generate_for_groups(
         }
     } else {
         quote! {
-            use crate::analyzer::{RuleConfiguration, RulePlainConfiguration, RuleFixConfiguration};
+            use crate::analyzer::{RuleConfiguration, RulePlainConfiguration, RuleFixConfiguration, SeverityOrGroup, RuleGroupExt};
             use biome_analyze::{options::RuleOptions, RuleFilter};
         }
     };
@@ -484,7 +484,7 @@ fn generate_for_groups(
                 #(
                     #[deserializable(rename = #group_strings)]
                     #[serde(skip_serializing_if = "Option::is_none")]
-                    pub #group_idents: Option<#group_pascal_idents>,
+                    pub #group_idents: Option<SeverityOrGroup<#group_pascal_idents>>,
                 )*
             }
 
@@ -511,7 +511,7 @@ fn generate_for_groups(
                     }
                     #(
                         if let Some(group) = &mut self.#group_idents {
-                            group.recommended = None;
+                            group.set_recommended(None);
                         }
                     )*
                 }
@@ -787,7 +787,7 @@ fn generate_group_struct(
         }
     } else {
         quote! {
-            pub(crate) fn get_rule_configuration(&self, rule_name: &str) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
+            fn get_rule_configuration(&self, rule_name: &str) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
                 match rule_name {
                     #( #get_rule_configuration_line ),*,
                     _ => None
@@ -895,42 +895,52 @@ fn generate_group_struct(
                     #( #lines_recommended_rule_as_filter ),*
                 ];
 
-                /// Retrieves the recommended rules
-                pub(crate) fn is_recommended_true(&self) -> bool {
+                const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
+                    #( #lines_all_rule_as_filter ),*
+                ];
+
+            }
+
+            impl RuleGroupExt for #group_pascal_ident {
+                fn is_recommended_true(&self) -> bool {
                     // we should inject recommended rules only when they are set to "true"
                     matches!(self.recommended, Some(true))
                 }
 
-                pub(crate) fn is_recommended_unset(&self) -> bool {
+                fn is_recommended_unset(&self) -> bool {
                     self.recommended.is_none()
                 }
 
 
-                pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+                fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
                    let mut index_set = FxHashSet::default();
                    #( #rule_enabled_check_line )*
                    index_set
                 }
 
-                pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+                fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
                    let mut index_set = FxHashSet::default();
                    #( #rule_disabled_check_line )*
                    index_set
                 }
 
                 /// Checks if, given a rule name, matches one of the rules contained in this category
-                pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+                fn has_rule(rule_name: &str) -> Option<&'static str> {
                     Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
                 }
 
-                pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
+                fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
                     Self::RECOMMENDED_RULES_AS_FILTERS
+                }
+
+                fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
+                    Self::ALL_RULES_AS_FILTERS
                 }
 
                 /// Select preset rules
                 // Preset rules shouldn't populate disabled rules
                 // because that will make specific rules cannot be enabled later.
-                pub(crate) fn collect_preset_rules(
+                fn collect_preset_rules(
                     &self,
                     parent_is_recommended: bool,
                     enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
@@ -939,6 +949,10 @@ fn generate_group_struct(
                     if self.is_recommended_true() || self.is_recommended_unset() && parent_is_recommended {
                         enabled_rules.extend(Self::recommended_rules_as_filters());
                     }
+                }
+
+                fn set_recommended(&mut self, value: Option<bool>) {
+                    self.recommended = value;
                 }
 
                 #get_configuration_function

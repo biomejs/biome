@@ -15,6 +15,7 @@ mod handle_svelte_files;
 mod handle_vue_files;
 mod included_files;
 mod linter_domains;
+mod linter_groups_plain;
 mod overrides_formatter;
 mod overrides_linter;
 mod overrides_organize_imports;

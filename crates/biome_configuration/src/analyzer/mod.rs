@@ -8,10 +8,13 @@ use biome_analyze::{FixKind, RuleFilter};
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext, Merge,
 };
-use biome_deserialize_macros::Deserializable;
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;
+use rustc_hash::FxHashSet;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
 use std::str::FromStr;
 
 #[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
@@ -207,6 +210,7 @@ impl From<RuleAssistPlainConfiguration> for Severity {
     PartialOrd,
     serde::Deserialize,
     serde::Serialize,
+    Merge,
 )]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
@@ -524,6 +528,213 @@ impl schemars::JsonSchema for RuleSelector {
     }
     fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
         String::json_schema(gen)
+    }
+}
+
+pub trait RuleGroupExt: Default + Merge + Debug {
+    /// Retrieves the recommended rules
+    fn is_recommended_true(&self) -> bool;
+    fn is_recommended_unset(&self) -> bool;
+    fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>>;
+    fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>>;
+    /// Checks if, given a rule name, matches one of the rules contained in this category
+    fn has_rule(rule_name: &str) -> Option<&'static str>;
+    /// Select preset rules
+    // Preset rules shouldn't populate disabled rules
+    // because that will make specific rules cannot be enabled later.
+    fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>];
+    /// Returns all rules of this group, as a list of [RuleFilter]
+    fn all_rules_as_filters() -> &'static [RuleFilter<'static>];
+    fn collect_preset_rules(
+        &self,
+        parent_is_recommended: bool,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
+    );
+    fn get_rule_configuration(
+        &self,
+        rule_name: &str,
+    ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)>;
+    fn set_recommended(&mut self, value: Option<bool>);
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
+pub enum SeverityOrGroup<G> {
+    Plain(GroupPlainConfiguration),
+    Group(G),
+}
+
+impl<G> SeverityOrGroup<G> {
+    pub fn unwrap_group(self) -> G {
+        match self {
+            SeverityOrGroup::Plain(_) => panic!("Cannot unwrap a plain configuration"),
+            SeverityOrGroup::Group(group) => group,
+        }
+    }
+
+    pub fn unwrap_group_as_mut(&mut self) -> &mut G {
+        match self {
+            SeverityOrGroup::Plain(_) => panic!("Cannot unwrap a plain configuration"),
+            SeverityOrGroup::Group(group) => group,
+        }
+    }
+}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    Deserializable,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    serde::Deserialize,
+    serde::Serialize,
+    Merge,
+)]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum GroupPlainConfiguration {
+    #[default]
+    /// It disables all the rules of this group
+    Off,
+    /// It enables all the rules of this group, with their default severity
+    On,
+    /// It enables all the rules of this group, and set their severity to "info"
+    Info,
+    /// It enables all the rules of this group, and set their severity to "warn"
+    Warn,
+    /// It enables all the rules of this group, and set their severity to "error+"
+    Error,
+}
+
+impl From<GroupPlainConfiguration> for RulePlainConfiguration {
+    fn from(value: GroupPlainConfiguration) -> Self {
+        match value {
+            GroupPlainConfiguration::Off => RulePlainConfiguration::Off,
+            GroupPlainConfiguration::On => RulePlainConfiguration::On,
+            GroupPlainConfiguration::Info => RulePlainConfiguration::Info,
+            GroupPlainConfiguration::Warn => RulePlainConfiguration::Warn,
+            GroupPlainConfiguration::Error => RulePlainConfiguration::Error,
+        }
+    }
+}
+
+impl<G> SeverityOrGroup<G>
+where
+    G: RuleGroupExt,
+{
+    pub(crate) fn get_rule_configuration(
+        &self,
+        rule_name: &str,
+    ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
+        match self {
+            SeverityOrGroup::Plain(plain) => Some((RulePlainConfiguration::from(*plain), None)),
+            SeverityOrGroup::Group(group) => group.get_rule_configuration(rule_name),
+        }
+    }
+
+    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        match self {
+            SeverityOrGroup::Plain(plain) => {
+                let mut filters = FxHashSet::default();
+                match plain {
+                    GroupPlainConfiguration::Off => filters,
+                    GroupPlainConfiguration::On
+                    | GroupPlainConfiguration::Info
+                    | GroupPlainConfiguration::Warn
+                    | GroupPlainConfiguration::Error => {
+                        filters.extend(G::all_rules_as_filters());
+                        filters
+                    }
+                }
+            }
+            SeverityOrGroup::Group(group) => group.get_enabled_rules(),
+        }
+    }
+
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        match self {
+            SeverityOrGroup::Plain(plain) => {
+                let mut filters = FxHashSet::default();
+                match plain {
+                    GroupPlainConfiguration::Off => {
+                        filters.extend(G::all_rules_as_filters());
+                        filters
+                    }
+                    GroupPlainConfiguration::On
+                    | GroupPlainConfiguration::Info
+                    | GroupPlainConfiguration::Warn
+                    | GroupPlainConfiguration::Error => filters,
+                }
+            }
+            SeverityOrGroup::Group(group) => group.get_disabled_rules(),
+        }
+    }
+
+    pub(crate) fn set_recommended(&mut self, value: Option<bool>) {
+        match self {
+            SeverityOrGroup::Plain(_) => {}
+            SeverityOrGroup::Group(group) => group.set_recommended(value),
+        }
+    }
+
+    pub(crate) fn collect_preset_rules(
+        &self,
+        parent_is_recommended: bool,
+        enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
+    ) {
+        match self {
+            SeverityOrGroup::Plain(plain) => {
+                if *plain != GroupPlainConfiguration::Off {
+                    enabled_rules.extend(G::all_rules_as_filters());
+                }
+            }
+            SeverityOrGroup::Group(group) => {
+                group.collect_preset_rules(parent_is_recommended, enabled_rules)
+            }
+        }
+    }
+}
+
+impl<G> Default for SeverityOrGroup<G>
+where
+    G: RuleGroupExt,
+{
+    fn default() -> Self {
+        SeverityOrGroup::Group(G::default())
+    }
+}
+
+impl<G> Merge for SeverityOrGroup<G>
+where
+    G: RuleGroupExt,
+{
+    fn merge_with(&mut self, other: Self) {
+        match (self, other) {
+            (Self::Plain(lhs), Self::Plain(rhs)) => lhs.merge_with(rhs),
+            (Self::Group(lhs), Self::Group(rhs)) => lhs.merge_with(rhs),
+            (Self::Plain(_), Self::Group(_)) => {}
+            (Self::Group(_), Self::Plain(_)) => {}
+        }
+    }
+}
+
+impl<G: Deserializable> Deserializable for SeverityOrGroup<G> {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        if value.visitable_type()? == DeserializableType::Str {
+            Deserializable::deserialize(ctx, value, name).map(SeverityOrGroup::Plain)
+        } else {
+            Deserializable::deserialize(ctx, value, name).map(SeverityOrGroup::<G>::Group)
+        }
     }
 }
 

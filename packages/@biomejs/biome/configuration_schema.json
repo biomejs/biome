@@ -1662,6 +1662,31 @@
 			},
 			"additionalProperties": false
 		},
+		"GroupPlainConfiguration": {
+			"oneOf": [
+				{ "type": "string", "enum": ["off"] },
+				{
+					"description": "Enables the recommended rules with their default",
+					"type": "string",
+					"enum": ["on"]
+				},
+				{
+					"description": "Enables the rule, and it will emit a diagnostic with information severity",
+					"type": "string",
+					"enum": ["info"]
+				},
+				{
+					"description": "Enables the rule, and it will emit a diagnostic with warning severity",
+					"type": "string",
+					"enum": ["warn"]
+				},
+				{
+					"description": "Enables the rule, and it will emit a diagnostic with error severity",
+					"type": "string",
+					"enum": ["error"]
+				}
+			]
+		},
 		"Hook": {
 			"type": "object",
 			"properties": {
@@ -3658,32 +3683,56 @@
 			"type": "object",
 			"properties": {
 				"a11y": {
-					"anyOf": [{ "$ref": "#/definitions/A11y" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_A11y" },
+						{ "type": "null" }
+					]
 				},
 				"complexity": {
-					"anyOf": [{ "$ref": "#/definitions/Complexity" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_Complexity" },
+						{ "type": "null" }
+					]
 				},
 				"correctness": {
-					"anyOf": [{ "$ref": "#/definitions/Correctness" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_Correctness" },
+						{ "type": "null" }
+					]
 				},
 				"nursery": {
-					"anyOf": [{ "$ref": "#/definitions/Nursery" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_Nursery" },
+						{ "type": "null" }
+					]
 				},
 				"performance": {
-					"anyOf": [{ "$ref": "#/definitions/Performance" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_Performance" },
+						{ "type": "null" }
+					]
 				},
 				"recommended": {
 					"description": "It enables the lint rules recommended by Biome. `true` by default.",
 					"type": ["boolean", "null"]
 				},
 				"security": {
-					"anyOf": [{ "$ref": "#/definitions/Security" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_Security" },
+						{ "type": "null" }
+					]
 				},
 				"style": {
-					"anyOf": [{ "$ref": "#/definitions/Style" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_Style" },
+						{ "type": "null" }
+					]
 				},
 				"suspicious": {
-					"anyOf": [{ "$ref": "#/definitions/Suspicious" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_Suspicious" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -3740,6 +3789,54 @@
 			"additionalProperties": false
 		},
 		"Semicolons": { "type": "string", "enum": ["always", "asNeeded"] },
+		"SeverityOrGroup_for_A11y": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/A11y" }
+			]
+		},
+		"SeverityOrGroup_for_Complexity": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/Complexity" }
+			]
+		},
+		"SeverityOrGroup_for_Correctness": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/Correctness" }
+			]
+		},
+		"SeverityOrGroup_for_Nursery": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/Nursery" }
+			]
+		},
+		"SeverityOrGroup_for_Performance": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/Performance" }
+			]
+		},
+		"SeverityOrGroup_for_Security": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/Security" }
+			]
+		},
+		"SeverityOrGroup_for_Style": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/Style" }
+			]
+		},
+		"SeverityOrGroup_for_Suspicious": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/Suspicious" }
+			]
+		},
 		"Source": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
