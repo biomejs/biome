@@ -23,7 +23,7 @@ use biome_configuration::{
 };
 use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_console::{markup, Console, ConsoleExt};
-use biome_diagnostics::PrintDiagnostic;
+use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
 use biome_service::configuration::{
@@ -810,7 +810,9 @@ pub(crate) trait CommandRunner: Sized {
                 path: Some(project_path),
             })?;
             for diagnostic in result.diagnostics {
-                console.log(markup! {{PrintDiagnostic::simple(&diagnostic)}});
+                if diagnostic.severity() == Severity::Fatal {
+                    console.log(markup! {{PrintDiagnostic::simple(&diagnostic)}});
+                }
             }
             if cli_options.verbose && matches!(execution.report_mode(), ReportMode::Terminal { .. })
             {
