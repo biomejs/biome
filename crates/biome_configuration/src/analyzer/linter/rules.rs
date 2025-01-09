@@ -3469,7 +3469,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_classes:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseSortedClasses>>,
-    #[doc = "Enforce ordering of CSS properties."]
+    #[doc = "Enforce ordering of CSS properties and nested rules."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_properties:
         Option<RuleFixConfiguration<biome_css_analyze::options::UseSortedProperties>>,
@@ -3578,7 +3578,6 @@ impl Nursery {
         "useDeprecatedReason",
         "useNamedOperation",
         "useParseIntRadix",
-        "useSortedProperties",
         "useStrictMode",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
@@ -3598,7 +3597,6 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[

@@ -427,16 +427,16 @@ mod tests {
         for prop in PROPERTY_ORDER.iter().rev() {
             // assert this property is not in the set yet
             assert!(
-                disallowed.get(prop).is_none(),
+                !disallowed.contains(prop),
                 "{} must be ordered after any properties that may override it",
                 prop
             );
 
             // record disallowed properties
-            for longhand_child_property in get_longhand_sub_properties(&prop).into_iter() {
+            for longhand_child_property in get_longhand_sub_properties(prop) {
                 disallowed.insert(longhand_child_property);
             }
-            for longhand_child_property in get_reset_to_initial_properties(&prop).into_iter() {
+            for longhand_child_property in get_reset_to_initial_properties(prop) {
                 disallowed.insert(longhand_child_property);
             }
         }
