@@ -1,10 +1,9 @@
 use std::{collections::HashMap, sync::LazyLock};
 
-/// Same order used by stylelint-config-recess-order
+/// This is the desired order of CSS properties used by useSortedProperties.
 ///
-/// This differs from stylelint-config-recess-order in the following ways:
+/// It's the same ordering used by stylelint-config-recess-order, except in the following ways:
 /// - Vendor prefixes removed
-/// - flex-direction and flex-flow swapped
 /// - IE filters (progid:DXImageTransform) removed
 /// - Removed properties not known to biome:
 ///   - font-effect, font-emphasize, font-emphasize-position, font-emphasize-style,
