@@ -156,7 +156,7 @@ impl Rule for NoFallthroughSwitchClause {
                         if is_switch && (conditional || has_default_clause) {
                             // Take the unconditional jump into account only if a default clause is present.
                             let Some(switch_clause) = switch_clauses.pop_front() else {
-                                unreachable!("Missing switch clause.")
+                                break;
                             };
                             block_to_switch_clause_range.insert(
                                 jump_block_id,
