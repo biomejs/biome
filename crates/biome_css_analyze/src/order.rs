@@ -1,19 +1,16 @@
 use std::{collections::HashMap, sync::LazyLock};
 
-/*
-Same order used by stylelint-config-recess-order
-(vendor prefixes omitted)
-
-This differs from stylelint-config-recess-order in the following ways:
-Vendor prefixes removed
-flex-direction and flex-flow swapped
-IE filters (progid:DXImageTransform) removed
-Removed properties not known to biome:
-    font-effect, font-emphasize, font-emphasize-position, font-emphasize-style,
-    font-smooth, text-outline, text-overflow-ellipsis, text-overflow-mode, nav-index, color-profile
-*/
+/// Same order used by stylelint-config-recess-order
+///
+/// This differs from stylelint-config-recess-order in the following ways:
+/// - Vendor prefixes removed
+/// - flex-direction and flex-flow swapped
+/// - IE filters (progid:DXImageTransform) removed
+/// - Removed properties not known to biome:
+///   - font-effect, font-emphasize, font-emphasize-position, font-emphasize-style,
+///   - font-smooth, text-outline, text-overflow-ellipsis, text-overflow-mode, nav-index, color-profile
 pub(crate) const PROPERTY_ORDER: [&str; 370] = [
-    // special
+    // the all property will always be first since it overrides everything
     "all",
     // position
     "position",
@@ -398,40 +395,51 @@ pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     "widows",
 ];
 
-pub(crate) static PROPERTY_ORDER_MAP: LazyLock<HashMap<&'static str, u32>> = LazyLock::new(|| {
-    let mut map = HashMap::with_capacity(PROPERTY_ORDER.len());
-    for (i, p) in PROPERTY_ORDER.iter().enumerate() {
-        map.insert(*p, i as u32);
-    }
-    map
-});
+pub(crate) static PROPERTY_ORDER_MAP: LazyLock<HashMap<&'static str, usize>> =
+    LazyLock::new(|| {
+        let mut map = HashMap::with_capacity(PROPERTY_ORDER.len());
+        for (i, p) in PROPERTY_ORDER.iter().enumerate() {
+            map.insert(*p, i);
+        }
+        map
+    });
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
     use crate::{
         keywords::VENDOR_PREFIXES,
-        utils::{is_known_properties, vendor_prefixed},
+        order::PROPERTY_ORDER_MAP,
+        utils::{
+            get_longhand_sub_properties, get_reset_to_initial_properties, is_known_properties,
+            vendor_prefixed,
+        },
     };
 
     use super::PROPERTY_ORDER;
 
-    // #[test]
-    // fn test_no_shorthand_after_longhand_in_order_list() {
-    //     for prop in PROPERTY_ORDER {
-    //         if let Some(shorthand) = LONGHAND_SUB_PROPERTIES_MAP.get(prop) {
-    //             let prop_order = PROPERTY_ORDER_MAP.get(prop);
-    //             let shorthand_order = PROPERTY_ORDER_MAP.get(shorthand);
-    //             assert!(
-    //                 shorthand_order.unwrap() < prop_order.unwrap(),
-    //                 "{} ({}) should be before {} ({})",
-    //                 shorthand,
-    //                 shorthand_order.unwrap(),
-    //                 prop,
-    //                 prop_order.unwrap(),
-    //             )
-    //         }
-    //     }
-    // }
+    #[test]
+    fn test_no_shorthand_after_longhand_in_order_list() {
+        let mut disallowed = HashSet::<&str>::new();
+        // backwards iteration allows this to make use of get_longhand_sub_properties
+        for prop in PROPERTY_ORDER.iter().rev() {
+            // assert this property is not in the set yet
+            assert!(
+                disallowed.get(prop).is_none(),
+                "{} must be ordered after any properties that may override it",
+                prop
+            );
+
+            // record disallowed properties
+            for longhand_child_property in get_longhand_sub_properties(&prop).into_iter() {
+                disallowed.insert(longhand_child_property);
+            }
+            for longhand_child_property in get_reset_to_initial_properties(&prop).into_iter() {
+                disallowed.insert(longhand_child_property);
+            }
+        }
+    }
 
     #[test]
     fn test_no_vendor_prefixes_in_order_list() {
@@ -443,16 +451,6 @@ mod tests {
             );
         }
     }
-
-    // Not all properties are in the list for now.
-    // #[test]
-    // fn test_all_known_properties_in_order_list() {
-    //     for prop in KNOWN_PROPERTIES {
-    //         if !PROPERTY_ORDER_MAP.contains_key(prop) {
-    //             println!("not in the list: {}", prop);
-    //         }
-    //     }
-    // }
 
     #[test]
     fn test_no_unknown_properties_in_order_list() {
@@ -469,18 +467,18 @@ mod tests {
         }
     }
 
-    // #[test]
-    // fn test_properties_ending_in_start_come_before_properties_ending_in_end() {
-    //     for prop in PROPERTY_ORDER {
-    //         if prop.contains("start") {
-    //             let with_end = prop.replace("start", "end");
-    //             assert!(
-    //                 PROPERTY_ORDER_MAP.get(prop) < PROPERTY_ORDER_MAP.get(&with_end),
-    //                 "{} should be before {}",
-    //                 prop,
-    //                 with_end
-    //             );
-    //         }
-    //     }
-    // }
+    #[test]
+    fn test_properties_ending_in_start_come_before_properties_ending_in_end() {
+        for prop in PROPERTY_ORDER {
+            if prop.contains("start") {
+                let with_end = prop.replace("start", "end");
+                assert!(
+                    PROPERTY_ORDER_MAP.get(prop) < PROPERTY_ORDER_MAP.get(with_end.as_str()),
+                    "{} should be before {}",
+                    prop,
+                    with_end
+                );
+            }
+        }
+    }
 }

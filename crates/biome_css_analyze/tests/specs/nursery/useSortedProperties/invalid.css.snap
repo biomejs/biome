@@ -9,26 +9,20 @@ expression: invalid.css
   display: block;
 }
 
-.progressive-fixes-1 {
+.multiple-properties {
   margin: 1px;
   transition:cubic-bezier(1, 0, 0, 1);
   color: red;
   display: block;
 }
 
-.progressive-fixes-2 {
-  margin: 1px;
-  color: red;
-  transition:cubic-bezier(1, 0, 0, 1);
-  display: block;
-}
-
+/* leading comment above rule */
 .comments {
   /* leading for z-index */
   z-index: 1; /* trailing for z-index */
   /* leading for margin */
   margin: 1px; /* trailing for margin*/
-}
+} /* trailing comment after rule */
 
 .oneline { color: red; display: block; }
 
@@ -80,6 +74,16 @@ expression: invalid.css
   -moz-padding: 20px;
 }
 
+.example-from-doc-comment {
+  transition: opactity 1s ease;
+  border: 1px solid black;
+  pointer-events: none;
+  color: black;
+  margin: 8px;
+  display: block;
+  --custom: 100;
+}
+
 ```
 
 # Diagnostics
@@ -95,7 +99,9 @@ invalid.css:1:19 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
   > 4 │ }
       │ ^
     5 │ 
-    6 │ .progressive-fixes-1 {
+    6 │ .multiple-properties {
+  
+  i Consistently ordering CSS properties can improve readability.
   
   i Safe fix: Sort these properties
   
@@ -117,7 +123,7 @@ invalid.css:6:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
   
      4 │ }
      5 │ 
-   > 6 │ .progressive-fixes-1 {
+   > 6 │ .multiple-properties {
        │                      ^
    > 7 │   margin: 1px;
    > 8 │   transition:cubic-bezier(1, 0, 0, 1);
@@ -126,12 +132,14 @@ invalid.css:6:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
   > 11 │ }
        │ ^
     12 │ 
-    13 │ .progressive-fixes-2 {
+    13 │ /* leading comment above rule */
+  
+  i Consistently ordering CSS properties can improve readability.
   
   i Safe fix: Sort these properties
   
      5  5 │   
-     6  6 │   .progressive-fixes-1 {
+     6  6 │   .multiple-properties {
      7    │ - ··margin:·1px;
      8    │ - ··transition:cubic-bezier(1,·0,·0,·1);
      9    │ - ··color:·red;
@@ -147,161 +155,169 @@ invalid.css:6:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.css:13:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:21:10 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Properties can be sorted.
   
-    11 │ }
-    12 │ 
-  > 13 │ .progressive-fixes-2 {
-       │                      ^
-  > 14 │   margin: 1px;
-  > 15 │   color: red;
-  > 16 │   transition:cubic-bezier(1, 0, 0, 1);
-  > 17 │   display: block;
-  > 18 │ }
-       │ ^
-    19 │ 
-    20 │ .comments {
-  
-  i Safe fix: Sort these properties
-  
-    12 12 │   
-    13 13 │   .progressive-fixes-2 {
-    14    │ - ··margin:·1px;
-       14 │ + ··display:·block;
-       15 │ + ··margin:·1px;
-    15 16 │     color: red;
-    16    │ - ··transition:cubic-bezier(1,·0,·0,·1);
-    17    │ - ··display:·block;
-       17 │ + ··transition:cubic-bezier(1,·0,·0,·1);
-    18 18 │   }
-    19 19 │   
-  
-
-```
-
-```
-invalid.css:27:10 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Properties can be sorted.
-  
-    25 │ }
-    26 │ 
-  > 27 │ .oneline { color: red; display: block; }
+    19 │ } /* trailing comment after rule */
+    20 │ 
+  > 21 │ .oneline { color: red; display: block; }
        │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    28 │ 
-    29 │ .nested-rules {
+    22 │ 
+    23 │ .nested-rules {
+  
+  i Consistently ordering CSS properties can improve readability.
   
   i Safe fix: Sort these properties
   
-    25 25 │   }
-    26 26 │   
-    27    │ - .oneline·{·color:·red;·display:·block;·}
-       27 │ + .oneline·{·display:·block;·color:·red;·}
-    28 28 │   
-    29 29 │   .nested-rules {
+    19 19 │   } /* trailing comment after rule */
+    20 20 │   
+    21    │ - .oneline·{·color:·red;·display:·block;·}
+       21 │ + .oneline·{·display:·block;·color:·red;·}
+    22 22 │   
+    23 23 │   .nested-rules {
   
 
 ```
 
 ```
-invalid.css:29:15 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:23:15 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Properties can be sorted.
   
-    27 │ .oneline { color: red; display: block; }
-    28 │ 
-  > 29 │ .nested-rules {
+    21 │ .oneline { color: red; display: block; }
+    22 │ 
+  > 23 │ .nested-rules {
        │               ^
-  > 30 │   display: block;
+  > 24 │   display: block;
         ...
-  > 34 │   margin: 1px;
-  > 35 │ }
+  > 28 │   margin: 1px;
+  > 29 │ }
        │ ^
-    36 │ 
-    37 │ .at-rules {
+    30 │ 
+    31 │ .at-rules {
+  
+  i Consistently ordering CSS properties can improve readability.
   
   i Safe fix: Sort these properties
   
-    29 29 │   .nested-rules {
-    30 30 │     display: block;
-    31    │ - ··.nested·{}
-       31 │ + ··margin:·1px;
-    32 32 │     color: red;
-    33 33 │     .nested {}
-    34    │ - ··margin:·1px;
-       34 │ + ··.nested·{}
-    35 35 │   }
-    36 36 │   
+    23 23 │   .nested-rules {
+    24 24 │     display: block;
+    25    │ - ··.nested·{}
+       25 │ + ··margin:·1px;
+    26 26 │     color: red;
+    27 27 │     .nested {}
+    28    │ - ··margin:·1px;
+       28 │ + ··.nested·{}
+    29 29 │   }
+    30 30 │   
   
 
 ```
 
 ```
-invalid.css:37:11 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:31:11 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Properties can be sorted.
   
-    35 │ }
-    36 │ 
-  > 37 │ .at-rules {
+    29 │ }
+    30 │ 
+  > 31 │ .at-rules {
        │           ^
-  > 38 │   display: block;
+  > 32 │   display: block;
         ...
-  > 42 │   margin: 1px;
-  > 43 │ }
+  > 36 │   margin: 1px;
+  > 37 │ }
        │ ^
-    44 │ 
-    45 │ .mixed-rules {
+    38 │ 
+    39 │ .mixed-rules {
+  
+  i Consistently ordering CSS properties can improve readability.
   
   i Safe fix: Sort these properties
   
-    37 37 │   .at-rules {
-    38 38 │     display: block;
-    39    │ - ··@media·(min-width:·100px)·{}
-    40    │ - ··color:·red;
-    41    │ - ··@media·(min-width:·100px)·{}
-    42    │ - ··margin:·1px;
-       39 │ + ··margin:·1px;
-       40 │ + ··color:·red;
-       41 │ + ··@media·(min-width:·100px)·{}
-       42 │ + ··@media·(min-width:·100px)·{}
-    43 43 │   }
-    44 44 │   
+    31 31 │   .at-rules {
+    32 32 │     display: block;
+    33    │ - ··@media·(min-width:·100px)·{}
+    34    │ - ··color:·red;
+    35    │ - ··@media·(min-width:·100px)·{}
+    36    │ - ··margin:·1px;
+       33 │ + ··margin:·1px;
+       34 │ + ··color:·red;
+       35 │ + ··@media·(min-width:·100px)·{}
+       36 │ + ··@media·(min-width:·100px)·{}
+    37 37 │   }
+    38 38 │   
   
 
 ```
 
 ```
-invalid.css:45:14 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:39:14 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Properties can be sorted.
   
-    43 │ }
-    44 │ 
-  > 45 │ .mixed-rules {
+    37 │ }
+    38 │ 
+  > 39 │ .mixed-rules {
        │              ^
-  > 46 │   display: block;
+  > 40 │   display: block;
         ...
-  > 50 │   margin: 1px;
+  > 44 │   margin: 1px;
+  > 45 │ }
+       │ ^
+    46 │ 
+    47 │ .vendor-prefixes {
+  
+  i Consistently ordering CSS properties can improve readability.
+  
+  i Safe fix: Sort these properties
+  
+    39 39 │   .mixed-rules {
+    40 40 │     display: block;
+    41    │ - ··@media·(min-width:·100px)·{}
+    42    │ - ··color:·red;
+    43    │ - ··.nested·{}
+    44    │ - ··margin:·1px;
+       41 │ + ··margin:·1px;
+       42 │ + ··color:·red;
+       43 │ + ··@media·(min-width:·100px)·{}
+       44 │ + ··.nested·{}
+    45 45 │   }
+    46 46 │   
+  
+
+```
+
+```
+invalid.css:47:18 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Properties can be sorted.
+  
+    45 │ }
+    46 │ 
+  > 47 │ .vendor-prefixes {
+       │                  ^
+  > 48 │   margin: 1px;
+  > 49 │   -moz-margin: 1px;
+  > 50 │   -webkit-margin: 1px;
   > 51 │ }
        │ ^
     52 │ 
-    53 │ .vendor-prefixes {
+    53 │ .case-insensitive {
+  
+  i Consistently ordering CSS properties can improve readability.
   
   i Safe fix: Sort these properties
   
-    45 45 │   .mixed-rules {
-    46 46 │     display: block;
-    47    │ - ··@media·(min-width:·100px)·{}
-    48    │ - ··color:·red;
-    49    │ - ··.nested·{}
-    50    │ - ··margin:·1px;
-       47 │ + ··margin:·1px;
-       48 │ + ··color:·red;
-       49 │ + ··@media·(min-width:·100px)·{}
-       50 │ + ··.nested·{}
+    46 46 │   
+    47 47 │   .vendor-prefixes {
+    48    │ - ··margin:·1px;
+    49    │ - ··-moz-margin:·1px;
+    50    │ - ··-webkit-margin:·1px;
+       48 │ + ··-moz-margin:·1px;
+       49 │ + ··-webkit-margin:·1px;
+       50 │ + ··margin:·1px;
     51 51 │   }
     52 52 │   
   
@@ -309,125 +325,141 @@ invalid.css:45:14 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.css:53:18 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:53:19 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Properties can be sorted.
   
     51 │ }
     52 │ 
-  > 53 │ .vendor-prefixes {
-       │                  ^
-  > 54 │   margin: 1px;
-  > 55 │   -moz-margin: 1px;
-  > 56 │   -webkit-margin: 1px;
-  > 57 │ }
+  > 53 │ .case-insensitive {
+       │                   ^
+  > 54 │   color: red;
+  > 55 │   DISPLAY: block;
+  > 56 │ }
        │ ^
-    58 │ 
-    59 │ .case-insensitive {
+    57 │ 
+    58 │ .nested-with-content {
+  
+  i Consistently ordering CSS properties can improve readability.
   
   i Safe fix: Sort these properties
   
     52 52 │   
-    53 53 │   .vendor-prefixes {
-    54    │ - ··margin:·1px;
-    55    │ - ··-moz-margin:·1px;
-    56    │ - ··-webkit-margin:·1px;
-       54 │ + ··-moz-margin:·1px;
-       55 │ + ··-webkit-margin:·1px;
-       56 │ + ··margin:·1px;
-    57 57 │   }
-    58 58 │   
+    53 53 │   .case-insensitive {
+    54    │ - ··color:·red;
+    55    │ - ··DISPLAY:·block;
+       54 │ + ··DISPLAY:·block;
+       55 │ + ··color:·red;
+    56 56 │   }
+    57 57 │   
   
 
 ```
 
 ```
-invalid.css:59:19 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:59:11 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Properties can be sorted.
   
-    57 │ }
-    58 │ 
-  > 59 │ .case-insensitive {
-       │                   ^
-  > 60 │   color: red;
-  > 61 │   DISPLAY: block;
-  > 62 │ }
-       │ ^
-    63 │ 
-    64 │ .nested-with-content {
-  
-  i Safe fix: Sort these properties
-  
-    58 58 │   
-    59 59 │   .case-insensitive {
-    60    │ - ··color:·red;
-    61    │ - ··DISPLAY:·block;
-       60 │ + ··DISPLAY:·block;
-       61 │ + ··color:·red;
-    62 62 │   }
-    63 63 │   
-  
-
-```
-
-```
-invalid.css:65:11 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Properties can be sorted.
-  
-    64 │ .nested-with-content {
-  > 65 │   .nested {
+    58 │ .nested-with-content {
+  > 59 │   .nested {
        │           ^
-  > 66 │     color: red;
-  > 67 │     display: block;
-  > 68 │   }
+  > 60 │     color: red;
+  > 61 │     display: block;
+  > 62 │   }
        │   ^
-    69 │ }
-    70 │ 
+    63 │ }
+    64 │ 
+  
+  i Consistently ordering CSS properties can improve readability.
   
   i Safe fix: Sort these properties
   
-    64 64 │   .nested-with-content {
-    65 65 │     .nested {
-    66    │ - ····color:·red;
-    67    │ - ····display:·block;
-       66 │ + ····display:·block;
-       67 │ + ····color:·red;
-    68 68 │     }
-    69 69 │   }
+    58 58 │   .nested-with-content {
+    59 59 │     .nested {
+    60    │ - ····color:·red;
+    61    │ - ····display:·block;
+       60 │ + ····display:·block;
+       61 │ + ····color:·red;
+    62 62 │     }
+    63 63 │   }
   
 
 ```
 
 ```
-invalid.css:71:66 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:65:66 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Properties can be sorted.
+  
+    63 │ }
+    64 │ 
+  > 65 │ .shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
+       │                                                                  ^
+  > 66 │   padding: 5px;
+  > 67 │   -webkit-padding-right: 10px;
+  > 68 │   -moz-padding: 20px;
+  > 69 │ }
+       │ ^
+    70 │ 
+    71 │ .example-from-doc-comment {
+  
+  i Consistently ordering CSS properties can improve readability.
+  
+  i Safe fix: Sort these properties
+  
+    64 64 │   
+    65 65 │   .shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
+    66    │ - ··padding:·5px;
+    67    │ - ··-webkit-padding-right:·10px;
+    68    │ - ··-moz-padding:·20px;
+       66 │ + ··-moz-padding:·20px;
+       67 │ + ··padding:·5px;
+       68 │ + ··-webkit-padding-right:·10px;
+    69 69 │   }
+    70 70 │   
+  
+
+```
+
+```
+invalid.css:71:27 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Properties can be sorted.
   
     69 │ }
     70 │ 
-  > 71 │ .shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
-       │                                                                  ^
-  > 72 │   padding: 5px;
-  > 73 │   -webkit-padding-right: 10px;
-  > 74 │   -moz-padding: 20px;
-  > 75 │ }
+  > 71 │ .example-from-doc-comment {
+       │                           ^
+  > 72 │   transition: opactity 1s ease;
+        ...
+  > 77 │   display: block;
+  > 78 │   --custom: 100;
+  > 79 │ }
        │ ^
-    76 │ 
+    80 │ 
+  
+  i Consistently ordering CSS properties can improve readability.
   
   i Safe fix: Sort these properties
   
     70 70 │   
-    71 71 │   .shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
-    72    │ - ··padding:·5px;
-    73    │ - ··-webkit-padding-right:·10px;
-    74    │ - ··-moz-padding:·20px;
-       72 │ + ··-moz-padding:·20px;
-       73 │ + ··padding:·5px;
-       74 │ + ··-webkit-padding-right:·10px;
-    75 75 │   }
-    76 76 │   
+    71 71 │   .example-from-doc-comment {
+    72    │ - ··transition:·opactity·1s·ease;
+    73    │ - ··border:·1px·solid·black;
+    74    │ - ··pointer-events:·none;
+       72 │ + ··--custom:·100;
+       73 │ + ··display:·block;
+       74 │ + ··margin:·8px;
+    75 75 │     color: black;
+    76    │ - ··margin:·8px;
+    77    │ - ··display:·block;
+    78    │ - ··--custom:·100;
+       76 │ + ··pointer-events:·none;
+       77 │ + ··border:·1px·solid·black;
+       78 │ + ··transition:·opactity·1s·ease;
+    79 79 │   }
+    80 80 │   
   
 
 ```

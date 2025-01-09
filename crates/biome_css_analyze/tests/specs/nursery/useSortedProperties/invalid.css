@@ -3,26 +3,20 @@
   display: block;
 }
 
-.progressive-fixes-1 {
+.multiple-properties {
   margin: 1px;
   transition:cubic-bezier(1, 0, 0, 1);
   color: red;
   display: block;
 }
 
-.progressive-fixes-2 {
-  margin: 1px;
-  color: red;
-  transition:cubic-bezier(1, 0, 0, 1);
-  display: block;
-}
-
+/* leading comment above rule */
 .comments {
   /* leading for z-index */
   z-index: 1; /* trailing for z-index */
   /* leading for margin */
   margin: 1px; /* trailing for margin*/
-}
+} /* trailing comment after rule */
 
 .oneline { color: red; display: block; }
 
@@ -72,4 +66,14 @@
   padding: 5px;
   -webkit-padding-right: 10px;
   -moz-padding: 20px;
+}
+
+.example-from-doc-comment {
+  transition: opactity 1s ease;
+  border: 1px solid black;
+  pointer-events: none;
+  color: black;
+  margin: 8px;
+  display: block;
+  --custom: 100;
 }

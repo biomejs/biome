@@ -67,3 +67,13 @@
     color: red;
   }
 }
+
+.example-from-doc-comment {
+  --custom:·100;
+  display:·block;
+  margin:·8px;
+  color: black;
+  pointer-events:·none;
+  border:·1px·solid·black;
+  transition:·opactity·1s·ease;
+}
