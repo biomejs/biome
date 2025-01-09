@@ -9,7 +9,7 @@ use std::time::{Duration, Instant};
 
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, Error, Severity};
-use biome_fs::{BiomePath, PathInterner, PathInternerSet, TraversalContext, TraversalScope};
+use biome_fs::{BiomePath, PathInterner, TraversalContext, TraversalScope};
 
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
@@ -21,9 +21,6 @@ use super::server::WorkspaceServer;
 pub(crate) struct ScanResult {
     /// Diagnostics reported while scanning the project.
     pub diagnostics: Vec<Diagnostic>,
-
-    /// Set containing all scanned paths.
-    pub paths: PathInternerSet,
 
     /// Duration of the full scan.
     pub duration: Duration,
@@ -41,7 +38,7 @@ pub(crate) fn scan(
 
     let collector = DiagnosticsCollector::new();
 
-    let (duration, paths, diagnostics) = thread::scope(|scope| {
+    let (duration, diagnostics) = thread::scope(|scope| {
         let handler = thread::Builder::new()
             .name("biome::scanner".to_string())
             .spawn_scoped(scope, || collector.run(diagnostics_receiver))
@@ -49,7 +46,7 @@ pub(crate) fn scan(
 
         // The traversal context is scoped to ensure all the channels it
         // contains are properly closed once scanning finishes.
-        let (duration, paths, _evaluated_paths) = scan_folder(
+        let duration = scan_folder(
             folder,
             ScanContext {
                 workspace,
@@ -63,12 +60,11 @@ pub(crate) fn scan(
         // Wait for the collector thread to finish.
         let diagnostics = handler.join().unwrap();
 
-        (duration, paths, diagnostics)
+        (duration, diagnostics)
     });
 
     Ok(ScanResult {
         diagnostics,
-        paths,
         duration,
     })
 }
@@ -89,10 +85,7 @@ fn init_thread_pool() {
 /// Initiates the filesystem traversal tasks from the provided path and runs it to completion.
 ///
 /// Returns the duration of the process and the evaluated paths.
-fn scan_folder(
-    folder: &Utf8Path,
-    ctx: ScanContext,
-) -> (Duration, PathInternerSet, BTreeSet<BiomePath>) {
+fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     let start = Instant::now();
     let fs = ctx.workspace.fs();
     let ctx_ref = &ctx;
@@ -100,15 +93,43 @@ fn scan_folder(
         scope.evaluate(ctx_ref, folder.to_path_buf());
     }));
 
-    let paths = ctx.evaluated_paths();
+    let evaluated_paths = ctx.evaluated_paths();
+
+    let mut configs = Vec::new();
+    let mut manifests = Vec::new();
+    let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
+    for path in evaluated_paths {
+        if path.is_config() {
+            configs.push(path);
+        } else if path.is_manifest() {
+            manifests.push(path);
+        } else {
+            handleable_paths.push(path);
+        }
+    }
+
     fs.traversal(Box::new(|scope: &dyn TraversalScope| {
-        for path in paths {
+        for path in &configs {
+            scope.handle(ctx_ref, path.to_path_buf());
+        }
+    }));
+    fs.traversal(Box::new(|scope: &dyn TraversalScope| {
+        for path in &manifests {
             scope.handle(ctx_ref, path.to_path_buf());
         }
     }));
 
-    let evaluated_paths = ctx.evaluated_paths();
-    (start.elapsed(), ctx.interner.into_paths(), evaluated_paths)
+    let mut paths = configs;
+    paths.append(&mut manifests);
+    ctx.workspace.update_project_layout_for_paths(&paths);
+
+    fs.traversal(Box::new(|scope: &dyn TraversalScope| {
+        for path in handleable_paths {
+            scope.handle(ctx_ref, path.into());
+        }
+    }));
+
+    start.elapsed()
 }
 
 struct DiagnosticsCollector {
