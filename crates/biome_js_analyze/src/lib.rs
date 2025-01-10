@@ -969,10 +969,7 @@ a == b;
     fn project_layout_with_top_level_dependencies(
         dependencies: Dependencies,
     ) -> Arc<ProjectLayout> {
-        let manifest = PackageJson {
-            dependencies,
-            ..Default::default()
-        };
+        let manifest = PackageJson::default().with_dependencies(dependencies);
 
         let project_layout = ProjectLayout::default();
         project_layout.insert_node_manifest("/".into(), manifest);

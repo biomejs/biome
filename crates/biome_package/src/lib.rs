@@ -3,21 +3,25 @@ mod license;
 mod node_js_package;
 
 pub use crate::diagnostics::{ProjectAnalyzeDiagnostic, ProjectDiagnostic};
+pub use license::generated::*;
+pub use node_js_package::{
+    Dependencies, NodeJsPackage, PackageJson, PackageType, TsConfigJson, Version,
+};
+
+use std::any::TypeId;
+use std::fmt::Debug;
+
 use biome_deserialize::{DeserializationDiagnostic, Deserialized};
 use biome_diagnostics::serde::Diagnostic;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::Language;
-pub use license::generated::*;
-pub use node_js_package::{Dependencies, NodeJsPackage, PackageJson, PackageType, Version};
-use std::any::TypeId;
-use std::fmt::Debug;
 
 pub(crate) type LanguageRoot<L> = <L as Language>::Root;
 
 pub(crate) type PackageRoot<P> =
     <<<P as Package>::Manifest as Manifest>::Language as Language>::Root;
 
-pub trait Manifest: Default + Debug {
+pub trait Manifest: Debug + Sized {
     type Language: Language;
 
     /// It loads the manifest of the package. It accepts the path where the manifest should be

@@ -418,10 +418,11 @@ impl ConfigurationPathHint {
 
 #[cfg(test)]
 mod test {
-    use oxc_resolver::{FileMetadata, ResolveOptions, ResolverGeneric};
+    use oxc_resolver::{FileMetadata, FsCache, ResolveOptions, ResolverGeneric};
     use std::env;
     use std::fs::read_link;
     use std::path::{Path, PathBuf};
+    use std::sync::Arc;
 
     #[test]
     fn resolver_test() {
@@ -448,8 +449,8 @@ mod test {
             }
         }
 
-        let resolver = ResolverGeneric::new_with_file_system(
-            Test {},
+        let resolver = ResolverGeneric::new_with_cache(
+            Arc::new(FsCache::new(Test {})),
             ResolveOptions {
                 condition_names: vec!["node".to_string(), "import".to_string()],
                 extensions: vec![".json".to_string()],

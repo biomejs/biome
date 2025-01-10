@@ -48,6 +48,8 @@ pub enum WorkspaceError {
     TransportError(TransportError),
     /// Emitted when the file is ignored and should not be processed
     FileIgnored(FileIgnored),
+    /// The file is too large to be processed.
+    FileTooLarge(FileTooLarge),
     /// Diagnostics emitted when querying the file system
     FileSystem(FileSystemDiagnostic),
     /// Raised when there's an issue around the VCS integration
@@ -498,6 +500,12 @@ impl From<CompileError> for WorkspaceError {
                 "{value:?}"
             )))),
         }
+    }
+}
+
+impl From<FileTooLarge> for WorkspaceError {
+    fn from(value: FileTooLarge) -> Self {
+        Self::FileTooLarge(value)
     }
 }
 

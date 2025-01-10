@@ -36,6 +36,7 @@ mod merge;
 mod validator;
 
 use biome_diagnostics::{Error, Severity};
+use biome_json_syntax::AnyJsonValue;
 pub use biome_rowan::TextRange;
 pub use diagnostics::{
     DeserializableType, DeserializableTypes, DeserializationAdvice, DeserializationDiagnostic,
@@ -142,6 +143,9 @@ pub trait DeserializableValue: Sized {
 
     /// Returns the type of this value.
     fn visitable_type(&self) -> Option<DeserializableType>;
+
+    /// Returns a JSON representation of the value, if possible.
+    fn into_json_value(self) -> Option<AnyJsonValue>;
 }
 
 /// This trait represents a visitor that walks through a [DeserializableValue].

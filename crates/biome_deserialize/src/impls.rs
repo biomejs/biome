@@ -8,7 +8,7 @@ use crate::{
 use biome_rowan::{TextRange, TokenText};
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap, HashSet},
-    hash::{BuildHasher, Hash},
+    hash::{BuildHasher, Hash, Hasher},
     marker::PhantomData,
     num::{NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8, NonZeroUsize},
     ops::Deref,
@@ -16,8 +16,9 @@ use std::{
 };
 
 /// Type that allows deserializing a string without heap-allocation when possible.
-/// This is analog to [std::borrow::Cow]:
-#[derive(Debug, Eq, PartialEq, Hash, Clone)]
+///
+/// This is analogous to [std::borrow::Cow], except for strings.
+#[derive(Clone, Debug)]
 pub enum Text {
     Borrowed(TokenText),
     Owned(String),
@@ -30,33 +31,9 @@ impl Text {
         }
     }
 }
-impl From<Text> for String {
-    fn from(value: Text) -> Self {
-        match value {
-            Text::Borrowed(token_text) => token_text.text().to_string(),
-            Text::Owned(string) => string,
-        }
-    }
-}
-impl PartialOrd for Text {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-impl Ord for Text {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.text().cmp(other.text())
-    }
-}
-impl Deref for Text {
-    type Target = str;
-    fn deref(&self) -> &Self::Target {
-        self.text()
-    }
-}
-impl std::fmt::Display for Text {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.text())
+impl Default for Text {
+    fn default() -> Self {
+        Self::Owned(String::new())
     }
 }
 impl Deserializable for Text {
@@ -80,6 +57,46 @@ impl Deserializable for Text {
             }
         }
         value.deserialize(ctx, Visitor, name)
+    }
+}
+impl Deref for Text {
+    type Target = str;
+    fn deref(&self) -> &Self::Target {
+        self.text()
+    }
+}
+impl std::fmt::Display for Text {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.text())
+    }
+}
+impl Eq for Text {}
+impl Hash for Text {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        state.write(self.text().as_bytes());
+    }
+}
+impl Ord for Text {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.text().cmp(other.text())
+    }
+}
+impl PartialEq for Text {
+    fn eq(&self, other: &Self) -> bool {
+        self.text() == other.text()
+    }
+}
+impl PartialOrd for Text {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl From<Text> for String {
+    fn from(value: Text) -> Self {
+        match value {
+            Text::Borrowed(token_text) => token_text.to_string(),
+            Text::Owned(string) => string,
+        }
     }
 }
 
@@ -813,7 +830,6 @@ impl Deserializable for camino::Utf8PathBuf {
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
-        let path = String::deserialize(ctx, value, name).map(Self::from)?;
-        Some(camino::Utf8PathBuf::from(path))
+        String::deserialize(ctx, value, name).map(Self::from)
     }
 }

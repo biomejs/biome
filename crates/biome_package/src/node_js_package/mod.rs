@@ -2,18 +2,17 @@ mod package_json;
 mod tsconfig_json;
 
 pub use package_json::{Dependencies, PackageJson, PackageType, Version};
+pub use tsconfig_json::TsConfigJson;
 
 use biome_rowan::Language;
 
 use crate::{Manifest, Package, PackageAnalyzeResult, ProjectAnalyzeDiagnostic, LICENSE_LIST};
 
-use tsconfig_json::TsConfigJson;
-
 #[derive(Default, Debug, Clone)]
 /// A Node.js project.
 pub struct NodeJsPackage {
     /// The `package.json` manifest
-    pub manifest: PackageJson,
+    pub manifest: Option<PackageJson>,
     /// Diagnostics emitted during the operations
     pub diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     /// The `tsconfig.json` manifest
@@ -40,7 +39,7 @@ impl Package for NodeJsPackage {
     fn insert_serialized_manifest(&mut self, content: &ProjectLanguageRoot<Self::Manifest>) {
         let deserialized = Self::Manifest::deserialize_manifest(content);
         let (manifest, diagnostics) = deserialized.consume();
-        self.manifest = manifest.unwrap_or_default();
+        self.manifest = manifest;
         self.diagnostics = diagnostics
             .into_iter()
             .map(biome_diagnostics::serde::Diagnostic::new)
@@ -48,12 +47,16 @@ impl Package for NodeJsPackage {
     }
 
     fn manifest(&self) -> Option<&Self::Manifest> {
-        Some(&self.manifest)
+        self.manifest.as_ref()
     }
 
     fn analyze(&self) -> PackageAnalyzeResult {
         let mut diagnostics = vec![];
-        if let Some((license, range)) = &self.manifest.license {
+        if let Some((license, range)) = self
+            .manifest
+            .as_ref()
+            .and_then(|manifest| manifest.license.as_ref())
+        {
             if !LICENSE_LIST.is_valid(license) {
                 diagnostics
                     .push(ProjectAnalyzeDiagnostic::new_invalid_license(license).with_range(range))

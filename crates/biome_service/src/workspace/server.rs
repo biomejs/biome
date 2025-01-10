@@ -23,6 +23,7 @@ use crate::workspace::{
 use crate::{file_handlers::Features, Workspace, WorkspaceError};
 use append_only_vec::AppendOnlyVec;
 use biome_configuration::{BiomeDiagnostic, Configuration};
+use biome_dependency_graph::DependencyGraph;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Deserialized;
 use biome_diagnostics::print_diagnostic_to_string;
@@ -32,7 +33,7 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, FileSystem};
 use biome_grit_patterns::{compile_pattern_with_options, CompilePatternOptions, GritQuery};
-use biome_js_syntax::ModuleKind;
+use biome_js_syntax::{AnyJsRoot, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_package::PackageType;
@@ -57,6 +58,9 @@ pub(super) struct WorkspaceServer {
 
     /// The layout of projects and their internal packages.
     project_layout: Arc<ProjectLayout>,
+
+    /// Dependency graph tracking imports across source files.
+    dependency_graph: Arc<DependencyGraph>,
 
     /// Stores the document (text content + version number) associated with a URL
     documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
@@ -131,6 +135,7 @@ impl WorkspaceServer {
             features: Features::new(),
             projects: Default::default(),
             project_layout: Default::default(),
+            dependency_graph: Default::default(),
             documents: Default::default(),
             file_sources: AppendOnlyVec::default(),
             patterns: Default::default(),
@@ -221,6 +226,23 @@ impl WorkspaceServer {
             .unwrap_or(DocumentFileSource::from_path(path))
     }
 
+    fn get_js_syntax(&self, path: &Utf8Path) -> Result<AnyJsRoot, WorkspaceError> {
+        let documents = self.documents.pin();
+        let doc = documents.get(path).ok_or_else(WorkspaceError::not_found)?;
+        let file_source = self.file_sources[doc.file_source_index];
+        match file_source {
+            DocumentFileSource::Js(_) => match &doc.syntax {
+                Ok(parse) => Ok(parse.tree()),
+                Err(error) => Err(WorkspaceError::FileTooLarge(error.clone())),
+            },
+            _ => Err(WorkspaceError::source_file_not_supported(
+                file_source,
+                path.to_string(),
+                path.extension().map(str::to_string),
+            )),
+        }
+    }
+
     /// Returns an error factory function for unsupported features at a given
     /// path.
     fn build_capability_error<'a>(
@@ -296,7 +318,7 @@ impl WorkspaceServer {
         if let DocumentFileSource::Js(js) = &mut source {
             let manifest = self.project_layout.get_node_manifest_for_path(&path);
             if let Some((_, manifest)) = manifest {
-                if manifest.r#type == Some(PackageType::Commonjs) && js.file_extension() == "js" {
+                if manifest.r#type == Some(PackageType::CommonJs) && js.file_extension() == "js" {
                     js.set_module_kind(ModuleKind::Script);
                 }
             }
@@ -527,6 +549,16 @@ impl WorkspaceServer {
         }
 
         Ok(())
+    }
+
+    pub(super) fn update_dependency_graph_for_paths(&self, paths: &[BiomePath]) {
+        self.dependency_graph.update_imports_for_js_paths(
+            self.fs.as_ref(),
+            &self.project_layout,
+            paths,
+            &[],
+            |path| self.get_js_syntax(path).ok(),
+        );
     }
 }
 

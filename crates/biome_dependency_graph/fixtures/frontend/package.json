@@ -1,0 +1,7 @@
+{
+    "name": "frontend",
+    "version": "0.0.0",
+    "dependencies": {
+        "shared": "link:../shared"
+    }
+}

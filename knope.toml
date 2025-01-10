@@ -234,6 +234,14 @@ versioned_files = ["crates/biome_syntax_codegen/Cargo.toml"]
 changelog       = "crates/biome_project_layout/CHANGELOG.md"
 versioned_files = ["crates/biome_project_layout/Cargo.toml"]
 
+[packages.biome_dependency_graph]
+changelog       = "crates/biome_dependency_graph/CHANGELOG.md"
+versioned_files = ["crates/biome_dependency_graph/Cargo.toml"]
+
+[packages.biome_json_value]
+changelog       = "crates/biome_json_value/CHANGELOG.md"
+versioned_files = ["crates/biome_json_value/Cargo.toml"]
+
 ## End of crates. DO NOT CHANGE!
 
 # Workflow to create a changeset

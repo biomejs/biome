@@ -167,6 +167,7 @@ ready:
 new-crate name:
   cargo new --lib crates/{{snakecase(name)}}
   cargo run -p xtask_codegen -- new-crate --name={{snakecase(name)}}
+  taplo format
 
 # Creates a new changeset for the final changelog
 new-changeset:

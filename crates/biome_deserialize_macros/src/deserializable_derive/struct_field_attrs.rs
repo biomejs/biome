@@ -28,6 +28,9 @@ pub struct StructFieldAttrs {
     /// Implies `bail_on_error`.
     pub required: bool,
 
+    /// If `true`, this field will not be deserialized at all.
+    pub skip: bool,
+
     /// Optional validation function to be called on the field value.
     pub validate: Option<Path>,
 
@@ -60,6 +63,8 @@ impl TryFrom<&Vec<Attribute>> for StructFieldAttrs {
                                 opts.bail_on_error = true;
                             } else if path.is_ident("rest") {
                                 opts.rest = true;
+                            } else if path.is_ident("skip") {
+                                opts.skip = true;
                             } else {
                                 let path_str = path.to_token_stream().to_string();
                                 return Err(Error::new(

@@ -73,7 +73,7 @@ impl ProjectLayout {
             let Some(node_manifest) = data
                 .node_package
                 .as_ref()
-                .map(|node_package| &node_package.manifest)
+                .and_then(|node_package| node_package.manifest.as_ref())
             else {
                 continue;
             };
@@ -91,6 +91,10 @@ impl ProjectLayout {
         result.map(|(package_path, package_json)| (package_path.clone(), package_json.clone()))
     }
 
+    /// Inserts a `package.json` manifest for the package at the given `path`.
+    ///
+    /// `path` refers to the package directory, not the `package.json` file
+    /// itself.
     pub fn insert_node_manifest(&self, path: Utf8PathBuf, manifest: PackageJson) {
         self.0.pin().update_or_insert_with(
             path,
@@ -104,7 +108,7 @@ impl ProjectLayout {
                         .map(|package| package.tsconfig.clone())
                         .unwrap_or_default(),
                 };
-                node_js_package.manifest = manifest.clone();
+                node_js_package.manifest = Some(manifest.clone());
 
                 PackageData {
                     node_package: Some(node_js_package),
@@ -112,7 +116,7 @@ impl ProjectLayout {
             },
             || {
                 let node_js_package = NodeJsPackage {
-                    manifest: manifest.clone(),
+                    manifest: Some(manifest.clone()),
                     ..Default::default()
                 };
 
@@ -123,6 +127,10 @@ impl ProjectLayout {
         );
     }
 
+    /// Inserts a `package.json` manifest for the package at the given `path`,
+    /// parsing the manifest on demand.
+    ///
+    /// See also [Self::insert_node_manifest()].
     pub fn insert_serialized_node_manifest(&self, path: Utf8PathBuf, manifest: AnyParse) {
         self.0.pin().update_or_insert_with(
             path,
@@ -153,6 +161,7 @@ impl ProjectLayout {
         );
     }
 
+    /// Removes a package and its metadata from the project layout.
     pub fn remove_package(&self, path: &Utf8Path) {
         self.0.pin().remove(path);
     }

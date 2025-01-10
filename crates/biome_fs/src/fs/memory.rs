@@ -1,6 +1,6 @@
 use biome_diagnostics::{Error, Severity};
 use camino::{Utf8Path, Utf8PathBuf};
-use oxc_resolver::{Resolution, ResolveError};
+use oxc_resolver::{FsResolution, ResolveError};
 use parking_lot::{lock_api::ArcMutexGuard, Mutex, RawMutex, RwLock};
 use rustc_hash::FxHashMap;
 use std::collections::hash_map::Entry;
@@ -13,7 +13,7 @@ use std::sync::Arc;
 use crate::fs::OpenOptions;
 use crate::{BiomePath, FileSystem, TraversalContext, TraversalScope};
 
-use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind};
+use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind, PathKind};
 
 type OnGetChangedFiles = Option<
     Arc<
@@ -205,17 +205,12 @@ impl FileSystem for MemoryFileSystem {
         self.path_is_file(path)
     }
 
-    fn path_is_file(&self, path: &Utf8Path) -> bool {
+    fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {
         let files = self.files.0.read();
-        files.get(path).is_some()
-    }
-
-    fn path_is_dir(&self, path: &Utf8Path) -> bool {
-        !self.path_is_file(path)
-    }
-
-    fn path_is_symlink(&self, _path: &Utf8Path) -> bool {
-        false
+        match files.get(path) {
+            Some(_) => Ok(PathKind::File { is_symlink: false }),
+            None => Ok(PathKind::Directory { is_symlink: false }),
+        }
     }
 
     fn get_changed_files(&self, _base: &str) -> io::Result<Vec<String>> {
@@ -242,7 +237,7 @@ impl FileSystem for MemoryFileSystem {
         &self,
         _specifier: &str,
         _path: &Utf8Path,
-    ) -> Result<Resolution, ResolveError> {
+    ) -> Result<FsResolution, ResolveError> {
         todo!()
     }
 }

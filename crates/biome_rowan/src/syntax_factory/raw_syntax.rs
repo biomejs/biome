@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 ///
 /// Allows third-party crates to access limited information about a `GreenNode` or construct
 /// a `GreenNode` in a limited places.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct RawSyntaxNode<K: SyntaxKind> {
     raw: GreenNode,
     ph: PhantomData<K>,
