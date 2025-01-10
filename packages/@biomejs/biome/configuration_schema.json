@@ -1664,24 +1664,28 @@
 		},
 		"GroupPlainConfiguration": {
 			"oneOf": [
-				{ "type": "string", "enum": ["off"] },
 				{
-					"description": "Enables the recommended rules with their default",
+					"description": "It disables all the rules of this group",
+					"type": "string",
+					"enum": ["off"]
+				},
+				{
+					"description": "It enables all the rules of this group, with their default severity",
 					"type": "string",
 					"enum": ["on"]
 				},
 				{
-					"description": "Enables the rule, and it will emit a diagnostic with information severity",
+					"description": "It enables all the rules of this group, and set their severity to \"info\"",
 					"type": "string",
 					"enum": ["info"]
 				},
 				{
-					"description": "Enables the rule, and it will emit a diagnostic with warning severity",
+					"description": "It enables all the rules of this group, and set their severity to \"warn\"",
 					"type": "string",
 					"enum": ["warn"]
 				},
 				{
-					"description": "Enables the rule, and it will emit a diagnostic with error severity",
+					"description": "It enables all the rules of this group, and set their severity to \"error+\"",
 					"type": "string",
 					"enum": ["error"]
 				}
