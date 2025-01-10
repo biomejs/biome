@@ -21,7 +21,7 @@ upgrade-tools:
 # Generate all files across crates and tools. You rarely want to use it locally.
 gen-all:
   cargo run -p xtask_codegen -- all
-  cargo codegen-configuration
+  just gen-configuration
   cargo codegen-migrate
   just gen-bindings
   just format
@@ -29,16 +29,24 @@ gen-all:
 # Generates TypeScript types and JSON schema of the configuration
 gen-bindings:
   cargo codegen-schema
-  cargo codegen-bindings
+  cargo run -p xtask_codegen --features schema -- bindings
 
 # Generates code generated files for the linter
 gen-analyzer:
   cargo run -p xtask_codegen -- analyzer
-  cargo codegen-configuration
+  just gen-configuration
   cargo codegen-migrate
   just gen-bindings
   cargo run -p rules_check
   just format
+
+gen-configuration:
+    cargo run -p xtask_codegen --features configuration -- configuration
+
+# Generates code for eslint migration
+gen-migrate:
+   cargo run -p xtask_codegen --features configuration -- migrate-eslint
+
 
 # Generates the initial files for all formatter crates
 gen-formatter:

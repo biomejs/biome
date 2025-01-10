@@ -1,6 +1,8 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use crate::analyzer::{RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration};
+use crate::analyzer::{
+    RuleConfiguration, RuleFixConfiguration, RuleGroupExt, RulePlainConfiguration, SeverityOrGroup,
+};
 use biome_analyze::{options::RuleOptions, RuleFilter};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::{Category, Severity};
@@ -73,28 +75,28 @@ pub struct Rules {
     pub recommended: Option<bool>,
     #[deserializable(rename = "a11y")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub a11y: Option<A11y>,
+    pub a11y: Option<SeverityOrGroup<A11y>>,
     #[deserializable(rename = "complexity")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub complexity: Option<Complexity>,
+    pub complexity: Option<SeverityOrGroup<Complexity>>,
     #[deserializable(rename = "correctness")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub correctness: Option<Correctness>,
+    pub correctness: Option<SeverityOrGroup<Correctness>>,
     #[deserializable(rename = "nursery")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub nursery: Option<Nursery>,
+    pub nursery: Option<SeverityOrGroup<Nursery>>,
     #[deserializable(rename = "performance")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub performance: Option<Performance>,
+    pub performance: Option<SeverityOrGroup<Performance>>,
     #[deserializable(rename = "security")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub security: Option<Security>,
+    pub security: Option<SeverityOrGroup<Security>>,
     #[deserializable(rename = "style")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub style: Option<Style>,
+    pub style: Option<SeverityOrGroup<Style>>,
     #[deserializable(rename = "suspicious")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub suspicious: Option<Suspicious>,
+    pub suspicious: Option<SeverityOrGroup<Suspicious>>,
 }
 impl Rules {
     #[doc = r" Checks if the code coming from [biome_diagnostics::Diagnostic] corresponds to a rule."]
@@ -225,28 +227,28 @@ impl Rules {
             self.recommended = Some(true)
         }
         if let Some(group) = &mut self.a11y {
-            group.recommended = None;
+            group.set_recommended(None);
         }
         if let Some(group) = &mut self.complexity {
-            group.recommended = None;
+            group.set_recommended(None);
         }
         if let Some(group) = &mut self.correctness {
-            group.recommended = None;
+            group.set_recommended(None);
         }
         if let Some(group) = &mut self.nursery {
-            group.recommended = None;
+            group.set_recommended(None);
         }
         if let Some(group) = &mut self.performance {
-            group.recommended = None;
+            group.set_recommended(None);
         }
         if let Some(group) = &mut self.security {
-            group.recommended = None;
+            group.set_recommended(None);
         }
         if let Some(group) = &mut self.style {
-            group.recommended = None;
+            group.set_recommended(None);
         }
         if let Some(group) = &mut self.suspicious {
-            group.recommended = None;
+            group.set_recommended(None);
         }
     }
     pub(crate) const fn is_recommended_false(&self) -> bool {
@@ -559,14 +561,51 @@ impl A11y {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
     ];
-    #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended_true(&self) -> bool {
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
+    ];
+}
+impl RuleGroupExt for A11y {
+    fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) fn is_recommended_unset(&self) -> bool {
+    fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_access_key.as_ref() {
             if rule.is_enabled() {
@@ -740,7 +779,7 @@ impl A11y {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_access_key.as_ref() {
             if rule.is_disabled() {
@@ -915,14 +954,17 @@ impl A11y {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+    fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
+    fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
+    fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
-    pub(crate) fn collect_preset_rules(
+    fn collect_preset_rules(
         &self,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
@@ -931,7 +973,10 @@ impl A11y {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }
-    pub(crate) fn get_rule_configuration(
+    fn set_recommended(&mut self, value: Option<bool>) {
+        self.recommended = value;
+    }
+    fn get_rule_configuration(
         &self,
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
@@ -1273,14 +1318,50 @@ impl Complexity {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
     ];
-    #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended_true(&self) -> bool {
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
+    ];
+}
+impl RuleGroupExt for Complexity {
+    fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) fn is_recommended_unset(&self) -> bool {
+    fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_banned_types.as_ref() {
             if rule.is_enabled() {
@@ -1452,7 +1533,7 @@ impl Complexity {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_banned_types.as_ref() {
             if rule.is_disabled() {
@@ -1625,14 +1706,17 @@ impl Complexity {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+    fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
+    fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
+    fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
-    pub(crate) fn collect_preset_rules(
+    fn collect_preset_rules(
         &self,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
@@ -1641,7 +1725,10 @@ impl Complexity {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }
-    pub(crate) fn get_rule_configuration(
+    fn set_recommended(&mut self, value: Option<bool>) {
+        self.recommended = value;
+    }
+    fn get_rule_configuration(
         &self,
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
@@ -2087,14 +2174,70 @@ impl Correctness {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]),
     ];
-    #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended_true(&self) -> bool {
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]),
+    ];
+}
+impl RuleGroupExt for Correctness {
+    fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) fn is_recommended_unset(&self) -> bool {
+    fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_children_prop.as_ref() {
             if rule.is_enabled() {
@@ -2363,7 +2506,7 @@ impl Correctness {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_children_prop.as_ref() {
             if rule.is_disabled() {
@@ -2633,14 +2776,17 @@ impl Correctness {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+    fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
+    fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
+    fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
-    pub(crate) fn collect_preset_rules(
+    fn collect_preset_rules(
         &self,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
@@ -2649,7 +2795,10 @@ impl Correctness {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }
-    pub(crate) fn get_rule_configuration(
+    fn set_recommended(&mut self, value: Option<bool>) {
+        self.recommended = value;
+    }
+    fn get_rule_configuration(
         &self,
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
@@ -3173,14 +3322,75 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]),
     ];
-    #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended_true(&self) -> bool {
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]),
+    ];
+}
+impl RuleGroupExt for Nursery {
+    fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) fn is_recommended_unset(&self) -> bool {
+    fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_common_js.as_ref() {
             if rule.is_enabled() {
@@ -3474,7 +3684,7 @@ impl Nursery {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_common_js.as_ref() {
             if rule.is_disabled() {
@@ -3769,14 +3979,17 @@ impl Nursery {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+    fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
+    fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
+    fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
-    pub(crate) fn collect_preset_rules(
+    fn collect_preset_rules(
         &self,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
@@ -3785,7 +3998,10 @@ impl Nursery {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }
-    pub(crate) fn get_rule_configuration(
+    fn set_recommended(&mut self, value: Option<bool>) {
+        self.recommended = value;
+    }
+    fn get_rule_configuration(
         &self,
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
@@ -4064,14 +4280,22 @@ impl Performance {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
     ];
-    #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended_true(&self) -> bool {
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
+    ];
+}
+impl RuleGroupExt for Performance {
+    fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) fn is_recommended_unset(&self) -> bool {
+    fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_accumulating_spread.as_ref() {
             if rule.is_enabled() {
@@ -4100,7 +4324,7 @@ impl Performance {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_accumulating_spread.as_ref() {
             if rule.is_disabled() {
@@ -4130,14 +4354,17 @@ impl Performance {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+    fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
+    fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
+    fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
-    pub(crate) fn collect_preset_rules(
+    fn collect_preset_rules(
         &self,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
@@ -4146,7 +4373,10 @@ impl Performance {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }
-    pub(crate) fn get_rule_configuration(
+    fn set_recommended(&mut self, value: Option<bool>) {
+        self.recommended = value;
+    }
+    fn get_rule_configuration(
         &self,
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
@@ -4207,14 +4437,20 @@ impl Security {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
     ];
-    #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended_true(&self) -> bool {
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
+    ];
+}
+impl RuleGroupExt for Security {
+    fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) fn is_recommended_unset(&self) -> bool {
+    fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_dangerously_set_inner_html.as_ref() {
             if rule.is_enabled() {
@@ -4233,7 +4469,7 @@ impl Security {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_dangerously_set_inner_html.as_ref() {
             if rule.is_disabled() {
@@ -4253,14 +4489,17 @@ impl Security {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+    fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
+    fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
+    fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
-    pub(crate) fn collect_preset_rules(
+    fn collect_preset_rules(
         &self,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
@@ -4269,7 +4508,10 @@ impl Security {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }
-    pub(crate) fn get_rule_configuration(
+    fn set_recommended(&mut self, value: Option<bool>) {
+        self.recommended = value;
+    }
+    fn get_rule_configuration(
         &self,
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
@@ -4532,14 +4774,65 @@ impl Style {
         "useThrowOnlyError",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[];
-    #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended_true(&self) -> bool {
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
+    ];
+}
+impl RuleGroupExt for Style {
+    fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) fn is_recommended_unset(&self) -> bool {
+    fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_arguments.as_ref() {
             if rule.is_enabled() {
@@ -4783,7 +5076,7 @@ impl Style {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_arguments.as_ref() {
             if rule.is_disabled() {
@@ -5028,14 +5321,17 @@ impl Style {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+    fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
+    fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
+    fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
-    pub(crate) fn collect_preset_rules(
+    fn collect_preset_rules(
         &self,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
@@ -5044,7 +5340,10 @@ impl Style {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }
-    pub(crate) fn get_rule_configuration(
+    fn set_recommended(&mut self, value: Option<bool>) {
+        self.recommended = value;
+    }
+    fn get_rule_configuration(
         &self,
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
@@ -5621,14 +5920,84 @@ impl Suspicious {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[64]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[66]),
     ];
-    #[doc = r" Retrieves the recommended rules"]
-    pub(crate) fn is_recommended_true(&self) -> bool {
+    const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[31]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[32]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[60]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[61]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[62]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[63]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[64]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[65]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[66]),
+    ];
+}
+impl RuleGroupExt for Suspicious {
+    fn is_recommended_true(&self) -> bool {
         matches!(self.recommended, Some(true))
     }
-    pub(crate) fn is_recommended_unset(&self) -> bool {
+    fn is_recommended_unset(&self) -> bool {
         self.recommended.is_none()
     }
-    pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_approximative_numeric_constant.as_ref() {
             if rule.is_enabled() {
@@ -5967,7 +6336,7 @@ impl Suspicious {
         }
         index_set
     }
-    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+    fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
         if let Some(rule) = self.no_approximative_numeric_constant.as_ref() {
             if rule.is_disabled() {
@@ -6307,14 +6676,17 @@ impl Suspicious {
         index_set
     }
     #[doc = r" Checks if, given a rule name, matches one of the rules contained in this category"]
-    pub(crate) fn has_rule(rule_name: &str) -> Option<&'static str> {
+    fn has_rule(rule_name: &str) -> Option<&'static str> {
         Some(Self::GROUP_RULES[Self::GROUP_RULES.binary_search(&rule_name).ok()?])
     }
-    pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
+    fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
+    fn all_rules_as_filters() -> &'static [RuleFilter<'static>] {
+        Self::ALL_RULES_AS_FILTERS
+    }
     #[doc = r" Select preset rules"]
-    pub(crate) fn collect_preset_rules(
+    fn collect_preset_rules(
         &self,
         parent_is_recommended: bool,
         enabled_rules: &mut FxHashSet<RuleFilter<'static>>,
@@ -6323,7 +6695,10 @@ impl Suspicious {
             enabled_rules.extend(Self::recommended_rules_as_filters());
         }
     }
-    pub(crate) fn get_rule_configuration(
+    fn set_recommended(&mut self, value: Option<bool>) {
+        self.recommended = value;
+    }
+    fn get_rule_configuration(
         &self,
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
