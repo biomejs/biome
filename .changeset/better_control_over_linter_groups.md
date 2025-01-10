@@ -5,7 +5,7 @@ cli: minor
 # Better control over linter groups
 
 Linter groups now accept new options to enable/disable all rules that belong to a group, and control the severity
-of the rule that belong to those groups.
+of the rules that belong to those groups.
 
 For example, you can downgrade the severity of rules that belong to `"style"` to emit `"info"` diagnostics:
 
