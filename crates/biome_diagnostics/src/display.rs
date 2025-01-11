@@ -110,6 +110,11 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
         };
 
         let is_vscode = env::var("TERM_PROGRAM").unwrap_or_default() == "vscode";
+        // https://github.com/JetBrains/jediterm/issues/253#issuecomment-1280492436
+        // https://github.com/JetBrains/intellij-community/blob/5ca79d879617e9cc82f61590b8d157d6a4ad8746/plugins/terminal/src/org/jetbrains/plugins/terminal/runner/LocalOptionsConfigurer.java#L94
+        let is_jetbrains = env::var("TERMINAL_EMULATOR")
+            .unwrap_or_default()
+            .contains("JetBrains");
 
         if let Some(name) = file_name {
             if is_vscode {
@@ -121,6 +126,8 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
                     fmt.write_markup(markup! {
                         <Hyperlink href={link}>{name}</Hyperlink>
                     })?;
+                } else if is_jetbrains {
+                    fmt.write_str(&format!(" at {name}"))?;
                 } else {
                     fmt.write_str(name)?;
                 }
