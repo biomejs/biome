@@ -109,6 +109,7 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
         };
 
         let is_vscode = env::var("TERM_PROGRAM").unwrap_or_default() == "vscode";
+        let is_jetbrains = env::var("TERMINAL_EMULATOR").unwrap_or_default().contains("JetBrains");
 
         if let Some(name) = file_name {
             if is_vscode {
@@ -121,7 +122,11 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
                         <Hyperlink href={link}>{name}</Hyperlink>
                     })?;
                 } else {
-                    fmt.write_str(name)?;
+                    if is_jetbrains {
+                        fmt.write_str(&format!(" at {name}"))?;
+                    } else {
+                        fmt.write_str(name)?;
+                    }
                 }
             }
 
