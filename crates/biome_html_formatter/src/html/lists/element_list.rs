@@ -4,12 +4,15 @@ use std::cell::RefCell;
 
 use crate::{
     comments::HtmlComments,
+    html::auxiliary::element::{FormatHtmlElement, FormatHtmlElementOptions},
     prelude::*,
     utils::children::{
         html_split_children, is_meaningful_html_text, HtmlChild, HtmlChildrenIterator, HtmlSpace,
     },
 };
-use biome_formatter::{best_fitting, prelude::*, CstFormatContext, FormatRuleWithOptions};
+use biome_formatter::{
+    best_fitting, prelude::*, CstFormatContext, FormatContext, FormatRuleWithOptions,
+};
 use biome_formatter::{format_args, write, VecBuffer};
 use biome_html_syntax::{
     AnyHtmlElement, HtmlClosingElement, HtmlClosingElementFields, HtmlElementList, HtmlRoot,
@@ -283,12 +286,17 @@ impl FormatHtmlElementList {
                             // <pre className="h-screen overflow-y-scroll" />
                             // adefg
                             // ```
-                            if matches!(non_text, AnyHtmlElement::HtmlSelfClosingElement(_))
-                                && !word.is_single_character()
-                            {
-                                Some(LineMode::Hard)
+
+                            if !f.context().options().whitespace_sensitivity().is_strict() {
+                                if matches!(non_text, AnyHtmlElement::HtmlSelfClosingElement(_))
+                                    && !word.is_single_character()
+                                {
+                                    Some(LineMode::Hard)
+                                } else {
+                                    Some(LineMode::Soft)
+                                }
                             } else {
-                                Some(LineMode::Soft)
+                                None
                             }
                         }
 
@@ -308,20 +316,28 @@ impl FormatHtmlElementList {
                         format_with(move |f| f.write_element(FormatElement::Line(mode)))
                     });
 
+                    let next_sibling_is_text =
+                        matches!(children_iter.peek(), Some(HtmlChild::Word(_)));
+                    let format_content = format_with(|f| match non_text {
+                        AnyHtmlElement::HtmlElement(element) => FormatNodeRule::fmt(
+                            &FormatHtmlElement::default().with_options(FormatHtmlElementOptions {
+                                next_sibling_is_text,
+                            }),
+                            element,
+                            f,
+                        ),
+                        non_text => non_text.format().fmt(f),
+                    });
+
                     if force_multiline {
                         if let Some(format_separator) = format_separator {
-                            multiline.write_with_separator(
-                                &non_text.format(),
-                                &format_separator,
-                                f,
-                            );
+                            multiline.write_with_separator(&format_content, &format_separator, f);
                         } else {
                             // it's safe to write without a separator because None means that next element is a separator or end of the iterator
-                            multiline.write_content(&non_text.format(), f);
+                            multiline.write_content(&format_content, f);
                         }
                     } else {
-                        let mut memoized = non_text.format().memoized();
-
+                        let mut memoized = format_content.memoized();
                         force_multiline = memoized.inspect(f)?.will_break();
                         flat.write(&format_args![memoized, format_separator], f);
 

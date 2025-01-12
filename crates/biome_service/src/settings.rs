@@ -111,6 +111,10 @@ impl Settings {
         if let Some(graphql) = configuration.graphql {
             self.languages.graphql = graphql.into()
         }
+        // html settings
+        if let Some(html) = configuration.html {
+            self.languages.html = html.into()
+        }
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
         if let Some(overrides) = configuration.overrides {
