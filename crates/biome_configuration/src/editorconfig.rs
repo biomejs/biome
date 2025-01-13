@@ -12,7 +12,7 @@
 use std::{collections::HashMap, str::FromStr};
 
 use biome_diagnostics::{Error, IniError};
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding};
 use serde::{Deserialize, Deserializer};
 
 use crate::{
@@ -93,8 +93,6 @@ pub struct EditorConfigOptions {
     indent_size: EditorconfigValue<IndentWidth>,
     #[serde(deserialize_with = "deserialize_optional_value_from_string")]
     end_of_line: EditorconfigValue<LineEnding>,
-    #[serde(deserialize_with = "deserialize_optional_value_from_string")]
-    max_line_length: EditorconfigValue<LineWidth>,
     // Not a biome option, but we need it to emit a diagnostic when this is set to false.
     #[serde(deserialize_with = "deserialize_optional_bool_from_string")]
     insert_final_newline: Option<bool>,
@@ -106,7 +104,6 @@ impl EditorConfigOptions {
             indent_style: self.indent_style.into(),
             indent_width: self.indent_size.into(),
             line_ending: self.end_of_line.into(),
-            line_width: self.max_line_length.into(),
             ..Default::default()
         }
     }
@@ -116,7 +113,6 @@ impl EditorConfigOptions {
             indent_style: self.indent_style.into(),
             indent_width: self.indent_size.into(),
             line_ending: self.end_of_line.into(),
-            line_width: self.max_line_length.into(),
             ..Default::default()
         }
     }
@@ -406,7 +402,6 @@ insert_final_newline = true
 end_of_line = crlf
 indent_style = space
 indent_size = 4
-max_line_length = 80
 "#;
 
         let conf = parse_str(input).expect("Failed to parse editorconfig");
@@ -416,7 +411,6 @@ max_line_length = 80
         assert_eq!(formatter.indent_style, Some(IndentStyle::Space));
         assert_eq!(formatter.indent_width.unwrap().value(), 4);
         assert_eq!(formatter.line_ending, Some(LineEnding::Crlf));
-        assert_eq!(formatter.line_width.map(|v| v.value()), Some(80));
     }
 
     #[test]
@@ -458,26 +452,6 @@ max_line_length = unset
         assert!(matches!(
             conf.options["*"].end_of_line,
             EditorconfigValue::Default
-        ));
-        assert!(matches!(
-            conf.options["*"].max_line_length,
-            EditorconfigValue::Default
-        ));
-    }
-
-    #[test]
-    fn should_parse_editorconfig_with_max_line_length_off() {
-        let input = r#"
-root = true
-
-[*]
-max_line_length = off
-"#;
-
-        let conf = parse_str(input).expect("Failed to parse editorconfig");
-        assert!(matches!(
-            conf.options["*"].max_line_length,
-            EditorconfigValue::Default,
         ));
     }
 

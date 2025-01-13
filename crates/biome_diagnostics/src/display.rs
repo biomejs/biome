@@ -109,12 +109,22 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
             _ => None,
         };
 
-        let is_vscode = env::var("TERM_PROGRAM").unwrap_or_default() == "vscode";
+        let is_vscode = {
+            if cfg!(debug_assertions) {
+                false
+            } else {
+                env::var("TERM_PROGRAM").unwrap_or_default() == "vscode"
+            }
+        };
         // https://github.com/JetBrains/jediterm/issues/253#issuecomment-1280492436
         // https://github.com/JetBrains/intellij-community/blob/5ca79d879617e9cc82f61590b8d157d6a4ad8746/plugins/terminal/src/org/jetbrains/plugins/terminal/runner/LocalOptionsConfigurer.java#L94
-        let is_jetbrains = env::var("TERMINAL_EMULATOR")
-            .unwrap_or_default()
-            .contains("JetBrains");
+        let is_jetbrains = {
+            if cfg!(debug_assertions) {
+                false
+            } else {
+                env::var("TERM_PROGRAM").unwrap_or_default() == "JetBrains-JediTerm"
+            }
+        };
 
         if let Some(name) = file_name {
             if is_vscode {
