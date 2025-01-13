@@ -14,7 +14,7 @@ use rustc_hash::FxHashSet;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use std::fmt::Debug;
+use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
 
 #[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
@@ -392,10 +392,25 @@ impl<T: Default> Merge for RuleWithFixOptions<T> {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub enum RuleSelector {
     Group(&'static str),
     Rule(&'static str, &'static str),
+}
+
+impl Debug for RuleSelector {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(self, f)
+    }
+}
+
+impl Display for RuleSelector {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RuleSelector::Group(group) => write!(f, "{}", group),
+            RuleSelector::Rule(group, rule) => write!(f, "{}/{}", group, rule),
+        }
+    }
 }
 
 impl RuleSelector {

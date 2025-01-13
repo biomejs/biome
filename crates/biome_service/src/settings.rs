@@ -42,6 +42,7 @@ use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::ops::Deref;
+use tracing::instrument;
 
 /// Global settings for the entire project.
 #[derive(Clone, Debug, Default)]
@@ -62,7 +63,7 @@ pub struct Settings {
 
 impl Settings {
     /// Merges the [Configuration] into the settings.
-    #[tracing::instrument(level = "trace", skip(self))]
+    #[tracing::instrument(level = "debug", skip(self))]
     pub fn merge_with_configuration(
         &mut self,
         configuration: Configuration,
@@ -655,6 +656,7 @@ impl WorkspaceSettingsHandle {
     }
 
     /// Resolve the formatting context for the given language
+    #[instrument(level = "debug", skip(file_source))]
     pub fn format_options<L>(
         &self,
         path: &BiomePath,

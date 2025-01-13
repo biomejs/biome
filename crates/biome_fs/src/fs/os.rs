@@ -154,7 +154,7 @@ struct OsFile {
 }
 
 impl File for OsFile {
-    #[instrument(level = "trace")]
+    #[instrument(level = "debug")]
     fn read_to_string(&mut self, buffer: &mut String) -> io::Result<()> {
         // Reset the cursor to the starting position
         self.inner.rewind()?;
@@ -163,7 +163,7 @@ impl File for OsFile {
         Ok(())
     }
 
-    #[instrument(level = "trace")]
+    #[instrument(level = "debug")]
     fn set_content(&mut self, content: &[u8]) -> io::Result<()> {
         // Truncate the file
         self.inner.set_len(0)?;

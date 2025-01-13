@@ -5,7 +5,6 @@ use crate::{session::Session, utils};
 use anyhow::{Context, Result};
 use biome_lsp_converters::from_proto;
 use tower_lsp::lsp_types::{RenameParams, WorkspaceEdit};
-use tracing::trace;
 
 #[tracing::instrument(level = "debug", skip(session), err)]
 pub(crate) fn rename(
@@ -14,8 +13,6 @@ pub(crate) fn rename(
 ) -> Result<Option<WorkspaceEdit>, LspError> {
     let url = params.text_document_position.text_document.uri;
     let path = session.file_path(&url)?;
-
-    trace!("Renaming...");
 
     let doc = session.document(&url)?;
     let position_encoding = session.position_encoding();

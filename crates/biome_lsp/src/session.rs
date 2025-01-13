@@ -315,7 +315,7 @@ impl Session {
     /// Computes diagnostics for the file matching the provided url and publishes
     /// them to the client. Called from [`handlers::text_document`] when a file's
     /// contents changes.
-    #[tracing::instrument(level = "trace", skip_all, fields(url = display(&url), diagnostic_count), err)]
+    #[tracing::instrument(level = "debug", skip_all, fields(url = display(&url), diagnostic_count), err)]
     pub(crate) async fn update_diagnostics(&self, url: lsp_types::Url) -> Result<(), LspError> {
         let doc = self.document(&url)?;
         self.update_diagnostics_for_document(url, doc).await
@@ -324,7 +324,7 @@ impl Session {
     /// Computes diagnostics for the file matching the provided url and publishes
     /// them to the client. Called from [`handlers::text_document`] when a file's
     /// contents changes.
-    #[tracing::instrument(level = "trace", skip_all, fields(url = display(&url), diagnostic_count), err)]
+    #[tracing::instrument(level = "debug", skip_all, fields(url = display(&url), diagnostic_count), err)]
     async fn update_diagnostics_for_document(
         &self,
         url: lsp_types::Url,
@@ -371,7 +371,7 @@ impl Session {
                 enabled_rules: Vec::new(),
             })?;
 
-            tracing::trace!("biome diagnostics: {:#?}", result.diagnostics);
+            tracing::debug!("biome diagnostics: {:#?}", result.diagnostics);
             let content = self.workspace.get_file_content(GetFileContentParams {
                 project_key: doc.project_key,
                 path: biome_path.clone(),
@@ -471,7 +471,7 @@ impl Session {
 
     /// This function attempts to read the `biome.json` configuration file from
     /// the root URI and update the workspace settings accordingly
-    #[tracing::instrument(level = "trace", skip(self))]
+    #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_workspace_settings(self: &Arc<Self>) {
         // Providing a custom configuration path will not allow to support workspaces
         if let Some(config_path) = &self.config_path {
@@ -534,6 +534,7 @@ impl Session {
         .await;
     }
 
+    #[tracing::instrument(level = "debug", skip(self))]
     async fn load_biome_configuration_file(
         self: &Arc<Self>,
         base_path: ConfigurationPathHint,
@@ -645,7 +646,7 @@ impl Session {
     }
 
     /// Requests "workspace/configuration" from client and updates Session config
-    #[tracing::instrument(level = "trace", skip(self))]
+    #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_extension_settings(&self) {
         let item = lsp_types::ConfigurationItem {
             scope_uri: None,

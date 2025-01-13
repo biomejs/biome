@@ -27,7 +27,7 @@ use tokio::task::spawn_blocking;
 use tower_lsp::jsonrpc::Result as LspResult;
 use tower_lsp::{lsp_types::*, ClientSocket};
 use tower_lsp::{LanguageServer, LspService, Server};
-use tracing::{error, info, trace, warn};
+use tracing::{error, info, warn};
 
 pub struct LSPServer {
     pub(crate) session: SessionHandle,
@@ -59,12 +59,6 @@ impl LSPServer {
     }
 
     async fn syntax_tree_request(&self, params: SyntaxTreePayload) -> LspResult<String> {
-        trace!(
-            "Calling method: {}\n with params: {:?}",
-            SYNTAX_TREE_REQUEST,
-            &params
-        );
-
         let url = params.text_document.uri;
         requests::syntax_tree::syntax_tree(&self.session, &url).map_err(into_lsp_error)
     }
@@ -234,7 +228,7 @@ impl LanguageServer for LSPServer {
     // The `root_path` field is deprecated, but we still read it so we can print a warning about it
     #[expect(deprecated)]
     #[tracing::instrument(
-        level = "trace",
+        level = "debug",
         skip_all,
         fields(
             root_uri = params.root_uri.as_ref().map(display),
@@ -275,7 +269,7 @@ impl LanguageServer for LSPServer {
         Ok(init)
     }
 
-    #[tracing::instrument(level = "trace", skip(self))]
+    #[tracing::instrument(level = "debug", skip(self))]
     async fn initialized(&self, params: InitializedParams) {
         let _ = params;
 
@@ -302,7 +296,7 @@ impl LanguageServer for LSPServer {
         Ok(())
     }
 
-    #[tracing::instrument(level = "trace", skip(self))]
+    #[tracing::instrument(level = "debug", skip(self))]
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
         let _ = params;
         self.session.load_workspace_settings().await;
@@ -311,7 +305,7 @@ impl LanguageServer for LSPServer {
         self.session.update_all_diagnostics().await;
     }
 
-    #[tracing::instrument(level = "trace", skip(self))]
+    #[tracing::instrument(level = "debug", skip(self))]
     async fn did_change_watched_files(&self, params: DidChangeWatchedFilesParams) {
         let file_paths = params
             .changes

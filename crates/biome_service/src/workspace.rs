@@ -107,6 +107,15 @@ pub struct FileFeaturesResult {
     pub features_supported: HashMap<FeatureKind, SupportKind>,
 }
 
+impl std::fmt::Display for FileFeaturesResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for (feature, support_kind) in self.features_supported.iter() {
+            write!(f, "{}: {}, ", feature, support_kind)?;
+        }
+        Ok(())
+    }
+}
+
 impl FileFeaturesResult {
     /// Sorted array of files that should not be processed no matter the cases.
     /// These files are handled by other tools.
@@ -371,6 +380,18 @@ pub enum SupportKind {
     FileNotSupported,
 }
 
+impl std::fmt::Display for SupportKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SupportKind::Supported => write!(f, "Supported"),
+            SupportKind::Ignored => write!(f, "Ignored"),
+            SupportKind::Protected => write!(f, "Protected"),
+            SupportKind::FeatureNotEnabled => write!(f, "FeatureNotEnabled"),
+            SupportKind::FileNotSupported => write!(f, "FileNotSupported"),
+        }
+    }
+}
+
 impl SupportKind {
     pub const fn is_supported(&self) -> bool {
         matches!(self, SupportKind::Supported)
@@ -400,6 +421,18 @@ pub enum FeatureKind {
     Search,
     Assist,
     Debug,
+}
+
+impl std::fmt::Display for FeatureKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            FeatureKind::Format => write!(f, "Format"),
+            FeatureKind::Lint => write!(f, "Lint"),
+            FeatureKind::Search => write!(f, "Search"),
+            FeatureKind::Assist => write!(f, "Assist"),
+            FeatureKind::Debug => write!(f, "Debug"),
+        }
+    }
 }
 
 #[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]

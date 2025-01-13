@@ -6,7 +6,6 @@ use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
-use tracing::trace;
 
 mod analyzer_plugin;
 mod categories;
@@ -293,7 +292,6 @@ where
     /// Runs phase 0 over nodes and tokens to process line breaks and
     /// suppression comments
     fn run_first_phase(mut self) -> ControlFlow<Break> {
-        trace!("Running first analyzer phase");
         let iter = self.root.syntax().preorder_with_tokens(Direction::Next);
         for event in iter {
             let node_event = match event {

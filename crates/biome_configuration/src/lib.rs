@@ -36,6 +36,7 @@ pub use analyzer::{
     linter_configuration, LinterConfiguration, RuleConfiguration, RuleFixConfiguration,
     RulePlainConfiguration, RuleWithFixOptions, RuleWithOptions, Rules,
 };
+use biome_console::fmt::{Display, Formatter};
 use biome_deserialize::Deserialized;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{IndentStyle, QuoteStyle};
@@ -385,6 +386,25 @@ pub enum ConfigurationPathHint {
     /// The path can either be a directory path or a file path.
     /// Throws any kind of I/O errors.
     FromUser(Utf8PathBuf),
+}
+
+impl Display for ConfigurationPathHint {
+    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
+        match self {
+            ConfigurationPathHint::None => write!(fmt, "No configuration file found.",),
+            ConfigurationPathHint::FromWorkspace(path) => write!(
+                fmt,
+                "Configuration path provided from a workspace: {}",
+                path
+            ),
+            ConfigurationPathHint::FromLsp(path) => {
+                write!(fmt, "Configuration path provided from the LSP: {}", path,)
+            }
+            ConfigurationPathHint::FromUser(path) => {
+                write!(fmt, "Configuration path provided by the user: {}", path,)
+            }
+        }
+    }
 }
 
 impl ConfigurationPathHint {

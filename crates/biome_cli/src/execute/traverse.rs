@@ -30,6 +30,7 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
+use tracing::{instrument, Span};
 
 pub(crate) struct TraverseResult {
     pub(crate) summary: TraversalSummary,
@@ -576,6 +577,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         self.push_message(error);
     }
 
+    #[instrument(level = "debug", skip(self, biome_path))]
     fn can_handle(&self, biome_path: &BiomePath) -> bool {
         let path = biome_path.as_path();
         if self.fs.path_is_dir(path) || self.fs.path_is_symlink(path) {
@@ -596,11 +598,14 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
                     self.push_diagnostic(err.into());
                     false
                 });
+            Span::current().record("can_handle", can_handle);
+
             return can_handle;
         }
 
         // bail on fifo and socket files
         if !self.fs.path_is_file(path) {
+            Span::current().record("can_handle", false);
             return false;
         }
 
@@ -614,23 +619,25 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
             Ok(file_features) => {
                 if file_features.is_protected() {
                     self.protected_file(biome_path);
+                    Span::current().record("can_handle", false);
                     return false;
                 }
 
                 if file_features.is_not_supported() && !file_features.is_ignored() {
                     // we should throw a diagnostic if we can't handle a file that isn't ignored
                     self.miss_handler_err(extension_error(biome_path), biome_path);
+                    Span::current().record("can_handle", false);
                     return false;
                 }
                 file_features
             }
             Err(err) => {
                 self.miss_handler_err(err, biome_path);
-
+                Span::current().record("can_handle", false);
                 return false;
             }
         };
-        match self.execution.traversal_mode() {
+        let result = match self.execution.traversal_mode() {
             TraversalMode::Check { .. } | TraversalMode::CI { .. } => {
                 file_features.supports_lint()
                     || file_features.supports_format()
@@ -641,7 +648,9 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
             // Imagine if Biome can't handle its own configuration file...
             TraversalMode::Migrate { .. } => true,
             TraversalMode::Search { .. } => file_features.supports_search(),
-        }
+        };
+        Span::current().record("can_handle", result);
+        result
     }
 
     fn handle_path(&self, path: BiomePath) {

@@ -372,7 +372,7 @@ fn format(
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
 
-    tracing::debug!("Format with the following options: \n{}", options);
+    tracing::debug!("Format with the following options: {:?}", options);
 
     let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
@@ -461,7 +461,6 @@ fn lint(params: LintParams) -> LintResults {
         range: None,
     };
 
-    info!("Analyze file {}", params.path.as_str());
     let mut process_lint = ProcessLint::new(&params);
 
     let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, |signal| {

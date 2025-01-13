@@ -45,7 +45,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
-use tracing::{debug, info, info_span, warn};
+use tracing::{info, instrument, warn};
 
 pub(super) struct WorkspaceServer {
     /// features available throughout the application
@@ -203,10 +203,11 @@ impl WorkspaceServer {
     }
 
     /// Gets the supported capabilities for a given file path.
+    #[instrument(level = "debug", skip(self), fields(
+        path = display(path.as_path())
+    ))]
     fn get_file_capabilities(&self, path: &BiomePath) -> Capabilities {
         let language = self.get_file_source(path);
-
-        debug!("File capabilities: {:?} {:?}", &language, &path);
         self.features.get_capabilities(path, language)
     }
 
@@ -242,7 +243,7 @@ impl WorkspaceServer {
     /// Returns a previously inserted file source by index.
     ///
     /// File sources can be inserted using `insert_source()`.
-    #[tracing::instrument(level = "trace", skip(self), fields(return))]
+    #[tracing::instrument(level = "debug", skip_all)]
     fn get_source(&self, index: usize) -> Option<DocumentFileSource> {
         if index < self.file_sources.len() {
             Some(self.file_sources[index])
@@ -255,7 +256,7 @@ impl WorkspaceServer {
     ///
     /// Returns the index at which the file source can be retrieved using
     /// `get_source()`.
-    #[tracing::instrument(level = "trace", skip(self), fields(return))]
+    #[tracing::instrument(level = "debug", skip_all)]
     fn insert_source(&self, document_file_source: DocumentFileSource) -> usize {
         self.file_sources
             .iter()
@@ -271,19 +272,24 @@ impl WorkspaceServer {
         self.open_file_internal(true, params)
     }
 
-    #[tracing::instrument(level = "trace", skip(self))]
+    #[tracing::instrument(level = "debug", skip(self, params), fields(
+        project_key = display(params.project_key),
+        path = display(params.path.as_path()),
+        version = display(params.version),
+    ))]
     fn open_file_internal(
         &self,
         opened_by_scanner: bool,
-        OpenFileParams {
+        params: OpenFileParams,
+    ) -> Result<(), WorkspaceError> {
+        let OpenFileParams {
             project_key,
             path,
             content,
             version,
             document_file_source,
             persist_node_cache,
-        }: OpenFileParams,
-    ) -> Result<(), WorkspaceError> {
+        } = params;
         let path: Utf8PathBuf = path.into();
         let mut source = document_file_source.unwrap_or(DocumentFileSource::from_path(&path));
 
@@ -605,7 +611,7 @@ impl Workspace for WorkspaceServer {
     /// ## Panics
     /// This function may panic if the internal settings mutex has been poisoned
     /// by another thread having previously panicked while holding the lock
-    #[tracing::instrument(level = "trace", skip(self))]
+    #[tracing::instrument(level = "debug", skip(self))]
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
         let mut settings = self
             .projects
@@ -639,6 +645,7 @@ impl Workspace for WorkspaceServer {
         Ok(self.projects.insert_project(path))
     }
 
+    #[instrument(level = "debug", skip(self))]
     fn scan_project_folder(
         &self,
         params: ScanProjectFolderParams,
@@ -833,10 +840,23 @@ impl Workspace for WorkspaceServer {
     }
 
     /// Retrieves the list of diagnostics associated with a file
-    #[tracing::instrument(level = "trace", skip(self))]
+    #[tracing::instrument(
+        level = "debug",
+        skip(self, params),
+        fields(
+            rule_categories = display(&params.categories),
+            path = display(&params.path),
+            project_key = debug(&params.project_key),
+            skip = debug(&params.skip),
+            only = debug(&params.only),
+            max_diagnostics = display(&params.max_diagnostics),
+        )
+    )]
     fn pull_diagnostics(
         &self,
-        PullDiagnosticsParams {
+        params: PullDiagnosticsParams,
+    ) -> Result<PullDiagnosticsResult, WorkspaceError> {
+        let PullDiagnosticsParams {
             project_key,
             path,
             categories,
@@ -844,8 +864,7 @@ impl Workspace for WorkspaceServer {
             only,
             skip,
             enabled_rules,
-        }: PullDiagnosticsParams,
-    ) -> Result<PullDiagnosticsResult, WorkspaceError> {
+        } = params;
         let parse = self.get_parse(&path)?;
         let (diagnostics, errors, skipped_diagnostics) =
             if let Some(lint) = self.get_file_capabilities(&path).analyzer.lint {
@@ -853,27 +872,25 @@ impl Workspace for WorkspaceServer {
                     .projects
                     .get_settings(project_key)
                     .ok_or_else(WorkspaceError::no_project)?;
-                info_span!("Pulling diagnostics", categories =? categories).in_scope(|| {
-                    let results = lint(LintParams {
-                        parse,
-                        workspace: &settings.into(),
-                        max_diagnostics: max_diagnostics as u32,
-                        path: &path,
-                        only,
-                        skip,
-                        language: self.get_file_source(&path),
-                        categories,
-                        project_layout: self.project_layout.clone(),
-                        suppression_reason: None,
-                        enabled_rules,
-                    });
+                let results = lint(LintParams {
+                    parse,
+                    workspace: &settings.into(),
+                    max_diagnostics: max_diagnostics as u32,
+                    path: &path,
+                    only,
+                    skip,
+                    language: self.get_file_source(&path),
+                    categories,
+                    project_layout: self.project_layout.clone(),
+                    suppression_reason: None,
+                    enabled_rules,
+                });
 
-                    (
-                        results.diagnostics,
-                        results.errors,
-                        results.skipped_diagnostics,
-                    )
-                })
+                (
+                    results.diagnostics,
+                    results.errors,
+                    results.skipped_diagnostics,
+                )
             } else {
                 let parse_diagnostics = parse.into_diagnostics();
                 let errors = parse_diagnostics
@@ -884,7 +901,11 @@ impl Workspace for WorkspaceServer {
                 (parse_diagnostics, errors, 0)
             };
 
-        info!("Pulled {:?} diagnostic(s)", diagnostics.len());
+        info!(
+            "Pulled {:?} diagnostic(s), skipped {:?} diagnostic(s)",
+            diagnostics.len(),
+            skipped_diagnostics
+        );
         Ok(PullDiagnosticsResult {
             diagnostics: diagnostics
                 .into_iter()
@@ -900,19 +921,25 @@ impl Workspace for WorkspaceServer {
 
     /// Retrieves the list of code actions available for a given cursor
     /// position within a file
-    #[tracing::instrument(level = "trace", skip(self))]
-    fn pull_actions(
-        &self,
-        PullActionsParams {
+    #[tracing::instrument(
+        level = "debug",
+        skip_all,
+        fields(
+            only = debug(&params.only),
+            skip = debug(&params.skip),
+            range = debug(&params.range)
+        )
+    )]
+    fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError> {
+        let PullActionsParams {
             project_key,
             path,
             range,
-            suppression_reason,
+            suppression_reason: _,
             only,
             skip,
             enabled_rules,
-        }: PullActionsParams,
-    ) -> Result<PullActionsResult, WorkspaceError> {
+        } = params;
         let capabilities = self.get_file_capabilities(&path);
         let code_actions = capabilities
             .analyzer
@@ -941,6 +968,13 @@ impl Workspace for WorkspaceServer {
 
     /// Runs the given file through the formatter using the provided options
     /// and returns the resulting source code
+    #[instrument(
+        level = "debug",
+        skip_all,
+        fields(
+            path = display(&params.path),
+        )
+    )]
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError> {
         let capabilities = self.get_file_capabilities(&params.path);
         let format = capabilities
@@ -962,6 +996,7 @@ impl Workspace for WorkspaceServer {
         format(&params.path, &document_file_source, parse, handle)
     }
 
+    #[instrument(level = "debug", skip(self, params))]
     fn format_range(&self, params: FormatRangeParams) -> Result<Printed, WorkspaceError> {
         let capabilities = self.get_file_capabilities(&params.path);
         let format_range = capabilities
@@ -989,6 +1024,7 @@ impl Workspace for WorkspaceServer {
         )
     }
 
+    #[instrument(level = "debug", skip(self, params))]
     fn format_on_type(&self, params: FormatOnTypeParams) -> Result<Printed, WorkspaceError> {
         let capabilities = self.get_file_capabilities(&params.path);
         let format_on_type = capabilities
@@ -1017,9 +1053,18 @@ impl Workspace for WorkspaceServer {
         )
     }
 
-    fn fix_file(
-        &self,
-        FixFileParams {
+    #[instrument(
+        level = "debug",
+        skip_all,
+        fields(
+            rule_categories = display(&params.rule_categories),
+            skip = debug(&params.skip),
+            only = debug(&params.only),
+            should_format = display(&params.should_format),
+        )
+    )]
+    fn fix_file(&self, params: FixFileParams) -> Result<FixFileResult, WorkspaceError> {
+        let FixFileParams {
             project_key,
             path,
             fix_file_mode,
@@ -1029,8 +1074,7 @@ impl Workspace for WorkspaceServer {
             enabled_rules,
             rule_categories,
             suppression_reason,
-        }: FixFileParams,
-    ) -> Result<FixFileResult, WorkspaceError> {
+        } = params;
         let capabilities = self.get_file_capabilities(&path);
 
         let fix_all = capabilities

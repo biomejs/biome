@@ -38,6 +38,7 @@ use biome_service::{Workspace, WorkspaceError};
 use bpaf::Bpaf;
 use camino::Utf8PathBuf;
 use std::ffi::OsString;
+use tracing::info;
 
 pub(crate) mod check;
 pub(crate) mod ci;
@@ -588,10 +589,6 @@ impl BiomeCommand {
         }
     }
 
-    pub const fn has_metrics(&self) -> bool {
-        false
-    }
-
     pub fn is_verbose(&self) -> bool {
         self.cli_options()
             .map_or(false, |cli_options| cli_options.verbose)
@@ -754,7 +751,11 @@ pub(crate) trait CommandRunner: Sized {
         let fs = workspace.fs();
         self.check_incompatible_arguments()?;
         let (execution, paths) = self.configure_workspace(fs, console, workspace, cli_options)?;
-        execute_mode(execution, session, cli_options, paths)
+        let result = execute_mode(execution, session, cli_options, paths);
+        // let data = s.snapshot().into_vec();
+
+        // dbg!(&data);
+        result
     }
 
     /// This function prepares the workspace with the following:
@@ -779,6 +780,11 @@ pub(crate) trait CommandRunner: Sized {
                 cli_options.verbose,
             )?;
         }
+        info!(
+            "Configuration file loaded: {:?}, diagnostics detected {}",
+            loaded_configuration.file_path,
+            loaded_configuration.diagnostics.len(),
+        );
         let configuration_path = loaded_configuration.directory_path.clone();
         let configuration = self.merge_configuration(loaded_configuration, fs, console)?;
         let vcs_base_path = configuration_path.clone().or(fs.working_directory());

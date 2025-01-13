@@ -9,7 +9,6 @@ use std::{
     collections::BinaryHeap,
     iter::{empty, once},
 };
-use tracing::debug;
 
 pub trait BatchMutationExt<L>: AstNode<Language = L>
 where
@@ -298,7 +297,6 @@ where
         });
         let parent_depth = parent.as_ref().map(|p| p.ancestors().count()).unwrap_or(0);
 
-        debug!("pushing change...");
         self.changes.push(CommitChange {
             parent_depth,
             parent,
