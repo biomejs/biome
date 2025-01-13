@@ -129,7 +129,7 @@ impl Rule for NoUselessFragments {
         let mut in_jsx_attr_expr = false;
         let mut in_js_logical_expr = false;
         let mut in_jsx_expr = false;
-        let mut under_jsx_list = false;
+        let mut in_jsx_list = false;
         match node {
             NoUselessFragmentsQuery::JsxFragment(fragment) => {
                 let parents_where_fragments_must_be_preserved = node.syntax().parent().map_or(
@@ -168,7 +168,7 @@ impl Rule for NoUselessFragments {
                             }),
                         Err(_) => {
                             if JsxChildList::try_cast(parent.clone()).is_ok() {
-                                under_jsx_list = true;
+                                in_jsx_list = true;
                                 false
                             } else {
                                 JsxAttributeInitializerClause::try_cast(parent.clone()).is_ok()
@@ -248,13 +248,7 @@ impl Rule for NoUselessFragments {
                                 None
                             }
                         }
-                        _ => {
-                            if under_jsx_list {
-                                Some(NoUselessFragmentsState::Children(child_list))
-                            } else {
-                                None
-                            }
-                        }
+                        _ => in_jsx_list.then_some(NoUselessFragmentsState::Children(child_list)),
                     }
                 } else {
                     None
