@@ -75,6 +75,7 @@ declare_lint_rule! {
 pub enum NoUselessFragmentsState {
     Empty,
     Child(AnyJsxChild),
+    Children(JsxChildList),
 }
 
 declare_node_union! {
@@ -128,6 +129,7 @@ impl Rule for NoUselessFragments {
         let mut in_jsx_attr_expr = false;
         let mut in_js_logical_expr = false;
         let mut in_jsx_expr = false;
+        let mut under_jsx_list = false;
         match node {
             NoUselessFragmentsQuery::JsxFragment(fragment) => {
                 let parents_where_fragments_must_be_preserved = node.syntax().parent().map_or(
@@ -158,14 +160,20 @@ impl Rule for NoUselessFragments {
                                     parent.kind(),
                                     JsSyntaxKind::JS_RETURN_STATEMENT
                                         | JsSyntaxKind::JS_INITIALIZER_CLAUSE
-                                        | JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
                                         | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
                                         | JsSyntaxKind::JS_FUNCTION_EXPRESSION
                                         | JsSyntaxKind::JS_FUNCTION_DECLARATION
                                         | JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER
                                 )
                             }),
-                        Err(_) => JsxAttributeInitializerClause::try_cast(parent.clone()).is_ok(),
+                        Err(_) => {
+                            if JsxChildList::try_cast(parent.clone()).is_ok() {
+                                under_jsx_list = true;
+                                false
+                            } else {
+                                JsxAttributeInitializerClause::try_cast(parent.clone()).is_ok()
+                            }
+                        }
                     },
                 );
 
@@ -240,7 +248,13 @@ impl Rule for NoUselessFragments {
                                 None
                             }
                         }
-                        _ => None,
+                        _ => {
+                            if under_jsx_list {
+                                Some(NoUselessFragmentsState::Children(child_list))
+                            } else {
+                                None
+                            }
+                        }
                     }
                 } else {
                     None
@@ -308,15 +322,22 @@ impl Rule for NoUselessFragments {
             .parent()
             .map_or(false, |parent| JsxChildList::can_cast(parent.kind()));
         if is_in_list {
-            let new_child = match state {
-                NoUselessFragmentsState::Empty => None,
-                NoUselessFragmentsState::Child(child) => Some(child.clone()),
-            };
-
-            if let Some(new_child) = new_child {
-                node.replace_node(&mut mutation, new_child);
-            } else {
-                node.remove_node_from_list(&mut mutation);
+            match state {
+                NoUselessFragmentsState::Child(child) => {
+                    node.replace_node(&mut mutation, child.clone());
+                }
+                NoUselessFragmentsState::Children(children) => {
+                    if let Some(old_children) = node
+                        .syntax()
+                        .parent()
+                        .and_then(|parent| JsxChildList::cast(parent.clone()))
+                    {
+                        mutation.replace_node(old_children, children.clone());
+                    }
+                }
+                _ => {
+                    node.remove_node_from_list(&mut mutation);
+                }
             }
         } else if let Some(parent) = node.parent::<JsxTagExpression>() {
             let parent = match parent.parent::<JsxExpressionAttributeValue>() {
