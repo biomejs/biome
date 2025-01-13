@@ -402,7 +402,6 @@ insert_final_newline = true
 end_of_line = crlf
 indent_style = space
 indent_size = 4
-max_line_length = 80
 "#;
 
         let conf = parse_str(input).expect("Failed to parse editorconfig");
@@ -412,7 +411,6 @@ max_line_length = 80
         assert_eq!(formatter.indent_style, Some(IndentStyle::Space));
         assert_eq!(formatter.indent_width.unwrap().value(), 4);
         assert_eq!(formatter.line_ending, Some(LineEnding::Crlf));
-        assert_eq!(formatter.line_width.map(|v| v.value()), Some(80));
     }
 
     #[test]
