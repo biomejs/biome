@@ -1,5 +1,5 @@
 use crate::run_cli;
-use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayload};
+use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
@@ -15,12 +15,15 @@ fn should_use_editorconfig() {
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 300
+indent_style = space
+indent_size = 8
 "#,
     );
 
     let test_file = Utf8Path::new("test.js");
-    let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
+    let contents = r#"function setName(name) {
+ currentName = name;
+}
 "#;
     fs.insert(test_file.into(), contents);
 
@@ -40,7 +43,6 @@ max_line_length = 300
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_use_editorconfig",
@@ -60,7 +62,8 @@ fn should_use_editorconfig_enabled_from_biome_conf() {
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 300
+indent_style = space
+indent_size = 8
 "#,
     );
 
@@ -76,7 +79,9 @@ max_line_length = 300
     );
 
     let test_file = Utf8Path::new("test.js");
-    let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
+    let contents = r#"function setName(name) {
+ currentName = name;
+}
 "#;
     fs.insert(test_file.into(), contents);
 
@@ -88,7 +93,6 @@ max_line_length = 300
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_use_editorconfig_enabled_from_biome_conf",
@@ -108,12 +112,15 @@ fn should_use_editorconfig_check() {
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 300
+indent_style = space
+indent_size = 8
 "#,
     );
 
     let test_file = Utf8Path::new("test.js");
-    let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
+    let contents = r#"function setName(name) {
+ currentName = name;
+}
 "#;
     fs.insert(test_file.into(), contents);
 
@@ -123,9 +130,8 @@ max_line_length = 300
         Args::from(["check", "--use-editorconfig=true", test_file.as_str()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_use_editorconfig_check",
@@ -145,7 +151,8 @@ fn should_use_editorconfig_check_enabled_from_biome_conf() {
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 300
+indent_style = space
+indent_size = 8
 "#,
     );
 
@@ -161,7 +168,9 @@ max_line_length = 300
     );
 
     let test_file = Utf8Path::new("test.js");
-    let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
+    let contents = r#"function setName(name) {
+ currentName = name;
+}
 "#;
     fs.insert(test_file.into(), contents);
 
@@ -171,9 +180,8 @@ max_line_length = 300
         Args::from(["check", test_file.as_str()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_use_editorconfig_check_enabled_from_biome_conf",
@@ -193,13 +201,12 @@ fn should_have_biome_override_editorconfig() {
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 100
 indent_style = tab
 "#,
     );
-    let biomeconfig = Utf8Path::new("biome.json");
+    let biome_config_path = Utf8Path::new("biome.json");
     fs.insert(
-        biomeconfig.into(),
+        biome_config_path.into(),
         r#"
 {
     "formatter": {
@@ -232,7 +239,6 @@ indent_style = tab
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_have_biome_override_editorconfig",
@@ -252,13 +258,19 @@ fn should_have_cli_override_editorconfig() {
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 90
+indent_style = space
+indent_size = 8
 "#,
     );
 
     let test_file = Utf8Path::new("test.js");
-    fs.insert(test_file.into(), r#"console.log("really long string that should break if the line width is <=90, but not at 100");
-"#);
+    fs.insert(
+        test_file.into(),
+        r#"function setName(name) {
+ currentName = name;
+}
+"#,
+    );
 
     let (fs, result) = run_cli(
         fs,
@@ -266,7 +278,7 @@ max_line_length = 90
         Args::from(
             [
                 "check",
-                "--line-width=100",
+                "--indent-width=4",
                 "--use-editorconfig=true",
                 test_file.as_str(),
             ]
@@ -274,7 +286,7 @@ max_line_length = 90
         ),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -356,12 +368,15 @@ fn should_use_editorconfig_ci() {
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 300
+indent_style = space
+indent_size = 8
 "#,
     );
 
     let test_file = Utf8Path::new("test.js");
-    let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
+    let contents = r#"function setName(name) {
+ currentName = name;
+}
 "#;
     fs.insert(test_file.into(), contents);
 
@@ -371,9 +386,8 @@ max_line_length = 300
         Args::from(["ci", "--use-editorconfig=true", test_file.as_str()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_use_editorconfig_ci",
@@ -393,7 +407,8 @@ fn should_use_editorconfig_ci_enabled_from_biome_conf() {
         editorconfig.into(),
         r#"
 [*]
-max_line_length = 300
+indent_style = space
+indent_size = 8
 "#,
     );
 
@@ -419,9 +434,8 @@ max_line_length = 300
         Args::from(["ci", test_file.as_str()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_use_editorconfig_ci_enabled_from_biome_conf",
@@ -466,7 +480,6 @@ insert_final_newline = false
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, test_file, contents);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_emit_diagnostics",
