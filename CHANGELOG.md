@@ -12,7 +12,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ## Unreleased
 
 - Fix [#4323](https://github.com/biomejs/biome/issues/4258), where `lint/a11y/useSemanticElement` accidentally showed recommendations for `role="searchbox"` instead of `role="search"`
-- Fix [#4875](https://github.com/biomejs/biome/issues/4875), where the Jetbrains IDE terminal would output unclickable, relative file path links to files. This does not fix paths without line and column numbers. Contributed by @Andrew-Chen-Wang
 
 ### Analyzer
 
