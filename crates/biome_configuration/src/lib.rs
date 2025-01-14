@@ -391,7 +391,7 @@ pub enum ConfigurationPathHint {
 impl Display for ConfigurationPathHint {
     fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
         match self {
-            ConfigurationPathHint::None => write!(fmt, "No configuration file found.",),
+            ConfigurationPathHint::None => write!(fmt, "Configuration file not provided.",),
             ConfigurationPathHint::FromWorkspace(path) => write!(
                 fmt,
                 "Configuration path provided from a workspace: {}",

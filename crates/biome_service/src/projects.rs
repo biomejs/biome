@@ -62,7 +62,7 @@ impl Projects {
     /// project key if a project with the given path already existed.
     #[instrument(skip(self, path), fields(path))]
     pub fn insert_project(&self, path: Utf8PathBuf) -> ProjectKey {
-        debug!("Insert workspace folder");
+        debug!("Insert workspace folder {}", path.as_str());
 
         let data = self.0.pin();
         for (key, project_data) in data.iter() {

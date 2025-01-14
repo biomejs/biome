@@ -234,7 +234,7 @@ impl FileFeaturesResult {
         }
 
         debug!(
-            "The file has the following feature sets: \n{:?}",
+            "The file has the following feature sets: {:?}",
             &self.features_supported
         );
 
