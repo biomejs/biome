@@ -43,10 +43,6 @@ bpaf                     = { workspace = true, features = ["bright-color"] }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }
 dashmap                  = { workspace = true }
-hdrhistogram             = { version = "7.5.4", default-features = false }
-metrics                  = { workspace = true }
-metrics-util             = { workspace = true }
-papaya                   = { workspace = true }
 path-absolutize          = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
 quick-junit              = "0.5.1"
 rayon                    = { workspace = true }

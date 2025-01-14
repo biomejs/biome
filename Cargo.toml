@@ -190,8 +190,6 @@ grit-util            = "0.5"
 ignore               = "0.4.23"
 indexmap             = { version = "2.7.0" }
 insta                = "1.41.1"
-metrics              = "0.24.1"
-metrics-util         = "0.19.0"
 natord               = "1.0.9"
 oxc_resolver         = "3.0.3"
 papaya               = "0.1.6"
