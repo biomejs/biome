@@ -1,3 +1,6 @@
+use biome_diagnostics::serde::Diagnostic;
+use biome_diagnostics::{Diagnostic as _, Error, Severity};
+use biome_fs::{BiomePath, PathInterner, TraversalContext, TraversalScope};
 use camino::Utf8Path;
 use crossbeam::channel::{unbounded, Receiver, Sender};
 use rayon::ThreadPoolBuilder;
@@ -6,10 +9,7 @@ use std::panic::catch_unwind;
 use std::sync::{Once, RwLock};
 use std::thread;
 use std::time::{Duration, Instant};
-
-use biome_diagnostics::serde::Diagnostic;
-use biome_diagnostics::{Diagnostic as _, Error, Severity};
-use biome_fs::{BiomePath, PathInterner, TraversalContext, TraversalScope};
+use tracing::instrument;
 
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
@@ -26,6 +26,7 @@ pub(crate) struct ScanResult {
     pub duration: Duration,
 }
 
+#[instrument(level = "debug", skip(workspace))]
 pub(crate) fn scan(
     workspace: &WorkspaceServer,
     project_key: ProjectKey,
@@ -85,6 +86,7 @@ fn init_thread_pool() {
 /// Initiates the filesystem traversal tasks from the provided path and runs it to completion.
 ///
 /// Returns the duration of the process and the evaluated paths.
+#[instrument(level = "debug", skip(ctx))]
 fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     let start = Instant::now();
     let fs = ctx.workspace.fs();

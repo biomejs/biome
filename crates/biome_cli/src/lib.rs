@@ -17,7 +17,6 @@ mod commands;
 mod diagnostics;
 mod execute;
 mod logging;
-mod metrics;
 mod panic;
 mod reporter;
 mod service;
@@ -60,12 +59,7 @@ impl<'app> CliSession<'app> {
 
     /// Main function to run Biome CLI
     pub fn run(self, command: BiomeCommand) -> Result<(), CliDiagnostic> {
-        let has_metrics = command.has_metrics();
-        if has_metrics {
-            crate::metrics::init_metrics();
-        }
-
-        let result = match command {
+        match command {
             BiomeCommand::Version(_) => commands::version::full_version(self),
             BiomeCommand::Rage(_, daemon_logs, formatter, linter) => {
                 commands::rage::rage(self, daemon_logs, formatter, linter)
@@ -269,13 +263,7 @@ impl<'app> CliSession<'app> {
                 Some(log_prefix_name),
             ),
             BiomeCommand::PrintSocket => commands::daemon::print_socket(),
-        };
-
-        if has_metrics {
-            metrics::print_metrics();
         }
-
-        result
     }
 }
 

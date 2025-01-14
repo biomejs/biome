@@ -1,5 +1,6 @@
 use enumflags2::{bitflags, BitFlags};
 use std::borrow::Cow;
+use std::fmt::{Display, Formatter};
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
@@ -21,6 +22,17 @@ pub enum RuleCategory {
     Action,
     /// This rule detects transformations that should be applied to the code
     Transformation,
+}
+
+impl Display for RuleCategory {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RuleCategory::Syntax => write!(f, "Syntax"),
+            RuleCategory::Lint => write!(f, "Lint"),
+            RuleCategory::Action => write!(f, "Action"),
+            RuleCategory::Transformation => write!(f, "Transformation"),
+        }
+    }
 }
 
 /// Actions that suppress rules should start with this string
@@ -230,6 +242,26 @@ pub(crate) enum Categories {
 ///
 /// Use [RuleCategoriesBuilder] to generate the categories you want to query.
 pub struct RuleCategories(BitFlags<Categories>);
+
+impl Display for RuleCategories {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if self.0.is_empty() {
+            write!(f, "No categories")
+        } else {
+            let mut list = f.debug_list();
+            if self.0.contains(Categories::Syntax) {
+                list.entry(&RuleCategory::Syntax);
+            }
+            if self.0.contains(Categories::Lint) {
+                list.entry(&RuleCategory::Lint);
+            }
+            if self.0.contains(Categories::Assist) {
+                list.entry(&RuleCategory::Action);
+            }
+            list.finish()
+        }
+    }
+}
 
 impl RuleCategories {
     pub fn empty() -> Self {

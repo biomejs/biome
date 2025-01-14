@@ -18,7 +18,6 @@ hashbrown       = { version = "0.14.5", features = ["inline-more"], default-feat
 rustc-hash      = { workspace = true }
 schemars        = { workspace = true, optional = true }
 serde           = { workspace = true, optional = true }
-tracing         = { workspace = true }
 
 [dev-dependencies]
 iai               = "0.1.1"

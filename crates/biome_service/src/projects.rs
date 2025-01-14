@@ -5,9 +5,10 @@ use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 use std::num::NonZeroUsize;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use tracing::trace;
+use tracing::{debug, instrument};
 
 /// Type that holds all the settings and information for different projects
 /// inside the workspace.
@@ -25,6 +26,12 @@ pub struct Projects(HashMap<ProjectKey, ProjectData, FxBuildHasher>);
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[repr(transparent)]
 pub struct ProjectKey(NonZeroUsize);
+
+impl Display for ProjectKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ProjectKey {}", self.0.get())
+    }
+}
 
 impl ProjectKey {
     #[expect(clippy::new_without_default)]
@@ -53,8 +60,9 @@ impl Projects {
     ///
     /// Returns the key of the newly inserted project, or returns an existing
     /// project key if a project with the given path already existed.
+    #[instrument(skip(self, path), fields(path))]
     pub fn insert_project(&self, path: Utf8PathBuf) -> ProjectKey {
-        trace!("Insert workspace folder: {path:?}");
+        debug!("Insert workspace folder {}", path.as_str());
 
         let data = self.0.pin();
         for (key, project_data) in data.iter() {

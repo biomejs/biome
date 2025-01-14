@@ -30,7 +30,7 @@ use biome_service::workspace::{
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
-use tracing::info;
+use tracing::{info, instrument};
 
 /// Useful information during the traversal of files and virtual content
 #[derive(Debug, Clone)]
@@ -43,42 +43,6 @@ pub struct Execution {
 
     /// The maximum number of diagnostics that can be printed in console
     max_diagnostics: u32,
-}
-
-impl Execution {
-    pub fn new_format(project_key: ProjectKey, vcs_targeted: VcsTargeted) -> Self {
-        Self {
-            traversal_mode: TraversalMode::Format {
-                project_key,
-                ignore_errors: false,
-                write: false,
-                stdin: None,
-                vcs_targeted,
-            },
-            report_mode: ReportMode::default(),
-            max_diagnostics: 0,
-        }
-    }
-
-    pub fn report_mode(&self) -> &ReportMode {
-        &self.report_mode
-    }
-}
-
-impl Execution {
-    pub(crate) fn to_feature(&self) -> FeatureName {
-        match self.traversal_mode {
-            TraversalMode::Format { .. } => FeaturesBuilder::new().with_formatter().build(),
-            TraversalMode::Lint { .. } => FeaturesBuilder::new().with_linter().build(),
-            TraversalMode::Check { .. } | TraversalMode::CI { .. } => FeaturesBuilder::new()
-                .with_formatter()
-                .with_linter()
-                .with_assist()
-                .build(),
-            TraversalMode::Migrate { .. } => FeatureName::empty(),
-            TraversalMode::Search { .. } => FeaturesBuilder::new().with_search().build(),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -390,24 +354,29 @@ impl Execution {
         matches!(self.traversal_mode, TraversalMode::Lint { .. })
     }
 
-    pub(crate) const fn is_check_apply(&self) -> bool {
-        matches!(
-            self.traversal_mode,
-            TraversalMode::Check {
-                fix_file_mode: Some(FixFileMode::SafeFixes),
-                ..
+    #[instrument(level = "debug", skip(self), fields(result))]
+    pub(crate) fn is_safe_fixes_enabled(&self) -> bool {
+        let result = match self.traversal_mode {
+            TraversalMode::Check { fix_file_mode, .. } => {
+                fix_file_mode == Some(FixFileMode::SafeFixes)
             }
-        )
+            _ => false,
+        };
+        tracing::Span::current().record("result", result);
+        result
     }
 
-    pub(crate) const fn is_check_apply_unsafe(&self) -> bool {
-        matches!(
-            self.traversal_mode,
-            TraversalMode::Check {
-                fix_file_mode: Some(FixFileMode::SafeAndUnsafeFixes),
-                ..
+    #[instrument(level = "debug", skip(self), fields(result))]
+    pub(crate) fn is_safe_and_unsafe_fixes_enabled(&self) -> bool {
+        let result = match self.traversal_mode {
+            TraversalMode::Check { fix_file_mode, .. } => {
+                fix_file_mode == Some(FixFileMode::SafeAndUnsafeFixes)
             }
-        )
+            _ => false,
+        };
+
+        tracing::Span::current().record("result", result);
+        result
     }
 
     pub(crate) const fn is_format(&self) -> bool {
@@ -462,6 +431,60 @@ impl Execution {
             TraversalMode::Migrate { write, .. } => write,
             TraversalMode::Search { .. } => false,
         }
+    }
+
+    pub fn new_format(project_key: ProjectKey, vcs_targeted: VcsTargeted) -> Self {
+        Self {
+            traversal_mode: TraversalMode::Format {
+                project_key,
+                ignore_errors: false,
+                write: false,
+                stdin: None,
+                vcs_targeted,
+            },
+            report_mode: ReportMode::default(),
+            max_diagnostics: 0,
+        }
+    }
+
+    pub fn report_mode(&self) -> &ReportMode {
+        &self.report_mode
+    }
+    pub(crate) fn to_feature(&self) -> FeatureName {
+        match self.traversal_mode {
+            TraversalMode::Format { .. } => FeaturesBuilder::new().with_formatter().build(),
+            TraversalMode::Lint { .. } => FeaturesBuilder::new().with_linter().build(),
+            TraversalMode::Check { .. } | TraversalMode::CI { .. } => FeaturesBuilder::new()
+                .with_formatter()
+                .with_linter()
+                .with_assist()
+                .build(),
+            TraversalMode::Migrate { .. } => FeatureName::empty(),
+            TraversalMode::Search { .. } => FeaturesBuilder::new().with_search().build(),
+        }
+    }
+
+    #[instrument(level = "debug", skip(self), fields(result))]
+    pub(crate) fn should_write(&self) -> bool {
+        let result = match self.traversal_mode {
+            TraversalMode::Format { write, .. } => write,
+
+            _ => self.is_safe_fixes_enabled() || self.is_safe_and_unsafe_fixes_enabled(),
+        };
+        tracing::Span::current().record("result", result);
+        result
+    }
+
+    #[instrument(level = "debug", skip(self), fields(result))]
+    pub(crate) fn should_ignore_errors(&self) -> bool {
+        let result = match self.traversal_mode {
+            TraversalMode::Format { ignore_errors, .. } => ignore_errors,
+
+            _ => false,
+        };
+        tracing::Span::current().record("result", result);
+
+        result
     }
 }
 
@@ -643,12 +666,12 @@ pub fn execute_mode(
     } else if errors > 0 || should_exit_on_warnings {
         let category = execution.as_diagnostic_category();
         if should_exit_on_warnings {
-            if execution.is_check_apply() {
+            if execution.is_safe_fixes_enabled() {
                 Err(CliDiagnostic::apply_warnings(category))
             } else {
                 Err(CliDiagnostic::check_warnings(category))
             }
-        } else if execution.is_check_apply() {
+        } else if execution.is_safe_fixes_enabled() {
             Err(CliDiagnostic::apply_error(category))
         } else {
             Err(CliDiagnostic::check_error(category))

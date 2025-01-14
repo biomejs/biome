@@ -131,7 +131,7 @@ fn parse(
     }
 }
 
-#[tracing::instrument(level = "trace", skip(parse, settings))]
+#[tracing::instrument(level = "debug", skip(parse, settings))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,

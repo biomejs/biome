@@ -28,6 +28,7 @@ use std::io::ErrorKind;
 use std::iter::FusedIterator;
 use std::ops::Deref;
 use std::path::Path;
+use tracing::instrument;
 
 /// Information regarding the configuration that was found.
 ///
@@ -142,6 +143,7 @@ impl LoadedConfiguration {
 }
 
 /// Load the partial configuration for this session of the CLI.
+#[instrument(level = "debug", skip(fs))]
 pub fn load_configuration(
     fs: &dyn FileSystem,
     config_path: ConfigurationPathHint,
@@ -169,6 +171,7 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 /// - Otherwise, the function will try to traverse upwards the file system until it finds a `biome.json` or `biome.jsonc`
 ///     file, or there aren't directories anymore. In this case, the function will not error but return an `Ok(None)`, which
 ///     means Biome will use the default configuration.
+#[instrument(level = "debug", skip(fs))]
 fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadConfig {
     // This path is used for configuration resolution from external packages.
     let external_resolution_base_path = match base_path {

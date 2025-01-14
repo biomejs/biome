@@ -23,7 +23,7 @@ use std::ops::Sub;
 use tower_lsp::lsp_types::{
     self as lsp, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionResponse,
 };
-use tracing::{debug, info, trace};
+use tracing::{debug, info};
 
 const FIX_ALL_CATEGORY: ActionCategory = ActionCategory::Source(SourceActionKind::FixAll);
 
@@ -37,7 +37,7 @@ fn fix_all_kind() -> CodeActionKind {
 /// Queries the [`AnalysisServer`] for code actions of the file matching its path
 ///
 /// If the AnalysisServer has no matching file, results in error.
-#[tracing::instrument(level = "trace", skip_all, fields(uri = display(& params.text_document.uri), range = debug(params.range), only = debug(& params.context.only), diagnostics = debug(& params.context.diagnostics)), err)]
+#[tracing::instrument(level = "debug", skip_all, fields(uri = display(& params.text_document.uri), range = debug(params.range), only = debug(& params.context.only), diagnostics = debug(& params.context.diagnostics)), err)]
 pub(crate) fn code_actions(
     session: &Session,
     params: CodeActionParams,
@@ -138,7 +138,7 @@ pub(crate) fn code_actions(
         }
     };
 
-    trace!("Filters: {:?}", &filters);
+    debug!("Filters: {:?}", &filters);
 
     // Generate an additional code action to apply all safe fixes on the
     // document if the action category "source.fixAll" was explicitly requested
@@ -193,7 +193,7 @@ pub(crate) fn code_actions(
             // Remove actions that do not match the categories requested by the
             // language client
             let matches_filters = filters.iter().any(|filter| {
-                trace!(
+                debug!(
                     "Filter {:?}, category {:?}",
                     filter,
                     action.category.to_str()

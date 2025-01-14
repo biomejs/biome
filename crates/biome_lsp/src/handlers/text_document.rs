@@ -82,8 +82,8 @@ pub(crate) async fn did_change(
         project_key: doc.project_key,
         path: path.clone(),
     })?;
-    tracing::trace!("old document: {:?}", old_text);
-    tracing::trace!("content changes: {:?}", params.content_changes);
+    tracing::debug!("old document: {:?}", old_text);
+    tracing::debug!("content changes: {:?}", params.content_changes);
 
     let text = apply_document_changes(
         session.position_encoding(),
@@ -91,7 +91,7 @@ pub(crate) async fn did_change(
         params.content_changes,
     );
 
-    tracing::trace!("new document: {:?}", text);
+    tracing::debug!("new document: {:?}", text);
 
     session.insert_document(url.clone(), Document::new(doc.project_key, version, &text));
 

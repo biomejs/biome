@@ -42,7 +42,7 @@ use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
 use std::borrow::Cow;
-use tracing::{debug_span, error, instrument, trace};
+use tracing::{debug_span, error, instrument};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -437,7 +437,7 @@ fn format(
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsonLanguage>(path, document_file_source);
 
-    tracing::debug!("Format with the following options: \n{}", options);
+    tracing::debug!("Format with the following options: {:?}", options);
 
     let tree = parse.syntax();
     let formatted = format_node(options, &tree)?;
@@ -610,7 +610,6 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         return PullActionsResult { actions: vec![] };
     };
 
-    trace!("JSON runs the analyzer");
     analyze(&tree, filter, &analyzer_options, file_source, |signal| {
         actions.extend(signal.actions().into_code_action_iter().map(|item| {
             CodeAction {

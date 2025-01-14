@@ -55,7 +55,7 @@ use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt::Debug;
-use tracing::{debug, debug_span, error, info, trace, trace_span};
+use tracing::{debug, debug_span, error, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -663,7 +663,6 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         range: None,
     };
 
-    info!("Analyze file {}", params.path.as_str());
     let mut process_lint = ProcessLint::new(&params);
     let (_, analyze_diagnostics) = analyze(
         &tree,
@@ -725,7 +724,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         };
     };
 
-    trace!("Javascript runs the analyzer");
+    debug!("Javascript runs the analyzer");
     analyze(
         &tree,
         filter,
@@ -735,7 +734,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         project_layout,
         |signal| {
             actions.extend(signal.actions().into_code_action_iter().map(|item| {
-                trace!("Pulled action category {:?}", item.category);
+                debug!("Pulled action category {:?}", item.category);
                 CodeAction {
                     category: item.category.clone(),
                     rule_name: item
@@ -904,7 +903,6 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     }
 }
 
-#[tracing::instrument(level = "trace", skip(parse, settings))]
 pub(crate) fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
@@ -912,11 +910,8 @@ pub(crate) fn format(
     settings: WorkspaceSettingsHandle,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
-
-    debug!("Options used for format: \n{}", options);
-
+    debug!("{:?}", &options);
     let tree = parse.syntax();
-    info!("Format file {}", biome_path.as_str());
     let formatted = format_node(options, &tree)?;
     match formatted.print() {
         Ok(printed) => Ok(printed),
@@ -927,7 +922,7 @@ pub(crate) fn format(
     }
 }
 
-#[tracing::instrument(level = "trace", skip(parse, settings))]
+#[tracing::instrument(level = "debug", skip(parse, settings, document_file_source))]
 pub(crate) fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
@@ -936,13 +931,13 @@ pub(crate) fn format_range(
     range: TextRange,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
-
+    debug!("{:?}", &options);
     let tree = parse.syntax();
     let printed = biome_js_formatter::format_range(options, &tree, range)?;
     Ok(printed)
 }
 
-#[tracing::instrument(level = "trace", skip(parse, settings))]
+#[tracing::instrument(level = "debug", skip(parse, settings, document_file_source))]
 pub(crate) fn format_on_type(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
@@ -951,7 +946,7 @@ pub(crate) fn format_on_type(
     offset: TextSize,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(path, document_file_source);
-
+    debug!("{:?}", &options);
     let tree = parse.syntax();
 
     let range = tree.text_range_with_trivia();

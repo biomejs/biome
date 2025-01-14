@@ -8,6 +8,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use enumflags2::{bitflags, BitFlags};
 use smallvec::SmallVec;
 use std::cmp::Ordering;
+use std::fmt::Formatter;
 use std::fs::read_to_string;
 use std::hash::Hash;
 use std::ops::DerefMut;
@@ -108,6 +109,12 @@ impl serde::Serialize for BiomePath {
         S: serde::Serializer,
     {
         serializer.serialize_str(self.path.as_str())
+    }
+}
+
+impl std::fmt::Display for BiomePath {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.path.as_str())
     }
 }
 

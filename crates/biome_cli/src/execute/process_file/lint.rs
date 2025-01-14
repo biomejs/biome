@@ -9,8 +9,10 @@ use biome_rowan::TextSize;
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use std::sync::atomic::Ordering;
+use tracing::{info, instrument};
 
 /// Lints a single file and returns a [FileResult]
+#[instrument(level = "debug", name = "cli_lint", skip_all)]
 pub(crate) fn lint<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     path: BiomePath,
@@ -31,14 +33,14 @@ pub(crate) fn lint<'ctx>(
     }
 }
 
+#[instrument(level = "debug", name = "cli_lint_guard", skip_all)]
+
 pub(crate) fn lint_with_guard<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     workspace_file: &mut WorkspaceFile,
     suppress: bool,
     suppression_reason: Option<&str>,
 ) -> FileResult {
-    let _ = tracing::info_span!("Lint ", path =? workspace_file.path).entered();
-
     let mut input = workspace_file.input()?;
     let mut changed = false;
     let (only, skip) =
@@ -68,6 +70,13 @@ pub(crate) fn lint_with_guard<'ctx>(
                 Some(suppression_explanation.to_string()),
             )
             .with_file_path_and_code(workspace_file.path.to_string(), category!("lint"))?;
+
+        info!(
+            "Fix file summary result. Errors {}, skipped fixes {}, actions {}",
+            fix_result.errors,
+            fix_result.skipped_suggested_fixes,
+            fix_result.actions.len()
+        );
 
         ctx.push_message(Message::SkippedFixes {
             skipped_suggested_fixes: fix_result.skipped_suggested_fixes,

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{Error, Value};
-use tracing::trace;
+use tracing::debug;
 
 pub(crate) const CONFIGURATION_SECTION: &str = "biome";
 
@@ -46,7 +46,7 @@ impl ExtensionSettings {
     pub(crate) fn set_workspace_settings(&mut self, value: Value) -> Result<(), Error> {
         let workspace_settings = serde_json::from_value(value)?;
         self.settings = workspace_settings;
-        trace!(
+        debug!(
             "Correctly stored the settings coming from the client: {:?}",
             self.settings
         );
