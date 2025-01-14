@@ -482,7 +482,7 @@ impl Execution {
 
             _ => false,
         };
-        tracing::Span::current().record("result", &result);
+        tracing::Span::current().record("result", result);
 
         result
     }

@@ -363,7 +363,6 @@ define_categories! {
     "plugin",
     "project",
     "search",
-    "metrics",
     "internalError/io",
     "internalError/fs",
     "internalError/panic",

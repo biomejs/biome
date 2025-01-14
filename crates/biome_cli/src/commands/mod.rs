@@ -751,11 +751,7 @@ pub(crate) trait CommandRunner: Sized {
         let fs = workspace.fs();
         self.check_incompatible_arguments()?;
         let (execution, paths) = self.configure_workspace(fs, console, workspace, cli_options)?;
-        let result = execute_mode(execution, session, cli_options, paths);
-        // let data = s.snapshot().into_vec();
-
-        // dbg!(&data);
-        result
+        execute_mode(execution, session, cli_options, paths)
     }
 
     /// This function prepares the workspace with the following:
