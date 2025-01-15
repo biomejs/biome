@@ -398,14 +398,19 @@
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"ignore": {
-					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
+					"description": "A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
 				"include": {
-					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
+					"description": "A list of Unix shell style patterns. Biome will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
+				},
+				"includes": {
+					"description": "A list of glob patterns. Biome will include files/folders that will match these patterns.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/definitions/Glob" }
 				}
 			},
 			"additionalProperties": false
@@ -1390,6 +1395,11 @@
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
+				"includes": {
+					"description": "A list of glob patterns. Biome will handle only those files/folders that will match these patterns.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/definitions/Glob" }
+				},
 				"maxSize": {
 					"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB",
 					"anyOf": [{ "$ref": "#/definitions/MaxSize" }, { "type": "null" }]
@@ -1469,6 +1479,11 @@
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
+				"includes": {
+					"description": "A list of glob patterns. The formatter will include files/folders that will match these patterns.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/definitions/Glob" }
+				},
 				"indentStyle": {
 					"description": "The indent style.",
 					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
@@ -1492,6 +1507,7 @@
 			},
 			"additionalProperties": false
 		},
+		"Glob": { "type": "string" },
 		"GraphqlAssistConfiguration": {
 			"description": "Options that changes how the GraphQL linter behaves",
 			"type": "object",
@@ -1807,7 +1823,7 @@
 		"ImportGroup": {
 			"anyOf": [
 				{ "$ref": "#/definitions/PredefinedImportGroup" },
-				{ "$ref": "#/definitions/Regex" }
+				{ "$ref": "#/definitions/Glob" }
 			]
 		},
 		"IndentScriptAndStyle": {
@@ -2258,9 +2274,14 @@
 					"items": { "type": "string" }
 				},
 				"include": {
-					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
+					"description": "A list of Unix shell style patterns. The analyzer will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
+				},
+				"includes": {
+					"description": "A list of glob patterns. The analyzer will handle only those files/folders that will match these patterns.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/definitions/Glob" }
 				},
 				"rules": {
 					"description": "List of rules",
@@ -3018,14 +3039,19 @@
 					]
 				},
 				"ignore": {
-					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
+					"description": "A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
 				"include": {
-					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
+					"description": "A list of Unix shell style patterns. Biome will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
+				},
+				"includes": {
+					"description": "A list of glob patterns. Biome will include files/folders that will match these patterns.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/definitions/Glob" }
 				},
 				"javascript": {
 					"description": "Specific configuration for the JavaScript language",

@@ -83,6 +83,12 @@ pub struct FormatterConfiguration {
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub include: Option<Vec<Box<str>>>,
+
+    /// A list of glob patterns. The formatter will include files/folders that will
+    /// match these patterns.
+    #[bpaf(pure(Default::default()), hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub includes: Option<Vec<biome_glob::Glob>>,
 }
 
 impl FormatterConfiguration {
@@ -120,13 +126,5 @@ impl FormatterConfiguration {
 
     pub fn use_editorconfig_resolved(&self) -> bool {
         self.use_editorconfig.unwrap_or_default().into()
-    }
-
-    pub fn ignore_resolved(&self) -> Vec<Box<str>> {
-        self.ignore.clone().unwrap_or_default()
-    }
-
-    pub fn include_resolved(&self) -> Vec<Box<str>> {
-        self.include.clone().unwrap_or_default()
     }
 }

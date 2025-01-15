@@ -1421,7 +1421,7 @@ fn does_not_format_ignored_directories() {
 fn does_not_format_ignored_file_in_included_directory() {
     let config = r#"{
         "formatter": {
-          "include": ["src"],
+          "includes": ["src/**"],
           "ignore": ["src/file2.js"]
         }
     }"#;
@@ -1469,11 +1469,11 @@ fn include_ignore_cascade() {
     // - `file4.js` is not included at top-level
     let config = r#"{
         "files": {
-          "include": ["file1.js", "file2.js", "file3.js"],
+          "includes": ["file1.js", "file2.js", "file3.js"],
           "ignore": ["file2.js"]
         },
         "formatter": {
-          "include": ["file1.js", "file2.js"],
+          "includes": ["file1.js", "file2.js"],
           "ignore": ["file3.js"]
         }
     }"#;
@@ -1939,7 +1939,7 @@ fn include_vcs_ignore_cascade() {
           "ignore": ["file2.js"]
         },
         "formatter": {
-          "include": ["file1.js", "file2.js", "file4.js"],
+          "includes": ["file1.js", "file2.js", "file4.js"],
           "ignore": ["file3.js"]
         }
     }"#;
@@ -2315,7 +2315,7 @@ fn format_json_trailing_commas_overrides_all() {
         "formatter": { "trailingCommas": "none" }
     },
     "overrides": [{
-        "include": ["file.json"],
+        "includes": ["file.json"],
         "json": {
             "formatter": { "trailingCommas": "all" }
         }
@@ -2358,7 +2358,7 @@ fn format_json_trailing_commas_overrides_none() {
         "formatter": { "trailingCommas": "all" }
     },
     "overrides": [{
-        "include": ["file.json"],
+        "includes": ["file.json"],
         "json": {
             "formatter": { "trailingCommas": "none" }
         }

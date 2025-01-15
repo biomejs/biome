@@ -367,15 +367,9 @@ impl ServiceLanguage for JsLanguage {
                                 pattern.languages.javascript.formatter.enabled,
                                 pattern.formatter.enabled,
                             )
-                            .and_then(|enabled| {
+                            .filter(|_| {
                                 // Then check whether the path satisfies
-                                if pattern.include.matches_path(path)
-                                    && !pattern.exclude.matches_path(path)
-                                {
-                                    Some(enabled)
-                                } else {
-                                    None
-                                }
+                                pattern.is_file_included(path)
                             })
                         });
 
@@ -402,15 +396,9 @@ impl ServiceLanguage for JsLanguage {
                                 pattern.languages.javascript.assist.enabled,
                                 pattern.assist.enabled,
                             )
-                            .and_then(|enabled| {
+                            .filter(|_| {
                                 // Then check whether the path satisfies
-                                if pattern.include.matches_path(path)
-                                    && !pattern.exclude.matches_path(path)
-                                {
-                                    Some(enabled)
-                                } else {
-                                    None
-                                }
+                                pattern.is_file_included(path)
                             })
                         });
 
@@ -437,15 +425,9 @@ impl ServiceLanguage for JsLanguage {
                                 pattern.languages.javascript.linter.enabled,
                                 pattern.linter.enabled,
                             )
-                            .and_then(|enabled| {
+                            .filter(|_| {
                                 // Then check whether the path satisfies
-                                if pattern.include.matches_path(path)
-                                    && !pattern.exclude.matches_path(path)
-                                {
-                                    Some(enabled)
-                                } else {
-                                    None
-                                }
+                                pattern.is_file_included(path)
                             })
                         });
 

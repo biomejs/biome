@@ -16,7 +16,7 @@ fn logs_the_appropriate_messages_according_to_set_diagnostics_level() {
         file_path.into(),
         r#"{
   "files": {
-    "include": ["test.js"]
+    "includes": ["test.js"]
   },
   "linter": {
     "rules": {

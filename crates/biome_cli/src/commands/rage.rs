@@ -254,6 +254,12 @@ impl Display for RageConfiguration<'_> {
                                 .collect::<Vec<_>>()
                                 .join(", ")
                         });
+                        let includes = formatter_configuration.includes.map(|list| {
+                            list.iter()
+                                .map(|s| s.to_string())
+                                .collect::<Vec<_>>()
+                                .join(", ")
+                        });
                         markup! (
                             {Section("Formatter")}
                             {KeyValuePair("Format with errors", markup!({DisplayOption(configuration.get_formatter_configuration().format_with_errors)}))}
@@ -265,6 +271,7 @@ impl Display for RageConfiguration<'_> {
                             {KeyValuePair("Bracket spacing", markup!({DisplayOption(formatter_configuration.bracket_spacing)}))}
                             {KeyValuePair("Ignore", markup!({DisplayOption(ignore)}))}
                             {KeyValuePair("Include", markup!({DisplayOption(include)}))}
+                            {KeyValuePair("Includes", markup!({DisplayOption(includes)}))}
                         ).fmt(fmt)?;
 
                         let javascript_formatter_configuration =

@@ -174,27 +174,52 @@ impl Projects {
         };
 
         let settings = &project_data.settings;
-        let (feature_included_files, feature_ignored_files) = match feature {
+        let (feature_includes_files, feature_included_files, feature_ignored_files) = match feature
+        {
             FeatureKind::Format => {
                 let formatter = &settings.formatter;
-                (&formatter.included_files, &formatter.ignored_files)
+                (
+                    &formatter.includes_files,
+                    &formatter.included_files,
+                    &formatter.ignored_files,
+                )
             }
             FeatureKind::Lint => {
                 let linter = &settings.linter;
-                (&linter.included_files, &linter.ignored_files)
+                (
+                    &linter.includes_files,
+                    &linter.included_files,
+                    &linter.ignored_files,
+                )
             }
 
             FeatureKind::Assist => {
                 let assists = &settings.assist;
-                (&assists.included_files, &assists.ignored_files)
+                (
+                    &assists.includes_files,
+                    &assists.included_files,
+                    &assists.ignored_files,
+                )
             }
             // TODO: enable once the configuration is available
             FeatureKind::Search => return false, // There is no search-specific config.
             FeatureKind::Debug => return false,
         };
-        let is_feature_included = feature_included_files.is_empty()
-            || is_dir(path)
-            || feature_included_files.matches_path(path);
+
+        let mut is_feature_included = true;
+        if !feature_includes_files.is_empty() {
+            let candidate_path = biome_glob::CandidatePath::new(&path);
+            is_feature_included = if is_dir(path) {
+                candidate_path.matches_directory_with_exceptions(feature_includes_files)
+            } else {
+                candidate_path.matches_with_exceptions(feature_includes_files)
+            };
+        }
+        if !feature_included_files.is_empty() {
+            is_feature_included =
+                is_feature_included && (is_dir(path) || feature_included_files.matches_path(path));
+        };
+
         !is_feature_included || feature_ignored_files.matches_path(path)
     }
 }

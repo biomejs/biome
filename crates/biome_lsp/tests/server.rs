@@ -1861,7 +1861,7 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
     },
     "overrides": [
         {
-            "include": ["*.ts", "*.tsx"],
+            "includes": ["**/*.ts", "**/*.tsx"],
             "linter": {
                 "rules": {
                     "style": {

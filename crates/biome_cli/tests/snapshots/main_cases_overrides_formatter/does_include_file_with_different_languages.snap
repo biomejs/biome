@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -8,17 +9,17 @@ expression: content
 {
   "overrides": [
     {
-      "include": ["test.js"],
+      "includes": ["test.js"],
       "formatter": { "lineWidth": 120 },
       "javascript": { "formatter": { "quoteStyle": "single" } }
     },
     {
-      "include": ["test2.js"],
+      "includes": ["test2.js"],
       "formatter": { "lineWidth": 120, "indentStyle": "space" },
       "javascript": { "formatter": { "semicolons": "asNeeded" } }
     },
     {
-      "include": ["test.css"],
+      "includes": ["test.css"],
       "formatter": { "lineWidth": 120, "indentStyle": "space" },
       "css": { "formatter": { "quoteStyle": "single" } }
     }

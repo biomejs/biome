@@ -98,13 +98,17 @@ export interface AssistConfiguration {
 	 */
 	enabled?: Bool;
 	/**
-	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
+	 * A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.
 	 */
 	ignore?: string[];
 	/**
-	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
+	 * A list of Unix shell style patterns. Biome will include files/folders that will match these patterns.
 	 */
 	include?: string[];
+	/**
+	 * A list of glob patterns. Biome will include files/folders that will match these patterns.
+	 */
+	includes?: Glob[];
 }
 /**
  * Options applied to CSS files
@@ -148,6 +152,10 @@ export interface FilesConfiguration {
 	 */
 	include?: string[];
 	/**
+	 * A list of glob patterns. Biome will handle only those files/folders that will match these patterns.
+	 */
+	includes?: Glob[];
+	/**
 	 * The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB
 	 */
 	maxSize?: MaxSize;
@@ -181,6 +189,10 @@ export interface FormatterConfiguration {
 	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
 	 */
 	include?: string[];
+	/**
+	 * A list of glob patterns. The formatter will include files/folders that will match these patterns.
+	 */
+	includes?: Glob[];
 	/**
 	 * The indent style.
 	 */
@@ -314,9 +326,13 @@ export interface LinterConfiguration {
 	 */
 	ignore?: string[];
 	/**
-	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
+	 * A list of Unix shell style patterns. The analyzer will include files/folders that will match these patterns.
 	 */
 	include?: string[];
+	/**
+	 * A list of glob patterns. The analyzer will handle only those files/folders that will match these patterns.
+	 */
+	includes?: Glob[];
 	/**
 	 * List of rules
 	 */
@@ -359,6 +375,7 @@ export interface Actions {
 	recommended?: boolean;
 	source?: Source;
 }
+export type Glob = string;
 /**
  * Options that changes how the CSS assist behaves
  */
@@ -768,13 +785,17 @@ export interface OverridePattern {
 	 */
 	html?: HtmlConfiguration;
 	/**
-	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
+	 * A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.
 	 */
 	ignore?: string[];
 	/**
-	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
+	 * A list of Unix shell style patterns. Biome will include files/folders that will match these patterns.
 	 */
 	include?: string[];
+	/**
+	 * A list of glob patterns. Biome will include files/folders that will match these patterns.
+	 */
+	includes?: Glob[];
 	/**
 	 * Specific configuration for the JavaScript language
 	 */
@@ -2611,7 +2632,7 @@ export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
 	 */
 	options: NoDoubleEqualsOptions;
 }
-export type ImportGroup = PredefinedImportGroup | Regex;
+export type ImportGroup = PredefinedImportGroup | Glob;
 /**
  * Used to identify the kind of code action emitted by a rule
  */
@@ -2834,7 +2855,6 @@ export type PredefinedImportGroup =
 	| ":bun:"
 	| ":node:"
 	| ":types:";
-export type Regex = string;
 export type DependencyAvailability = boolean | string[];
 export interface Hook {
 	/**
@@ -2865,6 +2885,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 export type Accessibility = "noPublic" | "explicit" | "none";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
+export type Regex = string;
 export interface Convention {
 	/**
 	 * String cases to enforce

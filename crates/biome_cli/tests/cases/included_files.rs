@@ -24,7 +24,7 @@ fn does_handle_only_included_files() {
     fs.insert(
         file_path.into(),
         r#"{
-  "files": { "include": ["test.js"] }
+  "files": { "includes": ["test.js"] }
 }
 "#
         .as_bytes(),
@@ -65,7 +65,7 @@ fn does_not_handle_included_files_if_overridden_by_ignore() {
     fs.insert(
         file_path.into(),
         r#"{
-  "files": { "include": ["test.js", "test2.js"], "ignore": ["test.js"] }
+  "files": { "includes": ["test.js", "test2.js"], "ignore": ["test.js"] }
 }
 "#
         .as_bytes(),
@@ -106,7 +106,7 @@ fn does_not_handle_included_files_if_overridden_by_ignore_formatter() {
     fs.insert(
         file_path.into(),
         r#"{
-  "formatter": { "include": ["test.js", "test2.js"], "ignore": ["test.js"] }
+  "formatter": { "includes": ["test.js", "test2.js"], "ignore": ["test.js"] }
 }
 "#
         .as_bytes(),
@@ -147,7 +147,7 @@ fn does_not_handle_included_files_if_overridden_by_ignore_linter() {
     fs.insert(
         file_path.into(),
         r#"{
-  "linter": { "include": ["test.js", "test2.js"], "ignore": ["test.js"] }
+  "linter": { "includes": ["test.js", "test2.js"], "ignore": ["test.js"] }
 }
 "#
         .as_bytes(),
@@ -190,7 +190,7 @@ fn does_not_handle_included_files_if_overridden_by_organize_imports() {
         r#"{
   "formatter": { "enabled": false },
   "linter": { "enabled": false },
-  "assist": { "include": ["test.js", "test2.js"], "ignore": ["test.js"] }
+  "assist": { "includes": ["test.js", "test2.js"], "ignore": ["test.js"] }
 }
 "#
         .as_bytes(),

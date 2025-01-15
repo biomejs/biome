@@ -3,6 +3,7 @@
 		{
 			"ignore": [],
 			"include": [],
+			"includes": [],
 			"javascript": {},
 			"json": {},
 			"css": {}

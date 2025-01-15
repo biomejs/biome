@@ -293,7 +293,7 @@ mod configuration {
                     "globals": ["React"]
                 },
                 "overrides": [{
-                    "include": ["tests"],
+                    "includes": ["tests/**"],
                     "javascript": {
                         "globals": ["test", "it"]
                     }

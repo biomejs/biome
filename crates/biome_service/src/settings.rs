@@ -149,7 +149,7 @@ impl Settings {
         for pattern in overrides.patterns.iter() {
             let pattern_rules = pattern.linter.rules.as_ref();
             if let Some(pattern_rules) = pattern_rules {
-                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                if pattern.is_file_included(path) {
                     result = if let Some(mut result) = result.take() {
                         // Override rules
                         result.to_mut().merge_with(pattern_rules.clone());
@@ -173,7 +173,7 @@ impl Settings {
         for pattern in overrides.patterns.iter() {
             let pattern_rules = pattern.linter.domains.as_ref();
             if let Some(pattern_rules) = pattern_rules {
-                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                if pattern.is_file_included(path) {
                     result = if let Some(mut result) = result.take() {
                         // Override rules
                         result.to_mut().merge_with(pattern_rules.clone());
@@ -195,7 +195,7 @@ impl Settings {
         for pattern in overrides.patterns.iter() {
             let pattern_rules = pattern.assist.actions.as_ref();
             if let Some(pattern_rules) = pattern_rules {
-                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                if pattern.is_file_included(path) {
                     result = if let Some(mut result) = result.take() {
                         // Override rules
                         result.to_mut().merge_with(pattern_rules.clone());
@@ -241,6 +241,8 @@ pub struct FormatSettings {
     pub ignored_files: Matcher,
     /// List of included paths/files
     pub included_files: Matcher,
+    /// List of included paths/files
+    pub includes_files: Box<[biome_glob::Glob]>,
 }
 
 impl FormatSettings {
@@ -297,6 +299,9 @@ pub struct LinterSettings {
     /// List of included paths/files to match
     pub included_files: Matcher,
 
+    /// List of included paths/files
+    pub includes_files: Box<[biome_glob::Glob]>,
+
     /// Rule domains
     pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
 }
@@ -334,6 +339,9 @@ pub struct AssistSettings {
 
     /// List of included paths/files to match
     pub included_files: Matcher,
+
+    /// List of included paths/files
+    pub includes_files: Box<[biome_glob::Glob]>,
 }
 
 impl AssistSettings {
@@ -591,6 +599,9 @@ pub struct FilesSettings {
     /// List of paths/files to matcher
     pub included_files: Matcher,
 
+    /// List of included paths/files
+    pub includes_files: Box<[biome_glob::Glob]>,
+
     /// Files not recognized by Biome should not emit a diagnostic
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
 }
@@ -622,6 +633,7 @@ fn to_file_settings(
                 config.ignore.as_deref(),
             )?,
             included_files: Matcher::from_globs(working_directory, config.include.as_deref())?,
+            includes_files: config.includes.unwrap_or_default().into(),
             ignore_unknown: config.ignore_unknown,
         })
     } else {
@@ -743,9 +755,7 @@ impl WorkspaceSettingsHandle {
                     .rev()
                     .find_map(|pattern| {
                         if let Some(enabled) = pattern.formatter.format_with_errors {
-                            if pattern.include.matches_path(path)
-                                && !pattern.exclude.matches_path(path)
-                            {
+                            if pattern.is_file_included(path) {
                                 return Some(enabled);
                             }
                         }
@@ -764,26 +774,6 @@ pub struct OverrideSettings {
 }
 
 impl OverrideSettings {
-    /// Checks whether at least one override excludes the provided `path`
-    pub fn is_path_excluded(&self, path: &Utf8Path) -> Option<bool> {
-        for pattern in &self.patterns {
-            if pattern.exclude.matches_path(path) {
-                return Some(true);
-            }
-        }
-        None
-    }
-    /// Checks whether at least one override include the provided `path`
-    pub fn is_path_included(&self, path: &Utf8Path) -> Option<bool> {
-        for pattern in &self.patterns {
-            if pattern.include.matches_path(path) {
-                return Some(true);
-            }
-        }
-        None
-    }
-    // #endregion
-
     /// It scans the current override rules and return the formatting options that of the first override is matched
     pub fn override_js_format_options(
         &self,
@@ -791,7 +781,7 @@ impl OverrideSettings {
         mut options: JsFormatOptions,
     ) -> JsFormatOptions {
         for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+            if pattern.is_file_included(path) {
                 pattern.apply_overrides_to_js_format_options(&mut options);
             }
         }
@@ -808,9 +798,7 @@ impl OverrideSettings {
             // Reverse the traversal as only the last override takes effect
             .rev()
             .find_map(|pattern| {
-                if pattern.languages.javascript.globals.is_some()
-                    && pattern.include.matches_path(path)
-                    && !pattern.exclude.matches_path(path)
+                if pattern.languages.javascript.globals.is_some() && pattern.is_file_included(path)
                 {
                     pattern.languages.javascript.globals.clone()
                 } else {
@@ -827,7 +815,7 @@ impl OverrideSettings {
             // Reverse the traversal as only the last override takes effect
             .rev()
             .find_map(|pattern| {
-                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                if pattern.is_file_included(path) {
                     pattern.languages.javascript.environment.jsx_runtime
                 } else {
                     None
@@ -842,7 +830,7 @@ impl OverrideSettings {
         mut options: GritFormatOptions,
     ) -> GritFormatOptions {
         for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+            if pattern.is_file_included(path) {
                 pattern.apply_overrides_to_grit_format_options(&mut options);
             }
         }
@@ -855,7 +843,7 @@ impl OverrideSettings {
         mut options: HtmlFormatOptions,
     ) -> HtmlFormatOptions {
         for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+            if pattern.is_file_included(path) {
                 pattern.apply_overrides_to_html_format_options(&mut options);
             }
         }
@@ -868,7 +856,7 @@ impl OverrideSettings {
         mut options: JsParserOptions,
     ) -> JsParserOptions {
         for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+            if pattern.is_file_included(path) {
                 pattern.apply_overrides_to_js_parser_options(&mut options);
             }
         }
@@ -881,7 +869,7 @@ impl OverrideSettings {
         mut options: JsonParserOptions,
     ) -> JsonParserOptions {
         for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+            if pattern.is_file_included(path) {
                 pattern.apply_overrides_to_json_parser_options(&mut options);
             }
         }
@@ -895,7 +883,7 @@ impl OverrideSettings {
         mut options: CssParserOptions,
     ) -> CssParserOptions {
         for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+            if pattern.is_file_included(path) {
                 pattern.apply_overrides_to_css_parser_options(&mut options);
             }
         }
@@ -911,7 +899,7 @@ impl OverrideSettings {
         mut options: CssFormatOptions,
     ) -> CssFormatOptions {
         for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+            if pattern.is_file_included(path) {
                 pattern.apply_overrides_to_css_format_options(&mut options);
             }
         }
@@ -925,7 +913,7 @@ impl OverrideSettings {
         mut options: JsonParserOptions,
     ) -> JsonParserOptions {
         for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+            if pattern.is_file_included(path) {
                 pattern.apply_overrides_to_json_parser_options(&mut options);
             }
         }
@@ -939,7 +927,7 @@ impl OverrideSettings {
         mut options: JsonFormatOptions,
     ) -> JsonFormatOptions {
         for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+            if pattern.is_file_included(path) {
                 pattern.apply_overrides_to_json_format_options(&mut options);
             }
         }
@@ -957,12 +945,13 @@ impl OverrideSettings {
         mut options: GraphqlFormatOptions,
     ) -> GraphqlFormatOptions {
         for pattern in self.patterns.iter() {
-            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+            if pattern.is_file_included(path) {
                 pattern.apply_overrides_to_graphql_format_options(&mut options);
             }
         }
         options
     }
+    // #endregion
 
     /// Retrieves the options of lint rules that have been overridden
     pub fn override_analyzer_rules(
@@ -971,7 +960,7 @@ impl OverrideSettings {
         mut analyzer_rules: AnalyzerRules,
     ) -> AnalyzerRules {
         for pattern in self.patterns.iter() {
-            if !pattern.exclude.matches_path(path) && pattern.include.matches_path(path) {
+            if pattern.is_file_included(path) {
                 if let Some(rules) = pattern.linter.rules.as_ref() {
                     push_to_analyzer_rules(
                         rules,
@@ -1025,8 +1014,9 @@ impl OverrideSettings {
 
 #[derive(Clone, Debug, Default)]
 pub struct OverrideSettingPattern {
-    pub exclude: Matcher,
-    pub include: Matcher,
+    exclude: Matcher,
+    include: Matcher,
+    includes: Box<[biome_glob::Glob]>,
     /// Formatter settings applied to all files in the workspaces
     pub formatter: OverrideFormatSettings,
     /// Linter settings applied to all files in the workspace
@@ -1038,6 +1028,23 @@ pub struct OverrideSettingPattern {
 }
 
 impl OverrideSettingPattern {
+    /// Returns `true` if this override settings concerns `file_path`.
+    ///
+    /// Note that only path to regular files should be passed.
+    /// This function doesn't take directories into account.
+    pub fn is_file_included(&self, file_path: &Utf8Path) -> bool {
+        if self.exclude.matches_path(file_path) {
+            return false;
+        }
+        self.include.matches_path(file_path)
+            || if !self.includes.is_empty() {
+                let candidate_path = biome_glob::CandidatePath::new(&file_path);
+                candidate_path.matches_with_exceptions(&self.includes)
+            } else {
+                false
+            }
+    }
+
     fn apply_overrides_to_js_format_options(&self, options: &mut JsFormatOptions) {
         let js_formatter = &self.languages.javascript.formatter;
         let formatter = &self.formatter;
@@ -1311,6 +1318,7 @@ pub fn to_override_settings(
         languages.html = to_html_language_settings(html, &current_settings.languages.html);
 
         let pattern_setting = OverrideSettingPattern {
+            includes: pattern.includes.unwrap_or_default().into(),
             include: Matcher::from_globs(working_directory.clone(), pattern.include.as_deref())?,
             exclude: Matcher::from_globs(working_directory.clone(), pattern.ignore.as_deref())?,
             formatter,
@@ -1441,6 +1449,7 @@ pub fn to_format_settings(
         bracket_spacing: conf.bracket_spacing,
         ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
         included_files: Matcher::from_globs(working_directory, conf.include.as_deref())?,
+        includes_files: conf.includes.unwrap_or_default().into(),
     })
 }
 
@@ -1467,6 +1476,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             format_with_errors: conf.format_with_errors,
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
+            includes_files: Default::default(),
         })
     }
 }
@@ -1480,6 +1490,7 @@ pub fn to_linter_settings(
         rules: conf.rules,
         ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
         included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
+        includes_files: conf.includes.unwrap_or_default().into(),
         domains: conf.domains,
     })
 }
@@ -1493,6 +1504,7 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
             rules: conf.rules,
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
+            includes_files: Default::default(),
             domains: conf.domains,
         })
     }
@@ -1507,6 +1519,7 @@ pub fn to_assist_settings(
         actions: conf.actions,
         ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
         included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
+        includes_files: conf.includes.unwrap_or_default().into(),
     })
 }
 
@@ -1519,6 +1532,7 @@ impl TryFrom<OverrideAssistConfiguration> for AssistSettings {
             actions: conf.actions,
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
+            includes_files: Default::default(),
         })
     }
 }

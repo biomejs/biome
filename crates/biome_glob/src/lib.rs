@@ -255,7 +255,7 @@ impl biome_deserialize::Deserializable for Glob {
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for Glob {
     fn schema_name() -> String {
-        "Regex".to_string()
+        "Glob".to_string()
     }
 
     fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {

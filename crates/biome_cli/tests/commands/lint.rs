@@ -1100,7 +1100,7 @@ fn include_files_in_subdir() {
     let mut console = BufferConsole::default();
     let config = r#"{
         "files": {
-            "include": ["./**/*.js"]
+            "includes": ["**/*.js"]
         }
     }"#;
 
@@ -1143,7 +1143,7 @@ fn include_files_in_symlinked_subdir() {
     let mut console = BufferConsole::default();
     let config = r#"{
         "files": {
-            "include": ["./**/*.js"]
+            "includes": ["**/*.js"]
         }
     }"#;
 
@@ -2548,7 +2548,7 @@ fn should_only_process_changed_file_if_its_included() {
         r#"
 {
     "files": {
-        "include": ["file.js"]
+        "includes": ["file.js"]
     },
     "vcs": {
         "defaultBranch": "main"
@@ -2763,7 +2763,7 @@ fn should_only_process_staged_file_if_its_included() {
         r#"
 {
     "files": {
-        "include": ["file.js"]
+        "includes": ["file.js"]
     },
     "vcs": {
         "defaultBranch": "main"

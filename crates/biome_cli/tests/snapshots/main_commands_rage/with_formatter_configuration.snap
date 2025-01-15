@@ -11,7 +11,7 @@ snapshot_kind: text
     "attributePosition": "multiline",
     "enabled": true,
     "formatWithErrors": true,
-    "include": [
+    "includes": [
       "**/*.html",
       "**/*.css",
       "**/*.js",
@@ -87,7 +87,8 @@ Formatter:
   Attribute position:           Multiline
   Bracket spacing:              unset
   Ignore:                       configuration-schema.json
-  Include:                      **/*.html, **/*.css, **/*.js, **/*.ts, **/*.tsx, **/*.jsx, **/*.json, **/*.md
+  Include:                      unset
+  Includes:                     **/*.html, **/*.css, **/*.js, **/*.ts, **/*.tsx, **/*.jsx, **/*.json, **/*.md
 
 JavaScript Formatter:
   Enabled:                      true

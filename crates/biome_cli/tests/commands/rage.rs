@@ -202,7 +202,7 @@ fn with_formatter_configuration() {
     "attributePosition": "multiline",
     "enabled": true,
     "formatWithErrors": true,
-    "include": [
+    "includes": [
       "**/*.html",
       "**/*.css",
       "**/*.js",

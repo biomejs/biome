@@ -332,7 +332,7 @@ fn extends_config_merge_overrides() {
         shared.into(),
         r#"{
             "overrides": [{
-                "include": ["**/*.js"],
+                "includes": ["**/*.js"],
                 "linter": { "rules": { "suspicious": { "noDebugger": "off" } } }
             }]
         }"#,
@@ -344,7 +344,7 @@ fn extends_config_merge_overrides() {
         r#"{
             "extends": ["shared.json"],
             "overrides": [{
-                "include": ["**/*.js"],
+                "includes": ["**/*.js"],
                 "linter": { "rules": { "correctness": { "noUnusedVariables": "error" } } }
             }]
         }"#,

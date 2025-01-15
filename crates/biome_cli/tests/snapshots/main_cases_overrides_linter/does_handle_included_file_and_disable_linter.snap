@@ -1,15 +1,16 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `biome.json`
 
 ```json
 {
   "files": {
-    "include": ["test.js", "special/**"]
+    "includes": ["test.js", "special/**"]
   },
-  "overrides": [{ "include": ["special/**"], "linter": { "enabled": false } }]
+  "overrides": [{ "includes": ["special/**"], "linter": { "enabled": false } }]
 }
 ```
 

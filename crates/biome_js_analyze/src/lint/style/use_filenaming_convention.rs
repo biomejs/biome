@@ -48,7 +48,7 @@ declare_lint_rule! {
     /// {
     ///   "overrides": [
     ///     {
-    ///        "include": ["test/**/*"],
+    ///        "includes": ["test/**/*"],
     ///        "linter": {
     ///          "rules": {
     ///            "style": {

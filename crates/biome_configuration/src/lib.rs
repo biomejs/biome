@@ -356,6 +356,12 @@ pub struct FilesConfiguration {
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub include: Option<Vec<Box<str>>>,
+
+    /// A list of glob patterns. Biome will handle only those files/folders that will
+    /// match these patterns.
+    #[bpaf(hide, pure(Default::default()))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub includes: Option<Vec<biome_glob::Glob>>,
 }
 
 pub struct ConfigurationPayload {
