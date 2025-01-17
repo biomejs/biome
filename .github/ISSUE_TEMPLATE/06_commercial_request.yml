@@ -1,7 +1,7 @@
 name: 💳 Commercial Support Request
 description: A request for Commercial Support with Biome. We will try to bring you into contact with a freelancer who can help you.
 title: "💳 <TITLE> "
-labels: ["paid-support"]
+type: Enterprise
 body:
   - type: textarea
     id: description
