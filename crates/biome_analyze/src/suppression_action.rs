@@ -86,6 +86,7 @@ pub trait SuppressionAction {
         mutation: &mut BatchMutation<Self::Language>,
         token: SyntaxToken<Self::Language>,
         suppression_text: &str,
+        suppression_reason: &str,
     );
 }
 

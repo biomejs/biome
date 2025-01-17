@@ -1,7 +1,8 @@
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
-    GetFileContentParams, IsPathIgnoredParams, OpenProjectParams, ProjectKey, RageParams,
-    RageResult, ServerInfo,
+    FixDiagnosticsInFileParams, FixDiagnosticsInFileResult, GetFileContentParams,
+    IsPathIgnoredParams, OpenProjectParams, ProjectKey, PullDiagnosticsAndActionsParams,
+    PullDiagnosticsAndActionsResult, RageParams, RageResult, ServerInfo,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -105,29 +106,6 @@ impl<T> Workspace for WorkspaceClient<T>
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync,
 {
-    fn fs(&self) -> &dyn FileSystem {
-        self.fs.as_ref()
-    }
-
-    fn file_features(
-        &self,
-        params: SupportsFeatureParams,
-    ) -> Result<FileFeaturesResult, WorkspaceError> {
-        self.request("biome/file_features", params)
-    }
-
-    fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
-        self.request("biome/is_path_ignored", params)
-    }
-
-    fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
-        self.request("biome/update_settings", params)
-    }
-
-    fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
-        self.request("biome/open_file", params)
-    }
-
     fn open_project(&self, params: OpenProjectParams) -> Result<ProjectKey, WorkspaceError> {
         self.request("biome/open_project", params)
     }
@@ -139,8 +117,27 @@ where
         self.request("biome/scan_project_folder", params)
     }
 
+    fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
+        self.request("biome/update_settings", params)
+    }
+
     fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError> {
         self.request("biome/close_project", params)
+    }
+
+    fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
+        self.request("biome/open_file", params)
+    }
+
+    fn file_features(
+        &self,
+        params: SupportsFeatureParams,
+    ) -> Result<FileFeaturesResult, WorkspaceError> {
+        self.request("biome/file_features", params)
+    }
+
+    fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
+        self.request("biome/is_path_ignored", params)
     }
 
     fn get_syntax_tree(
@@ -176,10 +173,6 @@ where
         self.request("biome/change_file", params)
     }
 
-    fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
-        self.request("biome/close_file", params)
-    }
-
     fn pull_diagnostics(
         &self,
         params: PullDiagnosticsParams,
@@ -189,6 +182,13 @@ where
 
     fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError> {
         self.request("biome/pull_actions", params)
+    }
+
+    fn pull_diagnostics_and_actions(
+        &self,
+        params: PullDiagnosticsAndActionsParams,
+    ) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError> {
+        self.request("biome/pull_diagnostics_and_actions", params)
     }
 
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError> {
@@ -207,12 +207,23 @@ where
         self.request("biome/fix_file", params)
     }
 
+    fn fix_diagnostics_in_file(
+        &self,
+        params: FixDiagnosticsInFileParams,
+    ) -> Result<FixDiagnosticsInFileResult, WorkspaceError> {
+        self.request("biome/fix_diagnostics_in_file", params)
+    }
+
     fn rename(&self, params: RenameParams) -> Result<RenameResult, WorkspaceError> {
         self.request("biome/rename", params)
     }
 
-    fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError> {
-        self.request("biome/rage", params)
+    fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
+        self.request("biome/close_file", params)
+    }
+
+    fn fs(&self) -> &dyn FileSystem {
+        self.fs.as_ref()
     }
 
     fn parse_pattern(
@@ -228,6 +239,10 @@ where
 
     fn drop_pattern(&self, params: super::DropPatternParams) -> Result<(), WorkspaceError> {
         self.request("biome/drop_pattern", params)
+    }
+
+    fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError> {
+        self.request("biome/rage", params)
     }
 
     fn server_info(&self) -> Option<&ServerInfo> {

@@ -860,6 +860,10 @@ impl<'analysis> AnalysisFilter<'analysis> {
                 .iter()
                 .any(|filter| filter.match_rule::<R>())
     }
+
+    pub fn set_range(&mut self, range: TextRange) {
+        self.range = Some(range)
+    }
 }
 
 /// Utility type to be used as a default value for the `B` generic type on

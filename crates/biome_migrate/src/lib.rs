@@ -82,6 +82,7 @@ where
             _: &mut BatchMutation<Self::Language>,
             _: SyntaxToken<Self::Language>,
             _: &str,
+            _: &str,
         ) {
         }
     }

@@ -1,15 +1,20 @@
 #[cfg(test)]
 mod test {
-    use biome_analyze::RuleCategories;
+    use biome_analyze::{
+        ActionCategory, OtherActionCategory, RuleCategories, RuleCategoriesBuilder,
+    };
     use biome_configuration::analyzer::{RuleGroup, RuleSelector};
     use biome_configuration::{Configuration, FilesConfiguration};
+    use biome_diagnostics::{category, Diagnostic, Severity};
     use biome_fs::{BiomePath, MemoryFileSystem};
     use biome_js_syntax::{JsFileSource, TextSize};
+    use biome_rowan::TextRange;
     use biome_service::file_handlers::DocumentFileSource;
     use biome_service::projects::ProjectKey;
     use biome_service::workspace::{
-        server, CloseFileParams, CloseProjectParams, FileContent, FileGuard, GetFileContentParams,
-        GetSyntaxTreeParams, OpenFileParams, OpenProjectParams, ScanProjectFolderParams,
+        server, CloseFileParams, CloseProjectParams, DiagnosticsRanges, FileContent, FileGuard,
+        FixDiagnosticsInFileParams, GetFileContentParams, GetSyntaxTreeParams, OpenFileParams,
+        OpenProjectParams, PullDiagnosticsAndActionsParams, ScanProjectFolderParams,
         UpdateSettingsParams,
     };
     use biome_service::{Workspace, WorkspaceError};
@@ -432,5 +437,98 @@ type User {
                 path: BiomePath::new("/project/a.ts"),
             })
             .is_err_and(|error| matches!(error, WorkspaceError::FileIgnored(_))));
+    }
+
+    #[test]
+    fn diagnostics_and_actions() {
+        let file_content = "debugger";
+        let mut fs = MemoryFileSystem::default();
+        fs.insert(Utf8PathBuf::from("/project/a.ts"), file_content);
+
+        let workspace = server(Box::new(fs));
+        let project_key = workspace
+            .open_project(OpenProjectParams {
+                path: Utf8PathBuf::from("/project").into(),
+                open_uninitialized: true,
+            })
+            .unwrap();
+
+        workspace
+            .scan_project_folder(ScanProjectFolderParams {
+                project_key,
+                path: None,
+            })
+            .unwrap();
+
+        let result = workspace
+            .pull_diagnostics_and_actions(PullDiagnosticsAndActionsParams {
+                project_key,
+                path: BiomePath::new("/project/a.ts"),
+                categories: RuleCategoriesBuilder::default().with_lint().build(),
+                only: vec![],
+                skip: vec![],
+                enabled_rules: vec![],
+                suppression_reason: Some("test explanation".into()),
+            })
+            .unwrap();
+
+        let data = result.data;
+        assert!(!data.is_empty());
+        let (diagnostic, actions) = data.iter().next().unwrap();
+        assert_eq!(diagnostic.severity(), Severity::Error);
+        assert_eq!(
+            actions.len(),
+            3,
+            "Code action, inline suppression and top-level suppression"
+        );
+    }
+
+    #[test]
+    fn fix_diagnostics_in_file() {
+        let file_content = "debugger";
+        let mut fs = MemoryFileSystem::default();
+        fs.insert(Utf8PathBuf::from("/project/a.ts"), file_content);
+
+        let workspace = server(Box::new(fs));
+        let project_key = workspace
+            .open_project(OpenProjectParams {
+                path: Utf8PathBuf::from("/project").into(),
+                open_uninitialized: true,
+            })
+            .unwrap();
+
+        workspace
+            .scan_project_folder(ScanProjectFolderParams {
+                project_key,
+                path: None,
+            })
+            .unwrap();
+
+        let result = workspace
+            .fix_diagnostics_in_file(FixDiagnosticsInFileParams {
+                project_key,
+                path: BiomePath::new("/project/a.ts"),
+                diagnostics_ranges: vec![DiagnosticsRanges {
+                    range: TextRange::new(0u32.into(), 8u32.into()),
+                    category: category!("lint/suspicious/noDebugger"),
+                    action: ActionCategory::Other(OtherActionCategory::ToplevelSuppression),
+                }],
+                categories: RuleCategoriesBuilder::default().with_lint().build(),
+                only: vec![],
+                skip: vec![],
+                enabled_rules: vec![],
+                should_format: true,
+                suppression_reason: Some("test explanation".into()),
+            })
+            .unwrap();
+
+        let data = result.code;
+        assert_eq!(
+            data,
+            r#"/** biome-ignore-all lint/suspicious/noDebugger: test explanation */
+
+debugger;
+"#
+        );
     }
 }

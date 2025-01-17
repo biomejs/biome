@@ -1148,6 +1148,7 @@ pub trait Rule: RuleMeta + Sized {
     fn top_level_suppression(
         ctx: &RuleContext<Self>,
         suppression_action: &dyn SuppressionAction<Language = RuleLanguage<Self>>,
+        suppression_reason: Option<&str>,
     ) -> Option<SuppressAction<RuleLanguage<Self>>>
     where
         Self: 'static,
@@ -1167,6 +1168,7 @@ pub trait Rule: RuleMeta + Sized {
                     &mut mutation,
                     first_token,
                     suppression_text.as_str(),
+                    suppression_reason.unwrap_or("<explanation>"),
                 );
                 return Some(SuppressAction {
                     mutation,

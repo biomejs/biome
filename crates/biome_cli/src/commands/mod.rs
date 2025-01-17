@@ -251,6 +251,11 @@ pub enum BiomeCommand {
         /// flag and the `defaultBranch` is not set in your biome.json
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
+
+        /// Use this option to enable an interactive UI where you can choose how to fix/suppress diagnostics emitted by the analyzer.
+        #[bpaf(long("interactive"), switch)]
+        interactive: bool,
+
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,

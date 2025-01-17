@@ -1,5 +1,10 @@
 use std::io;
 
+use crate::{
+    diagnostic::internal::AsDiagnostic, diagnostic::DiagnosticTag, Advices as _, Backtrace,
+    Category, DiagnosticTags, LogCategory, PrintDiagnostic, Resource, Severity, SourceCode, Visit,
+};
+use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::{fmt, markup, MarkupBuf};
 use biome_rowan::TextSize;
 use biome_text_edit::TextEdit;
@@ -8,11 +13,7 @@ use serde::{
     de::{self, SeqAccess},
     Deserialize, Deserializer, Serialize, Serializer,
 };
-
-use crate::{
-    diagnostic::internal::AsDiagnostic, diagnostic::DiagnosticTag, Advices as _, Backtrace,
-    Category, DiagnosticTags, LogCategory, Resource, Severity, SourceCode, Visit,
-};
+use std::fmt::Write;
 
 /// Serializable representation for a [Diagnostic](super::Diagnostic).
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -368,6 +369,28 @@ impl schemars::JsonSchema for DiagnosticTags {
     fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
         <Vec<DiagnosticTag>>::json_schema(gen)
     }
+}
+
+/// Utility function for testing purpose. The function will print an [Error]
+/// to a string, which is then returned by the function.
+pub fn print_serde_diagnostic_to_string(diagnostic: &Diagnostic) -> String {
+    let mut buffer = termcolor::Buffer::no_color();
+
+    Formatter::new(&mut Termcolor(&mut buffer))
+        .write_markup(markup! {
+            {PrintDiagnostic::verbose(diagnostic)}
+        })
+        .expect("failed to emit diagnostic");
+
+    let mut content = String::new();
+    writeln!(
+        content,
+        "{}",
+        std::str::from_utf8(buffer.as_slice()).expect("non utf8 in error buffer")
+    )
+    .unwrap();
+
+    content
 }
 
 #[cfg(test)]

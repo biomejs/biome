@@ -1,7 +1,8 @@
 use super::{
     search, AnalyzerCapabilities, AnalyzerVisitorBuilder, CodeActionsParams, DebugCapabilities,
-    EnabledForPath, ExtensionHandler, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, ProcessLint, SearchCapabilities,
+    DiagnosticsAndActionsParams, EnabledForPath, ExtensionHandler, FixDiagnosticsParams,
+    FormatterCapabilities, LintParams, LintResults, ParseResult, ParserCapabilities, ProcessLint,
+    SearchCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -10,7 +11,10 @@ use crate::settings::{
     check_feature_activity, check_override_feature_activity, LinterSettings, OverrideSettings,
     Settings,
 };
-use crate::workspace::DocumentFileSource;
+use crate::workspace::{
+    DiagnosticsRanges, DocumentFileSource, FixDiagnosticsInFileResult,
+    PullDiagnosticsAndActionsResult,
+};
 use crate::{
     settings::{
         FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage,
@@ -32,7 +36,7 @@ use biome_configuration::javascript::{
     JsGritMetavariable, JsLinterConfiguration, JsLinterEnabled, JsParserConfiguration,
     JsxEverywhere, JsxRuntime, UnsafeParameterDecoratorsEnabled,
 };
-use biome_diagnostics::Applicability;
+use biome_diagnostics::{Applicability, Diagnostic, Error};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, FormatError, IndentStyle, IndentWidth,
     LineEnding, LineWidth, Printed, QuoteStyle,
@@ -55,7 +59,7 @@ use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt::Debug;
-use tracing::{debug, debug_span, error, trace_span};
+use tracing::{debug, debug_span, error, instrument, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -482,6 +486,8 @@ impl ExtensionHandler for JsFileHandler {
                 code_actions: Some(code_actions),
                 fix_all: Some(fix_all),
                 rename: Some(rename),
+                diagnostics_and_actions: Some(diagnostics_and_actions),
+                fix_diagnostics: Some(fix_diagnostics),
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -749,6 +755,185 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     );
 
     PullActionsResult { actions }
+}
+
+#[tracing::instrument(level = "debug", skip(params))]
+pub(crate) fn diagnostics_and_actions(
+    params: DiagnosticsAndActionsParams,
+) -> PullDiagnosticsAndActionsResult {
+    let DiagnosticsAndActionsParams {
+        parse,
+        workspace,
+        path,
+        project_layout,
+        language,
+        suppression_reason,
+        enabled_rules,
+        only,
+        skip,
+        categories,
+    } = params;
+
+    let tree = parse.tree();
+    let _ = trace_span!("Parsed file").entered();
+    let analyzer_options =
+        workspace.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
+    let (enabled_rules, disabled_rules, analyzer_options) =
+        AnalyzerVisitorBuilder::new(params.workspace.settings(), analyzer_options)
+            .with_only(&only)
+            .with_skip(&skip)
+            .with_path(path.as_path())
+            .with_enabled_rules(&enabled_rules)
+            .with_project_layout(project_layout.clone())
+            .finish();
+
+    let filter = AnalysisFilter {
+        categories,
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
+
+    let Some(source_type) = language.to_js_file_source() else {
+        error!("Could not determine the file source of the file");
+        return PullDiagnosticsAndActionsResult::default();
+    };
+
+    let mut data = Vec::new();
+
+    analyze(
+        &tree,
+        filter,
+        &analyzer_options,
+        Vec::new(),
+        source_type,
+        project_layout,
+        |signal| {
+            if let Some(diagnostic) = signal.diagnostic() {
+                let actions: Vec<_> = signal
+                    .actions()
+                    .into_code_action_iter()
+                    .map(|item| CodeAction {
+                        category: item.category.clone(),
+                        rule_name: item
+                            .rule_name
+                            .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                        suggestion: item.suggestion,
+                    })
+                    .collect();
+
+                let diagnostic = biome_diagnostics::serde::Diagnostic::new(Error::from(diagnostic));
+                data.push((diagnostic, actions));
+            }
+
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+
+    PullDiagnosticsAndActionsResult { data }
+}
+
+#[instrument(level = "debug", skip(params))]
+pub(crate) fn fix_diagnostics(
+    params: FixDiagnosticsParams,
+) -> Result<FixDiagnosticsInFileResult, WorkspaceError> {
+    let FixDiagnosticsParams {
+        diagnostics_ranges,
+        path,
+        categories,
+        parse,
+        language,
+        workspace,
+        project_layout,
+        only,
+        skip,
+        should_format,
+        enabled_rules,
+        suppression_reason,
+    } = params;
+
+    let mut tree = parse.tree();
+
+    let analyzer_options =
+        workspace.analyzer_options::<JsLanguage>(path, &language, suppression_reason.as_deref());
+    let (enabled_rules, disabled_rules, analyzer_options) =
+        AnalyzerVisitorBuilder::new(workspace.settings(), analyzer_options)
+            .with_only(&only)
+            .with_skip(&skip)
+            .with_path(path.as_path())
+            .with_enabled_rules(&enabled_rules)
+            .with_project_layout(project_layout.clone())
+            .finish();
+
+    let Some(file_source) = language
+        .to_js_file_source()
+        .or(JsFileSource::try_from(path.as_path()).ok())
+    else {
+        return Err(extension_error(path));
+    };
+
+    let mut filter = AnalysisFilter {
+        categories,
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
+
+    for item in diagnostics_ranges {
+        let DiagnosticsRanges {
+            range,
+            category: diagnostic_category,
+            action: action_category,
+        } = item;
+        filter.set_range(range);
+
+        let (action, _) = analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            Vec::new(),
+            file_source,
+            project_layout.clone(),
+            |signal| {
+                let should_apply = signal
+                    .diagnostic()
+                    .is_some_and(|diag| diag.category() == Some(&diagnostic_category));
+                if should_apply {
+                    if let Some(action) = signal
+                        .actions()
+                        .find(|action| action.category == action_category)
+                    {
+                        return ControlFlow::Break(action);
+                    }
+                }
+
+                ControlFlow::Continue(())
+            },
+        );
+
+        if let Some(root) = action
+            .map(|action| action.mutation.commit_with_text_range_and_edit(true))
+            .map(|(root, _)| root)
+            .and_then(|root| AnyJsRoot::cast(root))
+        {
+            tree = root;
+        }
+    }
+
+    let code = if should_format {
+        format_node(
+            params
+                .workspace
+                .format_options::<JsLanguage>(path, &language),
+            tree.syntax(),
+        )?
+        .print()?
+        .into_code()
+    } else {
+        tree.syntax().to_string()
+    };
+
+    Ok(FixDiagnosticsInFileResult { code })
 }
 
 /// If applies all the safe fixes to the given syntax tree.

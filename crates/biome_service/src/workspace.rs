@@ -67,7 +67,7 @@ use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::Configuration;
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_diagnostics::serde::Diagnostic;
-use biome_diagnostics::CodeSuggestion;
+use biome_diagnostics::{Category, CodeSuggestion};
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
@@ -757,14 +757,18 @@ pub struct FixFileParams {
     pub path: BiomePath,
     pub fix_file_mode: FixFileMode,
     pub should_format: bool,
+    /// Kinds of rules to apply
+    pub rule_categories: RuleCategories,
+    /// The only rules to apply
     #[serde(default)]
     pub only: Vec<RuleSelector>,
+    /// The rules to skip
     #[serde(default)]
     pub skip: Vec<RuleSelector>,
-    /// Rules to apply to the file
+    /// Rules to apply on top of the configuration
     #[serde(default)]
     pub enabled_rules: Vec<RuleSelector>,
-    pub rule_categories: RuleCategories,
+    /// When applying a suppression action, specify the reason
     #[serde(default)]
     pub suppression_reason: Option<String>,
 }
@@ -856,6 +860,82 @@ pub enum RageEntry {
     Section(String),
     Pair { name: String, value: MarkupBuf },
     Markup(MarkupBuf),
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct PullDiagnosticsAndActionsParams {
+    /// Key of the project
+    pub project_key: ProjectKey,
+    /// File to extract the information from
+    pub path: BiomePath,
+    /// Kinds of rules to apply
+    pub categories: RuleCategories,
+    /// The only rules to apply
+    #[serde(default)]
+    pub only: Vec<RuleSelector>,
+    /// The rules to skip
+    #[serde(default)]
+    pub skip: Vec<RuleSelector>,
+    /// Rules to apply on top of the configuration
+    #[serde(default)]
+    pub enabled_rules: Vec<RuleSelector>,
+    /// When applying a suppression action, specify the reason
+    #[serde(default)]
+    pub suppression_reason: Option<String>,
+}
+
+#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct PullDiagnosticsAndActionsResult {
+    pub data: Vec<(Diagnostic, Vec<CodeAction>)>,
+}
+
+/// A list of tuples. Each tuple contains the range where to expect a diagnostic, the category of the diagnostic, and which action to apply to that diagnostic
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct DiagnosticsRanges {
+    pub range: TextRange,
+    pub category: &'static Category,
+    pub action: ActionCategory,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct FixDiagnosticsInFileParams {
+    /// Key of the project
+    pub project_key: ProjectKey,
+    /// File to apply the actions
+    pub path: BiomePath,
+    pub diagnostics_ranges: Vec<DiagnosticsRanges>,
+    /// Kinds of rules to apply
+    pub categories: RuleCategories,
+    /// Whether the new code should be formatted
+    pub should_format: bool,
+    /// The only rules to apply
+    #[serde(default)]
+    pub only: Vec<RuleSelector>,
+    /// Rules to skip
+    #[serde(default)]
+    pub skip: Vec<RuleSelector>,
+    /// Rules to apply on top of the configuration
+    #[serde(default)]
+    pub enabled_rules: Vec<RuleSelector>,
+    /// When applying a suppression action, specify the reason
+    #[serde(default)]
+    pub suppression_reason: Option<String>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct FixDiagnosticsInFileResult {
+    /// New source code for the file with all fixes applied
+    pub code: String,
 }
 
 impl RageEntry {
@@ -1124,6 +1204,12 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// position within a file.
     fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError>;
 
+    /// Retrieves analyzer diagnostics with relative code actions
+    fn pull_diagnostics_and_actions(
+        &self,
+        params: PullDiagnosticsAndActionsParams,
+    ) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError>;
+
     /// Runs the given file through the formatter using the provided options
     /// and returns the resulting source code.
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError>;
@@ -1137,6 +1223,11 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Returns the content of the file with all safe code actions applied.
     fn fix_file(&self, params: FixFileParams) -> Result<FixFileResult, WorkspaceError>;
+
+    fn fix_diagnostics_in_file(
+        &self,
+        params: FixDiagnosticsInFileParams,
+    ) -> Result<FixDiagnosticsInFileResult, WorkspaceError>;
 
     /// Returns the content of the file after renaming a symbol.
     fn rename(&self, params: RenameParams) -> Result<RenameResult, WorkspaceError>;
@@ -1356,6 +1447,25 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             path: self.path.clone(),
             pattern: pattern.clone(),
         })
+    }
+
+    pub fn pull_diagnostics_and_actions(
+        &self,
+        categories: RuleCategories,
+        only: Vec<RuleSelector>,
+        skip: Vec<RuleSelector>,
+        suppression_reason: Option<String>,
+    ) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError> {
+        self.workspace
+            .pull_diagnostics_and_actions(PullDiagnosticsAndActionsParams {
+                project_key: self.project_key,
+                path: self.path.clone(),
+                only,
+                skip,
+                categories,
+                suppression_reason,
+                enabled_rules: vec![],
+            })
     }
 }
 

@@ -124,6 +124,7 @@ impl<'app> CliSession<'app> {
                 javascript_linter,
                 json_linter,
                 graphql_linter,
+                interactive,
             } => run_command(
                 self,
                 &cli_options,
@@ -147,6 +148,7 @@ impl<'app> CliSession<'app> {
                     javascript_linter,
                     json_linter,
                     graphql_linter,
+                    interactive,
                 },
             ),
             BiomeCommand::Ci {

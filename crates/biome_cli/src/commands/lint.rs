@@ -32,6 +32,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) staged: bool,
     pub(crate) changed: bool,
+    pub(crate) interactive: bool,
     pub(crate) since: Option<String>,
     pub(crate) javascript_linter: Option<JsLinterConfiguration>,
     pub(crate) json_linter: Option<JsonLinterConfiguration>,
@@ -145,6 +146,7 @@ impl CommandRunner for LintCommandPayload {
             vcs_targeted: (self.staged, self.changed).into(),
             suppress: self.suppress,
             suppression_reason: self.suppression_reason.clone(),
+            interactive: self.interactive,
         })
         .set_report(cli_options))
     }

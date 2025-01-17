@@ -1,17 +1,19 @@
 use super::scanner::scan;
 use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
-    CloseProjectParams, FeatureName, FileContent, FixFileParams, FixFileResult, FormatFileParams,
-    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams,
-    ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
-    PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
+    CloseProjectParams, FeatureName, FileContent, FixDiagnosticsInFileParams,
+    FixDiagnosticsInFileResult, FixFileParams, FixFileResult, FormatFileParams, FormatOnTypeParams,
+    FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams, GetSyntaxTreeParams,
+    GetSyntaxTreeResult, OpenFileParams, OpenProjectParams, ParsePatternParams, ParsePatternResult,
+    PatternId, ProjectKey, PullActionsParams, PullActionsResult, PullDiagnosticsAndActionsParams,
+    PullDiagnosticsAndActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
     ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
     SupportsFeatureParams, UpdateSettingsParams,
 };
 use crate::diagnostics::FileTooLarge;
 use crate::file_handlers::{
-    Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
+    Capabilities, CodeActionsParams, DiagnosticsAndActionsParams, DocumentFileSource, FixAllParams,
+    FixDiagnosticsParams, LintParams, ParseResult,
 };
 use crate::is_dir;
 use crate::projects::Projects;
@@ -531,22 +533,97 @@ impl WorkspaceServer {
 }
 
 impl Workspace for WorkspaceServer {
-    fn fs(&self) -> &dyn FileSystem {
-        self.fs.as_ref()
-    }
-
-    fn check_file_size(
-        &self,
-        params: CheckFileSizeParams,
-    ) -> Result<CheckFileSizeResult, WorkspaceError> {
-        let documents = self.documents.pin();
-        let Some(document) = documents.get(params.path.as_path()) else {
-            return Err(WorkspaceError::not_found());
+    fn open_project(&self, params: OpenProjectParams) -> Result<ProjectKey, WorkspaceError> {
+        let path = if params.open_uninitialized {
+            let path = params.path.to_path_buf();
+            self.find_project_root(params.path).unwrap_or(path)
+        } else {
+            self.find_project_root(params.path)?
         };
 
-        let file_size = document.content.as_bytes().len();
-        let limit = self.projects.get_max_file_size(params.project_key);
-        Ok(CheckFileSizeResult { file_size, limit })
+        Ok(self.projects.insert_project(path))
+    }
+
+    #[instrument(level = "debug", skip(self))]
+    fn scan_project_folder(
+        &self,
+        params: ScanProjectFolderParams,
+    ) -> Result<ScanProjectFolderResult, WorkspaceError> {
+        let path = params
+            .path
+            .map(Utf8PathBuf::from)
+            .or_else(|| self.projects.get_project_path(params.project_key))
+            .ok_or_else(WorkspaceError::no_project)?;
+
+        // TODO: Need to register a file watcher. This should happen before we
+        //       start scanning, or we might miss changes that happened during
+        //       the scan.
+
+        // TODO: If a watcher is registered, we can also skip the scanning.
+        //       **But** if we are using a polling backend for the watching, we
+        //       probably want to force a poll at this moment.
+
+        let result = scan(self, params.project_key, &path)?;
+
+        Ok(ScanProjectFolderResult {
+            diagnostics: result.diagnostics,
+            duration: result.duration,
+        })
+    }
+
+    /// Updates the global settings for this workspace.
+    ///
+    /// ## Panics
+    /// This function may panic if the internal settings mutex has been poisoned
+    /// by another thread having previously panicked while holding the lock
+    #[tracing::instrument(level = "debug", skip(self))]
+    fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
+        let mut settings = self
+            .projects
+            .get_settings(params.project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+
+        settings.merge_with_configuration(
+            params.configuration,
+            params.workspace_directory.map(|p| p.to_path_buf()),
+            params.vcs_base_path.map(|p| p.to_path_buf()),
+            params.gitignore_matches.as_slice(),
+        )?;
+
+        self.projects.set_settings(params.project_key, settings);
+
+        Ok(())
+    }
+
+    fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError> {
+        let project_path = self
+            .projects
+            .get_project_path(params.project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+
+        // Limit the scope of the pin and the lock inside.
+        {
+            let documents = self.documents.pin();
+            let mut node_cache = self.node_cache.lock().unwrap();
+            for (path, document) in documents.iter() {
+                if document.opened_by_scanner
+                    && self
+                        .projects
+                        .path_belongs_only_to_project_with_path(path, &project_path)
+                {
+                    documents.remove(path);
+                    node_cache.remove(path.as_path());
+                }
+            }
+        }
+
+        self.projects.remove_project(params.project_key);
+
+        Ok(())
+    }
+
+    fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
+        self.open_file_internal(false, params)
     }
 
     fn file_features(
@@ -604,99 +681,6 @@ impl Workspace for WorkspaceServer {
 
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
         Ok(self.is_ignored(params.project_key, params.path.as_path(), params.features))
-    }
-
-    /// Updates the global settings for this workspace.
-    ///
-    /// ## Panics
-    /// This function may panic if the internal settings mutex has been poisoned
-    /// by another thread having previously panicked while holding the lock
-    #[tracing::instrument(level = "debug", skip(self))]
-    fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
-        let mut settings = self
-            .projects
-            .get_settings(params.project_key)
-            .ok_or_else(WorkspaceError::no_project)?;
-
-        settings.merge_with_configuration(
-            params.configuration,
-            params.workspace_directory.map(|p| p.to_path_buf()),
-            params.vcs_base_path.map(|p| p.to_path_buf()),
-            params.gitignore_matches.as_slice(),
-        )?;
-
-        self.projects.set_settings(params.project_key, settings);
-
-        Ok(())
-    }
-
-    fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
-        self.open_file_internal(false, params)
-    }
-
-    fn open_project(&self, params: OpenProjectParams) -> Result<ProjectKey, WorkspaceError> {
-        let path = if params.open_uninitialized {
-            let path = params.path.to_path_buf();
-            self.find_project_root(params.path).unwrap_or(path)
-        } else {
-            self.find_project_root(params.path)?
-        };
-
-        Ok(self.projects.insert_project(path))
-    }
-
-    #[instrument(level = "debug", skip(self))]
-    fn scan_project_folder(
-        &self,
-        params: ScanProjectFolderParams,
-    ) -> Result<ScanProjectFolderResult, WorkspaceError> {
-        let path = params
-            .path
-            .map(Utf8PathBuf::from)
-            .or_else(|| self.projects.get_project_path(params.project_key))
-            .ok_or_else(WorkspaceError::no_project)?;
-
-        // TODO: Need to register a file watcher. This should happen before we
-        //       start scanning, or we might miss changes that happened during
-        //       the scan.
-
-        // TODO: If a watcher is registered, we can also skip the scanning.
-        //       **But** if we are using a polling backend for the watching, we
-        //       probably want to force a poll at this moment.
-
-        let result = scan(self, params.project_key, &path)?;
-
-        Ok(ScanProjectFolderResult {
-            diagnostics: result.diagnostics,
-            duration: result.duration,
-        })
-    }
-
-    fn close_project(&self, params: CloseProjectParams) -> Result<(), WorkspaceError> {
-        let project_path = self
-            .projects
-            .get_project_path(params.project_key)
-            .ok_or_else(WorkspaceError::no_project)?;
-
-        // Limit the scope of the pin and the lock inside.
-        {
-            let documents = self.documents.pin();
-            let mut node_cache = self.node_cache.lock().unwrap();
-            for (path, document) in documents.iter() {
-                if document.opened_by_scanner
-                    && self
-                        .projects
-                        .path_belongs_only_to_project_with_path(path, &project_path)
-                {
-                    documents.remove(path);
-                    node_cache.remove(path.as_path());
-                }
-            }
-        }
-
-        self.projects.remove_project(params.project_key);
-
-        Ok(())
     }
 
     fn get_syntax_tree(
@@ -761,6 +745,20 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(WorkspaceError::not_found)
     }
 
+    fn check_file_size(
+        &self,
+        params: CheckFileSizeParams,
+    ) -> Result<CheckFileSizeResult, WorkspaceError> {
+        let documents = self.documents.pin();
+        let Some(document) = documents.get(params.path.as_path()) else {
+            return Err(WorkspaceError::not_found());
+        };
+
+        let file_size = document.content.as_bytes().len();
+        let limit = self.projects.get_max_file_size(params.project_key);
+        Ok(CheckFileSizeResult { file_size, limit })
+    }
+
     /// Changes the content of an open file.
     fn change_file(
         &self,
@@ -812,30 +810,6 @@ impl Workspace for WorkspaceServer {
         documents
             .insert(path.into(), document)
             .ok_or_else(WorkspaceError::not_found)?;
-        Ok(())
-    }
-
-    /// Closes a file that is opened in the workspace.
-    ///
-    /// This only unloads the document from the workspace if the file is NOT
-    /// opened by the scanner as well. If the scanner has opened the file, it
-    /// may still be required for multi-file analysis.
-    fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
-        {
-            let documents = self.documents.pin();
-            let document = documents
-                .get(params.path.as_path())
-                .ok_or_else(WorkspaceError::not_found)?;
-            if !document.opened_by_scanner {
-                documents.remove(params.path.as_path());
-            }
-        }
-
-        self.node_cache
-            .lock()
-            .unwrap()
-            .remove(params.path.as_path());
-
         Ok(())
     }
 
@@ -963,6 +937,47 @@ impl Workspace for WorkspaceServer {
             skip,
             suppression_reason: None,
             enabled_rules,
+        }))
+    }
+
+    fn pull_diagnostics_and_actions(
+        &self,
+        params: PullDiagnosticsAndActionsParams,
+    ) -> Result<PullDiagnosticsAndActionsResult, WorkspaceError> {
+        let PullDiagnosticsAndActionsParams {
+            project_key,
+            path,
+            categories,
+            only,
+            skip,
+            enabled_rules,
+            suppression_reason,
+        } = params;
+
+        let capabilities = self.get_file_capabilities(&path);
+        let diagnostics_and_actions = capabilities
+            .analyzer
+            .diagnostics_and_actions
+            .ok_or_else(self.build_capability_error(&path))?;
+
+        let parse = self.get_parse(&path)?;
+        let language = self.get_file_source(&path);
+        let settings = self
+            .projects
+            .get_settings(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+
+        Ok(diagnostics_and_actions(DiagnosticsAndActionsParams {
+            parse,
+            workspace: &settings.into(),
+            path: &path,
+            project_layout: self.project_layout.clone(),
+            language,
+            only,
+            skip,
+            suppression_reason,
+            enabled_rules,
+            categories,
         }))
     }
 
@@ -1104,6 +1119,51 @@ impl Workspace for WorkspaceServer {
         })
     }
 
+    fn fix_diagnostics_in_file(
+        &self,
+        params: FixDiagnosticsInFileParams,
+    ) -> Result<FixDiagnosticsInFileResult, WorkspaceError> {
+        let FixDiagnosticsInFileParams {
+            project_key,
+            path,
+            diagnostics_ranges,
+            categories,
+            only,
+            skip,
+            enabled_rules,
+            should_format,
+            suppression_reason,
+        } = params;
+
+        let capabilities = self.get_file_capabilities(&path);
+
+        let fix_diagnostics = capabilities
+            .analyzer
+            .fix_diagnostics
+            .ok_or_else(self.build_capability_error(&path))?;
+        let parse = self.get_parse(&path)?;
+        let settings = self
+            .projects
+            .get_settings(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let language = self.get_file_source(&path);
+
+        fix_diagnostics(FixDiagnosticsParams {
+            parse,
+            path: &path,
+            workspace: &settings.into(),
+            project_layout: self.project_layout.clone(),
+            language,
+            categories,
+            diagnostics_ranges,
+            only,
+            skip,
+            enabled_rules,
+            should_format,
+            suppression_reason,
+        })
+    }
+
     fn rename(&self, params: super::RenameParams) -> Result<RenameResult, WorkspaceError> {
         let capabilities = self.get_file_capabilities(&params.path);
         let rename = capabilities
@@ -1117,13 +1177,32 @@ impl Workspace for WorkspaceServer {
         Ok(result)
     }
 
-    fn rage(&self, _: RageParams) -> Result<RageResult, WorkspaceError> {
-        let entries = vec![
-            RageEntry::section("Workspace"),
-            RageEntry::pair("Open Documents", &format!("{}", self.documents.len())),
-        ];
+    /// Closes a file that is opened in the workspace.
+    ///
+    /// This only unloads the document from the workspace if the file is NOT
+    /// opened by the scanner as well. If the scanner has opened the file, it
+    /// may still be required for multi-file analysis.
+    fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
+        {
+            let documents = self.documents.pin();
+            let document = documents
+                .get(params.path.as_path())
+                .ok_or_else(WorkspaceError::not_found)?;
+            if !document.opened_by_scanner {
+                documents.remove(params.path.as_path());
+            }
+        }
 
-        Ok(RageResult { entries })
+        self.node_cache
+            .lock()
+            .unwrap()
+            .remove(params.path.as_path());
+
+        Ok(())
+    }
+
+    fn fs(&self) -> &dyn FileSystem {
+        self.fs.as_ref()
     }
 
     fn parse_pattern(
@@ -1172,6 +1251,15 @@ impl Workspace for WorkspaceServer {
     fn drop_pattern(&self, params: super::DropPatternParams) -> Result<(), WorkspaceError> {
         self.patterns.pin().remove(&params.pattern);
         Ok(())
+    }
+
+    fn rage(&self, _: RageParams) -> Result<RageResult, WorkspaceError> {
+        let entries = vec![
+            RageEntry::section("Workspace"),
+            RageEntry::pair("Open Documents", &format!("{}", self.documents.len())),
+        ];
+
+        Ok(RageResult { entries })
     }
 
     fn server_info(&self) -> Option<&ServerInfo> {

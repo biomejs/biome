@@ -297,6 +297,8 @@ impl ExtensionHandler for GraphqlFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
+                diagnostics_and_actions: None,
+                fix_diagnostics: None,
             },
             formatter: FormatterCapabilities {
                 format: Some(format),

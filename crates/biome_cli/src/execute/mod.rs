@@ -131,6 +131,9 @@ pub enum TraversalMode {
         suppress: bool,
         /// Explanation for suppressing diagnostics with `--suppress` and `--reason`
         suppression_reason: Option<String>,
+
+        /// Enable a UI interaction where users progressively fix diagnostics
+        interactive: bool,
     },
     /// This mode is enabled when running the command `biome ci`
     CI {
@@ -430,6 +433,17 @@ impl Execution {
             TraversalMode::Format { write, .. } => write,
             TraversalMode::Migrate { write, .. } => write,
             TraversalMode::Search { .. } => false,
+        }
+    }
+
+    pub(crate) fn is_interactive(&self) -> bool {
+        match self.traversal_mode {
+            TraversalMode::Lint { interactive, .. } => interactive,
+            TraversalMode::CI { .. }
+            | TraversalMode::Check { .. }
+            | TraversalMode::Format { .. }
+            | TraversalMode::Search { .. }
+            | TraversalMode::Migrate { .. } => false,
         }
     }
 

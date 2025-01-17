@@ -9,7 +9,8 @@ pub use crate::file_handlers::svelte::{SvelteFileHandler, SVELTE_FENCE};
 pub use crate::file_handlers::vue::{VueFileHandler, VUE_FENCE};
 use crate::settings::{Settings, WorkspaceSettingsHandle};
 use crate::workspace::{
-    FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult,
+    DiagnosticsRanges, FixDiagnosticsInFileResult, FixFileMode, FixFileResult, GetSyntaxTreeResult,
+    PullActionsResult, PullDiagnosticsAndActionsResult, RenameResult,
 };
 use crate::WorkspaceError;
 use biome_analyze::{
@@ -41,7 +42,6 @@ use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{FileSourceError, NodeCache};
 use biome_string_case::StrLikeExtension;
-
 use camino::Utf8Path;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
@@ -588,10 +588,41 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) enabled_rules: Vec<RuleSelector>,
 }
 
+pub(crate) struct DiagnosticsAndActionsParams<'a> {
+    pub(crate) parse: AnyParse,
+    pub(crate) workspace: &'a WorkspaceSettingsHandle,
+    pub(crate) path: &'a BiomePath,
+    pub(crate) project_layout: Arc<ProjectLayout>,
+    pub(crate) language: DocumentFileSource,
+    pub(crate) only: Vec<RuleSelector>,
+    pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) suppression_reason: Option<String>,
+    pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) categories: RuleCategories,
+}
+
+pub(crate) struct FixDiagnosticsParams<'a> {
+    pub(crate) parse: AnyParse,
+    pub(crate) workspace: &'a WorkspaceSettingsHandle,
+    pub(crate) path: &'a BiomePath,
+    pub(crate) project_layout: Arc<ProjectLayout>,
+    pub(crate) language: DocumentFileSource,
+    pub(crate) categories: RuleCategories,
+    pub(crate) diagnostics_ranges: Vec<DiagnosticsRanges>,
+    pub(crate) only: Vec<RuleSelector>,
+    pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) should_format: bool,
+    pub(crate) suppression_reason: Option<String>,
+}
+
 type Lint = fn(LintParams) -> LintResults;
 type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<FixFileResult, WorkspaceError>;
 type Rename = fn(&BiomePath, AnyParse, TextSize, String) -> Result<RenameResult, WorkspaceError>;
+type DiagnosticsAndActions = fn(DiagnosticsAndActionsParams) -> PullDiagnosticsAndActionsResult;
+type FixDiagnostics =
+    fn(FixDiagnosticsParams) -> Result<FixDiagnosticsInFileResult, WorkspaceError>;
 
 #[derive(Default)]
 pub struct AnalyzerCapabilities {
@@ -603,6 +634,10 @@ pub struct AnalyzerCapabilities {
     pub(crate) fix_all: Option<FixAll>,
     /// It renames a binding inside a file
     pub(crate) rename: Option<Rename>,
+    /// It extracts diagnostics and relative code actions
+    pub(crate) diagnostics_and_actions: Option<DiagnosticsAndActions>,
+    /// It fixes the diagnostics in the given the ranges and the action category
+    pub(crate) fix_diagnostics: Option<FixDiagnostics>,
 }
 
 type Format = fn(

@@ -431,9 +431,11 @@ where
                 }
             }
 
-            if let Some(suppression_action) =
-                R::top_level_suppression(&ctx, self.suppression_action)
-            {
+            if let Some(suppression_action) = R::top_level_suppression(
+                &ctx,
+                self.suppression_action,
+                self.options.suppression_reason.as_deref(),
+            ) {
                 let action = AnalyzerAction {
                     rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
                     category: ActionCategory::Other(OtherActionCategory::ToplevelSuppression),

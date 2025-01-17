@@ -55,11 +55,12 @@ impl SuppressionAction for JsSuppressionAction {
         mutation: &mut BatchMutation<Self::Language>,
         token: JsSyntaxToken,
         suppression_text: &str,
+        suppression_reason: &str,
     ) {
         let new_token = token.with_leading_trivia([
             (
                 TriviaPieceKind::SingleLineComment,
-                format!("/** {suppression_text}: <explanation> */").as_str(),
+                format!("/** {suppression_text}: {suppression_reason} */").as_str(),
             ),
             (TriviaPieceKind::Newline, "\n"),
             (TriviaPieceKind::Newline, "\n"),
