@@ -15,17 +15,16 @@ const ROOT_SELECTOR: &str = ":root";
 
 #[derive(Debug)]
 pub enum SemanticEvent {
-    RuleStart(TextRange),
+    RuleStart(CssSyntaxNode),
     RuleEnd,
     SelectorDeclaration {
         node: CssSyntaxNode,
-        range: TextRange,
         specificity: Specificity,
     },
     PropertyDeclaration {
+        node: CssSyntaxNode,
         property: CssProperty,
         value: CssValue,
-        range: TextRange,
     },
     /// Indicates the start of a `:root` selector
     RootSelectorStart,
@@ -44,7 +43,6 @@ pub enum SemanticEvent {
 #[derive(Default, Debug)]
 pub struct SemanticEventExtractor {
     stash: VecDeque<SemanticEvent>,
-    current_rule_stack: Vec<TextRange>,
     is_in_root_selector: bool,
 }
 
@@ -67,9 +65,7 @@ impl SemanticEventExtractor {
                 || kind == CSS_MEDIA_AT_RULE
                 || kind == CSS_SUPPORTS_AT_RULE =>
             {
-                let range = node.text_range();
-                self.stash.push_back(SemanticEvent::RuleStart(range));
-                self.current_rule_stack.push(range);
+                self.stash.push_back(SemanticEvent::RuleStart(node.clone()));
             }
             CSS_SELECTOR_LIST => {
                 if !matches!(
@@ -101,18 +97,12 @@ impl SemanticEventExtractor {
 
                 if let Some(property_name) = node.first_child().and_then(|p| p.first_child()) {
                     if let Some(value) = property_name.next_sibling() {
-                        let prop_range = property_name.text_range();
-                        let value_range = value.text_range();
                         self.stash.push_back(SemanticEvent::PropertyDeclaration {
+                            node: node.clone(),
                             property: CssProperty {
                                 node: property_name,
-                                range: prop_range,
                             },
-                            value: CssValue {
-                                node: value,
-                                range: value_range,
-                            },
-                            range: node.text_range(),
+                            value: CssValue { node: value },
                         });
                     }
                 }
@@ -129,8 +119,7 @@ impl SemanticEventExtractor {
         match selector {
             AnyCssSelector::CssComplexSelector(s) => {
                 let specificity = evaluate_complex_selector(&s);
-                let range = s.range();
-                self.add_selector_event(s.into(), range, specificity);
+                self.add_selector_event(s.into(), specificity);
             }
 
             AnyCssSelector::CssCompoundSelector(selector) => {
@@ -140,8 +129,7 @@ impl SemanticEventExtractor {
                     self.is_in_root_selector = true;
                 }
                 let specificity = evaluate_compound_selector(&selector);
-                let range = selector.range();
-                self.add_selector_event(selector.into(), range, specificity)
+                self.add_selector_event(selector.into(), specificity)
             }
             _ => {}
         }
@@ -189,11 +177,7 @@ impl SemanticEventExtractor {
                 if let Ok(prop_name) = prop.name() {
                     match prop_name.text().as_str() {
                         "initial-value" => {
-                            let prop_range = prop.value().range();
-                            initial_value = Some(CssValue {
-                                node: prop.into(),
-                                range: prop_range,
-                            });
+                            initial_value = Some(CssValue { node: prop.into() });
                         }
                         "syntax" => {
                             syntax = Some(prop.value().text().to_string());
@@ -207,11 +191,9 @@ impl SemanticEventExtractor {
             }
         }
 
-        let prop_range = property_name.text_trimmed_range();
         self.stash.push_back(SemanticEvent::AtProperty {
             property: CssProperty {
                 node: property_name,
-                range: prop_range,
             },
             initial_value,
             syntax,
@@ -220,17 +202,9 @@ impl SemanticEventExtractor {
         });
     }
 
-    fn add_selector_event(
-        &mut self,
-        node: CssSyntaxNode,
-        range: TextRange,
-        specificity: Specificity,
-    ) {
-        self.stash.push_back(SemanticEvent::SelectorDeclaration {
-            node,
-            range,
-            specificity,
-        });
+    fn add_selector_event(&mut self, node: CssSyntaxNode, specificity: Specificity) {
+        self.stash
+            .push_back(SemanticEvent::SelectorDeclaration { node, specificity });
     }
 
     pub fn leave(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
@@ -238,7 +212,6 @@ impl SemanticEventExtractor {
             node.kind(),
             CSS_QUALIFIED_RULE | CSS_NESTED_QUALIFIED_RULE | CSS_MEDIA_AT_RULE
         ) {
-            self.current_rule_stack.pop();
             self.stash.push_back(SemanticEvent::RuleEnd);
             if self.is_in_root_selector {
                 self.stash.push_back(SemanticEvent::RootSelectorEnd);

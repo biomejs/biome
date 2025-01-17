@@ -29,7 +29,7 @@ impl SemanticModel {
         &self.data.rules
     }
 
-    pub fn global_custom_variables(&self) -> &FxHashMap<CssSyntaxNode, CssGlobalCustomVariable> {
+    pub fn global_custom_variables(&self) -> &FxHashMap<String, CssGlobalCustomVariable> {
         &self.data.global_custom_variables
     }
 
@@ -72,7 +72,7 @@ pub(crate) struct SemanticModelData {
     /// List of all top-level rules in the CSS document
     pub(crate) rules: Vec<Rule>,
     /// Map of CSS variables declared in the `:root` selector or using the @property rule.
-    pub(crate) global_custom_variables: FxHashMap<CssSyntaxNode, CssGlobalCustomVariable>,
+    pub(crate) global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
     /// Map of all the rules by their id
     pub(crate) rules_by_id: FxHashMap<RuleId, Rule>,
     /// Map of the range of each rule to the rule itself
@@ -98,6 +98,7 @@ pub(crate) struct SemanticModelData {
 #[derive(Debug, Clone)]
 pub struct Rule {
     pub id: RuleId,
+    pub node: CssSyntaxNode,
     /// The selectors associated with this rule.
     pub selectors: Vec<Selector>,
     /// The declarations within this rule.
@@ -106,11 +107,43 @@ pub struct Rule {
     pub parent_id: Option<RuleId>,
     /// The ids of the child rules
     pub child_ids: Vec<RuleId>,
-    /// The text range of this rule in the source document.
-    pub range: TextRange,
     /// Specificity context of this rule
     /// See https://drafts.csswg.org/selectors-4/#specificity-rules
     pub specificity: Specificity,
+}
+
+impl Rule {
+    pub fn id(&self) -> RuleId {
+        self.id
+    }
+
+    pub fn node(&self) -> &CssSyntaxNode {
+        &self.node
+    }
+
+    pub fn range(&self) -> TextRange {
+        self.node.text_trimmed_range()
+    }
+
+    pub fn selectors(&self) -> &[Selector] {
+        &self.selectors
+    }
+
+    pub fn declarations(&self) -> &[CssDeclaration] {
+        &self.declarations
+    }
+
+    pub fn parent_id(&self) -> Option<RuleId> {
+        self.parent_id
+    }
+
+    pub fn child_ids(&self) -> &[RuleId] {
+        &self.child_ids
+    }
+
+    pub fn specificity(&self) -> Specificity {
+        self.specificity
+    }
 }
 
 /// Represents a CSS selector.
@@ -123,9 +156,26 @@ pub struct Rule {
 #[derive(Debug, Clone)]
 pub struct Selector {
     pub node: CssSyntaxNode,
-    pub range: TextRange,
     /// The specificity of the selector.
     pub specificity: Specificity,
+}
+
+impl Selector {
+    pub fn node(&self) -> &CssSyntaxNode {
+        &self.node
+    }
+
+    pub fn text(&self) -> String {
+        self.node.text_trimmed().to_string()
+    }
+
+    pub fn range(&self) -> TextRange {
+        self.node.text_trimmed_range()
+    }
+
+    pub fn specificity(&self) -> Specificity {
+        self.specificity
+    }
 }
 
 /// Represents the specificity of a CSS selector.
@@ -133,7 +183,7 @@ pub struct Selector {
 /// This specificity is represented as a tuple of three `u32` values,
 /// corresponding to (ID selectors, class selectors, type selectors).
 /// More details https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default, Copy)]
 pub struct Specificity(pub u32, pub u32, pub u32);
 
 /// In CSS, when selectors are combined (e.g., in a compound selector), their specificities are summed.
@@ -185,21 +235,65 @@ impl std::fmt::Display for Specificity {
 /// ```
 #[derive(Debug, Clone)]
 pub struct CssDeclaration {
+    pub node: CssSyntaxNode,
     pub property: CssProperty,
     pub value: CssValue,
-    pub range: TextRange,
+}
+
+impl CssDeclaration {
+    pub fn node(&self) -> &CssSyntaxNode {
+        &self.node
+    }
+
+    pub fn range(&self) -> TextRange {
+        self.node.text_trimmed_range()
+    }
+
+    pub fn property(&self) -> &CssProperty {
+        &self.property
+    }
+
+    pub fn value(&self) -> &CssValue {
+        &self.value
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct CssProperty {
     pub node: CssSyntaxNode,
-    pub range: TextRange,
+}
+
+impl CssProperty {
+    pub fn node(&self) -> &CssSyntaxNode {
+        &self.node
+    }
+
+    pub fn text(&self) -> String {
+        self.node.text_trimmed().to_string()
+    }
+
+    pub fn range(&self) -> TextRange {
+        self.node.text_trimmed_range()
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct CssValue {
     pub node: CssSyntaxNode,
-    pub range: TextRange,
+}
+
+impl CssValue {
+    pub fn node(&self) -> &CssSyntaxNode {
+        &self.node
+    }
+
+    pub fn text(&self) -> String {
+        self.node.text_trimmed().to_string()
+    }
+
+    pub fn range(&self) -> TextRange {
+        self.node.text_trimmed_range()
+    }
 }
 
 /// Represents a CSS global custom variable declaration.
@@ -232,8 +326,8 @@ pub struct RuleId(u32);
 
 impl RuleId {
     pub fn new(index: usize) -> Self {
-        // SAFETY: We didn't handle files execedding `u32::MAX` bytes.
-        // Thus, it isn't possible to execedd `u32::MAX` bindings.
+        // SAFETY: We didn't handle files exceeding `u32::MAX` bytes.
+        // Thus, it isn't possible to exceed `u32::MAX` bindings.
         Self(index as u32)
     }
 
