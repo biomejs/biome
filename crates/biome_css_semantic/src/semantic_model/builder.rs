@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use biome_css_syntax::CssRoot;
+use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 
@@ -14,7 +14,7 @@ pub struct SemanticModelBuilder {
     root: CssRoot,
     /// List of all top-level rules in the CSS file
     rules: Vec<Rule>,
-    global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
+    global_custom_variables: FxHashMap<CssSyntaxNode, CssGlobalCustomVariable>,
     /// Stack of rule IDs to keep track of the current rule hierarchy
     current_rule_stack: Vec<RuleId>,
     next_rule_id: RuleId,
@@ -94,9 +94,8 @@ impl SemanticModelBuilder {
                 }
             }
             SemanticEvent::SelectorDeclaration {
-                name,
+                node,
                 range,
-                original,
                 specificity,
             } => {
                 let parent_specificity = self
@@ -111,9 +110,8 @@ impl SemanticModelBuilder {
                 if let Some(current_rule) = self.current_rule_stack.last() {
                     let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
                     current_rule.selectors.push(Selector {
-                        name,
+                        node,
                         range,
-                        original,
                         specificity: parent_specificity + specificity.clone(),
                     });
 
@@ -125,13 +123,15 @@ impl SemanticModelBuilder {
                 value,
                 range,
             } => {
-                let is_global_var = self.is_in_root_selector && property.name.starts_with("--");
+                let is_global_var =
+                    self.is_in_root_selector && property.node.text().starts_with("--");
 
                 if let Some(current_rule) = self.current_rule_stack.last_mut() {
                     let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
                     if is_global_var {
+                        let node = property.node.clone();
                         self.global_custom_variables.insert(
-                            property.name.clone(),
+                            node,
                             CssGlobalCustomVariable::Root(CssDeclaration {
                                 property: property.clone(),
                                 value: value.clone(),
@@ -159,10 +159,11 @@ impl SemanticModelBuilder {
                 inherits,
                 range,
             } => {
+                let node = property.node.clone();
                 self.global_custom_variables.insert(
-                    property.name.to_string(),
+                    node,
                     CssGlobalCustomVariable::AtProperty {
-                        property,
+                        property: property.clone(),
                         initial_value,
                         syntax,
                         inherits,

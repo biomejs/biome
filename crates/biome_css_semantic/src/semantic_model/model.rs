@@ -1,6 +1,6 @@
 use std::{collections::BTreeMap, rc::Rc};
 
-use biome_css_syntax::{AnyCssSelector, CssRoot};
+use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_rowan::{TextRange, TextSize};
 use rustc_hash::FxHashMap;
 
@@ -29,7 +29,7 @@ impl SemanticModel {
         &self.data.rules
     }
 
-    pub fn global_custom_variables(&self) -> &FxHashMap<String, CssGlobalCustomVariable> {
+    pub fn global_custom_variables(&self) -> &FxHashMap<CssSyntaxNode, CssGlobalCustomVariable> {
         &self.data.global_custom_variables
     }
 
@@ -72,7 +72,7 @@ pub(crate) struct SemanticModelData {
     /// List of all top-level rules in the CSS document
     pub(crate) rules: Vec<Rule>,
     /// Map of CSS variables declared in the `:root` selector or using the @property rule.
-    pub(crate) global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
+    pub(crate) global_custom_variables: FxHashMap<CssSyntaxNode, CssGlobalCustomVariable>,
     /// Map of all the rules by their id
     pub(crate) rules_by_id: FxHashMap<RuleId, Rule>,
     /// Map of the range of each rule to the rule itself
@@ -108,7 +108,7 @@ pub struct Rule {
     pub child_ids: Vec<RuleId>,
     /// The text range of this rule in the source document.
     pub range: TextRange,
-    /// Specificity context of this rule  
+    /// Specificity context of this rule
     /// See https://drafts.csswg.org/selectors-4/#specificity-rules
     pub specificity: Specificity,
 }
@@ -122,11 +122,8 @@ pub struct Rule {
 /// ```
 #[derive(Debug, Clone)]
 pub struct Selector {
-    /// The name of the selector.
-    pub name: String,
-    /// The text range of the selector in the source document.
+    pub node: CssSyntaxNode,
     pub range: TextRange,
-    pub original: AnyCssSelector,
     /// The specificity of the selector.
     pub specificity: Specificity,
 }
@@ -193,15 +190,15 @@ pub struct CssDeclaration {
     pub range: TextRange,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct CssProperty {
-    pub name: String,
+    pub node: CssSyntaxNode,
     pub range: TextRange,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct CssValue {
-    pub text: String,
+    pub node: CssSyntaxNode,
     pub range: TextRange,
 }
 

@@ -1,7 +1,7 @@
-use std::{borrow::Cow, collections::VecDeque};
+use std::collections::VecDeque;
 
 use biome_css_syntax::{
-    AnyCssSelector, CssDeclarationBlock, CssRelativeSelector, CssSyntaxKind::*,
+    AnyCssSelector, CssDeclarationBlock, CssRelativeSelector, CssSyntaxKind::*, CssSyntaxNode,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, SyntaxNodeOptionExt, TextRange};
 
@@ -18,9 +18,8 @@ pub enum SemanticEvent {
     RuleStart(TextRange),
     RuleEnd,
     SelectorDeclaration {
-        name: String,
+        node: CssSyntaxNode,
         range: TextRange,
-        original: AnyCssSelector,
         specificity: Specificity,
     },
     PropertyDeclaration {
@@ -102,14 +101,16 @@ impl SemanticEventExtractor {
 
                 if let Some(property_name) = node.first_child().and_then(|p| p.first_child()) {
                     if let Some(value) = property_name.next_sibling() {
+                        let prop_range = property_name.text_range();
+                        let value_range = value.text_range();
                         self.stash.push_back(SemanticEvent::PropertyDeclaration {
                             property: CssProperty {
-                                name: property_name.text_trimmed().to_string(),
-                                range: property_name.text_trimmed_range(),
+                                node: property_name,
+                                range: prop_range,
                             },
                             value: CssValue {
-                                text: value.text_trimmed().to_string(),
-                                range: value.text_trimmed_range(),
+                                node: value,
+                                range: value_range,
                             },
                             range: node.text_range(),
                         });
@@ -128,12 +129,8 @@ impl SemanticEventExtractor {
         match selector {
             AnyCssSelector::CssComplexSelector(s) => {
                 let specificity = evaluate_complex_selector(&s);
-                self.add_selector_event(
-                    Cow::Borrowed(&s.text()),
-                    s.range(),
-                    AnyCssSelector::CssComplexSelector(s),
-                    specificity,
-                );
+                let range = s.range();
+                self.add_selector_event(s.into(), range, specificity);
             }
 
             AnyCssSelector::CssCompoundSelector(selector) => {
@@ -143,12 +140,8 @@ impl SemanticEventExtractor {
                     self.is_in_root_selector = true;
                 }
                 let specificity = evaluate_compound_selector(&selector);
-                self.add_selector_event(
-                    Cow::Borrowed(&selector_text),
-                    selector.range(),
-                    AnyCssSelector::CssCompoundSelector(selector),
-                    specificity,
-                )
+                let range = selector.range();
+                self.add_selector_event(selector.into(), range, specificity)
             }
             _ => {}
         }
@@ -196,9 +189,10 @@ impl SemanticEventExtractor {
                 if let Ok(prop_name) = prop.name() {
                     match prop_name.text().as_str() {
                         "initial-value" => {
+                            let prop_range = prop.value().range();
                             initial_value = Some(CssValue {
-                                text: prop.value().text().to_string(),
-                                range: prop.value().range(),
+                                node: prop.into(),
+                                range: prop_range,
                             });
                         }
                         "syntax" => {
@@ -213,10 +207,11 @@ impl SemanticEventExtractor {
             }
         }
 
+        let prop_range = property_name.text_trimmed_range();
         self.stash.push_back(SemanticEvent::AtProperty {
             property: CssProperty {
-                name: property_name.text_trimmed().to_string(),
-                range: property_name.text_range(),
+                node: property_name,
+                range: prop_range,
             },
             initial_value,
             syntax,
@@ -227,15 +222,13 @@ impl SemanticEventExtractor {
 
     fn add_selector_event(
         &mut self,
-        name: Cow<str>,
+        node: CssSyntaxNode,
         range: TextRange,
-        original: AnyCssSelector,
         specificity: Specificity,
     ) {
         self.stash.push_back(SemanticEvent::SelectorDeclaration {
-            name: name.into_owned(),
+            node,
             range,
-            original,
             specificity,
         });
     }
