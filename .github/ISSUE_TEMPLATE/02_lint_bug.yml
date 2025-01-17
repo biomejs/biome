@@ -2,6 +2,7 @@ name: 💅 Linter bug report
 description: Report a bug or regression of the linter
 title: "💅 <TITLE>"
 labels: [ "S-Needs triage" ]
+type: Bug
 body:
   - type: markdown
     attributes:
