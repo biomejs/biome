@@ -1152,6 +1152,7 @@ dependencies = [
  "biome_analyze",
  "biome_console",
  "biome_diagnostics",
+ "biome_glob",
  "biome_json_factory",
  "biome_json_formatter",
  "biome_json_parser",
