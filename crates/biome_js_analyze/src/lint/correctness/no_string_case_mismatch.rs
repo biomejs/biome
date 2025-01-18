@@ -223,7 +223,7 @@ impl<'a> CharCaseIterator<'a> {
         CharCaseIterator { iter: s.chars() }
     }
 }
-impl<'a> Iterator for CharCaseIterator<'a> {
+impl Iterator for CharCaseIterator<'_> {
     type Item = StringCase;
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(c) = self.iter.next() {

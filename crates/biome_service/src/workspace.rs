@@ -1359,7 +1359,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     }
 }
 
-impl<'app, W: Workspace + ?Sized> Drop for FileGuard<'app, W> {
+impl<W: Workspace + ?Sized> Drop for FileGuard<'_, W> {
     fn drop(&mut self) {
         self.workspace
             .close_file(CloseFileParams {

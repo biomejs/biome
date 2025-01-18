@@ -21,7 +21,7 @@ pub(crate) struct CompilationContext<'a> {
     pub function_definition_info: BTreeMap<String, DefinitionInfo>,
 }
 
-impl<'a> CompilationContext<'a> {
+impl CompilationContext<'_> {
     #[cfg(test)]
     pub(crate) fn new(
         source_path: Option<&'a Utf8Path>,

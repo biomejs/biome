@@ -144,21 +144,21 @@ pub struct SignalEntry<'phase, L: Language> {
 }
 
 // SignalEntry is ordered based on the starting point of its `text_range`
-impl<'phase, L: Language> Ord for SignalEntry<'phase, L> {
+impl<L: Language> Ord for SignalEntry<'_, L> {
     fn cmp(&self, other: &Self) -> Ordering {
         other.text_range.start().cmp(&self.text_range.start())
     }
 }
 
-impl<'phase, L: Language> PartialOrd for SignalEntry<'phase, L> {
+impl<L: Language> PartialOrd for SignalEntry<'_, L> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<'phase, L: Language> Eq for SignalEntry<'phase, L> {}
+impl<L: Language> Eq for SignalEntry<'_, L> {}
 
-impl<'phase, L: Language> PartialEq for SignalEntry<'phase, L> {
+impl<L: Language> PartialEq for SignalEntry<'_, L> {
     fn eq(&self, other: &Self) -> bool {
         self.text_range.start() == other.text_range.start()
     }

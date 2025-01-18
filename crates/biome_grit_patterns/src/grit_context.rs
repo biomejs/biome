@@ -56,7 +56,7 @@ pub struct GritExecContext<'a> {
     pub diagnostics: Mutex<Vec<RuleDiagnostic>>,
 }
 
-impl<'a> GritExecContext<'a> {
+impl GritExecContext<'_> {
     pub fn add_diagnostic(&self, diagnostic: RuleDiagnostic) {
         self.diagnostics.lock().unwrap().push(diagnostic);
     }

@@ -500,7 +500,7 @@ struct RestrictedImportVisitor<'a> {
     results: Vec<RestrictedImportMessage>,
 }
 
-impl<'a> RestrictedImportVisitor<'a> {
+impl RestrictedImportVisitor<'_> {
     pub const BARE_IMPORT_ALIAS: &'static str = "";
     pub const NAMESPACE_IMPORT_ALIAS: &'static str = "*";
     pub const DEFAULT_IMPORT_ALIAS: &'static str = "default";
@@ -827,8 +827,8 @@ impl<'a> RestrictedImportVisitor<'a> {
 
     /// Checks whether this import of the form `const local_name = import(...)` is allowed.
     fn visit_namespace_binding(&mut self, namespace_import: &JsIdentifierBinding) -> Option<()> {
-        return self
-            .visit_special_import_node(namespace_import.syntax(), Self::NAMESPACE_IMPORT_ALIAS);
+        self
+            .visit_special_import_node(namespace_import.syntax(), Self::NAMESPACE_IMPORT_ALIAS)
     }
 
     /// Checks whether this import of the form `{ imported_name }` is allowed.

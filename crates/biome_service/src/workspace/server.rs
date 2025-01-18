@@ -309,7 +309,7 @@ impl WorkspaceServer {
 
         let mut index = self.insert_source(source);
 
-        let size = content.as_bytes().len();
+        let size = content.len();
         let limit = self.projects.get_max_file_size(project_key);
         if size > limit {
             self.documents.pin().insert(
@@ -544,7 +544,7 @@ impl Workspace for WorkspaceServer {
             return Err(WorkspaceError::not_found());
         };
 
-        let file_size = document.content.as_bytes().len();
+        let file_size = document.content.len();
         let limit = self.projects.get_max_file_size(params.project_key);
         Ok(CheckFileSizeResult { file_size, limit })
     }

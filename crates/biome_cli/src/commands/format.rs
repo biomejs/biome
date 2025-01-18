@@ -63,10 +63,9 @@ impl CommandRunner for FormatCommandPayload {
         let mut configuration = fs_configuration;
 
         // merge formatter options
-        if !configuration
+        if configuration
             .formatter
-            .as_ref()
-            .is_some_and(|f| !f.is_enabled())
+            .as_ref().is_none_or(|f| f.is_enabled())
         {
             let formatter = configuration.formatter.get_or_insert_with(Default::default);
             if let Some(formatter_configuration) = self.formatter_configuration.clone() {

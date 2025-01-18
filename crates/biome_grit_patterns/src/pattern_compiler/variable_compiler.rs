@@ -18,7 +18,7 @@ impl VariableCompiler {
     }
 }
 
-impl<'a> NodeCompilationContext<'a> {
+impl NodeCompilationContext<'_> {
     pub(super) fn variable_from_name(&mut self, name: String) -> Variable {
         self.register_variable_with_optional_range(name, None)
     }

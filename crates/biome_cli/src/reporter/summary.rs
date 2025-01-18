@@ -27,7 +27,7 @@ impl Reporter for SummaryReporter {
 
 pub(crate) struct SummaryReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
 
-impl<'a> ReporterVisitor for SummaryReporterVisitor<'a> {
+impl ReporterVisitor for SummaryReporterVisitor<'_> {
     fn report_summary(
         &mut self,
         execution: &Execution,
@@ -184,7 +184,7 @@ struct LintSummaryDiagnostic<'a> {
 #[derive(Debug)]
 struct SummaryListAdvice<'a>(&'a BTreeSet<String>);
 
-impl<'a> Advices for SummaryListAdvice<'a> {
+impl Advices for SummaryListAdvice<'_> {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         let list: Vec<_> = self.0.iter().map(|s| s as &dyn Display).collect();
         visitor.record_list(&list)
@@ -268,7 +268,7 @@ impl LintsByCategory {
     }
 }
 
-impl<'a> Advices for &'a LintsByCategory {
+impl Advices for &LintsByCategory {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         let headers = &[
             markup!("Rule Name").to_owned(),
