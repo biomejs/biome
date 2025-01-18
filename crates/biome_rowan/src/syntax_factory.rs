@@ -175,10 +175,7 @@ impl<K: SyntaxKind> Iterator for SeparatedListWithMissingNodesOrSeparatorSlotsIt
     }
 }
 
-impl<K: SyntaxKind> FusedIterator
-    for SeparatedListWithMissingNodesOrSeparatorSlotsIterator<'_, K>
-{
-}
+impl<K: SyntaxKind> FusedIterator for SeparatedListWithMissingNodesOrSeparatorSlotsIterator<'_, K> {}
 
 impl<K: SyntaxKind> ExactSizeIterator
     for SeparatedListWithMissingNodesOrSeparatorSlotsIterator<'_, K>

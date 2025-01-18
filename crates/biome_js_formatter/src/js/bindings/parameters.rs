@@ -243,14 +243,12 @@ pub(crate) fn should_hug_function_parameters(
                                 if should_hug_formal_parameter {
                                     true
                                 } else {
-                                    parameter
-                                        .type_annotation()
-                                        .is_some_and(|type_annotation| {
-                                            matches!(
-                                                type_annotation.ty(),
-                                                Ok(AnyTsType::TsObjectType(_))
-                                            )
-                                        })
+                                    parameter.type_annotation().is_some_and(|type_annotation| {
+                                        matches!(
+                                            type_annotation.ty(),
+                                            Ok(AnyTsType::TsObjectType(_))
+                                        )
+                                    })
                                 }
                             }
                             AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsBogusBinding(_)) => {
