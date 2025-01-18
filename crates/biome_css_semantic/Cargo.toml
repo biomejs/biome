@@ -17,7 +17,7 @@ biome_rowan      = { workspace = true }
 rustc-hash       = { workspace = true }
 
 [dev-dependencies]
-biome_css_parser = { path = "../biome_css_parser" }
+# biome_css_parser = { path = "../biome_css_parser" }
 
 [lints]
 workspace = true

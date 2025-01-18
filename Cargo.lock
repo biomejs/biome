@@ -340,7 +340,6 @@ dependencies = [
 name = "biome_css_semantic"
 version = "0.0.0"
 dependencies = [
- "biome_css_parser",
  "biome_css_syntax",
  "biome_rowan",
  "rustc-hash 2.1.0",
