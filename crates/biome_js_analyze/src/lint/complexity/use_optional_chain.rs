@@ -753,7 +753,7 @@ impl LogicalOrLikeChain {
     /// ### Example
     /// `(foo ?? {}).bar` is inside `((foo ?? {}).bar || {}).baz;`
     fn is_inside_another_chain(&self) -> bool {
-        LogicalOrLikeChain::get_chain_parent(&self.member).map_or(false, |parent| {
+        LogicalOrLikeChain::get_chain_parent(&self.member).is_some_and(|parent| {
             parent
                 .as_js_logical_expression()
                 .filter(|parent_expression| {
@@ -785,7 +785,7 @@ impl LogicalOrLikeChain {
             // E.g. (((foo || {}))).bar;
             let object = object.omit_parentheses();
             if let AnyJsExpression::JsLogicalExpression(logical) = object {
-                let is_valid_operator = logical.operator().map_or(false, |operator| {
+                let is_valid_operator = logical.operator().is_ok_and(|operator| {
                     matches!(
                         operator,
                         JsLogicalOperator::NullishCoalescing | JsLogicalOperator::LogicalOr

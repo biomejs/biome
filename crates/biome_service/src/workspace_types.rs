@@ -259,7 +259,7 @@ fn schema_object_type<'a>(
     let has_defaults = schema
         .metadata
         .as_ref()
-        .map_or(false, |metadata| metadata.default.is_some());
+        .is_some_and(|metadata| metadata.default.is_some());
 
     (ts_type, is_nullable || has_defaults, description)
 }

@@ -516,7 +516,7 @@ fn capture_needs_to_be_in_the_dependency_list(
             // ... they are declared outside of the component function
             if component_function_range
                 .intersect(declaration_range)
-                .map_or(true, TextRange::is_empty)
+                .is_some_and(TextRange::is_empty)
             {
                 return false;
             }
@@ -552,7 +552,7 @@ fn capture_needs_to_be_in_the_dependency_list(
             // ... they are declared outside of the component function
             if component_function_range
                 .intersect(declaration_range)
-                .map_or(true, TextRange::is_empty)
+                .is_some_and(TextRange::is_empty)
             {
                 return false;
             }
@@ -562,7 +562,7 @@ fn capture_needs_to_be_in_the_dependency_list(
                 if declarator
                     .initializer()
                     .and_then(|initializer| initializer.expression().ok())
-                    .map_or(true, |expr| model.is_constant(&expr))
+                    .is_some_and(|expr| model.is_constant(&expr))
                 {
                     return false;
                 }
@@ -939,13 +939,11 @@ impl Rule for UseExhaustiveDependencies {
         match dep {
             Fix::MissingDependenciesArray {
                 function_name_range,
-            } => {
-                Some(RuleDiagnostic::new(
-                    rule_category!(),
-                    function_name_range,
-                    markup! {"This hook does not have a dependencies array"},
-                ))
-            }
+            } => Some(RuleDiagnostic::new(
+                rule_category!(),
+                function_name_range,
+                markup! {"This hook does not have a dependencies array"},
+            )),
             Fix::AddDependency {
                 function_name_range,
                 captures,

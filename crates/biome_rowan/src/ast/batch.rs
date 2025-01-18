@@ -394,7 +394,7 @@ where
                 while changes
                     .peek()
                     .and_then(|c| c.parent.as_ref())
-                    .map_or(false, |p| *p == curr_parent)
+                    .is_some_and(|p| *p == curr_parent)
                 {
                     // SAFETY: We can .pop().unwrap() because we .peek() above
                     let CommitChange {

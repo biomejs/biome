@@ -411,7 +411,7 @@ fn has_rest_object_or_array_parameter(parameters: &AnyJsArrowFunctionParameters)
 
 /// Returns `true` if parentheses can be safely avoided and the `arrow_parentheses` formatter option allows it
 pub fn can_avoid_parentheses(arrow: &JsArrowFunctionExpression, f: &mut JsFormatter) -> bool {
-    arrow.parameters().map_or(false, |parameters| {
+    arrow.parameters().is_ok_and(|parameters| {
         f.options().arrow_parentheses().is_as_needed()
             && parameters.len() == 1
             && arrow.type_parameters().is_none()
@@ -504,7 +504,7 @@ impl Format<JsFormatContext> for ArrowChain {
         //        () => () =>
         //          a
         //      )();
-        let is_callee = head_parent.as_ref().map_or(false, |parent| {
+        let is_callee = head_parent.as_ref().is_some_and(|parent| {
             matches!(
                 parent.kind(),
                 JsSyntaxKind::JS_CALL_EXPRESSION | JsSyntaxKind::JS_NEW_EXPRESSION
@@ -828,7 +828,7 @@ fn template_literal_contains_new_line(template: &JsTemplateExpression) -> bool {
     template.elements().iter().any(|element| match element {
         AnyJsTemplateElement::JsTemplateChunkElement(chunk) => chunk
             .template_chunk_token()
-            .map_or(false, |chunk| chunk.text().contains('\n')),
+            .is_ok_and(|chunk| chunk.text().contains('\n')),
         AnyJsTemplateElement::JsTemplateElement(_) => false,
     })
 }
@@ -862,7 +862,7 @@ fn template_literal_contains_new_line(template: &JsTemplateExpression) -> bool {
 pub(crate) fn is_multiline_template_starting_on_same_line(template: &JsTemplateExpression) -> bool {
     let contains_new_line = template_literal_contains_new_line(template);
 
-    let starts_on_same_line = template.syntax().first_token().map_or(false, |token| {
+    let starts_on_same_line = template.syntax().first_token().is_some_and(|token| {
         for piece in token.leading_trivia().pieces() {
             if let Some(comment) = piece.as_comments() {
                 if comment.has_newline() {

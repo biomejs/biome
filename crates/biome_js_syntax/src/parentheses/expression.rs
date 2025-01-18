@@ -236,7 +236,7 @@ impl NeedsParentheses for JsCallExpression {
         };
         parent.kind() == JsSyntaxKind::JS_NEW_EXPRESSION
             || (parent.kind() == JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE
-                && self.callee().map_or(true, |callee| {
+                && self.callee().is_ok_and(|callee| {
                     let callee_range = callee.range();
                     let leftmost = AnyJsExpressionLeftSide::leftmost(callee);
                     // require parens for iife and

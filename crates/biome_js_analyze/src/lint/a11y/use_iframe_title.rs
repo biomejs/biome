@@ -85,7 +85,7 @@ impl Rule for UseIframeTitle {
             if let Some(lang_attribute) = element.find_attribute_by_name("title") {
                 if !lang_attribute
                     .as_static_value()
-                    .map_or(true, |attribute| attribute.is_not_string_constant(""))
+                    .is_some_and(|attribute| attribute.is_not_string_constant(""))
                     && !element.has_trailing_spread_prop(&lang_attribute)
                 {
                     return Some(());

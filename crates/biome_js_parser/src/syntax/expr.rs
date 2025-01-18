@@ -198,13 +198,13 @@ pub(crate) fn parse_expression_or_recover_to_next_statement(
 // /^[يفمئامئ‍ئاسۆند]/i; //regex with unicode
 // /[\p{Control}--[\t\n]]/v;
 // /\’/; // regex with escaped non-ascii chars (issue #1941)
-
+//
 // test_err js literals
 // 00, 012, 08, 091, 0789 // parser errors
 // 01n, 0_0, 01.2 // lexer errors
 // "test
 // continues" // unterminated string literal
-
+//
 // test_err js regex
 // /[\p{Control}--[\t\n]]/vv;
 // /[\p{Control}--[\t\n]]/uv;
@@ -451,7 +451,6 @@ fn parse_yield_expression(p: &mut JsParser, context: ExpressionContext) -> Compl
 // test js conditional_expr
 // foo ? bar : baz
 // foo ? bar : baz ? bar : baz
-
 pub(super) fn parse_conditional_expr(p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax {
     // test_err js conditional_expr_err
     // foo ? bar baz
@@ -483,10 +482,10 @@ pub(super) fn parse_conditional_expr(p: &mut JsParser, context: ExpressionContex
 /// the next token is `:`.
 // test js arrow_expr_in_alternate
 // a ? (b) : a => {};
-
+//
 // test ts ts_arrow_exrp_in_alternate
 // a ? (b) : a => {};
-
+//
 // test jsx jsx_arrow_exrp_in_alternate
 // bar ? (foo) : (<a>{() => {}}</a>);
 fn parse_conditional_expr_consequent(p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax {
@@ -684,7 +683,7 @@ fn parse_binary_or_logical_expression(
 // new.target
 // new new new new Foo();
 // new Foo(bar, baz, 6 + 6, foo[bar] + ((foo) => {}) * foo?.bar)
-
+//
 // test_err js new_exprs
 // new;
 fn parse_member_expression_or_higher(p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax {
@@ -784,7 +783,7 @@ fn parse_member_expression_rest(
 
 // test_err ts ts_new_operator
 // new A<test><test>();
-
+//
 // test ts ts_new_operator
 // var c2 = new T<string>;  // Ok
 // var x1 = new SS<number>(); // OK
@@ -1039,9 +1038,8 @@ pub(super) fn parse_name(p: &mut JsParser) -> ParsedSyntax {
 }
 
 /// Arguments to a function.
-///
-/// `"(" (AssignExpr ",")* ")"`
-
+//
+// `"(" (AssignExpr ",")* ")"`
 // test js call_arguments
 // function foo(...args) {}
 // let a, b, c, d;
@@ -1591,7 +1589,7 @@ pub(crate) fn is_nth_at_identifier_or_keyword(p: &mut JsParser, n: usize) -> boo
 // let c = `${foo}`;
 // let d = `foo`;
 // let e = `${{ a: "string" }}`;
-
+//
 // test_err js template_literal
 // let a = `foo ${}`
 // let b = `${a a}`
@@ -1732,7 +1730,7 @@ impl ParseSeparatedList for ArrayElementsList {
 // [foo,];
 // [,,,,,foo,,,,];
 // [...a, ...b];
-
+//
 // test_err js array_expr_incomplete
 // let a = [
 fn parse_array_expr(p: &mut JsParser) -> ParsedSyntax {

@@ -117,7 +117,7 @@ impl SimpleArgument {
                     // max we allow (2), versus just comparing `len <= depth`.
                     arguments.args().len() + usize::from(depth) <= 2
                         && arguments.args().iter().all(|argument| {
-                            argument.map_or(true, |argument| {
+                            argument.is_ok_and(|argument| {
                                 SimpleArgument::from(argument).is_simple_impl(depth + 1)
                             })
                         })
@@ -304,7 +304,7 @@ impl SimpleArgument {
                                 Ok(AnyJsObjectMemberName::JsComputedMemberName(_))
                             );
 
-                            let is_simple = property.value().map_or(false, |value| {
+                            let is_simple = property.value().is_ok_and(|value| {
                                 SimpleArgument::from(value).is_simple_impl(depth + 1)
                             });
 

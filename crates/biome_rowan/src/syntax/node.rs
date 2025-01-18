@@ -700,33 +700,31 @@ impl<L: Language> SyntaxNode<L> {
     /// Whether the node contains trailing comments.
     pub fn has_trailing_comments(&self) -> bool {
         self.last_token()
-            .map_or(false, |tok| tok.has_trailing_comments())
+            .is_some_and(|tok| tok.has_trailing_comments())
     }
 
     /// Whether the last token of a node has comments (leading or trailing)
     pub fn last_token_has_comments(&self) -> bool {
-        self.last_token().map_or(false, |tok| {
-            tok.has_trailing_comments() || tok.has_leading_comments()
-        })
+        self.last_token()
+            .is_some_and(|tok| tok.has_trailing_comments() || tok.has_leading_comments())
     }
 
     /// Whether the first token of a node has comments (leading or trailing)
     pub fn first_token_has_comments(&self) -> bool {
-        self.first_token().map_or(false, |tok| {
-            tok.has_trailing_comments() || tok.has_leading_comments()
-        })
+        self.first_token()
+            .is_some_and(|tok| tok.has_trailing_comments() || tok.has_leading_comments())
     }
 
     /// Whether the node contains leading comments.
     pub fn has_leading_comments(&self) -> bool {
         self.first_token()
-            .map_or(false, |tok| tok.has_leading_comments())
+            .is_some_and(|tok| tok.has_leading_comments())
     }
 
     /// Whether the node contains leading newlines.
     pub fn has_leading_newline(&self) -> bool {
         self.first_token()
-            .map_or(false, |tok| tok.has_leading_newline())
+            .is_some_and(|tok| tok.has_leading_newline())
     }
 }
 

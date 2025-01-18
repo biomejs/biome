@@ -133,7 +133,7 @@ impl Rule for NoSvgWithoutTitle {
         let jsx_element = node.parent::<JsxElement>()?;
         if let AnyJsxElement::JsxOpeningElement(_) = node {
             let has_valid_title = has_valid_title_element(&jsx_element.children());
-            if has_valid_title.map_or(false, |bool| bool) {
+            if has_valid_title.is_some_and(|bool| bool) {
                 return None;
             }
         }

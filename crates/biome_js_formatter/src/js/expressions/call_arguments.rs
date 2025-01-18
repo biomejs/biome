@@ -669,9 +669,9 @@ fn with_token_tracking_disabled<F: FnOnce(&mut JsFormatter) -> R, R>(
 }
 
 fn function_has_only_simple_parameters(expression: &JsFunctionExpression) -> bool {
-    expression.parameters().map_or(true, |parameters| {
-        has_only_simple_parameters(&parameters, false)
-    })
+    expression
+        .parameters()
+        .is_ok_and(|parameters| has_only_simple_parameters(&parameters, false))
 }
 
 /// Helper for formatting a grouped call argument (see [should_group_first_argument] and [should_group_last_argument]).
@@ -1060,29 +1060,28 @@ fn can_group_expression_argument(
             //     (type: ObjectType): Provider<Opts> => {}
             //   );
             // }
-            let can_group_type =
-                return_type_annotation
-                    .and_then(|rty| rty.ty().ok())
-                    .map_or(true, |any_type| match any_type {
-                        AnyTsReturnType::AnyTsType(AnyTsType::TsReferenceType(_)) => match &body {
-                            AnyJsFunctionBody::JsFunctionBody(body) => {
-                                body.statements().iter().any(|statement| match statement {
-                                    AnyJsStatement::JsEmptyStatement(s) => {
-                                        // When the body contains an empty statement, comments in
-                                        // the body will get attached to that statement rather than
-                                        // the body itself, so they need to be checked for comments
-                                        // as well to ensure that the body is still considered
-                                        // groupable when those empty statements are removed by the
-                                        // printer.
-                                        comments.has_comments(s.syntax())
-                                    }
-                                    _ => true,
-                                }) || comments.has_dangling_comments(body.syntax())
-                            }
-                            _ => false,
-                        },
-                        _ => true,
-                    });
+            let can_group_type = return_type_annotation
+                .and_then(|rty| rty.ty().ok())
+                .is_some_and(|any_type| match any_type {
+                    AnyTsReturnType::AnyTsType(AnyTsType::TsReferenceType(_)) => match &body {
+                        AnyJsFunctionBody::JsFunctionBody(body) => {
+                            body.statements().iter().any(|statement| match statement {
+                                AnyJsStatement::JsEmptyStatement(s) => {
+                                    // When the body contains an empty statement, comments in
+                                    // the body will get attached to that statement rather than
+                                    // the body itself, so they need to be checked for comments
+                                    // as well to ensure that the body is still considered
+                                    // groupable when those empty statements are removed by the
+                                    // printer.
+                                    comments.has_comments(s.syntax())
+                                }
+                                _ => true,
+                            }) || comments.has_dangling_comments(body.syntax())
+                        }
+                        _ => false,
+                    },
+                    _ => true,
+                });
 
             let can_group_body = match &body {
                 AnyJsFunctionBody::JsFunctionBody(_)
@@ -1226,7 +1225,7 @@ fn is_react_hook_with_deps_array(arguments: &JsCallArguments, comments: &JsComme
 
             if !callback
                 .parameters()
-                .map_or(false, |parameters| parameters.is_empty())
+                .is_ok_and(|parameters| parameters.is_empty())
             {
                 return false;
             }
@@ -1265,7 +1264,7 @@ fn is_function_composition_args(arguments: &JsCallArguments) -> bool {
                 has_seen_function_like = true;
             }
             AnyJsCallArgument::AnyJsExpression(JsCallExpression(call)) => {
-                if call.arguments().map_or(false, |call_arguments| {
+                if call.arguments().is_ok_and(|call_arguments| {
                     call_arguments.args().iter().flatten().any(|arg| {
                         matches!(
                             arg,

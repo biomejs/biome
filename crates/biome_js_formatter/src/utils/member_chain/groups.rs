@@ -113,7 +113,7 @@ impl TailChainGroups {
             let group = self.groups.get(1);
             if let Some(group) = group {
                 let first_item = group.members.first();
-                first_item.map_or(false, |first_item| {
+                first_item.is_some_and(|first_item| {
                     comments.has_leading_comments(first_item.syntax())
                 })
             } else {
@@ -223,7 +223,7 @@ impl MemberChainGroup {
 
     pub(super) fn needs_empty_line_before(&self) -> bool {
         let first = self.members.first();
-        first.map_or(false, |first| match first {
+        first.is_some_and(|first| match first {
             ChainMember::StaticMember { expression } => {
                 let operator = expression.operator_token();
 
@@ -286,7 +286,7 @@ impl Format<JsFormatContext> for FormatMemberChainGroup<'_> {
 
         let last = group.members.last();
 
-        let needs_parens = last.map_or(false, |last| match last {
+        let needs_parens = last.is_some_and(|last| match last {
             ChainMember::StaticMember { expression, .. } => expression.needs_parentheses(),
             ChainMember::ComputedMember { expression, .. } => expression.needs_parentheses(),
             _ => false,

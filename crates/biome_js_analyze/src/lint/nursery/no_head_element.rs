@@ -67,7 +67,7 @@ impl Rule for NoHeadElement {
             let is_in_app_dir = ctx
                 .file_path()
                 .ancestors()
-                .any(|a| a.file_name().map_or(false, |f| f == "app" && a.is_dir()));
+                .any(|a| a.file_name().is_some_and(|f| f == "app" && a.is_dir()));
 
             if !is_in_app_dir {
                 return Some(element.syntax().text_range_with_trivia());

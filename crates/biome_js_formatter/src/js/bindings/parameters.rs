@@ -35,7 +35,7 @@ impl Format<JsFormatContext> for FormatAnyJsParameters {
 
         let parentheses_not_needed = self
             .as_arrow_function_expression()
-            .map_or(false, |expression| can_avoid_parentheses(&expression, f));
+            .is_some_and(|expression| can_avoid_parentheses(&expression, f));
         let has_any_decorated_parameter = list.has_any_decorated_parameter();
 
         let can_hug =
@@ -245,7 +245,7 @@ pub(crate) fn should_hug_function_parameters(
                                 } else {
                                     parameter
                                         .type_annotation()
-                                        .map_or(false, |type_annotation| {
+                                        .is_some_and(|type_annotation| {
                                             matches!(
                                                 type_annotation.ty(),
                                                 Ok(AnyTsType::TsObjectType(_))
@@ -313,7 +313,7 @@ pub(crate) fn should_hug_function_parameters(
             }
             AnyJsParameter::JsRestParameter(_) => false,
             AnyJsParameter::TsThisParameter(this) => {
-                this.type_annotation().map_or(false, |type_annotation| {
+                this.type_annotation().is_some_and(|type_annotation| {
                     matches!(type_annotation.ty(), Ok(AnyTsType::TsObjectType(_)))
                 })
             }

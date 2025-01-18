@@ -153,7 +153,7 @@ impl JsxOpeningElement {
 
     /// Returns `true` if jsx element has a child that is accessible.
     pub fn has_accessible_child(&self) -> bool {
-        self.parent::<JsxElement>().map_or(false, |parent| {
+        self.parent::<JsxElement>().is_some_and(|parent| {
             parent
                 .children()
                 .into_iter()
@@ -376,7 +376,7 @@ impl AnyJsxElement {
     /// - `<Span />` is a component and it would return `true`
     /// - `<span ></span>` is **not** component and it returns `false`
     pub fn is_custom_component(&self) -> bool {
-        self.name().map_or(false, |it| it.as_jsx_name().is_none())
+        self.name().is_ok_and(|it| it.as_jsx_name().is_none())
     }
 
     /// Returns `true` if the current element is an HTML element.
@@ -384,7 +384,7 @@ impl AnyJsxElement {
     /// - `<Span />` is a component and it would return `false`
     /// - `<span ></span>` is **not** component and it returns `true`
     pub fn is_element(&self) -> bool {
-        self.name().map_or(false, |it| it.as_jsx_name().is_some())
+        self.name().is_ok_and(|it| it.as_jsx_name().is_some())
     }
 
     pub fn has_spread_prop(&self) -> bool {
@@ -476,10 +476,10 @@ impl AnyJsxElement {
 
     pub fn has_truthy_attribute(&self, name_to_lookup: &str) -> bool {
         self.find_attribute_by_name(name_to_lookup)
-            .map_or(false, |attribute| {
+            .is_some_and(|attribute| {
                 attribute
                     .as_static_value()
-                    .map_or(true, |value| !(value.is_falsy() || value.text() == "false"))
+                    .is_some_and(|value| !(value.is_falsy() || value.text() == "false"))
                     && !self.has_trailing_spread_prop(&attribute)
             })
     }
@@ -508,7 +508,7 @@ impl biome_aria::Element for AnyJsxElement {
 impl JsxAttribute {
     pub fn is_value_null_or_undefined(&self) -> bool {
         self.as_static_value()
-            .map_or(false, |it| it.is_null_or_undefined())
+            .is_some_and(|it| it.is_null_or_undefined())
     }
 
     pub fn as_static_value(&self) -> Option<StaticValue> {
@@ -562,7 +562,7 @@ impl AnyJsxAttributeName {
 impl AnyJsxAttributeValue {
     pub fn is_value_null_or_undefined(&self) -> bool {
         self.as_static_value()
-            .map_or(false, |it| it.is_null_or_undefined())
+            .is_some_and(|it| it.is_null_or_undefined())
     }
 
     pub fn as_static_value(&self) -> Option<StaticValue> {
@@ -590,7 +590,7 @@ impl AnyJsxChild {
                 let expression = expression.expression()?;
                 expression
                     .as_static_value()
-                    .map_or(true, |value| !value.is_falsy())
+                    .is_some_and(|value| !value.is_falsy())
             }
             AnyJsxChild::JsxElement(element) => {
                 let opening_element = element.opening_element().ok()?;

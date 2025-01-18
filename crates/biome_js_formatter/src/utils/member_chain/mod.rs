@@ -190,7 +190,7 @@ impl MemberChain {
         let has_comments = first_group
             .members()
             .first()
-            .map_or(false, |member| comments.has_comments(member.syntax()));
+            .is_some_and(|member| comments.has_comments(member.syntax()));
 
         if has_comments {
             return false;
@@ -199,14 +199,13 @@ impl MemberChain {
         let has_computed_property = first_group
             .members()
             .first()
-            .map_or(false, |item| item.is_computed_expression());
+            .is_some_and(|item| item.is_computed_expression());
 
         if self.head.members().len() == 1 {
             let only_member = &self.head.members()[0];
 
-            let in_expression_statement = parent.map_or(false, |parent| {
-                parent.kind() == JsSyntaxKind::JS_EXPRESSION_STATEMENT
-            });
+            let in_expression_statement =
+                parent.is_some_and(|parent| parent.kind() == JsSyntaxKind::JS_EXPRESSION_STATEMENT);
 
             match only_member {
                 ChainMember::Node(node) => {
@@ -217,7 +216,7 @@ impl MemberChain {
                             .name()
                             .and_then(|name| name.value_token())
                             .as_ref()
-                            .map_or(false, is_factory);
+                            .is_ok_and(is_factory);
 
                         has_computed_property ||
                             is_factory ||
@@ -238,7 +237,7 @@ impl MemberChain {
                 .and_then(|member| member.as_js_name())
                 .and_then(|name| name.value_token().ok())
                 .as_ref()
-                .map_or(false, is_factory);
+                .is_some_and(is_factory);
 
             has_computed_property || is_factory
         } else {
@@ -397,7 +396,7 @@ impl Format<JsFormatContext> for MemberChain {
                 let has_empty_line_before_tail = self
                     .tail
                     .first()
-                    .map_or(false, |group| group.needs_empty_line_before());
+                    .is_some_and(|group| group.needs_empty_line_before());
 
                 if has_empty_line_before_tail || self.last_group().will_break(f)? {
                     write!(f, [expand_parent()])?;
@@ -457,7 +456,7 @@ fn split_members_into_head_and_remaining_groups(
 
     let first_group_end_index = if !members
         .first()
-        .map_or(false, |member| member.is_call_expression())
+        .is_some_and(|member| member.is_call_expression())
     {
         // Take as many member access chains as possible
         let rest = &members[non_call_or_array_member_access_start..];
@@ -558,7 +557,7 @@ fn is_computed_array_member_access(member: &ChainMember) -> bool {
 }
 
 fn has_arrow_or_function_expression_arg(call: &JsCallExpression) -> bool {
-    call.arguments().map_or(false, |arguments| {
+    call.arguments().is_ok_and(|arguments| {
         arguments.args().iter().any(|argument| {
             matches!(
                 argument,
@@ -572,9 +571,9 @@ fn has_arrow_or_function_expression_arg(call: &JsCallExpression) -> bool {
 }
 
 fn has_simple_arguments(call: &JsCallExpression) -> bool {
-    call.arguments().map_or(false, |arguments| {
+    call.arguments().is_ok_and(|arguments| {
         arguments.args().iter().all(|argument| {
-            argument.map_or(false, |argument| SimpleArgument::new(argument).is_simple())
+            argument.is_ok_and(|argument| SimpleArgument::new(argument).is_simple())
         })
     })
 }
@@ -613,9 +612,7 @@ fn has_short_name(identifier: &JsIdentifierExpression, tab_width: TabWidth) -> b
     identifier
         .name()
         .and_then(|name| name.value_token())
-        .map_or(false, |name| {
-            name.text_trimmed().len() <= u8::from(tab_width) as usize
-        })
+        .is_ok_and(|name| name.text_trimmed().len() <= u8::from(tab_width) as usize)
 }
 
 struct ChainMembersIterator<'a> {

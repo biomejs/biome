@@ -500,7 +500,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
         language: &GritTargetLanguage,
     ) -> GritResult<bool> {
         let truthiness = match self {
-            Self::Binding(bindings) => bindings.last().map_or(false, Binding::is_truthy),
+            Self::Binding(bindings) => bindings.last().is_some_and(Binding::is_truthy),
             Self::List(elements) => !elements.is_empty(),
             Self::Map(map) => !map.is_empty(),
             Self::Constant(c) => c.is_truthy(),
@@ -534,7 +534,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
             Self::Binding(b) => b
                 .last()
                 .and_then(Binding::as_constant)
-                .map_or(false, Constant::is_undefined),
+                .is_some_and(Constant::is_undefined),
             Self::Constant(Constant::Undefined) => true,
             Self::Constant(_)
             | Self::Snippets(_)

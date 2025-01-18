@@ -381,11 +381,11 @@ fn parse(
         let optional_json_file_source = file_source.to_json_file_source();
         let options = JsonParserOptions {
             allow_comments: parser.and_then(|p| p.allow_comments).map_or_else(
-                || optional_json_file_source.map_or(false, |x| x.allow_comments()),
+                || optional_json_file_source.is_some_and(|x| x.allow_comments()),
                 |value| value.value(),
             ),
             allow_trailing_commas: parser.and_then(|p| p.allow_trailing_commas).map_or_else(
-                || optional_json_file_source.map_or(false, |x| x.allow_trailing_commas()),
+                || optional_json_file_source.is_some_and(|x| x.allow_trailing_commas()),
                 |value| value.value(),
             ),
         };

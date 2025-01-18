@@ -639,7 +639,7 @@ fn is_type_assertion(syntax: &SyntaxNode<JsLanguage>) -> bool {
         )
     }
 
-    syntax.parent().map_or(false, |parent| {
+    syntax.parent().is_some_and(|parent| {
         if parent.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
             parent
                 .parent()

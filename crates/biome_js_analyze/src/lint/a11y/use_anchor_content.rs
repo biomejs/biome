@@ -161,13 +161,13 @@ fn has_valid_anchor_content(node: &AnyJsxElement) -> bool {
         .is_some()
         || node
             .find_attribute_by_name("children")
-            .map_or(false, |attribute| {
+            .is_some_and(|attribute| {
                 if attribute.initializer().is_none() {
                     return false;
                 }
                 attribute
                     .as_static_value()
-                    .map_or(true, |attribute| !attribute.is_falsy())
+                    .is_some_and(|attribute| !attribute.is_falsy())
             })
         || node.has_spread_prop()
 }

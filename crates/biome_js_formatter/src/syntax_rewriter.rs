@@ -228,7 +228,7 @@ impl JsFormatSyntaxRewriter {
 
                 let l_paren_trailing_non_whitespace_trivia = l_paren_trailing
                     .peek()
-                    .map_or(false, |piece| piece.is_skipped() || piece.is_comments());
+                    .is_some_and(|piece| piece.is_skipped() || piece.is_comments());
 
                 let l_paren_trivia =
                     chain_trivia_pieces(l_paren.leading_trivia().pieces(), l_paren_trailing);
@@ -412,12 +412,12 @@ impl JsFormatSyntaxRewriter {
 // TODO: This should be handled with a `NeedsParentheses` impl.
 fn decorator_expression_needs_parens(inner: &JsSyntaxNode) -> bool {
     match AnyJsExpression::cast_ref(inner) {
-        Some(AnyJsExpression::JsCallExpression(call)) => call.callee().map_or(true, |callee| {
+        Some(AnyJsExpression::JsCallExpression(call)) => call.callee().is_ok_and(|callee| {
             call.is_optional() || decorator_expression_needs_parens(callee.syntax())
         }),
         Some(AnyJsExpression::JsStaticMemberExpression(static_expr)) => {
             static_expr.is_optional()
-                || static_expr.object().map_or(true, |object| {
+                || static_expr.object().is_ok_and(|object| {
                     object.syntax().kind() != JsSyntaxKind::JS_IDENTIFIER_EXPRESSION
                 })
         }

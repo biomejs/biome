@@ -34,10 +34,9 @@ pub struct PackageData {
     /// The settings of the package.
     ///
     /// Usually inferred from a configuration file, e.g. `biome.json`.
-    // TODO: Uncomment this.
-    // Probably best done when Ema has finished with https://github.com/biomejs/biome/pull/4845
-    //settings: Settings,
-
+    /// TODO: Uncomment this.
+    /// Probably best done when Ema has finished with https://github.com/biomejs/biome/pull/4845
+    /// settings: Settings,
     /// Optional Node.js-specific package information, if relevant for the
     /// package.
     node_package: Option<NodeJsPackage>,

@@ -1,3 +1,4 @@
+#![allow(clippy::needless_lifetimes)]
 use grit_pattern_matcher::pattern::VariableSource;
 use grit_util::ByteRange;
 
@@ -21,7 +22,7 @@ pub(crate) struct CompilationContext<'a> {
     pub function_definition_info: BTreeMap<String, DefinitionInfo>,
 }
 
-impl CompilationContext<'_> {
+impl<'a> CompilationContext<'a> {
     #[cfg(test)]
     pub(crate) fn new(
         source_path: Option<&'a Utf8Path>,

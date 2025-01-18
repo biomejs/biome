@@ -132,50 +132,50 @@ impl Rule for NoUselessFragments {
         let mut in_jsx_list = false;
         match node {
             NoUselessFragmentsQuery::JsxFragment(fragment) => {
-                let parents_where_fragments_must_be_preserved = node.syntax().parent().map_or(
-                    false,
-                    |parent| match JsxTagExpression::try_cast(parent.clone()) {
-                        Ok(parent) => parent
-                            .syntax()
-                            .parent()
-                            .and_then(|parent| {
-                                if JsxExpressionAttributeValue::can_cast(parent.kind()) {
-                                    in_jsx_attr_expr = true;
-                                }
-                                if JsLogicalExpression::can_cast(parent.kind()) {
-                                    in_js_logical_expr = true;
-                                }
-                                if JsxExpressionChild::can_cast(parent.kind()) {
-                                    in_jsx_expr = true;
-                                }
-                                match JsParenthesizedExpression::try_cast(parent) {
-                                    Ok(parenthesized_expression) => {
-                                        parenthesized_expression.syntax().parent()
+                let parents_where_fragments_must_be_preserved =
+                    node.syntax().parent().is_some_and(|parent| {
+                        match JsxTagExpression::try_cast(parent.clone()) {
+                            Ok(parent) => parent
+                                .syntax()
+                                .parent()
+                                .and_then(|parent| {
+                                    if JsxExpressionAttributeValue::can_cast(parent.kind()) {
+                                        in_jsx_attr_expr = true;
                                     }
-                                    Err(parent) => Some(parent),
+                                    if JsLogicalExpression::can_cast(parent.kind()) {
+                                        in_js_logical_expr = true;
+                                    }
+                                    if JsxExpressionChild::can_cast(parent.kind()) {
+                                        in_jsx_expr = true;
+                                    }
+                                    match JsParenthesizedExpression::try_cast(parent) {
+                                        Ok(parenthesized_expression) => {
+                                            parenthesized_expression.syntax().parent()
+                                        }
+                                        Err(parent) => Some(parent),
+                                    }
+                                })
+                                .is_some_and(|parent| {
+                                    matches!(
+                                        parent.kind(),
+                                        JsSyntaxKind::JS_RETURN_STATEMENT
+                                            | JsSyntaxKind::JS_INITIALIZER_CLAUSE
+                                            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
+                                            | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+                                            | JsSyntaxKind::JS_FUNCTION_DECLARATION
+                                            | JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER
+                                    )
+                                }),
+                            Err(_) => {
+                                if JsxChildList::try_cast(parent.clone()).is_ok() {
+                                    in_jsx_list = true;
+                                    false
+                                } else {
+                                    JsxAttributeInitializerClause::try_cast(parent.clone()).is_ok()
                                 }
-                            })
-                            .map_or(false, |parent| {
-                                matches!(
-                                    parent.kind(),
-                                    JsSyntaxKind::JS_RETURN_STATEMENT
-                                        | JsSyntaxKind::JS_INITIALIZER_CLAUSE
-                                        | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-                                        | JsSyntaxKind::JS_FUNCTION_EXPRESSION
-                                        | JsSyntaxKind::JS_FUNCTION_DECLARATION
-                                        | JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER
-                                )
-                            }),
-                        Err(_) => {
-                            if JsxChildList::try_cast(parent.clone()).is_ok() {
-                                in_jsx_list = true;
-                                false
-                            } else {
-                                JsxAttributeInitializerClause::try_cast(parent.clone()).is_ok()
                             }
                         }
-                    },
-                );
+                    });
 
                 let child_list = fragment.children();
 
@@ -307,14 +307,15 @@ impl Rule for NoUselessFragments {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
 
-        let is_in_jsx_attr = node.syntax().grand_parent().map_or(false, |parent| {
-            JsxExpressionAttributeValue::can_cast(parent.kind())
-        });
+        let is_in_jsx_attr = node
+            .syntax()
+            .grand_parent()
+            .is_some_and(|parent| JsxExpressionAttributeValue::can_cast(parent.kind()));
 
         let is_in_list = node
             .syntax()
             .parent()
-            .map_or(false, |parent| JsxChildList::can_cast(parent.kind()));
+            .is_some_and(|parent| JsxChildList::can_cast(parent.kind()));
         if is_in_list {
             match state {
                 NoUselessFragmentsState::Child(child) => {

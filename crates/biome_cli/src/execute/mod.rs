@@ -284,7 +284,7 @@ impl Execution {
         // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
         let is_github = std::env::var("GITHUB_ACTIONS")
             .ok()
-            .map_or(false, |value| value == "true");
+            .is_some_and(|value| value == "true");
 
         Self {
             report_mode: ReportMode::default(),

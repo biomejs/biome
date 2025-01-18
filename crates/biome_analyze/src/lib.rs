@@ -571,7 +571,7 @@ where
 }
 
 fn range_match(filter: Option<TextRange>, range: TextRange) -> bool {
-    filter.map_or(true, |filter| filter.intersect(range).is_some())
+    filter.is_some_and(|filter| filter.intersect(range).is_some())
 }
 
 /// Signature for a suppression comment parser function
@@ -840,7 +840,7 @@ impl<'analysis> AnalysisFilter<'analysis> {
     /// Return `true` if the group `G` matches this filter
     pub fn match_group<G: RuleGroup>(&self) -> bool {
         self.match_category::<G::Category>()
-            && self.enabled_rules.map_or(true, |enabled_rules| {
+            && self.enabled_rules.is_some_and(|enabled_rules| {
                 enabled_rules.iter().any(|filter| filter.match_group::<G>())
             })
             && !self
@@ -852,7 +852,7 @@ impl<'analysis> AnalysisFilter<'analysis> {
     /// Return `true` if the rule `R` matches this filter
     pub fn match_rule<R: Rule>(&self) -> bool {
         self.match_category::<<R::Group as RuleGroup>::Category>()
-            && self.enabled_rules.map_or(true, |enabled_rules| {
+            && self.enabled_rules.is_some_and(|enabled_rules| {
                 enabled_rules.iter().any(|filter| filter.match_rule::<R>())
             })
             && !self
