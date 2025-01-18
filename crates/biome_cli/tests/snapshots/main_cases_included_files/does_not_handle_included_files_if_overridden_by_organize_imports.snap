@@ -9,7 +9,7 @@ snapshot_kind: text
 {
   "formatter": { "enabled": false },
   "linter": { "enabled": false },
-  "assist": { "includes": ["test.js", "test2.js"], "ignore": ["test.js"] }
+  "assist": { "includes": ["test.js", "test2.js", "!test.js"] }
 }
 ```
 

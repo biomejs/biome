@@ -8,8 +8,7 @@ snapshot_kind: text
 ```json
 {
   "formatter": {
-    "includes": ["src/**"],
-    "ignore": ["src/file2.js"]
+    "includes": ["src/**", "!src/file2.js"]
   }
 }
 ```

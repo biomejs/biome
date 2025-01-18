@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 snapshot_kind: text
 ---
 ## `biome.json`
@@ -12,8 +12,8 @@ snapshot_kind: text
     "enabled": true
   },
   "linter": {
-    "ignore": ["build/**"],
     "enabled": true,
+    "includes": ["**", "!build/**"],
     "rules": {
       "recommended": true
     }

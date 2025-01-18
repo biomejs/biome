@@ -1,7 +1,6 @@
 use crate::configs::{
-    CONFIG_DISABLED_FORMATTER, CONFIG_FILE_SIZE_LIMIT, CONFIG_FORMAT,
-    CONFIG_FORMATTER_AND_FILES_IGNORE, CONFIG_FORMATTER_IGNORED_DIRECTORIES,
-    CONFIG_FORMATTER_IGNORED_FILES, CONFIG_FORMAT_JSONC, CONFIG_ISSUE_3175_1, CONFIG_ISSUE_3175_2,
+    CONFIG_DISABLED_FORMATTER, CONFIG_FILE_SIZE_LIMIT, CONFIG_FORMAT, CONFIG_FORMAT_JSONC,
+    CONFIG_ISSUE_3175_1, CONFIG_ISSUE_3175_2,
 };
 use crate::snap_test::{assert_file_contents, markup_to_string, SnapshotPayload};
 use crate::{
@@ -1281,7 +1280,10 @@ fn does_not_format_ignored_files() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
     let file_path = Utf8Path::new("biome.json");
-    fs.insert(file_path.into(), CONFIG_FORMATTER_IGNORED_FILES.as_bytes());
+    fs.insert(
+        file_path.into(),
+        r#"{ "formatter": { "includes": ["**/*.js", "!test.js"] } }"#.as_bytes(),
+    );
 
     let file_path = Utf8Path::new("test.js");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
@@ -1313,7 +1315,11 @@ fn does_not_format_if_files_are_listed_in_ignore_option() {
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
-        CONFIG_FORMATTER_AND_FILES_IGNORE.as_bytes(),
+        r#"{
+            "files": { "includes": ["**", "!test1.js"] },
+            "formatter": { "includes": ["**", "!test2.js"] }
+        }"#
+        .as_bytes(),
     );
 
     let file_path_test1 = Utf8Path::new("test1.js");
@@ -1371,7 +1377,21 @@ fn does_not_format_ignored_directories() {
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
-        CONFIG_FORMATTER_IGNORED_DIRECTORIES.as_bytes(),
+        r#"{
+            "formatter": {
+                "includes": [
+                    "**",
+                    "!test1.js",
+                    "!test2.js",
+                    "!test3/**/*",
+                    "!/test4/**/*",
+                    "!test5/**/*",
+                    "!**/test6/*.js",
+                    "!**/*.test7.js"
+                ]
+            }
+        }"#
+        .as_bytes(),
     );
 
     const FILES: [(&str, bool); 9] = [
@@ -1421,8 +1441,7 @@ fn does_not_format_ignored_directories() {
 fn does_not_format_ignored_file_in_included_directory() {
     let config = r#"{
         "formatter": {
-          "includes": ["src/**"],
-          "ignore": ["src/file2.js"]
+          "includes": ["src/**", "!src/file2.js"]
         }
     }"#;
     let files = [("src/file1.js", true), ("src/file2.js", false)];
@@ -1469,12 +1488,10 @@ fn include_ignore_cascade() {
     // - `file4.js` is not included at top-level
     let config = r#"{
         "files": {
-          "includes": ["file1.js", "file2.js", "file3.js"],
-          "ignore": ["file2.js"]
+            "includes": ["file1.js", "file2.js", "file3.js", "!file2.js"]
         },
         "formatter": {
-          "includes": ["file1.js", "file2.js"],
-          "ignore": ["file3.js"]
+            "includes": ["file1.js", "file2.js", "!file3.js"]
         }
     }"#;
     let files = [
@@ -1936,11 +1953,10 @@ fn include_vcs_ignore_cascade() {
             "useIgnoreFile": true
         },
         "files": {
-          "ignore": ["file2.js"]
+            "includes": ["**", "!file2.js"]
         },
         "formatter": {
-          "includes": ["file1.js", "file2.js", "file4.js"],
-          "ignore": ["file3.js"]
+          "includes": ["file1.js", "file2.js", "file4.js", "!file3.js"]
         }
     }"#;
     let files = [
@@ -2842,7 +2858,7 @@ const a = {
 fn override_don_t_affect_ignored_files() {
     let config = r#"{
         "overrides": [{
-            "ignore": ["file2.js"]
+            "includes": ["**", "!file2.js"]
         }]
     }"#;
     let files = [("file1.js", true), ("file2.js", true)];
@@ -2923,7 +2939,7 @@ fn don_t_format_ignored_known_jsonc_files() {
     let config = r#"{
         "files": {
             "ignoreUnknown": true,
-            "ignore": [".eslintrc"]
+            "includes": ["**", "!.eslintrc"]
         }
     }"#;
     let files = [(".eslintrc", false)];
@@ -3287,19 +3303,18 @@ fn should_format_files_in_folders_ignored_by_linter() {
     fs.insert(
         biome_json.into(),
         r#"{
-    "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
-    "assist": {
-        "enabled": true
-    },
-    "linter": {
-        "ignore": ["**/build"],
-        "enabled": true,
-        "rules": {
-            "recommended": true
-        }
-    }
-}
-        "#,
+            "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+            "assist": {
+                "enabled": true
+            },
+            "linter": {
+                "includes": ["**", "!**/build"],
+                "enabled": true,
+                "rules": {
+                    "recommended": true
+                }
+            }
+        }"#,
     );
 
     let (fs, result) = run_cli(

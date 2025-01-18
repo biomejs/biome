@@ -2366,7 +2366,7 @@ async fn does_not_format_ignored_files() -> Result<()> {
     let mut fs = MemoryFileSystem::default();
     let config = r#"{
         "files": {
-            "ignore": ["document.js"]
+            "includes": ["**", "!**/document.js"]
         }
     }"#;
 

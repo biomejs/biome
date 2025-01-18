@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 snapshot_kind: text
 ---
 ## `biome.json`
@@ -8,13 +8,13 @@ snapshot_kind: text
 ```json
 {
   "linter": {
-    "ignore": ["/linter-ignored/**"]
+    "includes": ["**", "!/linter-ignored/**"]
   },
   "formatter": {
-    "ignore": ["/formatter-ignored/**"]
+    "includes": ["**", "!/formatter-ignored/**"]
   },
   "files": {
-    "ignore": ["/globally-ignored/**"]
+    "includes": ["**", "!/globally-ignored/**"]
   }
 }
 ```

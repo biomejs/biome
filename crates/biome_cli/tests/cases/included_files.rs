@@ -64,11 +64,7 @@ fn does_not_handle_included_files_if_overridden_by_ignore() {
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
-        r#"{
-  "files": { "includes": ["test.js", "test2.js"], "ignore": ["test.js"] }
-}
-"#
-        .as_bytes(),
+        r#"{ "files": { "includes": ["test.js", "test2.js", "!test.js"] } }"#.as_bytes(),
     );
 
     let test = Utf8Path::new("test.js");
@@ -105,11 +101,7 @@ fn does_not_handle_included_files_if_overridden_by_ignore_formatter() {
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
-        r#"{
-  "formatter": { "includes": ["test.js", "test2.js"], "ignore": ["test.js"] }
-}
-"#
-        .as_bytes(),
+        r#"{ "formatter": { "includes": ["test.js", "test2.js", "!test.js"] } }"#.as_bytes(),
     );
 
     let test = Utf8Path::new("test.js");
@@ -146,9 +138,7 @@ fn does_not_handle_included_files_if_overridden_by_ignore_linter() {
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
-        r#"{
-  "linter": { "includes": ["test.js", "test2.js"], "ignore": ["test.js"] }
-}
+        r#"{ "linter": { "includes": ["test.js", "test2.js", "!test.js"] } }
 "#
         .as_bytes(),
     );
@@ -188,11 +178,10 @@ fn does_not_handle_included_files_if_overridden_by_organize_imports() {
     fs.insert(
         file_path.into(),
         r#"{
-  "formatter": { "enabled": false },
-  "linter": { "enabled": false },
-  "assist": { "includes": ["test.js", "test2.js"], "ignore": ["test.js"] }
-}
-"#
+            "formatter": { "enabled": false },
+            "linter": { "enabled": false },
+            "assist": { "includes": ["test.js", "test2.js", "!test.js"] }
+        }"#
         .as_bytes(),
     );
 

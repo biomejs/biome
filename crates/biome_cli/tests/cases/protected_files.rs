@@ -165,7 +165,7 @@ fn not_process_ignored_file_from_cli_verbose() {
     let file_path1 = Utf8Path::new("biome.json");
     fs.insert(
         file_path1.into(),
-        r#"{ "files": { "ignore": ["package.json"] } }"#.as_bytes(),
+        r#"{ "files": { "includes": ["**", "!package.json"] } }"#.as_bytes(),
     );
 
     let (fs, result) = run_cli(

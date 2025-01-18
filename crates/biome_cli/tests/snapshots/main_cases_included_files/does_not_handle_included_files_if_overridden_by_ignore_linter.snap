@@ -6,9 +6,7 @@ snapshot_kind: text
 ## `biome.json`
 
 ```json
-{
-  "linter": { "includes": ["test.js", "test2.js"], "ignore": ["test.js"] }
-}
+{ "linter": { "includes": ["test.js", "test2.js", "!test.js"] } }
 ```
 
 ## `test.js`

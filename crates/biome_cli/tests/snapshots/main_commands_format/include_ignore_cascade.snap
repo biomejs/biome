@@ -8,12 +8,10 @@ snapshot_kind: text
 ```json
 {
   "files": {
-    "includes": ["file1.js", "file2.js", "file3.js"],
-    "ignore": ["file2.js"]
+    "includes": ["file1.js", "file2.js", "file3.js", "!file2.js"]
   },
   "formatter": {
-    "includes": ["file1.js", "file2.js"],
-    "ignore": ["file3.js"]
+    "includes": ["file1.js", "file2.js", "!file3.js"]
   }
 }
 ```

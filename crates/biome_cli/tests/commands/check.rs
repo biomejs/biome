@@ -1,8 +1,7 @@
 use crate::configs::{
-    CONFIG_FILE_SIZE_LIMIT, CONFIG_IGNORE_SYMLINK, CONFIG_LINTER_DISABLED,
-    CONFIG_LINTER_DISABLED_JSONC, CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC, CONFIG_LINTER_IGNORED_FILES,
-    CONFIG_LINTER_SUPPRESSED_GROUP, CONFIG_LINTER_SUPPRESSED_RULE,
-    CONFIG_LINTER_UPGRADE_DIAGNOSTIC, CONFIG_RECOMMENDED_GROUP,
+    CONFIG_FILE_SIZE_LIMIT, CONFIG_LINTER_DISABLED, CONFIG_LINTER_DISABLED_JSONC,
+    CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC, CONFIG_LINTER_SUPPRESSED_GROUP,
+    CONFIG_LINTER_SUPPRESSED_RULE, CONFIG_LINTER_UPGRADE_DIAGNOSTIC, CONFIG_RECOMMENDED_GROUP,
 };
 use crate::snap_test::{assert_file_contents, markup_to_string, SnapshotPayload};
 use crate::{
@@ -649,7 +648,10 @@ fn no_lint_when_file_is_ignored() {
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.json");
-    fs.insert(file_path.into(), CONFIG_LINTER_IGNORED_FILES.as_bytes());
+    fs.insert(
+        file_path.into(),
+        r#"{ "linter": { "includes": ["**", "!test.js"] } }"#.as_bytes(),
+    );
 
     let file_path = Utf8Path::new("test.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
@@ -688,14 +690,9 @@ fn no_lint_if_files_are_listed_in_ignore_option() {
     fs.insert(
         file_path.into(),
         r#"{
-  "files": {
-    "ignore": ["test1.js"]
-  },
-  "linter": {
-    "enabled": true,
-    "ignore": ["test2.js"]
-  }
-}"#
+            "files": { "includes": ["**", "!test1.js"] },
+            "linter": { "includes": ["**", "!test2.js"] }
+        }"#
         .as_bytes(),
     );
 
@@ -1027,7 +1024,9 @@ fn fs_files_ignore_symlink() {
     let config_path = root_path.join("biome.json");
     let mut config_file = File::create(config_path).unwrap();
     config_file
-        .write_all(CONFIG_IGNORE_SYMLINK.as_bytes())
+        .write_all(
+            r#"{ "files": { "includes": ["**", "!**/symlink_testcase2/**/*.ts"] } }"#.as_bytes(),
+        )
         .unwrap();
 
     let files: [Utf8PathBuf; 4] = [
@@ -1504,16 +1503,16 @@ fn applies_organize_imports_bug_4552() {
 
     let config = r#"{
         "assist": {
-                "enabled": true,
-                "ignore": ["index.ts"]
+            "enabled": true,
+            "includes": ["**", "!index.ts"]
         },
         "linter": {
-                "enabled": true,
-                "rules": {
-                        "recommended": true
-                }
+            "enabled": true,
+            "rules": {
+                    "recommended": true
+            }
         }
-}"#;
+    }"#;
     let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), config.as_bytes());
 
@@ -1607,7 +1606,7 @@ fn dont_applies_organize_imports_for_ignored_file() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let rome_json = r#"{ "assist": { "enabled": true, "ignore": ["check.js"] } }"#;
+    let rome_json = r#"{ "assist": { "enabled": true, "includes": ["**", "!check.js"] } }"#;
 
     let config_path = Utf8Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
@@ -2612,19 +2611,18 @@ fn should_show_formatter_diagnostics_for_files_ignored_by_linter() {
     fs.insert(
         biome_json.into(),
         r#"{
-    "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
-    "assist": {
-        "enabled": true
-    },
-    "linter": {
-        "ignore": ["build/**"],
-        "enabled": true,
-        "rules": {
-            "recommended": true
-        }
-    }
-}
-        "#,
+            "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+            "assist": {
+                "enabled": true
+            },
+            "linter": {
+                "enabled": true,
+                "includes": ["**", "!build/**"],
+                "rules": {
+                    "recommended": true
+                }
+            }
+        }"#,
     );
 
     let (fs, result) = run_cli(

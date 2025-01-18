@@ -482,7 +482,6 @@ impl WorkspaceServer {
         let Some(files_settings) = self.projects.get_files_settings(project_key) else {
             return false;
         };
-
         let mut is_included = true;
         if !files_settings.includes_files.is_empty() {
             let candidate_path = biome_glob::CandidatePath::new(&path);

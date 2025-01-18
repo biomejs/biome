@@ -205,12 +205,12 @@ fn biome_json_is_not_ignored() {
     fs.insert(
         Utf8PathBuf::from("biome.json"),
         r#"{
-        "files": { "ignore": ["*.json"] },
-  "formatter": {
-    "enabled": false
-  }
-}
-"#
+            "files": { "includes": ["**", "!*.json"] },
+            "formatter": {
+                "enabled": false
+            }
+        }
+        "#
         .as_bytes(),
     );
 

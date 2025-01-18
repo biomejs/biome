@@ -13,11 +13,10 @@ snapshot_kind: text
     "useIgnoreFile": true
   },
   "files": {
-    "ignore": ["file2.js"]
+    "includes": ["**", "!file2.js"]
   },
   "formatter": {
-    "includes": ["file1.js", "file2.js", "file4.js"],
-    "ignore": ["file3.js"]
+    "includes": ["file1.js", "file2.js", "file4.js", "!file3.js"]
   }
 }
 ```

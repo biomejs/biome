@@ -1,7 +1,6 @@
 use crate::configs::{
-    CONFIG_FILE_SIZE_LIMIT, CONFIG_IGNORE_SYMLINK, CONFIG_LINTER_AND_FILES_IGNORE,
-    CONFIG_LINTER_DISABLED, CONFIG_LINTER_DISABLED_JSONC, CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC,
-    CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC_INFO, CONFIG_LINTER_IGNORED_FILES,
+    CONFIG_FILE_SIZE_LIMIT, CONFIG_LINTER_DISABLED, CONFIG_LINTER_DISABLED_JSONC,
+    CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC, CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC_INFO,
     CONFIG_LINTER_SUPPRESSED_GROUP, CONFIG_LINTER_SUPPRESSED_RULE,
     CONFIG_LINTER_UPGRADE_DIAGNOSTIC, CONFIG_RECOMMENDED_GROUP,
 };
@@ -669,7 +668,10 @@ fn no_lint_when_file_is_ignored() {
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.json");
-    fs.insert(file_path.into(), CONFIG_LINTER_IGNORED_FILES.as_bytes());
+    fs.insert(
+        file_path.into(),
+        r#"{ "linter": { "includes": ["**", "!test.js"] } }"#.as_bytes(),
+    );
 
     let file_path = Utf8Path::new("test.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
@@ -705,7 +707,14 @@ fn no_lint_if_files_are_listed_in_ignore_option() {
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("biome.json");
-    fs.insert(file_path.into(), CONFIG_LINTER_AND_FILES_IGNORE.as_bytes());
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "files": { "includes": ["**", "!test1.js"] },
+            "linter": { "includes": ["**", "!test2.js"] }
+        }"#
+        .as_bytes(),
+    );
 
     let file_path_test1 = Utf8Path::new("test1.js");
     fs.insert(file_path_test1.into(), FIX_BEFORE.as_bytes());
@@ -1050,7 +1059,9 @@ fn fs_files_ignore_symlink() {
     let config_path = root_path.join("biome.json");
     let mut config_file = File::create(config_path).unwrap();
     config_file
-        .write_all(CONFIG_IGNORE_SYMLINK.as_bytes())
+        .write_all(
+            r#"{ "files": { "includes": ["**", "!**/symlink_testcase2/**/*.ts"] } }"#.as_bytes(),
+        )
         .unwrap();
 
     let files: [Utf8PathBuf; 4] = [
@@ -1201,11 +1212,7 @@ fn include_files_in_symlinked_subdir() {
 fn ignore_file_in_subdir_in_symlinked_dir() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
-    let config = r#"{
-        "files": {
-            "ignore": ["./symlink/subdir/file.js"]
-        }
-    }"#;
+    let config = r#"{ "files": { "includes": ["**", "!symlink/subdir/file.js"] } }"#;
 
     let root_path = Utf8PathBuf::from_path_buf(temp_dir())
         .unwrap()
@@ -2600,16 +2607,10 @@ fn should_not_process_ignored_file_even_if_its_changed() {
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
-        r#"
-{
-    "files": {
-        "ignore": ["file.js"]
-    },
-    "vcs": {
-        "defaultBranch": "main"
-    }
-}
-        "#
+        r#"{
+            "files": { "includes": ["**", "!file.js"] },
+            "vcs": { "defaultBranch": "main" }
+        }"#
         .as_bytes(),
     );
 
@@ -2809,16 +2810,10 @@ fn should_not_process_ignored_file_even_if_its_staged() {
     let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
-        r#"
-{
-    "files": {
-        "ignore": ["file.js"]
-    },
-    "vcs": {
-        "defaultBranch": "main"
-    }
-}
-        "#
+        r#"{
+            "files": { "includes": ["**", "!file.js"] },
+            "vcs": { "defaultBranch": "main" }
+        }"#
         .as_bytes(),
     );
 

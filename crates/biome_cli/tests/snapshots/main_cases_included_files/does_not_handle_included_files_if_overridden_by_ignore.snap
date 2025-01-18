@@ -6,9 +6,7 @@ snapshot_kind: text
 ## `biome.json`
 
 ```json
-{
-  "files": { "includes": ["test.js", "test2.js"], "ignore": ["test.js"] }
-}
+{ "files": { "includes": ["test.js", "test2.js", "!test.js"] } }
 ```
 
 ## `test.js`
