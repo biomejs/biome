@@ -476,7 +476,7 @@ where
     group_id: Option<GroupId>,
 }
 
-impl<'a, 'content, L, C> FormatOnlyIfBreaks<'a, 'content, L, C>
+impl<L, C> FormatOnlyIfBreaks<'_, '_, L, C>
 where
     L: Language,
 {

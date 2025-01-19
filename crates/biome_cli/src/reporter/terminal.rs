@@ -53,7 +53,7 @@ struct FixedPathsDiagnostic {
 
 pub(crate) struct ConsoleReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
 
-impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
+impl ReporterVisitor for ConsoleReporterVisitor<'_> {
     fn report_summary(
         &mut self,
         execution: &Execution,
@@ -148,7 +148,7 @@ impl fmt::Display for Files {
 
 struct SummaryDetail<'a>(pub(crate) &'a TraversalMode, usize);
 
-impl<'a> fmt::Display for SummaryDetail<'a> {
+impl fmt::Display for SummaryDetail<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         if let TraversalMode::Search { .. } = self.0 {
             return Ok(());
@@ -167,7 +167,7 @@ impl<'a> fmt::Display for SummaryDetail<'a> {
 }
 struct SummaryTotal<'a>(&'a TraversalMode, usize, &'a Duration);
 
-impl<'a> fmt::Display for SummaryTotal<'a> {
+impl fmt::Display for SummaryTotal<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         let files = Files(self.1);
         match self.0 {
@@ -211,7 +211,7 @@ pub(crate) struct ConsoleTraversalSummary<'a>(
     pub(crate) &'a TraversalMode,
     pub(crate) &'a TraversalSummary,
 );
-impl<'a> fmt::Display for ConsoleTraversalSummary<'a> {
+impl fmt::Display for ConsoleTraversalSummary<'_> {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
         let summary = SummaryTotal(self.0, self.1.changed + self.1.unchanged, &self.1.duration);
         let detail = SummaryDetail(self.0, self.1.changed);

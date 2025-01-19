@@ -183,7 +183,7 @@ impl Rule for UseIsNan {
                     call.into(),
                 );
 
-                return Some(JsRuleAction::new(
+                Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! {
@@ -191,7 +191,7 @@ impl Rule for UseIsNan {
                     }
                     .to_owned(),
                     mutation,
-                ));
+                ))
             }
             UseIsNanQuery::JsCaseClause(_) => None,
             UseIsNanQuery::JsSwitchStatement(_) => None,

@@ -110,7 +110,7 @@ impl<'a> DefaultDeserializationContext<'a> {
         }
     }
 }
-impl<'a> DeserializationContext for DefaultDeserializationContext<'a> {
+impl DeserializationContext for DefaultDeserializationContext<'_> {
     // Identifier of the deserialized root value.
     fn id(&self) -> Option<&str> {
         self.id

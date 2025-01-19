@@ -867,7 +867,7 @@ struct SyntaxVisitor<'a> {
     pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
 }
 
-impl<'a> RegistryVisitor<JsLanguage> for SyntaxVisitor<'a> {
+impl RegistryVisitor<JsLanguage> for SyntaxVisitor<'_> {
     fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Syntax {
             C::record_groups(self)
@@ -885,7 +885,7 @@ impl<'a> RegistryVisitor<JsLanguage> for SyntaxVisitor<'a> {
     }
 }
 
-impl<'a> RegistryVisitor<JsonLanguage> for SyntaxVisitor<'a> {
+impl RegistryVisitor<JsonLanguage> for SyntaxVisitor<'_> {
     fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Syntax {
             C::record_groups(self)
@@ -904,7 +904,7 @@ impl<'a> RegistryVisitor<JsonLanguage> for SyntaxVisitor<'a> {
     }
 }
 
-impl<'a> RegistryVisitor<CssLanguage> for SyntaxVisitor<'a> {
+impl RegistryVisitor<CssLanguage> for SyntaxVisitor<'_> {
     fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Syntax {
             C::record_groups(self)
@@ -923,7 +923,7 @@ impl<'a> RegistryVisitor<CssLanguage> for SyntaxVisitor<'a> {
     }
 }
 
-impl<'a> RegistryVisitor<GraphqlLanguage> for SyntaxVisitor<'a> {
+impl RegistryVisitor<GraphqlLanguage> for SyntaxVisitor<'_> {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Syntax {
             C::record_groups(self)
@@ -1131,7 +1131,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> RegistryVisitor<JsLanguage> for LintVisitor<'a, 'b> {
+impl RegistryVisitor<JsLanguage> for LintVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Lint {
             C::record_groups(self)
@@ -1153,7 +1153,7 @@ impl<'a, 'b> RegistryVisitor<JsLanguage> for LintVisitor<'a, 'b> {
         )
     }
 }
-impl<'a, 'b> RegistryVisitor<JsonLanguage> for LintVisitor<'a, 'b> {
+impl RegistryVisitor<JsonLanguage> for LintVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Lint {
             C::record_groups(self)
@@ -1177,7 +1177,7 @@ impl<'a, 'b> RegistryVisitor<JsonLanguage> for LintVisitor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> RegistryVisitor<CssLanguage> for LintVisitor<'a, 'b> {
+impl RegistryVisitor<CssLanguage> for LintVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Lint {
             C::record_groups(self)
@@ -1201,7 +1201,7 @@ impl<'a, 'b> RegistryVisitor<CssLanguage> for LintVisitor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for LintVisitor<'a, 'b> {
+impl RegistryVisitor<GraphqlLanguage> for LintVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Lint {
             C::record_groups(self)
@@ -1296,7 +1296,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> RegistryVisitor<JsLanguage> for AssistsVisitor<'a, 'b> {
+impl RegistryVisitor<JsLanguage> for AssistsVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
             C::record_groups(self)
@@ -1311,7 +1311,7 @@ impl<'a, 'b> RegistryVisitor<JsLanguage> for AssistsVisitor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> RegistryVisitor<JsonLanguage> for AssistsVisitor<'a, 'b> {
+impl RegistryVisitor<JsonLanguage> for AssistsVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
             C::record_groups(self)
@@ -1327,7 +1327,7 @@ impl<'a, 'b> RegistryVisitor<JsonLanguage> for AssistsVisitor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> RegistryVisitor<CssLanguage> for AssistsVisitor<'a, 'b> {
+impl RegistryVisitor<CssLanguage> for AssistsVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
             C::record_groups(self)
@@ -1343,7 +1343,7 @@ impl<'a, 'b> RegistryVisitor<CssLanguage> for AssistsVisitor<'a, 'b> {
     }
 }
 
-impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'a, 'b> {
+impl RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'_, '_> {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if C::CATEGORY == RuleCategory::Action {
             C::record_groups(self)

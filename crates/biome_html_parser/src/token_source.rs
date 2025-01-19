@@ -108,7 +108,7 @@ impl<'source> HtmlTokenSource<'source> {
     }
 }
 
-impl<'src> TokenSource for HtmlTokenSource<'src> {
+impl TokenSource for HtmlTokenSource<'_> {
     type Kind = HtmlSyntaxKind;
 
     fn current(&self) -> Self::Kind {
@@ -140,7 +140,7 @@ impl<'src> TokenSource for HtmlTokenSource<'src> {
     }
 }
 
-impl<'source> BumpWithContext for HtmlTokenSource<'source> {
+impl BumpWithContext for HtmlTokenSource<'_> {
     type Context = HtmlLexContext;
     fn bump_with_context(&mut self, context: Self::Context) {
         if self.current() != EOF {

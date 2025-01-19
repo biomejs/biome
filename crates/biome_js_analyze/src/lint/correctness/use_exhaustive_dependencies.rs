@@ -940,7 +940,7 @@ impl Rule for UseExhaustiveDependencies {
             Fix::MissingDependenciesArray {
                 function_name_range,
             } => {
-                return Some(RuleDiagnostic::new(
+                Some(RuleDiagnostic::new(
                     rule_category!(),
                     function_name_range,
                     markup! {"This hook does not have a dependencies array"},

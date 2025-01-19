@@ -668,7 +668,7 @@ impl<'l, 't, Lex: Lexer<'t>> LookaheadIterator<'l, 't, Lex> {
     }
 }
 
-impl<'l, 't, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'l, 't, Lex> {
+impl<'t, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'_, 't, Lex> {
     type Item = LookaheadToken<Lex::Kind>;
 
     #[inline]
@@ -707,7 +707,7 @@ impl<'l, 't, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'l, 't
     }
 }
 
-impl<'l, 't, Lex: LexerWithCheckpoint<'t>> FusedIterator for LookaheadIterator<'l, 't, Lex> {}
+impl<'t, Lex: LexerWithCheckpoint<'t>> FusedIterator for LookaheadIterator<'_, 't, Lex> {}
 
 #[derive(Debug)]
 pub struct LookaheadToken<Kind> {

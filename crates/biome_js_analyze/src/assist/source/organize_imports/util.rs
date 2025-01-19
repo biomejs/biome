@@ -161,12 +161,12 @@ enum PathComponent<'a> {
     /// See [Component::Normal]
     Normal(&'a std::ffi::OsStr),
 }
-impl<'a> PartialOrd for PathComponent<'a> {
+impl PartialOrd for PathComponent<'_> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
-impl<'a> Ord for PathComponent<'a> {
+impl Ord for PathComponent<'_> {
     fn cmp(&self, other: &Self) -> Ordering {
         match (self, other) {
             (PathComponent::RootDir, PathComponent::RootDir)

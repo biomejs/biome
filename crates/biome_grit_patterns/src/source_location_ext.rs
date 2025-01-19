@@ -6,7 +6,7 @@ pub trait SourceFileExt {
     fn to_grit_range(&self, range: TextRange) -> Option<Range>;
 }
 
-impl<'d> SourceFileExt for SourceFile<'d> {
+impl SourceFileExt for SourceFile<'_> {
     fn to_grit_range(&self, range: TextRange) -> Option<Range> {
         let start = self.location(range.start()).ok()?;
         let end = self.location(range.end()).ok()?;

@@ -81,7 +81,7 @@ impl Rule for NoDocumentImportInPage {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        return Some(
+        Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 ctx.query().range(),
@@ -92,6 +92,6 @@ impl Rule for NoDocumentImportInPage {
             .note(markup! {
                 "Only import "<Emphasis>"next/document"</Emphasis>" within "<Emphasis>"pages/_document.jsx"</Emphasis>" to customize the global document structure."
             })
-        );
+        )
     }
 }

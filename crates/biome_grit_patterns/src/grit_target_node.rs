@@ -303,7 +303,7 @@ impl<'a> GritTargetNode<'a> {
     }
 }
 
-impl<'a> Debug for GritTargetNode<'a> {
+impl Debug for GritTargetNode<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("GritTargetNode")
             .field("node", &self.node)
@@ -311,7 +311,7 @@ impl<'a> Debug for GritTargetNode<'a> {
     }
 }
 
-impl<'a> Deref for GritTargetNode<'a> {
+impl Deref for GritTargetNode<'_> {
     type Target = GritTargetLanguageNode;
 
     fn deref(&self) -> &Self::Target {
@@ -319,7 +319,7 @@ impl<'a> Deref for GritTargetNode<'a> {
     }
 }
 
-impl<'a> GritAstNode for GritTargetNode<'a> {
+impl GritAstNode for GritTargetNode<'_> {
     fn ancestors(&self) -> impl Iterator<Item = Self> {
         AncestorIterator::new(self.clone())
     }
@@ -411,7 +411,7 @@ pub enum GritSyntaxSlot<'a> {
     Empty { index: u32 },
 }
 
-impl<'a> GritSyntaxSlot<'a> {
+impl GritSyntaxSlot<'_> {
     pub fn contains_list(&self) -> bool {
         match self {
             GritSyntaxSlot::Node(node) => node.kind().is_list(),
