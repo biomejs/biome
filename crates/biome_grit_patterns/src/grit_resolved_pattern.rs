@@ -170,8 +170,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
                     Self::from_pattern(pattern, state, context, logs)
                 } else {
                     return Err(GritPatternError::new(format!(
-                        "cannot create resolved snippet from unresolved variable {}",
-                        name
+                        "cannot create resolved snippet from unresolved variable {name}"
                     )));
                 }
             }
@@ -264,8 +263,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
                     Self::from_pattern(pattern, state, context, logs)
                 } else {
                     return Err(GritPatternError::new(format!(
-                        "cannot create resolved snippet from unresolved variable {}",
-                        name
+                        "cannot create resolved snippet from unresolved variable {name}"
                     )));
                 }
             }
