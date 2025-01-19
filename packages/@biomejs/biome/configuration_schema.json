@@ -2533,6 +2533,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noFloatingPromises": {
+					"description": "Require Promise-like statements to be handled appropriately.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noGlobalDirnameFilename": {
 					"description": "Disallow the use of __dirname and __filename in the global scope.",
 					"anyOf": [
