@@ -827,8 +827,7 @@ impl RestrictedImportVisitor<'_> {
 
     /// Checks whether this import of the form `const local_name = import(...)` is allowed.
     fn visit_namespace_binding(&mut self, namespace_import: &JsIdentifierBinding) -> Option<()> {
-        self
-            .visit_special_import_node(namespace_import.syntax(), Self::NAMESPACE_IMPORT_ALIAS)
+        self.visit_special_import_node(namespace_import.syntax(), Self::NAMESPACE_IMPORT_ALIAS)
     }
 
     /// Checks whether this import of the form `{ imported_name }` is allowed.
