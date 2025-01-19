@@ -22,7 +22,7 @@ use super::node;
 /// Note that we don't need to deserialise every existing rule option.
 /// We only need to deserialise options that have equivalent biome options.
 /// This greatly reduces the amount of work involved.
-
+///
 /// ESLint flat configuration filenames.
 ///
 /// See https://eslint.org/docs/latest/use/configure/configuration-files-new

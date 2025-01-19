@@ -16,7 +16,6 @@ use biome_rowan::{AstNode, TextRange, WalkEvent};
 ///    type State = ();
 ///    type Signals = Option<Self::State>;
 ///    type Options = ();
-
 ///    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
 ///     let node = ctx.query();
 ///     for n in node.rules() {
@@ -154,7 +153,6 @@ impl QueryMatch for SemanticModelEvent {
 ///    type State = ();
 ///    type Signals = Option<Self::State>;
 ///    type Options = ();
-
 ///    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
 ///     let node = ctx.query();
 ///     // The model holds all information about the semantic.

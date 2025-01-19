@@ -3,7 +3,6 @@ use crate::{markup, Markup};
 use std::io;
 
 /// It displays a type that implements [std::fmt::Display]
-
 pub struct DebugDisplay<T>(pub T);
 
 impl<T> Display for DebugDisplay<T>

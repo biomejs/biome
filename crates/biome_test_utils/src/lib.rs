@@ -259,7 +259,7 @@ pub fn parse_test_path(file: &Utf8Path) -> (&str, &str) {
         }
 
         rule_name = group_name;
-        group_name = component.as_str().unwrap_or_default();
+        group_name = DiffableStr::as_str(component).unwrap_or_default();
     }
 
     (group_name, rule_name)
