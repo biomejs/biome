@@ -268,8 +268,11 @@ pub(crate) fn migrate_eslint_any_rule(
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
-            let rule = group.no_floating_promises.get_or_insert(Default::default());
-            rule.set_level(rule_severity.into());
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_floating_promises
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
         }
         "@typescript-eslint/no-inferrable-types" => {
             let group = rules.style.get_or_insert_with(Default::default);

@@ -5,9 +5,9 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, AnyJsExpression, AnyJsName, AnyTsReturnType, AnyTsType,
-    JsCallExpression, JsExpressionStatement, JsFunctionDeclaration, JsStaticMemberExpression,
-    JsSyntaxKind, TsReturnTypeAnnotation,
+    binding_ext::AnyJsBindingDeclaration, AnyJsExpression, AnyJsName, AnyTsName, AnyTsReturnType,
+    AnyTsType, JsCallExpression, JsExpressionStatement, JsFunctionDeclaration,
+    JsStaticMemberExpression, JsSyntaxKind, TsReturnTypeAnnotation,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 
@@ -247,7 +247,11 @@ fn is_return_type_promise(return_type: Option<TsReturnTypeAnnotation>) -> bool {
             _ => None,
         })
         .and_then(|reference_type| reference_type.name().ok())
-        .map_or(false, |name| name.text() == "Promise")
+        .and_then(|name| match name {
+            AnyTsName::JsReferenceIdentifier(identifier) => Some(identifier),
+            _ => None,
+        })
+        .map_or(false, |reference| reference.has_name("Promise"))
 }
 
 /// Checks if a `JsCallExpression` is a handled Promise-like expression.
@@ -276,7 +280,7 @@ fn is_handled_promise(js_call_expression: &JsCallExpression) -> bool {
         return false;
     };
 
-    let name = name.text();
+    let name = name.to_string();
 
     if name == "finally" {
         if let Ok(expr) = static_member_expr.object() {
