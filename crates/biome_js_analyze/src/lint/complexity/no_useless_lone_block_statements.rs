@@ -130,12 +130,12 @@ impl Rule for NoUselessLoneBlockStatements {
         let mut mutation = ctx.root().begin();
         mutation.replace_node_discard_trivia(stmts_list, new_stmts_list);
 
-        return Some(JsRuleAction::new(
+        Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove redundant block." }.to_owned(),
             mutation,
-        ));
+        ))
     }
 }
 

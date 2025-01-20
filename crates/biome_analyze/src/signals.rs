@@ -349,7 +349,7 @@ where
     }
 }
 
-impl<'bag, R> AnalyzerSignal<RuleLanguage<R>> for RuleSignal<'bag, R>
+impl<R> AnalyzerSignal<RuleLanguage<R>> for RuleSignal<'_, R>
 where
     R: Rule<Options: Default> + 'static,
 {

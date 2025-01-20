@@ -939,13 +939,11 @@ impl Rule for UseExhaustiveDependencies {
         match dep {
             Fix::MissingDependenciesArray {
                 function_name_range,
-            } => {
-                return Some(RuleDiagnostic::new(
-                    rule_category!(),
-                    function_name_range,
-                    markup! {"This hook does not have a dependencies array"},
-                ))
-            }
+            } => Some(RuleDiagnostic::new(
+                rule_category!(),
+                function_name_range,
+                markup! {"This hook does not have a dependencies array"},
+            )),
             Fix::AddDependency {
                 function_name_range,
                 captures,

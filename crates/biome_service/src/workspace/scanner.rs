@@ -187,14 +187,14 @@ pub(crate) struct ScanContext<'app> {
     pub(crate) evaluated_paths: RwLock<BTreeSet<BiomePath>>,
 }
 
-impl<'app> ScanContext<'app> {
+impl ScanContext<'_> {
     /// Send a message to the display thread
     pub(crate) fn send_diagnostic(&self, diagnostic: impl Into<Diagnostic>) {
         self.diagnostics_sender.send(diagnostic.into()).ok();
     }
 }
 
-impl<'app> TraversalContext for ScanContext<'app> {
+impl TraversalContext for ScanContext<'_> {
     fn interner(&self) -> &PathInterner {
         &self.interner
     }

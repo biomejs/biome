@@ -108,7 +108,7 @@ impl Rule for NoHeadImportInDocument {
             path.to_string()
         };
 
-        return Some(
+        Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 ctx.query().range(),
@@ -119,6 +119,6 @@ impl Rule for NoHeadImportInDocument {
             .note(markup! {
                 "Using the "<Emphasis>"next/head"</Emphasis>" in document pages can cause unexpected issues. Use "<Emphasis>"<Head />"</Emphasis>" from "<Emphasis>"next/document"</Emphasis>" instead."
             })
-        );
+        )
     }
 }

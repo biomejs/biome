@@ -549,7 +549,6 @@ impl<'a> SourceParentheses<'a> {
     /// Must be called with offsets in increasing order.
     ///
     /// Returns the source range of the `)` if there's any `)` in the deleted range at this offset. Returns `None` otherwise
-
     fn r_paren_source_range(&mut self, offset: TextSize) -> Option<TextRange> {
         match self {
             SourceParentheses::Empty => None,

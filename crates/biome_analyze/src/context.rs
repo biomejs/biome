@@ -178,7 +178,7 @@ where
     }
 }
 
-impl<'a, R> Deref for RuleContext<'a, R>
+impl<R> Deref for RuleContext<'_, R>
 where
     R: Rule,
 {

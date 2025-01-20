@@ -140,7 +140,7 @@ impl<'source> TokenSource for JsTokenSource<'source> {
     }
 }
 
-impl<'source> BumpWithContext for JsTokenSource<'source> {
+impl BumpWithContext for JsTokenSource<'_> {
     type Context = JsLexContext;
 
     #[inline(always)]

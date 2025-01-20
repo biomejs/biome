@@ -128,7 +128,7 @@ impl Rule for NoUselessEscapeInRegex {
                                     | b'.' | b':' | b';' | b'<' | b'=' | b'>' | b'?'
                                     | b'@' | b'`' | b'~' if has_v_flag => {
                                         // SAFETY: there is at least one preceding character (`[`)
-                                        if bytes[index-1] != *escaped && !byte_it.next().is_some_and(|(_, byte)| byte == escaped) {
+                                        if bytes[index-1] != *escaped && byte_it.next().is_none_or(|(_, byte)| byte != escaped) {
                                             return Some(State {
                                                 backslash_index: index as u16,
                                                 escaped: *escaped,
@@ -138,8 +138,8 @@ impl Rule for NoUselessEscapeInRegex {
                                     }
                                     b'_' if has_v_flag => {
                                         // `[\_^^]`
-                                        if !byte_it.next().is_some_and(|(_, byte)| *byte == b'^') &&
-                                            !byte_it.next().is_some_and(|(_, byte)| *byte == b'^') {
+                                        if byte_it.next().is_none_or(|(_, byte)| *byte != b'^') &&
+                                            byte_it.next().is_none_or(|(_, byte)| *byte != b'^') {
                                             return Some(State {
                                                 backslash_index: index as u16,
                                                 escaped: *escaped,

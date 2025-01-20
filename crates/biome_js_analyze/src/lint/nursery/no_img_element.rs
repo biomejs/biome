@@ -98,7 +98,7 @@ impl Rule for NoImgElement {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        return Some(
+        Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 ctx.query().range(),
@@ -109,6 +109,6 @@ impl Rule for NoImgElement {
             .note(markup! {
                 "Using the "<Emphasis>"<img>"</Emphasis>" can lead to slower LCP and higher bandwidth. Consider using "<Emphasis>"<Image />"</Emphasis>" from "<Emphasis>"next/image"</Emphasis>" to automatically optimize images."
             })
-        );
+        )
     }
 }

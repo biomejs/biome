@@ -711,7 +711,7 @@ struct FormatAllArgsBrokenOut<'a> {
     node: &'a JsCallArguments,
 }
 
-impl<'a> Format<JsFormatContext> for FormatAllArgsBrokenOut<'a> {
+impl Format<JsFormatContext> for FormatAllArgsBrokenOut<'_> {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
         let is_inside_import = self.node.parent::<JsImportCallExpression>().is_some();
 

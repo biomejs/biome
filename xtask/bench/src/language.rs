@@ -27,7 +27,7 @@ pub enum Parse<'a> {
     Graphql(&'a str),
 }
 
-impl<'a> Parse<'a> {
+impl Parse<'_> {
     pub fn try_from_case(case: &TestCase) -> Option<Parse> {
         match JsFileSource::try_from(case.path()) {
             Ok(source_type) => Some(Parse::JavaScript(source_type, case.code())),

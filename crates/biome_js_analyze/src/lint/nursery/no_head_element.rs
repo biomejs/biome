@@ -78,12 +78,12 @@ impl Rule for NoHeadElement {
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
-        return Some(RuleDiagnostic::new(
+        Some(RuleDiagnostic::new(
             rule_category!(),
             range,
             markup! { "Don't use "<Emphasis>"<head>"</Emphasis>" element." },
         ).note(markup! {
             "Using the "<Emphasis>"<head>"</Emphasis>" element can cause unexpected behavior in a Next.js application. Use "<Emphasis>"<Head />"</Emphasis>" from "<Emphasis>"next/head"</Emphasis>" instead."
-        }));
+        }))
     }
 }

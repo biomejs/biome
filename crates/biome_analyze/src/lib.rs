@@ -283,7 +283,7 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     suppressions: &'phase mut Suppressions<'analyzer>,
 }
 
-impl<'a, 'phase, L, Matcher, Break, Diag> PhaseRunner<'a, 'phase, L, Matcher, Break, Diag>
+impl<L, Matcher, Break, Diag> PhaseRunner<'_, '_, L, Matcher, Break, Diag>
 where
     L: Language,
     Matcher: QueryMatcher<L>,
@@ -708,7 +708,7 @@ pub fn to_analyzer_suppressions(
     result
 }
 
-impl<'a> AnalyzerSuppression<'a> {
+impl AnalyzerSuppression<'_> {
     pub const fn is_top_level(&self) -> bool {
         matches!(self.variant, AnalyzerSuppressionVariant::TopLevel)
     }
@@ -776,13 +776,13 @@ impl<'a> RuleFilter<'a> {
     }
 }
 
-impl<'a> Debug for RuleFilter<'a> {
+impl Debug for RuleFilter<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         Display::fmt(self, f)
     }
 }
 
-impl<'a> Display for RuleFilter<'a> {
+impl Display for RuleFilter<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             RuleFilter::Group(group) => {
@@ -795,7 +795,7 @@ impl<'a> Display for RuleFilter<'a> {
     }
 }
 
-impl<'a> biome_console::fmt::Display for RuleFilter<'a> {
+impl biome_console::fmt::Display for RuleFilter<'_> {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         match self {
             RuleFilter::Group(group) => {

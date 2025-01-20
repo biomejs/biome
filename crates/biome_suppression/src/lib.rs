@@ -31,7 +31,7 @@ pub struct Suppression<'a> {
     range: TextRange,
 }
 
-impl<'a> Suppression<'a> {
+impl Suppression<'_> {
     pub fn range(&self) -> TextRange {
         self.range
     }
