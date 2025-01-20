@@ -24,7 +24,7 @@ E {
 
 "#;
     let parse = parse_graphql(src);
-    println!("{:#?}", parse);
+    println!("{parse:#?}");
 
     let options = GraphqlFormatOptions::default()
         .with_line_width(LineWidth::try_from(80).unwrap())
