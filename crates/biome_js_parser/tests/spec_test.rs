@@ -176,13 +176,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-export let shim: typeof import("./foo2") = {
-    Bar: Bar2
-};
-
-export interface Foo {
-    bar: import('immutable').Map<string, int>;
-}
+export { type default as CrsMeta } from './crs-meta.js';
     "#;
 
     let root = parse(code, JsFileSource::ts(), JsParserOptions::default());
