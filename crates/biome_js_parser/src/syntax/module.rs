@@ -977,8 +977,8 @@ where
                 metadata.is_type = true;
             }
         } else {
-            // `{ type x }` or `{ type "x" }` or `{ type x as }`
-            metadata.is_type = is_nth_name(p, 1);
+            // `{ type x }` or `{ type "x" }` or `{ type x as }` or `{ type default as }`
+            metadata.is_type = is_nth_name(p, 1) || p.nth_at(1, T![default]);
             metadata.has_alias = p.nth_at(2, T![as]);
         }
     } else if p.at(T![as]) && is_nth_alias(p, 1) {

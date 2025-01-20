@@ -1,6 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/module/export_clause.ts
+snapshot_kind: text
 ---
 # Input
 
@@ -27,6 +28,8 @@ export  declare  class   E {  }
 export  type  *  from  "types";
 
 export  type  *  as  types   from  "types";
+
+export { type default as G } from './types.ts';
 
 ```
 
@@ -76,4 +79,6 @@ export declare class E {}
 export type * from "types";
 
 export type * as types from "types";
+
+export { type default as G } from "./types.ts";
 ```
