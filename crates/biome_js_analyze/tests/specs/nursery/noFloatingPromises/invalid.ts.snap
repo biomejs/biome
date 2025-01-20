@@ -10,6 +10,13 @@ async function returnsPromise(): Promise<string> {
 returnsPromise();
 returnsPromise().then(() => { }).finally(() => { });
 
+
+function returnsPromiseWithoutAsync(): Promise<string> {
+  return Promise.resolve("value")
+}
+
+
+returnsPromiseWithoutAsync()
 ```
 
 # Diagnostics
@@ -51,5 +58,22 @@ invalid.ts:5:1 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━�
   
     5 │ await·returnsPromise().then(()·=>·{·}).finally(()·=>·{·});
       │ ++++++                                                    
+
+```
+
+```
+invalid.ts:13:1 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+  > 13 │ returnsPromiseWithoutAsync()
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Safe fix: Add await operator.
+  
+    13 │ await·returnsPromiseWithoutAsync()
+       │ ++++++                            
 
 ```

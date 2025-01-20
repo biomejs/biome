@@ -3,3 +3,11 @@ async function returnsPromise(): Promise<string> {
 }
 returnsPromise();
 returnsPromise().then(() => { }).finally(() => { });
+
+
+function returnsPromiseWithoutAsync(): Promise<string> {
+  return Promise.resolve("value")
+}
+
+
+returnsPromiseWithoutAsync()
