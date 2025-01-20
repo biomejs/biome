@@ -11,6 +11,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ## Unreleased
 
+- Add RegExpStringIterator to TypeScript globals
 - Fix [#4323](https://github.com/biomejs/biome/issues/4258), where `lint/a11y/useSemanticElement` accidentally showed recommendations for `role="searchbox"` instead of `role="search"`
 
 ### Analyzer
