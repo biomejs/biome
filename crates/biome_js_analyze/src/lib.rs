@@ -875,6 +875,50 @@ let d;
     }
 
     #[test]
+    fn suppression_range_should_report_when_contains_inner_comment() {
+        const SOURCE: &str = "
+// biome-ignore lint/complexity/useArrowFunction: single rule
+const foo0 = function (bar: string) {
+  // biome-ignore lint/style/noParameterAssign: single rule
+  bar = 'baz';
+};";
+
+        let parsed = parse(SOURCE, JsFileSource::ts(), JsParserOptions::default());
+
+        let enabled_rules = vec![
+            RuleFilter::Rule("complexity", "useArrowFunction"),
+            RuleFilter::Rule("style", "noParameterAssign"),
+        ];
+
+        let filter = AnalysisFilter {
+            enabled_rules: Some(enabled_rules.as_slice()),
+            ..AnalysisFilter::default()
+        };
+        let options = AnalyzerOptions::default();
+        let root = parsed.tree();
+        analyze(
+            &root,
+            filter,
+            &options,
+            Vec::new(),
+            JsFileSource::ts(),
+            Default::default(),
+            |signal| {
+                if let Some(diag) = signal.diagnostic() {
+                    let error = diag
+                        .with_file_path("dummyFile")
+                        .with_file_source_code(SOURCE);
+                    let text = print_diagnostic_to_string(&error);
+                    eprintln!("{text}");
+                    panic!("Unexpected diagnostic");
+                }
+
+                ControlFlow::<Never>::Continue(())
+            },
+        );
+    }
+
+    #[test]
     fn unused_range_suppression() {
         const SOURCE: &str = "
 // biome-ignore-all lint/suspicious/noDoubleEquals: single rule

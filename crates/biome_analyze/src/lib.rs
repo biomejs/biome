@@ -2,7 +2,6 @@
 
 use biome_console::markup;
 use biome_parser::AnyParse;
-use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
@@ -448,19 +447,15 @@ where
                     let index =
                         self.suppressions
                             .line_suppressions
-                            .binary_search_by(|suppression| {
-                                if suppression.text_range.end() < entry.text_range.start() {
-                                    Ordering::Less
-                                } else if entry.text_range.end() < suppression.text_range.start() {
-                                    Ordering::Greater
-                                } else {
-                                    Ordering::Equal
-                                }
+                            .partition_point(|suppression| {
+                                suppression.text_range.end() < entry.text_range.start()
                             });
 
-                    index
-                        .ok()
-                        .map(|index| &mut self.suppressions.line_suppressions[index])
+                    if index >= self.suppressions.line_suppressions.len() {
+                        None
+                    } else {
+                        Some(&mut self.suppressions.line_suppressions[index])
+                    }
                 }
             };
 
