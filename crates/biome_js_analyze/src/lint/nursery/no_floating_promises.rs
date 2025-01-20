@@ -6,8 +6,8 @@ use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, AnyJsExpression, AnyJsName, AnyTsReturnType, AnyTsType,
-    JsCallExpression, JsExpressionStatement, JsFileSource, JsFunctionDeclaration,
-    JsStaticMemberExpression, JsSyntaxKind, TsReturnTypeAnnotation,
+    JsCallExpression, JsExpressionStatement, JsFunctionDeclaration, JsStaticMemberExpression,
+    JsSyntaxKind, TsReturnTypeAnnotation,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 
@@ -16,12 +16,12 @@ use crate::{services::semantic::Semantic, JsRuleAction};
 declare_lint_rule! {
     /// Require Promise-like statements to be handled appropriately.
     ///
-    /// "floating" Promise is one that is created without any code set up to handle any errors it might throw.
+    /// A "floating" `Promise` is one that is created without any code set up to handle any errors it might throw.
     /// Floating Promises can lead to several issues, including improperly sequenced operations, unhandled Promise rejections, and other unintended consequences.
     ///
     /// This rule will report Promise-valued statements that are not treated in one of the following ways:
-    /// - Calling its `.then()` with two arguments
-    /// - Calling its `.catch()` with one argument
+    /// - Calling its `.then()` method with two arguments
+    /// - Calling its `.catch()` method with one argument
     /// - `await`ing it
     /// - `return`ing it
     /// - `void`ing it
@@ -82,11 +82,6 @@ impl Rule for NoFloatingPromises {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let source_type = ctx.source_type::<JsFileSource>().language();
-        if !source_type.is_typescript() || source_type.is_definition_file() {
-            return None;
-        }
-
         let node = ctx.query();
         let model = ctx.model();
         let expression = node.expression().ok()?;
@@ -109,10 +104,6 @@ impl Rule for NoFloatingPromises {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
         let node = ctx.query();
         Some(
             RuleDiagnostic::new(
