@@ -113,36 +113,8 @@ pub struct Rule {
 }
 
 impl Rule {
-    pub fn id(&self) -> RuleId {
-        self.id
-    }
-
-    pub fn node(&self) -> &CssSyntaxNode {
-        &self.node
-    }
-
     pub fn range(&self) -> TextRange {
         self.node.text_trimmed_range()
-    }
-
-    pub fn selectors(&self) -> &[Selector] {
-        &self.selectors
-    }
-
-    pub fn declarations(&self) -> &[CssDeclaration] {
-        &self.declarations
-    }
-
-    pub fn parent_id(&self) -> Option<RuleId> {
-        self.parent_id
-    }
-
-    pub fn child_ids(&self) -> &[RuleId] {
-        &self.child_ids
-    }
-
-    pub fn specificity(&self) -> Specificity {
-        self.specificity
     }
 }
 
