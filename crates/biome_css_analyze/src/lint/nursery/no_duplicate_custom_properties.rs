@@ -60,7 +60,7 @@ impl Rule for NoDuplicateCustomProperties {
 
         for declaration in rule.declarations() {
             let prop = declaration.property();
-            let prop_name = prop.text();
+            let prop_name = prop.text().to_string();
             let prop_range = prop.range();
 
             let is_custom_property = prop_name.starts_with("--");

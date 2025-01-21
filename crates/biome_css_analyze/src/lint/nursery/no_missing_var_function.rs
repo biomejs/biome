@@ -166,7 +166,7 @@ impl Rule for NoMissingVarFunction {
         if rule
             .declarations()
             .iter()
-            .any(|decl| decl.property().text() == custom_variable_name)
+            .any(|decl| decl.property().text().to_string() == custom_variable_name)
         {
             return Some(node.clone());
         }
@@ -177,7 +177,7 @@ impl Rule for NoMissingVarFunction {
             if parent_rule
                 .declarations()
                 .iter()
-                .any(|decl| decl.property().text() == custom_variable_name)
+                .any(|decl| decl.property().text().to_string() == custom_variable_name)
             {
                 return Some(node.clone());
             }

@@ -123,7 +123,7 @@ impl SemanticModelBuilder {
                 if let Some(current_rule) = self.current_rule_stack.last_mut() {
                     let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
                     if is_global_var {
-                        let property_name = property.text();
+                        let property_name = property.text().to_string();
                         self.global_custom_variables.insert(
                             property_name,
                             CssGlobalCustomVariable::Root(CssDeclaration {
@@ -153,7 +153,7 @@ impl SemanticModelBuilder {
                 inherits,
                 range,
             } => {
-                let property_name = property.text();
+                let property_name = property.text().to_string();
                 self.global_custom_variables.insert(
                     property_name,
                     CssGlobalCustomVariable::AtProperty {

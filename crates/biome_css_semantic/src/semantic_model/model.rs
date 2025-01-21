@@ -1,7 +1,7 @@
 use std::{collections::BTreeMap, rc::Rc};
 
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
-use biome_rowan::{TextRange, TextSize};
+use biome_rowan::{SyntaxNodeText, TextRange, TextSize};
 use rustc_hash::FxHashMap;
 
 /// The façade for all semantic information of a CSS document.
@@ -165,8 +165,8 @@ impl Selector {
         &self.node
     }
 
-    pub fn text(&self) -> String {
-        self.node.text_trimmed().to_string()
+    pub fn text(&self) -> SyntaxNodeText {
+        self.node.text_trimmed()
     }
 
     pub fn range(&self) -> TextRange {
@@ -268,8 +268,8 @@ impl CssProperty {
         &self.node
     }
 
-    pub fn text(&self) -> String {
-        self.node.text_trimmed().to_string()
+    pub fn text(&self) -> SyntaxNodeText {
+        self.node.text_trimmed()
     }
 
     pub fn range(&self) -> TextRange {
@@ -287,8 +287,8 @@ impl CssValue {
         &self.node
     }
 
-    pub fn text(&self) -> String {
-        self.node.text_trimmed().to_string()
+    pub fn text(&self) -> SyntaxNodeText {
+        self.node.text_trimmed()
     }
 
     pub fn range(&self) -> TextRange {

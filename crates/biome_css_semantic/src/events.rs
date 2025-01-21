@@ -96,13 +96,15 @@ impl SemanticEventExtractor {
                 }
 
                 if let Some(property_name) = node.first_child().and_then(|p| p.first_child()) {
-                    if let Some(value) = property_name.next_sibling() {
+                    if let Some(property_value) = property_name.next_sibling() {
                         self.stash.push_back(SemanticEvent::PropertyDeclaration {
                             node: node.clone(),
                             property: CssProperty {
                                 node: property_name,
                             },
-                            value: CssValue { node: value },
+                            value: CssValue {
+                                node: property_value,
+                            },
                         });
                     }
                 }
