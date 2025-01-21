@@ -57,7 +57,7 @@ impl Rule for NoDuplicateProperties {
         let mut seen: FxHashMap<String, TextRange> = FxHashMap::default();
 
         for declaration in rule.declarations() {
-            let prop = &declaration.property;
+            let prop = declaration.property();
             let prop_name = prop.text();
             let prop_range = prop.range();
 

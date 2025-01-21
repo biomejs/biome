@@ -181,7 +181,7 @@ impl Rule for NoMissingVarFunction {
             {
                 return Some(node.clone());
             }
-            parent_id = parent_rule.parent_id;
+            parent_id = parent_rule.parent_id();
         }
 
         if model

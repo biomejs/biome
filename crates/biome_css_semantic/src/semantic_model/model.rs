@@ -97,19 +97,19 @@ pub(crate) struct SemanticModelData {
 ///
 #[derive(Debug, Clone)]
 pub struct Rule {
-    pub id: RuleId,
-    pub node: CssSyntaxNode,
+    pub(crate) id: RuleId,
+    pub(crate) node: CssSyntaxNode,
     /// The selectors associated with this rule.
-    pub selectors: Vec<Selector>,
+    pub(crate) selectors: Vec<Selector>,
     /// The declarations within this rule.
-    pub declarations: Vec<CssDeclaration>,
+    pub(crate) declarations: Vec<CssDeclaration>,
     /// The id of the parent rule
-    pub parent_id: Option<RuleId>,
+    pub(crate) parent_id: Option<RuleId>,
     /// The ids of the child rules
-    pub child_ids: Vec<RuleId>,
+    pub(crate) child_ids: Vec<RuleId>,
     /// Specificity context of this rule
     /// See https://drafts.csswg.org/selectors-4/#specificity-rules
-    pub specificity: Specificity,
+    pub(crate) specificity: Specificity,
 }
 
 impl Rule {
@@ -155,9 +155,9 @@ impl Rule {
 /// ```
 #[derive(Debug, Clone)]
 pub struct Selector {
-    pub node: CssSyntaxNode,
+    pub(crate) node: CssSyntaxNode,
     /// The specificity of the selector.
-    pub specificity: Specificity,
+    pub(crate) specificity: Specificity,
 }
 
 impl Selector {
@@ -235,9 +235,9 @@ impl std::fmt::Display for Specificity {
 /// ```
 #[derive(Debug, Clone)]
 pub struct CssDeclaration {
-    pub node: CssSyntaxNode,
-    pub property: CssProperty,
-    pub value: CssValue,
+    pub(crate) node: CssSyntaxNode,
+    pub(crate) property: CssProperty,
+    pub(crate) value: CssValue,
 }
 
 impl CssDeclaration {
@@ -260,7 +260,7 @@ impl CssDeclaration {
 
 #[derive(Debug, Clone)]
 pub struct CssProperty {
-    pub node: CssSyntaxNode,
+    pub(crate) node: CssSyntaxNode,
 }
 
 impl CssProperty {
@@ -279,7 +279,7 @@ impl CssProperty {
 
 #[derive(Debug, Clone)]
 pub struct CssValue {
-    pub node: CssSyntaxNode,
+    pub(crate) node: CssSyntaxNode,
 }
 
 impl CssValue {
