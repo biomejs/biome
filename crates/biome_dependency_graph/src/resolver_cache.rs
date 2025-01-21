@@ -434,7 +434,7 @@ impl oxc_resolver::CachedPath for CachedPath {
 
     #[inline]
     #[cfg(windows)]
-    fn normalize_root(&self, cache: &C) -> Self {
+    fn normalize_root<C: Cache<Cp = Self>>(&self, cache: &C) -> Self {
         if self.path().as_os_str().as_encoded_bytes().last() == Some(&b'/') {
             let mut path_string = self.path.to_string_lossy().into_owned();
             path_string.pop();
