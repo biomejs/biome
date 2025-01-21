@@ -21,6 +21,9 @@ pub struct PackageJson {
     pub path: Utf8PathBuf,
 
     /// Realpath to `package.json`. Contains the `package.json` filename.
+    ///
+    /// This is the canonicalized version of [Self::path], where all symbolic
+    /// links are resolved.
     pub realpath: Utf8PathBuf,
 
     /// The "name" field defines your package's name.

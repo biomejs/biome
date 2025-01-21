@@ -1,7 +1,7 @@
 use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
 use biome_rowan::{AstNode, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
-use oxc_resolver::ResolverGeneric;
+use oxc_resolver::{ResolveError, ResolverGeneric};
 
 use crate::{
     dependency_graph::{Import, ModuleImports},
@@ -50,13 +50,14 @@ impl<'a> ImportVisitor<'a> {
             return;
         };
 
-        let import = match self.resolver.resolve(self.directory, specifier.text()) {
-            Ok(resolution) => Import {
-                resolved_path: Utf8PathBuf::from_path_buf(resolution.into_path_buf()).ok(),
-            },
-            Err(_error) => Import {
-                resolved_path: None,
-            },
+        let import = Import {
+            resolved_path: self
+                .resolver
+                .resolve(self.directory, specifier.text())
+                .and_then(|resolution| {
+                    Utf8PathBuf::from_path_buf(resolution.into_path_buf())
+                        .map_err(|path| ResolveError::NotFound(path.to_string_lossy().to_string()))
+                }),
         };
 
         match node {

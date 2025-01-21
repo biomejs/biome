@@ -88,7 +88,9 @@ impl ProjectLayout {
             }
         }
 
-        result.map(|(package_path, package_json)| (package_path.clone(), package_json.clone()))
+        result.map(|(package_path, package_json)| {
+            (package_path.join("package.json"), package_json.clone())
+        })
     }
 
     /// Inserts a `package.json` manifest for the package at the given `path`.

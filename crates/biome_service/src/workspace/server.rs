@@ -33,7 +33,7 @@ use biome_diagnostics::{
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, FileSystem};
 use biome_grit_patterns::{compile_pattern_with_options, CompilePatternOptions, GritQuery};
-use biome_js_syntax::{AnyJsRoot, ModuleKind};
+use biome_js_syntax::ModuleKind;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_package::PackageType;
@@ -224,23 +224,6 @@ impl WorkspaceServer {
             .map(|doc| doc.file_source_index)
             .and_then(|index| self.get_source(index))
             .unwrap_or(DocumentFileSource::from_path(path))
-    }
-
-    fn get_js_syntax(&self, path: &Utf8Path) -> Result<AnyJsRoot, WorkspaceError> {
-        let documents = self.documents.pin();
-        let doc = documents.get(path).ok_or_else(WorkspaceError::not_found)?;
-        let file_source = self.file_sources[doc.file_source_index];
-        match file_source {
-            DocumentFileSource::Js(_) => match &doc.syntax {
-                Ok(parse) => Ok(parse.tree()),
-                Err(error) => Err(WorkspaceError::FileTooLarge(error.clone())),
-            },
-            _ => Err(WorkspaceError::source_file_not_supported(
-                file_source,
-                path.to_string(),
-                path.extension().map(str::to_string),
-            )),
-        }
     }
 
     /// Returns an error factory function for unsupported features at a given
@@ -557,7 +540,15 @@ impl WorkspaceServer {
             &self.project_layout,
             paths,
             &[],
-            |path| self.get_js_syntax(path).ok(),
+            |path| {
+                let documents = self.documents.pin();
+                let doc = documents.get(path)?;
+                let file_source = self.file_sources[doc.file_source_index];
+                match file_source {
+                    DocumentFileSource::Js(_) => doc.syntax.as_ref().map(AnyParse::tree).ok(),
+                    _ => None,
+                }
+            },
         );
     }
 }

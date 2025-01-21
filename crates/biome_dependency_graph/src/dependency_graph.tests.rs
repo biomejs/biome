@@ -1,6 +1,8 @@
-use biome_fs::MemoryFileSystem;
+use biome_deserialize::json::deserialize_from_json_str;
+use biome_fs::{MemoryFileSystem, OsFileSystem};
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::JsFileSource;
+use biome_json_parser::JsonParserOptions;
 use biome_json_value::JsonString;
 use biome_package::{Dependencies, PackageJson, Version};
 
@@ -87,7 +89,7 @@ fn test_resolve_relative_import() {
     assert_eq!(
         file_imports.static_imports.get("./bar.ts"),
         Some(&Import {
-            resolved_path: Some(Utf8PathBuf::from("/src/bar.ts"))
+            resolved_path: Ok(Utf8PathBuf::from("/src/bar.ts"))
         })
     );
 }
@@ -117,7 +119,104 @@ fn test_resolve_package_import() {
     assert_eq!(
         file_imports.static_imports.get("shared"),
         Some(&Import {
-            resolved_path: Some(Utf8PathBuf::from("/node_modules/shared/dist/index.js"))
+            resolved_path: Ok(Utf8PathBuf::from("/node_modules/shared/dist/index.js"))
+        })
+    );
+}
+
+#[test]
+fn test_resolve_package_import_in_monorepo_fixtures() {
+    // Make sure we have an absolute path regardless of working directory:
+    let fixtures_path = {
+        let mut path: Utf8PathBuf = std::env::current_dir().unwrap().try_into().unwrap();
+        while !path.join("Cargo.lock").exists() {
+            path = path
+                .parent()
+                .expect("couldn't find Cargo.lock")
+                .to_path_buf();
+        }
+        path.join("crates/biome_dependency_graph/fixtures")
+    };
+
+    let fs = OsFileSystem::new(fixtures_path.clone());
+
+    let project_layout = ProjectLayout::default();
+    project_layout.insert_node_manifest(format!("{fixtures_path}/frontend").into(), {
+        let path = Utf8PathBuf::from(format!("{fixtures_path}/frontend/package.json"));
+        deserialize_from_json_str::<PackageJson>(
+            &fs.read_file_from_path(&path)
+                .expect("package.json must be readable"),
+            JsonParserOptions::default(),
+            "package.json",
+        )
+        .into_deserialized()
+        .expect("package.json must parse")
+        .with_path(path)
+    });
+
+    project_layout.insert_node_manifest(format!("{fixtures_path}/shared").into(), {
+        let path = Utf8PathBuf::from(format!("{fixtures_path}/shared/package.json"));
+        deserialize_from_json_str::<PackageJson>(
+            &fs.read_file_from_path(&path)
+                .expect("package.json must be readable"),
+            JsonParserOptions::default(),
+            "package.json",
+        )
+        .into_deserialized()
+        .expect("package.json must parse")
+        .with_path(path)
+    });
+
+    project_layout.insert_node_manifest(
+        format!("{fixtures_path}/frontend/node_modules/shared").into(),
+        {
+            let path = Utf8PathBuf::from(format!(
+                "{fixtures_path}/frontend/node_modules/shared/package.json"
+            ));
+            deserialize_from_json_str::<PackageJson>(
+                &fs.read_file_from_path(&path)
+                    .expect("package.json must be readable"),
+                JsonParserOptions::default(),
+                "package.json",
+            )
+            .into_deserialized()
+            .expect("package.json must parse")
+            .with_path(path)
+        },
+    );
+
+    let added_paths = vec![
+        BiomePath::new(format!("{fixtures_path}/frontend/src/index.ts")),
+        BiomePath::new(format!(
+            "{fixtures_path}/frontend/node_modules/shared/dist/index.js"
+        )),
+        BiomePath::new(format!("{fixtures_path}/shared/dist/index.js")),
+    ];
+
+    let dependency_graph = DependencyGraph::default();
+    dependency_graph.update_imports_for_js_paths(&fs, &project_layout, &added_paths, &[], |path| {
+        fs.read_file_from_path(path).ok().and_then(|content| {
+            let parsed =
+                biome_js_parser::parse(&content, JsFileSource::tsx(), JsParserOptions::default());
+            assert!(parsed.diagnostics().is_empty());
+            parsed.try_tree()
+        })
+    });
+
+    let imports = dependency_graph.imports.pin();
+    let file_imports = imports
+        .get(Utf8Path::new(&format!(
+            "{fixtures_path}/frontend/src/index.ts"
+        )))
+        .unwrap();
+
+    assert_eq!(file_imports.static_imports.len(), 2);
+    assert_eq!(
+        file_imports.static_imports.get("shared"),
+        Some(&Import {
+            resolved_path: Ok(Utf8PathBuf::from(format!(
+                "{fixtures_path}/frontend/node_modules/shared/dist/index.js"
+            )))
         })
     );
 }

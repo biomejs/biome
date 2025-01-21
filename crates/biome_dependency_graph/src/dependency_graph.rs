@@ -1,3 +1,10 @@
+//! Dependency graph tracking imports across files.
+//!
+//! This can be used by lint rules for things such as cycle detection, and
+//! detecting broken imports.
+//!
+//! The dependency graph is instantiated and updated inside the Workspace
+//! Server.
 use std::{
     collections::BTreeMap,
     path::{Path, PathBuf},
@@ -8,7 +15,7 @@ use biome_fs::{BiomePath, FileSystem, PathKind};
 use biome_js_syntax::AnyJsRoot;
 use biome_project_layout::ProjectLayout;
 use camino::{Utf8Path, Utf8PathBuf};
-use oxc_resolver::{CachedPath, ResolveOptions, ResolverGeneric};
+use oxc_resolver::{CachedPath, ResolveError, ResolveOptions, ResolverGeneric};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
 
@@ -21,7 +28,14 @@ use crate::{import_visitor::ImportVisitor, resolver_cache::ResolverCache};
 /// invalidate part of the graph when there are file system changes.
 #[derive(Debug, Default)]
 pub struct DependencyGraph {
+    /// Cached imports per file.
     imports: HashMap<Utf8PathBuf, ModuleImports, FxBuildHasher>,
+
+    /// Cache that tracks the presence of files, directories, and symlinks
+    /// across the project.
+    ///
+    /// We use `PathBuf` here instead of `Utf8PathBuf` to avoid conversion of
+    /// paths coming from `oxc_resolver`.
     path_info: HashMap<PathBuf, Option<PathKind>>,
 }
 
@@ -52,7 +66,7 @@ pub struct ModuleImports {
     pub dynamic_imports: BTreeMap<String, Import>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Import {
     /// Absolute path of the resource being imported, if it can be resolved.
     ///
@@ -60,7 +74,7 @@ pub struct Import {
     /// point towards the resolved entry point of the package.
     ///
     /// If `None`, import resolution failed.
-    pub resolved_path: Option<Utf8PathBuf>,
+    pub resolved_path: Result<Utf8PathBuf, ResolveError>,
 }
 
 impl DependencyGraph {
@@ -68,11 +82,24 @@ impl DependencyGraph {
         self.imports.pin().get(path).cloned()
     }
 
+    /// Updates the dependency graph to add, update, or remove files.
+    ///
+    /// Only JavaScript/TypeScript files need to be provided as part of
+    /// `added_or_updated_paths` and `removed_paths`. Manifests are expected to
+    /// be resolved through the `project_layout`. As such, the `project_layout`
+    /// must have been updated before calling this method.
+    ///
+    /// `get_js_syntax_for_path` is a callback that may be called for any of the
+    /// files given in `added_or_updated_paths`, and it should return the syntax
+    /// root for each of them. If a file is already removed, or is inaccessible,
+    /// by the time `get_js_syntax_for_path` is called for it, `None` must be
+    /// returned. Error reporting, if necessary, should be handled by the
+    /// workspace server instead.
     pub fn update_imports_for_js_paths(
         &self,
         fs: &dyn FileSystem,
         project_layout: &ProjectLayout,
-        added_paths: &[BiomePath],
+        added_or_updated_paths: &[BiomePath],
         removed_paths: &[BiomePath],
         get_js_syntax_for_path: impl Fn(&Utf8Path) -> Option<AnyJsRoot>,
     ) {
@@ -80,7 +107,7 @@ impl DependencyGraph {
             fs,
             project_layout,
             self,
-            added_paths,
+            added_or_updated_paths,
             removed_paths,
         ));
         let resolver = ResolverGeneric::new_with_cache(
@@ -88,8 +115,25 @@ impl DependencyGraph {
             ResolveOptions::default().with_symbolic_link(false),
         );
 
+        // Make sure all directories are registered for the added/updated paths.
+        let path_info = self.path_info.pin();
+        for path in added_or_updated_paths {
+            let mut parent = path.parent();
+            while let Some(path) = parent {
+                if path_info
+                    .try_insert_with(path.as_std_path().to_path_buf(), || fs.path_kind(path).ok())
+                    .is_err()
+                {
+                    break;
+                };
+                parent = path.parent();
+            }
+        }
+
+        // Traverse all the added and updated paths and insert their resolved
+        // imports.
         let imports = self.imports.pin();
-        for path in added_paths {
+        for path in added_or_updated_paths {
             let Some(root) = get_js_syntax_for_path(path) else {
                 continue;
             };
@@ -103,12 +147,13 @@ impl DependencyGraph {
         // Update our `path_info` cache so that future usages of the
         // `ResolverCache` get cache hits through [Self::path_kind()].
         let paths = resolver_cache.paths();
-        let path_info = self.path_info.pin();
         for path in paths.pin().iter() {
             path_info.insert(path.to_path_buf(), path.kind());
         }
 
+        // Clean up removed paths.
         for removed_path in removed_paths {
+            imports.remove(removed_path.as_path());
             path_info.remove(removed_path.as_std_path());
         }
     }

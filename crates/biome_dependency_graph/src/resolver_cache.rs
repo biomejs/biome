@@ -119,7 +119,8 @@ impl Cache for ResolverCache<'_> {
         options: &ResolveOptions,
         ctx: &mut Ctx,
     ) -> Result<Option<(Self::Cp, Arc<PackageJson>)>, ResolveError> {
-        // Change to `std::sync::OnceLock::get_or_try_init` when it is stable.
+        // TODO: Change to `std::sync::OnceLock::get_or_try_init` when it is stable.
+        //       See: https://github.com/rust-lang/rust/issues/109737
         let result = path
             .package_json
             .get_or_try_init(|| {
@@ -132,12 +133,9 @@ impl Cache for ResolverCache<'_> {
                     return Ok(None);
                 };
                 package_json.realpath = if options.symlinks {
-                    self.canonicalize(path)?
-                        .join("package.json")
-                        .try_into()
-                        .map_err(|_| {
-                            ResolveError::NotFound("Non UTF-8 character in path".to_string())
-                        })?
+                    self.canonicalize(path)?.try_into().map_err(|_| {
+                        ResolveError::NotFound("Non UTF-8 character in path".to_string())
+                    })?
                 } else {
                     package_json_path
                 };

@@ -19,8 +19,12 @@ biome_deserialize_macros = { workspace = true }
 biome_json_syntax        = { workspace = true }
 biome_rowan              = { workspace = true }
 indexmap                 = { workspace = true }
-oxc_resolver             = { workspace = true }
+oxc_resolver             = { workspace = true, optional = true }
 rustc-hash               = { workspace = true }
+static_assertions        = "1.1.0"
+
+[features]
+oxc_resolver = ["dep:oxc_resolver"]
 
 [dev-dependencies]
 biome_json_parser = { workspace = true }

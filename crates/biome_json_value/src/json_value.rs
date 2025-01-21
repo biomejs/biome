@@ -1,3 +1,19 @@
+//! JSON value types based on `biome_json_syntax`.
+//!
+//! Compared to the CST types defined in `biome_json_syntax`, these have the
+//! following characteristics:
+//!
+//! - Values can be constructed from [`biome_json_syntax::AnyJsonValue`] with
+//!   few allocations. The only types that require allocation are arrays and
+//!   objects, as well as strings that contain escape sequences.
+//! - Objects, strings, and arrays can be mutated.
+//! - String values have escape sequences processed, so that their values
+//!   correspond to runtime values and not just lexical values.
+//! - [`oxc_resolver::ImportsExportsEntry`], [`oxc_resolver::ImportsExportsArray`],
+//!   and [`oxc_resolver::ImportsExportsMap`] are implemented for [`JsonValue`],
+//!   [`JsonArray`] and [`JsonObject`], respectively. This functionality can be
+//!   enabled through the `oxc_resolver` feature flag.
+//! - They are both [`Send`] and [`Sync`], so they can be shared across threads.
 use std::{
     borrow::Borrow,
     cmp::Ordering,
@@ -12,23 +28,11 @@ use biome_deserialize_macros::Deserializable;
 use biome_json_syntax::{AnyJsonValue, JsonArrayValue, JsonObjectValue, JsonStringValue};
 use biome_rowan::TokenText;
 use indexmap::IndexMap;
-use oxc_resolver::{
-    ImportsExportsArray, ImportsExportsEntry, ImportsExportsKind, ImportsExportsMap,
-};
 use rustc_hash::FxBuildHasher;
 
-/// JSON value based on types from `biome_json_syntax`, but with the following
-/// additional characteristics:
+/// JSON value based on types from `biome_json_syntax`.
 ///
-/// - Values can be constructed from [`biome_json_syntax::AnyJsonValue`] with
-///   few allocations. The only types that require allocation are arrays and
-///   objects, as well as strings that contain escape sequences.
-/// - Objects, strings, and arrays can be mutated.
-/// - String values have escape sequences processed, so that their values
-///   correspond to runtime values and not just lexical values.
-/// - [`oxc_resolver::ImportsExportsEntry`], [`oxc_resolver::ImportsExportsArray`],
-///   and [`oxc_resolver::ImportsExportsMap`] are implemented for `JsonValue`,
-///   [`JsonArray`] and [`JsonObject`], respectively.
+/// See the [module-level documentation](self) for more info.
 #[derive(Clone, Debug, PartialEq)]
 pub enum JsonValue {
     Array(JsonArray),
@@ -40,48 +44,50 @@ pub enum JsonValue {
     Bogus,
 }
 
+static_assertions::assert_impl_all!(JsonValue: Send, Sync);
+
 impl JsonValue {
-    pub fn as_array(&self) -> Option<&JsonArray> {
+    pub const fn as_array(&self) -> Option<&JsonArray> {
         match self {
             Self::Array(array) => Some(array),
             _ => None,
         }
     }
 
-    pub fn as_bool(&self) -> Option<bool> {
+    pub const fn as_bool(&self) -> Option<bool> {
         match self {
             Self::Bool(bool) => Some(*bool),
             _ => None,
         }
     }
 
-    pub fn as_number(&self) -> Option<f64> {
+    pub const fn as_number(&self) -> Option<f64> {
         match self {
             Self::Number(number) => Some(*number),
             _ => None,
         }
     }
 
-    pub fn as_object(&self) -> Option<&JsonObject> {
+    pub const fn as_object(&self) -> Option<&JsonObject> {
         match self {
             Self::Object(object) => Some(object),
             _ => None,
         }
     }
 
-    pub fn as_string(&self) -> Option<&JsonString> {
+    pub const fn as_string(&self) -> Option<&JsonString> {
         match self {
             Self::String(string) => Some(string),
             _ => None,
         }
     }
 
-    pub fn is_bogus(&self) -> bool {
-        self == &Self::Bogus
+    pub const fn is_bogus(&self) -> bool {
+        matches!(self, Self::Bogus)
     }
 
-    pub fn is_null(&self) -> bool {
-        self == &Self::Null
+    pub const fn is_null(&self) -> bool {
+        matches!(self, Self::Null)
     }
 }
 
@@ -143,16 +149,17 @@ impl From<JsonString> for JsonValue {
     }
 }
 
-impl<'a> ImportsExportsEntry<'a> for &'a JsonValue {
+#[cfg(feature = "oxc_resolver")]
+impl<'a> oxc_resolver::ImportsExportsEntry<'a> for &'a JsonValue {
     type Array = &'a JsonArray;
     type Map = &'a JsonObject;
 
-    fn kind(&self) -> ImportsExportsKind {
+    fn kind(&self) -> oxc_resolver::ImportsExportsKind {
         match self {
-            JsonValue::Array(_) => ImportsExportsKind::Array,
-            JsonValue::Object(_) => ImportsExportsKind::Map,
-            JsonValue::String(_) => ImportsExportsKind::String,
-            _ => ImportsExportsKind::Invalid,
+            JsonValue::Array(_) => oxc_resolver::ImportsExportsKind::Array,
+            JsonValue::Object(_) => oxc_resolver::ImportsExportsKind::Map,
+            JsonValue::String(_) => oxc_resolver::ImportsExportsKind::String,
+            _ => oxc_resolver::ImportsExportsKind::Invalid,
         }
     }
 
@@ -179,6 +186,8 @@ impl<'a> ImportsExportsEntry<'a> for &'a JsonValue {
 }
 
 /// JSON array to be used with [JsonValue].
+///
+/// See the [module-level documentation](self) for more info.
 #[derive(Clone, Debug, Default, Deserializable, PartialEq)]
 pub struct JsonArray(Vec<JsonValue>);
 
@@ -210,7 +219,8 @@ impl From<JsonArrayValue> for JsonArray {
     }
 }
 
-impl<'a> ImportsExportsArray<'a> for &'a JsonArray {
+#[cfg(feature = "oxc_resolver")]
+impl<'a> oxc_resolver::ImportsExportsArray<'a> for &'a JsonArray {
     type Entry = &'a JsonValue;
 
     fn len(&self) -> usize {
@@ -223,6 +233,8 @@ impl<'a> ImportsExportsArray<'a> for &'a JsonArray {
 }
 
 /// JSON object to be used with [JsonValue].
+///
+/// See the [module-level documentation](self) for more info.
 #[derive(Clone, Debug, Default, Deserializable, PartialEq)]
 pub struct JsonObject(IndexMap<JsonString, JsonValue, FxBuildHasher>);
 
@@ -264,7 +276,8 @@ impl From<JsonObjectValue> for JsonObject {
     }
 }
 
-impl<'a> ImportsExportsMap<'a> for &'a JsonObject {
+#[cfg(feature = "oxc_resolver")]
+impl<'a> oxc_resolver::ImportsExportsMap<'a> for &'a JsonObject {
     type Entry = &'a JsonValue;
 
     fn get(&self, key: &str) -> Option<Self::Entry> {
@@ -285,6 +298,8 @@ impl<'a> ImportsExportsMap<'a> for &'a JsonObject {
 /// This type can be constructed from [TokenText], in which case it will process
 /// any embedded escape sequences. Allocation is only required if escape
 /// sequences are present.
+///
+/// See the [module-level documentation](self) for more info.
 #[derive(Clone, Debug, Default, Deserializable, Eq, Hash, PartialEq)]
 pub struct JsonString(Text);
 
