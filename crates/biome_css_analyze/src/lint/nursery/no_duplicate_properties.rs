@@ -54,7 +54,7 @@ impl Rule for NoDuplicateProperties {
 
         let rule = model.get_rule_by_range(node.range())?;
 
-        let mut seen: FxHashMap<String, TextRange> = FxHashMap::default();
+        let mut seen: FxHashMap<Box<str>, TextRange> = FxHashMap::default();
 
         for declaration in rule.declarations() {
             let prop = declaration.property();
@@ -67,12 +67,12 @@ impl Rule for NoDuplicateProperties {
                 continue;
             }
 
-            match seen.entry(prop_name.clone()) {
+            match seen.entry(prop_name.clone().into()) {
                 Entry::Occupied(entry) => {
                     return Some((*entry.get(), (prop_range, prop_name.to_string())));
                 }
-                Entry::Vacant(_) => {
-                    seen.insert(prop_name, prop_range);
+                Entry::Vacant(entry) => {
+                    entry.insert(prop_range);
                 }
             }
         }
