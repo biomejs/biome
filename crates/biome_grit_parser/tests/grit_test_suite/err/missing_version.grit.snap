@@ -16,7 +16,9 @@ GritRoot {
     version: GritBogusVersion {
         items: [
             ENGINE_KW@0..7 "engine" [] [Whitespace(" ")],
-            BIOME_KW@7..12 "biome" [] [],
+            GritEngineName {
+                engine_kind: BIOME_KW@7..12 "biome" [] [],
+            },
         ],
     },
     language: missing (optional),
@@ -32,7 +34,8 @@ GritRoot {
   0: (empty)
   1: GRIT_BOGUS_VERSION@0..12
     0: ENGINE_KW@0..7 "engine" [] [Whitespace(" ")]
-    1: BIOME_KW@7..12 "biome" [] []
+    1: GRIT_ENGINE_NAME@7..12
+      0: BIOME_KW@7..12 "biome" [] []
   2: (empty)
   3: GRIT_DEFINITION_LIST@12..12
   4: EOF@12..13 "" [Newline("\n")] []
