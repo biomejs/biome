@@ -1,6 +1,6 @@
 use crate::cursor::{SyntaxNode, SyntaxToken};
 use crate::green::{GreenElement, GreenElementRef};
-use crate::{NodeOrToken, RawSyntaxKind, TokenAtOffset};
+use crate::{NodeOrToken, RawSyntaxKind};
 use biome_text_size::{TextRange, TextSize};
 use std::iter;
 
@@ -83,14 +83,6 @@ impl SyntaxElement {
         match self {
             NodeOrToken::Node(it) => it.prev_sibling_or_token(),
             NodeOrToken::Token(it) => it.prev_sibling_or_token(),
-        }
-    }
-
-    pub(super) fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset<SyntaxToken> {
-        assert!(self.text_range().start() <= offset && offset <= self.text_range().end());
-        match self {
-            NodeOrToken::Token(token) => TokenAtOffset::Single(token.clone()),
-            NodeOrToken::Node(node) => node.token_at_offset(offset),
         }
     }
 

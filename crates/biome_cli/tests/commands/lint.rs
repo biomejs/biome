@@ -4005,3 +4005,45 @@ fn linter_finds_nested_package_json_for_no_undeclared_dependencies_inversed() {
         result,
     ));
 }
+
+#[test]
+fn linter_doesnt_crash_on_malformed_code_from_issue_4623() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "linter": {
+        "rules": {
+            "recommended": false,
+            "suspicious": {
+                "noCommentText": "on"
+            }
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8PathBuf::from("issue4623.js"),
+        r#"<b
+ //
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "issue4623.js"].as_slice()),
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_doesnt_crash_on_malformed_code_from_issue_4623",
+        fs,
+        console,
+        result,
+    ));
+}
