@@ -5,6 +5,7 @@ pub(crate) mod container;
 pub(crate) mod definition;
 pub(crate) mod language_declaration;
 pub(crate) mod language_flavor_kind;
+pub(crate) mod language_name;
 pub(crate) mod list_accessor_subject;
 pub(crate) mod list_index;
 pub(crate) mod list_pattern;

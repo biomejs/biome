@@ -238,7 +238,7 @@ impl AriaRoles {
 
     /// Given an element name and attributes, it returns the role associated with that element.
     /// If no explicit role attribute is present, an implicit role is returned.
-    fn get_role_by_element_name(&self, element: &impl Element) -> Option<AriaRole> {
+    pub fn get_role_by_element_name(&self, element: &impl Element) -> Option<AriaRole> {
         element
             .find_attribute_by_name(|name| name == "role")
             .as_ref()

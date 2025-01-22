@@ -210,6 +210,7 @@ impl ServiceLanguage for CssLanguage {
                     })
             })
             .unwrap_or_default();
+        let preferred_jsx_quote = Default::default();
 
         let configuration = AnalyzerConfiguration::default()
             .with_rules(
@@ -217,7 +218,8 @@ impl ServiceLanguage for CssLanguage {
                     .map(|g| to_analyzer_rules(g, file_path.as_path()))
                     .unwrap_or_default(),
             )
-            .with_preferred_quote(preferred_quote);
+            .with_preferred_quote(preferred_quote)
+            .with_preferred_jsx_quote(preferred_jsx_quote);
 
         AnalyzerOptions::default()
             .with_file_path(file_path.as_path())

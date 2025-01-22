@@ -77,12 +77,12 @@ impl SuppressionAction for CssSuppressionAction {
             new_token = new_token.with_trailing_trivia([
                 (
                     TriviaPieceKind::SingleLineComment,
-                    format!("/* {}: {} */", suppression_text, suppression_reason).as_str(),
+                    format!("/* {suppression_text}: {suppression_reason} */").as_str(),
                 ),
                 (TriviaPieceKind::Newline, "\n"),
             ]);
         } else if has_leading_whitespace {
-            let suppression_comment = format!("/* {}: {} */", suppression_text, suppression_reason);
+            let suppression_comment = format!("/* {suppression_text}: {suppression_reason} */");
             let mut trivia = vec![
                 (
                     TriviaPieceKind::SingleLineComment,
@@ -104,7 +104,7 @@ impl SuppressionAction for CssSuppressionAction {
             new_token = new_token.with_leading_trivia([
                 (
                     TriviaPieceKind::SingleLineComment,
-                    format!("/* {}: {} */", suppression_text, suppression_reason).as_str(),
+                    format!("/* {suppression_text}: {suppression_reason} */").as_str(),
                 ),
                 (TriviaPieceKind::Newline, "\n"),
             ]);

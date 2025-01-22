@@ -225,6 +225,14 @@ impl GritDoubleLiteral {
         )
     }
 }
+impl GritEngineName {
+    pub fn with_engine_kind_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl GritEvery {
     pub fn with_every_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -318,7 +326,7 @@ impl GritLanguageDeclaration {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: GritLanguageName) -> Self {
+    pub fn with_name(self, element: AnyGritLanguageName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -374,7 +382,7 @@ impl GritLanguageName {
     }
 }
 impl GritLanguageSpecificSnippet {
-    pub fn with_language(self, element: GritLanguageName) -> Self {
+    pub fn with_language(self, element: AnyGritLanguageName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -1748,10 +1756,10 @@ impl GritVersion {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_biome_token(self, element: SyntaxToken) -> Self {
+    pub fn with_engine_name(self, element: GritEngineName) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {

@@ -15,6 +15,7 @@ pub mod no_head_import_in_document;
 pub mod no_img_element;
 pub mod no_irregular_whitespace;
 pub mod no_nested_ternary;
+pub mod no_noninteractive_element_interactions;
 pub mod no_octal_escape;
 pub mod no_package_private_imports;
 pub mod no_process_env;
@@ -65,6 +66,7 @@ declare_lint_group! {
             self :: no_img_element :: NoImgElement ,
             self :: no_irregular_whitespace :: NoIrregularWhitespace ,
             self :: no_nested_ternary :: NoNestedTernary ,
+            self :: no_noninteractive_element_interactions :: NoNoninteractiveElementInteractions ,
             self :: no_octal_escape :: NoOctalEscape ,
             self :: no_package_private_imports :: NoPackagePrivateImports ,
             self :: no_process_env :: NoProcessEnv ,

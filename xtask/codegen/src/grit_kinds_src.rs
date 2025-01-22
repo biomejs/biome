@@ -40,8 +40,10 @@ pub const GRIT_KINDS_SRC: KindsSrc = KindsSrc {
         "sequential",
         "multifile",
         "engine",
-        "biome",
         "language",
+        // engine names:
+        "biome",
+        "marzano",
         // languages:
         "js",
         "css",
@@ -117,6 +119,7 @@ pub const GRIT_KINDS_SRC: KindsSrc = KindsSrc {
         "GRIT_FILES",
         "GRIT_DEFINITION_LIST",
         "GRIT_VERSION",
+        "GRIT_ENGINE_NAME",
         "GRIT_LANGUAGE_DECLARATION",
         "GRIT_LANGUAGE_FLAVOR",
         "GRIT_LANGUAGE_FLAVOR_LIST",
@@ -217,6 +220,7 @@ pub const GRIT_KINDS_SRC: KindsSrc = KindsSrc {
         "GRIT_BOGUS_MAP_ELEMENT",
         "GRIT_BOGUS_LANGUAGE_DECLARATION",
         "GRIT_BOGUS_LANGUAGE_FLAVOR_KIND",
+        "GRIT_BOGUS_LANGUAGE_NAME",
         "GRIT_BOGUS_LITERAL",
         "GRIT_BOGUS_NAMED_ARG",
         "GRIT_BOGUS_PATTERN",

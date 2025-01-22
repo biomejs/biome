@@ -1511,6 +1511,10 @@ export interface Nursery {
 	 */
 	noNestedTernary?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow use event handlers on non-interactive elements.
+	 */
+	noNoninteractiveElementInteractions?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow octal escape sequences in string literals
 	 */
 	noOctalEscape?: RuleConfiguration_for_Null;
@@ -3280,6 +3284,7 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noNestedTernary"
+	| "lint/nursery/noNoninteractiveElementInteractions"
 	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noPackagePrivateImports"
 	| "lint/nursery/noProcessEnv"

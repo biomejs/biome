@@ -158,7 +158,7 @@ Leads may create a roadmap document to share with the community once the core co
 
 Roadmaps don't provide dates or deadlines; they only reflect what the core contributors decide to work on and how to spend the resources.
 
-The span of a roadmap should cover six months, but it might vary.
+The span of a roadmap should cover one year, but it might vary.
 
 ## Code review
 
@@ -176,7 +176,9 @@ We have a reasonably liberal approach to code review and merging. We value quick
 
 ## Financial Contributions
 
-There are two ways to fund Biome and its development: sponsorship and funded bounties, although we strongly prefer and recommend sponsorship.
+There are three ways to fund Biome and its development: sponsorship, funded bounties, and paid
+contracts. We strongly prefer and recommend sponsorship, but are willing to facilitate both bounties
+and contracting under some conditions.
 
 ### Sponsorship
 
@@ -224,6 +226,39 @@ Additionally, there is a strict process for assigning Project-Funded Bounties:
   - The waiting period is optional if a Lead approves the request.
   - If an objection is raised, the request is put on hold until a Lead makes the final decision.
 - There is a maximum amount of issues with pledges someone can have assigned to them. The limit is 2 for core contributors, and 1 for anyone else. By limiting the amount of issues with pledges that someone can have assigned, we make sure the bounties remain available for others to pick up.
+
+### Paid Contracting
+
+Core Contributors may enter freelance contracts with clients to work on Biome. Such contracts are
+between the contributor and their client, so they fall mostly outside the responsibility of the
+Biome project. Nevertheless, we can explicitly endorse such contracts under the following
+conditions:
+
+- Core Contributors that are open to contracts may be advertised on the project website if they
+  please.
+- Clients that hire a Core Contributor to work on Biome for an extended period (3 months or more)
+  are eligible to the same benefits as a project sponsor. Their sponsorship benefits will be based
+  on the monthly fee paid to the Core Contributor.
+- If the work that is expected to be delivered does not contribute to Biome's last-published
+  roadmap, Biome asks for a 30% fee over the total gross amount, excluding VAT, earned through the
+  contract. This is to cover review, project upkeep and continued maintenance of the functionality
+  after merging.
+  - For work that directly benefits the Biome roadmap, no such fee is required. For work that partly
+    or indirectly benefits the roadmap, a customized fee may be negotiated.
+  - If the last-published roadmap is more than 12 months old, the Core Contributor is asked to
+    consult with the Core team about alignment with the project goals.
+  - Fee negotiation may happen either publically in the `Community > #funding` channel, or privately
+    in the `Core > #core-team` channel.
+  - Custom fees require the approval of at least one Lead.
+- The work may not conflict with the project direction or
+  [its values](https://biomejs.dev/internals/philosophy/).
+- When a Core Contributor starts or ends a paid contract, it should be announced in the
+  `Core > #core-team` channel.
+- Biome and its members cannot be held responsible for the performance of any individual
+  contributor. We may help clients who are interested in hiring a Biome contributor for a contract
+  to get in contact with them, but we cannot guarantee their performance. It is the client's
+  responsibility to do due diligence and determine whether the contributor is suitable for the
+  assigned contract.
 
 ### Fund Allocation
 

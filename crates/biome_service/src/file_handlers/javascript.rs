@@ -273,6 +273,19 @@ impl ServiceLanguage for JsLanguage {
                     )
                 })
                 .unwrap_or_default();
+        let preferred_jsx_quote = global
+            .and_then(|global| {
+                global.languages.javascript.formatter.jsx_quote_style.map(
+                    |quote_style: QuoteStyle| {
+                        if quote_style == QuoteStyle::Single {
+                            PreferredQuote::Single
+                        } else {
+                            PreferredQuote::Double
+                        }
+                    },
+                )
+            })
+            .unwrap_or_default();
 
         let mut configuration = AnalyzerConfiguration::default();
         let mut globals = Vec::new();
@@ -345,7 +358,8 @@ impl ServiceLanguage for JsLanguage {
                     .unwrap_or_default(),
             )
             .with_globals(globals)
-            .with_preferred_quote(preferred_quote);
+            .with_preferred_quote(preferred_quote)
+            .with_preferred_jsx_quote(preferred_jsx_quote);
 
         AnalyzerOptions::default()
             .with_file_path(path.as_path())

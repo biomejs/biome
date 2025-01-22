@@ -152,6 +152,9 @@ impl AnyJsxOpeningElement {
     fn compute_layout(&self, comments: &JsComments) -> SyntaxResult<OpeningElementLayout> {
         let attributes = self.attributes();
         let name = self.name()?;
+        let last_attribute_has_comments = self.attributes().last().map_or(false, |attribute| {
+            comments.has_trailing_comments(attribute.syntax())
+        });
 
         let name_has_comments = comments.has_comments(name.syntax())
             || self
@@ -171,7 +174,7 @@ impl AnyJsxOpeningElement {
         } else {
             OpeningElementLayout::IndentAttributes {
                 name_has_comments,
-                last_attribute_has_comments: has_last_attribute_comments(self, comments),
+                last_attribute_has_comments,
             }
         };
 

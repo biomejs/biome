@@ -6,6 +6,7 @@ pub(crate) mod bogus_container;
 pub(crate) mod bogus_definition;
 pub(crate) mod bogus_language_declaration;
 pub(crate) mod bogus_language_flavor_kind;
+pub(crate) mod bogus_language_name;
 pub(crate) mod bogus_literal;
 pub(crate) mod bogus_map_element;
 pub(crate) mod bogus_named_arg;

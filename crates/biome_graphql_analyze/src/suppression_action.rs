@@ -71,7 +71,7 @@ impl SuppressionAction for GraphqlSuppressionAction {
             .filter(|trivia| trivia.is_whitespace())
             .collect();
 
-        let suppression_comment = format!("# {}: {}", suppression_text, suppression_reason);
+        let suppression_comment = format!("# {suppression_text}: {suppression_reason}");
         let suppression_comment = suppression_comment.as_str();
         let trivia = [
             (TriviaPieceKind::SingleLineComment, suppression_comment),

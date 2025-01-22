@@ -528,7 +528,6 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Carson McManus @dyc3](https://github.com/dyc3)
 - [Denis Bezrukov @denbezrukov](https://github.com/denbezrukov)
 - [Hiroki Ihoriya @unvalley](https://github.com/unvalley)
-- [Jon Egeland @faultyserver](https://github.com/faultyserver)
 - [Nicolas Hedger @nhedger](https://github.com/nhedger)
 - [Ze-Zheng Wu @Sec-ant](https://github.com/Sec-ant)
 
@@ -548,7 +547,6 @@ Members are listed in alphabetical order. Members are free to use the full name,
 ### Past Maintainers
 
 - [Daiki Nishikawa @nissy-dev](https://github.com/nissy-dev) (Core contributor)
+- [Jon Egeland @faultyserver](https://github.com/faultyserver)
 - [Takayuki Maeda @TaKO8Ki](https://github.com/TaKO8Ki) (Maintainer)
 - [Victor Teles @victor-teles](https://github.com/victor-teles) (Maintainer)
-
-

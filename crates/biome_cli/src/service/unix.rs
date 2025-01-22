@@ -74,7 +74,7 @@ fn spawn_daemon(
     }
 
     if let Some(log_file_name_prefix) = log_file_name_prefix {
-        cmd.arg(format!("--log-prefix-name={}", log_file_name_prefix));
+        cmd.arg(format!("--log-prefix-name={log_file_name_prefix}"));
     }
 
     // Create a new session for the process and make it the leader, this will

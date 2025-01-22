@@ -65,6 +65,9 @@ pub struct AnalyzerConfiguration {
     /// Allows to choose a different quote when applying fixes inside the lint rules
     preferred_quote: PreferredQuote,
 
+    /// Allows to choose a different JSX quote when applying fixes inside the lint rules
+    pub preferred_jsx_quote: PreferredQuote,
+
     /// Indicates the type of runtime or transformation used for interpreting JSX.
     jsx_runtime: Option<JsxRuntime>,
 }
@@ -157,6 +160,10 @@ impl AnalyzerOptions {
 
     pub fn preferred_quote(&self) -> &PreferredQuote {
         &self.configuration.preferred_quote
+    }
+
+    pub fn preferred_jsx_quote(&self) -> &PreferredQuote {
+        &self.configuration.preferred_jsx_quote
     }
 }
 

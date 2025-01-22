@@ -360,10 +360,7 @@ impl<'token> LiteralStringNormaliser<'token> {
             Cow::Borrowed(original)
         } else {
             Cow::Owned(std::format!(
-                "{}{}{}",
-                preferred_quote,
-                content_to_use,
-                preferred_quote,
+                "{preferred_quote}{content_to_use}{preferred_quote}",
             ))
         }
     }

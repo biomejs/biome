@@ -229,10 +229,10 @@ impl ErrorType {
                 };
                 let (method, old_method) = match (arg_type, extract_type) {
                     (SliceArgType::OneArg, SliceExtractType::Pop) => {
-                        ("X.at(-1)", format!("X.slice(-a){}", extract_string))
+                        ("X.at(-1)", format!("X.slice(-a){extract_string}"))
                     }
                     (SliceArgType::TwoArg, SliceExtractType::Pop) => {
-                        ("X.at(Y - 1)", format!("X.slice(a, Y){}", extract_string))
+                        ("X.at(Y - 1)", format!("X.slice(a, Y){extract_string}"))
                     }
                     _ => (
                         "X.at(Y)",
