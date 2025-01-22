@@ -137,10 +137,6 @@ impl DeserializableValue for AnyJsonValue {
             AnyJsonValue::JsonStringValue(_) => Some(DeserializableType::Str),
         }
     }
-
-    fn into_json_value(self) -> Option<AnyJsonValue> {
-        Some(self)
-    }
 }
 
 #[cfg(feature = "serde")]
@@ -256,10 +252,6 @@ impl DeserializableValue for JsonMemberName {
 
     fn visitable_type(&self) -> Option<DeserializableType> {
         Some(DeserializableType::Str)
-    }
-
-    fn into_json_value(self) -> Option<AnyJsonValue> {
-        None
     }
 }
 

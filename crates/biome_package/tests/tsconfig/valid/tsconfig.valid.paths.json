@@ -1,9 +1,11 @@
 {
-  "baseUrl": "src",
-  "paths": {
-    "@/services": [
-      "services",
-      "vendor/services"
-    ]
-  }
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@/services": [
+        "services",
+        "vendor/services"
+      ]
+    }
+  },
 }

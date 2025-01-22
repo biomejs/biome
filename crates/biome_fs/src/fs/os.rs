@@ -86,6 +86,18 @@ impl FileSystem for OsFileSystem {
         path.exists()
     }
 
+    fn path_is_file(&self, path: &Utf8Path) -> bool {
+        path.is_file()
+    }
+
+    fn path_is_dir(&self, path: &Utf8Path) -> bool {
+        path.is_dir()
+    }
+
+    fn path_is_symlink(&self, path: &Utf8Path) -> bool {
+        path.is_symlink()
+    }
+
     fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {
         match path.metadata() {
             Ok(metadata) => {

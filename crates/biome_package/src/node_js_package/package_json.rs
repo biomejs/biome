@@ -383,8 +383,8 @@ impl DeserializationVisitor for PackageJsonVisitor {
                     result.r#type = Deserializable::deserialize(ctx, &value, &key_text);
                 }
                 key => {
-                    if let Some(value) = value.into_json_value() {
-                        result.raw_json.insert(key.into(), value.into());
+                    if let Some(value) = JsonValue::deserialize(ctx, &value, &key_text) {
+                        result.raw_json.insert(key.into(), value);
                     }
                 }
             }
@@ -410,7 +410,9 @@ impl Deserializable for Version {
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, biome_deserialize_macros::Deserializable)]
 pub enum PackageType {
     #[default]
+    #[deserializable(rename = "module")]
     Module,
+    #[deserializable(rename = "commonjs")]
     CommonJs,
 }
 

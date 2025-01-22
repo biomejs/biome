@@ -5,14 +5,24 @@ expression: tsconfig.valid.baseUrl.json
 ## Input
 
 {
-  "baseUrl": "src"
+  "compilerOptions": {
+    "baseUrl": "src"
+  },
 }
+
 
 ## Data structure
 
 TsConfigJson {
-    base_url: Some(
-        "src",
-    ),
-    paths: {},
+    root: false,
+    path: "",
+    extends: None,
+    compiler_options: CompilerOptions {
+        base_url: Some(
+            "src",
+        ),
+        paths: None,
+        paths_base: "",
+    },
+    references: [],
 }

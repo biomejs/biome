@@ -12,8 +12,8 @@ use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 declare_lint_rule! {
     /// Enforce the use of the directive `"use strict"` in script files.
     ///
-    /// The JavaScript [strict mode](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode) prohibits some obsolete JavaScript syntaxes and makes some slight semantic chnmages to allow more optimizations by JavaScript engines.
-    ///  EcmaScript modules are always in strict mode, while JavaScript scripts are by default in non-strict mode, also known as _sloppy mode_.
+    /// The JavaScript [strict mode](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode) prohibits some obsolete JavaScript syntaxes and makes some slight semantic changes to allow more optimizations by JavaScript engines.
+    /// EcmaScript modules are always in strict mode, while JavaScript scripts are by default in non-strict mode, also known as _sloppy mode_.
     /// A developer can add the `"use strict"` directive at the start of a script file to enable the strict mode in that file.
     ///
     /// Biome considers a CommonJS (`.cjs`) file as a script file.

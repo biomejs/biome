@@ -196,7 +196,7 @@ ignore               = "0.4.23"
 indexmap             = { version = "2.7.0" }
 insta                = "1.41.1"
 natord               = "1.0.9"
-oxc_resolver         = { git = "https://github.com/arendjr/oxc-resolver.git", branch = "manifest-traits" } # "3.0.3"
+oxc_resolver         = "4.0"
 papaya               = "0.1.8"
 proc-macro2          = "1.0.86"
 quickcheck           = "1.0.3"
