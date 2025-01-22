@@ -703,10 +703,10 @@ impl AstNode for HtmlAttribute {
 }
 impl std::fmt::Debug for HtmlAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("HtmlAttribute")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -717,7 +717,7 @@ impl std::fmt::Debug for HtmlAttribute {
         } else {
             f.debug_struct("HtmlAttribute").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -754,10 +754,10 @@ impl AstNode for HtmlAttributeInitializerClause {
 }
 impl std::fmt::Debug for HtmlAttributeInitializerClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("HtmlAttributeInitializerClause")
                 .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
                 .field("value", &support::DebugSyntaxResult(self.value()))
@@ -765,7 +765,7 @@ impl std::fmt::Debug for HtmlAttributeInitializerClause {
         } else {
             f.debug_struct("HtmlAttributeInitializerClause").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -802,10 +802,10 @@ impl AstNode for HtmlCdataSection {
 }
 impl std::fmt::Debug for HtmlCdataSection {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("HtmlCdataSection")
                 .field(
                     "cdata_start_token",
@@ -823,7 +823,7 @@ impl std::fmt::Debug for HtmlCdataSection {
         } else {
             f.debug_struct("HtmlCdataSection").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -860,10 +860,10 @@ impl AstNode for HtmlClosingElement {
 }
 impl std::fmt::Debug for HtmlClosingElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("HtmlClosingElement")
                 .field(
                     "l_angle_token",
@@ -882,7 +882,7 @@ impl std::fmt::Debug for HtmlClosingElement {
         } else {
             f.debug_struct("HtmlClosingElement").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -919,10 +919,10 @@ impl AstNode for HtmlComment {
 }
 impl std::fmt::Debug for HtmlComment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("HtmlComment")
                 .field(
                     "comment_start_token",
@@ -940,7 +940,7 @@ impl std::fmt::Debug for HtmlComment {
         } else {
             f.debug_struct("HtmlComment").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -977,10 +977,10 @@ impl AstNode for HtmlContent {
 }
 impl std::fmt::Debug for HtmlContent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("HtmlContent")
                 .field(
                     "value_token",
@@ -990,7 +990,7 @@ impl std::fmt::Debug for HtmlContent {
         } else {
             f.debug_struct("HtmlContent").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1027,10 +1027,10 @@ impl AstNode for HtmlDirective {
 }
 impl std::fmt::Debug for HtmlDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("HtmlDirective")
                 .field(
                     "l_angle_token",
@@ -1065,7 +1065,7 @@ impl std::fmt::Debug for HtmlDirective {
         } else {
             f.debug_struct("HtmlDirective").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1102,10 +1102,10 @@ impl AstNode for HtmlElement {
 }
 impl std::fmt::Debug for HtmlElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("HtmlElement")
                 .field(
                     "opening_element",
@@ -1120,7 +1120,7 @@ impl std::fmt::Debug for HtmlElement {
         } else {
             f.debug_struct("HtmlElement").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1157,10 +1157,10 @@ impl AstNode for HtmlName {
 }
 impl std::fmt::Debug for HtmlName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("HtmlName")
                 .field(
                     "value_token",
@@ -1170,7 +1170,7 @@ impl std::fmt::Debug for HtmlName {
         } else {
             f.debug_struct("HtmlName").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1207,10 +1207,10 @@ impl AstNode for HtmlOpeningElement {
 }
 impl std::fmt::Debug for HtmlOpeningElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("HtmlOpeningElement")
                 .field(
                     "l_angle_token",
@@ -1226,7 +1226,7 @@ impl std::fmt::Debug for HtmlOpeningElement {
         } else {
             f.debug_struct("HtmlOpeningElement").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1263,10 +1263,10 @@ impl AstNode for HtmlRoot {
 }
 impl std::fmt::Debug for HtmlRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("HtmlRoot")
                 .field(
                     "bom_token",
@@ -1282,7 +1282,7 @@ impl std::fmt::Debug for HtmlRoot {
         } else {
             f.debug_struct("HtmlRoot").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1319,10 +1319,10 @@ impl AstNode for HtmlSelfClosingElement {
 }
 impl std::fmt::Debug for HtmlSelfClosingElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("HtmlSelfClosingElement")
                 .field(
                     "l_angle_token",
@@ -1342,7 +1342,7 @@ impl std::fmt::Debug for HtmlSelfClosingElement {
         } else {
             f.debug_struct("HtmlSelfClosingElement").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1379,10 +1379,10 @@ impl AstNode for HtmlString {
 }
 impl std::fmt::Debug for HtmlString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("HtmlString")
                 .field(
                     "value_token",
@@ -1392,7 +1392,7 @@ impl std::fmt::Debug for HtmlString {
         } else {
             f.debug_struct("HtmlString").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }

@@ -695,17 +695,17 @@ impl AstNode for YamlArray {
 }
 impl std::fmt::Debug for YamlArray {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("YamlArray")
                 .field("items", &self.items())
                 .finish()
         } else {
             f.debug_struct("YamlArray").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -742,10 +742,10 @@ impl AstNode for YamlArrayInline {
 }
 impl std::fmt::Debug for YamlArrayInline {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("YamlArrayInline")
                 .field(
                     "l_brack_token",
@@ -760,7 +760,7 @@ impl std::fmt::Debug for YamlArrayInline {
         } else {
             f.debug_struct("YamlArrayInline").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -797,10 +797,10 @@ impl AstNode for YamlArrayItem {
 }
 impl std::fmt::Debug for YamlArrayItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("YamlArrayItem")
                 .field(
                     "minus_token",
@@ -811,7 +811,7 @@ impl std::fmt::Debug for YamlArrayItem {
         } else {
             f.debug_struct("YamlArrayItem").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -848,10 +848,10 @@ impl AstNode for YamlBlockFolded {
 }
 impl std::fmt::Debug for YamlBlockFolded {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("YamlBlockFolded")
                 .field(
                     "r_angle_token",
@@ -862,7 +862,7 @@ impl std::fmt::Debug for YamlBlockFolded {
         } else {
             f.debug_struct("YamlBlockFolded").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -899,10 +899,10 @@ impl AstNode for YamlBlockLiteral {
 }
 impl std::fmt::Debug for YamlBlockLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("YamlBlockLiteral")
                 .field(
                     "bitwise_or_token",
@@ -913,7 +913,7 @@ impl std::fmt::Debug for YamlBlockLiteral {
         } else {
             f.debug_struct("YamlBlockLiteral").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -950,10 +950,10 @@ impl AstNode for YamlBlockValue {
 }
 impl std::fmt::Debug for YamlBlockValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("YamlBlockValue")
                 .field(
                     "yaml_block_value_token",
@@ -963,7 +963,7 @@ impl std::fmt::Debug for YamlBlockValue {
         } else {
             f.debug_struct("YamlBlockValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1000,10 +1000,10 @@ impl AstNode for YamlBooleanValue {
 }
 impl std::fmt::Debug for YamlBooleanValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("YamlBooleanValue")
                 .field(
                     "value_token",
@@ -1013,7 +1013,7 @@ impl std::fmt::Debug for YamlBooleanValue {
         } else {
             f.debug_struct("YamlBooleanValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1050,10 +1050,10 @@ impl AstNode for YamlDocument {
 }
 impl std::fmt::Debug for YamlDocument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("YamlDocument")
                 .field(
                     "dashdashdash_token",
@@ -1068,7 +1068,7 @@ impl std::fmt::Debug for YamlDocument {
         } else {
             f.debug_struct("YamlDocument").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1105,10 +1105,10 @@ impl AstNode for YamlIdentifier {
 }
 impl std::fmt::Debug for YamlIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("YamlIdentifier")
                 .field(
                     "value_token",
@@ -1118,7 +1118,7 @@ impl std::fmt::Debug for YamlIdentifier {
         } else {
             f.debug_struct("YamlIdentifier").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1155,10 +1155,10 @@ impl AstNode for YamlNullValue {
 }
 impl std::fmt::Debug for YamlNullValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("YamlNullValue")
                 .field(
                     "value_token",
@@ -1168,7 +1168,7 @@ impl std::fmt::Debug for YamlNullValue {
         } else {
             f.debug_struct("YamlNullValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1205,10 +1205,10 @@ impl AstNode for YamlNumberValue {
 }
 impl std::fmt::Debug for YamlNumberValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("YamlNumberValue")
                 .field(
                     "value_token",
@@ -1218,7 +1218,7 @@ impl std::fmt::Debug for YamlNumberValue {
         } else {
             f.debug_struct("YamlNumberValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1255,17 +1255,17 @@ impl AstNode for YamlObject {
 }
 impl std::fmt::Debug for YamlObject {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("YamlObject")
                 .field("members", &self.members())
                 .finish()
         } else {
             f.debug_struct("YamlObject").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1302,10 +1302,10 @@ impl AstNode for YamlObjectMember {
 }
 impl std::fmt::Debug for YamlObjectMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("YamlObjectMember")
                 .field("key", &support::DebugSyntaxResult(self.key()))
                 .field(
@@ -1317,7 +1317,7 @@ impl std::fmt::Debug for YamlObjectMember {
         } else {
             f.debug_struct("YamlObjectMember").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1354,10 +1354,10 @@ impl AstNode for YamlRoot {
 }
 impl std::fmt::Debug for YamlRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("YamlRoot")
                 .field(
                     "bom_token",
@@ -1369,7 +1369,7 @@ impl std::fmt::Debug for YamlRoot {
         } else {
             f.debug_struct("YamlRoot").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -1406,10 +1406,10 @@ impl AstNode for YamlStringValue {
 }
 impl std::fmt::Debug for YamlStringValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("YamlStringValue")
                 .field(
                     "value_token",
@@ -1419,7 +1419,7 @@ impl std::fmt::Debug for YamlStringValue {
         } else {
             f.debug_struct("YamlStringValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }

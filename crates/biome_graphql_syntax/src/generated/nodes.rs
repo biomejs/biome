@@ -3176,10 +3176,10 @@ impl AstNode for GraphqlAlias {
 }
 impl std::fmt::Debug for GraphqlAlias {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlAlias")
                 .field("value", &support::DebugSyntaxResult(self.value()))
                 .field(
@@ -3190,7 +3190,7 @@ impl std::fmt::Debug for GraphqlAlias {
         } else {
             f.debug_struct("GraphqlAlias").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -3227,10 +3227,10 @@ impl AstNode for GraphqlArgument {
 }
 impl std::fmt::Debug for GraphqlArgument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlArgument")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -3242,7 +3242,7 @@ impl std::fmt::Debug for GraphqlArgument {
         } else {
             f.debug_struct("GraphqlArgument").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -3279,10 +3279,10 @@ impl AstNode for GraphqlArguments {
 }
 impl std::fmt::Debug for GraphqlArguments {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlArguments")
                 .field(
                     "l_paren_token",
@@ -3297,7 +3297,7 @@ impl std::fmt::Debug for GraphqlArguments {
         } else {
             f.debug_struct("GraphqlArguments").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -3334,10 +3334,10 @@ impl AstNode for GraphqlArgumentsDefinition {
 }
 impl std::fmt::Debug for GraphqlArgumentsDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlArgumentsDefinition")
                 .field(
                     "l_paren_token",
@@ -3352,7 +3352,7 @@ impl std::fmt::Debug for GraphqlArgumentsDefinition {
         } else {
             f.debug_struct("GraphqlArgumentsDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -3389,10 +3389,10 @@ impl AstNode for GraphqlBooleanValue {
 }
 impl std::fmt::Debug for GraphqlBooleanValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlBooleanValue")
                 .field(
                     "value_token",
@@ -3402,7 +3402,7 @@ impl std::fmt::Debug for GraphqlBooleanValue {
         } else {
             f.debug_struct("GraphqlBooleanValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -3439,10 +3439,10 @@ impl AstNode for GraphqlDefaultValue {
 }
 impl std::fmt::Debug for GraphqlDefaultValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlDefaultValue")
                 .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
                 .field("value", &support::DebugSyntaxResult(self.value()))
@@ -3450,7 +3450,7 @@ impl std::fmt::Debug for GraphqlDefaultValue {
         } else {
             f.debug_struct("GraphqlDefaultValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -3487,10 +3487,10 @@ impl AstNode for GraphqlDescription {
 }
 impl std::fmt::Debug for GraphqlDescription {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlDescription")
                 .field(
                     "graphql_string_value",
@@ -3500,7 +3500,7 @@ impl std::fmt::Debug for GraphqlDescription {
         } else {
             f.debug_struct("GraphqlDescription").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -3537,10 +3537,10 @@ impl AstNode for GraphqlDirective {
 }
 impl std::fmt::Debug for GraphqlDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlDirective")
                 .field("at_token", &support::DebugSyntaxResult(self.at_token()))
                 .field("name", &support::DebugSyntaxResult(self.name()))
@@ -3552,7 +3552,7 @@ impl std::fmt::Debug for GraphqlDirective {
         } else {
             f.debug_struct("GraphqlDirective").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -3589,10 +3589,10 @@ impl AstNode for GraphqlDirectiveDefinition {
 }
 impl std::fmt::Debug for GraphqlDirectiveDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlDirectiveDefinition")
                 .field(
                     "description",
@@ -3622,7 +3622,7 @@ impl std::fmt::Debug for GraphqlDirectiveDefinition {
         } else {
             f.debug_struct("GraphqlDirectiveDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -3659,10 +3659,10 @@ impl AstNode for GraphqlDirectiveLocation {
 }
 impl std::fmt::Debug for GraphqlDirectiveLocation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlDirectiveLocation")
                 .field(
                     "value_token",
@@ -3672,7 +3672,7 @@ impl std::fmt::Debug for GraphqlDirectiveLocation {
         } else {
             f.debug_struct("GraphqlDirectiveLocation").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -3709,10 +3709,10 @@ impl AstNode for GraphqlEnumTypeDefinition {
 }
 impl std::fmt::Debug for GraphqlEnumTypeDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlEnumTypeDefinition")
                 .field(
                     "description",
@@ -3729,7 +3729,7 @@ impl std::fmt::Debug for GraphqlEnumTypeDefinition {
         } else {
             f.debug_struct("GraphqlEnumTypeDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -3766,10 +3766,10 @@ impl AstNode for GraphqlEnumTypeExtension {
 }
 impl std::fmt::Debug for GraphqlEnumTypeExtension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlEnumTypeExtension")
                 .field(
                     "extend_token",
@@ -3786,7 +3786,7 @@ impl std::fmt::Debug for GraphqlEnumTypeExtension {
         } else {
             f.debug_struct("GraphqlEnumTypeExtension").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -3823,17 +3823,17 @@ impl AstNode for GraphqlEnumValue {
 }
 impl std::fmt::Debug for GraphqlEnumValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlEnumValue")
                 .field("value", &support::DebugSyntaxResult(self.value()))
                 .finish()
         } else {
             f.debug_struct("GraphqlEnumValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -3870,10 +3870,10 @@ impl AstNode for GraphqlEnumValueDefinition {
 }
 impl std::fmt::Debug for GraphqlEnumValueDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlEnumValueDefinition")
                 .field(
                     "description",
@@ -3885,7 +3885,7 @@ impl std::fmt::Debug for GraphqlEnumValueDefinition {
         } else {
             f.debug_struct("GraphqlEnumValueDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -3922,10 +3922,10 @@ impl AstNode for GraphqlEnumValuesDefinition {
 }
 impl std::fmt::Debug for GraphqlEnumValuesDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlEnumValuesDefinition")
                 .field(
                     "l_curly_token",
@@ -3940,7 +3940,7 @@ impl std::fmt::Debug for GraphqlEnumValuesDefinition {
         } else {
             f.debug_struct("GraphqlEnumValuesDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -3977,10 +3977,10 @@ impl AstNode for GraphqlField {
 }
 impl std::fmt::Debug for GraphqlField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlField")
                 .field("alias", &support::DebugOptionalElement(self.alias()))
                 .field("name", &support::DebugSyntaxResult(self.name()))
@@ -3997,7 +3997,7 @@ impl std::fmt::Debug for GraphqlField {
         } else {
             f.debug_struct("GraphqlField").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4034,10 +4034,10 @@ impl AstNode for GraphqlFieldDefinition {
 }
 impl std::fmt::Debug for GraphqlFieldDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlFieldDefinition")
                 .field(
                     "description",
@@ -4058,7 +4058,7 @@ impl std::fmt::Debug for GraphqlFieldDefinition {
         } else {
             f.debug_struct("GraphqlFieldDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4095,10 +4095,10 @@ impl AstNode for GraphqlFieldsDefinition {
 }
 impl std::fmt::Debug for GraphqlFieldsDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlFieldsDefinition")
                 .field(
                     "l_curly_token",
@@ -4113,7 +4113,7 @@ impl std::fmt::Debug for GraphqlFieldsDefinition {
         } else {
             f.debug_struct("GraphqlFieldsDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4150,10 +4150,10 @@ impl AstNode for GraphqlFloatValue {
 }
 impl std::fmt::Debug for GraphqlFloatValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlFloatValue")
                 .field(
                     "graphql_float_literal_token",
@@ -4163,7 +4163,7 @@ impl std::fmt::Debug for GraphqlFloatValue {
         } else {
             f.debug_struct("GraphqlFloatValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4200,10 +4200,10 @@ impl AstNode for GraphqlFragmentDefinition {
 }
 impl std::fmt::Debug for GraphqlFragmentDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlFragmentDefinition")
                 .field(
                     "fragment_token",
@@ -4223,7 +4223,7 @@ impl std::fmt::Debug for GraphqlFragmentDefinition {
         } else {
             f.debug_struct("GraphqlFragmentDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4260,10 +4260,10 @@ impl AstNode for GraphqlFragmentSpread {
 }
 impl std::fmt::Debug for GraphqlFragmentSpread {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlFragmentSpread")
                 .field(
                     "dotdotdot_token",
@@ -4275,7 +4275,7 @@ impl std::fmt::Debug for GraphqlFragmentSpread {
         } else {
             f.debug_struct("GraphqlFragmentSpread").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4312,10 +4312,10 @@ impl AstNode for GraphqlImplementsInterfaces {
 }
 impl std::fmt::Debug for GraphqlImplementsInterfaces {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlImplementsInterfaces")
                 .field(
                     "implements_token",
@@ -4330,7 +4330,7 @@ impl std::fmt::Debug for GraphqlImplementsInterfaces {
         } else {
             f.debug_struct("GraphqlImplementsInterfaces").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4367,10 +4367,10 @@ impl AstNode for GraphqlInlineFragment {
 }
 impl std::fmt::Debug for GraphqlInlineFragment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlInlineFragment")
                 .field(
                     "dotdotdot_token",
@@ -4389,7 +4389,7 @@ impl std::fmt::Debug for GraphqlInlineFragment {
         } else {
             f.debug_struct("GraphqlInlineFragment").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4426,10 +4426,10 @@ impl AstNode for GraphqlInputFieldsDefinition {
 }
 impl std::fmt::Debug for GraphqlInputFieldsDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlInputFieldsDefinition")
                 .field(
                     "l_curly_token",
@@ -4444,7 +4444,7 @@ impl std::fmt::Debug for GraphqlInputFieldsDefinition {
         } else {
             f.debug_struct("GraphqlInputFieldsDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4481,10 +4481,10 @@ impl AstNode for GraphqlInputObjectTypeDefinition {
 }
 impl std::fmt::Debug for GraphqlInputObjectTypeDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlInputObjectTypeDefinition")
                 .field(
                     "description",
@@ -4504,7 +4504,7 @@ impl std::fmt::Debug for GraphqlInputObjectTypeDefinition {
         } else {
             f.debug_struct("GraphqlInputObjectTypeDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4541,10 +4541,10 @@ impl AstNode for GraphqlInputObjectTypeExtension {
 }
 impl std::fmt::Debug for GraphqlInputObjectTypeExtension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlInputObjectTypeExtension")
                 .field(
                     "extend_token",
@@ -4564,7 +4564,7 @@ impl std::fmt::Debug for GraphqlInputObjectTypeExtension {
         } else {
             f.debug_struct("GraphqlInputObjectTypeExtension").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4601,10 +4601,10 @@ impl AstNode for GraphqlInputValueDefinition {
 }
 impl std::fmt::Debug for GraphqlInputValueDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlInputValueDefinition")
                 .field(
                     "description",
@@ -4622,7 +4622,7 @@ impl std::fmt::Debug for GraphqlInputValueDefinition {
         } else {
             f.debug_struct("GraphqlInputValueDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4659,10 +4659,10 @@ impl AstNode for GraphqlIntValue {
 }
 impl std::fmt::Debug for GraphqlIntValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlIntValue")
                 .field(
                     "graphql_int_literal_token",
@@ -4672,7 +4672,7 @@ impl std::fmt::Debug for GraphqlIntValue {
         } else {
             f.debug_struct("GraphqlIntValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4709,10 +4709,10 @@ impl AstNode for GraphqlInterfaceTypeDefinition {
 }
 impl std::fmt::Debug for GraphqlInterfaceTypeDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlInterfaceTypeDefinition")
                 .field(
                     "description",
@@ -4733,7 +4733,7 @@ impl std::fmt::Debug for GraphqlInterfaceTypeDefinition {
         } else {
             f.debug_struct("GraphqlInterfaceTypeDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4770,10 +4770,10 @@ impl AstNode for GraphqlInterfaceTypeExtension {
 }
 impl std::fmt::Debug for GraphqlInterfaceTypeExtension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlInterfaceTypeExtension")
                 .field(
                     "extend_token",
@@ -4794,7 +4794,7 @@ impl std::fmt::Debug for GraphqlInterfaceTypeExtension {
         } else {
             f.debug_struct("GraphqlInterfaceTypeExtension").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4831,10 +4831,10 @@ impl AstNode for GraphqlListType {
 }
 impl std::fmt::Debug for GraphqlListType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlListType")
                 .field(
                     "l_brack_token",
@@ -4849,7 +4849,7 @@ impl std::fmt::Debug for GraphqlListType {
         } else {
             f.debug_struct("GraphqlListType").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4886,10 +4886,10 @@ impl AstNode for GraphqlListValue {
 }
 impl std::fmt::Debug for GraphqlListValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlListValue")
                 .field(
                     "l_brack_token",
@@ -4904,7 +4904,7 @@ impl std::fmt::Debug for GraphqlListValue {
         } else {
             f.debug_struct("GraphqlListValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4941,10 +4941,10 @@ impl AstNode for GraphqlLiteralName {
 }
 impl std::fmt::Debug for GraphqlLiteralName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlLiteralName")
                 .field(
                     "value_token",
@@ -4954,7 +4954,7 @@ impl std::fmt::Debug for GraphqlLiteralName {
         } else {
             f.debug_struct("GraphqlLiteralName").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -4991,10 +4991,10 @@ impl AstNode for GraphqlNameBinding {
 }
 impl std::fmt::Debug for GraphqlNameBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlNameBinding")
                 .field(
                     "value_token",
@@ -5004,7 +5004,7 @@ impl std::fmt::Debug for GraphqlNameBinding {
         } else {
             f.debug_struct("GraphqlNameBinding").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5041,10 +5041,10 @@ impl AstNode for GraphqlNameReference {
 }
 impl std::fmt::Debug for GraphqlNameReference {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlNameReference")
                 .field(
                     "value_token",
@@ -5054,7 +5054,7 @@ impl std::fmt::Debug for GraphqlNameReference {
         } else {
             f.debug_struct("GraphqlNameReference").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5091,10 +5091,10 @@ impl AstNode for GraphqlNonNullType {
 }
 impl std::fmt::Debug for GraphqlNonNullType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlNonNullType")
                 .field("base", &support::DebugSyntaxResult(self.base()))
                 .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
@@ -5102,7 +5102,7 @@ impl std::fmt::Debug for GraphqlNonNullType {
         } else {
             f.debug_struct("GraphqlNonNullType").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5139,17 +5139,17 @@ impl AstNode for GraphqlNullValue {
 }
 impl std::fmt::Debug for GraphqlNullValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlNullValue")
                 .field("null_token", &support::DebugSyntaxResult(self.null_token()))
                 .finish()
         } else {
             f.debug_struct("GraphqlNullValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5186,10 +5186,10 @@ impl AstNode for GraphqlObjectField {
 }
 impl std::fmt::Debug for GraphqlObjectField {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlObjectField")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -5201,7 +5201,7 @@ impl std::fmt::Debug for GraphqlObjectField {
         } else {
             f.debug_struct("GraphqlObjectField").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5238,10 +5238,10 @@ impl AstNode for GraphqlObjectTypeDefinition {
 }
 impl std::fmt::Debug for GraphqlObjectTypeDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlObjectTypeDefinition")
                 .field(
                     "description",
@@ -5259,7 +5259,7 @@ impl std::fmt::Debug for GraphqlObjectTypeDefinition {
         } else {
             f.debug_struct("GraphqlObjectTypeDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5296,10 +5296,10 @@ impl AstNode for GraphqlObjectTypeExtension {
 }
 impl std::fmt::Debug for GraphqlObjectTypeExtension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlObjectTypeExtension")
                 .field(
                     "extend_token",
@@ -5317,7 +5317,7 @@ impl std::fmt::Debug for GraphqlObjectTypeExtension {
         } else {
             f.debug_struct("GraphqlObjectTypeExtension").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5354,10 +5354,10 @@ impl AstNode for GraphqlObjectValue {
 }
 impl std::fmt::Debug for GraphqlObjectValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlObjectValue")
                 .field(
                     "l_curly_token",
@@ -5372,7 +5372,7 @@ impl std::fmt::Debug for GraphqlObjectValue {
         } else {
             f.debug_struct("GraphqlObjectValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5409,10 +5409,10 @@ impl AstNode for GraphqlOperationDefinition {
 }
 impl std::fmt::Debug for GraphqlOperationDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlOperationDefinition")
                 .field("ty", &support::DebugSyntaxResult(self.ty()))
                 .field("name", &support::DebugOptionalElement(self.name()))
@@ -5429,7 +5429,7 @@ impl std::fmt::Debug for GraphqlOperationDefinition {
         } else {
             f.debug_struct("GraphqlOperationDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5466,10 +5466,10 @@ impl AstNode for GraphqlOperationType {
 }
 impl std::fmt::Debug for GraphqlOperationType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlOperationType")
                 .field(
                     "value_token",
@@ -5479,7 +5479,7 @@ impl std::fmt::Debug for GraphqlOperationType {
         } else {
             f.debug_struct("GraphqlOperationType").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5516,10 +5516,10 @@ impl AstNode for GraphqlRoot {
 }
 impl std::fmt::Debug for GraphqlRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlRoot")
                 .field(
                     "bom_token",
@@ -5531,7 +5531,7 @@ impl std::fmt::Debug for GraphqlRoot {
         } else {
             f.debug_struct("GraphqlRoot").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5568,10 +5568,10 @@ impl AstNode for GraphqlRootOperationTypeDefinition {
 }
 impl std::fmt::Debug for GraphqlRootOperationTypeDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlRootOperationTypeDefinition")
                 .field(
                     "operation_type",
@@ -5587,7 +5587,7 @@ impl std::fmt::Debug for GraphqlRootOperationTypeDefinition {
             f.debug_struct("GraphqlRootOperationTypeDefinition")
                 .finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5624,10 +5624,10 @@ impl AstNode for GraphqlRootOperationTypes {
 }
 impl std::fmt::Debug for GraphqlRootOperationTypes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlRootOperationTypes")
                 .field(
                     "l_curly_token",
@@ -5642,7 +5642,7 @@ impl std::fmt::Debug for GraphqlRootOperationTypes {
         } else {
             f.debug_struct("GraphqlRootOperationTypes").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5679,10 +5679,10 @@ impl AstNode for GraphqlScalarTypeDefinition {
 }
 impl std::fmt::Debug for GraphqlScalarTypeDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlScalarTypeDefinition")
                 .field(
                     "description",
@@ -5698,7 +5698,7 @@ impl std::fmt::Debug for GraphqlScalarTypeDefinition {
         } else {
             f.debug_struct("GraphqlScalarTypeDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5735,10 +5735,10 @@ impl AstNode for GraphqlScalarTypeExtension {
 }
 impl std::fmt::Debug for GraphqlScalarTypeExtension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlScalarTypeExtension")
                 .field(
                     "extend_token",
@@ -5754,7 +5754,7 @@ impl std::fmt::Debug for GraphqlScalarTypeExtension {
         } else {
             f.debug_struct("GraphqlScalarTypeExtension").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5791,10 +5791,10 @@ impl AstNode for GraphqlSchemaDefinition {
 }
 impl std::fmt::Debug for GraphqlSchemaDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlSchemaDefinition")
                 .field(
                     "description",
@@ -5813,7 +5813,7 @@ impl std::fmt::Debug for GraphqlSchemaDefinition {
         } else {
             f.debug_struct("GraphqlSchemaDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5850,10 +5850,10 @@ impl AstNode for GraphqlSchemaExtension {
 }
 impl std::fmt::Debug for GraphqlSchemaExtension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlSchemaExtension")
                 .field(
                     "extend_token",
@@ -5872,7 +5872,7 @@ impl std::fmt::Debug for GraphqlSchemaExtension {
         } else {
             f.debug_struct("GraphqlSchemaExtension").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5909,10 +5909,10 @@ impl AstNode for GraphqlSelectionSet {
 }
 impl std::fmt::Debug for GraphqlSelectionSet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlSelectionSet")
                 .field(
                     "l_curly_token",
@@ -5927,7 +5927,7 @@ impl std::fmt::Debug for GraphqlSelectionSet {
         } else {
             f.debug_struct("GraphqlSelectionSet").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5964,10 +5964,10 @@ impl AstNode for GraphqlStringValue {
 }
 impl std::fmt::Debug for GraphqlStringValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlStringValue")
                 .field(
                     "graphql_string_literal_token",
@@ -5977,7 +5977,7 @@ impl std::fmt::Debug for GraphqlStringValue {
         } else {
             f.debug_struct("GraphqlStringValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6014,10 +6014,10 @@ impl AstNode for GraphqlTypeCondition {
 }
 impl std::fmt::Debug for GraphqlTypeCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlTypeCondition")
                 .field("on_token", &support::DebugSyntaxResult(self.on_token()))
                 .field("ty", &support::DebugSyntaxResult(self.ty()))
@@ -6025,7 +6025,7 @@ impl std::fmt::Debug for GraphqlTypeCondition {
         } else {
             f.debug_struct("GraphqlTypeCondition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6062,10 +6062,10 @@ impl AstNode for GraphqlUnionMemberTypes {
 }
 impl std::fmt::Debug for GraphqlUnionMemberTypes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlUnionMemberTypes")
                 .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
                 .field(
@@ -6077,7 +6077,7 @@ impl std::fmt::Debug for GraphqlUnionMemberTypes {
         } else {
             f.debug_struct("GraphqlUnionMemberTypes").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6114,10 +6114,10 @@ impl AstNode for GraphqlUnionTypeDefinition {
 }
 impl std::fmt::Debug for GraphqlUnionTypeDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlUnionTypeDefinition")
                 .field(
                     "description",
@@ -6137,7 +6137,7 @@ impl std::fmt::Debug for GraphqlUnionTypeDefinition {
         } else {
             f.debug_struct("GraphqlUnionTypeDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6174,10 +6174,10 @@ impl AstNode for GraphqlUnionTypeExtension {
 }
 impl std::fmt::Debug for GraphqlUnionTypeExtension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlUnionTypeExtension")
                 .field(
                     "extend_token",
@@ -6197,7 +6197,7 @@ impl std::fmt::Debug for GraphqlUnionTypeExtension {
         } else {
             f.debug_struct("GraphqlUnionTypeExtension").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6234,10 +6234,10 @@ impl AstNode for GraphqlVariableBinding {
 }
 impl std::fmt::Debug for GraphqlVariableBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlVariableBinding")
                 .field(
                     "dollar_token",
@@ -6248,7 +6248,7 @@ impl std::fmt::Debug for GraphqlVariableBinding {
         } else {
             f.debug_struct("GraphqlVariableBinding").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6285,10 +6285,10 @@ impl AstNode for GraphqlVariableDefinition {
 }
 impl std::fmt::Debug for GraphqlVariableDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlVariableDefinition")
                 .field("variable", &support::DebugSyntaxResult(self.variable()))
                 .field(
@@ -6302,7 +6302,7 @@ impl std::fmt::Debug for GraphqlVariableDefinition {
         } else {
             f.debug_struct("GraphqlVariableDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6339,10 +6339,10 @@ impl AstNode for GraphqlVariableDefinitions {
 }
 impl std::fmt::Debug for GraphqlVariableDefinitions {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlVariableDefinitions")
                 .field(
                     "l_paren_token",
@@ -6357,7 +6357,7 @@ impl std::fmt::Debug for GraphqlVariableDefinitions {
         } else {
             f.debug_struct("GraphqlVariableDefinitions").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6394,10 +6394,10 @@ impl AstNode for GraphqlVariableReference {
 }
 impl std::fmt::Debug for GraphqlVariableReference {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GraphqlVariableReference")
                 .field(
                     "dollar_token",
@@ -6408,7 +6408,7 @@ impl std::fmt::Debug for GraphqlVariableReference {
         } else {
             f.debug_struct("GraphqlVariableReference").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
