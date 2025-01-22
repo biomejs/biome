@@ -47,7 +47,7 @@ These assets and responsibilities are but are not limited to:
 - Access to social accounts.
 - Administration privileges of the [Biome Discord server][discord].
 - Administration privileges of the [Biome GitHub org][gh-org].
-- Website accesses (hosting platform, domain name, etc.).
+- Website credentials (hosting platform, domain name, etc.).
 - Access to sensitive emails, such as the CoC email.
 
 Also:
