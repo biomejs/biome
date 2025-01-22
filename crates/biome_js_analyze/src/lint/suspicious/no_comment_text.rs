@@ -6,7 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsxChild, JsSyntaxKind, JsSyntaxToken, JsxText};
-use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize};
+use biome_rowan::{BatchMutationExt, TextRange, TextSize};
 use std::ops::Range;
 
 declare_lint_rule! {
@@ -128,7 +128,7 @@ impl Rule for NoCommentText {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
-        let node_range_start = ctx.query().range().start();
+        let node_range_start = ctx.query().value_token().ok()?.text_range().start();
         Some(RuleDiagnostic::new(
             rule_category!(),
             TextRange::new(
