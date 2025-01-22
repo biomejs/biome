@@ -600,10 +600,78 @@ pub struct FilesSettings {
     pub included_files: Matcher,
 
     /// List of included paths/files
-    pub includes_files: Box<[biome_glob::Glob]>,
+    pub includes_files: IncludesFiles,
 
     /// Files not recognized by Biome should not emit a diagnostic
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
+}
+
+#[derive(Clone, Default, Debug)]
+pub struct IncludesFiles {
+    working_directory: Option<Utf8PathBuf>,
+    includes_files: Option<Box<[biome_glob::Glob]>>,
+}
+
+impl IncludesFiles {
+    fn new(
+        working_directory: Option<Utf8PathBuf>,
+        includes_files: Option<&[biome_glob::Glob]>,
+    ) -> Self {
+        if let Some(includes_files) = includes_files {
+            // NOTE: when Bpaf deserialize this value, it returns `Some([])` as default value, even when
+            // there aren't any globs. This is a limitation/bug, which means that we need to treat
+            // `Some([])` as no globs provided.
+            if includes_files.is_empty() {
+                Self {
+                    working_directory,
+                    includes_files: None,
+                }
+            } else {
+                Self {
+                    working_directory,
+                    includes_files: Some(includes_files.to_vec().into_boxed_slice()),
+                }
+            }
+        } else {
+            Self {
+                working_directory,
+                includes_files: None,
+            }
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.includes_files.is_none()
+    }
+
+    pub fn matches_with_exceptions(&self, path: &Utf8Path) -> bool {
+        if let Some(includes_files) = self.includes_files.as_ref() {
+            let path = if let Some(working_directory) = &self.working_directory {
+                path.strip_prefix(working_directory).unwrap_or(path)
+            } else {
+                path
+            };
+            let candidate_path = biome_glob::CandidatePath::new(path);
+
+            candidate_path.matches_with_exceptions(includes_files)
+        } else {
+            true
+        }
+    }
+
+    pub fn matches_directory_with_exceptions(&self, path: &Utf8Path) -> bool {
+        if let Some(includes_files) = self.includes_files.as_ref() {
+            let path = if let Some(working_directory) = &self.working_directory {
+                path.strip_prefix(working_directory).unwrap_or(path)
+            } else {
+                path
+            };
+            let candidate_path = biome_glob::CandidatePath::new(path);
+            candidate_path.matches_directory_with_exceptions(includes_files)
+        } else {
+            true
+        }
+    }
 }
 
 fn to_file_settings(
@@ -632,8 +700,11 @@ fn to_file_settings(
                 working_directory.clone(),
                 config.ignore.as_deref(),
             )?,
-            included_files: Matcher::from_globs(working_directory, config.include.as_deref())?,
-            includes_files: config.includes.unwrap_or_default().into(),
+            included_files: Matcher::from_globs(
+                working_directory.clone(),
+                config.include.as_deref(),
+            )?,
+            includes_files: IncludesFiles::new(working_directory, config.includes.as_deref()),
             ignore_unknown: config.ignore_unknown,
         })
     } else {
@@ -1016,7 +1087,7 @@ impl OverrideSettings {
 pub struct OverrideSettingPattern {
     exclude: Matcher,
     include: Matcher,
-    includes: Box<[biome_glob::Glob]>,
+    includes_files: IncludesFiles,
     /// Formatter settings applied to all files in the workspaces
     pub formatter: OverrideFormatSettings,
     /// Linter settings applied to all files in the workspace
@@ -1037,9 +1108,8 @@ impl OverrideSettingPattern {
             return false;
         }
         self.include.matches_path(file_path)
-            || if !self.includes.is_empty() {
-                let candidate_path = biome_glob::CandidatePath::new(&file_path);
-                candidate_path.matches_with_exceptions(&self.includes)
+            || if !self.includes_files.is_empty() {
+                self.includes_files.matches_with_exceptions(file_path)
             } else {
                 false
             }
@@ -1318,7 +1388,10 @@ pub fn to_override_settings(
         languages.html = to_html_language_settings(html, &current_settings.languages.html);
 
         let pattern_setting = OverrideSettingPattern {
-            includes: pattern.includes.unwrap_or_default().into(),
+            includes_files: IncludesFiles::new(
+                working_directory.clone(),
+                pattern.includes.as_deref(),
+            ),
             include: Matcher::from_globs(working_directory.clone(), pattern.include.as_deref())?,
             exclude: Matcher::from_globs(working_directory.clone(), pattern.ignore.as_deref())?,
             formatter,

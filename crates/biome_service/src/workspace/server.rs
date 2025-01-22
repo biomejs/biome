@@ -484,11 +484,12 @@ impl WorkspaceServer {
         };
         let mut is_included = true;
         if !files_settings.includes_files.is_empty() {
-            let candidate_path = biome_glob::CandidatePath::new(&path);
             is_included = if is_dir(path) {
-                candidate_path.matches_directory_with_exceptions(&files_settings.includes_files)
+                files_settings
+                    .includes_files
+                    .matches_directory_with_exceptions(path)
             } else {
-                candidate_path.matches_with_exceptions(&files_settings.includes_files)
+                files_settings.includes_files.matches_with_exceptions(path)
             };
         }
         if !files_settings.included_files.is_empty() {
