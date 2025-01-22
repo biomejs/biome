@@ -734,6 +734,16 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "jsx-a11y/no-noninteractive-element-interactions" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_noninteractive_element_interactions
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "jsx-a11y/no-noninteractive-element-to-interactive-role" => {
             let group = rules.a11y.get_or_insert_with(Default::default);
             let rule = group

@@ -160,6 +160,7 @@ pub type NoNodejsModules =
     <lint::correctness::no_nodejs_modules::NoNodejsModules as biome_analyze::Rule>::Options;
 pub type NoNonNullAssertion =
     <lint::style::no_non_null_assertion::NoNonNullAssertion as biome_analyze::Rule>::Options;
+pub type NoNoninteractiveElementInteractions = < lint :: nursery :: no_noninteractive_element_interactions :: NoNoninteractiveElementInteractions as biome_analyze :: Rule > :: Options ;
 pub type NoNoninteractiveElementToInteractiveRole = < lint :: a11y :: no_noninteractive_element_to_interactive_role :: NoNoninteractiveElementToInteractiveRole as biome_analyze :: Rule > :: Options ;
 pub type NoNoninteractiveTabindex = < lint :: a11y :: no_noninteractive_tabindex :: NoNoninteractiveTabindex as biome_analyze :: Rule > :: Options ;
 pub type NoNonoctalDecimalEscape = < lint :: correctness :: no_nonoctal_decimal_escape :: NoNonoctalDecimalEscape as biome_analyze :: Rule > :: Options ;

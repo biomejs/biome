@@ -11,6 +11,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ## Unreleased
 
+- Add `RegExpStringIterator` to TypeScript globals
 - Fix [#4323](https://github.com/biomejs/biome/issues/4258), where `lint/a11y/useSemanticElement` accidentally showed recommendations for `role="searchbox"` instead of `role="search"`
 
 ### Analyzer
@@ -40,6 +41,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - `biome migrate eslint` now correctly handles ESLint configuration with `null` values in file lists ([#4740](https://github.com/biomejs/biome/issues/4740)).
   Contributed by @Conaclos
+
+- Fix [#4202](https://github.com/biomejs/biome/issues/4202), where the formatting of the test function was different from prettier. Contributed by @mdm317
 
 ### Configuration
 
@@ -86,6 +89,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 	  {children}
   </Suspense>;
   ```
+
+- `noDuplicateProperties` now throws lint errors properly when we use `@supports` (fix [#4756](https://github.com/biomejs/biome/issues/4756)) Contributed by @mehm8128
+
+- Fix [#4719](https://github.com/biomejs/biome/issues/4719), `bracketSameLine` now performs as expected when a comment is placed before the last JSX attribute. Contributed by @bushuai
 
 ### JavaScript APIs
 
@@ -345,6 +352,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fixed `useSortedClasses` false positive and Supplementary test case ([#3394](https://github.com/biomejs/biome/issues/3394)) Contributed by @hangaoke1
 - [noLabelWithoutControl](https://biomejs.dev/linter/rules/no-label-without-control/) detects button tags as input ([#4511])(https://github.com/biomejs/biome/issues/4511). Contributed by @unvalley
+
+- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) now handles `JsxAttributeInitializerClause`, ensuring that fragments inside expressions like `<A b=<></> />` are preserved. ([#4208](https://github.com/biomejs/biome/issues/4208)). Contributed by @MaxtuneLee
+
+- [useSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes/) now suggests code fixes that match the JSX quote style of the formatter ([#4855](https://github.com/biomejs/biome/issues/4855)). Contributed by @lucasweng
 
 ### Parser
 

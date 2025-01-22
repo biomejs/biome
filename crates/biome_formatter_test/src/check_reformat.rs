@@ -71,7 +71,7 @@ where
         {
             Ok(formatted) => formatted,
             Err(err) => {
-                panic!("failed to format: {}", err);
+                panic!("failed to format: {err}");
             }
         };
 

@@ -338,7 +338,7 @@ impl<'a> GritAstNode for GritTargetNode<'a> {
         self.text_trimmed_range().to_code_range(self.text())
     }
 
-    #[allow(refining_impl_trait)]
+    #[expect(refining_impl_trait)]
     fn children(&self) -> impl Iterator<Item = Self> + Clone {
         ChildrenIterator::new(self)
     }

@@ -29,7 +29,6 @@ pub struct Workspace {
 #[wasm_bindgen]
 impl Workspace {
     #[wasm_bindgen(constructor)]
-    #[allow(clippy::new_without_default)]
     pub fn new() -> Workspace {
         Workspace {
             inner: workspace::server(),
@@ -208,6 +207,12 @@ impl Workspace {
         to_value(&result)
             .map(IRenameResult::from)
             .map_err(into_error)
+    }
+}
+
+impl Default for Workspace {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

@@ -2,6 +2,7 @@ name: 📝 Formatter bug report
 description: Report a bug or regression of the formatter
 title: "📝 <TITLE>"
 labels: [ "S-Needs triage" ]
+type: Bug
 body:
   - type: markdown
     attributes:

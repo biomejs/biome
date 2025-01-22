@@ -1,5 +1,5 @@
 #![cfg(test)]
-#![allow(unused_mut, unused_variables, unused_assignments)]
+#![expect(unused_mut, unused_variables)]
 
 use super::{GraphqlLexer, TextSize};
 use biome_graphql_syntax::GraphqlSyntaxKind::{self, EOF};

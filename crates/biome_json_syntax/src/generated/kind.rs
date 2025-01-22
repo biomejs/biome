@@ -1,6 +1,5 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-#![allow(clippy::all)]
 #![allow(bad_style, missing_docs, unreachable_pub)]
 #[doc = r" The kind of syntax node, e.g. `IDENT`, `FUNCTION_KW`, or `FOR_STMT`."]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -52,22 +51,16 @@ pub enum JsonSyntaxKind {
 use self::JsonSyntaxKind::*;
 impl JsonSyntaxKind {
     pub const fn is_punct(self) -> bool {
-        match self {
-            COLON | COMMA | L_PAREN | R_PAREN | L_CURLY | R_CURLY | L_BRACK | R_BRACK => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            COLON | COMMA | L_PAREN | R_PAREN | L_CURLY | R_CURLY | L_BRACK | R_BRACK
+        )
     }
     pub const fn is_literal(self) -> bool {
-        match self {
-            JSON_STRING_LITERAL | JSON_NUMBER_LITERAL => true,
-            _ => false,
-        }
+        matches!(self, JSON_STRING_LITERAL | JSON_NUMBER_LITERAL)
     }
     pub const fn is_list(self) -> bool {
-        match self {
-            JSON_MEMBER_LIST | JSON_ARRAY_ELEMENT_LIST => true,
-            _ => false,
-        }
+        matches!(self, JSON_MEMBER_LIST | JSON_ARRAY_ELEMENT_LIST)
     }
     pub fn from_keyword(ident: &str) -> Option<JsonSyntaxKind> {
         let kw = match ident {

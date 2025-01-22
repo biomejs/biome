@@ -149,6 +149,7 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
         .map(|node| format_ident!("{}", Case::Constant.convert(node)));
 
     let output = quote! {
+        #![allow(unused_mut)]
         use #syntax_crate::{*, #syntax_kind, #syntax_kind::*, T};
         use biome_rowan::{AstNode, ParsedChildren, RawNodeSlots, RawSyntaxNode, SyntaxFactory, SyntaxKind};
 
@@ -158,7 +159,6 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
         impl SyntaxFactory for #factory_kind {
             type Kind = #syntax_kind;
 
-            #[allow(unused_mut)]
             fn make_syntax(
                 kind: Self::Kind,
                 children: ParsedChildren<Self::Kind>,

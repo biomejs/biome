@@ -152,6 +152,9 @@ impl AnyJsxOpeningElement {
     fn compute_layout(&self, comments: &JsComments) -> SyntaxResult<OpeningElementLayout> {
         let attributes = self.attributes();
         let name = self.name()?;
+        let last_attribute_has_comments = self.attributes().last().map_or(false, |attribute| {
+            comments.has_trailing_comments(attribute.syntax())
+        });
 
         let name_has_comments = comments.has_comments(name.syntax())
             || self
@@ -171,7 +174,7 @@ impl AnyJsxOpeningElement {
         } else {
             OpeningElementLayout::IndentAttributes {
                 name_has_comments,
-                last_attribute_has_comments: has_last_attribute_comments(self, comments),
+                last_attribute_has_comments,
             }
         };
 
@@ -248,19 +251,4 @@ fn as_string_literal_attribute_value(attribute: &AnyJsxAttribute) -> Option<JsxS
         }
         JsxSpreadAttribute(_) => None,
     }
-}
-
-fn has_last_attribute_comments(element: &AnyJsxOpeningElement, comments: &JsComments) -> bool {
-    let has_comments_on_last_attribute = element
-        .attributes()
-        .last()
-        .map_or(false, |attribute| comments.has_comments(attribute.syntax()));
-
-    let last_attribute_has_comments = element
-        .syntax()
-        .tokens()
-        .map(|token| token.text().contains('>') && token.has_leading_comments())
-        .any(|has_comment| has_comment);
-
-    has_comments_on_last_attribute || last_attribute_has_comments
 }

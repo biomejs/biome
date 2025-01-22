@@ -1,7 +1,3 @@
-use std::{env, fs, io, path::PathBuf};
-
-use quote::{format_ident, quote};
-
 use biome_js_factory::syntax::JsFileSource;
 use biome_js_factory::{
     make,
@@ -10,6 +6,8 @@ use biome_js_factory::{
 use biome_js_formatter::{context::JsFormatOptions, format_node};
 use biome_rowan::AstNode;
 use biome_service::workspace_types::{generate_type, methods, ModuleQueue};
+use quote::{format_ident, quote};
+use std::{env, fs, io, path::PathBuf};
 
 fn main() -> io::Result<()> {
     let methods = methods();
@@ -74,10 +72,17 @@ fn main() -> io::Result<()> {
     // Generate wasm-bindgen extern type imports for all the types defined in the TS code
     let types = queue.visited().iter().map(|name| {
         let ident = format_ident!("I{name}");
-        quote! {
-            #[wasm_bindgen(typescript_type = #name)]
-            #[allow(non_camel_case_types)]
-            pub type #ident;
+        if name.contains('_') {
+            quote! {
+                #[wasm_bindgen(typescript_type = #name)]
+                #[expect(non_camel_case_types)]
+                pub type #ident;
+            }
+        } else {
+            quote! {
+                #[wasm_bindgen(typescript_type = #name)]
+                pub type #ident;
+            }
         }
     });
 

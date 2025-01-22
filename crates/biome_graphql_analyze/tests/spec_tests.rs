@@ -88,7 +88,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     }
 }
 
-#[allow(clippy::too_many_arguments)]
 pub(crate) fn analyze_and_snap(
     snapshot: &mut String,
     input_code: &str,

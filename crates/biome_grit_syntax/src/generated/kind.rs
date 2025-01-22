@@ -1,6 +1,5 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-#![allow(clippy::all)]
 #![allow(bad_style, missing_docs, unreachable_pub)]
 #[doc = r" The kind of syntax node, e.g. `IDENT`, `FUNCTION_KW`, or `FOR_STMT`."]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -217,35 +216,63 @@ pub enum GritSyntaxKind {
 use self::GritSyntaxKind::*;
 impl GritSyntaxKind {
     pub const fn is_punct(self) -> bool {
-        match self {
-            DOT3 | DOLLAR_UNDERSCORE | MATCH | SEMICOLON | COMMA | L_PAREN | R_PAREN | L_CURLY
-            | R_CURLY | L_BRACK | R_BRACK | L_ANGLE | R_ANGLE | PLUS | STAR | SLASH | PERCENT
-            | DOT | COLON | EQ | EQ2 | FAT_ARROW | BANG | NEQ | MINUS | LTEQ | GTEQ | PLUSEQ
-            | BACKTICK => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            DOT3 | DOLLAR_UNDERSCORE
+                | MATCH
+                | SEMICOLON
+                | COMMA
+                | L_PAREN
+                | R_PAREN
+                | L_CURLY
+                | R_CURLY
+                | L_BRACK
+                | R_BRACK
+                | L_ANGLE
+                | R_ANGLE
+                | PLUS
+                | STAR
+                | SLASH
+                | PERCENT
+                | DOT
+                | COLON
+                | EQ
+                | EQ2
+                | FAT_ARROW
+                | BANG
+                | NEQ
+                | MINUS
+                | LTEQ
+                | GTEQ
+                | PLUSEQ
+                | BACKTICK
+        )
     }
     pub const fn is_literal(self) -> bool {
-        match self {
-            GRIT_INT | GRIT_NEGATIVE_INT | GRIT_DOUBLE | GRIT_STRING | GRIT_REGEX
-            | GRIT_SNIPPET_REGEX => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            GRIT_INT
+                | GRIT_NEGATIVE_INT
+                | GRIT_DOUBLE
+                | GRIT_STRING
+                | GRIT_REGEX
+                | GRIT_SNIPPET_REGEX
+        )
     }
     pub const fn is_list(self) -> bool {
-        match self {
+        matches!(
+            self,
             GRIT_DEFINITION_LIST
-            | GRIT_LANGUAGE_FLAVOR_LIST
-            | GRIT_PATTERN_LIST
-            | GRIT_NAMED_ARG_LIST
-            | GRIT_MAP_ELEMENT_LIST
-            | GRIT_LIST
-            | GRIT_LIST_PATTERN_LIST
-            | GRIT_PATTERN_ARG_LIST
-            | GRIT_PREDICATE_LIST
-            | GRIT_VARIABLE_LIST => true,
-            _ => false,
-        }
+                | GRIT_LANGUAGE_FLAVOR_LIST
+                | GRIT_PATTERN_LIST
+                | GRIT_NAMED_ARG_LIST
+                | GRIT_MAP_ELEMENT_LIST
+                | GRIT_LIST
+                | GRIT_LIST_PATTERN_LIST
+                | GRIT_PATTERN_ARG_LIST
+                | GRIT_PREDICATE_LIST
+                | GRIT_VARIABLE_LIST
+        )
     }
     pub fn from_keyword(ident: &str) -> Option<GritSyntaxKind> {
         let kw = match ident {

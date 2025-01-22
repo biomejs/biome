@@ -263,9 +263,9 @@ fn suggested_name(text: &SyntaxToken<JsLanguage>) -> Option<String> {
 
     generate_suggested_name(unquoted).map(|suggested_name| {
         if is_single_quoted {
-            format!("'{}'", suggested_name)
+            format!("'{suggested_name}'")
         } else if is_double_quoted {
-            format!("\"{}\"", suggested_name)
+            format!("\"{suggested_name}\"")
         } else {
             suggested_name.to_string()
         }

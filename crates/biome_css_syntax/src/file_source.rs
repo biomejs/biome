@@ -7,8 +7,6 @@ use std::{ffi::OsStr, path::Path};
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
 pub struct CssFileSource {
-    // Unused until we potentially support postcss/less/sass
-    #[allow(unused)]
     variant: CssVariant,
 }
 

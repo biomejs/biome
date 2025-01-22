@@ -374,7 +374,7 @@ mod test {
         ];
         for items in sorted.windows(2) {
             let (x, y) = (&items[0], &items[1]);
-            assert!(x < y, "'{:?}' < '{:?}'", x, y);
+            assert!(x < y, "'{x:?}' < '{y:?}'");
         }
     }
 }
