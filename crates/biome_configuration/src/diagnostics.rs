@@ -4,6 +4,7 @@ use biome_deserialize::DeserializationDiagnostic;
 use biome_diagnostics::ResolveError;
 use biome_diagnostics::{Advices, Diagnostic, Error, LogCategory, MessageAndDescription, Visit};
 use biome_rowan::SyntaxError;
+use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 
@@ -45,6 +46,9 @@ pub enum BiomeDiagnostic {
 
     /// When something is wrong with the configuration
     InvalidConfiguration(InvalidConfiguration),
+
+    /// When a user provide a configuration file path that isn't a JSON/JSONC file
+    InvalidConfigurationFile(InvalidConfigurationFile),
 
     /// Thrown when the pattern inside the `ignore` field errors
     InvalidIgnorePattern(InvalidIgnorePattern),
@@ -108,6 +112,12 @@ impl BiomeDiagnostic {
     pub fn invalid_configuration(message: impl Display) -> Self {
         Self::InvalidConfiguration(InvalidConfiguration {
             message: MessageAndDescription::from(markup! {{message}}.to_owned()),
+        })
+    }
+
+    pub fn invalid_configuration_file(path: &Utf8Path) -> Self {
+        Self::InvalidConfigurationFile(InvalidConfigurationFile {
+            path: path.to_string(),
         })
     }
 
@@ -223,6 +233,20 @@ pub struct InvalidConfiguration {
     #[message]
     #[description]
     message: MessageAndDescription,
+}
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "configuration",
+    severity = Error,
+    message(
+        description = "Invalid configuration file. Expected JSON or JSONC file, but got {path}.",
+        message("Invalid configuration file. Expected JSON or JSONC file, but got "{self.path}".")
+    )
+)]
+pub struct InvalidConfigurationFile {
+    #[location(resource)]
+    path: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
