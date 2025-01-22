@@ -126,10 +126,13 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     ctx.workspace.update_project_layout_for_paths(&paths);
 
     fs.traversal(Box::new(|scope: &dyn TraversalScope| {
-        for path in handleable_paths {
-            scope.handle(ctx_ref, path.into());
+        for path in &handleable_paths {
+            scope.handle(ctx_ref, path.to_path_buf());
         }
     }));
+
+    ctx.workspace
+        .update_dependency_graph_for_paths(&handleable_paths);
 
     start.elapsed()
 }

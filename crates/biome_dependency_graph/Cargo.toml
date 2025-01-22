@@ -1,0 +1,36 @@
+
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Data structure for tracking imports across files"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_dependency_graph"
+repository.workspace = true
+version              = "0.0.1"
+
+[lints]
+workspace = true
+
+[dependencies]
+biome_fs             = { workspace = true }
+biome_js_syntax      = { workspace = true }
+biome_package        = { workspace = true }
+biome_project_layout = { workspace = true }
+biome_rowan          = { workspace = true }
+camino               = { workspace = true }
+cfg-if               = { workspace = true }
+once_cell            = "1"                  # Use `std::sync::OnceLock::get_or_try_init` when it is stable.
+oxc_resolver         = { workspace = true }
+papaya               = { workspace = true }
+rustc-hash           = { workspace = true }
+seize                = "0.4.9"              # Remove when https://github.com/ibraheemdev/papaya/issues/46 is resolved
+serde_json           = { workspace = true }
+
+[dev-dependencies]
+biome_deserialize = { workspace = true }
+biome_js_parser   = { workspace = true }
+biome_json_parser = { workspace = true }
+biome_json_value  = { workspace = true }

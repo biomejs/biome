@@ -4,7 +4,7 @@ use biome_diagnostics::{Error, Severity};
 use camino::{Utf8Path, Utf8PathBuf};
 pub use memory::{ErrorEntry, MemoryFileSystem};
 pub use os::OsFileSystem;
-use oxc_resolver::{Resolution, ResolveError};
+use oxc_resolver::{FsResolution, ResolveError};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::fmt::{Debug, Display, Formatter};
@@ -36,6 +36,43 @@ impl ConfigName {
 
 type AutoSearchResultAlias = Result<Option<AutoSearchResult>, FileSystemDiagnostic>;
 
+/// Represents the kind of filesystem entry a path points at.
+#[derive(Clone, Copy, Debug)]
+pub enum PathKind {
+    File { is_symlink: bool },
+    Directory { is_symlink: bool },
+}
+
+impl PathKind {
+    pub fn is_file(self) -> bool {
+        matches!(self, Self::File { .. })
+    }
+
+    pub fn is_dir(self) -> bool {
+        matches!(self, Self::Directory { .. })
+    }
+
+    pub fn is_symlink(self) -> bool {
+        match self {
+            PathKind::File { is_symlink } => is_symlink,
+            PathKind::Directory { is_symlink } => is_symlink,
+        }
+    }
+}
+
+impl From<PathKind> for oxc_resolver::FileMetadata {
+    fn from(kind: PathKind) -> Self {
+        match kind {
+            PathKind::File { is_symlink } => {
+                oxc_resolver::FileMetadata::new(true, false, is_symlink)
+            }
+            PathKind::Directory { is_symlink } => {
+                oxc_resolver::FileMetadata::new(false, true, is_symlink)
+            }
+        }
+    }
+}
+
 pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// It opens a file with the given set of options
     fn open_with_options(&self, path: &Utf8Path, options: OpenOptions)
@@ -53,14 +90,31 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// Checks if the given path exists in the file system
     fn path_exists(&self, path: &Utf8Path) -> bool;
 
-    /// Checks if the given path is a regular file
-    fn path_is_file(&self, path: &Utf8Path) -> bool;
+    /// Checks if the given path is a regular file.
+    ///
+    /// This methods follows symlinks, so it is possible for
+    /// [Self::path_is_symlink()] and this method to return `true` for the same
+    /// path.
+    fn path_is_file(&self, path: &Utf8Path) -> bool {
+        Self::path_kind(self, path).map_or(false, |kind| matches!(kind, PathKind::File { .. }))
+    }
 
     /// Checks if the given path is a directory
-    fn path_is_dir(&self, path: &Utf8Path) -> bool;
+    ///
+    /// This methods follows symlinks, so it is possible for
+    /// [Self::path_is_symlink()] and this method to return `true` for the same
+    /// path.
+    fn path_is_dir(&self, path: &Utf8Path) -> bool {
+        Self::path_kind(self, path).map_or(false, |kind| matches!(kind, PathKind::Directory { .. }))
+    }
 
     /// Checks if the given path is a symlink
-    fn path_is_symlink(&self, path: &Utf8Path) -> bool;
+    fn path_is_symlink(&self, path: &Utf8Path) -> bool {
+        Self::path_kind(self, path).map_or(false, PathKind::is_symlink)
+    }
+
+    /// Returns metadata about the path.
+    fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic>;
 
     /// This method accepts a directory path (`search_dir`) and a list of filenames (`file_names`),
     /// It looks for the files in the specified directory in the order they appear in the list.
@@ -183,7 +237,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
         &self,
         specifier: &str,
         path: &Utf8Path,
-    ) -> Result<Resolution, ResolveError>;
+    ) -> Result<FsResolution, ResolveError>;
 }
 
 /// Result of the auto search
@@ -372,6 +426,10 @@ where
         T::path_is_symlink(self, path)
     }
 
+    fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {
+        T::path_kind(self, path)
+    }
+
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
         T::get_changed_files(self, base)
     }
@@ -384,7 +442,7 @@ where
         &self,
         specifier: &str,
         path: &Utf8Path,
-    ) -> Result<Resolution, ResolveError> {
+    ) -> Result<FsResolution, ResolveError> {
         T::resolve_configuration(self, specifier, path)
     }
 }
@@ -457,7 +515,6 @@ impl Advices for FsErrorKind {
 		        LogCategory::Error,
 			    &format!("Biome can't read the following file, maybe for permissions reasons or it doesn't exist: {path}")
 			),
-
             FsErrorKind::UnknownFileType => visitor.record_log(
                 LogCategory::Info,
                 &"Biome encountered a file system entry that's neither a file, directory or symbolic link",

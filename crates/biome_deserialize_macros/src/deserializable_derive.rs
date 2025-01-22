@@ -81,6 +81,10 @@ impl DeriveInput {
                             .filter_map(|(ident, attrs, ty)| {
                                 let attrs = StructFieldAttrs::try_from(&attrs)
                                     .expect("Could not parse field attributes");
+                                if attrs.skip {
+                                    return None;
+                                }
+
                                 let key = attrs
                                     .rename
                                     .unwrap_or_else(|| Case::Camel.convert(&ident.to_string()));

@@ -23,6 +23,7 @@ use crate::workspace::{
 use crate::{file_handlers::Features, Workspace, WorkspaceError};
 use append_only_vec::AppendOnlyVec;
 use biome_configuration::{BiomeDiagnostic, Configuration};
+use biome_dependency_graph::DependencyGraph;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Deserialized;
 use biome_diagnostics::print_diagnostic_to_string;
@@ -57,6 +58,9 @@ pub(super) struct WorkspaceServer {
 
     /// The layout of projects and their internal packages.
     project_layout: Arc<ProjectLayout>,
+
+    /// Dependency graph tracking imports across source files.
+    dependency_graph: Arc<DependencyGraph>,
 
     /// Stores the document (text content + version number) associated with a URL
     documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
@@ -131,6 +135,7 @@ impl WorkspaceServer {
             features: Features::new(),
             projects: Default::default(),
             project_layout: Default::default(),
+            dependency_graph: Default::default(),
             documents: Default::default(),
             file_sources: AppendOnlyVec::default(),
             patterns: Default::default(),
@@ -296,7 +301,7 @@ impl WorkspaceServer {
         if let DocumentFileSource::Js(js) = &mut source {
             let manifest = self.project_layout.get_node_manifest_for_path(&path);
             if let Some((_, manifest)) = manifest {
-                if manifest.r#type == Some(PackageType::Commonjs) && js.file_extension() == "js" {
+                if manifest.r#type == Some(PackageType::CommonJs) && js.file_extension() == "js" {
                     js.set_module_kind(ModuleKind::Script);
                 }
             }
@@ -527,6 +532,24 @@ impl WorkspaceServer {
         }
 
         Ok(())
+    }
+
+    pub(super) fn update_dependency_graph_for_paths(&self, paths: &[BiomePath]) {
+        self.dependency_graph.update_imports_for_js_paths(
+            self.fs.as_ref(),
+            &self.project_layout,
+            paths,
+            &[],
+            |path| {
+                let documents = self.documents.pin();
+                let doc = documents.get(path)?;
+                let file_source = self.file_sources[doc.file_source_index];
+                match file_source {
+                    DocumentFileSource::Js(_) => doc.syntax.as_ref().map(AnyParse::tree).ok(),
+                    _ => None,
+                }
+            },
+        );
     }
 }
 

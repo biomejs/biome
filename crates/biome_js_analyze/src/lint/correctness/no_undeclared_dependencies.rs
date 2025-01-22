@@ -279,8 +279,7 @@ impl Rule for NoUndeclaredDependencies {
             ));
         };
 
-        let mut manifest_path = package_path.clone();
-        manifest_path.push("package.json");
+        let manifest_path = package_path.clone();
 
         let diag = RuleDiagnostic::new(
             rule_category!(),

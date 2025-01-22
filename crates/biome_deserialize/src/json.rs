@@ -120,7 +120,7 @@ impl DeserializableValue for AnyJsonValue {
                 visitor.visit_map(ctx, members, range, name)
             }
             AnyJsonValue::JsonStringValue(value) => {
-                let value = unescape_json(value.inner_string_text().ok()?);
+                let value = unescape_json_string(value.inner_string_text().ok()?);
                 visitor.visit_str(ctx, value, range, name)
             }
         }
@@ -246,7 +246,7 @@ impl DeserializableValue for JsonMemberName {
         visitor: V,
         name: &str,
     ) -> Option<V::Output> {
-        let value = unescape_json(self.inner_string_text().ok()?);
+        let value = unescape_json_string(self.inner_string_text().ok()?);
         visitor.visit_str(ctx, value, AstNode::range(self), name)
     }
 
@@ -255,16 +255,78 @@ impl DeserializableValue for JsonMemberName {
     }
 }
 
-/// Returns an unescaped version of `s`.
-/// If nothing is escaped, then `s` is returned without any allocation.
-/// If at least one character is escaped, then a string is allocated and holds the unescaped string.
-fn unescape_json(s: TokenText) -> Text {
-    if s.text().bytes().any(|c| c == b'\\') {
-        // Searching and replacing at the same time should be more optimal.
-        // However, strings are expected to be small and escapees are expected to be rare.
-        Text::Owned(s.text().replace(r"\\", r"\"))
-    } else {
-        Text::Borrowed(s)
+/// Returns `text` with escape sequences processed.
+///
+/// If nothing is escaped, `text` is returned without any allocation. If at
+/// least one character is escaped, then a string is allocated and holds the
+/// unescaped string.
+pub fn unescape_json_string(text: TokenText) -> Text {
+    enum State {
+        Normal,
+        Escaped,
+        EscapedUnicode(u8, char),
+    }
+
+    match text.find('\\') {
+        Some(index) => {
+            let mut state = State::Escaped;
+            let mut string = text[..index].to_string();
+            string.reserve(usize::from(text.len()) - string.len());
+            for c in text[(index + 1)..].chars() {
+                match state {
+                    State::Escaped => {
+                        let escaped = match c {
+                            '"' => '"',
+                            '\\' => '\\',
+                            '/' => '/',
+                            'b' => '\u{0008}',
+                            'f' => '\u{000c}',
+                            'n' => '\n',
+                            'r' => '\r',
+                            't' => '\t',
+                            'u' => {
+                                state = State::EscapedUnicode(0, '\0');
+                                continue;
+                            }
+                            c => c,
+                        };
+                        string.push(escaped);
+                        state = State::Normal;
+                    }
+                    State::EscapedUnicode(digit, char) => {
+                        let value = if c.is_ascii_digit() {
+                            c as u32 - '0' as u32
+                        } else if ('a'..='f').contains(&c) {
+                            c as u32 - 'a' as u32 + 10
+                        } else if ('A'..='F').contains(&c) {
+                            c as u32 - 'A' as u32 + 10
+                        } else {
+                            string.push(c);
+                            state = State::Normal;
+                            continue;
+                        };
+
+                        let char = match (16 * char as u32 + value).try_into() {
+                            Ok(char) => char,
+                            Err(_) => {
+                                state = State::Normal;
+                                continue;
+                            }
+                        };
+                        if digit == 3 {
+                            string.push(char);
+                            state = State::Normal;
+                        } else {
+                            state = State::EscapedUnicode(digit + 1, char);
+                        }
+                    }
+                    State::Normal if c == '\\' => state = State::Escaped,
+                    State::Normal => string.push(c),
+                }
+            }
+            Text::Owned(string)
+        }
+        None => Text::Borrowed(text),
     }
 }
 

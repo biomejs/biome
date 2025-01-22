@@ -1,5 +1,5 @@
 //! Implementation of the [FileSystem] and related traits for the underlying OS filesystem
-use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind};
+use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind, PathKind};
 use crate::fs::OpenOptions;
 use crate::{
     fs::{TraversalContext, TraversalScope},
@@ -7,7 +7,7 @@ use crate::{
 };
 use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
 use camino::{Utf8DirEntry, Utf8Path, Utf8PathBuf};
-use oxc_resolver::{Resolution, ResolveError, ResolveOptions, Resolver};
+use oxc_resolver::{FsResolution, ResolveError, ResolveOptions, Resolver};
 use rayon::{scope, Scope};
 use std::fs::FileType;
 use std::panic::AssertUnwindSafe;
@@ -98,11 +98,37 @@ impl FileSystem for OsFileSystem {
         path.is_symlink()
     }
 
+    fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {
+        match path.metadata() {
+            Ok(metadata) => {
+                let is_symlink = metadata.is_symlink();
+                if metadata.is_file() {
+                    Ok(PathKind::File { is_symlink })
+                } else if metadata.is_dir() {
+                    Ok(PathKind::Directory { is_symlink })
+                } else {
+                    Err(FileSystemDiagnostic {
+                        path: path.to_string(),
+                        severity: Severity::Error,
+                        error_kind: FsErrorKind::UnknownFileType,
+                        source: None,
+                    })
+                }
+            }
+            Err(error) => Err(FileSystemDiagnostic {
+                path: path.to_string(),
+                severity: Severity::Error,
+                error_kind: FsErrorKind::CantReadFile(error.to_string()),
+                source: None,
+            }),
+        }
+    }
+
     fn resolve_configuration(
         &self,
         specifier: &str,
         path: &Utf8Path,
-    ) -> Result<Resolution, ResolveError> {
+    ) -> Result<FsResolution, ResolveError> {
         self.configuration_resolver.resolve(path, specifier)
     }
 
