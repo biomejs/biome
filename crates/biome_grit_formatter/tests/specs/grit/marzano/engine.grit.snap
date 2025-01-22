@@ -27,8 +27,6 @@ Attribute Position: Auto
 -----
 
 ```grit
-engine
-marzano(0.1)
-
+engine marzano(0.1)
 `console.log($var)` => `console.log($var)`
 ```

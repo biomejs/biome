@@ -777,6 +777,7 @@ impl<'src> GritLexer<'src> {
             b"multifile" => MULTIFILE_KW,
             b"engine" => ENGINE_KW,
             b"biome" => BIOME_KW,
+            b"marzano" => MARZANO_KW,
             b"language" => LANGUAGE_KW,
             b"js" => JS_KW,
             b"css" => CSS_KW,
