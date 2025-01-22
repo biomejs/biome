@@ -2,6 +2,7 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 assertion_line: 212
 info: css/declaration_list.css
+snapshot_kind: text
 ---
 # Input
 
@@ -113,8 +114,14 @@ Quote style: Double Quotes
 
 a {
 	--bs-font-monospace: sfmono-regular / menlo;
-	--bs-font-monospace: sfmono-regular, menlo, monaco, consolas,
-		"Liberation Mono", "Courier New", monospace;
+	--bs-font-monospace:
+		sfmono-regular,
+		menlo,
+		monaco,
+		consolas,
+		"Liberation Mono",
+		"Courier New",
+		monospace;
 }
 
 a {

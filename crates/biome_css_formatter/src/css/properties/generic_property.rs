@@ -12,48 +12,47 @@ impl FormatNodeRule<CssGenericProperty> for FormatCssGenericProperty {
             value,
         } = node.as_fields();
 
-        let is_dash_identity = name.clone().unwrap().as_css_dashed_identifier().is_some();
+        let is_comma: bool = value.iter().any(|v| v.text().eq(","));
 
-        let has_comma = value.iter().any(|v| v.text().eq(","));
-
-        if has_comma && !is_dash_identity {
+        if is_comma {
             write!(
                 f,
                 [
                     name.format(),
                     colon_token.format(),
-                    indent(&format_with(|f| {
-                        let last = value.last().unwrap();
-
+                    &soft_line_indent_or_hard_space(&format_once(|f| {
                         for (idx, v) in value.iter().enumerate() {
-                            if idx == 0 {
-                                write!(f, [soft_line_break_or_space()])?;
+                            let is_last = idx == value.len() - 1;
+
+                            if is_last {
+                                write!(f, [v.format()])?;
+                                break;
                             }
+
+                            let Some(next) = value.iter().nth(idx + 1) else {
+                                continue;
+                            };
+
+                            let next_is_comma = next.text().eq(",");
 
                             if v.text().eq(",") {
                                 write!(f, [v.format(), hard_line_break()])?;
-                            } else if let Some(next) = value.iter().nth(idx + 1) {
-                                if next.text().eq(",") || v == last {
-                                    write!(f, [v.format()])?;
-                                } else {
-                                    write!(f, [v.format(), space()])?;
-                                }
-                            } else {
+                            } else if next_is_comma {
                                 write!(f, [v.format()])?;
+                            } else {
+                                write!(f, [v.format(), space()])?;
                             }
                         }
 
                         Ok(())
-                    })),
+                    }))
                 ]
-            )?;
-
-            return Ok(());
+            )
+        } else {
+            write!(
+                f,
+                [name.format(), colon_token.format(), space(), value.format()]
+            )
         }
-
-        write!(
-            f,
-            [name.format(), colon_token.format(), space(), value.format()]
-        )
     }
 }
