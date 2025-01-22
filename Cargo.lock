@@ -811,6 +811,7 @@ dependencies = [
  "biome_aria_metadata",
  "biome_console",
  "biome_control_flow",
+ "biome_dependency_graph",
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",

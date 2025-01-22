@@ -4,6 +4,7 @@ use biome_analyze::{
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_fs::OsFileSystem;
+use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage, ModuleKind};
 use biome_package::PackageType;
@@ -129,14 +130,10 @@ pub(crate) fn analyze_and_snap(
 
     let options = create_analyzer_options(input_file, &mut diagnostics);
 
-    let (_, errors) = biome_js_analyze::analyze(
-        &root,
-        filter,
-        &options,
-        plugins,
-        source_type,
-        project_layout,
-        |event| {
+    let services = JsAnalyzerServices::from((Default::default(), project_layout, source_type));
+
+    let (_, errors) =
+        biome_js_analyze::analyze(&root, filter, &options, plugins, services, |event| {
             if let Some(mut diag) = event.diagnostic() {
                 for action in event.actions() {
                     if check_action_type.is_suppression() {
@@ -192,8 +189,7 @@ pub(crate) fn analyze_and_snap(
             }
 
             ControlFlow::<Never>::Continue(())
-        },
-    );
+        });
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));
