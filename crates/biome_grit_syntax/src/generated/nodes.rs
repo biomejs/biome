@@ -1976,7 +1976,7 @@ impl GritPatternContains {
     pub fn contains(&self) -> SyntaxResult<AnyGritMaybeCurlyPattern> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn until_clause(&self) -> Option<GritPatternContainsUntilClause> {
+    pub fn until_clause(&self) -> Option<GritPatternUntilClause> {
         support::node(&self.syntax, 2usize)
     }
 }
@@ -1992,47 +1992,7 @@ impl Serialize for GritPatternContains {
 pub struct GritPatternContainsFields {
     pub contains_token: SyntaxResult<SyntaxToken>,
     pub contains: SyntaxResult<AnyGritMaybeCurlyPattern>,
-    pub until_clause: Option<GritPatternContainsUntilClause>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GritPatternContainsUntilClause {
-    pub(crate) syntax: SyntaxNode,
-}
-impl GritPatternContainsUntilClause {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> GritPatternContainsUntilClauseFields {
-        GritPatternContainsUntilClauseFields {
-            until_token: self.until_token(),
-            until: self.until(),
-        }
-    }
-    pub fn until_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn until(&self) -> SyntaxResult<AnyGritPattern> {
-        support::required_node(&self.syntax, 1usize)
-    }
-}
-impl Serialize for GritPatternContainsUntilClause {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct GritPatternContainsUntilClauseFields {
-    pub until_token: SyntaxResult<SyntaxToken>,
-    pub until: SyntaxResult<AnyGritPattern>,
+    pub until_clause: Option<GritPatternUntilClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritPatternDefinition {
@@ -2513,6 +2473,46 @@ pub struct GritPatternOrElseFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub patterns: GritPatternList,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GritPatternUntilClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GritPatternUntilClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GritPatternUntilClauseFields {
+        GritPatternUntilClauseFields {
+            until_token: self.until_token(),
+            until: self.until(),
+        }
+    }
+    pub fn until_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn until(&self) -> SyntaxResult<AnyGritPattern> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for GritPatternUntilClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GritPatternUntilClauseFields {
+    pub until_token: SyntaxResult<SyntaxToken>,
+    pub until: SyntaxResult<AnyGritPattern>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritPatternWhere {
@@ -4182,6 +4182,7 @@ impl GritWithin {
         GritWithinFields {
             within_token: self.within_token(),
             pattern: self.pattern(),
+            until_clause: self.until_clause(),
         }
     }
     pub fn within_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -4189,6 +4190,9 @@ impl GritWithin {
     }
     pub fn pattern(&self) -> SyntaxResult<AnyGritMaybeCurlyPattern> {
         support::required_node(&self.syntax, 1usize)
+    }
+    pub fn until_clause(&self) -> Option<GritPatternUntilClause> {
+        support::node(&self.syntax, 2usize)
     }
 }
 impl Serialize for GritWithin {
@@ -4203,6 +4207,7 @@ impl Serialize for GritWithin {
 pub struct GritWithinFields {
     pub within_token: SyntaxResult<SyntaxToken>,
     pub pattern: SyntaxResult<AnyGritMaybeCurlyPattern>,
+    pub until_clause: Option<GritPatternUntilClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritCodeSnippetSource {
@@ -5104,11 +5109,20 @@ impl AstNode for GritAddOperation {
 }
 impl std::fmt::Debug for GritAddOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritAddOperation")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("plus_token", &support::DebugSyntaxResult(self.plus_token()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritAddOperation")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("plus_token", &support::DebugSyntaxResult(self.plus_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritAddOperation").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritAddOperation> for SyntaxNode {
@@ -5144,12 +5158,21 @@ impl AstNode for GritAnnotation {
 }
 impl std::fmt::Debug for GritAnnotation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritAnnotation")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritAnnotation")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritAnnotation").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritAnnotation> for SyntaxNode {
@@ -5185,11 +5208,20 @@ impl AstNode for GritAssignmentAsPattern {
 }
 impl std::fmt::Debug for GritAssignmentAsPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritAssignmentAsPattern")
-            .field("container", &support::DebugSyntaxResult(self.container()))
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritAssignmentAsPattern")
+                .field("container", &support::DebugSyntaxResult(self.container()))
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .finish()
+        } else {
+            f.debug_struct("GritAssignmentAsPattern").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritAssignmentAsPattern> for SyntaxNode {
@@ -5225,12 +5257,21 @@ impl AstNode for GritBacktickSnippetLiteral {
 }
 impl std::fmt::Debug for GritBacktickSnippetLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBacktickSnippetLiteral")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritBacktickSnippetLiteral")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritBacktickSnippetLiteral").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritBacktickSnippetLiteral> for SyntaxNode {
@@ -5266,9 +5307,18 @@ impl AstNode for GritBooleanLiteral {
 }
 impl std::fmt::Debug for GritBooleanLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBooleanLiteral")
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritBooleanLiteral")
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("GritBooleanLiteral").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritBooleanLiteral> for SyntaxNode {
@@ -5304,17 +5354,26 @@ impl AstNode for GritBracketedPattern {
 }
 impl std::fmt::Debug for GritBracketedPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBracketedPattern")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritBracketedPattern")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritBracketedPattern").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritBracketedPattern> for SyntaxNode {
@@ -5350,17 +5409,26 @@ impl AstNode for GritBracketedPredicate {
 }
 impl std::fmt::Debug for GritBracketedPredicate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBracketedPredicate")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("predicate", &support::DebugSyntaxResult(self.predicate()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritBracketedPredicate")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("predicate", &support::DebugSyntaxResult(self.predicate()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritBracketedPredicate").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritBracketedPredicate> for SyntaxNode {
@@ -5396,14 +5464,23 @@ impl AstNode for GritBubble {
 }
 impl std::fmt::Debug for GritBubble {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBubble")
-            .field(
-                "bubble_token",
-                &support::DebugSyntaxResult(self.bubble_token()),
-            )
-            .field("scope", &support::DebugOptionalElement(self.scope()))
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritBubble")
+                .field(
+                    "bubble_token",
+                    &support::DebugSyntaxResult(self.bubble_token()),
+                )
+                .field("scope", &support::DebugOptionalElement(self.scope()))
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .finish()
+        } else {
+            f.debug_struct("GritBubble").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritBubble> for SyntaxNode {
@@ -5439,17 +5516,26 @@ impl AstNode for GritBubbleScope {
 }
 impl std::fmt::Debug for GritBubbleScope {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBubbleScope")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("variables", &self.variables())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritBubbleScope")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("variables", &self.variables())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritBubbleScope").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritBubbleScope> for SyntaxNode {
@@ -5485,9 +5571,18 @@ impl AstNode for GritCodeSnippet {
 }
 impl std::fmt::Debug for GritCodeSnippet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritCodeSnippet")
-            .field("source", &support::DebugSyntaxResult(self.source()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritCodeSnippet")
+                .field("source", &support::DebugSyntaxResult(self.source()))
+                .finish()
+        } else {
+            f.debug_struct("GritCodeSnippet").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritCodeSnippet> for SyntaxNode {
@@ -5523,17 +5618,26 @@ impl AstNode for GritCurlyPattern {
 }
 impl std::fmt::Debug for GritCurlyPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritCurlyPattern")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritCurlyPattern")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritCurlyPattern").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritCurlyPattern> for SyntaxNode {
@@ -5569,14 +5673,23 @@ impl AstNode for GritDivOperation {
 }
 impl std::fmt::Debug for GritDivOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritDivOperation")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "slash_token",
-                &support::DebugSyntaxResult(self.slash_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritDivOperation")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "slash_token",
+                    &support::DebugSyntaxResult(self.slash_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritDivOperation").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritDivOperation> for SyntaxNode {
@@ -5612,9 +5725,18 @@ impl AstNode for GritDot {
 }
 impl std::fmt::Debug for GritDot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritDot")
-            .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritDot")
+                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
+                .finish()
+        } else {
+            f.debug_struct("GritDot").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritDot> for SyntaxNode {
@@ -5650,13 +5772,22 @@ impl AstNode for GritDotdotdot {
 }
 impl std::fmt::Debug for GritDotdotdot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritDotdotdot")
-            .field(
-                "dotdotdot_token",
-                &support::DebugSyntaxResult(self.dotdotdot_token()),
-            )
-            .field("pattern", &support::DebugOptionalElement(self.pattern()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritDotdotdot")
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugSyntaxResult(self.dotdotdot_token()),
+                )
+                .field("pattern", &support::DebugOptionalElement(self.pattern()))
+                .finish()
+        } else {
+            f.debug_struct("GritDotdotdot").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritDotdotdot> for SyntaxNode {
@@ -5692,12 +5823,21 @@ impl AstNode for GritDoubleLiteral {
 }
 impl std::fmt::Debug for GritDoubleLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritDoubleLiteral")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritDoubleLiteral")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritDoubleLiteral").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritDoubleLiteral> for SyntaxNode {
@@ -5733,12 +5873,21 @@ impl AstNode for GritEngineName {
 }
 impl std::fmt::Debug for GritEngineName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritEngineName")
-            .field(
-                "engine_kind",
-                &support::DebugSyntaxResult(self.engine_kind()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritEngineName")
+                .field(
+                    "engine_kind",
+                    &support::DebugSyntaxResult(self.engine_kind()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritEngineName").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritEngineName> for SyntaxNode {
@@ -5774,13 +5923,22 @@ impl AstNode for GritEvery {
 }
 impl std::fmt::Debug for GritEvery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritEvery")
-            .field(
-                "every_token",
-                &support::DebugSyntaxResult(self.every_token()),
-            )
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritEvery")
+                .field(
+                    "every_token",
+                    &support::DebugSyntaxResult(self.every_token()),
+                )
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .finish()
+        } else {
+            f.debug_struct("GritEvery").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritEvery> for SyntaxNode {
@@ -5816,21 +5974,30 @@ impl AstNode for GritFiles {
 }
 impl std::fmt::Debug for GritFiles {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritFiles")
-            .field(
-                "multifile_token",
-                &support::DebugSyntaxResult(self.multifile_token()),
-            )
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("files", &self.files())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritFiles")
+                .field(
+                    "multifile_token",
+                    &support::DebugSyntaxResult(self.multifile_token()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("files", &self.files())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritFiles").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritFiles> for SyntaxNode {
@@ -5866,23 +6033,32 @@ impl AstNode for GritFunctionDefinition {
 }
 impl std::fmt::Debug for GritFunctionDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritFunctionDefinition")
-            .field(
-                "function_token",
-                &support::DebugSyntaxResult(self.function_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("args", &self.args())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritFunctionDefinition")
+                .field(
+                    "function_token",
+                    &support::DebugSyntaxResult(self.function_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("args", &self.args())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("GritFunctionDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritFunctionDefinition> for SyntaxNode {
@@ -5918,12 +6094,21 @@ impl AstNode for GritIntLiteral {
 }
 impl std::fmt::Debug for GritIntLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritIntLiteral")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritIntLiteral")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritIntLiteral").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritIntLiteral> for SyntaxNode {
@@ -5959,18 +6144,27 @@ impl AstNode for GritLanguageDeclaration {
 }
 impl std::fmt::Debug for GritLanguageDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritLanguageDeclaration")
-            .field(
-                "language_token",
-                &support::DebugSyntaxResult(self.language_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("flavor", &support::DebugOptionalElement(self.flavor()))
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritLanguageDeclaration")
+                .field(
+                    "language_token",
+                    &support::DebugSyntaxResult(self.language_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("flavor", &support::DebugOptionalElement(self.flavor()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritLanguageDeclaration").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritLanguageDeclaration> for SyntaxNode {
@@ -6006,17 +6200,26 @@ impl AstNode for GritLanguageFlavor {
 }
 impl std::fmt::Debug for GritLanguageFlavor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritLanguageFlavor")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("flavors", &self.flavors())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritLanguageFlavor")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("flavors", &self.flavors())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritLanguageFlavor").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritLanguageFlavor> for SyntaxNode {
@@ -6052,12 +6255,21 @@ impl AstNode for GritLanguageFlavorKind {
 }
 impl std::fmt::Debug for GritLanguageFlavorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritLanguageFlavorKind")
-            .field(
-                "flavor_kind",
-                &support::DebugSyntaxResult(self.flavor_kind()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritLanguageFlavorKind")
+                .field(
+                    "flavor_kind",
+                    &support::DebugSyntaxResult(self.flavor_kind()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritLanguageFlavorKind").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritLanguageFlavorKind> for SyntaxNode {
@@ -6093,12 +6305,21 @@ impl AstNode for GritLanguageName {
 }
 impl std::fmt::Debug for GritLanguageName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritLanguageName")
-            .field(
-                "language_kind",
-                &support::DebugSyntaxResult(self.language_kind()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritLanguageName")
+                .field(
+                    "language_kind",
+                    &support::DebugSyntaxResult(self.language_kind()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritLanguageName").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritLanguageName> for SyntaxNode {
@@ -6134,13 +6355,22 @@ impl AstNode for GritLanguageSpecificSnippet {
 }
 impl std::fmt::Debug for GritLanguageSpecificSnippet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritLanguageSpecificSnippet")
-            .field("language", &support::DebugSyntaxResult(self.language()))
-            .field(
-                "snippet_token",
-                &support::DebugSyntaxResult(self.snippet_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritLanguageSpecificSnippet")
+                .field("language", &support::DebugSyntaxResult(self.language()))
+                .field(
+                    "snippet_token",
+                    &support::DebugSyntaxResult(self.snippet_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritLanguageSpecificSnippet").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritLanguageSpecificSnippet> for SyntaxNode {
@@ -6176,22 +6406,31 @@ impl AstNode for GritLike {
 }
 impl std::fmt::Debug for GritLike {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritLike")
-            .field("like_token", &support::DebugSyntaxResult(self.like_token()))
-            .field(
-                "threshold",
-                &support::DebugOptionalElement(self.threshold()),
-            )
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("example", &support::DebugSyntaxResult(self.example()))
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritLike")
+                .field("like_token", &support::DebugSyntaxResult(self.like_token()))
+                .field(
+                    "threshold",
+                    &support::DebugOptionalElement(self.threshold()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("example", &support::DebugSyntaxResult(self.example()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritLike").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritLike> for SyntaxNode {
@@ -6227,17 +6466,26 @@ impl AstNode for GritLikeThreshold {
 }
 impl std::fmt::Debug for GritLikeThreshold {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritLikeThreshold")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("threshold", &support::DebugSyntaxResult(self.threshold()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritLikeThreshold")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("threshold", &support::DebugSyntaxResult(self.threshold()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritLikeThreshold").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritLikeThreshold> for SyntaxNode {
@@ -6273,18 +6521,27 @@ impl AstNode for GritList {
 }
 impl std::fmt::Debug for GritList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritList")
-            .field("name", &support::DebugOptionalElement(self.name()))
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("patterns", &self.patterns())
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritList")
+                .field("name", &support::DebugOptionalElement(self.name()))
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("patterns", &self.patterns())
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritList").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritList> for SyntaxNode {
@@ -6320,18 +6577,27 @@ impl AstNode for GritListAccessor {
 }
 impl std::fmt::Debug for GritListAccessor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritListAccessor")
-            .field("list", &support::DebugSyntaxResult(self.list()))
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("index", &support::DebugSyntaxResult(self.index()))
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritListAccessor")
+                .field("list", &support::DebugSyntaxResult(self.list()))
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("index", &support::DebugSyntaxResult(self.index()))
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritListAccessor").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritListAccessor> for SyntaxNode {
@@ -6367,17 +6633,26 @@ impl AstNode for GritMap {
 }
 impl std::fmt::Debug for GritMap {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritMap")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("elements", &self.elements())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritMap")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("elements", &self.elements())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritMap").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritMap> for SyntaxNode {
@@ -6413,11 +6688,20 @@ impl AstNode for GritMapAccessor {
 }
 impl std::fmt::Debug for GritMapAccessor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritMapAccessor")
-            .field("map", &support::DebugSyntaxResult(self.map()))
-            .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-            .field("key", &support::DebugSyntaxResult(self.key()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritMapAccessor")
+                .field("map", &support::DebugSyntaxResult(self.map()))
+                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
+                .field("key", &support::DebugSyntaxResult(self.key()))
+                .finish()
+        } else {
+            f.debug_struct("GritMapAccessor").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritMapAccessor> for SyntaxNode {
@@ -6453,14 +6737,23 @@ impl AstNode for GritMapElement {
 }
 impl std::fmt::Debug for GritMapElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritMapElement")
-            .field("key", &support::DebugSyntaxResult(self.key()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritMapElement")
+                .field("key", &support::DebugSyntaxResult(self.key()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("GritMapElement").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritMapElement> for SyntaxNode {
@@ -6496,14 +6789,23 @@ impl AstNode for GritModOperation {
 }
 impl std::fmt::Debug for GritModOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritModOperation")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "remainder_token",
-                &support::DebugSyntaxResult(self.remainder_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritModOperation")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "remainder_token",
+                    &support::DebugSyntaxResult(self.remainder_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritModOperation").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritModOperation> for SyntaxNode {
@@ -6539,11 +6841,20 @@ impl AstNode for GritMulOperation {
 }
 impl std::fmt::Debug for GritMulOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritMulOperation")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("star_token", &support::DebugSyntaxResult(self.star_token()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritMulOperation")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("star_token", &support::DebugSyntaxResult(self.star_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritMulOperation").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritMulOperation> for SyntaxNode {
@@ -6579,12 +6890,21 @@ impl AstNode for GritName {
 }
 impl std::fmt::Debug for GritName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritName")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritName")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritName").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritName> for SyntaxNode {
@@ -6620,11 +6940,20 @@ impl AstNode for GritNamedArg {
 }
 impl std::fmt::Debug for GritNamedArg {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritNamedArg")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritNamedArg")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .finish()
+        } else {
+            f.debug_struct("GritNamedArg").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritNamedArg> for SyntaxNode {
@@ -6660,12 +6989,21 @@ impl AstNode for GritNegativeIntLiteral {
 }
 impl std::fmt::Debug for GritNegativeIntLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritNegativeIntLiteral")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritNegativeIntLiteral")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritNegativeIntLiteral").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritNegativeIntLiteral> for SyntaxNode {
@@ -6701,18 +7039,27 @@ impl AstNode for GritNodeLike {
 }
 impl std::fmt::Debug for GritNodeLike {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritNodeLike")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("named_args", &self.named_args())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritNodeLike")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("named_args", &self.named_args())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritNodeLike").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritNodeLike> for SyntaxNode {
@@ -6748,9 +7095,18 @@ impl AstNode for GritNot {
 }
 impl std::fmt::Debug for GritNot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritNot")
-            .field("token", &support::DebugSyntaxResult(self.token()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritNot")
+                .field("token", &support::DebugSyntaxResult(self.token()))
+                .finish()
+        } else {
+            f.debug_struct("GritNot").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritNot> for SyntaxNode {
@@ -6786,14 +7142,23 @@ impl AstNode for GritPatternAccumulate {
 }
 impl std::fmt::Debug for GritPatternAccumulate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternAccumulate")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "add_assign_token",
-                &support::DebugSyntaxResult(self.add_assign_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternAccumulate")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "add_assign_token",
+                    &support::DebugSyntaxResult(self.add_assign_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritPatternAccumulate").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternAccumulate> for SyntaxNode {
@@ -6829,13 +7194,22 @@ impl AstNode for GritPatternAfter {
 }
 impl std::fmt::Debug for GritPatternAfter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternAfter")
-            .field(
-                "after_token",
-                &support::DebugSyntaxResult(self.after_token()),
-            )
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternAfter")
+                .field(
+                    "after_token",
+                    &support::DebugSyntaxResult(self.after_token()),
+                )
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .finish()
+        } else {
+            f.debug_struct("GritPatternAfter").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternAfter> for SyntaxNode {
@@ -6871,18 +7245,27 @@ impl AstNode for GritPatternAnd {
 }
 impl std::fmt::Debug for GritPatternAnd {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternAnd")
-            .field("and_token", &support::DebugSyntaxResult(self.and_token()))
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("patterns", &self.patterns())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternAnd")
+                .field("and_token", &support::DebugSyntaxResult(self.and_token()))
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("patterns", &self.patterns())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPatternAnd").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternAnd> for SyntaxNode {
@@ -6918,18 +7301,27 @@ impl AstNode for GritPatternAny {
 }
 impl std::fmt::Debug for GritPatternAny {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternAny")
-            .field("any_token", &support::DebugSyntaxResult(self.any_token()))
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("patterns", &self.patterns())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternAny")
+                .field("any_token", &support::DebugSyntaxResult(self.any_token()))
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("patterns", &self.patterns())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPatternAny").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternAny> for SyntaxNode {
@@ -6965,11 +7357,20 @@ impl AstNode for GritPatternAs {
 }
 impl std::fmt::Debug for GritPatternAs {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternAs")
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .field("as_token", &support::DebugSyntaxResult(self.as_token()))
-            .field("variable", &support::DebugSyntaxResult(self.variable()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternAs")
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .field("as_token", &support::DebugSyntaxResult(self.as_token()))
+                .field("variable", &support::DebugSyntaxResult(self.variable()))
+                .finish()
+        } else {
+            f.debug_struct("GritPatternAs").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternAs> for SyntaxNode {
@@ -7005,13 +7406,22 @@ impl AstNode for GritPatternBefore {
 }
 impl std::fmt::Debug for GritPatternBefore {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternBefore")
-            .field(
-                "before_token",
-                &support::DebugSyntaxResult(self.before_token()),
-            )
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternBefore")
+                .field(
+                    "before_token",
+                    &support::DebugSyntaxResult(self.before_token()),
+                )
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .finish()
+        } else {
+            f.debug_struct("GritPatternBefore").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternBefore> for SyntaxNode {
@@ -7047,17 +7457,26 @@ impl AstNode for GritPatternContains {
 }
 impl std::fmt::Debug for GritPatternContains {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternContains")
-            .field(
-                "contains_token",
-                &support::DebugSyntaxResult(self.contains_token()),
-            )
-            .field("contains", &support::DebugSyntaxResult(self.contains()))
-            .field(
-                "until_clause",
-                &support::DebugOptionalElement(self.until_clause()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternContains")
+                .field(
+                    "contains_token",
+                    &support::DebugSyntaxResult(self.contains_token()),
+                )
+                .field("contains", &support::DebugSyntaxResult(self.contains()))
+                .field(
+                    "until_clause",
+                    &support::DebugOptionalElement(self.until_clause()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPatternContains").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternContains> for SyntaxNode {
@@ -7067,48 +7486,6 @@ impl From<GritPatternContains> for SyntaxNode {
 }
 impl From<GritPatternContains> for SyntaxElement {
     fn from(n: GritPatternContains) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for GritPatternContainsUntilClause {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for GritPatternContainsUntilClause {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternContainsUntilClause")
-            .field(
-                "until_token",
-                &support::DebugSyntaxResult(self.until_token()),
-            )
-            .field("until", &support::DebugSyntaxResult(self.until()))
-            .finish()
-    }
-}
-impl From<GritPatternContainsUntilClause> for SyntaxNode {
-    fn from(n: GritPatternContainsUntilClause) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<GritPatternContainsUntilClause> for SyntaxElement {
-    fn from(n: GritPatternContainsUntilClause) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -7135,28 +7512,37 @@ impl AstNode for GritPatternDefinition {
 }
 impl std::fmt::Debug for GritPatternDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternDefinition")
-            .field(
-                "visibility_token",
-                &support::DebugOptionalElement(self.visibility_token()),
-            )
-            .field(
-                "pattern_token",
-                &support::DebugSyntaxResult(self.pattern_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("args", &self.args())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field("language", &support::DebugOptionalElement(self.language()))
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternDefinition")
+                .field(
+                    "visibility_token",
+                    &support::DebugOptionalElement(self.visibility_token()),
+                )
+                .field(
+                    "pattern_token",
+                    &support::DebugSyntaxResult(self.pattern_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("args", &self.args())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field("language", &support::DebugOptionalElement(self.language()))
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("GritPatternDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternDefinition> for SyntaxNode {
@@ -7192,17 +7578,26 @@ impl AstNode for GritPatternDefinitionBody {
 }
 impl std::fmt::Debug for GritPatternDefinitionBody {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternDefinitionBody")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("patterns", &self.patterns())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternDefinitionBody")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("patterns", &self.patterns())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPatternDefinitionBody").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternDefinitionBody> for SyntaxNode {
@@ -7238,13 +7633,22 @@ impl AstNode for GritPatternElseClause {
 }
 impl std::fmt::Debug for GritPatternElseClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternElseClause")
-            .field("else_token", &support::DebugSyntaxResult(self.else_token()))
-            .field(
-                "else_pattern",
-                &support::DebugSyntaxResult(self.else_pattern()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternElseClause")
+                .field("else_token", &support::DebugSyntaxResult(self.else_token()))
+                .field(
+                    "else_pattern",
+                    &support::DebugSyntaxResult(self.else_pattern()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPatternElseClause").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternElseClause> for SyntaxNode {
@@ -7280,29 +7684,38 @@ impl AstNode for GritPatternIfElse {
 }
 impl std::fmt::Debug for GritPatternIfElse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternIfElse")
-            .field("if_token", &support::DebugSyntaxResult(self.if_token()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field(
-                "if_predicate",
-                &support::DebugSyntaxResult(self.if_predicate()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field(
-                "then_pattern",
-                &support::DebugSyntaxResult(self.then_pattern()),
-            )
-            .field(
-                "else_clause",
-                &support::DebugOptionalElement(self.else_clause()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternIfElse")
+                .field("if_token", &support::DebugSyntaxResult(self.if_token()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field(
+                    "if_predicate",
+                    &support::DebugSyntaxResult(self.if_predicate()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field(
+                    "then_pattern",
+                    &support::DebugSyntaxResult(self.then_pattern()),
+                )
+                .field(
+                    "else_clause",
+                    &support::DebugOptionalElement(self.else_clause()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPatternIfElse").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternIfElse> for SyntaxNode {
@@ -7338,13 +7751,22 @@ impl AstNode for GritPatternIncludes {
 }
 impl std::fmt::Debug for GritPatternIncludes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternIncludes")
-            .field(
-                "includes_token",
-                &support::DebugSyntaxResult(self.includes_token()),
-            )
-            .field("includes", &support::DebugSyntaxResult(self.includes()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternIncludes")
+                .field(
+                    "includes_token",
+                    &support::DebugSyntaxResult(self.includes_token()),
+                )
+                .field("includes", &support::DebugSyntaxResult(self.includes()))
+                .finish()
+        } else {
+            f.debug_struct("GritPatternIncludes").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternIncludes> for SyntaxNode {
@@ -7380,14 +7802,23 @@ impl AstNode for GritPatternLimit {
 }
 impl std::fmt::Debug for GritPatternLimit {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternLimit")
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .field(
-                "limit_token",
-                &support::DebugSyntaxResult(self.limit_token()),
-            )
-            .field("limit", &support::DebugSyntaxResult(self.limit()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternLimit")
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .field(
+                    "limit_token",
+                    &support::DebugSyntaxResult(self.limit_token()),
+                )
+                .field("limit", &support::DebugSyntaxResult(self.limit()))
+                .finish()
+        } else {
+            f.debug_struct("GritPatternLimit").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternLimit> for SyntaxNode {
@@ -7423,13 +7854,22 @@ impl AstNode for GritPatternMaybe {
 }
 impl std::fmt::Debug for GritPatternMaybe {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternMaybe")
-            .field(
-                "maybe_token",
-                &support::DebugSyntaxResult(self.maybe_token()),
-            )
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternMaybe")
+                .field(
+                    "maybe_token",
+                    &support::DebugSyntaxResult(self.maybe_token()),
+                )
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .finish()
+        } else {
+            f.debug_struct("GritPatternMaybe").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternMaybe> for SyntaxNode {
@@ -7465,10 +7905,19 @@ impl AstNode for GritPatternNot {
 }
 impl std::fmt::Debug for GritPatternNot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternNot")
-            .field("not", &support::DebugSyntaxResult(self.not()))
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternNot")
+                .field("not", &support::DebugSyntaxResult(self.not()))
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .finish()
+        } else {
+            f.debug_struct("GritPatternNot").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternNot> for SyntaxNode {
@@ -7504,18 +7953,27 @@ impl AstNode for GritPatternOr {
 }
 impl std::fmt::Debug for GritPatternOr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternOr")
-            .field("or_token", &support::DebugSyntaxResult(self.or_token()))
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("patterns", &self.patterns())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternOr")
+                .field("or_token", &support::DebugSyntaxResult(self.or_token()))
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("patterns", &self.patterns())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPatternOr").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternOr> for SyntaxNode {
@@ -7551,21 +8009,30 @@ impl AstNode for GritPatternOrElse {
 }
 impl std::fmt::Debug for GritPatternOrElse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternOrElse")
-            .field(
-                "orelse_token",
-                &support::DebugSyntaxResult(self.orelse_token()),
-            )
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("patterns", &self.patterns())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternOrElse")
+                .field(
+                    "orelse_token",
+                    &support::DebugSyntaxResult(self.orelse_token()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("patterns", &self.patterns())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPatternOrElse").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternOrElse> for SyntaxNode {
@@ -7575,6 +8042,57 @@ impl From<GritPatternOrElse> for SyntaxNode {
 }
 impl From<GritPatternOrElse> for SyntaxElement {
     fn from(n: GritPatternOrElse) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for GritPatternUntilClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_PATTERN_UNTIL_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GRIT_PATTERN_UNTIL_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GritPatternUntilClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternUntilClause")
+                .field(
+                    "until_token",
+                    &support::DebugSyntaxResult(self.until_token()),
+                )
+                .field("until", &support::DebugSyntaxResult(self.until()))
+                .finish()
+        } else {
+            f.debug_struct("GritPatternUntilClause").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
+    }
+}
+impl From<GritPatternUntilClause> for SyntaxNode {
+    fn from(n: GritPatternUntilClause) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<GritPatternUntilClause> for SyntaxElement {
+    fn from(n: GritPatternUntilClause) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -7601,17 +8119,26 @@ impl AstNode for GritPatternWhere {
 }
 impl std::fmt::Debug for GritPatternWhere {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternWhere")
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .field(
-                "where_token",
-                &support::DebugSyntaxResult(self.where_token()),
-            )
-            .field(
-                "side_condition",
-                &support::DebugSyntaxResult(self.side_condition()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPatternWhere")
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .field(
+                    "where_token",
+                    &support::DebugSyntaxResult(self.where_token()),
+                )
+                .field(
+                    "side_condition",
+                    &support::DebugSyntaxResult(self.side_condition()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPatternWhere").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPatternWhere> for SyntaxNode {
@@ -7647,14 +8174,23 @@ impl AstNode for GritPredicateAccumulate {
 }
 impl std::fmt::Debug for GritPredicateAccumulate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateAccumulate")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "add_assign_token",
-                &support::DebugSyntaxResult(self.add_assign_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateAccumulate")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "add_assign_token",
+                    &support::DebugSyntaxResult(self.add_assign_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateAccumulate").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateAccumulate> for SyntaxNode {
@@ -7690,21 +8226,30 @@ impl AstNode for GritPredicateAnd {
 }
 impl std::fmt::Debug for GritPredicateAnd {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateAnd")
-            .field(
-                "and_token",
-                &support::DebugOptionalElement(self.and_token()),
-            )
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("predicates", &self.predicates())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateAnd")
+                .field(
+                    "and_token",
+                    &support::DebugOptionalElement(self.and_token()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("predicates", &self.predicates())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateAnd").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateAnd> for SyntaxNode {
@@ -7740,18 +8285,27 @@ impl AstNode for GritPredicateAny {
 }
 impl std::fmt::Debug for GritPredicateAny {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateAny")
-            .field("any_token", &support::DebugSyntaxResult(self.any_token()))
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("predicates", &self.predicates())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateAny")
+                .field("any_token", &support::DebugSyntaxResult(self.any_token()))
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("predicates", &self.predicates())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateAny").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateAny> for SyntaxNode {
@@ -7787,11 +8341,20 @@ impl AstNode for GritPredicateAssignment {
 }
 impl std::fmt::Debug for GritPredicateAssignment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateAssignment")
-            .field("container", &support::DebugSyntaxResult(self.container()))
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateAssignment")
+                .field("container", &support::DebugSyntaxResult(self.container()))
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateAssignment").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateAssignment> for SyntaxNode {
@@ -7827,18 +8390,27 @@ impl AstNode for GritPredicateCall {
 }
 impl std::fmt::Debug for GritPredicateCall {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateCall")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("named_args", &self.named_args())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateCall")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("named_args", &self.named_args())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateCall").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateCall> for SyntaxNode {
@@ -7874,17 +8446,26 @@ impl AstNode for GritPredicateCurly {
 }
 impl std::fmt::Debug for GritPredicateCurly {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateCurly")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("predicates", &self.predicates())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateCurly")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("predicates", &self.predicates())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateCurly").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateCurly> for SyntaxNode {
@@ -7920,23 +8501,32 @@ impl AstNode for GritPredicateDefinition {
 }
 impl std::fmt::Debug for GritPredicateDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateDefinition")
-            .field(
-                "predicate_token",
-                &support::DebugSyntaxResult(self.predicate_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("args", &self.args())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateDefinition")
+                .field(
+                    "predicate_token",
+                    &support::DebugSyntaxResult(self.predicate_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("args", &self.args())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateDefinition").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateDefinition> for SyntaxNode {
@@ -7972,13 +8562,22 @@ impl AstNode for GritPredicateElseClause {
 }
 impl std::fmt::Debug for GritPredicateElseClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateElseClause")
-            .field("else_token", &support::DebugSyntaxResult(self.else_token()))
-            .field(
-                "else_predicate",
-                &support::DebugSyntaxResult(self.else_predicate()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateElseClause")
+                .field("else_token", &support::DebugSyntaxResult(self.else_token()))
+                .field(
+                    "else_predicate",
+                    &support::DebugSyntaxResult(self.else_predicate()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateElseClause").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateElseClause> for SyntaxNode {
@@ -8014,14 +8613,23 @@ impl AstNode for GritPredicateEqual {
 }
 impl std::fmt::Debug for GritPredicateEqual {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateEqual")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "equality_token",
-                &support::DebugSyntaxResult(self.equality_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateEqual")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "equality_token",
+                    &support::DebugSyntaxResult(self.equality_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateEqual").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateEqual> for SyntaxNode {
@@ -8057,14 +8665,23 @@ impl AstNode for GritPredicateGreater {
 }
 impl std::fmt::Debug for GritPredicateGreater {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateGreater")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateGreater")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateGreater").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateGreater> for SyntaxNode {
@@ -8100,14 +8717,23 @@ impl AstNode for GritPredicateGreaterEqual {
 }
 impl std::fmt::Debug for GritPredicateGreaterEqual {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateGreaterEqual")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "greater_than_equal_token",
-                &support::DebugSyntaxResult(self.greater_than_equal_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateGreaterEqual")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "greater_than_equal_token",
+                    &support::DebugSyntaxResult(self.greater_than_equal_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateGreaterEqual").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateGreaterEqual> for SyntaxNode {
@@ -8143,29 +8769,38 @@ impl AstNode for GritPredicateIfElse {
 }
 impl std::fmt::Debug for GritPredicateIfElse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateIfElse")
-            .field("if_token", &support::DebugSyntaxResult(self.if_token()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field(
-                "if_predicate",
-                &support::DebugSyntaxResult(self.if_predicate()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field(
-                "then_predicate",
-                &support::DebugSyntaxResult(self.then_predicate()),
-            )
-            .field(
-                "else_clause",
-                &support::DebugOptionalElement(self.else_clause()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateIfElse")
+                .field("if_token", &support::DebugSyntaxResult(self.if_token()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field(
+                    "if_predicate",
+                    &support::DebugSyntaxResult(self.if_predicate()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field(
+                    "then_predicate",
+                    &support::DebugSyntaxResult(self.then_predicate()),
+                )
+                .field(
+                    "else_clause",
+                    &support::DebugOptionalElement(self.else_clause()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateIfElse").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateIfElse> for SyntaxNode {
@@ -8201,14 +8836,23 @@ impl AstNode for GritPredicateLess {
 }
 impl std::fmt::Debug for GritPredicateLess {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateLess")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateLess")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateLess").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateLess> for SyntaxNode {
@@ -8244,14 +8888,23 @@ impl AstNode for GritPredicateLessEqual {
 }
 impl std::fmt::Debug for GritPredicateLessEqual {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateLessEqual")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "less_than_equal_token",
-                &support::DebugSyntaxResult(self.less_than_equal_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateLessEqual")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "less_than_equal_token",
+                    &support::DebugSyntaxResult(self.less_than_equal_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateLessEqual").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateLessEqual> for SyntaxNode {
@@ -8287,14 +8940,23 @@ impl AstNode for GritPredicateMatch {
 }
 impl std::fmt::Debug for GritPredicateMatch {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateMatch")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "match_token",
-                &support::DebugSyntaxResult(self.match_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateMatch")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "match_token",
+                    &support::DebugSyntaxResult(self.match_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateMatch").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateMatch> for SyntaxNode {
@@ -8330,13 +8992,22 @@ impl AstNode for GritPredicateMaybe {
 }
 impl std::fmt::Debug for GritPredicateMaybe {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateMaybe")
-            .field(
-                "maybe_token",
-                &support::DebugSyntaxResult(self.maybe_token()),
-            )
-            .field("predicate", &support::DebugSyntaxResult(self.predicate()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateMaybe")
+                .field(
+                    "maybe_token",
+                    &support::DebugSyntaxResult(self.maybe_token()),
+                )
+                .field("predicate", &support::DebugSyntaxResult(self.predicate()))
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateMaybe").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateMaybe> for SyntaxNode {
@@ -8372,10 +9043,19 @@ impl AstNode for GritPredicateNot {
 }
 impl std::fmt::Debug for GritPredicateNot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateNot")
-            .field("not", &support::DebugSyntaxResult(self.not()))
-            .field("predicate", &support::DebugSyntaxResult(self.predicate()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateNot")
+                .field("not", &support::DebugSyntaxResult(self.not()))
+                .field("predicate", &support::DebugSyntaxResult(self.predicate()))
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateNot").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateNot> for SyntaxNode {
@@ -8411,14 +9091,23 @@ impl AstNode for GritPredicateNotEqual {
 }
 impl std::fmt::Debug for GritPredicateNotEqual {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateNotEqual")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "inequality_token",
-                &support::DebugSyntaxResult(self.inequality_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateNotEqual")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "inequality_token",
+                    &support::DebugSyntaxResult(self.inequality_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateNotEqual").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateNotEqual> for SyntaxNode {
@@ -8454,18 +9143,27 @@ impl AstNode for GritPredicateOr {
 }
 impl std::fmt::Debug for GritPredicateOr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateOr")
-            .field("or_token", &support::DebugSyntaxResult(self.or_token()))
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("predicates", &self.predicates())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateOr")
+                .field("or_token", &support::DebugSyntaxResult(self.or_token()))
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("predicates", &self.predicates())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateOr").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateOr> for SyntaxNode {
@@ -8501,13 +9199,22 @@ impl AstNode for GritPredicateReturn {
 }
 impl std::fmt::Debug for GritPredicateReturn {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateReturn")
-            .field(
-                "return_token",
-                &support::DebugSyntaxResult(self.return_token()),
-            )
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateReturn")
+                .field(
+                    "return_token",
+                    &support::DebugSyntaxResult(self.return_token()),
+                )
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateReturn").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateReturn> for SyntaxNode {
@@ -8543,18 +9250,27 @@ impl AstNode for GritPredicateRewrite {
 }
 impl std::fmt::Debug for GritPredicateRewrite {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPredicateRewrite")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "annotation",
-                &support::DebugOptionalElement(self.annotation()),
-            )
-            .field(
-                "fat_arrow_token",
-                &support::DebugSyntaxResult(self.fat_arrow_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritPredicateRewrite")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "annotation",
+                    &support::DebugOptionalElement(self.annotation()),
+                )
+                .field(
+                    "fat_arrow_token",
+                    &support::DebugSyntaxResult(self.fat_arrow_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritPredicateRewrite").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritPredicateRewrite> for SyntaxNode {
@@ -8590,12 +9306,21 @@ impl AstNode for GritRawBacktickSnippetLiteral {
 }
 impl std::fmt::Debug for GritRawBacktickSnippetLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritRawBacktickSnippetLiteral")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritRawBacktickSnippetLiteral")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritRawBacktickSnippetLiteral").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritRawBacktickSnippetLiteral> for SyntaxNode {
@@ -8631,12 +9356,21 @@ impl AstNode for GritRegexLiteral {
 }
 impl std::fmt::Debug for GritRegexLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritRegexLiteral")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritRegexLiteral")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritRegexLiteral").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritRegexLiteral> for SyntaxNode {
@@ -8672,13 +9406,22 @@ impl AstNode for GritRegexPattern {
 }
 impl std::fmt::Debug for GritRegexPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritRegexPattern")
-            .field("regex", &support::DebugSyntaxResult(self.regex()))
-            .field(
-                "variables",
-                &support::DebugOptionalElement(self.variables()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritRegexPattern")
+                .field("regex", &support::DebugSyntaxResult(self.regex()))
+                .field(
+                    "variables",
+                    &support::DebugOptionalElement(self.variables()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritRegexPattern").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritRegexPattern> for SyntaxNode {
@@ -8714,17 +9457,26 @@ impl AstNode for GritRegexPatternVariables {
 }
 impl std::fmt::Debug for GritRegexPatternVariables {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritRegexPatternVariables")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("args", &self.args())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritRegexPatternVariables")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("args", &self.args())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritRegexPatternVariables").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritRegexPatternVariables> for SyntaxNode {
@@ -8760,18 +9512,27 @@ impl AstNode for GritRewrite {
 }
 impl std::fmt::Debug for GritRewrite {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritRewrite")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "annotation",
-                &support::DebugOptionalElement(self.annotation()),
-            )
-            .field(
-                "fat_arrow_token",
-                &support::DebugSyntaxResult(self.fat_arrow_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritRewrite")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "annotation",
+                    &support::DebugOptionalElement(self.annotation()),
+                )
+                .field(
+                    "fat_arrow_token",
+                    &support::DebugSyntaxResult(self.fat_arrow_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritRewrite").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritRewrite> for SyntaxNode {
@@ -8807,16 +9568,25 @@ impl AstNode for GritRoot {
 }
 impl std::fmt::Debug for GritRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritRoot")
-            .field(
-                "bom_token",
-                &support::DebugOptionalElement(self.bom_token()),
-            )
-            .field("version", &support::DebugOptionalElement(self.version()))
-            .field("language", &support::DebugOptionalElement(self.language()))
-            .field("definitions", &self.definitions())
-            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritRoot")
+                .field(
+                    "bom_token",
+                    &support::DebugOptionalElement(self.bom_token()),
+                )
+                .field("version", &support::DebugOptionalElement(self.version()))
+                .field("language", &support::DebugOptionalElement(self.language()))
+                .field("definitions", &self.definitions())
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("GritRoot").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritRoot> for SyntaxNode {
@@ -8852,21 +9622,30 @@ impl AstNode for GritSequential {
 }
 impl std::fmt::Debug for GritSequential {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritSequential")
-            .field(
-                "sequential_token",
-                &support::DebugSyntaxResult(self.sequential_token()),
-            )
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("sequential", &self.sequential())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritSequential")
+                .field(
+                    "sequential_token",
+                    &support::DebugSyntaxResult(self.sequential_token()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("sequential", &self.sequential())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritSequential").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritSequential> for SyntaxNode {
@@ -8902,12 +9681,21 @@ impl AstNode for GritSnippetRegexLiteral {
 }
 impl std::fmt::Debug for GritSnippetRegexLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritSnippetRegexLiteral")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritSnippetRegexLiteral")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritSnippetRegexLiteral").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritSnippetRegexLiteral> for SyntaxNode {
@@ -8943,10 +9731,19 @@ impl AstNode for GritSome {
 }
 impl std::fmt::Debug for GritSome {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritSome")
-            .field("some_token", &support::DebugSyntaxResult(self.some_token()))
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritSome")
+                .field("some_token", &support::DebugSyntaxResult(self.some_token()))
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .finish()
+        } else {
+            f.debug_struct("GritSome").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritSome> for SyntaxNode {
@@ -8982,12 +9779,21 @@ impl AstNode for GritStringLiteral {
 }
 impl std::fmt::Debug for GritStringLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritStringLiteral")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritStringLiteral")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritStringLiteral").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritStringLiteral> for SyntaxNode {
@@ -9023,14 +9829,23 @@ impl AstNode for GritSubOperation {
 }
 impl std::fmt::Debug for GritSubOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritSubOperation")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "minus_token",
-                &support::DebugSyntaxResult(self.minus_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritSubOperation")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "minus_token",
+                    &support::DebugSyntaxResult(self.minus_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("GritSubOperation").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritSubOperation> for SyntaxNode {
@@ -9066,12 +9881,21 @@ impl AstNode for GritUndefinedLiteral {
 }
 impl std::fmt::Debug for GritUndefinedLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritUndefinedLiteral")
-            .field(
-                "token_token",
-                &support::DebugSyntaxResult(self.token_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritUndefinedLiteral")
+                .field(
+                    "token_token",
+                    &support::DebugSyntaxResult(self.token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritUndefinedLiteral").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritUndefinedLiteral> for SyntaxNode {
@@ -9107,12 +9931,21 @@ impl AstNode for GritUnderscore {
 }
 impl std::fmt::Debug for GritUnderscore {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritUnderscore")
-            .field(
-                "token_token",
-                &support::DebugSyntaxResult(self.token_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritUnderscore")
+                .field(
+                    "token_token",
+                    &support::DebugSyntaxResult(self.token_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritUnderscore").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritUnderscore> for SyntaxNode {
@@ -9148,12 +9981,21 @@ impl AstNode for GritVariable {
 }
 impl std::fmt::Debug for GritVariable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritVariable")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritVariable")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritVariable").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritVariable> for SyntaxNode {
@@ -9189,25 +10031,34 @@ impl AstNode for GritVersion {
 }
 impl std::fmt::Debug for GritVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritVersion")
-            .field(
-                "engine_token",
-                &support::DebugSyntaxResult(self.engine_token()),
-            )
-            .field(
-                "engine_name",
-                &support::DebugSyntaxResult(self.engine_name()),
-            )
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("version", &support::DebugSyntaxResult(self.version()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritVersion")
+                .field(
+                    "engine_token",
+                    &support::DebugSyntaxResult(self.engine_token()),
+                )
+                .field(
+                    "engine_name",
+                    &support::DebugSyntaxResult(self.engine_name()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("version", &support::DebugSyntaxResult(self.version()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritVersion").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritVersion> for SyntaxNode {
@@ -9243,13 +10094,26 @@ impl AstNode for GritWithin {
 }
 impl std::fmt::Debug for GritWithin {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritWithin")
-            .field(
-                "within_token",
-                &support::DebugSyntaxResult(self.within_token()),
-            )
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .finish()
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static DEPTH: AtomicUsize = AtomicUsize::new(0);
+        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        let result = if current_depth < 16 {
+            f.debug_struct("GritWithin")
+                .field(
+                    "within_token",
+                    &support::DebugSyntaxResult(self.within_token()),
+                )
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .field(
+                    "until_clause",
+                    &support::DebugOptionalElement(self.until_clause()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("GritWithin").finish()
+        };
+        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        result
     }
 }
 impl From<GritWithin> for SyntaxNode {
@@ -11794,11 +12658,6 @@ impl std::fmt::Display for GritPatternContains {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for GritPatternContainsUntilClause {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for GritPatternDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -11845,6 +12704,11 @@ impl std::fmt::Display for GritPatternOr {
     }
 }
 impl std::fmt::Display for GritPatternOrElse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GritPatternUntilClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

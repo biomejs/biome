@@ -92,6 +92,11 @@ impl AnalyzerConfiguration {
         self.preferred_quote = preferred_quote;
         self
     }
+
+    pub fn with_preferred_jsx_quote(mut self, preferred_jsx_quote: PreferredQuote) -> Self {
+        self.preferred_jsx_quote = preferred_jsx_quote;
+        self
+    }
 }
 
 /// A set of information useful to the analyzer infrastructure

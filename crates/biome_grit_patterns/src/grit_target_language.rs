@@ -220,7 +220,14 @@ impl GritTargetLanguage {
     /// Returns the target language based on the language declaration given
     /// inside a Grit pattern.
     pub fn from_declaration(language_decl: &GritLanguageDeclaration) -> Option<Self> {
-        match language_decl.name().ok()?.language_kind().ok()?.kind() {
+        match language_decl
+            .name()
+            .ok()?
+            .as_grit_language_name()?
+            .language_kind()
+            .ok()?
+            .kind()
+        {
             GritSyntaxKind::CSS_KW => Some(Self::CssTargetLanguage(CssTargetLanguage)),
             GritSyntaxKind::JS_KW => Some(Self::JsTargetLanguage(JsTargetLanguage)),
             _ => None,

@@ -252,17 +252,3 @@ fn as_string_literal_attribute_value(attribute: &AnyJsxAttribute) -> Option<JsxS
         JsxSpreadAttribute(_) => None,
     }
 }
-
-fn has_last_attribute_comments(element: &AnyJsxOpeningElement, comments: &JsComments) -> bool {
-    let has_comments_on_last_attribute = element
-        .attributes()
-        .last()
-        .map_or(false, |attribute| comments.has_comments(attribute.syntax()));
-
-    let last_attribute_has_comments = element
-        .syntax()
-        .tokens()
-        .any(|token| token.text().contains('>') && token.has_leading_comments());
-
-    has_comments_on_last_attribute || last_attribute_has_comments
-}

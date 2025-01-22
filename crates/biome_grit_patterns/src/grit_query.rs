@@ -82,12 +82,8 @@ impl GritQuery {
 
         let var_registry = VarRegistry::from_locations(&self.variable_locations);
 
-        // FIXME: Can be simplified when https://github.com/getgrit/gritql/pull/594/files is released.
-        let paths: Vec<PathBuf> = files
-            .iter()
-            .map(|file| file.path.clone().into_std_path_buf())
-            .collect();
-        let file_registry = FileRegistry::new_from_paths(paths.iter().collect());
+        let paths: Vec<_> = files.iter().map(|file| file.path.as_std_path()).collect();
+        let file_registry = FileRegistry::new_from_paths(paths);
         let binding = FilePattern::Single(file_ptr);
 
         let mut state = State::new(var_registry.into(), file_registry);
