@@ -5109,10 +5109,10 @@ impl AstNode for GritAddOperation {
 }
 impl std::fmt::Debug for GritAddOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritAddOperation")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field("plus_token", &support::DebugSyntaxResult(self.plus_token()))
@@ -5121,7 +5121,7 @@ impl std::fmt::Debug for GritAddOperation {
         } else {
             f.debug_struct("GritAddOperation").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5158,10 +5158,10 @@ impl AstNode for GritAnnotation {
 }
 impl std::fmt::Debug for GritAnnotation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritAnnotation")
                 .field(
                     "value_token",
@@ -5171,7 +5171,7 @@ impl std::fmt::Debug for GritAnnotation {
         } else {
             f.debug_struct("GritAnnotation").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5208,10 +5208,10 @@ impl AstNode for GritAssignmentAsPattern {
 }
 impl std::fmt::Debug for GritAssignmentAsPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritAssignmentAsPattern")
                 .field("container", &support::DebugSyntaxResult(self.container()))
                 .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
@@ -5220,7 +5220,7 @@ impl std::fmt::Debug for GritAssignmentAsPattern {
         } else {
             f.debug_struct("GritAssignmentAsPattern").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5257,10 +5257,10 @@ impl AstNode for GritBacktickSnippetLiteral {
 }
 impl std::fmt::Debug for GritBacktickSnippetLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritBacktickSnippetLiteral")
                 .field(
                     "value_token",
@@ -5270,7 +5270,7 @@ impl std::fmt::Debug for GritBacktickSnippetLiteral {
         } else {
             f.debug_struct("GritBacktickSnippetLiteral").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5307,17 +5307,17 @@ impl AstNode for GritBooleanLiteral {
 }
 impl std::fmt::Debug for GritBooleanLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritBooleanLiteral")
                 .field("value", &support::DebugSyntaxResult(self.value()))
                 .finish()
         } else {
             f.debug_struct("GritBooleanLiteral").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5354,10 +5354,10 @@ impl AstNode for GritBracketedPattern {
 }
 impl std::fmt::Debug for GritBracketedPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritBracketedPattern")
                 .field(
                     "l_paren_token",
@@ -5372,7 +5372,7 @@ impl std::fmt::Debug for GritBracketedPattern {
         } else {
             f.debug_struct("GritBracketedPattern").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5409,10 +5409,10 @@ impl AstNode for GritBracketedPredicate {
 }
 impl std::fmt::Debug for GritBracketedPredicate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritBracketedPredicate")
                 .field(
                     "l_paren_token",
@@ -5427,7 +5427,7 @@ impl std::fmt::Debug for GritBracketedPredicate {
         } else {
             f.debug_struct("GritBracketedPredicate").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5464,10 +5464,10 @@ impl AstNode for GritBubble {
 }
 impl std::fmt::Debug for GritBubble {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritBubble")
                 .field(
                     "bubble_token",
@@ -5479,7 +5479,7 @@ impl std::fmt::Debug for GritBubble {
         } else {
             f.debug_struct("GritBubble").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5516,10 +5516,10 @@ impl AstNode for GritBubbleScope {
 }
 impl std::fmt::Debug for GritBubbleScope {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritBubbleScope")
                 .field(
                     "l_paren_token",
@@ -5534,7 +5534,7 @@ impl std::fmt::Debug for GritBubbleScope {
         } else {
             f.debug_struct("GritBubbleScope").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5571,17 +5571,17 @@ impl AstNode for GritCodeSnippet {
 }
 impl std::fmt::Debug for GritCodeSnippet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritCodeSnippet")
                 .field("source", &support::DebugSyntaxResult(self.source()))
                 .finish()
         } else {
             f.debug_struct("GritCodeSnippet").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5618,10 +5618,10 @@ impl AstNode for GritCurlyPattern {
 }
 impl std::fmt::Debug for GritCurlyPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritCurlyPattern")
                 .field(
                     "l_curly_token",
@@ -5636,7 +5636,7 @@ impl std::fmt::Debug for GritCurlyPattern {
         } else {
             f.debug_struct("GritCurlyPattern").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5673,10 +5673,10 @@ impl AstNode for GritDivOperation {
 }
 impl std::fmt::Debug for GritDivOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritDivOperation")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -5688,7 +5688,7 @@ impl std::fmt::Debug for GritDivOperation {
         } else {
             f.debug_struct("GritDivOperation").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5725,17 +5725,17 @@ impl AstNode for GritDot {
 }
 impl std::fmt::Debug for GritDot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritDot")
                 .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
                 .finish()
         } else {
             f.debug_struct("GritDot").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5772,10 +5772,10 @@ impl AstNode for GritDotdotdot {
 }
 impl std::fmt::Debug for GritDotdotdot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritDotdotdot")
                 .field(
                     "dotdotdot_token",
@@ -5786,7 +5786,7 @@ impl std::fmt::Debug for GritDotdotdot {
         } else {
             f.debug_struct("GritDotdotdot").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5823,10 +5823,10 @@ impl AstNode for GritDoubleLiteral {
 }
 impl std::fmt::Debug for GritDoubleLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritDoubleLiteral")
                 .field(
                     "value_token",
@@ -5836,7 +5836,7 @@ impl std::fmt::Debug for GritDoubleLiteral {
         } else {
             f.debug_struct("GritDoubleLiteral").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5873,10 +5873,10 @@ impl AstNode for GritEngineName {
 }
 impl std::fmt::Debug for GritEngineName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritEngineName")
                 .field(
                     "engine_kind",
@@ -5886,7 +5886,7 @@ impl std::fmt::Debug for GritEngineName {
         } else {
             f.debug_struct("GritEngineName").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5923,10 +5923,10 @@ impl AstNode for GritEvery {
 }
 impl std::fmt::Debug for GritEvery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritEvery")
                 .field(
                     "every_token",
@@ -5937,7 +5937,7 @@ impl std::fmt::Debug for GritEvery {
         } else {
             f.debug_struct("GritEvery").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -5974,10 +5974,10 @@ impl AstNode for GritFiles {
 }
 impl std::fmt::Debug for GritFiles {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritFiles")
                 .field(
                     "multifile_token",
@@ -5996,7 +5996,7 @@ impl std::fmt::Debug for GritFiles {
         } else {
             f.debug_struct("GritFiles").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6033,10 +6033,10 @@ impl AstNode for GritFunctionDefinition {
 }
 impl std::fmt::Debug for GritFunctionDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritFunctionDefinition")
                 .field(
                     "function_token",
@@ -6057,7 +6057,7 @@ impl std::fmt::Debug for GritFunctionDefinition {
         } else {
             f.debug_struct("GritFunctionDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6094,10 +6094,10 @@ impl AstNode for GritIntLiteral {
 }
 impl std::fmt::Debug for GritIntLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritIntLiteral")
                 .field(
                     "value_token",
@@ -6107,7 +6107,7 @@ impl std::fmt::Debug for GritIntLiteral {
         } else {
             f.debug_struct("GritIntLiteral").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6144,10 +6144,10 @@ impl AstNode for GritLanguageDeclaration {
 }
 impl std::fmt::Debug for GritLanguageDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritLanguageDeclaration")
                 .field(
                     "language_token",
@@ -6163,7 +6163,7 @@ impl std::fmt::Debug for GritLanguageDeclaration {
         } else {
             f.debug_struct("GritLanguageDeclaration").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6200,10 +6200,10 @@ impl AstNode for GritLanguageFlavor {
 }
 impl std::fmt::Debug for GritLanguageFlavor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritLanguageFlavor")
                 .field(
                     "l_paren_token",
@@ -6218,7 +6218,7 @@ impl std::fmt::Debug for GritLanguageFlavor {
         } else {
             f.debug_struct("GritLanguageFlavor").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6255,10 +6255,10 @@ impl AstNode for GritLanguageFlavorKind {
 }
 impl std::fmt::Debug for GritLanguageFlavorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritLanguageFlavorKind")
                 .field(
                     "flavor_kind",
@@ -6268,7 +6268,7 @@ impl std::fmt::Debug for GritLanguageFlavorKind {
         } else {
             f.debug_struct("GritLanguageFlavorKind").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6305,10 +6305,10 @@ impl AstNode for GritLanguageName {
 }
 impl std::fmt::Debug for GritLanguageName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritLanguageName")
                 .field(
                     "language_kind",
@@ -6318,7 +6318,7 @@ impl std::fmt::Debug for GritLanguageName {
         } else {
             f.debug_struct("GritLanguageName").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6355,10 +6355,10 @@ impl AstNode for GritLanguageSpecificSnippet {
 }
 impl std::fmt::Debug for GritLanguageSpecificSnippet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritLanguageSpecificSnippet")
                 .field("language", &support::DebugSyntaxResult(self.language()))
                 .field(
@@ -6369,7 +6369,7 @@ impl std::fmt::Debug for GritLanguageSpecificSnippet {
         } else {
             f.debug_struct("GritLanguageSpecificSnippet").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6406,10 +6406,10 @@ impl AstNode for GritLike {
 }
 impl std::fmt::Debug for GritLike {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritLike")
                 .field("like_token", &support::DebugSyntaxResult(self.like_token()))
                 .field(
@@ -6429,7 +6429,7 @@ impl std::fmt::Debug for GritLike {
         } else {
             f.debug_struct("GritLike").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6466,10 +6466,10 @@ impl AstNode for GritLikeThreshold {
 }
 impl std::fmt::Debug for GritLikeThreshold {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritLikeThreshold")
                 .field(
                     "l_paren_token",
@@ -6484,7 +6484,7 @@ impl std::fmt::Debug for GritLikeThreshold {
         } else {
             f.debug_struct("GritLikeThreshold").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6521,10 +6521,10 @@ impl AstNode for GritList {
 }
 impl std::fmt::Debug for GritList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritList")
                 .field("name", &support::DebugOptionalElement(self.name()))
                 .field(
@@ -6540,7 +6540,7 @@ impl std::fmt::Debug for GritList {
         } else {
             f.debug_struct("GritList").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6577,10 +6577,10 @@ impl AstNode for GritListAccessor {
 }
 impl std::fmt::Debug for GritListAccessor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritListAccessor")
                 .field("list", &support::DebugSyntaxResult(self.list()))
                 .field(
@@ -6596,7 +6596,7 @@ impl std::fmt::Debug for GritListAccessor {
         } else {
             f.debug_struct("GritListAccessor").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6633,10 +6633,10 @@ impl AstNode for GritMap {
 }
 impl std::fmt::Debug for GritMap {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritMap")
                 .field(
                     "l_curly_token",
@@ -6651,7 +6651,7 @@ impl std::fmt::Debug for GritMap {
         } else {
             f.debug_struct("GritMap").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6688,10 +6688,10 @@ impl AstNode for GritMapAccessor {
 }
 impl std::fmt::Debug for GritMapAccessor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritMapAccessor")
                 .field("map", &support::DebugSyntaxResult(self.map()))
                 .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
@@ -6700,7 +6700,7 @@ impl std::fmt::Debug for GritMapAccessor {
         } else {
             f.debug_struct("GritMapAccessor").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6737,10 +6737,10 @@ impl AstNode for GritMapElement {
 }
 impl std::fmt::Debug for GritMapElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritMapElement")
                 .field("key", &support::DebugSyntaxResult(self.key()))
                 .field(
@@ -6752,7 +6752,7 @@ impl std::fmt::Debug for GritMapElement {
         } else {
             f.debug_struct("GritMapElement").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6789,10 +6789,10 @@ impl AstNode for GritModOperation {
 }
 impl std::fmt::Debug for GritModOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritModOperation")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -6804,7 +6804,7 @@ impl std::fmt::Debug for GritModOperation {
         } else {
             f.debug_struct("GritModOperation").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6841,10 +6841,10 @@ impl AstNode for GritMulOperation {
 }
 impl std::fmt::Debug for GritMulOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritMulOperation")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field("star_token", &support::DebugSyntaxResult(self.star_token()))
@@ -6853,7 +6853,7 @@ impl std::fmt::Debug for GritMulOperation {
         } else {
             f.debug_struct("GritMulOperation").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6890,10 +6890,10 @@ impl AstNode for GritName {
 }
 impl std::fmt::Debug for GritName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritName")
                 .field(
                     "value_token",
@@ -6903,7 +6903,7 @@ impl std::fmt::Debug for GritName {
         } else {
             f.debug_struct("GritName").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6940,10 +6940,10 @@ impl AstNode for GritNamedArg {
 }
 impl std::fmt::Debug for GritNamedArg {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritNamedArg")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
@@ -6952,7 +6952,7 @@ impl std::fmt::Debug for GritNamedArg {
         } else {
             f.debug_struct("GritNamedArg").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -6989,10 +6989,10 @@ impl AstNode for GritNegativeIntLiteral {
 }
 impl std::fmt::Debug for GritNegativeIntLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritNegativeIntLiteral")
                 .field(
                     "value_token",
@@ -7002,7 +7002,7 @@ impl std::fmt::Debug for GritNegativeIntLiteral {
         } else {
             f.debug_struct("GritNegativeIntLiteral").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7039,10 +7039,10 @@ impl AstNode for GritNodeLike {
 }
 impl std::fmt::Debug for GritNodeLike {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritNodeLike")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -7058,7 +7058,7 @@ impl std::fmt::Debug for GritNodeLike {
         } else {
             f.debug_struct("GritNodeLike").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7095,17 +7095,17 @@ impl AstNode for GritNot {
 }
 impl std::fmt::Debug for GritNot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritNot")
                 .field("token", &support::DebugSyntaxResult(self.token()))
                 .finish()
         } else {
             f.debug_struct("GritNot").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7142,10 +7142,10 @@ impl AstNode for GritPatternAccumulate {
 }
 impl std::fmt::Debug for GritPatternAccumulate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternAccumulate")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -7157,7 +7157,7 @@ impl std::fmt::Debug for GritPatternAccumulate {
         } else {
             f.debug_struct("GritPatternAccumulate").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7194,10 +7194,10 @@ impl AstNode for GritPatternAfter {
 }
 impl std::fmt::Debug for GritPatternAfter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternAfter")
                 .field(
                     "after_token",
@@ -7208,7 +7208,7 @@ impl std::fmt::Debug for GritPatternAfter {
         } else {
             f.debug_struct("GritPatternAfter").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7245,10 +7245,10 @@ impl AstNode for GritPatternAnd {
 }
 impl std::fmt::Debug for GritPatternAnd {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternAnd")
                 .field("and_token", &support::DebugSyntaxResult(self.and_token()))
                 .field(
@@ -7264,7 +7264,7 @@ impl std::fmt::Debug for GritPatternAnd {
         } else {
             f.debug_struct("GritPatternAnd").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7301,10 +7301,10 @@ impl AstNode for GritPatternAny {
 }
 impl std::fmt::Debug for GritPatternAny {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternAny")
                 .field("any_token", &support::DebugSyntaxResult(self.any_token()))
                 .field(
@@ -7320,7 +7320,7 @@ impl std::fmt::Debug for GritPatternAny {
         } else {
             f.debug_struct("GritPatternAny").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7357,10 +7357,10 @@ impl AstNode for GritPatternAs {
 }
 impl std::fmt::Debug for GritPatternAs {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternAs")
                 .field("pattern", &support::DebugSyntaxResult(self.pattern()))
                 .field("as_token", &support::DebugSyntaxResult(self.as_token()))
@@ -7369,7 +7369,7 @@ impl std::fmt::Debug for GritPatternAs {
         } else {
             f.debug_struct("GritPatternAs").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7406,10 +7406,10 @@ impl AstNode for GritPatternBefore {
 }
 impl std::fmt::Debug for GritPatternBefore {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternBefore")
                 .field(
                     "before_token",
@@ -7420,7 +7420,7 @@ impl std::fmt::Debug for GritPatternBefore {
         } else {
             f.debug_struct("GritPatternBefore").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7457,10 +7457,10 @@ impl AstNode for GritPatternContains {
 }
 impl std::fmt::Debug for GritPatternContains {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternContains")
                 .field(
                     "contains_token",
@@ -7475,7 +7475,7 @@ impl std::fmt::Debug for GritPatternContains {
         } else {
             f.debug_struct("GritPatternContains").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7512,10 +7512,10 @@ impl AstNode for GritPatternDefinition {
 }
 impl std::fmt::Debug for GritPatternDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternDefinition")
                 .field(
                     "visibility_token",
@@ -7541,7 +7541,7 @@ impl std::fmt::Debug for GritPatternDefinition {
         } else {
             f.debug_struct("GritPatternDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7578,10 +7578,10 @@ impl AstNode for GritPatternDefinitionBody {
 }
 impl std::fmt::Debug for GritPatternDefinitionBody {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternDefinitionBody")
                 .field(
                     "l_curly_token",
@@ -7596,7 +7596,7 @@ impl std::fmt::Debug for GritPatternDefinitionBody {
         } else {
             f.debug_struct("GritPatternDefinitionBody").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7633,10 +7633,10 @@ impl AstNode for GritPatternElseClause {
 }
 impl std::fmt::Debug for GritPatternElseClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternElseClause")
                 .field("else_token", &support::DebugSyntaxResult(self.else_token()))
                 .field(
@@ -7647,7 +7647,7 @@ impl std::fmt::Debug for GritPatternElseClause {
         } else {
             f.debug_struct("GritPatternElseClause").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7684,10 +7684,10 @@ impl AstNode for GritPatternIfElse {
 }
 impl std::fmt::Debug for GritPatternIfElse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternIfElse")
                 .field("if_token", &support::DebugSyntaxResult(self.if_token()))
                 .field(
@@ -7714,7 +7714,7 @@ impl std::fmt::Debug for GritPatternIfElse {
         } else {
             f.debug_struct("GritPatternIfElse").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7751,10 +7751,10 @@ impl AstNode for GritPatternIncludes {
 }
 impl std::fmt::Debug for GritPatternIncludes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternIncludes")
                 .field(
                     "includes_token",
@@ -7765,7 +7765,7 @@ impl std::fmt::Debug for GritPatternIncludes {
         } else {
             f.debug_struct("GritPatternIncludes").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7802,10 +7802,10 @@ impl AstNode for GritPatternLimit {
 }
 impl std::fmt::Debug for GritPatternLimit {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternLimit")
                 .field("pattern", &support::DebugSyntaxResult(self.pattern()))
                 .field(
@@ -7817,7 +7817,7 @@ impl std::fmt::Debug for GritPatternLimit {
         } else {
             f.debug_struct("GritPatternLimit").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7854,10 +7854,10 @@ impl AstNode for GritPatternMaybe {
 }
 impl std::fmt::Debug for GritPatternMaybe {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternMaybe")
                 .field(
                     "maybe_token",
@@ -7868,7 +7868,7 @@ impl std::fmt::Debug for GritPatternMaybe {
         } else {
             f.debug_struct("GritPatternMaybe").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7905,10 +7905,10 @@ impl AstNode for GritPatternNot {
 }
 impl std::fmt::Debug for GritPatternNot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternNot")
                 .field("not", &support::DebugSyntaxResult(self.not()))
                 .field("pattern", &support::DebugSyntaxResult(self.pattern()))
@@ -7916,7 +7916,7 @@ impl std::fmt::Debug for GritPatternNot {
         } else {
             f.debug_struct("GritPatternNot").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -7953,10 +7953,10 @@ impl AstNode for GritPatternOr {
 }
 impl std::fmt::Debug for GritPatternOr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternOr")
                 .field("or_token", &support::DebugSyntaxResult(self.or_token()))
                 .field(
@@ -7972,7 +7972,7 @@ impl std::fmt::Debug for GritPatternOr {
         } else {
             f.debug_struct("GritPatternOr").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8009,10 +8009,10 @@ impl AstNode for GritPatternOrElse {
 }
 impl std::fmt::Debug for GritPatternOrElse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternOrElse")
                 .field(
                     "orelse_token",
@@ -8031,7 +8031,7 @@ impl std::fmt::Debug for GritPatternOrElse {
         } else {
             f.debug_struct("GritPatternOrElse").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8068,10 +8068,10 @@ impl AstNode for GritPatternUntilClause {
 }
 impl std::fmt::Debug for GritPatternUntilClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternUntilClause")
                 .field(
                     "until_token",
@@ -8082,7 +8082,7 @@ impl std::fmt::Debug for GritPatternUntilClause {
         } else {
             f.debug_struct("GritPatternUntilClause").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8119,10 +8119,10 @@ impl AstNode for GritPatternWhere {
 }
 impl std::fmt::Debug for GritPatternWhere {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPatternWhere")
                 .field("pattern", &support::DebugSyntaxResult(self.pattern()))
                 .field(
@@ -8137,7 +8137,7 @@ impl std::fmt::Debug for GritPatternWhere {
         } else {
             f.debug_struct("GritPatternWhere").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8174,10 +8174,10 @@ impl AstNode for GritPredicateAccumulate {
 }
 impl std::fmt::Debug for GritPredicateAccumulate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateAccumulate")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -8189,7 +8189,7 @@ impl std::fmt::Debug for GritPredicateAccumulate {
         } else {
             f.debug_struct("GritPredicateAccumulate").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8226,10 +8226,10 @@ impl AstNode for GritPredicateAnd {
 }
 impl std::fmt::Debug for GritPredicateAnd {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateAnd")
                 .field(
                     "and_token",
@@ -8248,7 +8248,7 @@ impl std::fmt::Debug for GritPredicateAnd {
         } else {
             f.debug_struct("GritPredicateAnd").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8285,10 +8285,10 @@ impl AstNode for GritPredicateAny {
 }
 impl std::fmt::Debug for GritPredicateAny {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateAny")
                 .field("any_token", &support::DebugSyntaxResult(self.any_token()))
                 .field(
@@ -8304,7 +8304,7 @@ impl std::fmt::Debug for GritPredicateAny {
         } else {
             f.debug_struct("GritPredicateAny").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8341,10 +8341,10 @@ impl AstNode for GritPredicateAssignment {
 }
 impl std::fmt::Debug for GritPredicateAssignment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateAssignment")
                 .field("container", &support::DebugSyntaxResult(self.container()))
                 .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
@@ -8353,7 +8353,7 @@ impl std::fmt::Debug for GritPredicateAssignment {
         } else {
             f.debug_struct("GritPredicateAssignment").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8390,10 +8390,10 @@ impl AstNode for GritPredicateCall {
 }
 impl std::fmt::Debug for GritPredicateCall {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateCall")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -8409,7 +8409,7 @@ impl std::fmt::Debug for GritPredicateCall {
         } else {
             f.debug_struct("GritPredicateCall").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8446,10 +8446,10 @@ impl AstNode for GritPredicateCurly {
 }
 impl std::fmt::Debug for GritPredicateCurly {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateCurly")
                 .field(
                     "l_curly_token",
@@ -8464,7 +8464,7 @@ impl std::fmt::Debug for GritPredicateCurly {
         } else {
             f.debug_struct("GritPredicateCurly").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8501,10 +8501,10 @@ impl AstNode for GritPredicateDefinition {
 }
 impl std::fmt::Debug for GritPredicateDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateDefinition")
                 .field(
                     "predicate_token",
@@ -8525,7 +8525,7 @@ impl std::fmt::Debug for GritPredicateDefinition {
         } else {
             f.debug_struct("GritPredicateDefinition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8562,10 +8562,10 @@ impl AstNode for GritPredicateElseClause {
 }
 impl std::fmt::Debug for GritPredicateElseClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateElseClause")
                 .field("else_token", &support::DebugSyntaxResult(self.else_token()))
                 .field(
@@ -8576,7 +8576,7 @@ impl std::fmt::Debug for GritPredicateElseClause {
         } else {
             f.debug_struct("GritPredicateElseClause").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8613,10 +8613,10 @@ impl AstNode for GritPredicateEqual {
 }
 impl std::fmt::Debug for GritPredicateEqual {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateEqual")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -8628,7 +8628,7 @@ impl std::fmt::Debug for GritPredicateEqual {
         } else {
             f.debug_struct("GritPredicateEqual").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8665,10 +8665,10 @@ impl AstNode for GritPredicateGreater {
 }
 impl std::fmt::Debug for GritPredicateGreater {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateGreater")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -8680,7 +8680,7 @@ impl std::fmt::Debug for GritPredicateGreater {
         } else {
             f.debug_struct("GritPredicateGreater").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8717,10 +8717,10 @@ impl AstNode for GritPredicateGreaterEqual {
 }
 impl std::fmt::Debug for GritPredicateGreaterEqual {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateGreaterEqual")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -8732,7 +8732,7 @@ impl std::fmt::Debug for GritPredicateGreaterEqual {
         } else {
             f.debug_struct("GritPredicateGreaterEqual").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8769,10 +8769,10 @@ impl AstNode for GritPredicateIfElse {
 }
 impl std::fmt::Debug for GritPredicateIfElse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateIfElse")
                 .field("if_token", &support::DebugSyntaxResult(self.if_token()))
                 .field(
@@ -8799,7 +8799,7 @@ impl std::fmt::Debug for GritPredicateIfElse {
         } else {
             f.debug_struct("GritPredicateIfElse").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8836,10 +8836,10 @@ impl AstNode for GritPredicateLess {
 }
 impl std::fmt::Debug for GritPredicateLess {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateLess")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -8851,7 +8851,7 @@ impl std::fmt::Debug for GritPredicateLess {
         } else {
             f.debug_struct("GritPredicateLess").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8888,10 +8888,10 @@ impl AstNode for GritPredicateLessEqual {
 }
 impl std::fmt::Debug for GritPredicateLessEqual {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateLessEqual")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -8903,7 +8903,7 @@ impl std::fmt::Debug for GritPredicateLessEqual {
         } else {
             f.debug_struct("GritPredicateLessEqual").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8940,10 +8940,10 @@ impl AstNode for GritPredicateMatch {
 }
 impl std::fmt::Debug for GritPredicateMatch {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateMatch")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -8955,7 +8955,7 @@ impl std::fmt::Debug for GritPredicateMatch {
         } else {
             f.debug_struct("GritPredicateMatch").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8992,10 +8992,10 @@ impl AstNode for GritPredicateMaybe {
 }
 impl std::fmt::Debug for GritPredicateMaybe {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateMaybe")
                 .field(
                     "maybe_token",
@@ -9006,7 +9006,7 @@ impl std::fmt::Debug for GritPredicateMaybe {
         } else {
             f.debug_struct("GritPredicateMaybe").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9043,10 +9043,10 @@ impl AstNode for GritPredicateNot {
 }
 impl std::fmt::Debug for GritPredicateNot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateNot")
                 .field("not", &support::DebugSyntaxResult(self.not()))
                 .field("predicate", &support::DebugSyntaxResult(self.predicate()))
@@ -9054,7 +9054,7 @@ impl std::fmt::Debug for GritPredicateNot {
         } else {
             f.debug_struct("GritPredicateNot").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9091,10 +9091,10 @@ impl AstNode for GritPredicateNotEqual {
 }
 impl std::fmt::Debug for GritPredicateNotEqual {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateNotEqual")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -9106,7 +9106,7 @@ impl std::fmt::Debug for GritPredicateNotEqual {
         } else {
             f.debug_struct("GritPredicateNotEqual").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9143,10 +9143,10 @@ impl AstNode for GritPredicateOr {
 }
 impl std::fmt::Debug for GritPredicateOr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateOr")
                 .field("or_token", &support::DebugSyntaxResult(self.or_token()))
                 .field(
@@ -9162,7 +9162,7 @@ impl std::fmt::Debug for GritPredicateOr {
         } else {
             f.debug_struct("GritPredicateOr").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9199,10 +9199,10 @@ impl AstNode for GritPredicateReturn {
 }
 impl std::fmt::Debug for GritPredicateReturn {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateReturn")
                 .field(
                     "return_token",
@@ -9213,7 +9213,7 @@ impl std::fmt::Debug for GritPredicateReturn {
         } else {
             f.debug_struct("GritPredicateReturn").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9250,10 +9250,10 @@ impl AstNode for GritPredicateRewrite {
 }
 impl std::fmt::Debug for GritPredicateRewrite {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritPredicateRewrite")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -9269,7 +9269,7 @@ impl std::fmt::Debug for GritPredicateRewrite {
         } else {
             f.debug_struct("GritPredicateRewrite").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9306,10 +9306,10 @@ impl AstNode for GritRawBacktickSnippetLiteral {
 }
 impl std::fmt::Debug for GritRawBacktickSnippetLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritRawBacktickSnippetLiteral")
                 .field(
                     "value_token",
@@ -9319,7 +9319,7 @@ impl std::fmt::Debug for GritRawBacktickSnippetLiteral {
         } else {
             f.debug_struct("GritRawBacktickSnippetLiteral").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9356,10 +9356,10 @@ impl AstNode for GritRegexLiteral {
 }
 impl std::fmt::Debug for GritRegexLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritRegexLiteral")
                 .field(
                     "value_token",
@@ -9369,7 +9369,7 @@ impl std::fmt::Debug for GritRegexLiteral {
         } else {
             f.debug_struct("GritRegexLiteral").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9406,10 +9406,10 @@ impl AstNode for GritRegexPattern {
 }
 impl std::fmt::Debug for GritRegexPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritRegexPattern")
                 .field("regex", &support::DebugSyntaxResult(self.regex()))
                 .field(
@@ -9420,7 +9420,7 @@ impl std::fmt::Debug for GritRegexPattern {
         } else {
             f.debug_struct("GritRegexPattern").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9457,10 +9457,10 @@ impl AstNode for GritRegexPatternVariables {
 }
 impl std::fmt::Debug for GritRegexPatternVariables {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritRegexPatternVariables")
                 .field(
                     "l_paren_token",
@@ -9475,7 +9475,7 @@ impl std::fmt::Debug for GritRegexPatternVariables {
         } else {
             f.debug_struct("GritRegexPatternVariables").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9512,10 +9512,10 @@ impl AstNode for GritRewrite {
 }
 impl std::fmt::Debug for GritRewrite {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritRewrite")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -9531,7 +9531,7 @@ impl std::fmt::Debug for GritRewrite {
         } else {
             f.debug_struct("GritRewrite").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9568,10 +9568,10 @@ impl AstNode for GritRoot {
 }
 impl std::fmt::Debug for GritRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritRoot")
                 .field(
                     "bom_token",
@@ -9585,7 +9585,7 @@ impl std::fmt::Debug for GritRoot {
         } else {
             f.debug_struct("GritRoot").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9622,10 +9622,10 @@ impl AstNode for GritSequential {
 }
 impl std::fmt::Debug for GritSequential {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritSequential")
                 .field(
                     "sequential_token",
@@ -9644,7 +9644,7 @@ impl std::fmt::Debug for GritSequential {
         } else {
             f.debug_struct("GritSequential").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9681,10 +9681,10 @@ impl AstNode for GritSnippetRegexLiteral {
 }
 impl std::fmt::Debug for GritSnippetRegexLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritSnippetRegexLiteral")
                 .field(
                     "value_token",
@@ -9694,7 +9694,7 @@ impl std::fmt::Debug for GritSnippetRegexLiteral {
         } else {
             f.debug_struct("GritSnippetRegexLiteral").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9731,10 +9731,10 @@ impl AstNode for GritSome {
 }
 impl std::fmt::Debug for GritSome {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritSome")
                 .field("some_token", &support::DebugSyntaxResult(self.some_token()))
                 .field("pattern", &support::DebugSyntaxResult(self.pattern()))
@@ -9742,7 +9742,7 @@ impl std::fmt::Debug for GritSome {
         } else {
             f.debug_struct("GritSome").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9779,10 +9779,10 @@ impl AstNode for GritStringLiteral {
 }
 impl std::fmt::Debug for GritStringLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritStringLiteral")
                 .field(
                     "value_token",
@@ -9792,7 +9792,7 @@ impl std::fmt::Debug for GritStringLiteral {
         } else {
             f.debug_struct("GritStringLiteral").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9829,10 +9829,10 @@ impl AstNode for GritSubOperation {
 }
 impl std::fmt::Debug for GritSubOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritSubOperation")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -9844,7 +9844,7 @@ impl std::fmt::Debug for GritSubOperation {
         } else {
             f.debug_struct("GritSubOperation").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9881,10 +9881,10 @@ impl AstNode for GritUndefinedLiteral {
 }
 impl std::fmt::Debug for GritUndefinedLiteral {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritUndefinedLiteral")
                 .field(
                     "token_token",
@@ -9894,7 +9894,7 @@ impl std::fmt::Debug for GritUndefinedLiteral {
         } else {
             f.debug_struct("GritUndefinedLiteral").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9931,10 +9931,10 @@ impl AstNode for GritUnderscore {
 }
 impl std::fmt::Debug for GritUnderscore {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritUnderscore")
                 .field(
                     "token_token",
@@ -9944,7 +9944,7 @@ impl std::fmt::Debug for GritUnderscore {
         } else {
             f.debug_struct("GritUnderscore").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9981,10 +9981,10 @@ impl AstNode for GritVariable {
 }
 impl std::fmt::Debug for GritVariable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritVariable")
                 .field(
                     "value_token",
@@ -9994,7 +9994,7 @@ impl std::fmt::Debug for GritVariable {
         } else {
             f.debug_struct("GritVariable").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10031,10 +10031,10 @@ impl AstNode for GritVersion {
 }
 impl std::fmt::Debug for GritVersion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritVersion")
                 .field(
                     "engine_token",
@@ -10057,7 +10057,7 @@ impl std::fmt::Debug for GritVersion {
         } else {
             f.debug_struct("GritVersion").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10094,10 +10094,10 @@ impl AstNode for GritWithin {
 }
 impl std::fmt::Debug for GritWithin {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("GritWithin")
                 .field(
                     "within_token",
@@ -10112,7 +10112,7 @@ impl std::fmt::Debug for GritWithin {
         } else {
             f.debug_struct("GritWithin").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }

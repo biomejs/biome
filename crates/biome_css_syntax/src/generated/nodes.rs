@@ -8928,10 +8928,10 @@ impl AstNode for CssAtRule {
 }
 impl std::fmt::Debug for CssAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssAtRule")
                 .field("at_token", &support::DebugSyntaxResult(self.at_token()))
                 .field("rule", &support::DebugSyntaxResult(self.rule()))
@@ -8939,7 +8939,7 @@ impl std::fmt::Debug for CssAtRule {
         } else {
             f.debug_struct("CssAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -8976,10 +8976,10 @@ impl AstNode for CssAttributeMatcher {
 }
 impl std::fmt::Debug for CssAttributeMatcher {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssAttributeMatcher")
                 .field("operator", &support::DebugSyntaxResult(self.operator()))
                 .field("value", &support::DebugSyntaxResult(self.value()))
@@ -8988,7 +8988,7 @@ impl std::fmt::Debug for CssAttributeMatcher {
         } else {
             f.debug_struct("CssAttributeMatcher").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9025,17 +9025,17 @@ impl AstNode for CssAttributeMatcherValue {
 }
 impl std::fmt::Debug for CssAttributeMatcherValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssAttributeMatcherValue")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .finish()
         } else {
             f.debug_struct("CssAttributeMatcherValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9072,10 +9072,10 @@ impl AstNode for CssAttributeName {
 }
 impl std::fmt::Debug for CssAttributeName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssAttributeName")
                 .field(
                     "namespace",
@@ -9086,7 +9086,7 @@ impl std::fmt::Debug for CssAttributeName {
         } else {
             f.debug_struct("CssAttributeName").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9123,10 +9123,10 @@ impl AstNode for CssAttributeSelector {
 }
 impl std::fmt::Debug for CssAttributeSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssAttributeSelector")
                 .field(
                     "l_brack_token",
@@ -9142,7 +9142,7 @@ impl std::fmt::Debug for CssAttributeSelector {
         } else {
             f.debug_struct("CssAttributeSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9179,10 +9179,10 @@ impl AstNode for CssBinaryExpression {
 }
 impl std::fmt::Debug for CssBinaryExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssBinaryExpression")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -9194,7 +9194,7 @@ impl std::fmt::Debug for CssBinaryExpression {
         } else {
             f.debug_struct("CssBinaryExpression").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9231,10 +9231,10 @@ impl AstNode for CssBracketedValue {
 }
 impl std::fmt::Debug for CssBracketedValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssBracketedValue")
                 .field(
                     "l_brack_token",
@@ -9249,7 +9249,7 @@ impl std::fmt::Debug for CssBracketedValue {
         } else {
             f.debug_struct("CssBracketedValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9286,10 +9286,10 @@ impl AstNode for CssCharsetAtRule {
 }
 impl std::fmt::Debug for CssCharsetAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssCharsetAtRule")
                 .field(
                     "charset_token",
@@ -9304,7 +9304,7 @@ impl std::fmt::Debug for CssCharsetAtRule {
         } else {
             f.debug_struct("CssCharsetAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9341,10 +9341,10 @@ impl AstNode for CssClassSelector {
 }
 impl std::fmt::Debug for CssClassSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssClassSelector")
                 .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
                 .field("name", &support::DebugSyntaxResult(self.name()))
@@ -9352,7 +9352,7 @@ impl std::fmt::Debug for CssClassSelector {
         } else {
             f.debug_struct("CssClassSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9389,10 +9389,10 @@ impl AstNode for CssColor {
 }
 impl std::fmt::Debug for CssColor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssColor")
                 .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
                 .field(
@@ -9403,7 +9403,7 @@ impl std::fmt::Debug for CssColor {
         } else {
             f.debug_struct("CssColor").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9440,10 +9440,10 @@ impl AstNode for CssColorProfileAtRule {
 }
 impl std::fmt::Debug for CssColorProfileAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssColorProfileAtRule")
                 .field(
                     "color_profile_token",
@@ -9455,7 +9455,7 @@ impl std::fmt::Debug for CssColorProfileAtRule {
         } else {
             f.debug_struct("CssColorProfileAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9492,10 +9492,10 @@ impl AstNode for CssComplexSelector {
 }
 impl std::fmt::Debug for CssComplexSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssComplexSelector")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field("combinator", &support::DebugSyntaxResult(self.combinator()))
@@ -9504,7 +9504,7 @@ impl std::fmt::Debug for CssComplexSelector {
         } else {
             f.debug_struct("CssComplexSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9541,10 +9541,10 @@ impl AstNode for CssComposesImportSpecifier {
 }
 impl std::fmt::Debug for CssComposesImportSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssComposesImportSpecifier")
                 .field("from_token", &support::DebugSyntaxResult(self.from_token()))
                 .field("source", &support::DebugSyntaxResult(self.source()))
@@ -9552,7 +9552,7 @@ impl std::fmt::Debug for CssComposesImportSpecifier {
         } else {
             f.debug_struct("CssComposesImportSpecifier").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9589,10 +9589,10 @@ impl AstNode for CssComposesProperty {
 }
 impl std::fmt::Debug for CssComposesProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssComposesProperty")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -9604,7 +9604,7 @@ impl std::fmt::Debug for CssComposesProperty {
         } else {
             f.debug_struct("CssComposesProperty").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9641,10 +9641,10 @@ impl AstNode for CssComposesPropertyValue {
 }
 impl std::fmt::Debug for CssComposesPropertyValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssComposesPropertyValue")
                 .field("classes", &self.classes())
                 .field(
@@ -9655,7 +9655,7 @@ impl std::fmt::Debug for CssComposesPropertyValue {
         } else {
             f.debug_struct("CssComposesPropertyValue").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9692,10 +9692,10 @@ impl AstNode for CssCompoundSelector {
 }
 impl std::fmt::Debug for CssCompoundSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssCompoundSelector")
                 .field("nesting_selectors", &self.nesting_selectors())
                 .field(
@@ -9707,7 +9707,7 @@ impl std::fmt::Debug for CssCompoundSelector {
         } else {
             f.debug_struct("CssCompoundSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9744,10 +9744,10 @@ impl AstNode for CssContainerAndQuery {
 }
 impl std::fmt::Debug for CssContainerAndQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssContainerAndQuery")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field("and_token", &support::DebugSyntaxResult(self.and_token()))
@@ -9756,7 +9756,7 @@ impl std::fmt::Debug for CssContainerAndQuery {
         } else {
             f.debug_struct("CssContainerAndQuery").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9793,10 +9793,10 @@ impl AstNode for CssContainerAtRule {
 }
 impl std::fmt::Debug for CssContainerAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssContainerAtRule")
                 .field(
                     "container_token",
@@ -9809,7 +9809,7 @@ impl std::fmt::Debug for CssContainerAtRule {
         } else {
             f.debug_struct("CssContainerAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9846,10 +9846,10 @@ impl AstNode for CssContainerNotQuery {
 }
 impl std::fmt::Debug for CssContainerNotQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssContainerNotQuery")
                 .field("not_token", &support::DebugSyntaxResult(self.not_token()))
                 .field("query", &support::DebugSyntaxResult(self.query()))
@@ -9857,7 +9857,7 @@ impl std::fmt::Debug for CssContainerNotQuery {
         } else {
             f.debug_struct("CssContainerNotQuery").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9894,10 +9894,10 @@ impl AstNode for CssContainerOrQuery {
 }
 impl std::fmt::Debug for CssContainerOrQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssContainerOrQuery")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field("or_token", &support::DebugSyntaxResult(self.or_token()))
@@ -9906,7 +9906,7 @@ impl std::fmt::Debug for CssContainerOrQuery {
         } else {
             f.debug_struct("CssContainerOrQuery").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9943,10 +9943,10 @@ impl AstNode for CssContainerQueryInParens {
 }
 impl std::fmt::Debug for CssContainerQueryInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssContainerQueryInParens")
                 .field(
                     "l_paren_token",
@@ -9961,7 +9961,7 @@ impl std::fmt::Debug for CssContainerQueryInParens {
         } else {
             f.debug_struct("CssContainerQueryInParens").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -9998,10 +9998,10 @@ impl AstNode for CssContainerSizeFeatureInParens {
 }
 impl std::fmt::Debug for CssContainerSizeFeatureInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssContainerSizeFeatureInParens")
                 .field(
                     "l_paren_token",
@@ -10016,7 +10016,7 @@ impl std::fmt::Debug for CssContainerSizeFeatureInParens {
         } else {
             f.debug_struct("CssContainerSizeFeatureInParens").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10053,10 +10053,10 @@ impl AstNode for CssContainerStyleAndQuery {
 }
 impl std::fmt::Debug for CssContainerStyleAndQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssContainerStyleAndQuery")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field("and_token", &support::DebugSyntaxResult(self.and_token()))
@@ -10065,7 +10065,7 @@ impl std::fmt::Debug for CssContainerStyleAndQuery {
         } else {
             f.debug_struct("CssContainerStyleAndQuery").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10102,10 +10102,10 @@ impl AstNode for CssContainerStyleInParens {
 }
 impl std::fmt::Debug for CssContainerStyleInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssContainerStyleInParens")
                 .field(
                     "l_paren_token",
@@ -10120,7 +10120,7 @@ impl std::fmt::Debug for CssContainerStyleInParens {
         } else {
             f.debug_struct("CssContainerStyleInParens").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10157,10 +10157,10 @@ impl AstNode for CssContainerStyleNotQuery {
 }
 impl std::fmt::Debug for CssContainerStyleNotQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssContainerStyleNotQuery")
                 .field("not_token", &support::DebugSyntaxResult(self.not_token()))
                 .field("query", &support::DebugSyntaxResult(self.query()))
@@ -10168,7 +10168,7 @@ impl std::fmt::Debug for CssContainerStyleNotQuery {
         } else {
             f.debug_struct("CssContainerStyleNotQuery").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10205,10 +10205,10 @@ impl AstNode for CssContainerStyleOrQuery {
 }
 impl std::fmt::Debug for CssContainerStyleOrQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssContainerStyleOrQuery")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field("or_token", &support::DebugSyntaxResult(self.or_token()))
@@ -10217,7 +10217,7 @@ impl std::fmt::Debug for CssContainerStyleOrQuery {
         } else {
             f.debug_struct("CssContainerStyleOrQuery").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10254,10 +10254,10 @@ impl AstNode for CssContainerStyleQueryInParens {
 }
 impl std::fmt::Debug for CssContainerStyleQueryInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssContainerStyleQueryInParens")
                 .field(
                     "style_token",
@@ -10276,7 +10276,7 @@ impl std::fmt::Debug for CssContainerStyleQueryInParens {
         } else {
             f.debug_struct("CssContainerStyleQueryInParens").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10313,10 +10313,10 @@ impl AstNode for CssCounterStyleAtRule {
 }
 impl std::fmt::Debug for CssCounterStyleAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssCounterStyleAtRule")
                 .field(
                     "counter_style_token",
@@ -10328,7 +10328,7 @@ impl std::fmt::Debug for CssCounterStyleAtRule {
         } else {
             f.debug_struct("CssCounterStyleAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10365,10 +10365,10 @@ impl AstNode for CssCustomIdentifier {
 }
 impl std::fmt::Debug for CssCustomIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssCustomIdentifier")
                 .field(
                     "value_token",
@@ -10378,7 +10378,7 @@ impl std::fmt::Debug for CssCustomIdentifier {
         } else {
             f.debug_struct("CssCustomIdentifier").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10415,10 +10415,10 @@ impl AstNode for CssDashedIdentifier {
 }
 impl std::fmt::Debug for CssDashedIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssDashedIdentifier")
                 .field(
                     "value_token",
@@ -10428,7 +10428,7 @@ impl std::fmt::Debug for CssDashedIdentifier {
         } else {
             f.debug_struct("CssDashedIdentifier").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10465,10 +10465,10 @@ impl AstNode for CssDeclaration {
 }
 impl std::fmt::Debug for CssDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssDeclaration")
                 .field("property", &support::DebugSyntaxResult(self.property()))
                 .field(
@@ -10479,7 +10479,7 @@ impl std::fmt::Debug for CssDeclaration {
         } else {
             f.debug_struct("CssDeclaration").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10516,10 +10516,10 @@ impl AstNode for CssDeclarationBlock {
 }
 impl std::fmt::Debug for CssDeclarationBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssDeclarationBlock")
                 .field(
                     "l_curly_token",
@@ -10534,7 +10534,7 @@ impl std::fmt::Debug for CssDeclarationBlock {
         } else {
             f.debug_struct("CssDeclarationBlock").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10571,10 +10571,10 @@ impl AstNode for CssDeclarationImportant {
 }
 impl std::fmt::Debug for CssDeclarationImportant {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssDeclarationImportant")
                 .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
                 .field(
@@ -10585,7 +10585,7 @@ impl std::fmt::Debug for CssDeclarationImportant {
         } else {
             f.debug_struct("CssDeclarationImportant").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10622,10 +10622,10 @@ impl AstNode for CssDeclarationOrAtRuleBlock {
 }
 impl std::fmt::Debug for CssDeclarationOrAtRuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssDeclarationOrAtRuleBlock")
                 .field(
                     "l_curly_token",
@@ -10640,7 +10640,7 @@ impl std::fmt::Debug for CssDeclarationOrAtRuleBlock {
         } else {
             f.debug_struct("CssDeclarationOrAtRuleBlock").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10677,10 +10677,10 @@ impl AstNode for CssDeclarationOrRuleBlock {
 }
 impl std::fmt::Debug for CssDeclarationOrRuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssDeclarationOrRuleBlock")
                 .field(
                     "l_curly_token",
@@ -10695,7 +10695,7 @@ impl std::fmt::Debug for CssDeclarationOrRuleBlock {
         } else {
             f.debug_struct("CssDeclarationOrRuleBlock").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10732,10 +10732,10 @@ impl AstNode for CssDeclarationWithSemicolon {
 }
 impl std::fmt::Debug for CssDeclarationWithSemicolon {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssDeclarationWithSemicolon")
                 .field(
                     "declaration",
@@ -10749,7 +10749,7 @@ impl std::fmt::Debug for CssDeclarationWithSemicolon {
         } else {
             f.debug_struct("CssDeclarationWithSemicolon").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10786,10 +10786,10 @@ impl AstNode for CssDocumentAtRule {
 }
 impl std::fmt::Debug for CssDocumentAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssDocumentAtRule")
                 .field(
                     "document_token",
@@ -10801,7 +10801,7 @@ impl std::fmt::Debug for CssDocumentAtRule {
         } else {
             f.debug_struct("CssDocumentAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10838,10 +10838,10 @@ impl AstNode for CssDocumentCustomMatcher {
 }
 impl std::fmt::Debug for CssDocumentCustomMatcher {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssDocumentCustomMatcher")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -10857,7 +10857,7 @@ impl std::fmt::Debug for CssDocumentCustomMatcher {
         } else {
             f.debug_struct("CssDocumentCustomMatcher").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10894,10 +10894,10 @@ impl AstNode for CssEmptyDeclaration {
 }
 impl std::fmt::Debug for CssEmptyDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssEmptyDeclaration")
                 .field(
                     "semicolon_token",
@@ -10907,7 +10907,7 @@ impl std::fmt::Debug for CssEmptyDeclaration {
         } else {
             f.debug_struct("CssEmptyDeclaration").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10944,10 +10944,10 @@ impl AstNode for CssFontFaceAtRule {
 }
 impl std::fmt::Debug for CssFontFaceAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssFontFaceAtRule")
                 .field(
                     "font_face_token",
@@ -10958,7 +10958,7 @@ impl std::fmt::Debug for CssFontFaceAtRule {
         } else {
             f.debug_struct("CssFontFaceAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -10995,17 +10995,17 @@ impl AstNode for CssFontFamilyName {
 }
 impl std::fmt::Debug for CssFontFamilyName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssFontFamilyName")
                 .field("names", &self.names())
                 .finish()
         } else {
             f.debug_struct("CssFontFamilyName").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11042,10 +11042,10 @@ impl AstNode for CssFontFeatureValuesAtRule {
 }
 impl std::fmt::Debug for CssFontFeatureValuesAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssFontFeatureValuesAtRule")
                 .field(
                     "font_feature_values_token",
@@ -11057,7 +11057,7 @@ impl std::fmt::Debug for CssFontFeatureValuesAtRule {
         } else {
             f.debug_struct("CssFontFeatureValuesAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11094,10 +11094,10 @@ impl AstNode for CssFontFeatureValuesBlock {
 }
 impl std::fmt::Debug for CssFontFeatureValuesBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssFontFeatureValuesBlock")
                 .field(
                     "l_curly_token",
@@ -11112,7 +11112,7 @@ impl std::fmt::Debug for CssFontFeatureValuesBlock {
         } else {
             f.debug_struct("CssFontFeatureValuesBlock").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11149,10 +11149,10 @@ impl AstNode for CssFontFeatureValuesItem {
 }
 impl std::fmt::Debug for CssFontFeatureValuesItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssFontFeatureValuesItem")
                 .field("at_token", &support::DebugSyntaxResult(self.at_token()))
                 .field("name", &support::DebugSyntaxResult(self.name()))
@@ -11161,7 +11161,7 @@ impl std::fmt::Debug for CssFontFeatureValuesItem {
         } else {
             f.debug_struct("CssFontFeatureValuesItem").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11198,10 +11198,10 @@ impl AstNode for CssFontPaletteValuesAtRule {
 }
 impl std::fmt::Debug for CssFontPaletteValuesAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssFontPaletteValuesAtRule")
                 .field(
                     "font_palette_values_token",
@@ -11213,7 +11213,7 @@ impl std::fmt::Debug for CssFontPaletteValuesAtRule {
         } else {
             f.debug_struct("CssFontPaletteValuesAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11250,10 +11250,10 @@ impl AstNode for CssFunction {
 }
 impl std::fmt::Debug for CssFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssFunction")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -11269,7 +11269,7 @@ impl std::fmt::Debug for CssFunction {
         } else {
             f.debug_struct("CssFunction").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11306,17 +11306,17 @@ impl AstNode for CssGenericDelimiter {
 }
 impl std::fmt::Debug for CssGenericDelimiter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssGenericDelimiter")
                 .field("value", &support::DebugSyntaxResult(self.value()))
                 .finish()
         } else {
             f.debug_struct("CssGenericDelimiter").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11353,10 +11353,10 @@ impl AstNode for CssGenericProperty {
 }
 impl std::fmt::Debug for CssGenericProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssGenericProperty")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -11368,7 +11368,7 @@ impl std::fmt::Debug for CssGenericProperty {
         } else {
             f.debug_struct("CssGenericProperty").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11405,10 +11405,10 @@ impl AstNode for CssIdSelector {
 }
 impl std::fmt::Debug for CssIdSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssIdSelector")
                 .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
                 .field("name", &support::DebugSyntaxResult(self.name()))
@@ -11416,7 +11416,7 @@ impl std::fmt::Debug for CssIdSelector {
         } else {
             f.debug_struct("CssIdSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11453,10 +11453,10 @@ impl AstNode for CssIdentifier {
 }
 impl std::fmt::Debug for CssIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssIdentifier")
                 .field(
                     "value_token",
@@ -11466,7 +11466,7 @@ impl std::fmt::Debug for CssIdentifier {
         } else {
             f.debug_struct("CssIdentifier").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11503,10 +11503,10 @@ impl AstNode for CssImportAnonymousLayer {
 }
 impl std::fmt::Debug for CssImportAnonymousLayer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssImportAnonymousLayer")
                 .field(
                     "layer_token",
@@ -11516,7 +11516,7 @@ impl std::fmt::Debug for CssImportAnonymousLayer {
         } else {
             f.debug_struct("CssImportAnonymousLayer").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11553,10 +11553,10 @@ impl AstNode for CssImportAtRule {
 }
 impl std::fmt::Debug for CssImportAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssImportAtRule")
                 .field(
                     "import_token",
@@ -11574,7 +11574,7 @@ impl std::fmt::Debug for CssImportAtRule {
         } else {
             f.debug_struct("CssImportAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11611,10 +11611,10 @@ impl AstNode for CssImportNamedLayer {
 }
 impl std::fmt::Debug for CssImportNamedLayer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssImportNamedLayer")
                 .field(
                     "layer_token",
@@ -11633,7 +11633,7 @@ impl std::fmt::Debug for CssImportNamedLayer {
         } else {
             f.debug_struct("CssImportNamedLayer").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11670,10 +11670,10 @@ impl AstNode for CssImportSupports {
 }
 impl std::fmt::Debug for CssImportSupports {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssImportSupports")
                 .field(
                     "supports_token",
@@ -11692,7 +11692,7 @@ impl std::fmt::Debug for CssImportSupports {
         } else {
             f.debug_struct("CssImportSupports").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11729,10 +11729,10 @@ impl AstNode for CssKeyframesAtRule {
 }
 impl std::fmt::Debug for CssKeyframesAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssKeyframesAtRule")
                 .field(
                     "keyframes_token",
@@ -11744,7 +11744,7 @@ impl std::fmt::Debug for CssKeyframesAtRule {
         } else {
             f.debug_struct("CssKeyframesAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11781,10 +11781,10 @@ impl AstNode for CssKeyframesBlock {
 }
 impl std::fmt::Debug for CssKeyframesBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssKeyframesBlock")
                 .field(
                     "l_curly_token",
@@ -11799,7 +11799,7 @@ impl std::fmt::Debug for CssKeyframesBlock {
         } else {
             f.debug_struct("CssKeyframesBlock").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11836,17 +11836,17 @@ impl AstNode for CssKeyframesIdentSelector {
 }
 impl std::fmt::Debug for CssKeyframesIdentSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssKeyframesIdentSelector")
                 .field("selector", &support::DebugSyntaxResult(self.selector()))
                 .finish()
         } else {
             f.debug_struct("CssKeyframesIdentSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11883,10 +11883,10 @@ impl AstNode for CssKeyframesItem {
 }
 impl std::fmt::Debug for CssKeyframesItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssKeyframesItem")
                 .field("selectors", &self.selectors())
                 .field("block", &support::DebugSyntaxResult(self.block()))
@@ -11894,7 +11894,7 @@ impl std::fmt::Debug for CssKeyframesItem {
         } else {
             f.debug_struct("CssKeyframesItem").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11931,17 +11931,17 @@ impl AstNode for CssKeyframesPercentageSelector {
 }
 impl std::fmt::Debug for CssKeyframesPercentageSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssKeyframesPercentageSelector")
                 .field("selector", &support::DebugSyntaxResult(self.selector()))
                 .finish()
         } else {
             f.debug_struct("CssKeyframesPercentageSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -11978,10 +11978,10 @@ impl AstNode for CssKeyframesScopeFunction {
 }
 impl std::fmt::Debug for CssKeyframesScopeFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssKeyframesScopeFunction")
                 .field("scope", &support::DebugSyntaxResult(self.scope()))
                 .field(
@@ -11997,7 +11997,7 @@ impl std::fmt::Debug for CssKeyframesScopeFunction {
         } else {
             f.debug_struct("CssKeyframesScopeFunction").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12034,10 +12034,10 @@ impl AstNode for CssKeyframesScopePrefix {
 }
 impl std::fmt::Debug for CssKeyframesScopePrefix {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssKeyframesScopePrefix")
                 .field("scope", &support::DebugSyntaxResult(self.scope()))
                 .field("name", &support::DebugSyntaxResult(self.name()))
@@ -12045,7 +12045,7 @@ impl std::fmt::Debug for CssKeyframesScopePrefix {
         } else {
             f.debug_struct("CssKeyframesScopePrefix").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12082,10 +12082,10 @@ impl AstNode for CssKeyframesScopedName {
 }
 impl std::fmt::Debug for CssKeyframesScopedName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssKeyframesScopedName")
                 .field(
                     "colon_token",
@@ -12096,7 +12096,7 @@ impl std::fmt::Debug for CssKeyframesScopedName {
         } else {
             f.debug_struct("CssKeyframesScopedName").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12133,10 +12133,10 @@ impl AstNode for CssLayerAtRule {
 }
 impl std::fmt::Debug for CssLayerAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssLayerAtRule")
                 .field(
                     "layer_token",
@@ -12147,7 +12147,7 @@ impl std::fmt::Debug for CssLayerAtRule {
         } else {
             f.debug_struct("CssLayerAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12184,10 +12184,10 @@ impl AstNode for CssLayerDeclaration {
 }
 impl std::fmt::Debug for CssLayerDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssLayerDeclaration")
                 .field("references", &self.references())
                 .field("block", &support::DebugSyntaxResult(self.block()))
@@ -12195,7 +12195,7 @@ impl std::fmt::Debug for CssLayerDeclaration {
         } else {
             f.debug_struct("CssLayerDeclaration").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12232,10 +12232,10 @@ impl AstNode for CssLayerReference {
 }
 impl std::fmt::Debug for CssLayerReference {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssLayerReference")
                 .field("references", &self.references())
                 .field(
@@ -12246,7 +12246,7 @@ impl std::fmt::Debug for CssLayerReference {
         } else {
             f.debug_struct("CssLayerReference").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12284,10 +12284,10 @@ impl AstNode for CssListOfComponentValuesExpression {
 }
 impl std::fmt::Debug for CssListOfComponentValuesExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssListOfComponentValuesExpression")
                 .field("css_component_value_list", &self.css_component_value_list())
                 .finish()
@@ -12295,7 +12295,7 @@ impl std::fmt::Debug for CssListOfComponentValuesExpression {
             f.debug_struct("CssListOfComponentValuesExpression")
                 .finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12332,10 +12332,10 @@ impl AstNode for CssMarginAtRule {
 }
 impl std::fmt::Debug for CssMarginAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssMarginAtRule")
                 .field("at_token", &support::DebugSyntaxResult(self.at_token()))
                 .field("name", &support::DebugSyntaxResult(self.name()))
@@ -12344,7 +12344,7 @@ impl std::fmt::Debug for CssMarginAtRule {
         } else {
             f.debug_struct("CssMarginAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12381,10 +12381,10 @@ impl AstNode for CssMediaAndCondition {
 }
 impl std::fmt::Debug for CssMediaAndCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssMediaAndCondition")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field("and_token", &support::DebugSyntaxResult(self.and_token()))
@@ -12393,7 +12393,7 @@ impl std::fmt::Debug for CssMediaAndCondition {
         } else {
             f.debug_struct("CssMediaAndCondition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12430,10 +12430,10 @@ impl AstNode for CssMediaAndTypeQuery {
 }
 impl std::fmt::Debug for CssMediaAndTypeQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssMediaAndTypeQuery")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field("and_token", &support::DebugSyntaxResult(self.and_token()))
@@ -12442,7 +12442,7 @@ impl std::fmt::Debug for CssMediaAndTypeQuery {
         } else {
             f.debug_struct("CssMediaAndTypeQuery").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12479,10 +12479,10 @@ impl AstNode for CssMediaAtRule {
 }
 impl std::fmt::Debug for CssMediaAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssMediaAtRule")
                 .field(
                     "media_token",
@@ -12494,7 +12494,7 @@ impl std::fmt::Debug for CssMediaAtRule {
         } else {
             f.debug_struct("CssMediaAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12531,10 +12531,10 @@ impl AstNode for CssMediaConditionInParens {
 }
 impl std::fmt::Debug for CssMediaConditionInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssMediaConditionInParens")
                 .field(
                     "l_paren_token",
@@ -12549,7 +12549,7 @@ impl std::fmt::Debug for CssMediaConditionInParens {
         } else {
             f.debug_struct("CssMediaConditionInParens").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12586,17 +12586,17 @@ impl AstNode for CssMediaConditionQuery {
 }
 impl std::fmt::Debug for CssMediaConditionQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssMediaConditionQuery")
                 .field("condition", &support::DebugSyntaxResult(self.condition()))
                 .finish()
         } else {
             f.debug_struct("CssMediaConditionQuery").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12633,10 +12633,10 @@ impl AstNode for CssMediaFeatureInParens {
 }
 impl std::fmt::Debug for CssMediaFeatureInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssMediaFeatureInParens")
                 .field(
                     "l_paren_token",
@@ -12651,7 +12651,7 @@ impl std::fmt::Debug for CssMediaFeatureInParens {
         } else {
             f.debug_struct("CssMediaFeatureInParens").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12688,10 +12688,10 @@ impl AstNode for CssMediaNotCondition {
 }
 impl std::fmt::Debug for CssMediaNotCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssMediaNotCondition")
                 .field("not_token", &support::DebugSyntaxResult(self.not_token()))
                 .field("condition", &support::DebugSyntaxResult(self.condition()))
@@ -12699,7 +12699,7 @@ impl std::fmt::Debug for CssMediaNotCondition {
         } else {
             f.debug_struct("CssMediaNotCondition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12736,10 +12736,10 @@ impl AstNode for CssMediaOrCondition {
 }
 impl std::fmt::Debug for CssMediaOrCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssMediaOrCondition")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field("or_token", &support::DebugSyntaxResult(self.or_token()))
@@ -12748,7 +12748,7 @@ impl std::fmt::Debug for CssMediaOrCondition {
         } else {
             f.debug_struct("CssMediaOrCondition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12785,17 +12785,17 @@ impl AstNode for CssMediaType {
 }
 impl std::fmt::Debug for CssMediaType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssMediaType")
                 .field("value", &support::DebugSyntaxResult(self.value()))
                 .finish()
         } else {
             f.debug_struct("CssMediaType").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12832,10 +12832,10 @@ impl AstNode for CssMediaTypeQuery {
 }
 impl std::fmt::Debug for CssMediaTypeQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssMediaTypeQuery")
                 .field("modifier", &support::DebugOptionalElement(self.modifier()))
                 .field("ty", &support::DebugSyntaxResult(self.ty()))
@@ -12843,7 +12843,7 @@ impl std::fmt::Debug for CssMediaTypeQuery {
         } else {
             f.debug_struct("CssMediaTypeQuery").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12880,10 +12880,10 @@ impl AstNode for CssMetavariable {
 }
 impl std::fmt::Debug for CssMetavariable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssMetavariable")
                 .field(
                     "value_token",
@@ -12893,7 +12893,7 @@ impl std::fmt::Debug for CssMetavariable {
         } else {
             f.debug_struct("CssMetavariable").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12930,17 +12930,17 @@ impl AstNode for CssNamedNamespacePrefix {
 }
 impl std::fmt::Debug for CssNamedNamespacePrefix {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssNamedNamespacePrefix")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .finish()
         } else {
             f.debug_struct("CssNamedNamespacePrefix").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -12977,10 +12977,10 @@ impl AstNode for CssNamespace {
 }
 impl std::fmt::Debug for CssNamespace {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssNamespace")
                 .field("prefix", &support::DebugOptionalElement(self.prefix()))
                 .field(
@@ -12991,7 +12991,7 @@ impl std::fmt::Debug for CssNamespace {
         } else {
             f.debug_struct("CssNamespace").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13028,10 +13028,10 @@ impl AstNode for CssNamespaceAtRule {
 }
 impl std::fmt::Debug for CssNamespaceAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssNamespaceAtRule")
                 .field(
                     "namespace_token",
@@ -13047,7 +13047,7 @@ impl std::fmt::Debug for CssNamespaceAtRule {
         } else {
             f.debug_struct("CssNamespaceAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13084,10 +13084,10 @@ impl AstNode for CssNestedQualifiedRule {
 }
 impl std::fmt::Debug for CssNestedQualifiedRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssNestedQualifiedRule")
                 .field("prelude", &self.prelude())
                 .field("block", &support::DebugSyntaxResult(self.block()))
@@ -13095,7 +13095,7 @@ impl std::fmt::Debug for CssNestedQualifiedRule {
         } else {
             f.debug_struct("CssNestedQualifiedRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13132,17 +13132,17 @@ impl AstNode for CssNestedSelector {
 }
 impl std::fmt::Debug for CssNestedSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssNestedSelector")
                 .field("amp_token", &support::DebugSyntaxResult(self.amp_token()))
                 .finish()
         } else {
             f.debug_struct("CssNestedSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13179,10 +13179,10 @@ impl AstNode for CssNthOffset {
 }
 impl std::fmt::Debug for CssNthOffset {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssNthOffset")
                 .field("sign", &support::DebugSyntaxResult(self.sign()))
                 .field("value", &support::DebugSyntaxResult(self.value()))
@@ -13190,7 +13190,7 @@ impl std::fmt::Debug for CssNthOffset {
         } else {
             f.debug_struct("CssNthOffset").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13227,10 +13227,10 @@ impl AstNode for CssNumber {
 }
 impl std::fmt::Debug for CssNumber {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssNumber")
                 .field(
                     "value_token",
@@ -13240,7 +13240,7 @@ impl std::fmt::Debug for CssNumber {
         } else {
             f.debug_struct("CssNumber").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13277,10 +13277,10 @@ impl AstNode for CssPageAtRule {
 }
 impl std::fmt::Debug for CssPageAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPageAtRule")
                 .field("page_token", &support::DebugSyntaxResult(self.page_token()))
                 .field("selectors", &self.selectors())
@@ -13289,7 +13289,7 @@ impl std::fmt::Debug for CssPageAtRule {
         } else {
             f.debug_struct("CssPageAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13326,10 +13326,10 @@ impl AstNode for CssPageAtRuleBlock {
 }
 impl std::fmt::Debug for CssPageAtRuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPageAtRuleBlock")
                 .field(
                     "l_curly_token",
@@ -13344,7 +13344,7 @@ impl std::fmt::Debug for CssPageAtRuleBlock {
         } else {
             f.debug_struct("CssPageAtRuleBlock").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13381,10 +13381,10 @@ impl AstNode for CssPageSelector {
 }
 impl std::fmt::Debug for CssPageSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPageSelector")
                 .field("ty", &support::DebugOptionalElement(self.ty()))
                 .field("pseudos", &self.pseudos())
@@ -13392,7 +13392,7 @@ impl std::fmt::Debug for CssPageSelector {
         } else {
             f.debug_struct("CssPageSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13429,10 +13429,10 @@ impl AstNode for CssPageSelectorPseudo {
 }
 impl std::fmt::Debug for CssPageSelectorPseudo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPageSelectorPseudo")
                 .field(
                     "colon_token",
@@ -13443,7 +13443,7 @@ impl std::fmt::Debug for CssPageSelectorPseudo {
         } else {
             f.debug_struct("CssPageSelectorPseudo").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13480,10 +13480,10 @@ impl AstNode for CssParameter {
 }
 impl std::fmt::Debug for CssParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssParameter")
                 .field(
                     "any_css_expression",
@@ -13493,7 +13493,7 @@ impl std::fmt::Debug for CssParameter {
         } else {
             f.debug_struct("CssParameter").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13530,10 +13530,10 @@ impl AstNode for CssParenthesizedExpression {
 }
 impl std::fmt::Debug for CssParenthesizedExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssParenthesizedExpression")
                 .field(
                     "l_paren_token",
@@ -13551,7 +13551,7 @@ impl std::fmt::Debug for CssParenthesizedExpression {
         } else {
             f.debug_struct("CssParenthesizedExpression").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13588,10 +13588,10 @@ impl AstNode for CssPercentage {
 }
 impl std::fmt::Debug for CssPercentage {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPercentage")
                 .field(
                     "value_token",
@@ -13605,7 +13605,7 @@ impl std::fmt::Debug for CssPercentage {
         } else {
             f.debug_struct("CssPercentage").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13642,10 +13642,10 @@ impl AstNode for CssPositionTryAtRule {
 }
 impl std::fmt::Debug for CssPositionTryAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPositionTryAtRule")
                 .field(
                     "position_try_token",
@@ -13657,7 +13657,7 @@ impl std::fmt::Debug for CssPositionTryAtRule {
         } else {
             f.debug_struct("CssPositionTryAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13694,10 +13694,10 @@ impl AstNode for CssPropertyAtRule {
 }
 impl std::fmt::Debug for CssPropertyAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPropertyAtRule")
                 .field(
                     "property_token",
@@ -13709,7 +13709,7 @@ impl std::fmt::Debug for CssPropertyAtRule {
         } else {
             f.debug_struct("CssPropertyAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13747,10 +13747,10 @@ impl AstNode for CssPseudoClassFunctionCompoundSelector {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionCompoundSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassFunctionCompoundSelector")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -13767,7 +13767,7 @@ impl std::fmt::Debug for CssPseudoClassFunctionCompoundSelector {
             f.debug_struct("CssPseudoClassFunctionCompoundSelector")
                 .finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13805,10 +13805,10 @@ impl AstNode for CssPseudoClassFunctionCompoundSelectorList {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionCompoundSelectorList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassFunctionCompoundSelectorList")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -13825,7 +13825,7 @@ impl std::fmt::Debug for CssPseudoClassFunctionCompoundSelectorList {
             f.debug_struct("CssPseudoClassFunctionCompoundSelectorList")
                 .finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13862,10 +13862,10 @@ impl AstNode for CssPseudoClassFunctionIdentifier {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassFunctionIdentifier")
                 .field("name_token", &support::DebugSyntaxResult(self.name_token()))
                 .field(
@@ -13881,7 +13881,7 @@ impl std::fmt::Debug for CssPseudoClassFunctionIdentifier {
         } else {
             f.debug_struct("CssPseudoClassFunctionIdentifier").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13918,10 +13918,10 @@ impl AstNode for CssPseudoClassFunctionNth {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionNth {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassFunctionNth")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -13937,7 +13937,7 @@ impl std::fmt::Debug for CssPseudoClassFunctionNth {
         } else {
             f.debug_struct("CssPseudoClassFunctionNth").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -13975,10 +13975,10 @@ impl AstNode for CssPseudoClassFunctionRelativeSelectorList {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionRelativeSelectorList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassFunctionRelativeSelectorList")
                 .field("name_token", &support::DebugSyntaxResult(self.name_token()))
                 .field(
@@ -13995,7 +13995,7 @@ impl std::fmt::Debug for CssPseudoClassFunctionRelativeSelectorList {
             f.debug_struct("CssPseudoClassFunctionRelativeSelectorList")
                 .finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14032,10 +14032,10 @@ impl AstNode for CssPseudoClassFunctionSelector {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassFunctionSelector")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -14051,7 +14051,7 @@ impl std::fmt::Debug for CssPseudoClassFunctionSelector {
         } else {
             f.debug_struct("CssPseudoClassFunctionSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14089,10 +14089,10 @@ impl AstNode for CssPseudoClassFunctionSelectorList {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionSelectorList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassFunctionSelectorList")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -14109,7 +14109,7 @@ impl std::fmt::Debug for CssPseudoClassFunctionSelectorList {
             f.debug_struct("CssPseudoClassFunctionSelectorList")
                 .finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14146,10 +14146,10 @@ impl AstNode for CssPseudoClassFunctionValueList {
 }
 impl std::fmt::Debug for CssPseudoClassFunctionValueList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassFunctionValueList")
                 .field("name_token", &support::DebugSyntaxResult(self.name_token()))
                 .field(
@@ -14165,7 +14165,7 @@ impl std::fmt::Debug for CssPseudoClassFunctionValueList {
         } else {
             f.debug_struct("CssPseudoClassFunctionValueList").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14202,17 +14202,17 @@ impl AstNode for CssPseudoClassIdentifier {
 }
 impl std::fmt::Debug for CssPseudoClassIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassIdentifier")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .finish()
         } else {
             f.debug_struct("CssPseudoClassIdentifier").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14249,10 +14249,10 @@ impl AstNode for CssPseudoClassNth {
 }
 impl std::fmt::Debug for CssPseudoClassNth {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassNth")
                 .field("sign", &support::DebugOptionalElement(self.sign()))
                 .field("value", &support::DebugOptionalElement(self.value()))
@@ -14265,7 +14265,7 @@ impl std::fmt::Debug for CssPseudoClassNth {
         } else {
             f.debug_struct("CssPseudoClassNth").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14302,17 +14302,17 @@ impl AstNode for CssPseudoClassNthIdentifier {
 }
 impl std::fmt::Debug for CssPseudoClassNthIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassNthIdentifier")
                 .field("value", &support::DebugSyntaxResult(self.value()))
                 .finish()
         } else {
             f.debug_struct("CssPseudoClassNthIdentifier").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14349,10 +14349,10 @@ impl AstNode for CssPseudoClassNthNumber {
 }
 impl std::fmt::Debug for CssPseudoClassNthNumber {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassNthNumber")
                 .field("sign", &support::DebugOptionalElement(self.sign()))
                 .field("value", &support::DebugSyntaxResult(self.value()))
@@ -14360,7 +14360,7 @@ impl std::fmt::Debug for CssPseudoClassNthNumber {
         } else {
             f.debug_struct("CssPseudoClassNthNumber").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14397,10 +14397,10 @@ impl AstNode for CssPseudoClassNthSelector {
 }
 impl std::fmt::Debug for CssPseudoClassNthSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassNthSelector")
                 .field("nth", &support::DebugSyntaxResult(self.nth()))
                 .field(
@@ -14411,7 +14411,7 @@ impl std::fmt::Debug for CssPseudoClassNthSelector {
         } else {
             f.debug_struct("CssPseudoClassNthSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14448,10 +14448,10 @@ impl AstNode for CssPseudoClassOfNthSelector {
 }
 impl std::fmt::Debug for CssPseudoClassOfNthSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassOfNthSelector")
                 .field("of_token", &support::DebugSyntaxResult(self.of_token()))
                 .field("selectors", &self.selectors())
@@ -14459,7 +14459,7 @@ impl std::fmt::Debug for CssPseudoClassOfNthSelector {
         } else {
             f.debug_struct("CssPseudoClassOfNthSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14496,10 +14496,10 @@ impl AstNode for CssPseudoClassSelector {
 }
 impl std::fmt::Debug for CssPseudoClassSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoClassSelector")
                 .field(
                     "colon_token",
@@ -14510,7 +14510,7 @@ impl std::fmt::Debug for CssPseudoClassSelector {
         } else {
             f.debug_struct("CssPseudoClassSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14547,10 +14547,10 @@ impl AstNode for CssPseudoElementFunctionIdentifier {
 }
 impl std::fmt::Debug for CssPseudoElementFunctionIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoElementFunctionIdentifier")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -14567,7 +14567,7 @@ impl std::fmt::Debug for CssPseudoElementFunctionIdentifier {
             f.debug_struct("CssPseudoElementFunctionIdentifier")
                 .finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14604,10 +14604,10 @@ impl AstNode for CssPseudoElementFunctionSelector {
 }
 impl std::fmt::Debug for CssPseudoElementFunctionSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoElementFunctionSelector")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -14623,7 +14623,7 @@ impl std::fmt::Debug for CssPseudoElementFunctionSelector {
         } else {
             f.debug_struct("CssPseudoElementFunctionSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14660,17 +14660,17 @@ impl AstNode for CssPseudoElementIdentifier {
 }
 impl std::fmt::Debug for CssPseudoElementIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoElementIdentifier")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .finish()
         } else {
             f.debug_struct("CssPseudoElementIdentifier").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14707,10 +14707,10 @@ impl AstNode for CssPseudoElementSelector {
 }
 impl std::fmt::Debug for CssPseudoElementSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssPseudoElementSelector")
                 .field(
                     "double_colon_token",
@@ -14721,7 +14721,7 @@ impl std::fmt::Debug for CssPseudoElementSelector {
         } else {
             f.debug_struct("CssPseudoElementSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14758,10 +14758,10 @@ impl AstNode for CssQualifiedRule {
 }
 impl std::fmt::Debug for CssQualifiedRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssQualifiedRule")
                 .field("prelude", &self.prelude())
                 .field("block", &support::DebugSyntaxResult(self.block()))
@@ -14769,7 +14769,7 @@ impl std::fmt::Debug for CssQualifiedRule {
         } else {
             f.debug_struct("CssQualifiedRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14806,17 +14806,17 @@ impl AstNode for CssQueryFeatureBoolean {
 }
 impl std::fmt::Debug for CssQueryFeatureBoolean {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssQueryFeatureBoolean")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .finish()
         } else {
             f.debug_struct("CssQueryFeatureBoolean").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14853,10 +14853,10 @@ impl AstNode for CssQueryFeaturePlain {
 }
 impl std::fmt::Debug for CssQueryFeaturePlain {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssQueryFeaturePlain")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -14868,7 +14868,7 @@ impl std::fmt::Debug for CssQueryFeaturePlain {
         } else {
             f.debug_struct("CssQueryFeaturePlain").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14905,10 +14905,10 @@ impl AstNode for CssQueryFeatureRange {
 }
 impl std::fmt::Debug for CssQueryFeatureRange {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssQueryFeatureRange")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field("comparison", &support::DebugSyntaxResult(self.comparison()))
@@ -14917,7 +14917,7 @@ impl std::fmt::Debug for CssQueryFeatureRange {
         } else {
             f.debug_struct("CssQueryFeatureRange").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -14954,17 +14954,17 @@ impl AstNode for CssQueryFeatureRangeComparison {
 }
 impl std::fmt::Debug for CssQueryFeatureRangeComparison {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssQueryFeatureRangeComparison")
                 .field("operator", &support::DebugSyntaxResult(self.operator()))
                 .finish()
         } else {
             f.debug_struct("CssQueryFeatureRangeComparison").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15001,10 +15001,10 @@ impl AstNode for CssQueryFeatureRangeInterval {
 }
 impl std::fmt::Debug for CssQueryFeatureRangeInterval {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssQueryFeatureRangeInterval")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field(
@@ -15021,7 +15021,7 @@ impl std::fmt::Debug for CssQueryFeatureRangeInterval {
         } else {
             f.debug_struct("CssQueryFeatureRangeInterval").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15058,10 +15058,10 @@ impl AstNode for CssQueryFeatureReverseRange {
 }
 impl std::fmt::Debug for CssQueryFeatureReverseRange {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssQueryFeatureReverseRange")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field("comparison", &support::DebugSyntaxResult(self.comparison()))
@@ -15070,7 +15070,7 @@ impl std::fmt::Debug for CssQueryFeatureReverseRange {
         } else {
             f.debug_struct("CssQueryFeatureReverseRange").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15107,10 +15107,10 @@ impl AstNode for CssRatio {
 }
 impl std::fmt::Debug for CssRatio {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssRatio")
                 .field("numerator", &support::DebugSyntaxResult(self.numerator()))
                 .field(
@@ -15125,7 +15125,7 @@ impl std::fmt::Debug for CssRatio {
         } else {
             f.debug_struct("CssRatio").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15162,10 +15162,10 @@ impl AstNode for CssRegularDimension {
 }
 impl std::fmt::Debug for CssRegularDimension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssRegularDimension")
                 .field(
                     "value_token",
@@ -15176,7 +15176,7 @@ impl std::fmt::Debug for CssRegularDimension {
         } else {
             f.debug_struct("CssRegularDimension").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15213,10 +15213,10 @@ impl AstNode for CssRelativeSelector {
 }
 impl std::fmt::Debug for CssRelativeSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssRelativeSelector")
                 .field(
                     "combinator",
@@ -15227,7 +15227,7 @@ impl std::fmt::Debug for CssRelativeSelector {
         } else {
             f.debug_struct("CssRelativeSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15264,10 +15264,10 @@ impl AstNode for CssRoot {
 }
 impl std::fmt::Debug for CssRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssRoot")
                 .field(
                     "bom_token",
@@ -15279,7 +15279,7 @@ impl std::fmt::Debug for CssRoot {
         } else {
             f.debug_struct("CssRoot").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15316,10 +15316,10 @@ impl AstNode for CssRuleBlock {
 }
 impl std::fmt::Debug for CssRuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssRuleBlock")
                 .field(
                     "l_curly_token",
@@ -15334,7 +15334,7 @@ impl std::fmt::Debug for CssRuleBlock {
         } else {
             f.debug_struct("CssRuleBlock").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15371,10 +15371,10 @@ impl AstNode for CssScopeAtRule {
 }
 impl std::fmt::Debug for CssScopeAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssScopeAtRule")
                 .field(
                     "scope_token",
@@ -15386,7 +15386,7 @@ impl std::fmt::Debug for CssScopeAtRule {
         } else {
             f.debug_struct("CssScopeAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15423,10 +15423,10 @@ impl AstNode for CssScopeEdge {
 }
 impl std::fmt::Debug for CssScopeEdge {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssScopeEdge")
                 .field(
                     "l_paren_token",
@@ -15441,7 +15441,7 @@ impl std::fmt::Debug for CssScopeEdge {
         } else {
             f.debug_struct("CssScopeEdge").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15478,10 +15478,10 @@ impl AstNode for CssScopeRangeEnd {
 }
 impl std::fmt::Debug for CssScopeRangeEnd {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssScopeRangeEnd")
                 .field("to_token", &support::DebugSyntaxResult(self.to_token()))
                 .field("end", &support::DebugSyntaxResult(self.end()))
@@ -15489,7 +15489,7 @@ impl std::fmt::Debug for CssScopeRangeEnd {
         } else {
             f.debug_struct("CssScopeRangeEnd").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15526,10 +15526,10 @@ impl AstNode for CssScopeRangeInterval {
 }
 impl std::fmt::Debug for CssScopeRangeInterval {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssScopeRangeInterval")
                 .field("start", &support::DebugSyntaxResult(self.start()))
                 .field("to_token", &support::DebugSyntaxResult(self.to_token()))
@@ -15538,7 +15538,7 @@ impl std::fmt::Debug for CssScopeRangeInterval {
         } else {
             f.debug_struct("CssScopeRangeInterval").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15575,17 +15575,17 @@ impl AstNode for CssScopeRangeStart {
 }
 impl std::fmt::Debug for CssScopeRangeStart {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssScopeRangeStart")
                 .field("start", &support::DebugSyntaxResult(self.start()))
                 .finish()
         } else {
             f.debug_struct("CssScopeRangeStart").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15622,10 +15622,10 @@ impl AstNode for CssStartingStyleAtRule {
 }
 impl std::fmt::Debug for CssStartingStyleAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssStartingStyleAtRule")
                 .field(
                     "starting_style_token",
@@ -15636,7 +15636,7 @@ impl std::fmt::Debug for CssStartingStyleAtRule {
         } else {
             f.debug_struct("CssStartingStyleAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15673,10 +15673,10 @@ impl AstNode for CssString {
 }
 impl std::fmt::Debug for CssString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssString")
                 .field(
                     "value_token",
@@ -15686,7 +15686,7 @@ impl std::fmt::Debug for CssString {
         } else {
             f.debug_struct("CssString").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15723,10 +15723,10 @@ impl AstNode for CssSupportsAndCondition {
 }
 impl std::fmt::Debug for CssSupportsAndCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssSupportsAndCondition")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field("and_token", &support::DebugSyntaxResult(self.and_token()))
@@ -15735,7 +15735,7 @@ impl std::fmt::Debug for CssSupportsAndCondition {
         } else {
             f.debug_struct("CssSupportsAndCondition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15772,10 +15772,10 @@ impl AstNode for CssSupportsAtRule {
 }
 impl std::fmt::Debug for CssSupportsAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssSupportsAtRule")
                 .field(
                     "supports_token",
@@ -15787,7 +15787,7 @@ impl std::fmt::Debug for CssSupportsAtRule {
         } else {
             f.debug_struct("CssSupportsAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15824,10 +15824,10 @@ impl AstNode for CssSupportsConditionInParens {
 }
 impl std::fmt::Debug for CssSupportsConditionInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssSupportsConditionInParens")
                 .field(
                     "l_paren_token",
@@ -15842,7 +15842,7 @@ impl std::fmt::Debug for CssSupportsConditionInParens {
         } else {
             f.debug_struct("CssSupportsConditionInParens").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15879,10 +15879,10 @@ impl AstNode for CssSupportsFeatureDeclaration {
 }
 impl std::fmt::Debug for CssSupportsFeatureDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssSupportsFeatureDeclaration")
                 .field(
                     "l_paren_token",
@@ -15900,7 +15900,7 @@ impl std::fmt::Debug for CssSupportsFeatureDeclaration {
         } else {
             f.debug_struct("CssSupportsFeatureDeclaration").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15937,10 +15937,10 @@ impl AstNode for CssSupportsFeatureSelector {
 }
 impl std::fmt::Debug for CssSupportsFeatureSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssSupportsFeatureSelector")
                 .field(
                     "selector_token",
@@ -15959,7 +15959,7 @@ impl std::fmt::Debug for CssSupportsFeatureSelector {
         } else {
             f.debug_struct("CssSupportsFeatureSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -15996,10 +15996,10 @@ impl AstNode for CssSupportsNotCondition {
 }
 impl std::fmt::Debug for CssSupportsNotCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssSupportsNotCondition")
                 .field("not_token", &support::DebugSyntaxResult(self.not_token()))
                 .field("query", &support::DebugSyntaxResult(self.query()))
@@ -16007,7 +16007,7 @@ impl std::fmt::Debug for CssSupportsNotCondition {
         } else {
             f.debug_struct("CssSupportsNotCondition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16044,10 +16044,10 @@ impl AstNode for CssSupportsOrCondition {
 }
 impl std::fmt::Debug for CssSupportsOrCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssSupportsOrCondition")
                 .field("left", &support::DebugSyntaxResult(self.left()))
                 .field("or_token", &support::DebugSyntaxResult(self.or_token()))
@@ -16056,7 +16056,7 @@ impl std::fmt::Debug for CssSupportsOrCondition {
         } else {
             f.debug_struct("CssSupportsOrCondition").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16093,10 +16093,10 @@ impl AstNode for CssTypeSelector {
 }
 impl std::fmt::Debug for CssTypeSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssTypeSelector")
                 .field(
                     "namespace",
@@ -16107,7 +16107,7 @@ impl std::fmt::Debug for CssTypeSelector {
         } else {
             f.debug_struct("CssTypeSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16144,10 +16144,10 @@ impl AstNode for CssUnicodeCodepoint {
 }
 impl std::fmt::Debug for CssUnicodeCodepoint {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssUnicodeCodepoint")
                 .field(
                     "value_token",
@@ -16157,7 +16157,7 @@ impl std::fmt::Debug for CssUnicodeCodepoint {
         } else {
             f.debug_struct("CssUnicodeCodepoint").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16194,10 +16194,10 @@ impl AstNode for CssUnicodeRange {
 }
 impl std::fmt::Debug for CssUnicodeRange {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssUnicodeRange")
                 .field(
                     "prefix_token",
@@ -16208,7 +16208,7 @@ impl std::fmt::Debug for CssUnicodeRange {
         } else {
             f.debug_struct("CssUnicodeRange").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16245,10 +16245,10 @@ impl AstNode for CssUnicodeRangeInterval {
 }
 impl std::fmt::Debug for CssUnicodeRangeInterval {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssUnicodeRangeInterval")
                 .field("start", &support::DebugSyntaxResult(self.start()))
                 .field(
@@ -16260,7 +16260,7 @@ impl std::fmt::Debug for CssUnicodeRangeInterval {
         } else {
             f.debug_struct("CssUnicodeRangeInterval").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16297,10 +16297,10 @@ impl AstNode for CssUnicodeRangeWildcard {
 }
 impl std::fmt::Debug for CssUnicodeRangeWildcard {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssUnicodeRangeWildcard")
                 .field(
                     "value_token",
@@ -16310,7 +16310,7 @@ impl std::fmt::Debug for CssUnicodeRangeWildcard {
         } else {
             f.debug_struct("CssUnicodeRangeWildcard").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16347,17 +16347,17 @@ impl AstNode for CssUniversalNamespacePrefix {
 }
 impl std::fmt::Debug for CssUniversalNamespacePrefix {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssUniversalNamespacePrefix")
                 .field("star_token", &support::DebugSyntaxResult(self.star_token()))
                 .finish()
         } else {
             f.debug_struct("CssUniversalNamespacePrefix").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16394,10 +16394,10 @@ impl AstNode for CssUniversalSelector {
 }
 impl std::fmt::Debug for CssUniversalSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssUniversalSelector")
                 .field(
                     "namespace",
@@ -16408,7 +16408,7 @@ impl std::fmt::Debug for CssUniversalSelector {
         } else {
             f.debug_struct("CssUniversalSelector").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16445,10 +16445,10 @@ impl AstNode for CssUnknownBlockAtRule {
 }
 impl std::fmt::Debug for CssUnknownBlockAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssUnknownBlockAtRule")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field("components", &support::DebugSyntaxResult(self.components()))
@@ -16457,7 +16457,7 @@ impl std::fmt::Debug for CssUnknownBlockAtRule {
         } else {
             f.debug_struct("CssUnknownBlockAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16494,10 +16494,10 @@ impl AstNode for CssUnknownDimension {
 }
 impl std::fmt::Debug for CssUnknownDimension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssUnknownDimension")
                 .field(
                     "value_token",
@@ -16508,7 +16508,7 @@ impl std::fmt::Debug for CssUnknownDimension {
         } else {
             f.debug_struct("CssUnknownDimension").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16545,10 +16545,10 @@ impl AstNode for CssUnknownValueAtRule {
 }
 impl std::fmt::Debug for CssUnknownValueAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssUnknownValueAtRule")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field("components", &support::DebugSyntaxResult(self.components()))
@@ -16560,7 +16560,7 @@ impl std::fmt::Debug for CssUnknownValueAtRule {
         } else {
             f.debug_struct("CssUnknownValueAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16597,10 +16597,10 @@ impl AstNode for CssUrlFunction {
 }
 impl std::fmt::Debug for CssUrlFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssUrlFunction")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -16617,7 +16617,7 @@ impl std::fmt::Debug for CssUrlFunction {
         } else {
             f.debug_struct("CssUrlFunction").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16654,10 +16654,10 @@ impl AstNode for CssUrlValueRaw {
 }
 impl std::fmt::Debug for CssUrlValueRaw {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssUrlValueRaw")
                 .field(
                     "value_token",
@@ -16667,7 +16667,7 @@ impl std::fmt::Debug for CssUrlValueRaw {
         } else {
             f.debug_struct("CssUrlValueRaw").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16704,10 +16704,10 @@ impl AstNode for CssValueAtRule {
 }
 impl std::fmt::Debug for CssValueAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssValueAtRule")
                 .field(
                     "value_token",
@@ -16722,7 +16722,7 @@ impl std::fmt::Debug for CssValueAtRule {
         } else {
             f.debug_struct("CssValueAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16759,17 +16759,17 @@ impl AstNode for CssValueAtRuleDeclarationClause {
 }
 impl std::fmt::Debug for CssValueAtRuleDeclarationClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssValueAtRuleDeclarationClause")
                 .field("properties", &self.properties())
                 .finish()
         } else {
             f.debug_struct("CssValueAtRuleDeclarationClause").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16806,10 +16806,10 @@ impl AstNode for CssValueAtRuleGenericProperty {
 }
 impl std::fmt::Debug for CssValueAtRuleGenericProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssValueAtRuleGenericProperty")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
@@ -16821,7 +16821,7 @@ impl std::fmt::Debug for CssValueAtRuleGenericProperty {
         } else {
             f.debug_struct("CssValueAtRuleGenericProperty").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16858,10 +16858,10 @@ impl AstNode for CssValueAtRuleImportClause {
 }
 impl std::fmt::Debug for CssValueAtRuleImportClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssValueAtRuleImportClause")
                 .field("specifiers", &self.specifiers())
                 .field("from_token", &support::DebugSyntaxResult(self.from_token()))
@@ -16870,7 +16870,7 @@ impl std::fmt::Debug for CssValueAtRuleImportClause {
         } else {
             f.debug_struct("CssValueAtRuleImportClause").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16907,17 +16907,17 @@ impl AstNode for CssValueAtRuleImportSpecifier {
 }
 impl std::fmt::Debug for CssValueAtRuleImportSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssValueAtRuleImportSpecifier")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .finish()
         } else {
             f.debug_struct("CssValueAtRuleImportSpecifier").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -16955,10 +16955,10 @@ impl AstNode for CssValueAtRuleNamedImportSpecifier {
 }
 impl std::fmt::Debug for CssValueAtRuleNamedImportSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssValueAtRuleNamedImportSpecifier")
                 .field("name", &support::DebugSyntaxResult(self.name()))
                 .field("as_token", &support::DebugSyntaxResult(self.as_token()))
@@ -16968,7 +16968,7 @@ impl std::fmt::Debug for CssValueAtRuleNamedImportSpecifier {
             f.debug_struct("CssValueAtRuleNamedImportSpecifier")
                 .finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }
@@ -17005,10 +17005,10 @@ impl AstNode for CssViewTransitionAtRule {
 }
 impl std::fmt::Debug for CssViewTransitionAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use std::sync::atomic::{AtomicUsize, Ordering};
-        static DEPTH: AtomicUsize = AtomicUsize::new(0);
-        let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
         let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
             f.debug_struct("CssViewTransitionAtRule")
                 .field(
                     "view_transition_token",
@@ -17019,7 +17019,7 @@ impl std::fmt::Debug for CssViewTransitionAtRule {
         } else {
             f.debug_struct("CssViewTransitionAtRule").finish()
         };
-        DEPTH.fetch_sub(1, Ordering::Relaxed);
+        DEPTH.set(current_depth);
         result
     }
 }

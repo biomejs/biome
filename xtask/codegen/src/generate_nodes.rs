@@ -240,17 +240,17 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
             let debug_fmt_impl = if fields.len() > 0 {
                 quote! {
-                    use std::sync::atomic::{AtomicUsize, Ordering};
-                    static DEPTH: AtomicUsize = AtomicUsize::new(0);
-                    let current_depth = DEPTH.fetch_add(1, Ordering::Relaxed);
+                    thread_local! { static DEPTH: std::cell::Cell<u8> = const { std::cell::Cell::new(0) } };
+                    let current_depth = DEPTH.get();
                     let result = if current_depth < 16 {
+                        DEPTH.set(current_depth + 1);
                         f.debug_struct(#string_name)
                             #(#fields)*
                             .finish()
                     } else {
                         f.debug_struct(#string_name).finish()
                     };
-                    DEPTH.fetch_sub(1, Ordering::Relaxed);
+                    DEPTH.set(current_depth);
                     result
                 }
             } else {
