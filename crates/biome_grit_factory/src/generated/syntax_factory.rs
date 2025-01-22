@@ -17,7 +17,6 @@ impl SyntaxFactory for GritSyntaxFactory {
             GRIT_BOGUS
             | GRIT_BOGUS_CONTAINER
             | GRIT_BOGUS_DEFINITION
-            | GRIT_BOGUS_ENGINE_NAME
             | GRIT_BOGUS_LANGUAGE_DECLARATION
             | GRIT_BOGUS_LANGUAGE_FLAVOR_KIND
             | GRIT_BOGUS_LANGUAGE_NAME

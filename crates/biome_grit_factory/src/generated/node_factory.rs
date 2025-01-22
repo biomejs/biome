@@ -1694,16 +1694,6 @@ where
         slots,
     ))
 }
-pub fn grit_bogus_engine_name<I>(slots: I) -> GritBogusEngineName
-where
-    I: IntoIterator<Item = Option<SyntaxElement>>,
-    I::IntoIter: ExactSizeIterator,
-{
-    GritBogusEngineName::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_BOGUS_ENGINE_NAME,
-        slots,
-    ))
-}
 pub fn grit_bogus_language_declaration<I>(slots: I) -> GritBogusLanguageDeclaration
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,

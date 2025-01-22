@@ -12208,62 +12208,6 @@ impl From<GritBogusDefinition> for SyntaxElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub struct GritBogusEngineName {
-    syntax: SyntaxNode,
-}
-impl GritBogusEngineName {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn items(&self) -> SyntaxElementChildren {
-        support::elements(&self.syntax)
-    }
-}
-impl AstNode for GritBogusEngineName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_BOGUS_ENGINE_NAME as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_BOGUS_ENGINE_NAME
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for GritBogusEngineName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritBogusEngineName")
-            .field("items", &DebugSyntaxElementChildren(self.items()))
-            .finish()
-    }
-}
-impl From<GritBogusEngineName> for SyntaxNode {
-    fn from(n: GritBogusEngineName) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<GritBogusEngineName> for SyntaxElement {
-    fn from(n: GritBogusEngineName) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GritBogusLanguageDeclaration {
     syntax: SyntaxNode,
 }

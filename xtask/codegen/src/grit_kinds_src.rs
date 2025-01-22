@@ -226,6 +226,5 @@ pub const GRIT_KINDS_SRC: KindsSrc = KindsSrc {
         "GRIT_BOGUS_PATTERN",
         "GRIT_BOGUS_PREDICATE",
         "GRIT_BOGUS_VERSION",
-        "GRIT_BOGUS_ENGINE_NAME",
     ],
 };

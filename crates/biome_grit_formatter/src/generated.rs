@@ -3793,44 +3793,6 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusDefinition {
         )
     }
 }
-impl FormatRule<biome_grit_syntax::GritBogusEngineName>
-    for crate::grit::bogus::bogus_engine_name::FormatGritBogusEngineName
-{
-    type Context = GritFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_grit_syntax::GritBogusEngineName,
-        f: &mut GritFormatter,
-    ) -> FormatResult<()> {
-        FormatBogusNodeRule::<biome_grit_syntax::GritBogusEngineName>::fmt(self, node, f)
-    }
-}
-impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusEngineName {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_grit_syntax::GritBogusEngineName,
-        crate::grit::bogus::bogus_engine_name::FormatGritBogusEngineName,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::grit::bogus::bogus_engine_name::FormatGritBogusEngineName::default(),
-        )
-    }
-}
-impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusEngineName {
-    type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritBogusEngineName,
-        crate::grit::bogus::bogus_engine_name::FormatGritBogusEngineName,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::grit::bogus::bogus_engine_name::FormatGritBogusEngineName::default(),
-        )
-    }
-}
 impl FormatRule<biome_grit_syntax::GritBogusLanguageDeclaration>
     for crate::grit::bogus::bogus_language_declaration::FormatGritBogusLanguageDeclaration
 {

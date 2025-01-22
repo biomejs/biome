@@ -44,7 +44,6 @@ GritBogusMapElement = SyntaxElement*
 GritBogusLanguageDeclaration = SyntaxElement*
 GritBogusLanguageFlavorKind = SyntaxElement*
 GritBogusLanguageName = SyntaxElement*
-GritBogusEngineName = SyntaxElement*
 GritBogusLiteral = SyntaxElement*
 GritBogusNamedArg = SyntaxElement*
 GritBogusPattern = SyntaxElement*
