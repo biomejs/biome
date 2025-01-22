@@ -181,7 +181,7 @@ Contributions to the project aren't only limited to code. Contributions come in 
 
 ### Governance changes
 
-Changes to the governance document must be approved by at least fifty percent of the Core Contributors at least one lead.
+Changes to the governance document must be approved by at least fifty percent of the Core Contributors and a majority of the Leads.
 
 ## Project Direction
 
