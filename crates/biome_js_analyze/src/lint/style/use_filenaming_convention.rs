@@ -95,9 +95,7 @@ declare_lint_rule! {
     /// When the option is set to `false`, a name may include non-ASCII characters.
     /// `café` and `안녕하세요` are so valid.
     ///
-    /// Default: `false`
-    ///
-    /// **This option will be turned on by default in Biome 2.0.**
+    /// Default: `true`
     ///
     /// ### match (Since v2.0.0)
     ///
@@ -406,7 +404,7 @@ pub struct FilenamingConventionOptions {
     pub strict_case: bool,
 
     /// If `false`, then non-ASCII characters are allowed.
-    #[serde(default, skip_serializing_if = "is_default")]
+    #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
     pub require_ascii: bool,
 
     /// Regular expression to enforce
@@ -430,7 +428,7 @@ impl Default for FilenamingConventionOptions {
     fn default() -> Self {
         Self {
             strict_case: true,
-            require_ascii: false,
+            require_ascii: true,
             matching: None,
             filename_cases: FilenameCases::default(),
         }
