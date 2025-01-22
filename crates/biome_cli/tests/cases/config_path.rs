@@ -98,3 +98,28 @@ fn set_config_path_to_file() {
         result,
     ));
 }
+
+#[test]
+fn raises_an_error_when_the_config_file_is_not_json() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let config_path = Utf8Path::new("biome.yml");
+    fs.insert(config_path.into(), r#"blah: foo"#.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--config-path=biome.yml", "src"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "raises_an_error_when_the_config_file_is_not_json",
+        fs,
+        console,
+        result,
+    ));
+}

@@ -193,9 +193,14 @@ fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadCon
             let content = fs.read_file_from_path(config_file_path)?;
             let parser_options = match config_file_path.extension() {
                 Some("json") => JsonParserOptions::default(),
-                _ => JsonParserOptions::default()
+                Some("jsonc") => JsonParserOptions::default()
                     .with_allow_comments()
                     .with_allow_trailing_commas(),
+                _ => {
+                    return Err(
+                        BiomeDiagnostic::invalid_configuration_file(config_file_path).into(),
+                    )
+                }
             };
             let deserialized =
                 deserialize_from_json_str::<Configuration>(&content, parser_options, "");
@@ -569,5 +574,24 @@ impl ConfigurationExt for Configuration {
             }
         }
         Ok((None, vec![]))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::configuration::load_configuration;
+    use biome_configuration::ConfigurationPathHint;
+    use biome_fs::MemoryFileSystem;
+    use camino::Utf8PathBuf;
+
+    #[test]
+    fn should_not_load_a_configuration_yml() {
+        let mut fs = MemoryFileSystem::default();
+        fs.insert(Utf8PathBuf::from("biome.yml"), "content".to_string());
+        let path_hint = ConfigurationPathHint::FromUser(Utf8PathBuf::from("biome.yml"));
+
+        let result = load_configuration(&fs, path_hint);
+
+        assert!(result.is_err());
     }
 }
