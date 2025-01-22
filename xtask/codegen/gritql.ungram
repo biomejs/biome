@@ -43,6 +43,8 @@ GritBogusDefinition = SyntaxElement*
 GritBogusMapElement = SyntaxElement*
 GritBogusLanguageDeclaration = SyntaxElement*
 GritBogusLanguageFlavorKind = SyntaxElement*
+GritBogusLanguageName = SyntaxElement*
+GritBogusEngineName = SyntaxElement*
 GritBogusLiteral = SyntaxElement*
 GritBogusNamedArg = SyntaxElement*
 GritBogusPattern = SyntaxElement*
@@ -62,7 +64,12 @@ AnyGritVersion =
 
 // engine biome(1.0)
 // ^^^^^^ ^^^^^^^^^^
-GritVersion = 'engine' 'biome' '(' version: GritDoubleLiteral ')'
+GritVersion =
+	'engine'
+	engine_name: GritEngineName
+	'(' version: GritDoubleLiteral ')'
+
+GritEngineName = engine_kind: ('biome' | 'marzano')
 
 AnyGritLanguageDeclaration =
     GritLanguageDeclaration
@@ -72,7 +79,7 @@ AnyGritLanguageDeclaration =
 // ^^^^^^^^ ^^^^^^^^^^^^^^ ^^^^^
 GritLanguageDeclaration =
     'language'
-    name: GritLanguageName
+    name: AnyGritLanguageName
     flavor: GritLanguageFlavor?
     ';'?
 
@@ -580,6 +587,10 @@ GritVariableList = GritVariable (',' GritVariable)* ','?
 GritName = value: 'grit_name'
 
 // These are target languages
+AnyGritLanguageName =
+    GritLanguageName
+    | GritBogusLanguageName
+
 GritLanguageName =
     language_kind: ('js' | 'css' | 'json' | 'grit' | 'html')
 
@@ -588,7 +599,7 @@ GritBacktickSnippetLiteral = value: 'grit_backtick_snippet'
 GritRawBacktickSnippetLiteral = value: 'grit_raw_backtick_snippet'
 
 GritLanguageSpecificSnippet =
-    language: GritLanguageName
+    language: AnyGritLanguageName
     snippet: 'grit_string'
 
 // a code snippet may be prefixed by a label;

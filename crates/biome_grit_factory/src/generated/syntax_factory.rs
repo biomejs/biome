@@ -17,8 +17,10 @@ impl SyntaxFactory for GritSyntaxFactory {
             GRIT_BOGUS
             | GRIT_BOGUS_CONTAINER
             | GRIT_BOGUS_DEFINITION
+            | GRIT_BOGUS_ENGINE_NAME
             | GRIT_BOGUS_LANGUAGE_DECLARATION
             | GRIT_BOGUS_LANGUAGE_FLAVOR_KIND
+            | GRIT_BOGUS_LANGUAGE_NAME
             | GRIT_BOGUS_LITERAL
             | GRIT_BOGUS_MAP_ELEMENT
             | GRIT_BOGUS_NAMED_ARG
@@ -426,6 +428,25 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.into_node(GRIT_DOUBLE_LITERAL, children)
             }
+            GRIT_ENGINE_NAME => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if matches!(element.kind(), T![biome] | T![marzano]) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GRIT_ENGINE_NAME.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GRIT_ENGINE_NAME, children)
+            }
             GRIT_EVERY => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -577,7 +598,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if GritLanguageName::can_cast(element.kind()) {
+                    if AnyGritLanguageName::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -684,7 +705,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if GritLanguageName::can_cast(element.kind()) {
+                    if AnyGritLanguageName::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -2948,7 +2969,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if element.kind() == T![biome] {
+                    if GritEngineName::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }

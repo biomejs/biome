@@ -77,6 +77,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritDoubleLiteral::new_unchecked(node) };
                     $body
                 }
+                $crate::GritSyntaxKind::GRIT_ENGINE_NAME => {
+                    let $pattern = unsafe { $crate::GritEngineName::new_unchecked(node) };
+                    $body
+                }
                 $crate::GritSyntaxKind::GRIT_EVERY => {
                     let $pattern = unsafe { $crate::GritEvery::new_unchecked(node) };
                     $body
@@ -411,6 +415,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritBogusDefinition::new_unchecked(node) };
                     $body
                 }
+                $crate::GritSyntaxKind::GRIT_BOGUS_ENGINE_NAME => {
+                    let $pattern = unsafe { $crate::GritBogusEngineName::new_unchecked(node) };
+                    $body
+                }
                 $crate::GritSyntaxKind::GRIT_BOGUS_LANGUAGE_DECLARATION => {
                     let $pattern =
                         unsafe { $crate::GritBogusLanguageDeclaration::new_unchecked(node) };
@@ -419,6 +427,10 @@ macro_rules! map_syntax_node {
                 $crate::GritSyntaxKind::GRIT_BOGUS_LANGUAGE_FLAVOR_KIND => {
                     let $pattern =
                         unsafe { $crate::GritBogusLanguageFlavorKind::new_unchecked(node) };
+                    $body
+                }
+                $crate::GritSyntaxKind::GRIT_BOGUS_LANGUAGE_NAME => {
+                    let $pattern = unsafe { $crate::GritBogusLanguageName::new_unchecked(node) };
                     $body
                 }
                 $crate::GritSyntaxKind::GRIT_BOGUS_LITERAL => {

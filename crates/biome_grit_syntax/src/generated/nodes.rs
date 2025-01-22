@@ -630,6 +630,41 @@ pub struct GritDoubleLiteralFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GritEngineName {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GritEngineName {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GritEngineNameFields {
+        GritEngineNameFields {
+            engine_kind: self.engine_kind(),
+        }
+    }
+    pub fn engine_kind(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for GritEngineName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GritEngineNameFields {
+    pub engine_kind: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritEvery {
     pub(crate) syntax: SyntaxNode,
 }
@@ -839,7 +874,7 @@ impl GritLanguageDeclaration {
     pub fn language_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<GritLanguageName> {
+    pub fn name(&self) -> SyntaxResult<AnyGritLanguageName> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn flavor(&self) -> Option<GritLanguageFlavor> {
@@ -860,7 +895,7 @@ impl Serialize for GritLanguageDeclaration {
 #[derive(Serialize)]
 pub struct GritLanguageDeclarationFields {
     pub language_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<GritLanguageName>,
+    pub name: SyntaxResult<AnyGritLanguageName>,
     pub flavor: Option<GritLanguageFlavor>,
     pub semicolon_token: Option<SyntaxToken>,
 }
@@ -999,7 +1034,7 @@ impl GritLanguageSpecificSnippet {
             snippet_token: self.snippet_token(),
         }
     }
-    pub fn language(&self) -> SyntaxResult<GritLanguageName> {
+    pub fn language(&self) -> SyntaxResult<AnyGritLanguageName> {
         support::required_node(&self.syntax, 0usize)
     }
     pub fn snippet_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -1016,7 +1051,7 @@ impl Serialize for GritLanguageSpecificSnippet {
 }
 #[derive(Serialize)]
 pub struct GritLanguageSpecificSnippetFields {
-    pub language: SyntaxResult<GritLanguageName>,
+    pub language: SyntaxResult<AnyGritLanguageName>,
     pub snippet_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -4091,7 +4126,7 @@ impl GritVersion {
     pub fn as_fields(&self) -> GritVersionFields {
         GritVersionFields {
             engine_token: self.engine_token(),
-            biome_token: self.biome_token(),
+            engine_name: self.engine_name(),
             l_paren_token: self.l_paren_token(),
             version: self.version(),
             r_paren_token: self.r_paren_token(),
@@ -4100,8 +4135,8 @@ impl GritVersion {
     pub fn engine_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn biome_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn engine_name(&self) -> SyntaxResult<GritEngineName> {
+        support::required_node(&self.syntax, 1usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -4124,7 +4159,7 @@ impl Serialize for GritVersion {
 #[derive(Serialize)]
 pub struct GritVersionFields {
     pub engine_token: SyntaxResult<SyntaxToken>,
-    pub biome_token: SyntaxResult<SyntaxToken>,
+    pub engine_name: SyntaxResult<GritEngineName>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub version: SyntaxResult<GritDoubleLiteral>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -4302,6 +4337,25 @@ impl AnyGritLanguageFlavorKind {
     pub fn as_grit_language_flavor_kind(&self) -> Option<&GritLanguageFlavorKind> {
         match &self {
             AnyGritLanguageFlavorKind::GritLanguageFlavorKind(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyGritLanguageName {
+    GritBogusLanguageName(GritBogusLanguageName),
+    GritLanguageName(GritLanguageName),
+}
+impl AnyGritLanguageName {
+    pub fn as_grit_bogus_language_name(&self) -> Option<&GritBogusLanguageName> {
+        match &self {
+            AnyGritLanguageName::GritBogusLanguageName(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_grit_language_name(&self) -> Option<&GritLanguageName> {
+        match &self {
+            AnyGritLanguageName::GritLanguageName(item) => Some(item),
             _ => None,
         }
     }
@@ -5653,6 +5707,47 @@ impl From<GritDoubleLiteral> for SyntaxNode {
 }
 impl From<GritDoubleLiteral> for SyntaxElement {
     fn from(n: GritDoubleLiteral) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for GritEngineName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_ENGINE_NAME as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GRIT_ENGINE_NAME
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GritEngineName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GritEngineName")
+            .field(
+                "engine_kind",
+                &support::DebugSyntaxResult(self.engine_kind()),
+            )
+            .finish()
+    }
+}
+impl From<GritEngineName> for SyntaxNode {
+    fn from(n: GritEngineName) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<GritEngineName> for SyntaxElement {
+    fn from(n: GritEngineName) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -9100,8 +9195,8 @@ impl std::fmt::Debug for GritVersion {
                 &support::DebugSyntaxResult(self.engine_token()),
             )
             .field(
-                "biome_token",
-                &support::DebugSyntaxResult(self.biome_token()),
+                "engine_name",
+                &support::DebugSyntaxResult(self.engine_name()),
             )
             .field(
                 "l_paren_token",
@@ -9593,6 +9688,70 @@ impl From<AnyGritLanguageFlavorKind> for SyntaxNode {
 }
 impl From<AnyGritLanguageFlavorKind> for SyntaxElement {
     fn from(n: AnyGritLanguageFlavorKind) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<GritBogusLanguageName> for AnyGritLanguageName {
+    fn from(node: GritBogusLanguageName) -> AnyGritLanguageName {
+        AnyGritLanguageName::GritBogusLanguageName(node)
+    }
+}
+impl From<GritLanguageName> for AnyGritLanguageName {
+    fn from(node: GritLanguageName) -> AnyGritLanguageName {
+        AnyGritLanguageName::GritLanguageName(node)
+    }
+}
+impl AstNode for AnyGritLanguageName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        GritBogusLanguageName::KIND_SET.union(GritLanguageName::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, GRIT_BOGUS_LANGUAGE_NAME | GRIT_LANGUAGE_NAME)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            GRIT_BOGUS_LANGUAGE_NAME => {
+                AnyGritLanguageName::GritBogusLanguageName(GritBogusLanguageName { syntax })
+            }
+            GRIT_LANGUAGE_NAME => {
+                AnyGritLanguageName::GritLanguageName(GritLanguageName { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyGritLanguageName::GritBogusLanguageName(it) => &it.syntax,
+            AnyGritLanguageName::GritLanguageName(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyGritLanguageName::GritBogusLanguageName(it) => it.syntax,
+            AnyGritLanguageName::GritLanguageName(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyGritLanguageName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyGritLanguageName::GritBogusLanguageName(it) => std::fmt::Debug::fmt(it, f),
+            AnyGritLanguageName::GritLanguageName(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyGritLanguageName> for SyntaxNode {
+    fn from(n: AnyGritLanguageName) -> SyntaxNode {
+        match n {
+            AnyGritLanguageName::GritBogusLanguageName(it) => it.into(),
+            AnyGritLanguageName::GritLanguageName(it) => it.into(),
+        }
+    }
+}
+impl From<AnyGritLanguageName> for SyntaxElement {
+    fn from(n: AnyGritLanguageName) -> SyntaxElement {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -11330,6 +11489,11 @@ impl std::fmt::Display for AnyGritLanguageFlavorKind {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyGritLanguageName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyGritListAccessorSubject {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -11471,6 +11635,11 @@ impl std::fmt::Display for GritDotdotdot {
     }
 }
 impl std::fmt::Display for GritDoubleLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GritEngineName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -12039,6 +12208,62 @@ impl From<GritBogusDefinition> for SyntaxElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct GritBogusEngineName {
+    syntax: SyntaxNode,
+}
+impl GritBogusEngineName {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for GritBogusEngineName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_BOGUS_ENGINE_NAME as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GRIT_BOGUS_ENGINE_NAME
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GritBogusEngineName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GritBogusEngineName")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<GritBogusEngineName> for SyntaxNode {
+    fn from(n: GritBogusEngineName) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<GritBogusEngineName> for SyntaxElement {
+    fn from(n: GritBogusEngineName) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GritBogusLanguageDeclaration {
     syntax: SyntaxNode,
 }
@@ -12147,6 +12372,62 @@ impl From<GritBogusLanguageFlavorKind> for SyntaxNode {
 }
 impl From<GritBogusLanguageFlavorKind> for SyntaxElement {
     fn from(n: GritBogusLanguageFlavorKind) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct GritBogusLanguageName {
+    syntax: SyntaxNode,
+}
+impl GritBogusLanguageName {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for GritBogusLanguageName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_BOGUS_LANGUAGE_NAME as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GRIT_BOGUS_LANGUAGE_NAME
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GritBogusLanguageName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GritBogusLanguageName")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<GritBogusLanguageName> for SyntaxNode {
+    fn from(n: GritBogusLanguageName) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<GritBogusLanguageName> for SyntaxElement {
+    fn from(n: GritBogusLanguageName) -> SyntaxElement {
         n.syntax.into()
     }
 }

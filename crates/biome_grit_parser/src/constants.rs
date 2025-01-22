@@ -50,6 +50,8 @@ pub(crate) const NOT_SET: TokenSet<GritSyntaxKind> = token_set![NOT_KW, T![!]];
 
 pub(crate) const REGEX_SET: TokenSet<GritSyntaxKind> = token_set![GRIT_REGEX, GRIT_SNIPPET_REGEX];
 
+pub(crate) const SUPPORTED_ENGINE_SET: TokenSet<GritSyntaxKind> = token_set![T![biome]];
+
 pub(crate) const SUPPORTED_LANGUAGE_SET: TokenSet<GritSyntaxKind> =
     token_set![T![js], T![json], T![css], T![grit], T![html]];
 

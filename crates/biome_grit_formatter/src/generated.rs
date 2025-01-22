@@ -559,6 +559,44 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritDoubleLiteral {
         )
     }
 }
+impl FormatRule<biome_grit_syntax::GritEngineName>
+    for crate::grit::auxiliary::engine_name::FormatGritEngineName
+{
+    type Context = GritFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_grit_syntax::GritEngineName,
+        f: &mut GritFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_grit_syntax::GritEngineName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<GritFormatContext> for biome_grit_syntax::GritEngineName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_grit_syntax::GritEngineName,
+        crate::grit::auxiliary::engine_name::FormatGritEngineName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::grit::auxiliary::engine_name::FormatGritEngineName::default(),
+        )
+    }
+}
+impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritEngineName {
+    type Format = FormatOwnedWithRule<
+        biome_grit_syntax::GritEngineName,
+        crate::grit::auxiliary::engine_name::FormatGritEngineName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::grit::auxiliary::engine_name::FormatGritEngineName::default(),
+        )
+    }
+}
 impl FormatRule<biome_grit_syntax::GritEvery> for crate::grit::auxiliary::every::FormatGritEvery {
     type Context = GritFormatContext;
     #[inline(always)]
@@ -3755,6 +3793,44 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusDefinition {
         )
     }
 }
+impl FormatRule<biome_grit_syntax::GritBogusEngineName>
+    for crate::grit::bogus::bogus_engine_name::FormatGritBogusEngineName
+{
+    type Context = GritFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_grit_syntax::GritBogusEngineName,
+        f: &mut GritFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_grit_syntax::GritBogusEngineName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusEngineName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_grit_syntax::GritBogusEngineName,
+        crate::grit::bogus::bogus_engine_name::FormatGritBogusEngineName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::grit::bogus::bogus_engine_name::FormatGritBogusEngineName::default(),
+        )
+    }
+}
+impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusEngineName {
+    type Format = FormatOwnedWithRule<
+        biome_grit_syntax::GritBogusEngineName,
+        crate::grit::bogus::bogus_engine_name::FormatGritBogusEngineName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::grit::bogus::bogus_engine_name::FormatGritBogusEngineName::default(),
+        )
+    }
+}
 impl FormatRule<biome_grit_syntax::GritBogusLanguageDeclaration>
     for crate::grit::bogus::bogus_language_declaration::FormatGritBogusLanguageDeclaration
 {
@@ -3817,6 +3893,44 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusLanguageFlavo
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: grit :: bogus :: bogus_language_flavor_kind :: FormatGritBogusLanguageFlavorKind :: default ())
+    }
+}
+impl FormatRule<biome_grit_syntax::GritBogusLanguageName>
+    for crate::grit::bogus::bogus_language_name::FormatGritBogusLanguageName
+{
+    type Context = GritFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_grit_syntax::GritBogusLanguageName,
+        f: &mut GritFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_grit_syntax::GritBogusLanguageName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusLanguageName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_grit_syntax::GritBogusLanguageName,
+        crate::grit::bogus::bogus_language_name::FormatGritBogusLanguageName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::grit::bogus::bogus_language_name::FormatGritBogusLanguageName::default(),
+        )
+    }
+}
+impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusLanguageName {
+    type Format = FormatOwnedWithRule<
+        biome_grit_syntax::GritBogusLanguageName,
+        crate::grit::bogus::bogus_language_name::FormatGritBogusLanguageName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::grit::bogus::bogus_language_name::FormatGritBogusLanguageName::default(),
+        )
     }
 }
 impl FormatRule<biome_grit_syntax::GritBogusLiteral>
@@ -4169,6 +4283,31 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageFlavorK
         FormatOwnedWithRule::new(
             self,
             crate::grit::any::language_flavor_kind::FormatAnyGritLanguageFlavorKind::default(),
+        )
+    }
+}
+impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_grit_syntax::AnyGritLanguageName,
+        crate::grit::any::language_name::FormatAnyGritLanguageName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::grit::any::language_name::FormatAnyGritLanguageName::default(),
+        )
+    }
+}
+impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageName {
+    type Format = FormatOwnedWithRule<
+        biome_grit_syntax::AnyGritLanguageName,
+        crate::grit::any::language_name::FormatAnyGritLanguageName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::grit::any::language_name::FormatAnyGritLanguageName::default(),
         )
     }
 }

@@ -44,8 +44,9 @@ pub enum GritSyntaxKind {
     SEQUENTIAL_KW,
     MULTIFILE_KW,
     ENGINE_KW,
-    BIOME_KW,
     LANGUAGE_KW,
+    BIOME_KW,
+    MARZANO_KW,
     JS_KW,
     CSS_KW,
     JSON_KW,
@@ -107,6 +108,7 @@ pub enum GritSyntaxKind {
     GRIT_FILES,
     GRIT_DEFINITION_LIST,
     GRIT_VERSION,
+    GRIT_ENGINE_NAME,
     GRIT_LANGUAGE_DECLARATION,
     GRIT_LANGUAGE_FLAVOR,
     GRIT_LANGUAGE_FLAVOR_LIST,
@@ -205,11 +207,13 @@ pub enum GritSyntaxKind {
     GRIT_BOGUS_MAP_ELEMENT,
     GRIT_BOGUS_LANGUAGE_DECLARATION,
     GRIT_BOGUS_LANGUAGE_FLAVOR_KIND,
+    GRIT_BOGUS_LANGUAGE_NAME,
     GRIT_BOGUS_LITERAL,
     GRIT_BOGUS_NAMED_ARG,
     GRIT_BOGUS_PATTERN,
     GRIT_BOGUS_PREDICATE,
     GRIT_BOGUS_VERSION,
+    GRIT_BOGUS_ENGINE_NAME,
     #[doc(hidden)]
     __LAST,
 }
@@ -279,8 +283,9 @@ impl GritSyntaxKind {
             "sequential" => SEQUENTIAL_KW,
             "multifile" => MULTIFILE_KW,
             "engine" => ENGINE_KW,
-            "biome" => BIOME_KW,
             "language" => LANGUAGE_KW,
+            "biome" => BIOME_KW,
+            "marzano" => MARZANO_KW,
             "js" => JS_KW,
             "css" => CSS_KW,
             "json" => JSON_KW,
@@ -356,8 +361,9 @@ impl GritSyntaxKind {
             SEQUENTIAL_KW => "sequential",
             MULTIFILE_KW => "multifile",
             ENGINE_KW => "engine",
-            BIOME_KW => "biome",
             LANGUAGE_KW => "language",
+            BIOME_KW => "biome",
+            MARZANO_KW => "marzano",
             JS_KW => "js",
             CSS_KW => "css",
             JSON_KW => "json",
@@ -403,4 +409,4 @@ impl GritSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [...] => { $ crate :: GritSyntaxKind :: DOT3 } ; ["$_"] => { $ crate :: GritSyntaxKind :: DOLLAR_UNDERSCORE } ; [<:] => { $ crate :: GritSyntaxKind :: MATCH } ; [;] => { $ crate :: GritSyntaxKind :: SEMICOLON } ; [,] => { $ crate :: GritSyntaxKind :: COMMA } ; ['('] => { $ crate :: GritSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: GritSyntaxKind :: R_PAREN } ; ['{'] => { $ crate :: GritSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: GritSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: GritSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: GritSyntaxKind :: R_BRACK } ; [<] => { $ crate :: GritSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: GritSyntaxKind :: R_ANGLE } ; [+] => { $ crate :: GritSyntaxKind :: PLUS } ; [*] => { $ crate :: GritSyntaxKind :: STAR } ; [/] => { $ crate :: GritSyntaxKind :: SLASH } ; [%] => { $ crate :: GritSyntaxKind :: PERCENT } ; [.] => { $ crate :: GritSyntaxKind :: DOT } ; [:] => { $ crate :: GritSyntaxKind :: COLON } ; [=] => { $ crate :: GritSyntaxKind :: EQ } ; [==] => { $ crate :: GritSyntaxKind :: EQ2 } ; [=>] => { $ crate :: GritSyntaxKind :: FAT_ARROW } ; [!] => { $ crate :: GritSyntaxKind :: BANG } ; [!=] => { $ crate :: GritSyntaxKind :: NEQ } ; [-] => { $ crate :: GritSyntaxKind :: MINUS } ; [<=] => { $ crate :: GritSyntaxKind :: LTEQ } ; [>=] => { $ crate :: GritSyntaxKind :: GTEQ } ; [+=] => { $ crate :: GritSyntaxKind :: PLUSEQ } ; ['`'] => { $ crate :: GritSyntaxKind :: BACKTICK } ; [sequential] => { $ crate :: GritSyntaxKind :: SEQUENTIAL_KW } ; [multifile] => { $ crate :: GritSyntaxKind :: MULTIFILE_KW } ; [engine] => { $ crate :: GritSyntaxKind :: ENGINE_KW } ; [biome] => { $ crate :: GritSyntaxKind :: BIOME_KW } ; [language] => { $ crate :: GritSyntaxKind :: LANGUAGE_KW } ; [js] => { $ crate :: GritSyntaxKind :: JS_KW } ; [css] => { $ crate :: GritSyntaxKind :: CSS_KW } ; [json] => { $ crate :: GritSyntaxKind :: JSON_KW } ; [grit] => { $ crate :: GritSyntaxKind :: GRIT_KW } ; [html] => { $ crate :: GritSyntaxKind :: HTML_KW } ; [typescript] => { $ crate :: GritSyntaxKind :: TYPESCRIPT_KW } ; [jsx] => { $ crate :: GritSyntaxKind :: JSX_KW } ; [js_do_not_use] => { $ crate :: GritSyntaxKind :: JS_DO_NOT_USE_KW } ; [as] => { $ crate :: GritSyntaxKind :: AS_KW } ; [limit] => { $ crate :: GritSyntaxKind :: LIMIT_KW } ; [where] => { $ crate :: GritSyntaxKind :: WHERE_KW } ; [orelse] => { $ crate :: GritSyntaxKind :: ORELSE_KW } ; [maybe] => { $ crate :: GritSyntaxKind :: MAYBE_KW } ; [after] => { $ crate :: GritSyntaxKind :: AFTER_KW } ; [before] => { $ crate :: GritSyntaxKind :: BEFORE_KW } ; [contains] => { $ crate :: GritSyntaxKind :: CONTAINS_KW } ; [until] => { $ crate :: GritSyntaxKind :: UNTIL_KW } ; [includes] => { $ crate :: GritSyntaxKind :: INCLUDES_KW } ; [if] => { $ crate :: GritSyntaxKind :: IF_KW } ; [else] => { $ crate :: GritSyntaxKind :: ELSE_KW } ; [within] => { $ crate :: GritSyntaxKind :: WITHIN_KW } ; [bubble] => { $ crate :: GritSyntaxKind :: BUBBLE_KW } ; [not] => { $ crate :: GritSyntaxKind :: NOT_KW } ; [or] => { $ crate :: GritSyntaxKind :: OR_KW } ; [and] => { $ crate :: GritSyntaxKind :: AND_KW } ; [any] => { $ crate :: GritSyntaxKind :: ANY_KW } ; [some] => { $ crate :: GritSyntaxKind :: SOME_KW } ; [every] => { $ crate :: GritSyntaxKind :: EVERY_KW } ; [private] => { $ crate :: GritSyntaxKind :: PRIVATE_KW } ; [pattern] => { $ crate :: GritSyntaxKind :: PATTERN_KW } ; [predicate] => { $ crate :: GritSyntaxKind :: PREDICATE_KW } ; [function] => { $ crate :: GritSyntaxKind :: FUNCTION_KW } ; [true] => { $ crate :: GritSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: GritSyntaxKind :: FALSE_KW } ; [undefined] => { $ crate :: GritSyntaxKind :: UNDEFINED_KW } ; [like] => { $ crate :: GritSyntaxKind :: LIKE_KW } ; [return] => { $ crate :: GritSyntaxKind :: RETURN_KW } ; [ident] => { $ crate :: GritSyntaxKind :: IDENT } ; [EOF] => { $ crate :: GritSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: GritSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: GritSyntaxKind :: HASH } ; }
+macro_rules ! T { [...] => { $ crate :: GritSyntaxKind :: DOT3 } ; ["$_"] => { $ crate :: GritSyntaxKind :: DOLLAR_UNDERSCORE } ; [<:] => { $ crate :: GritSyntaxKind :: MATCH } ; [;] => { $ crate :: GritSyntaxKind :: SEMICOLON } ; [,] => { $ crate :: GritSyntaxKind :: COMMA } ; ['('] => { $ crate :: GritSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: GritSyntaxKind :: R_PAREN } ; ['{'] => { $ crate :: GritSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: GritSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: GritSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: GritSyntaxKind :: R_BRACK } ; [<] => { $ crate :: GritSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: GritSyntaxKind :: R_ANGLE } ; [+] => { $ crate :: GritSyntaxKind :: PLUS } ; [*] => { $ crate :: GritSyntaxKind :: STAR } ; [/] => { $ crate :: GritSyntaxKind :: SLASH } ; [%] => { $ crate :: GritSyntaxKind :: PERCENT } ; [.] => { $ crate :: GritSyntaxKind :: DOT } ; [:] => { $ crate :: GritSyntaxKind :: COLON } ; [=] => { $ crate :: GritSyntaxKind :: EQ } ; [==] => { $ crate :: GritSyntaxKind :: EQ2 } ; [=>] => { $ crate :: GritSyntaxKind :: FAT_ARROW } ; [!] => { $ crate :: GritSyntaxKind :: BANG } ; [!=] => { $ crate :: GritSyntaxKind :: NEQ } ; [-] => { $ crate :: GritSyntaxKind :: MINUS } ; [<=] => { $ crate :: GritSyntaxKind :: LTEQ } ; [>=] => { $ crate :: GritSyntaxKind :: GTEQ } ; [+=] => { $ crate :: GritSyntaxKind :: PLUSEQ } ; ['`'] => { $ crate :: GritSyntaxKind :: BACKTICK } ; [sequential] => { $ crate :: GritSyntaxKind :: SEQUENTIAL_KW } ; [multifile] => { $ crate :: GritSyntaxKind :: MULTIFILE_KW } ; [engine] => { $ crate :: GritSyntaxKind :: ENGINE_KW } ; [language] => { $ crate :: GritSyntaxKind :: LANGUAGE_KW } ; [biome] => { $ crate :: GritSyntaxKind :: BIOME_KW } ; [marzano] => { $ crate :: GritSyntaxKind :: MARZANO_KW } ; [js] => { $ crate :: GritSyntaxKind :: JS_KW } ; [css] => { $ crate :: GritSyntaxKind :: CSS_KW } ; [json] => { $ crate :: GritSyntaxKind :: JSON_KW } ; [grit] => { $ crate :: GritSyntaxKind :: GRIT_KW } ; [html] => { $ crate :: GritSyntaxKind :: HTML_KW } ; [typescript] => { $ crate :: GritSyntaxKind :: TYPESCRIPT_KW } ; [jsx] => { $ crate :: GritSyntaxKind :: JSX_KW } ; [js_do_not_use] => { $ crate :: GritSyntaxKind :: JS_DO_NOT_USE_KW } ; [as] => { $ crate :: GritSyntaxKind :: AS_KW } ; [limit] => { $ crate :: GritSyntaxKind :: LIMIT_KW } ; [where] => { $ crate :: GritSyntaxKind :: WHERE_KW } ; [orelse] => { $ crate :: GritSyntaxKind :: ORELSE_KW } ; [maybe] => { $ crate :: GritSyntaxKind :: MAYBE_KW } ; [after] => { $ crate :: GritSyntaxKind :: AFTER_KW } ; [before] => { $ crate :: GritSyntaxKind :: BEFORE_KW } ; [contains] => { $ crate :: GritSyntaxKind :: CONTAINS_KW } ; [until] => { $ crate :: GritSyntaxKind :: UNTIL_KW } ; [includes] => { $ crate :: GritSyntaxKind :: INCLUDES_KW } ; [if] => { $ crate :: GritSyntaxKind :: IF_KW } ; [else] => { $ crate :: GritSyntaxKind :: ELSE_KW } ; [within] => { $ crate :: GritSyntaxKind :: WITHIN_KW } ; [bubble] => { $ crate :: GritSyntaxKind :: BUBBLE_KW } ; [not] => { $ crate :: GritSyntaxKind :: NOT_KW } ; [or] => { $ crate :: GritSyntaxKind :: OR_KW } ; [and] => { $ crate :: GritSyntaxKind :: AND_KW } ; [any] => { $ crate :: GritSyntaxKind :: ANY_KW } ; [some] => { $ crate :: GritSyntaxKind :: SOME_KW } ; [every] => { $ crate :: GritSyntaxKind :: EVERY_KW } ; [private] => { $ crate :: GritSyntaxKind :: PRIVATE_KW } ; [pattern] => { $ crate :: GritSyntaxKind :: PATTERN_KW } ; [predicate] => { $ crate :: GritSyntaxKind :: PREDICATE_KW } ; [function] => { $ crate :: GritSyntaxKind :: FUNCTION_KW } ; [true] => { $ crate :: GritSyntaxKind :: TRUE_KW } ; [false] => { $ crate :: GritSyntaxKind :: FALSE_KW } ; [undefined] => { $ crate :: GritSyntaxKind :: UNDEFINED_KW } ; [like] => { $ crate :: GritSyntaxKind :: LIKE_KW } ; [return] => { $ crate :: GritSyntaxKind :: RETURN_KW } ; [ident] => { $ crate :: GritSyntaxKind :: IDENT } ; [EOF] => { $ crate :: GritSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: GritSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: GritSyntaxKind :: HASH } ; }

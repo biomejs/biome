@@ -20,7 +20,9 @@ GritRoot {
     bom_token: missing (optional),
     version: GritVersion {
         engine_token: ENGINE_KW@0..7 "engine" [] [Whitespace(" ")],
-        biome_token: BIOME_KW@7..12 "biome" [] [],
+        engine_name: GritEngineName {
+            engine_kind: BIOME_KW@7..12 "biome" [] [],
+        },
         l_paren_token: L_PAREN@12..13 "(" [] [],
         version: GritDoubleLiteral {
             value_token: GRIT_DOUBLE@13..16 "0.1" [] [],
@@ -89,7 +91,8 @@ GritRoot {
   0: (empty)
   1: GRIT_VERSION@0..17
     0: ENGINE_KW@0..7 "engine" [] [Whitespace(" ")]
-    1: BIOME_KW@7..12 "biome" [] []
+    1: GRIT_ENGINE_NAME@7..12
+      0: BIOME_KW@7..12 "biome" [] []
     2: L_PAREN@12..13 "(" [] []
     3: GRIT_DOUBLE_LITERAL@13..16
       0: GRIT_DOUBLE@13..16 "0.1" [] []
