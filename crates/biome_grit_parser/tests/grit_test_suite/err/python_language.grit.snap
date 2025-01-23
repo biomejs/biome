@@ -1,0 +1,114 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+engine biome(0.1)
+language python;
+
+`$var in $dict.keys()` => `$var in $dict`
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: GritVersion {
+        engine_token: ENGINE_KW@0..7 "engine" [] [Whitespace(" ")],
+        engine_name: GritEngineName {
+            engine_kind: BIOME_KW@7..12 "biome" [] [],
+        },
+        l_paren_token: L_PAREN@12..13 "(" [] [],
+        version: GritDoubleLiteral {
+            value_token: GRIT_DOUBLE@13..16 "0.1" [] [],
+        },
+        r_paren_token: R_PAREN@16..17 ")" [] [],
+    },
+    language: GritLanguageDeclaration {
+        language_token: LANGUAGE_KW@17..27 "language" [Newline("\n")] [Whitespace(" ")],
+        name: GritBogusLanguageName {
+            items: [
+                GRIT_NAME@27..33 "python" [] [],
+            ],
+        },
+        flavor: missing (optional),
+        semicolon_token: SEMICOLON@33..34 ";" [] [],
+    },
+    definitions: GritDefinitionList [
+        GritRewrite {
+            left: GritCodeSnippet {
+                source: GritBacktickSnippetLiteral {
+                    value_token: GRIT_BACKTICK_SNIPPET@34..59 "`$var in $dict.keys()`" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                },
+            },
+            annotation: missing (optional),
+            fat_arrow_token: FAT_ARROW@59..62 "=>" [] [Whitespace(" ")],
+            right: GritCodeSnippet {
+                source: GritBacktickSnippetLiteral {
+                    value_token: GRIT_BACKTICK_SNIPPET@62..77 "`$var in $dict`" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@77..78 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..78
+  0: (empty)
+  1: GRIT_VERSION@0..17
+    0: ENGINE_KW@0..7 "engine" [] [Whitespace(" ")]
+    1: GRIT_ENGINE_NAME@7..12
+      0: BIOME_KW@7..12 "biome" [] []
+    2: L_PAREN@12..13 "(" [] []
+    3: GRIT_DOUBLE_LITERAL@13..16
+      0: GRIT_DOUBLE@13..16 "0.1" [] []
+    4: R_PAREN@16..17 ")" [] []
+  2: GRIT_LANGUAGE_DECLARATION@17..34
+    0: LANGUAGE_KW@17..27 "language" [Newline("\n")] [Whitespace(" ")]
+    1: GRIT_BOGUS_LANGUAGE_NAME@27..33
+      0: GRIT_NAME@27..33 "python" [] []
+    2: (empty)
+    3: SEMICOLON@33..34 ";" [] []
+  3: GRIT_DEFINITION_LIST@34..77
+    0: GRIT_REWRITE@34..77
+      0: GRIT_CODE_SNIPPET@34..59
+        0: GRIT_BACKTICK_SNIPPET_LITERAL@34..59
+          0: GRIT_BACKTICK_SNIPPET@34..59 "`$var in $dict.keys()`" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: (empty)
+      2: FAT_ARROW@59..62 "=>" [] [Whitespace(" ")]
+      3: GRIT_CODE_SNIPPET@62..77
+        0: GRIT_BACKTICK_SNIPPET_LITERAL@62..77
+          0: GRIT_BACKTICK_SNIPPET@62..77 "`$var in $dict`" [] []
+  4: EOF@77..78 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+python_language.grit:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected language.
+  
+    1 │ engine biome(0.1)
+  > 2 │ language python;
+      │          ^^^^^^
+    3 │ 
+    4 │ `$var in $dict.keys()` => `$var in $dict`
+  
+  i Expected one of:
+  
+  - js
+  - json
+  - css
+  - grit
+  - html
+  
+```
