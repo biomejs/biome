@@ -208,11 +208,10 @@ impl Projects {
 
         let mut is_feature_included = true;
         if !feature_includes_files.is_empty() {
-            let candidate_path = biome_glob::CandidatePath::new(&path);
             is_feature_included = if is_dir(path) {
-                candidate_path.matches_directory_with_exceptions(feature_includes_files)
+                feature_includes_files.matches_directory_with_exceptions(path)
             } else {
-                candidate_path.matches_with_exceptions(feature_includes_files)
+                feature_includes_files.matches_with_exceptions(path)
             };
         }
         if !feature_included_files.is_empty() {

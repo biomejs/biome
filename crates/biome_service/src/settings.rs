@@ -242,7 +242,7 @@ pub struct FormatSettings {
     /// List of included paths/files
     pub included_files: Matcher,
     /// List of included paths/files
-    pub includes_files: Box<[biome_glob::Glob]>,
+    pub includes_files: IncludesFiles,
 }
 
 impl FormatSettings {
@@ -300,7 +300,7 @@ pub struct LinterSettings {
     pub included_files: Matcher,
 
     /// List of included paths/files
-    pub includes_files: Box<[biome_glob::Glob]>,
+    pub includes_files: IncludesFiles,
 
     /// Rule domains
     pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
@@ -341,7 +341,7 @@ pub struct AssistSettings {
     pub included_files: Matcher,
 
     /// List of included paths/files
-    pub includes_files: Box<[biome_glob::Glob]>,
+    pub includes_files: IncludesFiles,
 }
 
 impl AssistSettings {
@@ -652,7 +652,6 @@ impl IncludesFiles {
                 path
             };
             let candidate_path = biome_glob::CandidatePath::new(path);
-
             candidate_path.matches_with_exceptions(includes_files)
         } else {
             true
@@ -1521,8 +1520,8 @@ pub fn to_format_settings(
         bracket_same_line: conf.bracket_same_line,
         bracket_spacing: conf.bracket_spacing,
         ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
-        included_files: Matcher::from_globs(working_directory, conf.include.as_deref())?,
-        includes_files: conf.includes.unwrap_or_default().into(),
+        included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
+        includes_files: IncludesFiles::new(working_directory, conf.includes.as_deref()),
     })
 }
 
@@ -1563,7 +1562,7 @@ pub fn to_linter_settings(
         rules: conf.rules,
         ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
         included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
-        includes_files: conf.includes.unwrap_or_default().into(),
+        includes_files: IncludesFiles::new(working_directory, conf.includes.as_deref()),
         domains: conf.domains,
     })
 }
@@ -1592,7 +1591,7 @@ pub fn to_assist_settings(
         actions: conf.actions,
         ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
         included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
-        includes_files: conf.includes.unwrap_or_default().into(),
+        includes_files: IncludesFiles::new(working_directory, conf.includes.as_deref()),
     })
 }
 

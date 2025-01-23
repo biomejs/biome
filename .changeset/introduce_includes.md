@@ -4,9 +4,9 @@ cli: minor
 
 # Introduce `includes`
 
-Biome allow users to `include` and `ignore` files in its configuration using glob patterns.
+Biome allows users to `include` and `ignore` files in its configuration using glob patterns.
 
-For example, in the following configuration, all files of the `src` directory are checked except the ones ending with the extension `.test.js`.
+For example, in the following configuration, all files of the `src/` directory are checked except the ones ending with the extension `.test.js`.
 
 ```json
 {
