@@ -338,7 +338,7 @@ declare_lint_rule! {
     /// {
     ///     "options": {
     ///         "strictCase": false,
-    ///         "requireAscii": true,
+    ///         "requireAscii": false,
     ///         "enumMemberCase": "CONSTANT_CASE",
     ///         "conventions": [
     ///             {
@@ -400,9 +400,7 @@ declare_lint_rule! {
     /// When `requireAscii` is set to `false`, names may include non-ASCII characters.
     /// For example, `café` and `안녕하세요` would be considered valid then.
     ///
-    /// **Default:** `false`
-    ///
-    /// **This option will be turned on by default in Biome 2.0.**
+    /// **Default:** `true`
     ///
     /// ### enumMemberCase
     ///
@@ -1020,7 +1018,7 @@ pub struct NamingConventionOptions {
     pub strict_case: bool,
 
     /// If `false`, then non-ASCII characters are allowed.
-    #[serde(default, skip_serializing_if = "is_default")]
+    #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
     pub require_ascii: bool,
 
     /// Custom conventions.
@@ -1035,7 +1033,7 @@ impl Default for NamingConventionOptions {
     fn default() -> Self {
         Self {
             strict_case: true,
-            require_ascii: false,
+            require_ascii: true,
             conventions: Vec::new().into_boxed_slice(),
             enum_member_case: Format::default(),
         }
