@@ -123,3 +123,31 @@ fn raises_an_error_when_the_config_file_is_not_json() {
         result,
     ));
 }
+
+#[test]
+fn raises_an_error_for_no_configuration_file_found() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file = Utf8Path::new("file.js");
+    fs.insert(
+        file.into(),
+        r#"function name() { return "lorem" }"#.as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--config-path=config", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "raises_an_error_for_no_configuration_file_found",
+        fs,
+        console,
+        result,
+    ));
+}

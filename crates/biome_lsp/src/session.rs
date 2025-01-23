@@ -43,7 +43,7 @@ use tower_lsp::lsp_types;
 use tower_lsp::lsp_types::{Diagnostic, Url};
 use tower_lsp::lsp_types::{MessageType, Registration};
 use tower_lsp::lsp_types::{Unregistration, WorkspaceFolder};
-use tracing::{error, info};
+use tracing::{error, info, warn};
 
 pub(crate) struct ClientInformation {
     /// The name of the client
@@ -556,6 +556,11 @@ impl Session {
                 self.client.log_message(MessageType::ERROR, message).await;
             }
             return ConfigurationStatus::Error;
+        }
+
+        if loaded_configuration.double_configuration_found {
+            warn!("Both biome.json and biome.jsonc files were found in the same folder. Biome will use the biome.json file.");
+            self.client.log_message(MessageType::WARNING, "Both biome.json and biome.jsonc files were found in the same folder. Biome will use the biome.json file.").await;
         }
 
         info!("Configuration loaded successfully from disk.");

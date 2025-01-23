@@ -776,6 +776,11 @@ pub(crate) trait CommandRunner: Sized {
                 cli_options.verbose,
             )?;
         }
+        if loaded_configuration.double_configuration_found {
+            console.log(markup! {
+                <Warn>"Both biome.json and biome.jsonc files were found in the same folder. Biome will use the biome.json file."</Warn>
+            })
+        }
         info!(
             "Configuration file loaded: {:?}, diagnostics detected {}",
             loaded_configuration.file_path,
