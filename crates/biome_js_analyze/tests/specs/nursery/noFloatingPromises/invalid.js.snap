@@ -14,7 +14,7 @@ returnsPromise().then(() => { }).finally(() => { });
 
 # Diagnostics
 ```
-invalid.js:4:1 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
@@ -27,15 +27,11 @@ invalid.js:4:1 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i Safe fix: Add await operator.
-  
-    4 │ await·returnsPromise();
-      │ ++++++                 
 
 ```
 
 ```
-invalid.js:5:1 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
@@ -47,9 +43,5 @@ invalid.js:5:1 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━�
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
-  i Safe fix: Add await operator.
-  
-    5 │ await·returnsPromise().then(()·=>·{·}).finally(()·=>·{·});
-      │ ++++++                                                    
 
 ```
