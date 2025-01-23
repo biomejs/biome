@@ -25,3 +25,24 @@ function returnsPromiseWithoutAsync(): Promise<string> {
 
 
 returnsPromiseWithoutAsync()
+
+
+const returnsPromiseAssignedArrowFunction = async (): Promise<string> => {
+  return 'value';
+};
+
+returnsPromiseAssignedArrowFunction();
+
+const returnsPromiseAssignedFunction = async function (): Promise<string> {
+  return 'value'
+}
+
+async function returnsPromiseAssignedFunctionInAsyncFunction(): Promise<void> {
+  returnsPromiseAssignedFunction().then(() => { })
+}
+
+const returnsPromiseAssignedArrowFunctionAnnotatedType: () => Promise<string> = () => {
+  return Promise.resolve('value');
+};
+
+returnsPromiseAssignedArrowFunctionAnnotatedType();
