@@ -895,7 +895,16 @@ impl Rule for UseNamingConvention {
             // This assertion hold because only identifiers are renamable.
             debug_assert!(name_token.kind() != JsSyntaxKind::JS_STRING_LITERAL);
             let name = name_token.text_trimmed();
-            let preferred_case = expected_cases.into_iter().next()?;
+            let is_name_capitalized = name.chars().next().is_some_and(|c| c.is_uppercase());
+            let preferred_case = if is_name_capitalized {
+                // Try to preserve the capitalization by preferring cases starting with a capital letter
+                expected_cases
+                    .into_iter()
+                    .find(|&case| Cases::from(case).contains(Case::NumberableCapital))
+                    .unwrap_or(expected_cases.into_iter().next()?)
+            } else {
+                expected_cases.into_iter().next()?
+            };
             let new_name_part =
                 preferred_case.convert(&name[(name_range.start as _)..(name_range.end as _)]);
             let mut new_name =

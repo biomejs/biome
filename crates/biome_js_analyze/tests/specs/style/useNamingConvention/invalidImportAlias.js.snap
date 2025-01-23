@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidImportAlias.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -36,10 +35,10 @@ invalidImportAlias.js:1:15 lint/style/useNamingConvention  FIXABLE  ━━━━
   i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
     See the rule options for more details.
   
-  i Safe fix: Rename this symbol in camelCase.
+  i Safe fix: Rename this symbol in PascalCase.
   
      1    │ - import·{·X·as·XxXX·}·from·""
-        1 │ + import·{·X·as·xxXx·}·from·""
+        1 │ + import·{·X·as·XxXx·}·from·""
      2  2 │   
      3  3 │   import { Y as snake_case  } from ""
   
@@ -85,12 +84,12 @@ invalidImportAlias.js:5:15 lint/style/useNamingConvention  FIXABLE  ━━━━
   i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
     See the rule options for more details.
   
-  i Safe fix: Rename this symbol in camelCase.
+  i Safe fix: Rename this symbol in PascalCase.
   
      3  3 │   import { Y as snake_case  } from ""
      4  4 │   
      5    │ - import·{·X·as·XxXX·}·from·""
-        5 │ + import·{·X·as·xxXx·}·from·""
+        5 │ + import·{·X·as·XxXx·}·from·""
      6  6 │   
      7  7 │   import { Y as snake_case  } from ""
   
@@ -136,12 +135,12 @@ invalidImportAlias.js:9:8 lint/style/useNamingConvention  FIXABLE  ━━━━�
   i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
     See the rule options for more details.
   
-  i Safe fix: Rename this symbol in camelCase.
+  i Safe fix: Rename this symbol in PascalCase.
   
      7  7 │   import { Y as snake_case  } from ""
      8  8 │   
      9    │ - import·XxXX·from·""
-        9 │ + import·xxXx·from·""
+        9 │ + import·XxXx·from·""
     10 10 │   
     11 11 │   import snake_case from ""
   
@@ -187,12 +186,12 @@ invalidImportAlias.js:13:8 lint/style/useNamingConvention  FIXABLE  ━━━━
   i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
     See the rule options for more details.
   
-  i Safe fix: Rename this symbol in camelCase.
+  i Safe fix: Rename this symbol in PascalCase.
   
     11 11 │   import snake_case from ""
     12 12 │   
     13    │ - import·XxXX·from·""
-       13 │ + import·xxXx·from·""
+       13 │ + import·XxXx·from·""
     14 14 │   
     15 15 │   import snake_case from ""
   
