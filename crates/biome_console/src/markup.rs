@@ -182,6 +182,11 @@ impl Markup<'_> {
 pub struct MarkupBuf(pub Vec<MarkupNodeBuf>);
 
 impl MarkupBuf {
+    pub fn extend_with(&mut self, markup: Markup) {
+        // SAFETY: The implementation of Write for MarkupBuf below always returns Ok
+        Formatter::new(self).write_markup(markup).unwrap();
+    }
+
     pub fn is_empty(&self) -> bool {
         self.0.iter().all(|node| node.content.is_empty())
     }

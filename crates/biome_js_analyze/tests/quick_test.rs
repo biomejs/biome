@@ -5,8 +5,8 @@ use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::JsFileSource;
 use biome_test_utils::{
-    code_fix_to_string, create_analyzer_options, diagnostic_to_string, parse_test_path,
-    project_layout_with_node_manifest, scripts_from_json,
+    code_fix_to_string, create_analyzer_options, dependency_graph_for_test_file,
+    diagnostic_to_string, parse_test_path, project_layout_with_node_manifest, scripts_from_json,
 };
 use camino::Utf8Path;
 use std::ops::Deref;
@@ -16,7 +16,7 @@ use std::{fs::read_to_string, slice};
 #[ignore]
 #[test]
 fn quick_test() {
-    let input_file = Utf8Path::new("tests/specs/complexity/noUselessFragments/issue_4751.jsx");
+    let input_file = Utf8Path::new("tests/specs/nursery/noImportCycles/invalidFoobar.js");
     let file_name = input_file.file_name().unwrap();
 
     let (group, rule) = parse_test_path(input_file);
@@ -74,7 +74,9 @@ fn analyze(
     let options = create_analyzer_options(input_file, &mut diagnostics);
     let project_layout = project_layout_with_node_manifest(input_file, &mut diagnostics);
 
-    let services = JsAnalyzerServices::from((Default::default(), project_layout, source_type));
+    let dependency_graph = dependency_graph_for_test_file(input_file, &project_layout);
+
+    let services = JsAnalyzerServices::from((dependency_graph, project_layout, source_type));
 
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, Vec::new(), services, |event| {

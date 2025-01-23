@@ -2568,6 +2568,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noImportCycles": {
+					"description": "Prevent import cycles.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noIrregularWhitespace": {
 					"description": "Disallows the use of irregular whitespace characters.",
 					"anyOf": [

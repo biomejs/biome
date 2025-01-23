@@ -128,6 +128,8 @@ pub type NoImplicitBoolean =
     <lint::style::no_implicit_boolean::NoImplicitBoolean as biome_analyze::Rule>::Options;
 pub type NoImportAssign =
     <lint::suspicious::no_import_assign::NoImportAssign as biome_analyze::Rule>::Options;
+pub type NoImportCycles =
+    <lint::nursery::no_import_cycles::NoImportCycles as biome_analyze::Rule>::Options;
 pub type NoInferrableTypes =
     <lint::style::no_inferrable_types::NoInferrableTypes as biome_analyze::Rule>::Options;
 pub type NoInnerDeclarations =

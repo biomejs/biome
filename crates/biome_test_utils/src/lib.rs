@@ -3,8 +3,11 @@ use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
 use biome_configuration::Configuration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
+use biome_dependency_graph::DependencyGraph;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
+use biome_fs::{BiomePath, FileSystem, OsFileSystem};
+use biome_js_parser::{JsFileSource, JsParserOptions};
 use biome_json_parser::{JsonParserOptions, ParseDiagnostic};
 use biome_package::PackageJson;
 use biome_project_layout::ProjectLayout;
@@ -156,6 +159,46 @@ where
         let document_file_source = DocumentFileSource::from_path(input_file);
         handle.format_options::<L>(&input_file.into(), &document_file_source)
     }
+}
+
+/// Creates a dependency graph that is initialized for the given `input_file`.
+///
+/// It uses an [OsFileSystem] initialized for the directory in which the test
+/// file resides and inserts all files from that directory, so that files
+/// importing each other within that directory will be picked up correctly.
+///
+/// The `project_layout` should be initialized in advance if you want any
+/// manifest files to be discovered.
+pub fn dependency_graph_for_test_file(
+    input_file: &Utf8Path,
+    project_layout: &ProjectLayout,
+) -> Arc<DependencyGraph> {
+    let dependency_graph = DependencyGraph::default();
+
+    let dir = input_file.parent().unwrap().to_path_buf();
+    let paths: Vec<_> = std::fs::read_dir(&dir)
+        .unwrap()
+        .filter_map(|path| {
+            let path = Utf8PathBuf::try_from(path.unwrap().path()).unwrap();
+            DocumentFileSource::from_well_known(&path)
+                .is_javascript_like()
+                .then(|| BiomePath::new(path))
+        })
+        .collect();
+    let fs = OsFileSystem::new(dir);
+
+    dependency_graph.update_imports_for_js_paths(&fs, project_layout, &paths, &[], |path| {
+        fs.read_file_from_path(path).ok().and_then(|content| {
+            let file_source = path
+                .extension()
+                .and_then(|extension| JsFileSource::try_from_extension(extension).ok())
+                .unwrap_or_default();
+            let parsed = biome_js_parser::parse(&content, file_source, JsParserOptions::default());
+            parsed.try_tree()
+        })
+    });
+
+    Arc::new(dependency_graph)
 }
 
 pub fn project_layout_with_node_manifest(
