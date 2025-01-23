@@ -9,6 +9,7 @@ pub mod no_duplicate_else_if;
 pub mod no_dynamic_namespace_import_access;
 pub mod no_enum;
 pub mod no_exported_imports;
+pub mod no_floating_promises;
 pub mod no_global_dirname_filename;
 pub mod no_head_element;
 pub mod no_head_import_in_document;
@@ -60,6 +61,7 @@ declare_lint_group! {
             self :: no_dynamic_namespace_import_access :: NoDynamicNamespaceImportAccess ,
             self :: no_enum :: NoEnum ,
             self :: no_exported_imports :: NoExportedImports ,
+            self :: no_floating_promises :: NoFloatingPromises ,
             self :: no_global_dirname_filename :: NoGlobalDirnameFilename ,
             self :: no_head_element :: NoHeadElement ,
             self :: no_head_import_in_document :: NoHeadImportInDocument ,
