@@ -233,6 +233,13 @@ impl FileSystem for MemoryFileSystem {
         Ok(cb())
     }
 
+    fn read_link(&self, _path: &Utf8Path) -> io::Result<Utf8PathBuf> {
+        Err(io::Error::new(
+            io::ErrorKind::Unsupported,
+            "memory FS doesn't support symlinks",
+        ))
+    }
+
     fn resolve_configuration(
         &self,
         _specifier: &str,

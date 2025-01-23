@@ -20,11 +20,9 @@ pub struct PackageJson {
     /// Path to `package.json`. Contains the `package.json` filename.
     pub path: Utf8PathBuf,
 
-    /// Realpath to `package.json`. Contains the `package.json` filename.
-    ///
-    /// This is the canonicalized version of [Self::path], where all symbolic
-    /// links are resolved.
-    pub realpath: Utf8PathBuf,
+    /// Canonicalized version of [Self::path], where all symbolic links are
+    /// resolved.
+    pub canonicalized_path: Utf8PathBuf,
 
     /// The "name" field defines your package's name.
     /// The "name" field can be used in addition to the "exports" field to self-reference a package using its name.
@@ -59,11 +57,29 @@ impl PackageJson {
         }
     }
 
+    /// Returns [self] with both `path` and `canonicalized_path` set to the
+    /// given `path`.
+    ///
+    /// Use [Self::with_path_and_canonicalized_path()] if you want to set a
+    /// different canonicalized path.
     pub fn with_path(self, path: impl Into<Utf8PathBuf>) -> Self {
         let path: Utf8PathBuf = path.into();
         Self {
             path: path.clone(),
-            realpath: path,
+            canonicalized_path: path,
+            ..self
+        }
+    }
+
+    /// Returns [self] with updated `path` and `canonicalized_path`.
+    pub fn with_path_and_canonicalized_path(
+        self,
+        path: impl Into<Utf8PathBuf>,
+        canonicalized_path: impl Into<Utf8PathBuf>,
+    ) -> Self {
+        Self {
+            path: path.into(),
+            canonicalized_path: canonicalized_path.into(),
             ..self
         }
     }
@@ -165,15 +181,18 @@ impl oxc_resolver::PackageJson for PackageJson {
     }
 
     fn realpath(&self) -> &Path {
-        self.realpath.as_std_path()
+        self.canonicalized_path.as_std_path()
     }
 
     fn directory(&self) -> &Path {
         debug_assert!(self
-            .realpath
+            .canonicalized_path
             .file_name()
             .is_some_and(|x| x == "package.json"));
-        self.realpath.parent().map(Utf8Path::as_std_path).unwrap()
+        self.canonicalized_path
+            .parent()
+            .map(Utf8Path::as_std_path)
+            .unwrap()
     }
 
     fn name(&self) -> Option<&str> {

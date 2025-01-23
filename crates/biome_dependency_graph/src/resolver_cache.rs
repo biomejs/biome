@@ -3,15 +3,19 @@ use std::{
     cell::RefCell,
     collections::BTreeSet,
     hash::{BuildHasherDefault, Hash, Hasher},
+    io,
     ops::Deref,
     path::{Component, Path, PathBuf},
-    sync::Arc,
+    sync::{
+        atomic::{AtomicU64, Ordering},
+        Arc,
+    },
 };
 
 use biome_fs::{BiomePath, FileSystem, PathKind};
 use biome_package::{PackageJson, TsConfigJson};
 use biome_project_layout::ProjectLayout;
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::{FromPathBufError, Utf8Component, Utf8Path, Utf8PathBuf};
 use once_cell::sync::OnceCell as OnceLock;
 use oxc_resolver::{
     context::ResolveContext as Ctx, Cache, CachedPath as _, ResolveError, ResolveOptions, TsConfig,
@@ -21,10 +25,13 @@ use rustc_hash::FxHasher;
 
 use crate::DependencyGraph;
 
+static THREAD_COUNT: AtomicU64 = AtomicU64::new(1);
+
 thread_local! {
     /// Per-thread pre-allocated path that is used to perform operations on paths more quickly.
     /// Learned from parcel <https://github.com/parcel-bundler/parcel/blob/a53f8f3ba1025c7ea8653e9719e0a61ef9717079/crates/parcel-resolver/src/cache.rs#L394>
     pub static SCRATCH_PATH: RefCell<PathBuf> = RefCell::new(PathBuf::with_capacity(256));
+    pub static THREAD_ID: u64 = THREAD_COUNT.fetch_add(1, Ordering::SeqCst);
 }
 
 /// Cache to be used while resolving dependencies.
@@ -46,8 +53,8 @@ pub(crate) struct ResolverCache<'a> {
     fs: &'a dyn FileSystem,
     project_layout: &'a ProjectLayout,
     dependency_graph: &'a DependencyGraph,
-    added_paths: BTreeSet<&'a Path>,
-    removed_paths: BTreeSet<&'a Path>,
+    added_paths: BTreeSet<&'a Utf8Path>,
+    removed_paths: BTreeSet<&'a Utf8Path>,
 
     paths: HashSet<CachedPath, BuildHasherDefault<IdentityHasher>>,
     tsconfigs: HashMap<Utf8PathBuf, Arc<TsConfigJson>, BuildHasherDefault<FxHasher>>,
@@ -65,11 +72,8 @@ impl<'a> ResolverCache<'a> {
             fs,
             project_layout,
             dependency_graph,
-            added_paths: added_paths.iter().map(|path| path.as_std_path()).collect(),
-            removed_paths: removed_paths
-                .iter()
-                .map(|path| path.as_std_path())
-                .collect(),
+            added_paths: added_paths.iter().map(|path| path.as_path()).collect(),
+            removed_paths: removed_paths.iter().map(|path| path.as_path()).collect(),
 
             paths: HashSet::builder()
                 .hasher(BuildHasherDefault::default())
@@ -88,13 +92,68 @@ impl<'a> ResolverCache<'a> {
         &self.paths
     }
 
-    fn path_kind(&self, path: &Path) -> Option<PathKind> {
+    fn path_kind(&self, path: &Utf8Path) -> Option<PathKind> {
         if self.added_paths.contains(path) {
-            let utf8_path = path.try_into().ok()?;
-            self.fs.path_kind(utf8_path).ok()
+            self.fs.path_kind(path).ok()
         } else {
             self.dependency_graph.path_kind(path)
         }
+    }
+
+    /// Returns the canonical path, resolving all symbolic links.
+    ///
+    /// <https://github.com/parcel-bundler/parcel/blob/4d27ec8b8bd1792f536811fef86e74a31fa0e704/crates/parcel-resolver/src/cache.rs#L232>
+    fn canonicalize_impl(&self, path: &CachedPath) -> Result<CachedPath, ResolveError> {
+        // Check if this thread is already canonicalizing. If so, we have found a circular symlink.
+        // If a different thread is canonicalizing, OnceLock will queue this thread to wait for the result.
+        let tid = THREAD_ID.with(|t| *t);
+        if path.canonicalizing.load(Ordering::Acquire) == tid {
+            return Err(io::Error::new(io::ErrorKind::NotFound, "Circular symlink").into());
+        }
+
+        path.canonicalized
+            .get_or_init(|| {
+                path.canonicalizing.store(tid, Ordering::Release);
+
+                let res = path.parent().map_or_else(
+                    || Ok(path.normalize_root(self)),
+                    |parent| {
+                        self.canonicalize_impl(parent).and_then(|parent_canonical| {
+                            let normalized = parent_canonical.normalize_with(
+                                path.path().strip_prefix(parent.path()).unwrap(),
+                                self,
+                            );
+
+                            let utf8_path = Utf8PathBuf::try_from(path.path().to_path_buf())
+                                .map_err(FromPathBufError::into_io_error)?;
+                            if self.fs.path_is_symlink(&utf8_path) {
+                                let link = self.fs.read_link(&normalized.path)?;
+                                if link.is_absolute() {
+                                    return self.canonicalize_impl(
+                                        &self.value(normalize(&link).as_std_path()),
+                                    );
+                                } else if let Some(dir) = normalized.parent() {
+                                    // Symlink is relative `../../foo.js`, use the path directory
+                                    // to resolve this symlink.
+                                    return self
+                                        .canonicalize_impl(&dir.normalize_with(&link, self));
+                                }
+                                debug_assert!(
+                                    false,
+                                    "Failed to get path parent for {:?}.",
+                                    normalized.path()
+                                );
+                            }
+
+                            Ok(normalized)
+                        })
+                    },
+                );
+
+                path.canonicalizing.store(0, Ordering::Release);
+                res
+            })
+            .clone()
     }
 }
 
@@ -104,8 +163,14 @@ impl Cache for ResolverCache<'_> {
     type Tc = TsConfigJson;
 
     fn canonicalize(&self, path: &Self::Cp) -> Result<PathBuf, ResolveError> {
-        // TODO: This still needs to be implemented for better symlink support.
-        Ok(path.path().to_path_buf())
+        let cached_path = self.canonicalize_impl(path)?;
+        let path = cached_path.to_path_buf();
+        cfg_if::cfg_if! {
+            if #[cfg(windows)] {
+                let path = strip_windows_prefix(path);
+            }
+        }
+        Ok(path)
     }
 
     fn clear(&self) {
@@ -132,10 +197,10 @@ impl Cache for ResolverCache<'_> {
                 else {
                     return Ok(None);
                 };
-                package_json.realpath = if options.symlinks {
-                    self.canonicalize(path)?.try_into().map_err(|_| {
-                        ResolveError::NotFound("Non UTF-8 character in path".to_string())
-                    })?
+                package_json.canonicalized_path = if options.symlinks {
+                    self.canonicalize(&self.value(&path.path().join("package.json")))?
+                        .try_into()
+                        .map_err(FromPathBufError::into_io_error)?
                 } else {
                     package_json_path
                 };
@@ -152,12 +217,12 @@ impl Cache for ResolverCache<'_> {
             Ok(None) => {
                 // Avoid an allocation by making this lazy
                 if let Some(deps) = &mut ctx.missing_dependencies {
-                    deps.push(path.path.join("package.json"));
+                    deps.push(path.path().join("package.json"));
                 }
             }
             Err(_) => {
                 if let Some(deps) = &mut ctx.file_dependencies {
-                    deps.push(path.path.join("package.json"));
+                    deps.push(path.path().join("package.json"));
                 }
             }
         }
@@ -171,28 +236,28 @@ impl Cache for ResolverCache<'_> {
         path: &Path,
         callback: F,
     ) -> Result<Arc<TsConfigJson>, ResolveError> {
-        let utf8_path: &Utf8Path = path
+        let path: &Utf8Path = path
             .try_into()
             .map_err(|_| ResolveError::NotFound(path.to_string_lossy().to_string()))?;
 
         let tsconfigs = self.tsconfigs.pin();
-        if let Some(tsconfig) = tsconfigs.get(utf8_path) {
+        if let Some(tsconfig) = tsconfigs.get(path) {
             return Ok(Arc::clone(tsconfig));
         }
 
         let kind = self.path_kind(path);
         let tsconfig_path = if kind.is_some_and(PathKind::is_file) {
-            Cow::Borrowed(utf8_path)
+            Cow::Borrowed(path)
         } else if kind.is_some_and(PathKind::is_dir) {
-            Cow::Owned(utf8_path.join("tsconfig.json"))
+            Cow::Owned(path.join("tsconfig.json"))
         } else {
-            Cow::Owned(Utf8PathBuf::from(format!("{utf8_path}.json")))
+            Cow::Owned(Utf8PathBuf::from(format!("{path}.json")))
         };
 
         let mut tsconfig_string = self
             .fs
-            .read_file_from_path(utf8_path)
-            .map_err(|_| ResolveError::TsconfigNotFound(path.to_path_buf()))?;
+            .read_file_from_path(path)
+            .map_err(|_| ResolveError::TsconfigNotFound(path.as_std_path().to_path_buf()))?;
         // FIXME: We should load this from the ProjectLayout instead.
         let (mut tsconfig, diagnostics) =
             TsConfigJson::parse(root, &tsconfig_path, &mut tsconfig_string);
@@ -204,7 +269,7 @@ impl Cache for ResolverCache<'_> {
 
         tsconfig.expand_template_variables();
         let tsconfig = Arc::new(tsconfig);
-        tsconfigs.insert(utf8_path.to_path_buf(), Arc::clone(&tsconfig));
+        tsconfigs.insert(path.to_path_buf(), Arc::clone(&tsconfig));
         Ok(tsconfig)
     }
 
@@ -237,6 +302,7 @@ impl Cache for ResolverCache<'_> {
         };
 
         let paths = self.paths.pin();
+        let path = Utf8Path::from_path(path).expect("Non UTF-8 characters in path");
         let key = BorrowedCachedPath { hash, path };
         if let Some(cached_path) = paths.get(&key) {
             return if self.removed_paths.contains(path) {
@@ -251,7 +317,7 @@ impl Cache for ResolverCache<'_> {
             };
         }
 
-        let parent = path.parent().map(|p| self.value(p));
+        let parent = path.parent().map(|p| self.value(p.as_std_path()));
         let cached_path = CachedPath(Arc::new(CachedPathImpl::new(
             hash,
             path.to_path_buf().into_boxed_path(),
@@ -268,9 +334,11 @@ pub(crate) struct CachedPath(Arc<CachedPathImpl>);
 
 pub(crate) struct CachedPathImpl {
     hash: u64,
-    path: Box<Path>,
+    pub(crate) path: Box<Utf8Path>,
     parent: Option<CachedPath>,
     kind: Option<PathKind>,
+    canonicalized: OnceLock<Result<CachedPath, ResolveError>>,
+    canonicalizing: AtomicU64,
     node_modules: OnceLock<Option<CachedPath>>,
     package_json: OnceLock<Option<(CachedPath, Arc<PackageJson>)>>,
 }
@@ -278,7 +346,7 @@ pub(crate) struct CachedPathImpl {
 impl CachedPathImpl {
     const fn new(
         hash: u64,
-        path: Box<Path>,
+        path: Box<Utf8Path>,
         parent: Option<CachedPath>,
         meta: Option<PathKind>,
     ) -> Self {
@@ -287,6 +355,8 @@ impl CachedPathImpl {
             path,
             parent,
             kind: meta,
+            canonicalized: OnceLock::new(),
+            canonicalizing: AtomicU64::new(0),
             node_modules: OnceLock::new(),
             package_json: OnceLock::new(),
         }
@@ -307,11 +377,11 @@ impl Deref for CachedPath {
 
 impl oxc_resolver::CachedPath for CachedPath {
     fn path(&self) -> &Path {
-        &self.0.path
+        self.0.path.as_std_path()
     }
 
     fn to_path_buf(&self) -> PathBuf {
-        self.path.to_path_buf()
+        self.path().to_path_buf()
     }
 
     fn parent(&self) -> Option<&Self> {
@@ -324,7 +394,7 @@ impl oxc_resolver::CachedPath for CachedPath {
         cache: &C,
         ctx: &mut Ctx,
     ) -> Option<Self> {
-        let cached_path = cache.value(&self.path.join(module_name));
+        let cached_path = cache.value(&self.path().join(module_name));
         cache.is_dir(&cached_path, ctx).then_some(cached_path)
     }
 
@@ -405,7 +475,7 @@ impl oxc_resolver::CachedPath for CachedPath {
         }
         SCRATCH_PATH.with_borrow_mut(|path| {
             path.clear();
-            path.push(&self.path);
+            path.push(self.path());
             for component in std::iter::once(head).chain(components) {
                 match component {
                     Component::CurDir => {}
@@ -436,7 +506,7 @@ impl oxc_resolver::CachedPath for CachedPath {
     #[cfg(windows)]
     fn normalize_root<C: Cache<Cp = Self>>(&self, cache: &C) -> Self {
         if self.path().as_os_str().as_encoded_bytes().last() == Some(&b'/') {
-            let mut path_string = self.path.to_string_lossy().into_owned();
+            let mut path_string = self.path.to_string();
             path_string.pop();
             path_string.push('\\');
             cache.value(&PathBuf::from(path_string))
@@ -468,7 +538,7 @@ impl Eq for CachedPath {}
 
 struct BorrowedCachedPath<'a> {
     hash: u64,
-    path: &'a Path,
+    path: &'a Utf8Path,
 }
 
 impl Equivalent<CachedPath> for BorrowedCachedPath<'_> {
@@ -506,4 +576,52 @@ impl Hasher for IdentityHasher {
     fn finish(&self) -> u64 {
         self.0
     }
+}
+
+// https://github.com/parcel-bundler/parcel/blob/e0b99c2a42e9109a9ecbd6f537844a1b33e7faf5/packages/utils/node-resolver-rs/src/path.rs#L7
+fn normalize(path: &Utf8Path) -> Utf8PathBuf {
+    let mut components = path.components().peekable();
+    let mut ret = if let Some(c @ Utf8Component::Prefix(..)) = components.peek() {
+        let buf = Utf8PathBuf::from(c.as_str());
+        components.next();
+        buf
+    } else {
+        Utf8PathBuf::new()
+    };
+
+    for component in components {
+        match component {
+            Utf8Component::Prefix(..) => unreachable!("Path {path:?}"),
+            Utf8Component::RootDir => {
+                ret.push(component.as_str());
+            }
+            Utf8Component::CurDir => {}
+            Utf8Component::ParentDir => {
+                ret.pop();
+            }
+            Utf8Component::Normal(c) => {
+                ret.push(c);
+            }
+        }
+    }
+
+    ret
+}
+
+// https://github.com/oxc-project/oxc-resolver/blob/2bc5173e30adb9c30ed9aa98c083bb758ffb8d90/src/file_system.rs#L168
+#[cfg(windows)]
+fn strip_windows_prefix<P: AsRef<Path>>(path: P) -> PathBuf {
+    const UNC_PATH_PREFIX: &[u8] = b"\\\\?\\UNC\\";
+    const LONG_PATH_PREFIX: &[u8] = b"\\\\?\\";
+    let path_bytes = path.as_ref().as_os_str().as_encoded_bytes();
+    path_bytes
+        .strip_prefix(UNC_PATH_PREFIX)
+        .or_else(|| path_bytes.strip_prefix(LONG_PATH_PREFIX))
+        .map_or_else(
+            || path.as_ref().to_path_buf(),
+            |p| {
+                // SAFETY: `as_encoded_bytes` ensures `p` is valid path bytes
+                unsafe { PathBuf::from(std::ffi::OsStr::from_encoded_bytes_unchecked(p)) }
+            },
+        )
 }

@@ -181,7 +181,7 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
             )
             .into_deserialized()
             .expect("package.json must parse")
-            .with_path(path)
+            .with_path_and_canonicalized_path(path, format!("{fixtures_path}/shared/package.json"))
         },
     );
 
@@ -214,10 +214,8 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
     assert_eq!(
         file_imports.static_imports.get("shared"),
         Some(&Import {
-            // FIXME: This should really have pointed towards the target of the
-            //        symlink.
             resolved_path: Ok(Utf8PathBuf::from(format!(
-                "{fixtures_path}/frontend/node_modules/shared/dist/index.js"
+                "{fixtures_path}/shared/dist/index.js"
             )))
         })
     );

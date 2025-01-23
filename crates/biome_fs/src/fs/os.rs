@@ -124,6 +124,10 @@ impl FileSystem for OsFileSystem {
         }
     }
 
+    fn read_link(&self, path: &Utf8Path) -> io::Result<Utf8PathBuf> {
+        path.read_link_utf8()
+    }
+
     fn resolve_configuration(
         &self,
         specifier: &str,
