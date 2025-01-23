@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: img.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -60,6 +61,9 @@ expression: img.jsx
   <img aria-labelledby="id1" />
   <img aria-hidden />
   <img aria-hidden={true} />
+  <img alt="alt tag" src="" {...(flag && { referrerPolicy: 'no-referrer' })}></img>
+  <img src="test" alt="this is a cool image" {...restProps}></img>
+  <img alt={alt || ""} {...props} />
 </>;
 
 ```
