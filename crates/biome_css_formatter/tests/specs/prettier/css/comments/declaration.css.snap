@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: css/comments/declaration.css
 ---
 # Input
@@ -101,7 +100,7 @@ body
 +  /* comment 11 */ color: red /* comment 12 */ !important /* comment 13 */; /* comment 14 */
    /* comment 15 */
  }
- 
+
  @font-face {
    font-family: "Prettier";
 -  src: /* comment 16 */
@@ -112,7 +111,7 @@ body
 +    local(/* comment 17 */ "Prettier" /* comment 18 */), /* comment 19 */
 +    /* comment 20 */ url("http://prettier.com/font.woff") /* comment 21 */; /* comment 22 */
  }
- 
+
  .foo {
 -  /* comment 23 */
 -  color/* comment 24 */:/* comment 25 */ blue /* comment 26 */; /* comment 27 */
@@ -179,7 +178,7 @@ body
 +  /* comment 73 */
    /* comment 75 */
  }
- 
+
 ```
 
 # Output

@@ -1,8 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: css/declaration_list.css
-snapshot_kind: text
 ---
 # Input
 
@@ -53,7 +51,7 @@ a {
     color: blue;
   }
 }
-  
+
 .without-comments {
   a,
   button {

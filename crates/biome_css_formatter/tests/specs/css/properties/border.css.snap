@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: css/properties/border.css
 ---
 # Input
@@ -26,23 +25,23 @@ div {
 
     /* <line-width> */
     border : ThIn;
-    border: 
+    border:
     medium
     ;
     border:   100px;
 
     /* <color> */
-    border: 
+    border:
     #fff;
 
     /* combinations */
     border: 2px
     dotted;
     border  :   outset   #f33;
-    border:#000 medium  
-     
+    border:#000 medium
+
     dashed
-        
+
         ;
 }
 
