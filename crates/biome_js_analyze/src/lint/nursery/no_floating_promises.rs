@@ -6,9 +6,9 @@ use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, AnyJsExpression, AnyJsName, AnyTsName, AnyTsReturnType,
-    AnyTsType, JsArrowFunctionExpression, JsCallExpression, JsExpressionStatement,
-    JsFunctionDeclaration, JsMethodClassMember, JsMethodObjectMember, JsStaticMemberExpression,
-    JsSyntaxKind, TsReturnTypeAnnotation,
+    AnyTsType, AnyTsVariableAnnotation, JsArrowFunctionExpression, JsCallExpression,
+    JsExpressionStatement, JsFunctionDeclaration, JsMethodClassMember, JsMethodObjectMember,
+    JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator, TsReturnTypeAnnotation,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
 
@@ -43,6 +43,15 @@ declare_lint_rule! {
     ///   return 'value';
     /// }
     /// returnsPromise().then(() => {});
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// const returnsPromise = async (): Promise<string> => {
+    ///   return 'value';
+    /// }
+    /// async function returnsPromiseInAsyncFunction() {
+    ///   returnsPromise().then(() => {});
+    /// }
     /// ```
     ///
     /// ### Valid
@@ -195,24 +204,27 @@ fn is_callee_a_promise(callee: &AnyJsExpression, model: &SemanticModel) -> bool 
             let Some(any_js_binding_decl) = binding.tree().declaration() else {
                 return false;
             };
-
-            let AnyJsBindingDeclaration::JsFunctionDeclaration(func_decl) = any_js_binding_decl
-            else {
-                return false;
-            };
-
-            return is_function_a_promise(&func_decl);
+            match any_js_binding_decl {
+                AnyJsBindingDeclaration::JsFunctionDeclaration(func_decl) => {
+                    is_function_a_promise(&func_decl)
+                }
+                AnyJsBindingDeclaration::JsVariableDeclarator(js_var_decl) => {
+                    is_variable_initializer_a_promise(&js_var_decl)
+                        || is_variable_annotation_a_promise(&js_var_decl)
+                }
+                _ => false,
+            }
         }
         AnyJsExpression::JsStaticMemberExpression(static_member_expr) => {
-            return is_member_expression_callee_a_promise(static_member_expr, model);
+            is_member_expression_callee_a_promise(static_member_expr, model)
         }
-        _ => {}
+        _ => false,
     }
-    false
 }
 
 fn is_function_a_promise(func_decl: &JsFunctionDeclaration) -> bool {
-    func_decl.async_token().is_some() || is_return_type_promise(func_decl.return_type_annotation())
+    func_decl.async_token().is_some()
+        || is_return_type_a_promise(func_decl.return_type_annotation())
 }
 
 /// Checks if a TypeScript return type annotation is a `Promise`.
@@ -240,7 +252,7 @@ fn is_function_a_promise(func_decl: &JsFunctionDeclaration) -> bool {
 /// ```typescript
 /// function doesNotReturnPromise(): void {}
 /// ```
-fn is_return_type_promise(return_type: Option<TsReturnTypeAnnotation>) -> bool {
+fn is_return_type_a_promise(return_type: Option<TsReturnTypeAnnotation>) -> bool {
     return_type
         .and_then(|ts_return_type_anno| ts_return_type_anno.ty().ok())
         .and_then(|any_ts_return_type| match any_ts_return_type {
@@ -360,32 +372,7 @@ fn is_member_expression_callee_a_promise(
         return false;
     };
 
-    match callee {
-        AnyJsExpression::JsStaticMemberExpression(static_member_expr) => {
-            return is_member_expression_callee_a_promise(&static_member_expr, model);
-        }
-        AnyJsExpression::JsIdentifierExpression(ident_expr) => {
-            let Some(reference) = ident_expr.name().ok() else {
-                return false;
-            };
-            let Some(binding) = model.binding(&reference) else {
-                return false;
-            };
-
-            let Some(any_js_binding_decl) = binding.tree().declaration() else {
-                return false;
-            };
-
-            let AnyJsBindingDeclaration::JsFunctionDeclaration(func_decl) = any_js_binding_decl
-            else {
-                return false;
-            };
-            return is_function_a_promise(&func_decl);
-        }
-        _ => {}
-    }
-
-    false
+    is_callee_a_promise(&callee, model)
 }
 
 /// Checks if the given `JsExpressionStatement` is within an async function.
@@ -422,4 +409,76 @@ fn is_in_async_function(node: &JsExpressionStatement) -> bool {
             _ => None,
         })
         .is_some()
+}
+
+/// Checks if the initializer of a `JsVariableDeclarator` is an async function.
+///
+/// Example TypeScript code that would return `true`:
+///
+/// ```typescript
+/// const returnsPromise = async (): Promise<string> => {
+///   return 'value';
+/// }
+///
+/// const returnsPromise = async function (): Promise<string> {
+///   return 'value'
+/// }
+/// ```
+fn is_variable_initializer_a_promise(js_variable_declarator: &JsVariableDeclarator) -> bool {
+    let Some(initializer_clause) = &js_variable_declarator.initializer() else {
+        return false;
+    };
+    let Ok(expr) = initializer_clause.expression() else {
+        return false;
+    };
+    match expr {
+        AnyJsExpression::JsArrowFunctionExpression(arrow_func) => {
+            arrow_func.async_token().is_some()
+                || is_return_type_a_promise(arrow_func.return_type_annotation())
+        }
+        AnyJsExpression::JsFunctionExpression(func_expr) => {
+            func_expr.async_token().is_some()
+                || is_return_type_a_promise(func_expr.return_type_annotation())
+        }
+        _ => false,
+    }
+}
+
+/// Checks if a `JsVariableDeclarator` has a TypeScript type annotation of `Promise`.
+///
+///
+/// Example TypeScript code that would return `true`:
+/// ```typescript
+/// const returnsPromise: () => Promise<string> = () => {
+///   return Promise.resolve("value")
+/// }
+/// ```
+fn is_variable_annotation_a_promise(js_variable_declarator: &JsVariableDeclarator) -> bool {
+    js_variable_declarator
+        .variable_annotation()
+        .and_then(|anno| match anno {
+            AnyTsVariableAnnotation::TsTypeAnnotation(type_anno) => Some(type_anno),
+            _ => None,
+        })
+        .and_then(|ts_type_anno| ts_type_anno.ty().ok())
+        .and_then(|any_ts_type| match any_ts_type {
+            AnyTsType::TsFunctionType(func_type) => {
+                func_type
+                    .return_type()
+                    .ok()
+                    .and_then(|return_type| match return_type {
+                        AnyTsReturnType::AnyTsType(AnyTsType::TsReferenceType(ref_type)) => {
+                            ref_type.name().ok().map(|name| match name {
+                                AnyTsName::JsReferenceIdentifier(identifier) => {
+                                    identifier.has_name("Promise")
+                                }
+                                _ => false,
+                            })
+                        }
+                        _ => None,
+                    })
+            }
+            _ => None,
+        })
+        .unwrap_or(false)
 }
