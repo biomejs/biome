@@ -1825,6 +1825,7 @@ impl From<HtmlBogusElement> for SyntaxElement {
         n.syntax.into()
     }
 }
+biome_rowan::declare_node_union! { pub AnyHtmlBogusNode = HtmlBogus | HtmlBogusAttribute | HtmlBogusElement }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct HtmlAttributeList {
     syntax_list: SyntaxList,

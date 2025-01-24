@@ -125,6 +125,7 @@ declare_visitor! {
         return_stmt: ReturnVisitor,
         throw: ThrowVisitor,
         variable: VariableVisitor,
+        bogus: BogusVisitor,
     }
 }
 

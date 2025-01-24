@@ -1811,6 +1811,7 @@ impl From<YamlBogusValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+biome_rowan::declare_node_union! { pub AnyYamlBogusNode = YamlBogus | YamlBogusValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct YamlArrayInlineList {
     syntax_list: SyntaxList,

@@ -2644,6 +2644,7 @@ impl From<MdBogus> for SyntaxElement {
         n.syntax.into()
     }
 }
+biome_rowan::declare_node_union! { pub AnyMdBogusNode = MdBogus }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct MdBlockList {
     syntax_list: SyntaxList,
