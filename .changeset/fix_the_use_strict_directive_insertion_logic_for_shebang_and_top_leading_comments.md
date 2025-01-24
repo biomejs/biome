@@ -38,9 +38,9 @@ let some_variable = "some value";
 - with shebang and comment
 
 ```diff
-- #! /usr/bin node"use strict";
+- #!/usr/bin/env node"use strict";
 - // comment
-+ #! /usr/bin node
++ #!/usr/bin/env node
 + "use strict";
 + // comment
 let some_variable = "some value";
