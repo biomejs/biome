@@ -101,10 +101,10 @@ impl Rule for UseStrictMode {
             .statements()
             .syntax()
             .first_leading_trivia()
-            .map_or(false, |f| {
+            .is_some_and(|f| {
                 f.pieces()
                     .next()
-                    .map_or(false, |piece| piece.kind() == TriviaPieceKind::Newline)
+                    .is_some_and(|piece| piece.kind() == TriviaPieceKind::Newline)
             });
 
         let mut leading_trivia = Vec::new();
