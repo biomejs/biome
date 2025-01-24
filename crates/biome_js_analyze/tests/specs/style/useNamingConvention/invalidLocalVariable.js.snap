@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidLocalVariable.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -37,11 +36,11 @@ invalidLocalVariable.js:2:11 lint/style/useNamingConvention  FIXABLE  ━━━�
     3 │ 
     4 │     let CONSTANT_CASE_LET
   
-  i Safe fix: Rename this symbol in camelCase.
+  i Safe fix: Rename this symbol in PascalCase.
   
      1  1 │   export default function () {
      2    │ - ····const·CONSTANT_CASE_CONST·=·0
-        2 │ + ····const·constantCaseConst·=·0
+        2 │ + ····const·ConstantCaseConst·=·0
      3  3 │   
      4  4 │       let CONSTANT_CASE_LET
   
@@ -60,12 +59,12 @@ invalidLocalVariable.js:4:9 lint/style/useNamingConvention  FIXABLE  ━━━�
     5 │ 
     6 │     var CONSTANT_CASE_VAR
   
-  i Safe fix: Rename this symbol in camelCase.
+  i Safe fix: Rename this symbol in PascalCase.
   
      2  2 │       const CONSTANT_CASE_CONST = 0
      3  3 │   
      4    │ - ····let·CONSTANT_CASE_LET
-        4 │ + ····let·constantCaseLet
+        4 │ + ····let·ConstantCaseLet
      5  5 │   
      6  6 │       var CONSTANT_CASE_VAR
   
@@ -84,12 +83,12 @@ invalidLocalVariable.js:6:9 lint/style/useNamingConvention  FIXABLE  ━━━�
     7 │ 
     8 │     const { prop: Unknown_Style } = obj
   
-  i Safe fix: Rename this symbol in camelCase.
+  i Safe fix: Rename this symbol in PascalCase.
   
      4  4 │       let CONSTANT_CASE_LET
      5  5 │   
      6    │ - ····var·CONSTANT_CASE_VAR
-        6 │ + ····var·constantCaseVar
+        6 │ + ····var·ConstantCaseVar
      7  7 │   
      8  8 │       const { prop: Unknown_Style } = obj
   
@@ -108,12 +107,12 @@ invalidLocalVariable.js:8:19 lint/style/useNamingConvention  FIXABLE  ━━━�
      9 │ }
     10 │ 
   
-  i Safe fix: Rename this symbol in camelCase.
+  i Safe fix: Rename this symbol in PascalCase.
   
      6  6 │       var CONSTANT_CASE_VAR
      7  7 │   
      8    │ - ····const·{·prop:·Unknown_Style·}·=·obj
-        8 │ + ····const·{·prop:·unknownStyle·}·=·obj
+        8 │ + ····const·{·prop:·UnknownStyle·}·=·obj
      9  9 │   }
     10 10 │   
   

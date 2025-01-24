@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidFunction.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -50,12 +49,12 @@ invalidFunction.js:3:10 lint/style/useNamingConvention  FIXABLE  ━━━━━
     4 │ 
     5 │ (function() {
   
-  i Safe fix: Rename this symbol in camelCase.
+  i Safe fix: Rename this symbol in PascalCase.
   
      1  1 │   function special_function() {}
      2  2 │   
      3    │ - function·Unknown_Style()·{}
-        3 │ + function·unknownStyle()·{}
+        3 │ + function·UnknownStyle()·{}
      4  4 │   
      5  5 │   (function() {
   
@@ -73,12 +72,12 @@ invalidFunction.js:6:14 lint/style/useNamingConvention  FIXABLE  ━━━━━
     7 │ 
     8 │     const g = function SPECIAL_FUNCTION() {}
   
-  i Safe fix: Rename this symbol in camelCase.
+  i Safe fix: Rename this symbol in PascalCase.
   
      4  4 │   
      5  5 │   (function() {
      6    │ - ····function·PERSON()·{}
-        6 │ + ····function·person()·{}
+        6 │ + ····function·Person()·{}
      7  7 │   
      8  8 │       const g = function SPECIAL_FUNCTION() {}
   
@@ -97,12 +96,12 @@ invalidFunction.js:8:24 lint/style/useNamingConvention  FIXABLE  ━━━━━
      9 │ })()
     10 │ 
   
-  i Safe fix: Rename this symbol in camelCase.
+  i Safe fix: Rename this symbol in PascalCase.
   
      6  6 │       function PERSON() {}
      7  7 │   
      8    │ - ····const·g·=·function·SPECIAL_FUNCTION()·{}
-        8 │ + ····const·g·=·function·specialFunction()·{}
+        8 │ + ····const·g·=·function·SpecialFunction()·{}
      9  9 │   })()
     10 10 │   
   
