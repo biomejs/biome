@@ -1,7 +1,7 @@
 //! Utilities for high level parsing of js code.
 
 use crate::*;
-use biome_js_syntax::{
+pub use biome_js_syntax::{
     AnyJsRoot, JsFileSource, JsLanguage, JsModule, JsScript, JsSyntaxNode, ModuleKind,
 };
 use biome_parser::token_source::Trivia;

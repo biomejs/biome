@@ -66,6 +66,24 @@ pub struct ModuleImports {
     pub dynamic_imports: BTreeMap<String, Import>,
 }
 
+impl ModuleImports {
+    /// Allows draining a single entry from the imports.
+    ///
+    /// Returns a `(specifier, import)` pair from either the static or dynamic
+    /// imports, whichever is non-empty. Returns `None` if both are empty.
+    ///
+    /// Using this method allows for consuming the struct while iterating over
+    /// it, without necessarily turning the entire struct into an iterator at
+    /// once.
+    pub fn drain_one(&mut self) -> Option<(String, Import)> {
+        if self.static_imports.is_empty() {
+            self.dynamic_imports.pop_first()
+        } else {
+            self.static_imports.pop_first()
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Import {
     /// Absolute path of the resource being imported, if it can be resolved.

@@ -199,7 +199,6 @@ impl Analyze {
                     filter,
                     &options,
                     Vec::new(),
-                    JsFileSource::default(),
                     Default::default(),
                     |event| {
                         black_box(event.diagnostic());

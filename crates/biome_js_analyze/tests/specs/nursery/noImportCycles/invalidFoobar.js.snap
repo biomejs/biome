@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidFoobar.js
+---
+# Input
+```js
+import { baz } from "./invalidBaz.js";
+
+export function foo() {
+    baz();
+}
+
+export function bar() {
+    console.log("foobar");
+}
+
+```
+
+# Diagnostics
+```
+invalidFoobar.js:1:21 lint/nursery/noImportCycles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is part of a cycle.
+  
+  > 1 │ import { baz } from "./invalidBaz.js";
+      │                     ^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ export function foo() {
+  
+  i This import resolves to tests/specs/nursery/noImportCycles/invalidBaz.js
+        ... which imports tests/specs/nursery/noImportCycles/invalidFoobar.js
+        ... which is the file we're importing from.
+  
+
+```

@@ -7,6 +7,7 @@ use biome_analyze::{
     MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
 };
 use biome_aria::AriaRoles;
+use biome_dependency_graph::DependencyGraph;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_project_layout::ProjectLayout;
@@ -39,21 +40,42 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
     metadata
 });
 
+#[derive(Default)]
+pub struct JsAnalyzerServices {
+    dependency_graph: Arc<DependencyGraph>,
+    project_layout: Arc<ProjectLayout>,
+    source_type: JsFileSource,
+}
+
+impl From<(Arc<DependencyGraph>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
+    fn from(
+        (dependency_graph, project_layout, source_type): (
+            Arc<DependencyGraph>,
+            Arc<ProjectLayout>,
+            JsFileSource,
+        ),
+    ) -> Self {
+        Self {
+            dependency_graph,
+            project_layout,
+            source_type,
+        }
+    }
+}
+
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
 /// to selectively restrict analysis to specific rules / a specific source range,
 /// then call `emit_signal` when an analysis rule emits a diagnostic or action.
 /// Additionally, this function takes a `inspect_matcher` function that can be
 /// used to inspect the "query matches" emitted by the analyzer before they are
 /// processed by the lint rules registry
-#[expect(clippy::too_many_arguments)]
 pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     root: &LanguageRoot<JsLanguage>,
     filter: AnalysisFilter,
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
     plugins: Vec<Box<dyn AnalyzerPlugin>>,
-    source_type: JsFileSource,
-    project_layout: Arc<ProjectLayout>,
+    services: JsAnalyzerServices,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
 where
@@ -90,6 +112,12 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
+    let JsAnalyzerServices {
+        dependency_graph,
+        project_layout,
+        source_type,
+    } = services;
+
     let (registry, mut services, diagnostics, visitors) = registry.build();
 
     // Bail if we can't parse a rule option
@@ -117,7 +145,7 @@ where
 
     services.insert_service(Arc::new(AriaRoles));
     services.insert_service(source_type);
-
+    services.insert_service(dependency_graph);
     services.insert_service(project_layout.get_node_manifest_for_path(&options.file_path));
     services.insert_service(project_layout);
 
@@ -140,8 +168,7 @@ pub fn analyze<'a, F, B>(
     filter: AnalysisFilter,
     options: &'a AnalyzerOptions,
     plugins: Vec<Box<dyn AnalyzerPlugin>>,
-    source_type: JsFileSource,
-    project_layout: Arc<ProjectLayout>,
+    services: JsAnalyzerServices,
     emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
 where
@@ -154,8 +181,7 @@ where
         |_| {},
         options,
         plugins,
-        source_type,
-        project_layout,
+        services,
         emit_signal,
     )
 }
@@ -195,6 +221,12 @@ let bar = 33;
         let mut dependencies = Dependencies::default();
         dependencies.add("buffer", "latest");
 
+        let services = JsAnalyzerServices::from((
+            Default::default(),
+            project_layout_with_top_level_dependencies(dependencies),
+            JsFileSource::tsx(),
+        ));
+
         analyze(
             &parsed.tree(),
             AnalysisFilter {
@@ -203,8 +235,7 @@ let bar = 33;
             },
             &options,
             Vec::new(),
-            JsFileSource::tsx(),
-            project_layout_with_top_level_dependencies(dependencies),
+            services,
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     error_ranges.push(diag.location().span.unwrap());
@@ -252,7 +283,6 @@ let bar = 33;
             AnalysisFilter::default(),
             &options,
             Vec::new(),
-            JsFileSource::js_module(),
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -338,7 +368,6 @@ let bar = 33;
             AnalysisFilter::default(),
             &options,
             Vec::new(),
-            JsFileSource::js_module(),
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -410,7 +439,6 @@ let bar = 33;
             filter,
             &options,
             Vec::new(),
-            JsFileSource::js_module(),
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -455,7 +483,6 @@ let bar = 33;
             filter,
             &options,
             Vec::new(),
-            JsFileSource::js_module(),
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -507,7 +534,6 @@ debugger;
             filter,
             &options,
             Vec::new(),
-            JsFileSource::js_module(),
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -554,7 +580,6 @@ debugger;
             filter,
             &options,
             Vec::new(),
-            JsFileSource::js_module(),
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -603,7 +628,6 @@ debugger;
             filter,
             &options,
             Vec::new(),
-            JsFileSource::js_module(),
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -653,7 +677,6 @@ let bar = 33;
             filter,
             &options,
             Vec::new(),
-            JsFileSource::js_module(),
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -701,7 +724,6 @@ let bar = 33;
             filter,
             &options,
             Vec::new(),
-            JsFileSource::js_module(),
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -752,7 +774,6 @@ let c;
             filter,
             &options,
             Vec::new(),
-            JsFileSource::js_module(),
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -804,7 +825,6 @@ debugger;
             filter,
             &options,
             Vec::new(),
-            JsFileSource::js_module(),
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -857,7 +877,6 @@ let d;
             filter,
             &options,
             Vec::new(),
-            JsFileSource::js_module(),
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -896,26 +915,22 @@ const foo0 = function (bar: string) {
         };
         let options = AnalyzerOptions::default();
         let root = parsed.tree();
-        analyze(
-            &root,
-            filter,
-            &options,
-            Vec::new(),
-            JsFileSource::ts(),
-            Default::default(),
-            |signal| {
-                if let Some(diag) = signal.diagnostic() {
-                    let error = diag
-                        .with_file_path("dummyFile")
-                        .with_file_source_code(SOURCE);
-                    let text = print_diagnostic_to_string(&error);
-                    eprintln!("{text}");
-                    panic!("Unexpected diagnostic");
-                }
 
-                ControlFlow::<Never>::Continue(())
-            },
-        );
+        let services =
+            JsAnalyzerServices::from((Default::default(), Default::default(), JsFileSource::ts()));
+
+        analyze(&root, filter, &options, Vec::new(), services, |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                let error = diag
+                    .with_file_path("dummyFile")
+                    .with_file_source_code(SOURCE);
+                let text = print_diagnostic_to_string(&error);
+                eprintln!("{text}");
+                panic!("Unexpected diagnostic");
+            }
+
+            ControlFlow::<Never>::Continue(())
+        });
     }
 
     #[test]
@@ -949,7 +964,6 @@ a == b;
             filter,
             &options,
             Vec::new(),
-            JsFileSource::js_module(),
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {

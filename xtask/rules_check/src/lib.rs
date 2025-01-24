@@ -14,6 +14,7 @@ use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, Severity};
 use biome_fs::BiomePath;
 use biome_graphql_syntax::GraphqlLanguage;
+use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
 use biome_json_factory::make;
@@ -426,34 +427,29 @@ fn assert_lint(
                     test,
                 );
 
-                biome_js_analyze::analyze(
-                    &root,
-                    filter,
-                    &options,
-                    vec![],
-                    file_source,
-                    Default::default(),
-                    |signal| {
-                        if let Some(mut diag) = signal.diagnostic() {
-                            for action in signal.actions() {
-                                if !action.is_suppression() {
-                                    diag = diag.add_code_suggestion(action.into());
-                                }
-                            }
+                let services =
+                    JsAnalyzerServices::from((Default::default(), Default::default(), file_source));
 
-                            let error = diag.with_file_path(&file_path).with_file_source_code(code);
-                            let res = diagnostics.write_diagnostic(error);
-
-                            // Abort the analysis on error
-                            if let Err(err) = res {
-                                eprintln!("Error: {err}");
-                                return ControlFlow::Break(err);
+                biome_js_analyze::analyze(&root, filter, &options, vec![], services, |signal| {
+                    if let Some(mut diag) = signal.diagnostic() {
+                        for action in signal.actions() {
+                            if !action.is_suppression() {
+                                diag = diag.add_code_suggestion(action.into());
                             }
                         }
 
-                        ControlFlow::Continue(())
-                    },
-                );
+                        let error = diag.with_file_path(&file_path).with_file_source_code(code);
+                        let res = diagnostics.write_diagnostic(error);
+
+                        // Abort the analysis on error
+                        if let Err(err) = res {
+                            eprintln!("Error: {err}");
+                            return ControlFlow::Break(err);
+                        }
+                    }
+
+                    ControlFlow::Continue(())
+                });
             }
         }
         DocumentFileSource::Json(file_source) => {

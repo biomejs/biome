@@ -39,7 +39,9 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
-use biome_js_analyze::{analyze, analyze_with_inspect_matcher, ControlFlowGraph};
+use biome_js_analyze::{
+    analyze, analyze_with_inspect_matcher, ControlFlowGraph, JsAnalyzerServices,
+};
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, QuoteProperties, Semicolons};
 use biome_js_formatter::format_node;
@@ -617,7 +619,6 @@ fn debug_control_flow(parse: AnyParse, cursor: TextSize) -> String {
         },
         &options,
         Vec::new(),
-        JsFileSource::default(),
         Default::default(),
         |_| ControlFlow::<Never>::Continue(()),
     );
@@ -678,13 +679,14 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     };
 
     let mut process_lint = ProcessLint::new(&params);
+    let services =
+        JsAnalyzerServices::from((params.dependency_graph, params.project_layout, file_source));
     let (_, analyze_diagnostics) = analyze(
         &tree,
         filter,
         &analyzer_options,
         Vec::new(),
-        file_source,
-        params.project_layout,
+        services,
         |signal| process_lint.process_signal(signal),
     );
 
@@ -698,6 +700,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
         workspace,
         path,
+        dependency_graph,
         project_layout,
         language,
         only,
@@ -738,14 +741,15 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         };
     };
 
+    let services = JsAnalyzerServices::from((dependency_graph, project_layout, source_type));
+
     debug!("Javascript runs the analyzer");
     analyze(
         &tree,
         filter,
         &analyzer_options,
         Vec::new(),
-        source_type,
-        project_layout,
+        services,
         |signal| {
             actions.extend(signal.actions().into_code_action_iter().map(|item| {
                 debug!("Pulled action category {:?}", item.category);
@@ -813,13 +817,18 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let mut errors: u16 = 0;
 
     loop {
+        let services = JsAnalyzerServices::from((
+            params.dependency_graph.clone(),
+            params.project_layout.clone(),
+            file_source,
+        ));
+
         let (action, _) = analyze(
             &tree,
             filter,
             &analyzer_options,
             Vec::new(),
-            file_source,
-            params.project_layout.clone(),
+            services,
             |signal| {
                 let current_diagnostic = signal.diagnostic();
 

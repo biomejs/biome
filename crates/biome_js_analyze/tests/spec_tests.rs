@@ -4,17 +4,19 @@ use biome_analyze::{
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_fs::OsFileSystem;
+use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage, ModuleKind};
 use biome_package::PackageType;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, parse_test_path, project_layout_with_node_manifest,
-    register_leak_checker, scripts_from_json, write_analyzer_snapshot, CheckActionType,
+    assert_errors_are_absent, code_fix_to_string, create_analyzer_options,
+    dependency_graph_for_test_file, diagnostic_to_string, has_bogus_nodes_or_empty_slots,
+    parse_test_path, project_layout_with_node_manifest, register_leak_checker, scripts_from_json,
+    write_analyzer_snapshot, CheckActionType,
 };
-use camino::Utf8Path;
+use camino::{Utf8Component, Utf8Path};
 use std::ops::Deref;
 use std::{fs::read_to_string, slice};
 
@@ -129,14 +131,21 @@ pub(crate) fn analyze_and_snap(
 
     let options = create_analyzer_options(input_file, &mut diagnostics);
 
-    let (_, errors) = biome_js_analyze::analyze(
-        &root,
-        filter,
-        &options,
-        plugins,
-        source_type,
-        project_layout,
-        |event| {
+    // FIXME: We probably want to enable it for all rules? Right now it seems to
+    //        trigger a leak panic...
+    let dependency_graph = if input_file
+        .components()
+        .any(|component| component == Utf8Component::Normal("noImportCycles"))
+    {
+        dependency_graph_for_test_file(input_file, &project_layout)
+    } else {
+        Default::default()
+    };
+
+    let services = JsAnalyzerServices::from((dependency_graph, project_layout, source_type));
+
+    let (_, errors) =
+        biome_js_analyze::analyze(&root, filter, &options, plugins, services, |event| {
             if let Some(mut diag) = event.diagnostic() {
                 for action in event.actions() {
                     if check_action_type.is_suppression() {
@@ -192,8 +201,7 @@ pub(crate) fn analyze_and_snap(
             }
 
             ControlFlow::<Never>::Continue(())
-        },
-    );
+        });
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));
@@ -206,6 +214,18 @@ pub(crate) fn analyze_and_snap(
         code_fixes.as_slice(),
         source_type.file_extension(),
     );
+
+    // FIXME: I wish we could do this more generically, but we cannot do this
+    //        for all tests, since it would cause many incorrect replacements.
+    //        Maybe there's a regular expression that could work, but it feels
+    //        flimsy too...
+    if input_file
+        .components()
+        .any(|component| component == Utf8Component::Normal("noImportCycles"))
+    {
+        // Normalize Windows paths.
+        *snapshot = snapshot.replace('\\', "/");
+    }
 
     diagnostics.len()
 }
