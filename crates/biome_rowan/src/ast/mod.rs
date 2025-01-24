@@ -747,6 +747,9 @@ pub enum SyntaxError {
     /// Error thrown when a mandatory node is not found
     MissingRequiredChild,
 
+    /// Error thrown when a bogus node is encountered in an unexpected position
+    UnexpectedBogusNode,
+
     /// Error thrown when a metavariable node is found in an unexpected context
     UnexpectedMetavariable,
 }
@@ -755,7 +758,8 @@ impl Display for SyntaxError {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         match self {
             SyntaxError::MissingRequiredChild => fmt.write_str("missing required child"),
-            SyntaxError::UnexpectedMetavariable => fmt.write_str("unexpectedd metavariable node"),
+            SyntaxError::UnexpectedBogusNode => fmt.write_str("unexpected bogus node"),
+            SyntaxError::UnexpectedMetavariable => fmt.write_str("unexpected metavariable node"),
         }
     }
 }
@@ -828,6 +832,7 @@ pub mod support {
             match &self.0 {
                 Ok(node) => std::fmt::Debug::fmt(node, f),
                 Err(SyntaxError::MissingRequiredChild) => f.write_str("missing (required)"),
+                Err(SyntaxError::UnexpectedBogusNode) => f.write_str("bogus node"),
                 Err(SyntaxError::UnexpectedMetavariable) => f.write_str("metavariable"),
             }
         }

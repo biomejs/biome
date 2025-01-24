@@ -4047,3 +4047,30 @@ fn linter_doesnt_crash_on_malformed_code_from_issue_4623() {
         result,
     ));
 }
+
+#[test]
+fn linter_doesnt_crash_on_malformed_code_from_issue_4723() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    fs.insert(
+        Utf8PathBuf::from("issue4723.js"),
+        r#"   if ndpato{      (){   if asCmesnen{   }
+  if     '&
+  else"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "issue4723.js"].as_slice()),
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "linter_doesnt_crash_on_malformed_code_from_issue_4723",
+        fs,
+        console,
+        result,
+    ));
+}
