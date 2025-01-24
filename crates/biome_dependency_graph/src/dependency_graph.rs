@@ -5,17 +5,13 @@
 //!
 //! The dependency graph is instantiated and updated inside the Workspace
 //! Server.
-use std::{
-    collections::BTreeMap,
-    path::{Path, PathBuf},
-    sync::Arc,
-};
+use std::{collections::BTreeMap, sync::Arc};
 
 use biome_fs::{BiomePath, FileSystem, PathKind};
 use biome_js_syntax::AnyJsRoot;
 use biome_project_layout::ProjectLayout;
 use camino::{Utf8Path, Utf8PathBuf};
-use oxc_resolver::{CachedPath, ResolveError, ResolveOptions, ResolverGeneric};
+use oxc_resolver::{ResolveError, ResolveOptions, ResolverGeneric};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
 
@@ -33,10 +29,7 @@ pub struct DependencyGraph {
 
     /// Cache that tracks the presence of files, directories, and symlinks
     /// across the project.
-    ///
-    /// We use `PathBuf` here instead of `Utf8PathBuf` to avoid conversion of
-    /// paths coming from `oxc_resolver`.
-    path_info: HashMap<PathBuf, Option<PathKind>>,
+    path_info: HashMap<Utf8PathBuf, Option<PathKind>>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -128,10 +121,8 @@ impl DependencyGraph {
             added_or_updated_paths,
             removed_paths,
         ));
-        let resolver = ResolverGeneric::new_with_cache(
-            resolver_cache.clone(),
-            ResolveOptions::default().with_symbolic_link(false),
-        );
+        let resolver =
+            ResolverGeneric::new_with_cache(resolver_cache.clone(), ResolveOptions::default());
 
         // Make sure all directories are registered for the added/updated paths.
         let path_info = self.path_info.pin();
@@ -139,7 +130,7 @@ impl DependencyGraph {
             let mut parent = path.parent();
             while let Some(path) = parent {
                 if path_info
-                    .try_insert_with(path.as_std_path().to_path_buf(), || fs.path_kind(path).ok())
+                    .try_insert_with(path.to_path_buf(), || fs.path_kind(path).ok())
                     .is_err()
                 {
                     break;
@@ -166,17 +157,17 @@ impl DependencyGraph {
         // `ResolverCache` get cache hits through [Self::path_kind()].
         let paths = resolver_cache.paths();
         for path in paths.pin().iter() {
-            path_info.insert(path.to_path_buf(), path.kind());
+            path_info.insert(path.path.to_path_buf(), path.kind());
         }
 
         // Clean up removed paths.
         for removed_path in removed_paths {
             imports.remove(removed_path.as_path());
-            path_info.remove(removed_path.as_std_path());
+            path_info.remove(removed_path.as_path());
         }
     }
 
-    pub(crate) fn path_kind(&self, path: &Path) -> Option<PathKind> {
+    pub(crate) fn path_kind(&self, path: &Utf8Path) -> Option<PathKind> {
         self.path_info.pin().get(path).copied().flatten()
     }
 }

@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::fmt::{Debug, Display, Formatter};
 use std::panic::RefUnwindSafe;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::{fmt, io};
 use tracing::{error, info};
@@ -229,6 +230,9 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
         }
     }
 
+    /// Returns the resolution of a symbolic link.
+    fn read_link(&self, path: &Utf8Path) -> io::Result<Utf8PathBuf>;
+
     fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>>;
 
     fn get_staged_files(&self) -> io::Result<Vec<String>>;
@@ -438,6 +442,10 @@ where
         T::get_staged_files(self)
     }
 
+    fn read_link(&self, path: &Utf8Path) -> io::Result<Utf8PathBuf> {
+        T::read_link(self, path)
+    }
+
     fn resolve_configuration(
         &self,
         specifier: &str,
@@ -480,17 +488,20 @@ pub enum FsErrorKind {
     DereferencedSymlink(String),
     /// Too deeply nested symbolic link expansion
     DeeplyNestedSymlinkExpansion(String),
+    /// Invalid UTF-8 characters in path.
+    NonUtf8Path(PathBuf),
 }
 
 impl console::fmt::Display for FsErrorKind {
     fn fmt(&self, fmt: &mut console::fmt::Formatter) -> io::Result<()> {
         match self {
-            FsErrorKind::CantReadFile(_) => fmt.write_str("Cannot read file"),
-            FsErrorKind::UnknownFileType => fmt.write_str("Unknown file type"),
-            FsErrorKind::DereferencedSymlink(_) => fmt.write_str("Dereferenced symlink"),
-            FsErrorKind::DeeplyNestedSymlinkExpansion(_) => {
+            Self::CantReadFile(_) => fmt.write_str("Cannot read file"),
+            Self::UnknownFileType => fmt.write_str("Unknown file type"),
+            Self::DereferencedSymlink(_) => fmt.write_str("Dereferenced symlink"),
+            Self::DeeplyNestedSymlinkExpansion(_) => {
                 fmt.write_str("Deeply nested symlink expansion")
             }
+            Self::NonUtf8Path(_) => fmt.write_str("Invalid UTF-8 characters in path"),
         }
     }
 }
@@ -498,12 +509,13 @@ impl console::fmt::Display for FsErrorKind {
 impl std::fmt::Display for FsErrorKind {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            FsErrorKind::CantReadFile(_) => fmt.write_str("Cannot read file"),
-            FsErrorKind::UnknownFileType => write!(fmt, "Unknown file type"),
-            FsErrorKind::DereferencedSymlink(_) => write!(fmt, "Dereferenced symlink"),
-            FsErrorKind::DeeplyNestedSymlinkExpansion(_) => {
+            Self::CantReadFile(_) => fmt.write_str("Cannot read file"),
+            Self::UnknownFileType => write!(fmt, "Unknown file type"),
+            Self::DereferencedSymlink(_) => write!(fmt, "Dereferenced symlink"),
+            Self::DeeplyNestedSymlinkExpansion(_) => {
                 write!(fmt, "Deeply nested symlink expansion")
             }
+            Self::NonUtf8Path(_) => write!(fmt, "Invalid UTF-8 characters in path"),
         }
     }
 }
@@ -511,22 +523,26 @@ impl std::fmt::Display for FsErrorKind {
 impl Advices for FsErrorKind {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         match self {
-			FsErrorKind::CantReadFile(path) => visitor.record_log(
+			Self::CantReadFile(path) => visitor.record_log(
 		        LogCategory::Error,
 			    &format!("Biome can't read the following file, maybe for permissions reasons or it doesn't exist: {path}")
 			),
-            FsErrorKind::UnknownFileType => visitor.record_log(
+            Self::UnknownFileType => visitor.record_log(
                 LogCategory::Info,
                 &"Biome encountered a file system entry that's neither a file, directory or symbolic link",
             ),
-            FsErrorKind::DereferencedSymlink(path) => visitor.record_log(
+            Self::DereferencedSymlink(path) => visitor.record_log(
                 LogCategory::Info,
                 &format!("Biome encountered a file system entry that is a broken symbolic link: {path}"),
             ),
-            FsErrorKind::DeeplyNestedSymlinkExpansion(path) => visitor.record_log(
+            Self::DeeplyNestedSymlinkExpansion(path) => visitor.record_log(
                 LogCategory::Error,
                 &format!("Biome encountered a file system entry with too many nested symbolic links, possibly forming an infinite cycle: {path}"),
             ),
+            Self::NonUtf8Path(path) => visitor.record_log(
+                LogCategory::Error,
+                &format!("Biome encountered a path with invalid UTF-8 characters: {}", path.display())
+            )
         }
     }
 }
