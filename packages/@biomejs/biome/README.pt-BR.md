@@ -127,7 +127,7 @@ Leia mais sobre nossa [filosofia de projeto][biome-philosophy].
         <a href="https://www.phoenixlabs.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://images.opencollective.com/phoenix-labs/2824ed4/logo/100.png?height=100" height="100"></a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://lokalise.com//?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/14294501?s=200&v=4" height="100"></a>
+        <a href="https://lokalise.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/14294501?s=200&v=4" height="100"></a>
       </td>
     </tr>
   </tbody>
