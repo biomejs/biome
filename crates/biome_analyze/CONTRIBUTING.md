@@ -51,7 +51,7 @@ See the [code generation section](#code-generation) for more details.
 
 To create a new rule, you have to create and update several files.
 Because it is a bit tedious, _Biome_ provides an easy way to create and test your rule using [Just](https://just.systems/man/en/).
-_Just_ is not part of the rust toolchain, you have to install it with [a package manager](https://just.systems/man/en/chapter_4.html).
+_Just_ is not part of the rust toolchain, you have to install it with [a package manager](https://just.systems/man/en/packages.html).
 
 ### Guidelines
 
