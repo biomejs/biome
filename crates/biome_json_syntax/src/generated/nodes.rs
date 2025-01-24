@@ -1178,6 +1178,7 @@ impl From<JsonBogusValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+biome_rowan::declare_node_union! { pub AnyJsonBogusNode = JsonBogus | JsonBogusValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct JsonArrayElementList {
     syntax_list: SyntaxList,

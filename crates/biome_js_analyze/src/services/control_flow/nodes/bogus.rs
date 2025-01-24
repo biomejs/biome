@@ -1,4 +1,4 @@
-use biome_js_syntax::JsBogusStatement;
+use biome_js_syntax::AnyJsBogusNode;
 use biome_rowan::{SyntaxError, SyntaxResult};
 
 use crate::services::control_flow::{
@@ -14,7 +14,7 @@ use crate::services::control_flow::{
 pub(in crate::services::control_flow) struct BogusVisitor;
 
 impl NodeVisitor for BogusVisitor {
-    type Node = JsBogusStatement;
+    type Node = AnyJsBogusNode;
 
     fn enter(_: Self::Node, _: &mut FunctionBuilder, _: StatementStack) -> SyntaxResult<Self> {
         Err(SyntaxError::UnexpectedBogusNode)

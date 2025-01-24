@@ -7969,6 +7969,7 @@ impl From<GraphqlBogusValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+biome_rowan::declare_node_union! { pub AnyGraphqlBogusNode = GraphqlBogus | GraphqlBogusDefinition | GraphqlBogusSelection | GraphqlBogusType | GraphqlBogusValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct GraphqlArgumentDefinitionList {
     syntax_list: SyntaxList,

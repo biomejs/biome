@@ -727,6 +727,29 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         }
     });
 
+    let any_bogus = {
+        let kinds = ast.bogus.iter().enumerate().map(|(i, bogus_name)| {
+            let ident = format_ident!("{bogus_name}");
+            if i == 0 {
+                quote! { #ident }
+            } else {
+                quote! { | #ident }
+            }
+        });
+        let ident = format_ident!(
+            "Any{}BogusNode",
+            ast.bogus
+                .iter()
+                .find_map(|bogus_name| bogus_name.strip_suffix("Bogus"))
+                .expect("expected a plain *Bogus node")
+        );
+        quote! {
+            biome_rowan::declare_node_union! {
+                pub #ident = #(#kinds)*
+            }
+        }
+    };
+
     let lists = ast.lists().map(|(name, list)| {
         let list_name = format_ident!("{}", name);
         let list_kind = format_ident!("{}", Case::Constant.convert(name));
@@ -929,6 +952,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         #(#union_boilerplate_impls)*
         #(#display_impls)*
         #(#bogus)*
+        #any_bogus
         #(#lists)*
 
         #[derive(Clone)]
