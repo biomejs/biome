@@ -5,9 +5,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_factory::make;
+use biome_js_factory::make::{js_directive, js_directive_list, token};
 use biome_js_syntax::{JsScript, JsSyntaxKind, JsSyntaxToken, T};
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
 
 declare_lint_rule! {
     /// Enforce the use of the directive `"use strict"` in script files.
@@ -53,16 +53,20 @@ impl Rule for UseStrictMode {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if node
-            .directives()
-            .iter()
-            .filter_map(|directive| directive.inner_string_text().ok())
-            .all(|directive| directive.text() != "use strict")
-        {
-            Some(())
-        } else {
-            None
+
+        if node.directives().is_empty() && node.statements().is_empty() {
+            return None;
         }
+
+        if node.directives().iter().any(|directive| {
+            directive
+                .inner_string_text()
+                .map_or(false, |text| text.text() == "use strict")
+        }) {
+            return None;
+        }
+
+        Some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -79,7 +83,7 @@ impl Rule for UseStrictMode {
                 "Strict mode allows to opt-in some optimisations of the runtime engines, and it eliminates some JavaScript silent errors by changing them to throw errors."
             })
             .note(markup!{
-                "Check the "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode">"for more information regarding strict mode."</Hyperlink>
+                "Check the "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode">"MDN web docs"</Hyperlink>" for more information regarding strict mode."
             }),
         )
     }
@@ -91,22 +95,62 @@ impl Rule for UseStrictMode {
             PreferredQuote::Double => "\"use strict\"",
             PreferredQuote::Single => "'use strict'",
         };
-        let value = JsSyntaxToken::new_detached(JsSyntaxKind::JSX_STRING_LITERAL, value, [], []);
-        let use_strict_diretcive = make::js_directive(value)
-            .with_semicolon_token(make::token(T![;]))
-            .build();
-        let directives = make::js_directive_list(
+
+        // check if the first statement has a newline as the first trivia.
+        let is_statement_first_trivia_newline = node
+            .statements()
+            .syntax()
+            .first_leading_trivia()
+            .is_some_and(|f| {
+                f.pieces()
+                    .next()
+                    .is_some_and(|piece| piece.kind() == TriviaPieceKind::Newline)
+            });
+
+        let mut leading_trivia = Vec::new();
+        let mut trailing_trivia = Vec::new();
+
+        // if the script has directives or an interpreter directive, add a newline before the "use strict" directive.
+        if !node.directives().is_empty() || node.interpreter_token().is_some() {
+            leading_trivia.push((TriviaPieceKind::Newline, "\n"));
+        }
+
+        // if the script has statements and the first statement does not have a newline before it, add a newline behind the "use strict" directive.
+        if !node.statements().is_empty() && !is_statement_first_trivia_newline {
+            trailing_trivia.push((TriviaPieceKind::Newline, "\n"));
+        }
+
+        let mut strict_directive_token =
+            JsSyntaxToken::new_detached(JsSyntaxKind::JSX_STRING_LITERAL, value, [], []);
+
+        if !leading_trivia.is_empty() {
+            strict_directive_token = strict_directive_token.with_leading_trivia(leading_trivia);
+        }
+
+        let mut strict_directive = js_directive(strict_directive_token);
+
+        if !trailing_trivia.is_empty() {
+            strict_directive = strict_directive
+                .with_semicolon_token(token(T![;]).with_trailing_trivia(trailing_trivia))
+        } else {
+            strict_directive = strict_directive.with_semicolon_token(token(T![;]));
+        };
+
+        let directives = js_directive_list(
             node.directives()
                 .into_iter()
-                .chain([use_strict_diretcive])
+                .chain([strict_directive.build()])
                 .collect::<Vec<_>>(),
         );
+
         let new_node = node.clone().with_directives(directives);
-        mutation.replace_node(node, new_node);
+
+        // use replace_element_discard_trivia to prevent duplication of the leading comment when it is the first element in the node's leading trivia.
+        mutation.replace_element_discard_trivia(node.into(), new_node.into());
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup!("Insert a top level"<Emphasis>"\"use strict\" "</Emphasis>".").to_owned(),
+            markup!("Insert a top level "<Emphasis>"\"use strict\""</Emphasis>".").to_owned(),
             mutation,
         ))
     }
