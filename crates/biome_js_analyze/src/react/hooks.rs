@@ -447,7 +447,7 @@ pub fn is_binding_react_stable(
     let Some(callee) = declarator
         .initializer()
         .and_then(|initializer| initializer.expression().ok())
-        .and_then(|initializer| initializer.as_js_call_expression()?.callee().ok())
+        .and_then(|initializer| unwrap_to_call_expression(initializer)?.callee().ok())
     else {
         return false;
     };
@@ -472,6 +472,32 @@ pub fn is_binding_react_stable(
             (_, _) => false,
         }
     })
+}
+
+/// Unwrap the expression to a call expression without changing the result of the expression,
+/// such as type assertions.
+fn unwrap_to_call_expression(mut expression: AnyJsExpression) -> Option<JsCallExpression> {
+    loop {
+        match expression {
+            AnyJsExpression::JsCallExpression(expr) => return Some(expr),
+            AnyJsExpression::JsParenthesizedExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            AnyJsExpression::JsSequenceExpression(expr) => {
+                expression = expr.right().ok()?;
+            }
+            AnyJsExpression::TsAsExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            AnyJsExpression::TsSatisfiesExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            AnyJsExpression::TsNonNullAssertionExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            _ => return None,
+        }
+    }
 }
 
 #[cfg(test)]

@@ -1,6 +1,6 @@
 /* should not generate diagnostics */
 
-import { useEffect } from "react";
+import { type MutableRefObject, useEffect, useRef } from "react";
 
 // capturing declarations
 function overloaded(s: string): string;
@@ -45,4 +45,21 @@ export function MyComponent3({ outer }: { outer: string[] }) {
 			const a: (typeof outer)[number] = "foo";
 			console.log(a)
 		}, []);
+}
+
+// useRef's are still considered as stable even if there's any type assertion
+export function MyComponent4() {
+    const parenthesizedRef = (((useRef())));
+    const sequenceRef = (doSomething(), useRef());
+    const nonNullAssertedRef = useRef()!;
+    const castedRef = useRef() as MutableRefObject<HTMLElement>;
+    const satisfiedRef = useRef() satisfies MutableRefObject<HTMLElement>;
+
+    useEffect(() => {
+        console.log(parenthesizedRef.current);
+        console.log(sequenceRef.current);
+        console.log(nonNullAssertedRef.current);
+        console.log(castedRef.current.innerHTML);
+        console.log(satisfiedRef.current.innerHTML);
+    }, []);
 }
