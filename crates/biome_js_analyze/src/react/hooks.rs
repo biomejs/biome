@@ -476,25 +476,27 @@ pub fn is_binding_react_stable(
 
 /// Unwrap the expression to a call expression without changing the result of the expression,
 /// such as type assertions.
-fn unwrap_to_call_expression(expression: AnyJsExpression) -> Option<JsCallExpression> {
-    match expression {
-        AnyJsExpression::JsCallExpression(expr) => Some(expr),
-        AnyJsExpression::JsParenthesizedExpression(expr) => {
-            expr.expression().ok().and_then(unwrap_to_call_expression)
+fn unwrap_to_call_expression(mut expression: AnyJsExpression) -> Option<JsCallExpression> {
+    loop {
+        match expression {
+            AnyJsExpression::JsCallExpression(expr) => return Some(expr),
+            AnyJsExpression::JsParenthesizedExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            AnyJsExpression::JsSequenceExpression(expr) => {
+                expression = expr.right().ok()?;
+            }
+            AnyJsExpression::TsAsExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            AnyJsExpression::TsSatisfiesExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            AnyJsExpression::TsNonNullAssertionExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            _ => return None,
         }
-        AnyJsExpression::JsSequenceExpression(expr) => {
-            expr.right().ok().and_then(unwrap_to_call_expression)
-        }
-        AnyJsExpression::TsAsExpression(expr) => {
-            expr.expression().ok().and_then(unwrap_to_call_expression)
-        }
-        AnyJsExpression::TsSatisfiesExpression(expr) => {
-            expr.expression().ok().and_then(unwrap_to_call_expression)
-        }
-        AnyJsExpression::TsNonNullAssertionExpression(expr) => {
-            expr.expression().ok().and_then(unwrap_to_call_expression)
-        }
-        _ => None,
     }
 }
 
