@@ -1,3 +1,7 @@
+> [!IMPORTANT]
+> All new developments, fixes and features should be directed towards the `next` branch.
+> The `main` is only used for maintenance and CI while the team prepares everything for v2.
+
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg">
