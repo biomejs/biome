@@ -55,7 +55,6 @@ Also:
 - Onboard new [core contributors](#core-contributor) and new leads.
 - Takes part in [project decisions](#project-direction-and-planning).
 - Access to the Discord `Lead` category and channels that belong to this category.
-- Access to the 1Password team group.
 - Propose changes to the governance document via PR.
 
 The ownership of assets is only sometimes evenly distributed among all the leads.
@@ -84,10 +83,7 @@ Core Contributors are outstanding [maintainers](#maintainer), are ambassadors of
 - Ability to [vote](#maintainer-nomination) on new maintainers and [vote](#core-contributor-nomination) on new core contributors
 - Onboard new [maintainers](#maintainer)
 - Assign [pledges to issues](#bounties).
-- Access to Netlify.com deployments team.
-- Access to the Discord Sapphire bot.
 - Access to the Discord `Core contributors` category and channels that belong to this category.
-- Access to the 1Password team group.
 - Propose changes to the governance document via PR.
 
 #### Core contributor nomination
@@ -282,7 +278,7 @@ conditions:
     or indirectly benefits the roadmap, a customized fee may be negotiated.
   - If the last-published roadmap is more than 12 months old, the Core Contributor is asked to
     consult with the Core team about alignment with the project goals.
-  - Fee negotiation may happen either publically in the `Community > #funding` channel, or privately
+  - Fee negotiation may happen either publicly in the `Community > #funding` channel, or privately
     in the `Core > #core-team` channel.
   - Custom fees require the approval of at least one Lead.
 - The work may not conflict with the project direction or
