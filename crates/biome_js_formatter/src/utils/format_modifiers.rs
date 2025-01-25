@@ -115,7 +115,7 @@ where
     list.syntax_list()
         .node()
         .next_sibling_or_token()
-        .map_or(false, |node| match node {
+        .is_some_and(|node| match node {
             NodeOrToken::Node(node) => node.has_leading_newline(),
             NodeOrToken::Token(token) => token.has_leading_newline(),
         })

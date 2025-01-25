@@ -131,7 +131,7 @@ fn has_valid_heading_content(node: &AnyJsxElement) -> bool {
         .is_some()
         || node
             .find_attribute_by_name("children")
-            .map_or(false, |attribute| {
+            .is_some_and(|attribute| {
                 if attribute.initializer().is_none() {
                     return false;
                 }

@@ -193,7 +193,7 @@ impl ControlFlowStatement {
                     if parent
                         .label_token()
                         .ok()
-                        .map_or(false, |it| it.text_trimmed() == label.text_trimmed())
+                        .is_some_and(|it| it.text_trimmed() == label.text_trimmed())
                     {
                         is_label_inside_finally = true;
                     }

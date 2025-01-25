@@ -110,9 +110,10 @@ fn handle_declaration_name_comment(
 ) -> CommentPlacement<CssLanguage> {
     match comment.preceding_node() {
         Some(following_node) if AnyCssDeclarationName::can_cast(following_node.kind()) => {
-            if following_node.parent().map_or(false, |p| {
-                p.kind() == CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST
-            }) {
+            if following_node
+                .parent()
+                .is_some_and(|p| p.kind() == CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST)
+            {
                 CommentPlacement::Default(comment)
             } else {
                 CommentPlacement::leading(following_node.clone(), comment)

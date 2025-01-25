@@ -61,7 +61,7 @@ impl Rule for UseStrictMode {
         if node.directives().iter().any(|directive| {
             directive
                 .inner_string_text()
-                .map_or(false, |text| text.text() == "use strict")
+                .is_ok_and(|text| text.text() == "use strict")
         }) {
             return None;
         }

@@ -149,7 +149,7 @@ impl Pattern {
             tokens.push(AnyRecursiveSequence);
         } else {
             // A pattern is absolute if it starts with a path separator, eg. "/home" or "\\?\C:\Users"
-            let mut is_absolute = chars.first().map_or(false, |c| path::is_separator(*c));
+            let mut is_absolute = chars.first().is_some_and(|c| path::is_separator(*c));
 
             // On windows a pattern may also be absolute if it starts with a
             // drive letter, a colon and a separator, eg. "c:/Users" or "G:\Users"

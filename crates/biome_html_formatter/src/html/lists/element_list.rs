@@ -180,7 +180,7 @@ impl FormatHtmlElementList {
                         None => None,
                     };
 
-                    child_breaks = separator.map_or(false, |separator| separator.will_break());
+                    child_breaks = separator.is_some_and(|separator| separator.will_break());
 
                     flat.write(&format_args![word, separator], f);
 
@@ -302,7 +302,7 @@ impl FormatHtmlElementList {
                         None => None,
                     };
 
-                    child_breaks = line_mode.map_or(false, |mode| mode.is_hard());
+                    child_breaks = line_mode.is_some_and(|mode| mode.is_hard());
 
                     let format_separator = line_mode.map(|mode| {
                         format_with(move |f| f.write_element(FormatElement::Line(mode)))
@@ -412,7 +412,7 @@ impl FormatHtmlElementList {
                     meta.meaningful_text = meta.meaningful_text
                         || text
                             .value_token()
-                            .map_or(false, |token| is_meaningful_html_text(token.text()));
+                            .is_ok_and(|token| is_meaningful_html_text(token.text()));
                 }
                 _ => {}
             }

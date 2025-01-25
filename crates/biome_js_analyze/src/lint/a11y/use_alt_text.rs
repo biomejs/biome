@@ -163,17 +163,17 @@ impl Rule for UseAltText {
 fn has_type_image_attribute(element: &AnyJsxElement) -> bool {
     element
         .find_attribute_by_name("type")
-        .map_or(false, |attribute| {
+        .is_some_and(|attribute| {
             attribute
                 .as_static_value()
-                .map_or(false, |value| value.text() == "image")
+                .is_some_and(|value| value.text() == "image")
         })
 }
 
 fn has_valid_alt_text(element: &AnyJsxElement) -> bool {
     element
         .find_attribute_by_name("alt")
-        .map_or(false, |attribute| {
+        .is_some_and(|attribute| {
             if attribute.initializer().is_none() {
                 return false;
             }
@@ -188,7 +188,7 @@ fn has_valid_alt_text(element: &AnyJsxElement) -> bool {
 fn has_valid_label(element: &AnyJsxElement, name_to_lookup: &str) -> bool {
     element
         .find_attribute_by_name(name_to_lookup)
-        .map_or(false, |attribute| {
+        .is_some_and(|attribute| {
             if attribute.initializer().is_none() {
                 return false;
             }
@@ -201,7 +201,7 @@ fn has_valid_label(element: &AnyJsxElement, name_to_lookup: &str) -> bool {
 fn is_aria_hidden(element: &AnyJsxElement) -> bool {
     element
         .find_attribute_by_name("aria-hidden")
-        .map_or(false, |attribute| {
+        .is_some_and(|attribute| {
             attribute
                 .as_static_value()
                 .map_or(true, |value| match value {

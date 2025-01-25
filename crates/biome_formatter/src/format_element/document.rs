@@ -292,7 +292,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         _ => unreachable!(),
                     }
 
-                    let is_next_text = iter.peek().map_or(false, |e| e.is_text() || e.is_space());
+                    let is_next_text = iter.peek().is_some_and(|e| e.is_text() || e.is_space());
 
                     if !is_next_text {
                         write!(f, [text("\"")])?;
@@ -687,7 +687,7 @@ impl FormatElements for [FormatElement] {
 
     fn has_label(&self, expected: LabelId) -> bool {
         self.first()
-            .map_or(false, |element| element.has_label(expected))
+            .is_some_and(|element| element.has_label(expected))
     }
 
     fn start_tag(&self, kind: TagKind) -> Option<&Tag> {

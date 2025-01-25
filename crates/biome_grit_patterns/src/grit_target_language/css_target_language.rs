@@ -68,7 +68,7 @@ impl GritTargetLanguageImpl for CssTargetLanguage {
 
     fn is_comment_kind(kind: GritTargetSyntaxKind) -> bool {
         kind.as_css_kind()
-            .map_or(false, |kind| COMMENT_KINDS.matches(kind))
+            .is_some_and(|kind| COMMENT_KINDS.matches(kind))
     }
 
     fn metavariable_kind() -> Self::Kind {

@@ -341,7 +341,7 @@ impl JsBinaryExpression {
             Ok(self
                 .right()?
                 .as_static_value()
-                .map_or(false, |x| x.is_null_or_undefined()))
+                .is_some_and(|x| x.is_null_or_undefined()))
         } else {
             Ok(false)
         }
@@ -1256,8 +1256,7 @@ impl AnyJsExpression {
             AnyJsExpression::JsParenthesizedExpression(parenthesized_expression) => {
                 parenthesized_expression
                     .expression()
-                    .ok()
-                    .map_or(false, |expression| expression.is_literal_expression())
+                    .is_ok_and(|expression| expression.is_literal_expression())
             }
 
             _ => false,
@@ -1861,9 +1860,9 @@ impl JsCallExpression {
     }
 
     pub fn has_callee(&self, name: &str) -> bool {
-        self.callee().map_or(false, |it| {
+        self.callee().is_ok_and(|it| {
             it.as_js_reference_identifier()
-                .map_or(false, |it| it.has_name(name))
+                .is_some_and(|it| it.has_name(name))
         })
     }
 
@@ -1903,7 +1902,7 @@ impl JsCallExpression {
                         .parent::<JsCallArgumentList>()
                         .and_then(|arguments_list| arguments_list.parent::<JsCallArguments>())
                         .and_then(|arguments| arguments.parent::<self::JsCallExpression>())
-                        .map_or(Ok(false), |parent| parent.is_test_call_expression())?
+                        .is_some_and(|parent| parent.is_test_call_expression().unwrap_or(false))
                 {
                     return Ok(matches!(
                         argument,
@@ -1916,7 +1915,7 @@ impl JsCallExpression {
                 if is_unit_test_set_up_callee(&callee) {
                     return Ok(argument
                         .as_any_js_expression()
-                        .map_or(false, is_angular_test_wrapper));
+                        .is_some_and(is_angular_test_wrapper));
                 }
 
                 Ok(false)
@@ -1941,7 +1940,7 @@ impl JsCallExpression {
 
                 if second
                     .as_any_js_expression()
-                    .map_or(false, is_angular_test_wrapper)
+                    .is_some_and(is_angular_test_wrapper)
                 {
                     return Ok(true);
                 }
@@ -1955,9 +1954,9 @@ impl JsCallExpression {
                     ),
                     AnyJsCallArgument::AnyJsExpression(JsArrowFunctionExpression(arrow)) => (
                         arrow.parameters(),
-                        arrow.body().map_or(false, |body| {
-                            matches!(body, AnyJsFunctionBody::JsFunctionBody(_))
-                        }),
+                        arrow
+                            .body()
+                            .is_ok_and(|body| matches!(body, AnyJsFunctionBody::JsFunctionBody(_))),
                     ),
                     _ => return Ok(false),
                 };
@@ -1985,7 +1984,7 @@ fn is_angular_test_wrapper(expression: &AnyJsExpression) -> bool {
             Ok(JsIdentifierExpression(identifier)) => identifier
                 .name()
                 .and_then(|name| name.value_token())
-                .map_or(false, |name| {
+                .is_ok_and(|name| {
                     matches!(
                         name.text_trimmed(),
                         "async" | "inject" | "fakeAsync" | "waitForAsync"
@@ -2004,7 +2003,7 @@ fn is_unit_test_set_up_callee(callee: &AnyJsExpression) -> bool {
         AnyJsExpression::JsIdentifierExpression(identifier) => identifier
             .name()
             .and_then(|name| name.value_token())
-            .map_or(false, |name| {
+            .is_ok_and(|name| {
                 matches!(
                     name.text_trimmed(),
                     "beforeEach" | "beforeAll" | "afterEach" | "afterAll"
@@ -2016,9 +2015,9 @@ fn is_unit_test_set_up_callee(callee: &AnyJsExpression) -> bool {
 
 impl JsNewExpression {
     pub fn has_callee(&self, name: &str) -> bool {
-        self.callee().map_or(false, |it| {
+        self.callee().is_ok_and(|it| {
             it.as_js_reference_identifier()
-                .map_or(false, |it| it.has_name(name))
+                .is_some_and(|it| it.has_name(name))
         })
     }
 }

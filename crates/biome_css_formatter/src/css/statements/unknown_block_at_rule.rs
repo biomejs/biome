@@ -14,7 +14,7 @@ impl FormatNodeRule<CssUnknownBlockAtRule> for FormatCssUnknownBlockAtRule {
 
         write!(f, [name.format(), space(), components.format()])?;
 
-        if components.map_or(false, |components| components.items().next().is_some()) {
+        if components.is_ok_and(|components| components.items().next().is_some()) {
             write!(f, [space()])?;
         }
 

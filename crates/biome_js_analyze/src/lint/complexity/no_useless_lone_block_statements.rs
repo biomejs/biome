@@ -181,5 +181,5 @@ fn is_not_var_declaration(variable: &JsVariableStatement) -> bool {
     variable
         .declaration()
         .ok()
-        .map_or(false, |decl| !decl.is_var())
+        .is_some_and(|decl| !decl.is_var())
 }

@@ -1239,7 +1239,7 @@ fn is_react_hook_with_deps_array(arguments: &JsCallArguments, comments: &JsComme
 
             if !callback
                 .parameters()
-                .map_or(false, |parameters| parameters.is_empty())
+                .is_ok_and(|parameters| parameters.is_empty())
             {
                 return false;
             }
@@ -1278,7 +1278,7 @@ fn is_function_composition_args(arguments: &JsCallArguments) -> bool {
                 has_seen_function_like = true;
             }
             AnyJsCallArgument::AnyJsExpression(JsCallExpression(call)) => {
-                if call.arguments().map_or(false, |call_arguments| {
+                if call.arguments().is_ok_and(|call_arguments| {
                     call_arguments.args().iter().flatten().any(|arg| {
                         matches!(
                             arg,

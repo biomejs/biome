@@ -392,7 +392,7 @@ impl ImportNode {
                     let will_need_newline = sep
                         .trailing_trivia()
                         .last()
-                        .map_or(false, |piece| piece.kind().is_single_line_comment());
+                        .is_some_and(|piece| piece.kind().is_single_line_comment());
 
                     (sep.clone(), will_need_newline)
                 } else {
@@ -474,7 +474,7 @@ fn prepend_leading_newline(
     let leading_trivia = prev_token.leading_trivia();
     let has_leading_newline = leading_trivia
         .first()
-        .map_or(false, |piece| piece.is_newline());
+        .is_some_and(|piece| piece.is_newline());
 
     if has_leading_newline {
         return None;

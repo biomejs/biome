@@ -240,15 +240,15 @@ impl Configuration {
     }
 
     pub fn is_formatter_enabled(&self) -> bool {
-        self.formatter.as_ref().map_or(false, |f| f.is_enabled())
+        self.formatter.as_ref().is_some_and(|f| f.is_enabled())
     }
 
     pub fn is_linter_enabled(&self) -> bool {
-        self.linter.as_ref().map_or(false, |f| f.is_enabled())
+        self.linter.as_ref().is_some_and(|f| f.is_enabled())
     }
 
     pub fn is_assist_enabled(&self) -> bool {
-        self.assist.as_ref().map_or(false, |f| f.is_enabled())
+        self.assist.as_ref().is_some_and(|f| f.is_enabled())
     }
 
     pub fn get_linter_rules(&self) -> Rules {
@@ -266,7 +266,7 @@ impl Configuration {
     }
 
     pub fn is_vcs_enabled(&self) -> bool {
-        self.assist.as_ref().map_or(false, |f| f.is_enabled())
+        self.assist.as_ref().is_some_and(|f| f.is_enabled())
     }
 
     /// Whether Biome should check for `.editorconfig` file
