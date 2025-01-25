@@ -179,7 +179,7 @@ impl Projects {
             FeatureKind::Format => {
                 let formatter = &settings.formatter;
                 (
-                    &formatter.includes_files,
+                    &formatter.includes,
                     &formatter.included_files,
                     &formatter.ignored_files,
                 )
@@ -187,7 +187,7 @@ impl Projects {
             FeatureKind::Lint => {
                 let linter = &settings.linter;
                 (
-                    &linter.includes_files,
+                    &linter.includes,
                     &linter.included_files,
                     &linter.ignored_files,
                 )
@@ -196,7 +196,7 @@ impl Projects {
             FeatureKind::Assist => {
                 let assists = &settings.assist;
                 (
-                    &assists.includes_files,
+                    &assists.includes,
                     &assists.included_files,
                     &assists.ignored_files,
                 )
@@ -207,7 +207,7 @@ impl Projects {
         };
 
         let mut is_feature_included = true;
-        if !feature_includes_files.is_empty() {
+        if !feature_includes_files.is_unset() {
             is_feature_included = if is_dir(path) {
                 feature_includes_files.matches_directory_with_exceptions(path)
             } else {

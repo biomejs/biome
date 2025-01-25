@@ -242,7 +242,7 @@ pub struct FormatSettings {
     /// List of included paths/files
     pub included_files: Matcher,
     /// List of included paths/files
-    pub includes_files: IncludesFiles,
+    pub includes: Includes,
 }
 
 impl FormatSettings {
@@ -300,7 +300,7 @@ pub struct LinterSettings {
     pub included_files: Matcher,
 
     /// List of included paths/files
-    pub includes_files: IncludesFiles,
+    pub includes: Includes,
 
     /// Rule domains
     pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
@@ -341,7 +341,7 @@ pub struct AssistSettings {
     pub included_files: Matcher,
 
     /// List of included paths/files
-    pub includes_files: IncludesFiles,
+    pub includes: Includes,
 }
 
 impl AssistSettings {
@@ -600,66 +600,64 @@ pub struct FilesSettings {
     pub included_files: Matcher,
 
     /// List of included paths/files
-    pub includes_files: IncludesFiles,
+    pub includes: Includes,
 
     /// Files not recognized by Biome should not emit a diagnostic
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
 }
 
+/// An optional list of globs with exceptions that first normalizes the tested paths before matching them against the globs.
 #[derive(Clone, Default, Debug)]
-pub struct IncludesFiles {
+pub struct Includes {
+    /// This path is used to normalize the tested paths against [Self::globs].
     working_directory: Option<Utf8PathBuf>,
-    includes_files: Option<Box<[biome_glob::Glob]>>,
+    /// If `None`, then all files are included
+    /// Otherwise this filtered out all files that doesn't match.
+    globs: Option<Box<[biome_glob::Glob]>>,
 }
 
-impl IncludesFiles {
+impl Includes {
     fn new(
         working_directory: Option<Utf8PathBuf>,
-        includes_files: Option<&[biome_glob::Glob]>,
+        globs: Option<impl Into<Box<[biome_glob::Glob]>>>,
     ) -> Self {
-        if let Some(includes_files) = includes_files {
-            Self {
-                working_directory,
-                includes_files: Some(includes_files.to_vec().into_boxed_slice()),
-            }
-        } else {
-            Self {
-                working_directory,
-                includes_files: None,
-            }
+        Self {
+            working_directory,
+            globs: globs.map(|globs| globs.into()),
         }
     }
 
-    pub fn is_empty(&self) -> bool {
-        self.includes_files.is_none()
+    /// Returns `true` is no globs are set.
+    pub fn is_unset(&self) -> bool {
+        self.globs.is_none()
     }
 
+    /// Normalize `path` and match it against the list of globs.
     pub fn matches_with_exceptions(&self, path: &Utf8Path) -> bool {
-        if let Some(includes_files) = self.includes_files.as_ref() {
-            let path = if let Some(working_directory) = &self.working_directory {
-                path.strip_prefix(working_directory).unwrap_or(path)
-            } else {
-                path
-            };
-            let candidate_path = biome_glob::CandidatePath::new(path);
-            candidate_path.matches_with_exceptions(includes_files)
+        let Some(globs) = self.globs.as_ref() else {
+            return true;
+        };
+        let path = if let Some(working_directory) = &self.working_directory {
+            path.strip_prefix(working_directory).unwrap_or(path)
         } else {
-            true
-        }
+            path
+        };
+        let candidate_path = biome_glob::CandidatePath::new(path);
+        candidate_path.matches_with_exceptions(globs)
     }
 
+    /// Normalize `path` and match it against the list of globs.
     pub fn matches_directory_with_exceptions(&self, path: &Utf8Path) -> bool {
-        if let Some(includes_files) = self.includes_files.as_ref() {
-            let path = if let Some(working_directory) = &self.working_directory {
-                path.strip_prefix(working_directory).unwrap_or(path)
-            } else {
-                path
-            };
-            let candidate_path = biome_glob::CandidatePath::new(path);
-            candidate_path.matches_directory_with_exceptions(includes_files)
+        let Some(globs) = self.globs.as_ref() else {
+            return true;
+        };
+        let path = if let Some(working_directory) = &self.working_directory {
+            path.strip_prefix(working_directory).unwrap_or(path)
         } else {
-            true
-        }
+            path
+        };
+        let candidate_path = biome_glob::CandidatePath::new(path);
+        candidate_path.matches_directory_with_exceptions(globs)
     }
 }
 
@@ -693,7 +691,7 @@ fn to_file_settings(
                 working_directory.clone(),
                 config.include.as_deref(),
             )?,
-            includes_files: IncludesFiles::new(working_directory, config.includes.as_deref()),
+            includes: Includes::new(working_directory, config.includes),
             ignore_unknown: config.ignore_unknown,
         })
     } else {
@@ -1076,7 +1074,7 @@ impl OverrideSettings {
 pub struct OverrideSettingPattern {
     exclude: Matcher,
     include: Matcher,
-    includes_files: IncludesFiles,
+    includes: Includes,
     /// Formatter settings applied to all files in the workspaces
     pub formatter: OverrideFormatSettings,
     /// Linter settings applied to all files in the workspace
@@ -1097,8 +1095,8 @@ impl OverrideSettingPattern {
             return false;
         }
         self.include.matches_path(file_path)
-            || if !self.includes_files.is_empty() {
-                self.includes_files.matches_with_exceptions(file_path)
+            || if !self.includes.is_unset() {
+                self.includes.matches_with_exceptions(file_path)
             } else {
                 false
             }
@@ -1377,10 +1375,7 @@ pub fn to_override_settings(
         languages.html = to_html_language_settings(html, &current_settings.languages.html);
 
         let pattern_setting = OverrideSettingPattern {
-            includes_files: IncludesFiles::new(
-                working_directory.clone(),
-                pattern.includes.as_deref(),
-            ),
+            includes: Includes::new(working_directory.clone(), pattern.includes),
             include: Matcher::from_globs(working_directory.clone(), pattern.include.as_deref())?,
             exclude: Matcher::from_globs(working_directory.clone(), pattern.ignore.as_deref())?,
             formatter,
@@ -1511,7 +1506,7 @@ pub fn to_format_settings(
         bracket_spacing: conf.bracket_spacing,
         ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
         included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
-        includes_files: IncludesFiles::new(working_directory, conf.includes.as_deref()),
+        includes: Includes::new(working_directory, conf.includes),
     })
 }
 
@@ -1538,7 +1533,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             format_with_errors: conf.format_with_errors,
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
-            includes_files: Default::default(),
+            includes: Default::default(),
         })
     }
 }
@@ -1552,7 +1547,7 @@ pub fn to_linter_settings(
         rules: conf.rules,
         ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
         included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
-        includes_files: IncludesFiles::new(working_directory, conf.includes.as_deref()),
+        includes: Includes::new(working_directory, conf.includes),
         domains: conf.domains,
     })
 }
@@ -1566,7 +1561,7 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
             rules: conf.rules,
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
-            includes_files: Default::default(),
+            includes: Default::default(),
             domains: conf.domains,
         })
     }
@@ -1581,7 +1576,7 @@ pub fn to_assist_settings(
         actions: conf.actions,
         ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
         included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
-        includes_files: IncludesFiles::new(working_directory, conf.includes.as_deref()),
+        includes: Includes::new(working_directory, conf.includes),
     })
 }
 
@@ -1594,7 +1589,7 @@ impl TryFrom<OverrideAssistConfiguration> for AssistSettings {
             actions: conf.actions,
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
-            includes_files: Default::default(),
+            includes: Default::default(),
         })
     }
 }

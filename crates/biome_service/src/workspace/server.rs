@@ -483,13 +483,13 @@ impl WorkspaceServer {
             return false;
         };
         let mut is_included = true;
-        if !files_settings.includes_files.is_empty() {
+        if !files_settings.includes.is_unset() {
             is_included = if is_dir(path) {
                 files_settings
-                    .includes_files
+                    .includes
                     .matches_directory_with_exceptions(path)
             } else {
-                files_settings.includes_files.matches_with_exceptions(path)
+                files_settings.includes.matches_with_exceptions(path)
             };
         }
         if !files_settings.included_files.is_empty() {
