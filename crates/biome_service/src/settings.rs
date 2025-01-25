@@ -618,19 +618,9 @@ impl IncludesFiles {
         includes_files: Option<&[biome_glob::Glob]>,
     ) -> Self {
         if let Some(includes_files) = includes_files {
-            // NOTE: when Bpaf deserialize this value, it returns `Some([])` as default value, even when
-            // there aren't any globs. This is a limitation/bug, which means that we need to treat
-            // `Some([])` as no globs provided.
-            if includes_files.is_empty() {
-                Self {
-                    working_directory,
-                    includes_files: None,
-                }
-            } else {
-                Self {
-                    working_directory,
-                    includes_files: Some(includes_files.to_vec().into_boxed_slice()),
-                }
+            Self {
+                working_directory,
+                includes_files: Some(includes_files.to_vec().into_boxed_slice()),
             }
         } else {
             Self {

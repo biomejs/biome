@@ -166,7 +166,7 @@ pub struct OverrideLinterConfiguration {
 
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(pure(Rules::default()), hide)]
+    #[bpaf(pure(Default::default()), hide)]
     pub rules: Option<Rules>,
 
     /// List of rules
