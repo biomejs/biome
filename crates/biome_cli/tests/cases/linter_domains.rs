@@ -129,7 +129,7 @@ fn enable_test_rules_via_overrides() {
         }
     },
     "overrides": [{
-        "include": ["test1.js"],
+        "includes": ["test1.js"],
         "linter": {
             "domains": {
                 "test": "all"

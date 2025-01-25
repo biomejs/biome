@@ -22,6 +22,7 @@ biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true, features = ["serde_ini", "oxc_resolver"] }
 biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true, features = ["serde"] }
+biome_glob               = { workspace = true }
 biome_graphql_analyze    = { workspace = true }
 biome_graphql_syntax     = { workspace = true }
 biome_html_formatter     = { workspace = true, features = ["serde"] }

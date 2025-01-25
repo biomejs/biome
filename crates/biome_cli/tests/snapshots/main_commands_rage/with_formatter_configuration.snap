@@ -11,7 +11,7 @@ snapshot_kind: text
     "attributePosition": "multiline",
     "enabled": true,
     "formatWithErrors": true,
-    "include": [
+    "includes": [
       "**/*.html",
       "**/*.css",
       "**/*.js",
@@ -19,13 +19,13 @@ snapshot_kind: text
       "**/*.tsx",
       "**/*.jsx",
       "**/*.json",
-      "**/*.md"
+      "**/*.md",
+      "!configuration-schema.json"
     ],
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
-    "lineWidth": 120,
-    "ignore": ["configuration-schema.json"]
+    "lineWidth": 120
   },
   "javascript": {
     "formatter": {
@@ -86,8 +86,9 @@ Formatter:
   Line width:                   120
   Attribute position:           Multiline
   Bracket spacing:              unset
-  Ignore:                       configuration-schema.json
-  Include:                      **/*.html, **/*.css, **/*.js, **/*.ts, **/*.tsx, **/*.jsx, **/*.json, **/*.md
+  Ignore:                       unset
+  Include:                      unset
+  Includes:                     **/*.html, **/*.css, **/*.js, **/*.ts, **/*.tsx, **/*.jsx, **/*.json, **/*.md, !configuration-schema.json
 
 JavaScript Formatter:
   Enabled:                      true

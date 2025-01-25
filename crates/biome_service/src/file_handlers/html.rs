@@ -153,15 +153,9 @@ impl ServiceLanguage for HtmlLanguage {
                                 pattern.languages.html.formatter.enabled,
                                 pattern.formatter.enabled,
                             )
-                            .and_then(|enabled| {
+                            .filter(|_| {
                                 // Then check whether the path satisfies
-                                if pattern.include.matches_path(path)
-                                    && !pattern.exclude.matches_path(path)
-                                {
-                                    Some(enabled)
-                                } else {
-                                    None
-                                }
+                                pattern.is_file_included(path)
                             })
                         });
 

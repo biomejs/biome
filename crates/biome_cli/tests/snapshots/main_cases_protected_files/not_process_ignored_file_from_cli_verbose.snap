@@ -1,11 +1,12 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `biome.json`
 
 ```json
-{ "files": { "ignore": ["package.json"] } }
+{ "files": { "includes": ["**", "!package.json"] } }
 ```
 
 ## `other.json`

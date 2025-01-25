@@ -1861,7 +1861,7 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
     },
     "overrides": [
         {
-            "include": ["*.ts", "*.tsx"],
+            "includes": ["**/*.ts", "**/*.tsx"],
             "linter": {
                 "rules": {
                     "style": {
@@ -2366,7 +2366,7 @@ async fn does_not_format_ignored_files() -> Result<()> {
     let mut fs = MemoryFileSystem::default();
     let config = r#"{
         "files": {
-            "ignore": ["document.js"]
+            "includes": ["**", "!**/document.js"]
         }
     }"#;
 

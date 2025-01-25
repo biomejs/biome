@@ -27,6 +27,7 @@ biome_deserialize       = { workspace = true }
 biome_diagnostics       = { workspace = true, features = ["camino"] }
 biome_formatter         = { workspace = true, features = ["serde"] }
 biome_fs                = { workspace = true, features = ["serde"] }
+biome_glob              = { workspace = true }
 biome_graphql_analyze   = { workspace = true }
 biome_graphql_formatter = { workspace = true }
 biome_graphql_parser    = { workspace = true }

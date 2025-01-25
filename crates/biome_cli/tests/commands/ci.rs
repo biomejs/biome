@@ -845,16 +845,16 @@ fn correctly_handles_ignored_and_not_ignored_files() {
     fs.insert(
         configuration.into(),
         r#"{
-        "linter": {
-                "ignore": ["/linter-ignored/**"]
-        },
-        "formatter": {
-                "ignore": ["/formatter-ignored/**"]
-        },
-        "files": {
-                "ignore": ["/globally-ignored/**"]
-        }
-    }"#,
+            "linter": {
+                "includes": ["**", "!/linter-ignored/**"]
+            },
+            "formatter": {
+                "includes": ["**", "!/formatter-ignored/**"]
+            },
+            "files": {
+                "includes": ["**", "!/globally-ignored/**"]
+            }
+        }"#,
     );
 
     let file_path1 = Utf8Path::new("/formatter-ignored/test.js");

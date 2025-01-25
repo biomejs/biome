@@ -487,10 +487,20 @@ impl WorkspaceServer {
         let Some(files_settings) = self.projects.get_files_settings(project_key) else {
             return false;
         };
-
-        let is_included = files_settings.included_files.is_empty()
-            || is_dir(path)
-            || files_settings.included_files.matches_path(path);
+        let mut is_included = true;
+        if !files_settings.includes.is_unset() {
+            is_included = if is_dir(path) {
+                files_settings
+                    .includes
+                    .matches_directory_with_exceptions(path)
+            } else {
+                files_settings.includes.matches_with_exceptions(path)
+            };
+        }
+        if !files_settings.included_files.is_empty() {
+            is_included =
+                is_included && (is_dir(path) || files_settings.included_files.matches_path(path))
+        };
 
         !is_included
             || files_settings.ignored_files.matches_path(path)

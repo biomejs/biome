@@ -202,7 +202,7 @@ fn with_formatter_configuration() {
     "attributePosition": "multiline",
     "enabled": true,
     "formatWithErrors": true,
-    "include": [
+    "includes": [
       "**/*.html",
       "**/*.css",
       "**/*.js",
@@ -210,13 +210,13 @@ fn with_formatter_configuration() {
       "**/*.tsx",
       "**/*.jsx",
       "**/*.json",
-      "**/*.md"
+      "**/*.md",
+      "!configuration-schema.json"
     ],
     "indentStyle": "space",
     "indentWidth": 2,
     "lineEnding": "lf",
-    "lineWidth": 120,
-    "ignore": ["configuration-schema.json"]
+    "lineWidth": 120
   },
   "javascript": {
     "formatter": {

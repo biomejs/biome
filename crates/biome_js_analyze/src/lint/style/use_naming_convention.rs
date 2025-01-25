@@ -307,7 +307,7 @@ declare_lint_rule! {
     ///       // ...
     ///       "overrides": [
     ///         {
-    ///           "include": ["typings/*.d.ts"],
+    ///           "includes": ["typings/*.d.ts"],
     ///           "linter": {
     ///             "rules": {
     ///               "style": {

@@ -19,9 +19,9 @@ fn does_handle_included_file_and_disable_organize_imports() {
         file_path.into(),
         r#"{
   "files": {
-    "include": ["test.js", "special/**"]
+    "includes": ["test.js", "special/**"]
   },
-  "overrides": [{ "include": ["special/**"], "assist": { "enabled": false } }]
+  "overrides": [{ "includes": ["special/**"], "assist": { "enabled": false } }]
 }
 
 "#

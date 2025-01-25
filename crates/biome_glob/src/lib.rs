@@ -255,7 +255,7 @@ impl biome_deserialize::Deserializable for Glob {
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for Glob {
     fn schema_name() -> String {
-        "Regex".to_string()
+        "Glob".to_string()
     }
 
     fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
@@ -272,7 +272,7 @@ impl schemars::JsonSchema for Glob {
 pub struct CandidatePath<'a>(globset::Candidate<'a>);
 impl<'a> CandidatePath<'a> {
     /// Create a new candidate for matching from the given path.
-    pub fn new(path: &'a impl AsRef<std::path::Path>) -> Self {
+    pub fn new<P: AsRef<std::path::Path> + ?Sized>(path: &'a P) -> Self {
         Self(globset::Candidate::new(path))
     }
 

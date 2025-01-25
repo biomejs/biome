@@ -34,15 +34,20 @@ impl FromStr for Overrides {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverridePattern {
-    /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
+    /// A list of Unix shell style patterns. Biome will ignore files/folders that will
     /// match these patterns.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore: Option<Vec<Box<str>>>,
 
-    /// A list of Unix shell style patterns. The formatter will include files/folders that will
+    /// A list of Unix shell style patterns. Biome will include files/folders that will
     /// match these patterns.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub include: Option<Vec<Box<str>>>,
+
+    /// A list of glob patterns. Biome will include files/folders that will
+    /// match these patterns.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub includes: Option<Vec<biome_glob::Glob>>,
 
     /// Specific configuration for the JavaScript language
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -161,7 +166,7 @@ pub struct OverrideLinterConfiguration {
 
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(pure(Rules::default()), hide)]
+    #[bpaf(pure(Default::default()), hide)]
     pub rules: Option<Rules>,
 
     /// List of rules

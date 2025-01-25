@@ -23,9 +23,9 @@ fn does_handle_included_file_and_disable_linter() {
         file_path.into(),
         r#"{
   "files": {
-    "include": ["test.js", "special/**"]
+    "includes": ["test.js", "special/**"]
   },
-  "overrides": [{ "include": ["special/**"], "linter": { "enabled": false } }]
+  "overrides": [{ "includes": ["special/**"], "linter": { "enabled": false } }]
 }
 
 "#
@@ -66,7 +66,7 @@ fn does_include_file_with_different_rules() {
     fs.insert(
         file_path.into(),
         r#"{
-  "overrides": [{ "include": ["special/**"], "linter": { "rules": {
+  "overrides": [{ "includes": ["special/**"], "linter": { "rules": {
     "suspicious": { "noDebugger": "off" }
   } } }]
 }
@@ -111,7 +111,7 @@ fn does_include_file_with_different_linting_and_applies_all_of_them() {
         r#"{
     "overrides": [
         {
-            "include": [
+            "includes": [
                 "special/**"
             ],
             "linter": {
@@ -123,7 +123,7 @@ fn does_include_file_with_different_linting_and_applies_all_of_them() {
             }
         },
         {
-            "include": [
+            "includes": [
                 "special/**"
             ],
             "linter": {
@@ -177,7 +177,7 @@ fn does_include_file_with_different_overrides() {
         r#"{
     "overrides": [
         {
-            "include": [
+            "includes": [
                 "test.js"
             ],
             "linter": {
@@ -189,7 +189,7 @@ fn does_include_file_with_different_overrides() {
             }
         },
         {
-            "include": [
+            "includes": [
                 "test2.js"
             ],
             "linter": {
@@ -243,7 +243,7 @@ fn does_override_the_rules() {
         r#"{
     "overrides": [
         {
-            "include": [
+            "includes": [
                 "test.js"
             ],
             "linter": {
@@ -303,7 +303,7 @@ fn does_not_change_linting_settings() {
                 }
             },
   "overrides": [
-    { "include": ["test.js"], "formatter": { "enabled": false } }
+    { "includes": ["test.js"], "formatter": { "enabled": false } }
   ]
 }
 
@@ -352,7 +352,7 @@ fn does_override_recommended() {
             },
             "overrides": [
                 {
-                    "include": ["test.js"],
+                    "includes": ["test.js"],
                     "linter": {
                         "rules": {
                             "recommended": false
@@ -406,7 +406,7 @@ fn does_override_groupe_recommended() {
             },
             "overrides": [
                 {
-                    "include": ["test.js"],
+                    "includes": ["test.js"],
                     "linter": {
                         "rules": {
                             "suspicious": {
@@ -462,7 +462,7 @@ fn does_preserve_group_recommended_when_override_global_recommened() {
             },
             "overrides": [
                 {
-                    "include": ["test.js"],
+                    "includes": ["test.js"],
                     "linter": {
                         "rules": {
                             "recommended": true
@@ -516,7 +516,7 @@ fn does_preserve_individually_diabled_rules_in_overrides() {
             },
             "overrides": [
                 {
-                    "include": ["test.js"],
+                    "includes": ["test.js"],
                     "linter": {
                         "rules": {
                             "suspicious": {}
@@ -570,7 +570,7 @@ fn does_merge_all_overrides() {
             },
             "overrides": [
                 {
-                    "include": ["*.js"],
+                    "includes": ["*.js"],
                     "linter": {
                         "rules": {
                             "suspicious": {
@@ -579,7 +579,7 @@ fn does_merge_all_overrides() {
                         }
                     }
                 }, {
-                    "include": ["test.js"],
+                    "includes": ["test.js"],
                     "linter": {
                         "rules": {
                             "suspicious": {
@@ -588,7 +588,7 @@ fn does_merge_all_overrides() {
                         }
                     }
                 }, {
-                    "include": ["test3.js"]
+                    "includes": ["test3.js"]
                 }
             ]
         }"#
@@ -631,10 +631,10 @@ fn does_not_conceal_overrides_globals() {
             },
             "overrides": [
                 {
-                    "include": ["*.js"],
+                    "includes": ["*.js"],
                     "javascript": { "globals": ["GLOBAL_VAR"] }
                 }, {
-                    "include": ["*.js"]
+                    "includes": ["*.js"]
                 }
             ]
         }"#
@@ -672,10 +672,10 @@ fn takes_last_linter_enabled_into_account() {
             },
             "overrides": [
                 {
-                    "include": ["*.js"],
+                    "includes": ["*.js"],
                     "linter": { "enabled": false }
                 }, {
-                    "include": ["*.js"],
+                    "includes": ["*.js"],
                     "linter": { "enabled": true }
                 }
             ]

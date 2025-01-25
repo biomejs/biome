@@ -37,9 +37,9 @@ fn does_handle_included_file_and_disable_formatter() {
         file_path.into(),
         r#"{
   "files": {
-    "include": ["test.js", "special/**"]
+    "includes": ["test.js", "special/**"]
   },
-  "overrides": [{ "include": ["special/**"], "formatter": { "enabled": false } }]
+  "overrides": [{ "includes": ["special/**"], "formatter": { "enabled": false } }]
 }
 
 "#
@@ -80,7 +80,7 @@ fn does_include_file_with_different_formatting() {
     fs.insert(
         file_path.into(),
         r#"{
-  "overrides": [{ "include": ["special/**"], "formatter": { "lineWidth": 20 } }]
+  "overrides": [{ "includes": ["special/**"], "formatter": { "lineWidth": 20 } }]
 }
 
 "#
@@ -122,8 +122,8 @@ fn does_include_file_with_different_formatting_and_all_of_them() {
         file_path.into(),
         r#"{
   "overrides": [
-    { "include": ["special/**"], "formatter": { "lineWidth": 130 } },
-    { "include": ["special/**"], "formatter": { "lineWidth": 20 } }
+    { "includes": ["special/**"], "formatter": { "lineWidth": 130 } },
+    { "includes": ["special/**"], "formatter": { "lineWidth": 20 } }
    ]
 }
 
@@ -166,8 +166,8 @@ fn does_include_file_with_different_overrides() {
         file_path.into(),
         r#"{
   "overrides": [
-    { "include": ["test.js"], "formatter": { "lineWidth": 20 } },
-    { "include": ["test2.js"], "formatter": { "lineWidth": 20, "indentStyle": "space" } }
+    { "includes": ["test.js"], "formatter": { "lineWidth": 20 } },
+    { "includes": ["test2.js"], "formatter": { "lineWidth": 20, "indentStyle": "space" } }
    ]
 }
 
@@ -219,9 +219,9 @@ fn complex_enable_disable_overrides() {
     }
   },
   "overrides": [
-    { "include": ["formatted.js"], "formatter": { "enabled": true } },
+    { "includes": ["formatted.js"], "formatter": { "enabled": true } },
     {
-      "include": ["dirty.js"],
+      "includes": ["dirty.js"],
       "linter": {
         "rules": {
           "performance": {
@@ -278,9 +278,9 @@ fn does_include_file_with_different_languages() {
         file_path.into(),
         r#"{
   "overrides": [
-    { "include": ["test.js"], "formatter": { "lineWidth": 120 }, "javascript": { "formatter": { "quoteStyle": "single" } } },
-    { "include": ["test2.js"], "formatter": { "lineWidth": 120, "indentStyle": "space" }, "javascript": { "formatter": { "semicolons": "asNeeded" } } },
-    { "include": ["test.css"], "formatter": { "lineWidth": 120, "indentStyle": "space" }, "css": { "formatter": { "quoteStyle": "single" } } }
+    { "includes": ["test.js"], "formatter": { "lineWidth": 120 }, "javascript": { "formatter": { "quoteStyle": "single" } } },
+    { "includes": ["test2.js"], "formatter": { "lineWidth": 120, "indentStyle": "space" }, "javascript": { "formatter": { "semicolons": "asNeeded" } } },
+    { "includes": ["test.css"], "formatter": { "lineWidth": 120, "indentStyle": "space" }, "css": { "formatter": { "quoteStyle": "single" } } }
    ]
 }
 "#
@@ -335,15 +335,15 @@ fn does_include_file_with_different_languages_and_files() {
         file_path.into(),
         r#"{
   "overrides": [
-    { "include": ["test.js"], "formatter": { "lineWidth": 120 }, "javascript": { "formatter": { "quoteStyle": "single" } } },
+    { "includes": ["test.js"], "formatter": { "lineWidth": 120 }, "javascript": { "formatter": { "quoteStyle": "single" } } },
     {
-        "include": ["test2.js"],
+        "includes": ["test2.js"],
         "formatter": { "lineWidth": 120, "indentStyle": "space" },
         "javascript": { "formatter": { "semicolons": "asNeeded" } },
         "json": { "formatter": { "indentStyle": "space", "lineWidth": 20, "indentWidth": 4 } }
     },
     {
-        "include": ["test3.json"],
+        "includes": ["test3.json"],
         "formatter": { "lineWidth": 120, "indentStyle": "space" },
         "json": { "formatter": { "indentStyle": "space", "lineWidth": 20, "indentWidth": 4 } }
     }
@@ -408,7 +408,7 @@ fn does_not_change_formatting_settings() {
         r#"{
         "formatter": { "lineWidth": 20, "indentStyle": "space" },
   "overrides": [
-    { "include": ["test.js"], "linter": { "enabled": false } }
+    { "includes": ["test.js"], "linter": { "enabled": false } }
   ]
 }
 
@@ -452,7 +452,7 @@ fn does_not_change_formatting_language_settings() {
         r#"{
         "javascript": { "formatter": { "quoteStyle": "single" } },
   "overrides": [
-    { "include": ["test.js"], "linter": { "enabled": false } }
+    { "includes": ["test.js"], "linter": { "enabled": false } }
   ]
 }
 
@@ -496,7 +496,7 @@ fn does_not_change_formatting_language_settings_2() {
         r#"{
     "javascript": { "formatter": { "lineWidth": 20 } },
   "overrides": [
-    { "include": ["test.js"], "linter": { "enabled": false } }
+    { "includes": ["test.js"], "linter": { "enabled": false } }
   ]
 }
 
@@ -540,8 +540,8 @@ fn does_not_conceal_previous_overrides() {
         r#"{
   "javascript": { "formatter": { "quoteStyle": "single" } },
   "overrides": [
-    { "include": ["*.js"], "javascript": { "formatter": { "quoteStyle": "double" } } },
-    { "include": ["test.js"], "javascript": { "formatter": { "indentWidth": 4 } } }
+    { "includes": ["*.js"], "javascript": { "formatter": { "quoteStyle": "double" } } },
+    { "includes": ["test.js"], "javascript": { "formatter": { "indentWidth": 4 } } }
   ]
 }"#
         .as_bytes(),
@@ -578,10 +578,10 @@ fn takes_last_formatter_enabled_into_account() {
         r#"{
             "overrides": [
                 {
-                    "include": ["*.js"],
+                    "includes": ["*.js"],
                     "formatter": { "enabled": false }
                 }, {
-                    "include": ["*.js"],
+                    "includes": ["*.js"],
                     "formatter": { "enabled": true }
                 }
             ]
@@ -617,7 +617,7 @@ fn does_not_override_well_known_special_files_when_config_override_is_present() 
         r#"{
             "overrides": [
                 {
-                    "include": [
+                    "includes": [
                         "**/*.json"
                     ],
                     "formatter": { "enabled": false }
@@ -673,7 +673,7 @@ fn allow_trailing_commas_on_well_known_files() {
             },
             "overrides": [
                 {
-                    "include": [
+                    "includes": [
                         "**/*.json"
                     ],
                     "json": { "parser": { "allowTrailingCommas": true } }
@@ -741,7 +741,7 @@ fn disallow_comments_on_well_known_files() {
             },
             "overrides": [
                 {
-                    "include": [
+                    "includes": [
                         "**/*.json"
                     ],
                     "json": { "parser": { "allowComments": false } }
@@ -785,7 +785,7 @@ fn overrides_default_formatter_for_package_json() {
         r#"{
             "overrides": [
                 {
-                    "include": ["package.json"],
+                    "includes": ["package.json"],
                     "json": { "formatter": { "expand": "followSource" } }
                 }
             ]
@@ -825,7 +825,7 @@ fn overrides_grit_formatting_options() {
             },
             "overrides": [
                 {
-                    "include": [
+                    "includes": [
                         "file.grit"
                     ],
                     "grit": { "formatter": { "indentStyle": "space", "indentWidth": 8 }  }

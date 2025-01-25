@@ -1,16 +1,12 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `biome.json`
 
 ```json
-{
-  "formatter": {
-    "enabled": true,
-    "ignore": ["test.js"]
-  }
-}
+{ "formatter": { "includes": ["**/*.js", "!test.js"] } }
 ```
 
 ## `test.js`

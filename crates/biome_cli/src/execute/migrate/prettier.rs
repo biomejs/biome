@@ -208,6 +208,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             format_with_errors: Some(false.into()),
             ignore: None,
             include: None,
+            includes: None,
             enabled: Some(true.into()),
             // editorconfig support is intentionally set to true, because prettier always reads the editorconfig file
             // see: https://github.com/prettier/prettier/issues/15255
