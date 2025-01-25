@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+var koko = 1;
+
+```
+
+# Diagnostics
+```
+invalid.js:1:12 lint/nursery/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! No magic number: 1
+  
+  > 1 │ var koko = 1;
+      │            ^
+    2 │ 
+  
+  i Consider extracting this magic number into a named constant.
+  
+
+```
