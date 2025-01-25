@@ -35,8 +35,6 @@ impl ConfigName {
     }
 }
 
-type AutoSearchResultAlias = Result<Option<AutoSearchResult>, FileSystemDiagnostic>;
-
 /// Represents the kind of filesystem entry a path points at.
 #[derive(Clone, Copy, Debug)]
 pub enum PathKind {
@@ -117,74 +115,47 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// Returns metadata about the path.
     fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic>;
 
-    /// This method accepts a directory path (`search_dir`) and a list of filenames (`file_names`),
-    /// It looks for the files in the specified directory in the order they appear in the list.
-    /// If a file is not found in the initial directory, the search may continue into the parent
-    /// directories based on the `should_error_if_file_not_found` flag.
+    /// This method accepts a directory path (`search_dir`) and a file name `search_file`,
     ///
-    /// Behavior if files are not found in `search_dir`:
+    /// It looks for `search_file` starting from the given `search_dir`, and then it starts
+    /// navigating upwards the parent directories until it finds a file that matches `search_file` or
+    /// there aren't any more parent folders.
     ///
-    /// - If `should_error_if_file_not_found` is set to `true`, the method will return an error.
-    /// - If `should_error_if_file_not_found` is set to `false`, the method will search for the files in the parent
-    ///   directories of `search_dir` recursively until:
-    ///     - It finds a file, reads it, and returns its contents along with its path.
-    ///     - It confirms that the file doesn't exist in any of the checked directories.
-    ///
-    /// ## Errors
-    ///
-    /// The method returns an error if `should_error_if_file_not_found` is `true`,
-    /// and the file is not found or cannot be opened or read.
-    ///
-    fn auto_search(
+    /// If no file is found, the method returns `None`
+    fn auto_search_file(
         &self,
         search_dir: &Utf8Path,
-        file_names: &[&str],
-        should_error_if_file_not_found: bool,
-    ) -> AutoSearchResultAlias {
-        let mut curret_search_dir = search_dir.to_path_buf();
+        search_file: &str,
+    ) -> Option<AutoSearchResult> {
+        let mut current_search_dir = search_dir.to_path_buf();
         let mut is_searching_in_parent_dir = false;
+
         loop {
-            let mut errors: Vec<FileSystemDiagnostic> = vec![];
-
-            // Iterate all possible file names
-            for file_name in file_names {
-                let file_path = curret_search_dir.join(file_name);
-                match self.read_file_from_path(&file_path) {
-                    Ok(content) => {
-                        if is_searching_in_parent_dir {
-                            info!(
+            let file_path = current_search_dir.join(search_file);
+            match self.read_file_from_path(&file_path) {
+                Ok(content) => {
+                    if is_searching_in_parent_dir {
+                        info!(
                                 "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
-                                curret_search_dir
+                                current_search_dir
                             );
-                        }
-                        return Ok(Some(AutoSearchResult { content, file_path }));
                     }
-                    Err(error) => {
-                        // We don't return the error immediately because
-                        // there're multiple valid file names to search for
-                        if !is_searching_in_parent_dir && should_error_if_file_not_found {
-                            errors.push(error);
-                        }
+                    return Some(AutoSearchResult {
+                        content,
+                        file_path,
+                        directory_path: current_search_dir,
+                    });
+                }
+                _ => {
+                    if let Some(parent_search_dir) = current_search_dir.parent() {
+                        current_search_dir = Utf8PathBuf::from(parent_search_dir);
+                        is_searching_in_parent_dir = true;
+                    } else {
+                        return None;
                     }
                 }
-            }
-
-            if !is_searching_in_parent_dir && should_error_if_file_not_found {
-                if let Some(diagnostic) = errors.into_iter().next() {
-                    // We can only return one Err, so we return the first diagnostic.
-                    return Err(diagnostic);
-                }
-            }
-
-            if let Some(parent_search_dir) = curret_search_dir.parent() {
-                curret_search_dir = Utf8PathBuf::from(parent_search_dir);
-                is_searching_in_parent_dir = true;
-            } else {
-                break;
             }
         }
-
-        Ok(None)
     }
 
     /// Reads the content of a file specified by `file_path`.
@@ -251,6 +222,8 @@ pub struct AutoSearchResult {
     pub content: String,
     /// The path of the file found
     pub file_path: Utf8PathBuf,
+    /// The directory where the file was found
+    pub directory_path: Utf8PathBuf,
 }
 
 pub trait File {

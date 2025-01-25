@@ -35,6 +35,8 @@ pub enum BiomeDiagnostic {
     /// Thrown when the program can't serialize the configuration, while saving it
     SerializationError(SerializationError),
 
+    NoConfigurationFileFound(NoConfigurationFileFound),
+
     /// Thrown when trying to **create** a new configuration file, but it exists already
     ConfigAlreadyExists(ConfigAlreadyExists),
 
@@ -121,6 +123,12 @@ impl BiomeDiagnostic {
         })
     }
 
+    pub fn no_configuration_file_found(path: &Utf8Path) -> Self {
+        Self::NoConfigurationFileFound(NoConfigurationFileFound {
+            path: path.to_string(),
+        })
+    }
+
     pub fn cant_resolve(path: impl Display, source: oxc_resolver::ResolveError) -> Self {
         Self::CantResolve(CantResolve {
             message: MessageAndDescription::from(
@@ -176,6 +184,20 @@ pub struct SerializationError;
     severity = Error
 )]
 pub struct ConfigAlreadyExists {}
+
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "configuration",
+    severity = Error,
+    message(
+        message("Biome couldn't find a configuration in the directory "<Emphasis>{self.path}</Emphasis>"."),
+        description = "Biome couldn't find a configuration in the directory {path}."
+    )
+)]
+pub struct NoConfigurationFileFound {
+    #[location(resource)]
+    path: String,
+}
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(

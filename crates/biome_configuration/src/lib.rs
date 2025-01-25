@@ -358,6 +358,7 @@ pub struct FilesConfiguration {
     pub include: Option<Vec<Box<str>>>,
 }
 
+#[derive(Debug)]
 pub struct ConfigurationPayload {
     /// The result of the deserialization
     pub deserialized: Deserialized<Configuration>,
@@ -365,6 +366,8 @@ pub struct ConfigurationPayload {
     pub configuration_file_path: Utf8PathBuf,
     /// The base path where the external configuration in a package should be resolved from
     pub external_resolution_base_path: Utf8PathBuf,
+    /// Whether `biome.json` and `biome.jsonc` were found in the same folder
+    pub double_configuration_found: bool,
 }
 
 #[derive(Debug, Default, PartialEq, Clone)]
