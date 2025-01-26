@@ -1,0 +1,6 @@
+{
+  "$schema": "/Users/user/rust/biome/packages/@biomejs/biome/configuration_schema.json",
+  "formatter": {
+    "attributePosition": "multiline"
+  }
+}
