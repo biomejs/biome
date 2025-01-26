@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
+info: attributes/multiline/no-break.html
+---
+# Input
+
+```html
+<div foo="bar"></div>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Multiline
+-----
+
+```html
+<div foo="bar"></div>
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+-----
+
+```html
+<div foo="bar"></div>
+```
