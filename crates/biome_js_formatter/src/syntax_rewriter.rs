@@ -228,7 +228,7 @@ impl JsFormatSyntaxRewriter {
 
                 let l_paren_trailing_non_whitespace_trivia = l_paren_trailing
                     .peek()
-                    .map_or(false, |piece| piece.is_skipped() || piece.is_comments());
+                    .is_some_and(|piece| piece.is_skipped() || piece.is_comments());
 
                 let l_paren_trivia =
                     chain_trivia_pieces(l_paren.leading_trivia().pieces(), l_paren_trailing);

@@ -182,7 +182,7 @@ where
             name.as_css_identifier()
                 .map(|name| name.to_trimmed_string())
         })
-        .map_or(false, |name| {
+        .is_some_and(|name| {
             let name = name.to_ascii_lowercase_cow();
 
             name.starts_with("grid-template") || name == "grid"

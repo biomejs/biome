@@ -95,7 +95,7 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// [Self::path_is_symlink()] and this method to return `true` for the same
     /// path.
     fn path_is_file(&self, path: &Utf8Path) -> bool {
-        Self::path_kind(self, path).map_or(false, |kind| matches!(kind, PathKind::File { .. }))
+        Self::path_kind(self, path).is_ok_and(|kind| matches!(kind, PathKind::File { .. }))
     }
 
     /// Checks if the given path is a directory
@@ -104,12 +104,12 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// [Self::path_is_symlink()] and this method to return `true` for the same
     /// path.
     fn path_is_dir(&self, path: &Utf8Path) -> bool {
-        Self::path_kind(self, path).map_or(false, |kind| matches!(kind, PathKind::Directory { .. }))
+        Self::path_kind(self, path).is_ok_and(|kind| matches!(kind, PathKind::Directory { .. }))
     }
 
     /// Checks if the given path is a symlink
     fn path_is_symlink(&self, path: &Utf8Path) -> bool {
-        Self::path_kind(self, path).map_or(false, PathKind::is_symlink)
+        Self::path_kind(self, path).is_ok_and(PathKind::is_symlink)
     }
 
     /// Returns metadata about the path.
