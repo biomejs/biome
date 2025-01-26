@@ -46,3 +46,10 @@ const returnsPromiseAssignedArrowFunctionAnnotatedType: () => Promise<string> = 
 };
 
 returnsPromiseAssignedArrowFunctionAnnotatedType();
+
+
+const promise = new Promise((resolve) => resolve('value'));
+promise.then(() => { }).finally(() => { });
+
+Promise.resolve('value').then(() => { })
+Promise.all([p1, p2, p3])

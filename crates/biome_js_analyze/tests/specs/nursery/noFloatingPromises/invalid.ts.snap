@@ -52,6 +52,13 @@ const returnsPromiseAssignedArrowFunctionAnnotatedType: () => Promise<string> = 
 };
 
 returnsPromiseAssignedArrowFunctionAnnotatedType();
+
+
+const promise = new Promise((resolve) => resolve('value'));
+promise.then(() => { }).finally(() => { });
+
+Promise.resolve('value').then(() => { })
+Promise.all([p1, p2, p3])
 ```
 
 # Diagnostics
@@ -210,6 +217,53 @@ invalid.ts:48:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
     47 │ 
   > 48 │ returnsPromiseAssignedArrowFunctionAnnotatedType();
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:52:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    51 │ const promise = new Promise((resolve) => resolve('value'));
+  > 52 │ promise.then(() => { }).finally(() => { });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ 
+    54 │ Promise.resolve('value').then(() => { })
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:54:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    52 │ promise.then(() => { }).finally(() => { });
+    53 │ 
+  > 54 │ Promise.resolve('value').then(() => { })
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ Promise.all([p1, p2, p3])
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:55:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    54 │ Promise.resolve('value').then(() => { })
+  > 55 │ Promise.all([p1, p2, p3])
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
