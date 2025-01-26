@@ -21,6 +21,7 @@ pub(crate) struct CompilationContext<'a> {
     pub function_definition_info: BTreeMap<String, DefinitionInfo>,
 }
 
+#[expect(clippy::needless_lifetimes)]
 impl<'a> CompilationContext<'a> {
     #[cfg(test)]
     pub(crate) fn new(
