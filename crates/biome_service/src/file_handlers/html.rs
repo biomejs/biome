@@ -1,5 +1,5 @@
 use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions};
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, AttributePosition, Printed};
 use biome_fs::BiomePath;
 use biome_html_formatter::{format_node, HtmlFormatOptions};
 use biome_html_parser::parse_html_with_cache;
@@ -25,6 +25,7 @@ pub struct HtmlFormatterSettings {
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
+    pub attribute_position: Option<AttributePosition>,
     pub enabled: Option<bool>,
 }
 
@@ -36,6 +37,7 @@ impl Default for HtmlFormatterSettings {
             indent_width: Default::default(),
             line_ending: Default::default(),
             line_width: Default::default(),
+            attribute_position: Default::default(),
         }
     }
 }
@@ -79,11 +81,17 @@ impl ServiceLanguage for HtmlLanguage {
             .or(global.and_then(|g| g.line_ending))
             .unwrap_or_default();
 
+        let attribute_position = language
+            .and_then(|l| l.attribute_position)
+            .or(global.and_then(|g| g.attribute_position))
+            .unwrap_or_default();
+
         let options = HtmlFormatOptions::new(file_source.to_html_file_source().unwrap_or_default())
             .with_indent_style(indent_style)
             .with_indent_width(indent_width)
             .with_line_width(line_width)
-            .with_line_ending(line_ending);
+            .with_line_ending(line_ending)
+            .with_attribute_position(attribute_position);
         if let Some(overrides) = overrides {
             overrides.to_override_html_format_options(path, options)
         } else {
