@@ -22,15 +22,11 @@ Indent style: Tab
 Indent width: 2
 Line ending: LF
 Line width: 80
-Attribute Position: Multiline
+Attribute Position: Auto
 -----
 
 ```html
-<div
-	foo="bar"
-	disabled
-	id="foo"
-></div>
+<div foo="bar" disabled id="foo"></div>
 ```
 
 ## Output 1
@@ -40,9 +36,13 @@ Indent style: Tab
 Indent width: 2
 Line ending: LF
 Line width: 80
-Attribute Position: Auto
+Attribute Position: Multiline
 -----
 
 ```html
-<div foo="bar" disabled id="foo"></div>
+<div
+	foo="bar"
+	disabled
+	id="foo"
+></div>
 ```
