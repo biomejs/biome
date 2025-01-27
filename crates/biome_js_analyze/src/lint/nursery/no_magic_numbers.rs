@@ -51,7 +51,6 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-magic-numbers")],
         recommended: false,
-        fix_kind: FixKind::None,
     }
 }
 
