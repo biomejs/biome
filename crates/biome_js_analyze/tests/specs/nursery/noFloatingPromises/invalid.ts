@@ -53,3 +53,8 @@ promise.then(() => { }).finally(() => { });
 
 Promise.resolve('value').then(() => { })
 Promise.all([p1, p2, p3])
+
+
+const promiseWithParentheses = (new Promise((resolve, reject) => resolve('value')));
+promiseWithParentheses;
+(returnsPromise());

@@ -59,6 +59,11 @@ promise.then(() => { }).finally(() => { });
 
 Promise.resolve('value').then(() => { })
 Promise.all([p1, p2, p3])
+
+
+const promiseWithParentheses = (new Promise((resolve, reject) => resolve('value')));
+promiseWithParentheses;
+(returnsPromise());
 ```
 
 # Diagnostics
@@ -250,6 +255,7 @@ invalid.ts:54:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   > 54 │ Promise.resolve('value').then(() => { })
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     55 │ Promise.all([p1, p2, p3])
+    56 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -264,6 +270,37 @@ invalid.ts:55:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
     54 │ Promise.resolve('value').then(() => { })
   > 55 │ Promise.all([p1, p2, p3])
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:59:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    58 │ const promiseWithParentheses = (new Promise((resolve, reject) => resolve('value')));
+  > 59 │ promiseWithParentheses;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ (returnsPromise());
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:60:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    58 │ const promiseWithParentheses = (new Promise((resolve, reject) => resolve('value')));
+    59 │ promiseWithParentheses;
+  > 60 │ (returnsPromise());
+       │ ^^^^^^^^^^^^^^^^^^^
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

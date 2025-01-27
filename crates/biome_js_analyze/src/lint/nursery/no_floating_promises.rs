@@ -106,7 +106,7 @@ impl Rule for NoFloatingPromises {
         let node = ctx.query();
         let model = ctx.model();
         let expression = node.expression().ok()?;
-        match expression {
+        match expression.omit_parentheses() {
             AnyJsExpression::JsCallExpression(js_call_expression) => {
                 let any_js_expression = js_call_expression.callee().ok()?;
 
@@ -501,7 +501,7 @@ fn is_variable_initializer_a_promise(
 ) -> Option<bool> {
     let initializer_clause = &js_variable_declarator.initializer()?;
     let expr = initializer_clause.expression().ok()?;
-    match expr {
+    match expr.omit_parentheses() {
         AnyJsExpression::JsArrowFunctionExpression(arrow_func) => Some(
             arrow_func.async_token().is_some()
                 || is_return_type_a_promise(arrow_func.return_type_annotation())
