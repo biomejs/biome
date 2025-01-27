@@ -1291,6 +1291,10 @@ export interface Nursery {
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noMagicNumbers?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow missing var function for css variables.
 	 */
 	noMissingVarFunction?: RuleConfiguration_for_Null;
@@ -3113,6 +3117,7 @@ export type Category =
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
+	| "lint/nursery/noMagicNumbers"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noNestedTernary"

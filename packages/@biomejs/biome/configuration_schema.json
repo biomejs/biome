@@ -2302,6 +2302,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMagicNumbers": {
+					"description": "Disallows the use of magic numbers.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMissingVarFunction": {
 					"description": "Disallow missing var function for css variables.",
 					"anyOf": [
