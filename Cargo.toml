@@ -184,7 +184,7 @@ getrandom          = "0.2.15"
 globset            = "0.4.15"
 ignore             = "0.4.23"
 indexmap           = { version = "2.7.1", features = ["serde"] }
-insta              = "1.42.0"
+insta              = "1.42.1"
 natord             = "1.0.9"
 oxc_resolver       = "3.0.3"
 proc-macro2        = "1.0.86"
