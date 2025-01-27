@@ -46,7 +46,7 @@ declare_lint_rule! {
     /// let total = price * TAX_RATE;
     /// ```
     pub NoMagicNumbers {
-        version: "1.0.0",
+        version: "next",
         name: "noMagicNumbers",
         language: "js",
         sources: &[RuleSource::Eslint("no-magic-numbers")],
