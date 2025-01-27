@@ -114,7 +114,7 @@ impl Rule for NoFloatingPromises {
                     return None;
                 }
 
-                if is_handled_promise(&js_call_expression).unwrap_or(false) {
+                if is_handled_promise(&js_call_expression).unwrap_or_default() {
                     return None;
                 }
 
@@ -250,8 +250,8 @@ fn is_binding_a_promise(
             Some(is_function_a_promise(&func_decl))
         }
         AnyJsBindingDeclaration::JsVariableDeclarator(js_var_decl) => Some(
-            is_variable_initializer_a_promise(&js_var_decl).unwrap_or(false)
-                || is_variable_annotation_a_promise(&js_var_decl).unwrap_or(false),
+            is_variable_initializer_a_promise(&js_var_decl).unwrap_or_default()
+                || is_variable_annotation_a_promise(&js_var_decl).unwrap_or_default(),
         ),
         _ => Some(false),
     }
@@ -259,7 +259,7 @@ fn is_binding_a_promise(
 
 fn is_function_a_promise(func_decl: &JsFunctionDeclaration) -> bool {
     func_decl.async_token().is_some()
-        || is_return_type_a_promise(func_decl.return_type_annotation()).unwrap_or(false)
+        || is_return_type_a_promise(func_decl.return_type_annotation()).unwrap_or_default()
 }
 
 /// Checks if a TypeScript return type annotation is a `Promise`.
@@ -395,8 +395,8 @@ fn is_member_expression_callee_a_promise(
             is_callee_a_promise(&callee, model)
         }
         AnyJsExpression::JsIdentifierExpression(js_ident_expr) => Some(
-            is_expression_an_promise(&js_ident_expr).unwrap_or(false)
-                || is_binding_a_promise(&js_ident_expr, model).unwrap_or(false),
+            is_expression_an_promise(&js_ident_expr).unwrap_or_default()
+                || is_binding_a_promise(&js_ident_expr, model).unwrap_or_default(),
         ),
         _ => Some(false),
     }
@@ -504,11 +504,12 @@ fn is_variable_initializer_a_promise(
     match expr {
         AnyJsExpression::JsArrowFunctionExpression(arrow_func) => Some(
             arrow_func.async_token().is_some()
-                || is_return_type_a_promise(arrow_func.return_type_annotation()).unwrap_or(false),
+                || is_return_type_a_promise(arrow_func.return_type_annotation())
+                    .unwrap_or_default(),
         ),
         AnyJsExpression::JsFunctionExpression(func_expr) => Some(
             func_expr.async_token().is_some()
-                || is_return_type_a_promise(func_expr.return_type_annotation()).unwrap_or(false),
+                || is_return_type_a_promise(func_expr.return_type_annotation()).unwrap_or_default(),
         ),
         AnyJsExpression::JsNewExpression(js_new_epr) => {
             let any_js_expr = js_new_epr.callee().ok()?;
