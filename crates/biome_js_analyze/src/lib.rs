@@ -202,21 +202,16 @@ mod tests {
     #[test]
     fn quick_test() {
         const SOURCE: &str = r#"
-
-        /**
-* biome-ignore lint/style/useConst: reason
- */
-
-
-let foo = 2;
-let bar = 33;
+let Component = ({ a }) => {
+  return <div a={a} />;
+};
         "#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let options = AnalyzerOptions::default();
-        let rule_filter = RuleFilter::Rule("style", "useConst");
+        let rule_filter = RuleFilter::Rule("nursery", "noPropsDestructure");
 
         let mut dependencies = Dependencies::default();
         dependencies.add("buffer", "latest");

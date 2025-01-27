@@ -2480,6 +2480,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDestructuredProps": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDocumentCookie": {
 					"description": "Disallow direct assignments to document.cookie.",
 					"anyOf": [
