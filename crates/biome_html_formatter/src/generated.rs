@@ -75,6 +75,44 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlAttributeInitializ
         FormatOwnedWithRule :: new (self , crate :: html :: auxiliary :: attribute_initializer_clause :: FormatHtmlAttributeInitializerClause :: default ())
     }
 }
+impl FormatRule<biome_html_syntax::HtmlCdataSection>
+    for crate::html::auxiliary::cdata_section::FormatHtmlCdataSection
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlCdataSection,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlCdataSection>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlCdataSection {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlCdataSection,
+        crate::html::auxiliary::cdata_section::FormatHtmlCdataSection,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::html::auxiliary::cdata_section::FormatHtmlCdataSection::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlCdataSection {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlCdataSection,
+        crate::html::auxiliary::cdata_section::FormatHtmlCdataSection,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::auxiliary::cdata_section::FormatHtmlCdataSection::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::HtmlClosingElement>
     for crate::html::auxiliary::closing_element::FormatHtmlClosingElement
 {

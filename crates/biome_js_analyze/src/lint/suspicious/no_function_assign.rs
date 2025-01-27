@@ -1,6 +1,7 @@
 use crate::services::semantic::Semantic;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::{Reference, ReferencesExtensions};
 use biome_js_syntax::{JsFunctionDeclaration, JsIdentifierBinding};
 use biome_rowan::AstNode;
@@ -99,6 +100,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-func-assign")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

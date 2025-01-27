@@ -40,7 +40,7 @@ impl Rule for NoTypeOnlyImportAttributes {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let extension = ctx.file_path().extension()?;
-        if extension.as_encoded_bytes() == b"cts" {
+        if extension.as_bytes() == b"cts" {
             // Ignore `*.cts`
             return None;
         }

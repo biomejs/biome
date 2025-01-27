@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var foo = "foo";
 eval(foo);
 
@@ -382,5 +383,3 @@ invalid.js:73:5 lint/security/noGlobalEval ━━━━━━━━━━━━�
   
 
 ```
-
-

@@ -6,6 +6,7 @@ use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
     ExceptionHandlerKind, InstructionKind,
 };
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsDefaultClause, JsLanguage, JsSwitchStatement, JsSyntaxNode};
 use biome_rowan::{AstNode, AstNodeList, TextRange, WalkEvent};
 use roaring::RoaringBitmap;
@@ -60,6 +61,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-fallthrough")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -154,7 +156,7 @@ impl Rule for NoFallthroughSwitchClause {
                         if is_switch && (conditional || has_default_clause) {
                             // Take the unconditional jump into account only if a default clause is present.
                             let Some(switch_clause) = switch_clauses.pop_front() else {
-                                unreachable!("Missing switch clause.")
+                                break;
                             };
                             block_to_switch_clause_range.insert(
                                 jump_block_id,

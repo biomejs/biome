@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{format_args, write};
+use biome_formatter::{format_args, write, FormatContext};
 use biome_json_syntax::{JsonArrayValue, JsonArrayValueFields};
 
 #[derive(Debug, Clone, Default)]
@@ -12,7 +12,8 @@ impl FormatNodeRule<JsonArrayValue> for FormatJsonArrayValue {
             r_brack_token,
         } = node.as_fields();
 
-        let should_expand = f.comments().has_dangling_comments(node.syntax());
+        let should_expand =
+            f.comments().has_dangling_comments(node.syntax()) || f.context().options().expand();
 
         write!(
             f,

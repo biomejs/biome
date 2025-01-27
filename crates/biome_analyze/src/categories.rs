@@ -1,11 +1,14 @@
 use enumflags2::{bitflags, BitFlags};
 use std::borrow::Cow;
+use std::fmt::{Display, Formatter};
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum RuleCategory {
     /// This rule checks the syntax according to the language specification
     /// and emits error diagnostics accordingly
@@ -21,8 +24,20 @@ pub enum RuleCategory {
     Transformation,
 }
 
+impl Display for RuleCategory {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RuleCategory::Syntax => write!(f, "Syntax"),
+            RuleCategory::Lint => write!(f, "Lint"),
+            RuleCategory::Action => write!(f, "Action"),
+            RuleCategory::Transformation => write!(f, "Transformation"),
+        }
+    }
+}
+
 /// Actions that suppress rules should start with this string
-pub const SUPPRESSION_ACTION_CATEGORY: &str = "quickfix.suppressRule";
+pub const SUPPRESSION_INLINE_ACTION_CATEGORY: &str = "quickfix.suppressRule.inline";
+pub const SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY: &str = "quickfix.suppressRule.topLevel";
 
 /// The category of a code action, this type maps directly to the
 /// [CodeActionKind] type in the Language Server Protocol specification
@@ -31,8 +46,10 @@ pub const SUPPRESSION_ACTION_CATEGORY: &str = "quickfix.suppressRule";
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum ActionCategory {
     /// Base kind for quickfix actions: 'quickfix'.
     ///
@@ -48,7 +65,23 @@ pub enum ActionCategory {
     Source(SourceActionKind),
     /// This action is using a base kind not covered by any of the previous
     /// variants
-    Other(Cow<'static, str>),
+    Other(OtherActionCategory),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum OtherActionCategory {
+    /// Base kind for inline suppressions actions: `quickfix.suppressRule.inline.biome`
+    InlineSuppression,
+    /// Base kind for inline suppressions actions: `quickfix.suppressRule.topLevel.biome`
+    ToplevelSuppression,
+    /// Generic action that can't be mapped
+    Generic(Cow<'static, str>),
 }
 
 impl ActionCategory {
@@ -58,7 +91,7 @@ impl ActionCategory {
     ///
     /// ```
     /// use std::borrow::Cow;
-    /// use biome_analyze::{ActionCategory, RefactorKind};
+    /// use biome_analyze::{ActionCategory, RefactorKind, OtherActionCategory};
     ///
     /// assert!(ActionCategory::QuickFix(Cow::from("quickfix")).matches("quickfix"));
     ///
@@ -67,6 +100,9 @@ impl ActionCategory {
     ///
     /// assert!(ActionCategory::Refactor(RefactorKind::Extract).matches("refactor"));
     /// assert!(ActionCategory::Refactor(RefactorKind::Extract).matches("refactor.extract"));
+    ///
+    /// assert!(ActionCategory::Other(OtherActionCategory::InlineSuppression).matches("quickfix.suppressRule.inline.biome"));
+    /// assert!(ActionCategory::Other(OtherActionCategory::ToplevelSuppression).matches("quickfix.suppressRule.topLevel.biome"));
     /// ```
     pub fn matches(&self, filter: &str) -> bool {
         self.to_str().starts_with(filter)
@@ -105,10 +141,18 @@ impl ActionCategory {
                 Cow::Borrowed("source.organizeImports.biome")
             }
             ActionCategory::Source(SourceActionKind::Other(tag)) => {
-                Cow::Owned(format!("source.{tag}.biome"))
+                Cow::Owned(format!("source.biome.{tag}"))
             }
 
-            ActionCategory::Other(tag) => Cow::Owned(format!("{tag}.biome")),
+            ActionCategory::Other(other_action) => match other_action {
+                OtherActionCategory::InlineSuppression => {
+                    Cow::Borrowed("quickfix.suppressRule.inline.biome")
+                }
+                OtherActionCategory::ToplevelSuppression => {
+                    Cow::Borrowed("quickfix.suppressRule.topLevel.biome")
+                }
+                OtherActionCategory::Generic(tag) => Cow::Owned(format!("{tag}.biome")),
+            },
         }
     }
 }
@@ -119,8 +163,10 @@ impl ActionCategory {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum RefactorKind {
     /// This action describes a refactor with no particular sub-category
     None,
@@ -159,8 +205,10 @@ pub enum RefactorKind {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum SourceActionKind {
     /// This action describes a source action with no particular sub-category
     None,
@@ -183,7 +231,7 @@ pub enum SourceActionKind {
 pub(crate) enum Categories {
     Syntax = 1 << RuleCategory::Syntax as u8,
     Lint = 1 << RuleCategory::Lint as u8,
-    Action = 1 << RuleCategory::Action as u8,
+    Assist = 1 << RuleCategory::Action as u8,
     Transformation = 1 << RuleCategory::Transformation as u8,
 }
 
@@ -194,6 +242,26 @@ pub(crate) enum Categories {
 ///
 /// Use [RuleCategoriesBuilder] to generate the categories you want to query.
 pub struct RuleCategories(BitFlags<Categories>);
+
+impl Display for RuleCategories {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if self.0.is_empty() {
+            write!(f, "No categories")
+        } else {
+            let mut list = f.debug_list();
+            if self.0.contains(Categories::Syntax) {
+                list.entry(&RuleCategory::Syntax);
+            }
+            if self.0.contains(Categories::Lint) {
+                list.entry(&RuleCategory::Lint);
+            }
+            if self.0.contains(Categories::Assist) {
+                list.entry(&RuleCategory::Action);
+            }
+            list.finish()
+        }
+    }
+}
 
 impl RuleCategories {
     pub fn empty() -> Self {
@@ -229,7 +297,7 @@ impl From<RuleCategory> for RuleCategories {
         match input {
             RuleCategory::Syntax => RuleCategories(BitFlags::from_flag(Categories::Syntax)),
             RuleCategory::Lint => RuleCategories(BitFlags::from_flag(Categories::Lint)),
-            RuleCategory::Action => RuleCategories(BitFlags::from_flag(Categories::Action)),
+            RuleCategory::Action => RuleCategories(BitFlags::from_flag(Categories::Assist)),
             RuleCategory::Transformation => {
                 RuleCategories(BitFlags::from_flag(Categories::Transformation))
             }
@@ -253,7 +321,7 @@ impl serde::Serialize for RuleCategories {
             flags.push(RuleCategory::Lint);
         }
 
-        if self.0.contains(Categories::Action) {
+        if self.0.contains(Categories::Assist) {
             flags.push(RuleCategory::Action);
         }
 
@@ -301,7 +369,7 @@ impl<'de> serde::Deserialize<'de> for RuleCategories {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "schema")]
 impl schemars::JsonSchema for RuleCategories {
     fn schema_name() -> String {
         String::from("RuleCategories")
@@ -339,8 +407,8 @@ impl RuleCategoriesBuilder {
         self
     }
 
-    pub fn with_action(mut self) -> Self {
-        self.flags.insert(Categories::Action);
+    pub fn with_assist(mut self) -> Self {
+        self.flags.insert(Categories::Assist);
         self
     }
 

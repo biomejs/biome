@@ -65,7 +65,7 @@ impl Rule for NoDoneCallback {
 
         let is_test_each = callee
             .get_callee_member_name()
-            .map_or(false, |m| m.text_trimmed() == "each");
+            .is_some_and(|m| m.text_trimmed() == "each");
 
         if is_test_each && !JsTemplateExpression::can_cast(callee.syntax().kind()) {
             return None;

@@ -1,12 +1,10 @@
 use crate::file_handlers::{
     javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
-    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities,
+    EnabledForPath, ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults,
+    ParseResult, ParserCapabilities,
 };
-use crate::settings::{Settings, WorkspaceSettingsHandle};
-use crate::workspace::{
-    DocumentFileSource, FixFileResult, OrganizeImportsResult, PullActionsResult,
-};
+use crate::settings::WorkspaceSettingsHandle;
+use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
 use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
@@ -84,6 +82,12 @@ impl SvelteFileHandler {
 impl ExtensionHandler for SvelteFileHandler {
     fn capabilities(&self) -> Capabilities {
         Capabilities {
+            enabled_for_path: EnabledForPath {
+                formatter: Some(javascript::formatter_enabled),
+                search: Some(javascript::search_enabled),
+                assist: Some(javascript::assist_enabled),
+                linter: Some(javascript::linter_enabled),
+            },
             parser: ParserCapabilities { parse: Some(parse) },
             debug: DebugCapabilities {
                 debug_syntax_tree: None,
@@ -95,7 +99,6 @@ impl ExtensionHandler for SvelteFileHandler {
                 code_actions: Some(code_actions),
                 rename: None,
                 fix_all: Some(fix_all),
-                organize_imports: Some(organize_imports),
             },
             formatter: FormatterCapabilities {
                 format: Some(format),
@@ -112,7 +115,7 @@ fn parse(
     _rome_path: &BiomePath,
     _file_source: DocumentFileSource,
     text: &str,
-    _settings: Option<&Settings>,
+    _settings: WorkspaceSettingsHandle,
     cache: &mut NodeCache,
 ) -> ParseResult {
     let script = SvelteFileHandler::input(text);
@@ -128,7 +131,7 @@ fn parse(
     }
 }
 
-#[tracing::instrument(level = "trace", skip(parse, settings))]
+#[tracing::instrument(level = "debug", skip(parse, settings))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
@@ -167,8 +170,4 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     javascript::fix_all(params)
-}
-
-fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceError> {
-    javascript::organize_imports(parse)
 }

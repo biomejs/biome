@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 Atomics();
 JSON();
 Math();
@@ -1447,5 +1448,3 @@ invalid.js:109:16 lint/correctness/noGlobalObjectCalls ━━━━━━━━�
   
 
 ```
-
-

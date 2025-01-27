@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import x from "y";
 x = 1;
 
@@ -362,5 +363,3 @@ invalid.js:34:1 lint/suspicious/noImportAssign ━━━━━━━━━━━
   
 
 ```
-
-

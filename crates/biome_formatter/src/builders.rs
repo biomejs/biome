@@ -527,7 +527,7 @@ impl<Context> Format<Context> for LineSuffixBoundary {
 ///
 ///         let recorded = recording.stop();
 ///
-///         let is_labelled = recorded.first().map_or(false, |element| element.has_label(LabelId::of(MyLabels::Main)));
+///         let is_labelled = recorded.first().is_some_and(|element| element.has_label(LabelId::of(MyLabels::Main)));
 ///
 ///         if is_labelled {
 ///             write!(f, [text(" has label `Main`")])
@@ -661,7 +661,6 @@ pub const fn space() -> Space {
 /// # Ok(())
 /// # }
 /// ```
-
 #[inline]
 pub const fn hard_space() -> HardSpace {
     HardSpace
@@ -773,7 +772,6 @@ impl<Context> Format<Context> for HardSpace {
 /// #    Ok(())
 /// # }
 /// ```
-
 #[inline]
 pub fn indent<Content, Context>(content: &Content) -> Indent<Context>
 where
@@ -931,7 +929,6 @@ impl<Context> std::fmt::Debug for Indent<'_, Context> {
 /// # Ok(())
 /// # }
 /// ```
-
 #[inline]
 pub fn dedent<Content, Context>(content: &Content) -> Dedent<Context>
 where
@@ -1535,7 +1532,6 @@ pub fn soft_line_indent_or_space<Context>(content: &impl Format<Context>) -> Blo
 /// # Ok(())
 /// # }
 /// ```
-
 #[inline]
 pub fn soft_line_indent_or_hard_space<Context>(
     content: &impl Format<Context>,

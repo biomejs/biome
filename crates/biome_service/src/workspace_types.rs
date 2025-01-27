@@ -259,7 +259,7 @@ fn schema_object_type<'a>(
     let has_defaults = schema
         .metadata
         .as_ref()
-        .map_or(false, |metadata| metadata.default.is_some());
+        .is_some_and(|metadata| metadata.default.is_some());
 
     (ts_type, is_nullable || has_defaults, description)
 }
@@ -451,17 +451,16 @@ macro_rules! workspace_method {
 }
 
 /// Returns a list of signature for all the methods in the [Workspace] trait
-pub fn methods() -> [WorkspaceMethod; 19] {
+pub fn methods() -> [WorkspaceMethod; 21] {
     [
         workspace_method!(file_features),
         workspace_method!(update_settings),
-        workspace_method!(register_project_folder),
-        workspace_method!(set_manifest_for_project),
+        workspace_method!(open_project),
         workspace_method!(open_file),
         workspace_method!(change_file),
         workspace_method!(close_file),
         workspace_method!(get_syntax_tree),
-        workspace_method!(organize_imports),
+        workspace_method!(check_file_size),
         workspace_method!(get_file_content),
         workspace_method!(get_control_flow_graph),
         workspace_method!(get_formatter_ir),
@@ -472,5 +471,8 @@ pub fn methods() -> [WorkspaceMethod; 19] {
         workspace_method!(format_on_type),
         workspace_method!(fix_file),
         workspace_method!(rename),
+        workspace_method!(parse_pattern),
+        workspace_method!(search_pattern),
+        workspace_method!(drop_pattern),
     ]
 }

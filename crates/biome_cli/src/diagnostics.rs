@@ -1,9 +1,8 @@
-use biome_console::fmt::Display;
 use biome_console::markup;
-use biome_diagnostics::adapters::{BpafError, IoError, SerdeJsonError};
 use biome_diagnostics::{
     Advices, Category, Diagnostic, Error, LogCategory, MessageAndDescription, Severity, Visit,
 };
+use biome_diagnostics::{BpafError, IoError, SerdeJsonError};
 use biome_service::WorkspaceError;
 use std::process::{ExitCode, Termination};
 use std::{env::current_exe, fmt::Debug};
@@ -258,14 +257,6 @@ pub struct DeprecatedArgument {
     pub message: MessageAndDescription,
 }
 
-impl DeprecatedArgument {
-    pub fn new(message: impl Display) -> Self {
-        Self {
-            message: MessageAndDescription::from(markup! {{message}}.to_owned()),
-        }
-    }
-}
-
 #[derive(Debug, Diagnostic)]
 pub enum ReportDiagnostic {
     /// Emitted when trying to serialise the report
@@ -472,26 +463,6 @@ impl Termination for CliDiagnostic {
         } else {
             ExitCode::SUCCESS
         }
-    }
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-category = "internalError/fs",
-    severity = Warning,
-    message(
-        description = "The configuration file {path} is deprecated. Use biome.json instead.",
-        message("The configuration file "<Emphasis>{self.path}</Emphasis>" is deprecated. Use "<Emphasis>"biome.json"</Emphasis>" instead."),
-    )
-)]
-pub struct DeprecatedConfigurationFile {
-    #[location(resource)]
-    pub path: String,
-}
-
-impl DeprecatedConfigurationFile {
-    pub fn new(path: impl Into<String>) -> Self {
-        Self { path: path.into() }
     }
 }
 

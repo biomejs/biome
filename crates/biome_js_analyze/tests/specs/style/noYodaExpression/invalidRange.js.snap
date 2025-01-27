@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidRange.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 if (a < 0 && 0 <= b && b < 1) {}
 if (0 <= a && a < 1 && b < 1) {}
 if (1 < a && a < 0) {}

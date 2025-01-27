@@ -7,7 +7,7 @@ use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TransformSourceMap,
 };
-use biome_json_syntax::JsonLanguage;
+use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use std::default::Default;
 use std::fmt;
 use std::rc::Rc;
@@ -67,19 +67,23 @@ pub struct JsonFormatOptions {
     attribute_position: AttributePosition,
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
     trailing_commas: TrailingCommas,
+    expand: Expand,
+    /// The kind of file
+    file_source: JsonFileSource,
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum TrailingCommas {
     #[default]
-    /// The formatter will remove the trailing commas
+    /// The formatter will remove the trailing commas.
     None,
-    /// The trailing commas are allowed and advised
+    /// The trailing commas are allowed and advised only in JSONC files. Trailing commas are removed from JSON files.
     All,
 }
 
@@ -96,7 +100,7 @@ impl FromStr for TrailingCommas {
 }
 
 impl fmt::Display for TrailingCommas {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             TrailingCommas::None => std::write!(f, "None"),
             TrailingCommas::All => std::write!(f, "All"),
@@ -104,9 +108,43 @@ impl fmt::Display for TrailingCommas {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum Expand {
+    Always,
+    #[default]
+    FollowSource,
+}
+
+impl FromStr for Expand {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "always" => Ok(Self::Always),
+            "follow-source" => Ok(Self::FollowSource),
+            _ => Err(std::format!("unknown expand literal: {}", s)),
+        }
+    }
+}
+
+impl fmt::Display for Expand {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Expand::Always => std::write!(f, "Always"),
+            Expand::FollowSource => std::write!(f, "Follow Source"),
+        }
+    }
+}
+
 impl JsonFormatOptions {
-    pub fn new() -> Self {
+    pub fn new(file_source: JsonFileSource) -> Self {
         Self {
+            file_source,
             ..Default::default()
         }
     }
@@ -136,6 +174,11 @@ impl JsonFormatOptions {
         self
     }
 
+    pub fn with_expand(mut self, expand: Expand) -> Self {
+        self.expand = expand;
+        self
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -156,11 +199,24 @@ impl JsonFormatOptions {
         self.trailing_commas = trailing_commas;
     }
 
+    /// Set `expand_lists`
+    pub fn set_expand(&mut self, expand: Expand) {
+        self.expand = expand;
+    }
+
     pub(crate) fn to_trailing_separator(&self) -> TrailingSeparator {
         match self.trailing_commas {
             TrailingCommas::None => TrailingSeparator::Omit,
             TrailingCommas::All => TrailingSeparator::Allowed,
         }
+    }
+
+    pub(crate) fn file_source(&self) -> &JsonFileSource {
+        &self.file_source
+    }
+
+    pub(crate) const fn expand(&self) -> bool {
+        matches!(self.expand, Expand::Always)
     }
 }
 
@@ -185,6 +241,10 @@ impl FormatOptions for JsonFormatOptions {
         self.attribute_position
     }
 
+    fn bracket_same_line(&self) -> biome_formatter::BracketSameLine {
+        biome_formatter::BracketSameLine::default()
+    }
+
     fn bracket_spacing(&self) -> BracketSpacing {
         BracketSpacing::default()
     }
@@ -200,6 +260,9 @@ impl fmt::Display for JsonFormatOptions {
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
-        writeln!(f, "Trailing commas: {}", self.trailing_commas)
+        writeln!(f, "Trailing commas: {}", self.trailing_commas)?;
+        writeln!(f, "Expand: {}", self.expand)?;
+
+        Ok(())
     }
 }

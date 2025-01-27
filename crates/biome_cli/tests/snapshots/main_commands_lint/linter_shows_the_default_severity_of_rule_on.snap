@@ -1,0 +1,104 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+snapshot_kind: text
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "noVar": "on"
+      }
+    }
+  }
+}
+```
+
+## `file1.js`
+
+```js
+var name = 'tobias'
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome exited because the configuration resulted in errors. Please fix them.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `noVar`.
+  
+    3 │         "rules": {
+    4 │             "style": {
+  > 5 │                 "noVar": "on"
+      │                 ^^^^^^^
+    6 │             }
+    7 │         }
+  
+  i Known keys:
+  
+  - recommended
+  - noArguments
+  - noCommaOperator
+  - noDefaultExport
+  - noDoneCallback
+  - noImplicitBoolean
+  - noInferrableTypes
+  - noNamespace
+  - noNamespaceImport
+  - noNegationElse
+  - noNonNullAssertion
+  - noParameterAssign
+  - noParameterProperties
+  - noRestrictedGlobals
+  - noShoutyConstants
+  - noUnusedTemplateLiteral
+  - noUselessElse
+  - noYodaExpression
+  - useAsConstAssertion
+  - useBlockStatements
+  - useCollapsedElseIf
+  - useConsistentArrayType
+  - useConsistentBuiltinInstantiation
+  - useConst
+  - useDefaultParameterLast
+  - useDefaultSwitchClause
+  - useEnumInitializers
+  - useExplicitLengthCheck
+  - useExponentiationOperator
+  - useExportType
+  - useFilenamingConvention
+  - useForOf
+  - useFragmentSyntax
+  - useImportType
+  - useLiteralEnumMembers
+  - useNamingConvention
+  - useNodeAssertStrict
+  - useNodejsImportProtocol
+  - useNumberNamespace
+  - useNumericLiterals
+  - useSelfClosingElements
+  - useShorthandArrayType
+  - useShorthandAssign
+  - useShorthandFunctionType
+  - useSingleCaseStatement
+  - useSingleVarDeclarator
+  - useTemplate
+  - useThrowNewError
+  - useThrowOnlyError
+  
+
+```

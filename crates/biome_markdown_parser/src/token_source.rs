@@ -106,7 +106,7 @@ impl<'source> MarkdownTokenSource<'source> {
     }
 }
 
-impl<'source> TokenSource for MarkdownTokenSource<'source> {
+impl TokenSource for MarkdownTokenSource<'_> {
     type Kind = MarkdownSyntaxKind;
 
     fn current(&self) -> Self::Kind {
@@ -138,7 +138,7 @@ impl<'source> TokenSource for MarkdownTokenSource<'source> {
     }
 }
 
-impl<'source> BumpWithContext for MarkdownTokenSource<'source> {
+impl BumpWithContext for MarkdownTokenSource<'_> {
     type Context = MarkdownLexContext;
 
     fn bump_with_context(&mut self, context: Self::Context) {

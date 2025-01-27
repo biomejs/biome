@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: getWords.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 /* should not generate diagnostics */
 
 function getWords(num) {
@@ -20,5 +21,3 @@ function getWords(num) {
 }
 
 ```
-
-

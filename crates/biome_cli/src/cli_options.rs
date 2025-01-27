@@ -3,8 +3,8 @@ use crate::LoggingLevel;
 use biome_configuration::ConfigurationPathHint;
 use biome_diagnostics::Severity;
 use bpaf::Bpaf;
+use camino::Utf8PathBuf;
 use std::fmt::{Display, Formatter};
-use std::path::PathBuf;
 use std::str::FromStr;
 
 /// Global options applied to all commands
@@ -91,7 +91,7 @@ impl CliOptions {
     pub(crate) fn as_configuration_path_hint(&self) -> ConfigurationPathHint {
         match self.config_path.as_ref() {
             None => ConfigurationPathHint::default(),
-            Some(path) => ConfigurationPathHint::FromUser(PathBuf::from(path)),
+            Some(path) => ConfigurationPathHint::FromUser(Utf8PathBuf::from(path)),
         }
     }
 }

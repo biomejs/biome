@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: withBindingInvalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import React, { createElement } from "react";
 
 React.createElement('button');
@@ -93,5 +94,3 @@ withBindingInvalid.js:13:13 lint/a11y/useButtonType ━━━━━━━━━�
   
 
 ```
-
-

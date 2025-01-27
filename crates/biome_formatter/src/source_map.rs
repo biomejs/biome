@@ -232,7 +232,7 @@ impl TransformSourceMap {
             // It can, therefore, be necessary to navigate backwards again.
             // In this case, do a binary search for the index of the next deleted range (`O(log(n)`).
             let out_of_order_marker =
-                previous_marker.map_or(false, |previous| previous.source > marker.source);
+                previous_marker.is_some_and(|previous| previous.source > marker.source);
 
             if out_of_order_marker {
                 let index = self
@@ -606,7 +606,7 @@ mod tests {
         let root = cst_builder.finish();
 
         let mut builder = TransformSourceMapBuilder::new();
-        builder.push_source_text(&root.text().to_string());
+        builder.push_source_text(&root.text_with_trivia().to_string());
 
         // Add mappings for all removed parentheses.
 
@@ -692,7 +692,7 @@ mod tests {
 
         let root = cst_builder.finish();
 
-        assert_eq!(&root.text(), "((a));");
+        assert_eq!(&root.text_with_trivia(), "((a));");
 
         let mut bogus = root
             .descendants()
@@ -711,7 +711,7 @@ mod tests {
             .unwrap();
 
         let mut builder = TransformSourceMapBuilder::new();
-        builder.push_source_text(&root.text().to_string());
+        builder.push_source_text(&root.text_with_trivia().to_string());
 
         // Add mappings for all removed parentheses.
         builder.add_deleted_range(TextRange::new(TextSize::from(0), TextSize::from(2)));
@@ -754,7 +754,7 @@ mod tests {
         let root = cst_builder.finish();
 
         let mut builder = TransformSourceMapBuilder::new();
-        builder.push_source_text(&root.text().to_string());
+        builder.push_source_text(&root.text_with_trivia().to_string());
 
         // Add mappings for all removed parentheses.
 

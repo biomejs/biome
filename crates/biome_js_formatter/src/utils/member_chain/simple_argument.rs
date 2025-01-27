@@ -304,7 +304,7 @@ impl SimpleArgument {
                                 Ok(AnyJsObjectMemberName::JsComputedMemberName(_))
                             );
 
-                            let is_simple = property.value().map_or(false, |value| {
+                            let is_simple = property.value().is_ok_and(|value| {
                                 SimpleArgument::from(value).is_simple_impl(depth + 1)
                             });
 

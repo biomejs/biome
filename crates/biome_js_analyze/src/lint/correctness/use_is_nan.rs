@@ -1,6 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -64,6 +65,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("use-isnan")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -181,7 +183,7 @@ impl Rule for UseIsNan {
                     call.into(),
                 );
 
-                return Some(JsRuleAction::new(
+                Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! {
@@ -189,7 +191,7 @@ impl Rule for UseIsNan {
                     }
                     .to_owned(),
                     mutation,
-                ));
+                ))
             }
             UseIsNanQuery::JsCaseClause(_) => None,
             UseIsNanQuery::JsSwitchStatement(_) => None,
@@ -233,7 +235,7 @@ fn create_is_nan_expression(nan: AnyJsExpression) -> Option<AnyJsExpression> {
                 .object()
                 .ok()?
                 .as_js_static_member_expression()
-                .is_some_and(|y| y.member().is_ok_and(|z| z.text() == "Number"));
+                .is_some_and(|y| y.member().is_ok_and(|z| z.to_trimmed_string() == "Number"));
 
             if !reference.is_global_this() && !reference.has_name("window")
                 || number_identifier_exists

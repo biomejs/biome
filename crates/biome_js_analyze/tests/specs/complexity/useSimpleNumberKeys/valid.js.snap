@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 ({ 0: "zero" });
 ({ 1: "one" });
 ({ 1.2: "12" });
@@ -17,5 +18,3 @@ expression: valid.js
 ({ ...a });
 
 ```
-
-

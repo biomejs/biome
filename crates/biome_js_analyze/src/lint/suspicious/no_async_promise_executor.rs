@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunction, JsNewExpression, JsNewExpressionFields,
 };
@@ -44,6 +45,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-async-promise-executor")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -65,7 +67,7 @@ impl Rule for NoAsyncPromiseExecutor {
         let is_promise_constructor = callee
             .as_js_identifier_expression()
             .and_then(|ident| ident.name().ok())
-            .map_or(false, |name| name.syntax().text_trimmed() == "Promise");
+            .is_some_and(|name| name.syntax().text_trimmed() == "Promise");
         if !is_promise_constructor {
             return None;
         }

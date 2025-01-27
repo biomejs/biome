@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 foo + 'baz';
 
 1 * 2 + 'foo';
@@ -1285,5 +1286,3 @@ invalid.js:105:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
   
 
 ```
-
-

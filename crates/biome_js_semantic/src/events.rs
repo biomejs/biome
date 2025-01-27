@@ -531,14 +531,14 @@ impl SemanticEventExtractor {
                         if let Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) =
                             declaration.parent_binding_pattern_declaration()
                         {
-                            if declarator.declaration().map_or(false, |x| x.is_var()) {
+                            if declarator.declaration().is_some_and(|x| x.is_var()) {
                                 hoisted_scope_id = self.scope_index_to_hoist_declarations(0)
                             }
                         }
                         self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
                     }
                     AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
-                        if declarator.declaration().map_or(false, |x| x.is_var()) {
+                        if declarator.declaration().is_some_and(|x| x.is_var()) {
                             hoisted_scope_id = self.scope_index_to_hoist_declarations(0)
                         }
                         self.push_binding(hoisted_scope_id, BindingName::Value(name), info);

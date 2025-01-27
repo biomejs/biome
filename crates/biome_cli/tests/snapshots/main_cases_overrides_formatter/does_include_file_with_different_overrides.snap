@@ -1,15 +1,16 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `biome.json`
 
 ```json
 {
   "overrides": [
-    { "include": ["test.js"], "formatter": { "lineWidth": 20 } },
+    { "includes": ["test.js"], "formatter": { "lineWidth": 20 } },
     {
-      "include": ["test2.js"],
+      "includes": ["test2.js"],
       "formatter": { "lineWidth": 20, "indentStyle": "space" }
     }
   ]

@@ -13,7 +13,7 @@ impl FormatRule<JsVariableDeclaratorList> for FormatJsVariableDeclaratorList {
     fn fmt(&self, node: &JsVariableDeclaratorList, f: &mut JsFormatter) -> FormatResult<()> {
         let length = node.len();
 
-        let is_parent_for_loop = node.syntax().grand_parent().map_or(false, |grand_parent| {
+        let is_parent_for_loop = node.syntax().grand_parent().is_some_and(|grand_parent| {
             matches!(
                 grand_parent.kind(),
                 JsSyntaxKind::JS_FOR_STATEMENT
@@ -23,7 +23,7 @@ impl FormatRule<JsVariableDeclaratorList> for FormatJsVariableDeclaratorList {
         });
 
         let has_any_initializer = node.iter().any(|declarator| {
-            declarator.map_or(false, |declarator| declarator.initializer().is_some())
+            declarator.is_ok_and(|declarator| declarator.initializer().is_some())
         });
 
         let format_separator = format_with(|f| {

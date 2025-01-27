@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidParentsWithHigherPrecedence.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 + Math.pow(a, b);
 - Math.pow(a, b);
 ! Math.pow(a, b);
@@ -475,5 +476,3 @@ invalidParentsWithHigherPrecedence.js:21:7 lint/style/useExponentiationOperator 
   
 
 ```
-
-

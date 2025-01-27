@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 A: {
 	if (foo()) {
 		break A;
@@ -61,5 +62,3 @@ A: var foo = 0;
 A: asserts(cond, "cond should hold");
 
 ```
-
-

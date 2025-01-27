@@ -19,7 +19,7 @@ pub struct VisitorContext<'phase, 'query, L: Language> {
     pub options: &'phase AnalyzerOptions,
 }
 
-impl<'phase, 'query, L: Language> VisitorContext<'phase, 'query, L> {
+impl<L: Language> VisitorContext<'_, '_, L> {
     pub fn match_query<T: QueryMatch>(&mut self, query: T) {
         self.query_matcher.match_query(MatchQueryParams {
             phase: self.phase,

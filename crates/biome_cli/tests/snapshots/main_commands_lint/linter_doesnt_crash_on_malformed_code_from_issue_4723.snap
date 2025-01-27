@@ -1,0 +1,161 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `issue4723.js`
+
+```js
+   if ndpato{      (){   if asCmesnen{   }
+  if     '&
+  else
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+issue4723.js:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `(` but instead found `ndpato`
+  
+  > 1 │    if ndpato{      (){   if asCmesnen{   }
+      │       ^^^^^^
+    2 │   if     '&
+    3 │   else
+  
+  i Remove ndpato
+  
+
+```
+
+```block
+issue4723.js:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+  > 1 │    if ndpato{      (){   if asCmesnen{   }
+      │             ^
+    2 │   if     '&
+    3 │   else
+  
+  i Remove {
+  
+
+```
+
+```block
+issue4723.js:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `=>` but instead found `{`
+  
+  > 1 │    if ndpato{      (){   if asCmesnen{   }
+      │                      ^
+    2 │   if     '&
+    3 │   else
+  
+  i Remove {
+  
+
+```
+
+```block
+issue4723.js:1:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `(` but instead found `asCmesnen`
+  
+  > 1 │    if ndpato{      (){   if asCmesnen{   }
+      │                             ^^^^^^^^^
+    2 │   if     '&
+    3 │   else
+  
+  i Remove asCmesnen
+  
+
+```
+
+```block
+issue4723.js:1:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+  > 1 │    if ndpato{      (){   if asCmesnen{   }
+      │                                      ^
+    2 │   if     '&
+    3 │   else
+  
+  i Remove {
+  
+
+```
+
+```block
+issue4723.js:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unterminated string literal
+  
+    1 │    if ndpato{      (){   if asCmesnen{   }
+  > 2 │   if     '&
+      │          ^^
+    3 │   else
+  
+  i 
+  
+    1 │    if ndpato{      (){   if asCmesnen{   }
+  > 2 │   if     '&
+      │          ^^
+    3 │   else
+  
+  i The closing quote must be on the same line.
+  
+
+```
+
+```block
+issue4723.js:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `else`
+  
+    1 │    if ndpato{      (){   if asCmesnen{   }
+    2 │   if     '&
+  > 3 │   else
+      │   ^^^^
+  
+  i Remove else
+  
+
+```
+
+```block
+issue4723.js:3:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found the end of the file.
+  
+    1 │    if ndpato{      (){   if asCmesnen{   }
+    2 │   if     '&
+  > 3 │   else
+      │       
+  
+  i Expected a statement here.
+  
+    1 │    if ndpato{      (){   if asCmesnen{   }
+    2 │   if     '&
+  > 3 │   else
+      │       
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 8 errors.
+```

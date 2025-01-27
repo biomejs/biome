@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 
 if (/*a*/ arr /*b*/ instanceof /*c*/ Array /*d*/) {}
 
@@ -86,5 +87,3 @@ invalid.js:6:11 lint/suspicious/useIsArray  FIXABLE  ━━━━━━━━━
   
 
 ```
-
-

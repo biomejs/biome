@@ -283,7 +283,7 @@ fn is_same_reference(left: AnyJsExpression, right: AnyJsExpression) -> Option<bo
             else {
                 return Some(false);
             };
-            if left_member.text() != right_member.text() {
+            if left_member.to_trimmed_string() != right_member.to_trimmed_string() {
                 return Some(false);
             }
             is_same_reference(left.object().ok()?, right.object().ok()?)
@@ -295,7 +295,7 @@ fn is_same_reference(left: AnyJsExpression, right: AnyJsExpression) -> Option<bo
         ) => {
             let left_member = left.member().ok()?;
             let right_member = right.member().ok()?;
-            if left_member.text() != right_member.text() {
+            if left_member.to_trimmed_string() != right_member.to_trimmed_string() {
                 Some(false)
             } else {
                 is_same_reference(left.object().ok()?, right.object().ok()?)
@@ -305,7 +305,7 @@ fn is_same_reference(left: AnyJsExpression, right: AnyJsExpression) -> Option<bo
         (
             AnyJsExpression::JsIdentifierExpression(left),
             AnyJsExpression::JsIdentifierExpression(right),
-        ) => Some(left.name().ok()?.text() == right.name().ok()?.text()),
+        ) => Some(left.name().ok()?.to_trimmed_string() == right.name().ok()?.to_trimmed_string()),
         // this
         (AnyJsExpression::JsThisExpression(_), AnyJsExpression::JsThisExpression(_)) => Some(true),
         _ => Some(false),

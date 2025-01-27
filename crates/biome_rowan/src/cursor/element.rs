@@ -1,6 +1,6 @@
 use crate::cursor::{SyntaxNode, SyntaxToken};
 use crate::green::{GreenElement, GreenElementRef};
-use crate::{NodeOrToken, RawSyntaxKind, TokenAtOffset};
+use crate::{NodeOrToken, RawSyntaxKind};
 use biome_text_size::{TextRange, TextSize};
 use std::iter;
 
@@ -86,14 +86,6 @@ impl SyntaxElement {
         }
     }
 
-    pub(super) fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset<SyntaxToken> {
-        assert!(self.text_range().start() <= offset && offset <= self.text_range().end());
-        match self {
-            NodeOrToken::Token(token) => TokenAtOffset::Single(token.clone()),
-            NodeOrToken::Node(node) => node.token_at_offset(offset),
-        }
-    }
-
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
     pub fn detach(self) -> Self {
         match self {
@@ -110,7 +102,7 @@ impl SyntaxElement {
     }
 }
 
-// region: impls
+// #region: impls
 
 impl From<SyntaxNode> for SyntaxElement {
     #[inline]
@@ -126,4 +118,4 @@ impl From<SyntaxToken> for SyntaxElement {
     }
 }
 
-// endregion
+// #endregion

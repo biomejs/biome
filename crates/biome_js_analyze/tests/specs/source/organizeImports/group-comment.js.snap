@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: group-comment.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // group 1 leading
 
 // leading d
@@ -42,5 +43,3 @@ import a from 'a';
 -import a from 'a';
 
 ```
-
-

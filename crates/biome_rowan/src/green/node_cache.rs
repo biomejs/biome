@@ -382,7 +382,7 @@ pub(crate) struct CachedNodeEntry<'a> {
     raw_entry: RawOccupiedEntryMut<'a, CachedNode, (), BuildHasherDefault<FxHasher>>,
 }
 
-impl<'a> CachedNodeEntry<'a> {
+impl CachedNodeEntry<'_> {
     pub fn node(&self) -> &GreenNodeData {
         self.raw_entry.key().node.value()
     }
@@ -392,7 +392,7 @@ impl<'a> CachedNodeEntry<'a> {
     }
 }
 
-impl<'a> VacantNodeEntry<'a> {
+impl VacantNodeEntry<'_> {
     /// Inserts the `node` into the cache so that future queries for the same kind and children resolve to the passed `node`.
     ///
     /// Returns the hash of the node.

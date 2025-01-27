@@ -1,0 +1,16 @@
+---
+source: crates/biome_package/tests/manifest_spec_tests.rs
+expression: name.json
+---
+name.json:2:10 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × name has an incorrect type, expected a string, but received a boolean.
+  
+    1 │ {
+  > 2 │ 	"name": false
+      │ 	        ^^^^^
+    3 │ }
+    4 │ 
+  
+
+

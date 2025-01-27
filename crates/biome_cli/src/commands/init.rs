@@ -1,12 +1,12 @@
 use crate::{CliDiagnostic, CliSession};
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_console::{markup, ConsoleExt};
 use biome_fs::ConfigName;
 use biome_service::configuration::create_config;
 
-pub(crate) fn init(mut session: CliSession, emit_jsonc: bool) -> Result<(), CliDiagnostic> {
-    let fs = &mut session.app.fs;
-    create_config(fs, PartialConfiguration::init(), emit_jsonc)?;
+pub(crate) fn init(session: CliSession, emit_jsonc: bool) -> Result<(), CliDiagnostic> {
+    let fs = session.app.workspace.fs();
+    create_config(fs, Configuration::init(), emit_jsonc)?;
     let file_created = if emit_jsonc {
         ConfigName::biome_jsonc()
     } else {

@@ -113,7 +113,7 @@ impl FormatNodeRule<TsUnionType> for FormatTsUnionType {
 
             let is_inside_complex_tuple_type = node
                 .parent::<TsTupleTypeElementList>()
-                .map_or(false, |tuple| tuple.len() > 1);
+                .is_some_and(|tuple| tuple.len() > 1);
 
             if is_inside_complex_tuple_type {
                 write!(

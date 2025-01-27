@@ -49,7 +49,7 @@ impl Format<JsFormatContext> for AnyJsStatementWithArgument {
                 .trailing_comments(self.syntax())
                 .last()
                 .or_else(|| comments.dangling_comments(self.syntax()).last())
-                .map_or(false, |comment| comment.kind().is_line());
+                .is_some_and(|comment| comment.kind().is_line());
 
             if is_last_comment_line {
                 write!(f, [FormatOptionalSemicolon::new(Some(&semicolon))])?;

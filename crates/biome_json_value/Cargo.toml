@@ -1,0 +1,30 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Mutable JSON values constructable from biome_json_syntax"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_json_value"
+repository.workspace = true
+version              = "0.1.0"
+
+[lints]
+workspace = true
+
+[dependencies]
+biome_deserialize        = { workspace = true, features = ["indexmap"] }
+biome_deserialize_macros = { workspace = true }
+biome_json_syntax        = { workspace = true }
+biome_rowan              = { workspace = true }
+indexmap                 = { workspace = true }
+oxc_resolver             = { workspace = true, optional = true }
+rustc-hash               = { workspace = true }
+static_assertions        = "1.1.0"
+
+[features]
+oxc_resolver = ["dep:oxc_resolver"]
+
+[dev-dependencies]
+biome_json_parser = { workspace = true }

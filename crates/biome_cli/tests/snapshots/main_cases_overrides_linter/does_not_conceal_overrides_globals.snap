@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -15,11 +16,11 @@ expression: content
   },
   "overrides": [
     {
-      "include": ["*.js"],
+      "includes": ["*.js"],
       "javascript": { "globals": ["GLOBAL_VAR"] }
     },
     {
-      "include": ["*.js"]
+      "includes": ["*.js"]
     }
   ]
 }

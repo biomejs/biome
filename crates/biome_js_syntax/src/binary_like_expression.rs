@@ -77,7 +77,7 @@ impl AnyJsBinaryLikeExpression {
     /// switch (a + b) {} // true
     /// ```
     pub fn is_inside_condition(&self, parent: Option<&JsSyntaxNode>) -> bool {
-        parent.map_or(false, |parent| {
+        parent.is_some_and(|parent| {
             let test = match parent.kind() {
                 JsSyntaxKind::JS_IF_STATEMENT => JsIfStatement::unwrap_cast(parent.clone()).test(),
                 JsSyntaxKind::JS_DO_WHILE_STATEMENT => {
@@ -91,7 +91,7 @@ impl AnyJsBinaryLikeExpression {
                 }
                 _ => return false,
             };
-            test.map_or(false, |test| test.syntax() == self.syntax())
+            test.is_ok_and(|test| test.syntax() == self.syntax())
         })
     }
 
@@ -113,7 +113,7 @@ impl AnyJsBinaryLikeExpression {
     pub fn should_inline_logical_expression(&self) -> bool {
         match self {
             AnyJsBinaryLikeExpression::JsLogicalExpression(logical) => {
-                logical.right().map_or(false, |right| match right {
+                logical.right().is_ok_and(|right| match right {
                     AnyJsExpression::JsObjectExpression(object) => !object.members().is_empty(),
                     AnyJsExpression::JsArrayExpression(array) => !array.elements().is_empty(),
                     AnyJsExpression::JsxTagExpression(_) => true,

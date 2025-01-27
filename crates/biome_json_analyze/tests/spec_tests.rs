@@ -9,16 +9,17 @@ use biome_test_utils::{
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker,
     write_analyzer_snapshot,
 };
+use camino::Utf8Path;
 use std::ops::Deref;
-use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
+use std::{fs::read_to_string, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{json}", crate::run_test, "module"}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
 
-    let input_file = Path::new(input);
-    let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
+    let input_file = Utf8Path::new(input);
+    let file_name = input_file.file_name().unwrap();
 
     let (group, rule) = parse_test_path(input_file);
     if rule == "specs" || rule == "suppression" {
@@ -78,7 +79,7 @@ pub(crate) fn analyze_and_snap(
     file_source: JsonFileSource,
     filter: AnalysisFilter,
     file_name: &str,
-    input_file: &Path,
+    input_file: &Utf8Path,
 ) -> usize {
     let parsed = parse_json(input_code, JsonParserOptions::default());
     let root = parsed.tree();
@@ -125,7 +126,7 @@ pub(crate) fn analyze_and_snap(
     diagnostics.len()
 }
 
-fn check_code_action(path: &Path, source: &str, action: &AnalyzerAction<JsonLanguage>) {
+fn check_code_action(path: &Utf8Path, source: &str, action: &AnalyzerAction<JsonLanguage>) {
     let (new_tree, text_edit) = match action
         .mutation
         .clone()

@@ -13,6 +13,6 @@ impl GraphqlStringValue {
     /// ```
     pub fn is_block(&self) -> bool {
         self.graphql_string_literal_token()
-            .map_or(false, |token| token.text_trimmed().starts_with("\"\"\""))
+            .is_ok_and(|token| token.text_trimmed().starts_with("\"\"\""))
     }
 }

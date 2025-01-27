@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: reactCreateElementInvalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 React.createElement("div", { tabIndex: '1' })
 React.createElement("div", { tabIndex: 1 })
 React.createElement("div", { tabIndex: +1 })
@@ -89,5 +90,3 @@ reactCreateElementInvalid.js:3:40 lint/a11y/noPositiveTabindex  FIXABLE  ━━�
   
 
 ```
-
-

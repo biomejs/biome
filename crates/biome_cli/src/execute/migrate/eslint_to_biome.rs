@@ -1,5 +1,6 @@
+use biome_configuration::analyzer::SeverityOrGroup;
 use biome_configuration::{self as biome_config};
-use biome_deserialize::{Merge, StringSet};
+use biome_deserialize::Merge;
 use biome_js_analyze::lint::style::no_restricted_globals;
 
 use super::{eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_typescript};
@@ -30,7 +31,7 @@ impl eslint_eslint::AnyConfigData {
     pub(crate) fn into_biome_config(
         self,
         options: &MigrationOptions,
-    ) -> (biome_config::PartialConfiguration, MigrationResults) {
+    ) -> (biome_config::Configuration, MigrationResults) {
         match self {
             Self::Flat(config) => config.into_biome_config(options),
             Self::Legacy(config) => config.into_biome_config(options),
@@ -42,10 +43,10 @@ impl eslint_eslint::FlatConfigData {
     pub(crate) fn into_biome_config(
         self,
         options: &MigrationOptions,
-    ) -> (biome_config::PartialConfiguration, MigrationResults) {
+    ) -> (biome_config::Configuration, MigrationResults) {
         let mut results = MigrationResults::default();
-        let mut biome_config = biome_config::PartialConfiguration::default();
-        let mut linter = biome_config::PartialLinterConfiguration::default();
+        let mut biome_config = biome_config::Configuration::default();
+        let mut linter = biome_config::LinterConfiguration::default();
         let mut overrides = biome_config::Overrides::default();
         let global_config_object = if self.0.len() == 1 {
             // If there is a single config object, then we use it as the global config
@@ -62,8 +63,11 @@ impl eslint_eslint::FlatConfigData {
                 } else {
                     let mut override_pat = biome_config::OverridePattern::default();
                     if let Some(language_options) = flat_config_object.language_options {
-                        let globals = language_options.globals.enabled().collect::<StringSet>();
-                        let js_config = biome_config::PartialJavascriptConfiguration {
+                        let globals = language_options
+                            .globals
+                            .enabled()
+                            .collect::<rustc_hash::FxHashSet<_>>();
+                        let js_config = biome_config::JsConfiguration {
                             globals: Some(globals),
                             ..Default::default()
                         };
@@ -98,8 +102,11 @@ impl eslint_eslint::FlatConfigData {
             biome_config::Rules::default()
         };
         if let Some(language_options) = global_config_object.language_options {
-            let globals = language_options.globals.enabled().collect::<StringSet>();
-            let js_config = biome_config::PartialJavascriptConfiguration {
+            let globals = language_options
+                .globals
+                .enabled()
+                .collect::<rustc_hash::FxHashSet<_>>();
+            let js_config = biome_config::JsConfiguration {
                 globals: Some(globals),
                 ..Default::default()
             };
@@ -122,18 +129,18 @@ impl eslint_eslint::LegacyConfigData {
     pub(crate) fn into_biome_config(
         self,
         options: &MigrationOptions,
-    ) -> (biome_config::PartialConfiguration, MigrationResults) {
+    ) -> (biome_config::Configuration, MigrationResults) {
         let mut results = MigrationResults::default();
-        let mut biome_config = biome_config::PartialConfiguration::default();
+        let mut biome_config = biome_config::Configuration::default();
         if !self.globals.is_empty() {
-            let globals = self.globals.enabled().collect::<StringSet>();
-            let js_config = biome_config::PartialJavascriptConfiguration {
+            let globals = self.globals.enabled().collect::<rustc_hash::FxHashSet<_>>();
+            let js_config = biome_config::JsConfiguration {
                 globals: Some(globals),
                 ..Default::default()
             };
             biome_config.javascript = Some(js_config)
         }
-        let mut linter = biome_config::PartialLinterConfiguration::default();
+        let mut linter = biome_config::LinterConfiguration::default();
         let mut rules = self.rules.into_biome_rules(options, &mut results);
         rules.recommended = Some(false);
         linter.rules = Some(rules);
@@ -142,7 +149,7 @@ impl eslint_eslint::LegacyConfigData {
                 .ignore_patterns
                 .into_iter()
                 .map(|p| p.0)
-                .collect::<StringSet>();
+                .collect::<Vec<_>>();
             linter.ignore = Some(ignore);
         }
         if !self.overrides.is_empty() {
@@ -150,8 +157,11 @@ impl eslint_eslint::LegacyConfigData {
             for override_elt in self.overrides {
                 let mut override_pattern = biome_config::OverridePattern::default();
                 if !override_elt.globals.is_empty() {
-                    let globals = override_elt.globals.enabled().collect::<StringSet>();
-                    let js_config = biome_config::PartialJavascriptConfiguration {
+                    let globals = override_elt
+                        .globals
+                        .enabled()
+                        .collect::<rustc_hash::FxHashSet<_>>();
+                    let js_config = biome_config::JsConfiguration {
                         globals: Some(globals),
                         ..Default::default()
                     };
@@ -211,13 +221,15 @@ fn migrate_eslint_rule(
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
                     let group = rules.suspicious.get_or_insert_with(Default::default);
-                    group.no_console = Some(biome_config::RuleFixConfiguration::WithOptions(
-                        biome_config::RuleWithFixOptions {
-                            level: severity.into(),
-                            fix: None,
-                            options: Box::new((*rule_options).into()),
-                        },
-                    ));
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.no_console = Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: severity.into(),
+                                fix: None,
+                                options: Box::new((*rule_options).into()),
+                            },
+                        ));
+                    }
                 }
             }
         }
@@ -229,28 +241,37 @@ fn migrate_eslint_rule(
                     .into_iter()
                     .map(|g| g.into_name().into_boxed_str());
                 let group = rules.style.get_or_insert_with(Default::default);
-                group.no_restricted_globals = Some(biome_config::RuleConfiguration::WithOptions(
-                    biome_config::RuleWithOptions {
-                        level: severity.into(),
-                        options: Box::new(no_restricted_globals::RestrictedGlobalsOptions {
-                            denied_globals: globals.collect::<Vec<_>>().into_boxed_slice(),
-                        }),
-                    },
-                ));
+                if let SeverityOrGroup::Group(group) = group {
+                    group.no_restricted_globals =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: severity.into(),
+                                options: Box::new(
+                                    no_restricted_globals::RestrictedGlobalsOptions {
+                                        denied_globals: globals
+                                            .collect::<Vec<_>>()
+                                            .into_boxed_slice(),
+                                    },
+                                ),
+                            },
+                        ));
+                }
             }
         }
         eslint_eslint::Rule::Jsxa11yArioaRoles(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
                     let group = rules.a11y.get_or_insert_with(Default::default);
-                    group.use_valid_aria_role =
-                        Some(biome_config::RuleFixConfiguration::WithOptions(
-                            biome_config::RuleWithFixOptions {
-                                level: severity.into(),
-                                fix: None,
-                                options: Box::new((*rule_options).into()),
-                            },
-                        ));
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.use_valid_aria_role =
+                            Some(biome_config::RuleFixConfiguration::WithOptions(
+                                biome_config::RuleWithFixOptions {
+                                    level: severity.into(),
+                                    fix: None,
+                                    options: Box::new((*rule_options).into()),
+                                },
+                            ));
+                    }
                 }
             }
         }
@@ -258,14 +279,16 @@ fn migrate_eslint_rule(
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
                     let group = rules.style.get_or_insert_with(Default::default);
-                    group.use_consistent_array_type =
-                        Some(biome_config::RuleFixConfiguration::WithOptions(
-                            biome_config::RuleWithFixOptions {
-                                level: severity.into(),
-                                fix: None,
-                                options: rule_options.into(),
-                            },
-                        ));
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.use_consistent_array_type =
+                            Some(biome_config::RuleFixConfiguration::WithOptions(
+                                biome_config::RuleWithFixOptions {
+                                    level: severity.into(),
+                                    fix: None,
+                                    options: rule_options.into(),
+                                },
+                            ));
+                    }
                 }
             }
         }
@@ -273,13 +296,15 @@ fn migrate_eslint_rule(
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
                     let group = rules.nursery.get_or_insert_with(Default::default);
-                    group.use_consistent_member_accessibility =
-                        Some(biome_config::RuleConfiguration::WithOptions(
-                            biome_config::RuleWithOptions {
-                                level: severity.into(),
-                                options: rule_options.into(),
-                            },
-                        ));
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.use_consistent_member_accessibility =
+                            Some(biome_config::RuleConfiguration::WithOptions(
+                                biome_config::RuleWithOptions {
+                                    level: severity.into(),
+                                    options: rule_options.into(),
+                                },
+                            ));
+                    }
                 }
             }
         }
@@ -290,25 +315,30 @@ fn migrate_eslint_rule(
                     conf.into_vec().into_iter().map(|v| *v),
                 );
                 let group = rules.style.get_or_insert_with(Default::default);
-                group.use_naming_convention =
-                    Some(biome_config::RuleFixConfiguration::WithOptions(
-                        biome_config::RuleWithFixOptions {
-                            level: severity.into(),
-                            fix: None,
-                            options: options.into(),
-                        },
-                    ));
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_naming_convention =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: severity.into(),
+                                fix: None,
+                                options: options.into(),
+                            },
+                        ));
+                }
             }
         }
         eslint_eslint::Rule::UnicornFilenameCase(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let group = rules.style.get_or_insert_with(Default::default);
-                group.use_filenaming_convention = Some(
-                    biome_config::RuleConfiguration::WithOptions(biome_config::RuleWithOptions {
-                        level: conf.severity().into(),
-                        options: Box::new(conf.option_or_default().into()),
-                    }),
-                );
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_filenaming_convention =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: conf.severity().into(),
+                                options: Box::new(conf.option_or_default().into()),
+                            },
+                        ));
+                }
             }
         }
     }
@@ -323,8 +353,8 @@ mod tests {
     #[test]
     fn flat_config_single_config_object() {
         let flat_config = FlatConfigData(vec![FlatConfigObject {
-            files: ["*.js".to_string()].into_iter().collect(),
-            ignores: ["*.test.js".to_string()].into_iter().collect(),
+            files: vec!["*.js".into()],
+            ignores: vec!["*.test.js".into()],
             language_options: None,
             rules: Some(Rules(
                 [Rule::Any(Cow::Borrowed("eqeqeq"), Severity::Error)]
@@ -337,16 +367,10 @@ mod tests {
         assert!(biome_config.files.is_none());
         assert!(biome_config.overrides.is_none());
         assert!(biome_config.formatter.is_none());
-        assert!(biome_config.organize_imports.is_none());
+        assert!(biome_config.assist.is_none());
         let linter = biome_config.linter.unwrap();
-        assert_eq!(
-            linter.include,
-            Some(["*.js".to_string()].into_iter().collect())
-        );
-        assert_eq!(
-            linter.ignore,
-            Some(["*.test.js".to_string()].into_iter().collect())
-        );
+        assert_eq!(linter.include.unwrap(), ["*.js".into()],);
+        assert_eq!(linter.ignore.unwrap(), ["*.test.js".into()],);
         assert!(linter.rules.is_some());
     }
 
@@ -354,14 +378,14 @@ mod tests {
     fn flat_config_multiple_config_object() {
         let flat_config = FlatConfigData(vec![
             FlatConfigObject {
-                files: ShorthandVec::default(),
-                ignores: ["*.test.js".to_string()].into_iter().collect(),
+                files: vec![],
+                ignores: vec!["*.test.js".into()],
                 language_options: None,
                 rules: None,
             },
             FlatConfigObject {
-                files: ShorthandVec::default(),
-                ignores: ShorthandVec::default(),
+                files: vec![],
+                ignores: vec![],
                 language_options: None,
                 rules: Some(Rules(
                     [Rule::Any(Cow::Borrowed("eqeqeq"), Severity::Error)]
@@ -370,14 +394,14 @@ mod tests {
                 )),
             },
             FlatConfigObject {
-                files: ShorthandVec::default(),
-                ignores: ["*.spec.js".to_string()].into_iter().collect(),
+                files: vec![],
+                ignores: vec!["*.spec.js".into()],
                 language_options: None,
                 rules: None,
             },
             FlatConfigObject {
-                files: ["*.ts".to_string()].into_iter().collect(),
-                ignores: ShorthandVec::default(),
+                files: vec!["*.ts".into()],
+                ignores: vec![],
                 language_options: None,
                 rules: Some(Rules(
                     [Rule::Any(Cow::Borrowed("eqeqeq"), Severity::Off)]
@@ -390,19 +414,21 @@ mod tests {
 
         assert!(biome_config.files.is_none());
         assert!(biome_config.formatter.is_none());
-        assert!(biome_config.organize_imports.is_none());
+        assert!(biome_config.assist.is_none());
         let linter = biome_config.linter.unwrap();
         assert!(linter.include.is_none());
         assert_eq!(
-            linter.ignore,
-            Some(
-                ["*.test.js".to_string(), "*.spec.js".to_string()]
-                    .into_iter()
-                    .collect()
-            )
+            linter.ignore.unwrap(),
+            ["*.test.js".into(), "*.spec.js".into()]
         );
         assert_eq!(
-            linter.rules.unwrap().suspicious.unwrap().no_double_equals,
+            linter
+                .rules
+                .unwrap()
+                .suspicious
+                .unwrap()
+                .unwrap_group()
+                .no_double_equals,
             Some(biome_config::RuleFixConfiguration::Plain(
                 biome_config::RulePlainConfiguration::Error
             ))
@@ -410,10 +436,7 @@ mod tests {
         let overrides = biome_config.overrides.unwrap();
         assert_eq!(overrides.0.len(), 1);
         let override0 = overrides.0.into_iter().next().unwrap();
-        assert_eq!(
-            override0.include,
-            Some(["*.ts".to_string()].into_iter().collect())
-        );
+        assert_eq!(override0.include.unwrap(), ["*.ts".into()],);
         assert!(override0.ignore.is_none());
         assert_eq!(
             override0
@@ -423,6 +446,7 @@ mod tests {
                 .unwrap()
                 .suspicious
                 .unwrap()
+                .unwrap_group()
                 .no_double_equals,
             Some(biome_config::RuleFixConfiguration::Plain(
                 biome_config::RulePlainConfiguration::Off

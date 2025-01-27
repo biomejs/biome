@@ -20,3 +20,5 @@ export  declare  class   E {  }
 export  type  *  from  "types";
 
 export  type  *  as  types   from  "types";
+
+export { type default as G } from './types.ts';

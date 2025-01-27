@@ -76,7 +76,7 @@ where
                     match comment.lines_after() {
                         0 => {
                             let should_nestle =
-                                leading_comments_iter.peek().map_or(false, |next_comment| {
+                                leading_comments_iter.peek().is_some_and(|next_comment| {
                                     should_nestle_adjacent_doc_comments(comment, next_comment)
                                 });
 
@@ -138,7 +138,7 @@ where
 
             let format_comment = FormatRefWithRule::new(comment, Context::CommentRule::default());
 
-            let should_nestle = previous_comment.map_or(false, |previous_comment| {
+            let should_nestle = previous_comment.is_some_and(|previous_comment| {
                 should_nestle_adjacent_doc_comments(previous_comment, comment)
             });
 
@@ -169,7 +169,7 @@ where
                                     //   /**
                                     //    * docs
                                     //   */ /* still on the same line */
-                                    if previous_comment.map_or(false, |previous_comment| {
+                                    if previous_comment.is_some_and(|previous_comment| {
                                         previous_comment.kind().is_line()
                                     }) {
                                         write!(f, [hard_line_break()])?;
@@ -315,7 +315,7 @@ where
                 let format_comment =
                     FormatRefWithRule::new(comment, Context::CommentRule::default());
 
-                let should_nestle = previous_comment.map_or(false, |previous_comment| {
+                let should_nestle = previous_comment.is_some_and(|previous_comment| {
                     should_nestle_adjacent_doc_comments(previous_comment, comment)
                 });
 
@@ -334,7 +334,7 @@ where
             if matches!(self.indent(), DanglingIndentMode::Soft)
                 && dangling_comments
                     .last()
-                    .map_or(false, |comment| comment.kind().is_line())
+                    .is_some_and(|comment| comment.kind().is_line())
             {
                 write!(f, [hard_line_break()])?;
             }
@@ -476,7 +476,7 @@ where
     group_id: Option<GroupId>,
 }
 
-impl<'a, 'content, L, C> FormatOnlyIfBreaks<'a, 'content, L, C>
+impl<L, C> FormatOnlyIfBreaks<'_, '_, L, C>
 where
     L: Language,
 {

@@ -12,14 +12,11 @@ pub enum CompileError {
     /// Indicates the (top-level) pattern could not be parsed.
     ParsePatternError(ParseDiagnostic),
 
-    /// Used for missing syntax nodes.
-    MissingSyntaxNode,
+    /// Used for syntax errors.
+    SyntaxError(SyntaxError),
 
     /// A built-in function call was discovered in an unexpected context.
     UnexpectedBuiltinCall(String),
-
-    /// A metavariables was discovered in an unexpected context.
-    UnexpectedMetavariable,
 
     /// If a function with the same name is defined multiple times.
     DuplicateFunctionDefinition(String),
@@ -95,14 +92,17 @@ impl Diagnostic for CompileError {
                 fmt.write_markup(markup! { "Error parsing pattern: " })?;
                 diagnostic.message(fmt)
             }
-            CompileError::MissingSyntaxNode => {
+            CompileError::SyntaxError(SyntaxError::MissingRequiredChild) => {
                 fmt.write_markup(markup! { "A syntax node was missing" })
+            }
+            CompileError::SyntaxError(SyntaxError::UnexpectedBogusNode) => {
+                fmt.write_markup(markup! { "Unexpected bogus node" })
+            }
+            CompileError::SyntaxError(SyntaxError::UnexpectedMetavariable) => {
+                fmt.write_markup(markup! { "Unexpected metavariable" })
             }
             CompileError::UnexpectedBuiltinCall(name) => {
                 fmt.write_markup(markup! { "Unexpected call to built-in: "{{name}}"()" })
-            }
-            CompileError::UnexpectedMetavariable => {
-                fmt.write_markup(markup! { "Unexpected metavariable" })
             }
             CompileError::DuplicateFunctionDefinition(name) => {
                 fmt.write_markup(markup! { "Duplicate function definition: "{{name}} })
@@ -202,10 +202,7 @@ impl Diagnostic for CompileError {
 
 impl From<SyntaxError> for CompileError {
     fn from(error: SyntaxError) -> Self {
-        match error {
-            SyntaxError::MissingRequiredChild => Self::MissingSyntaxNode,
-            SyntaxError::UnexpectedMetavariable => Self::UnexpectedMetavariable,
-        }
+        Self::SyntaxError(error)
     }
 }
 

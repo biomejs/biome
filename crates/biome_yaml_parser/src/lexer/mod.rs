@@ -56,7 +56,7 @@ pub(crate) struct YamlLexer<'src> {
     context: YamlLexContext,
 }
 
-impl<'source> YamlLexer<'source> {
+impl YamlLexer<'_> {
     fn current_char(&self) -> Option<u8> {
         self.source.as_bytes().get(self.position).copied()
     }

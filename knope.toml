@@ -22,6 +22,9 @@ versioned_files = [
   "packages/@biomejs/backend-jsonrpc/package.json",
 ]
 
+[packages.js-api]
+changelog       = "packages/@biomejs/js-api/CHANGELOG.md"
+versioned_files = ["packages/@biomejs/js-api/package.json"]
 
 # Special crate. This is the main binary that we are going to release.
 [packages.biome_cli]
@@ -161,9 +164,9 @@ versioned_files = ["crates/biome_markup/Cargo.toml"]
 [packages.biome_parser]
 changelog       = "crates/biome_parser/CHANGELOG.md"
 versioned_files = ["crates/biome_parser/Cargo.toml"]
-[packages.biome_project]
-changelog       = "crates/biome_project/CHANGELOG.md"
-versioned_files = ["crates/biome_project/Cargo.toml"]
+[packages.biome_package]
+changelog       = "crates/biome_package/CHANGELOG.md"
+versioned_files = ["crates/biome_package/Cargo.toml"]
 [packages.biome_rowan]
 changelog       = "crates/biome_rowan/CHANGELOG.md"
 versioned_files = ["crates/biome_rowan/Cargo.toml"]
@@ -215,6 +218,10 @@ versioned_files = ["crates/biome_graphql_semantic/Cargo.toml"]
 changelog       = "crates/biome_css_semantic/CHANGELOG.md"
 versioned_files = ["crates/biome_css_semantic/Cargo.toml"]
 
+[packages.biome_plugin_loader]
+changelog       = "crates/biome_plugin_loader/CHANGELOG.md"
+versioned_files = ["crates/biome_plugin_loader/Cargo.toml"]
+
 [packages.biome_glob]
 changelog       = "crates/biome_glob/CHANGELOG.md"
 versioned_files = ["crates/biome_glob/Cargo.toml"]
@@ -222,6 +229,18 @@ versioned_files = ["crates/biome_glob/Cargo.toml"]
 [packages.biome_syntax_codegen]
 changelog       = "crates/biome_syntax_codegen/CHANGELOG.md"
 versioned_files = ["crates/biome_syntax_codegen/Cargo.toml"]
+
+[packages.biome_project_layout]
+changelog       = "crates/biome_project_layout/CHANGELOG.md"
+versioned_files = ["crates/biome_project_layout/Cargo.toml"]
+
+[packages.biome_dependency_graph]
+changelog       = "crates/biome_dependency_graph/CHANGELOG.md"
+versioned_files = ["crates/biome_dependency_graph/Cargo.toml"]
+
+[packages.biome_json_value]
+changelog       = "crates/biome_json_value/CHANGELOG.md"
+versioned_files = ["crates/biome_json_value/Cargo.toml"]
 
 ## End of crates. DO NOT CHANGE!
 

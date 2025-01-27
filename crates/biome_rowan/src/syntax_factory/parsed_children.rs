@@ -51,7 +51,7 @@ pub struct ParsedChildrenIntoIterator<'a, K> {
     ph: PhantomData<K>,
 }
 
-impl<'a, K: SyntaxKind> Iterator for ParsedChildrenIntoIterator<'a, K> {
+impl<K: SyntaxKind> Iterator for ParsedChildrenIntoIterator<'_, K> {
     type Item = RawSyntaxElement<K>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -66,15 +66,15 @@ impl<'a, K: SyntaxKind> Iterator for ParsedChildrenIntoIterator<'a, K> {
     }
 }
 
-impl<'a, K: SyntaxKind> FusedIterator for ParsedChildrenIntoIterator<'a, K> {}
+impl<K: SyntaxKind> FusedIterator for ParsedChildrenIntoIterator<'_, K> {}
 
-impl<'a, K: SyntaxKind> ExactSizeIterator for ParsedChildrenIntoIterator<'a, K> {
+impl<K: SyntaxKind> ExactSizeIterator for ParsedChildrenIntoIterator<'_, K> {
     fn len(&self) -> usize {
         self.inner.len()
     }
 }
 
-impl<'a, K: SyntaxKind> DoubleEndedIterator for ParsedChildrenIntoIterator<'a, K> {
+impl<K: SyntaxKind> DoubleEndedIterator for ParsedChildrenIntoIterator<'_, K> {
     fn next_back(&mut self) -> Option<Self::Item> {
         self.inner
             .next_back()
@@ -115,15 +115,15 @@ impl<'a, K: SyntaxKind> Iterator for ParsedChildrenIterator<'a, K> {
     }
 }
 
-impl<'a, K: SyntaxKind> FusedIterator for ParsedChildrenIterator<'a, K> {}
+impl<K: SyntaxKind> FusedIterator for ParsedChildrenIterator<'_, K> {}
 
-impl<'a, K: SyntaxKind> ExactSizeIterator for ParsedChildrenIterator<'a, K> {
+impl<K: SyntaxKind> ExactSizeIterator for ParsedChildrenIterator<'_, K> {
     fn len(&self) -> usize {
         self.inner.len()
     }
 }
 
-impl<'a, K: SyntaxKind> DoubleEndedIterator for ParsedChildrenIterator<'a, K> {
+impl<K: SyntaxKind> DoubleEndedIterator for ParsedChildrenIterator<'_, K> {
     fn next_back(&mut self) -> Option<Self::Item> {
         self.inner
             .next_back()

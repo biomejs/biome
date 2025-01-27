@@ -41,6 +41,7 @@ GritRoot {
                                     value_token: GRIT_BACKTICK_SNIPPET@45..64 "`if (DEBUG) { $_ }`" [] [],
                                 },
                             },
+                            until_clause: missing (optional),
                         },
                     },
                 ],
@@ -78,6 +79,7 @@ GritRoot {
               1: GRIT_CODE_SNIPPET@45..64
                 0: GRIT_BACKTICK_SNIPPET_LITERAL@45..64
                   0: GRIT_BACKTICK_SNIPPET@45..64 "`if (DEBUG) { $_ }`" [] []
+              2: (empty)
         3: R_CURLY@64..66 "}" [Newline("\n")] []
   4: EOF@66..67 "" [Newline("\n")] []
 

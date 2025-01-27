@@ -134,11 +134,11 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
                 Self::Empty(node2, sort2) => node1.kind() == node2.kind() && sort1 == sort2,
                 Self::Range(..) | Self::File(_) | Self::Node(..) | Self::Constant(_) => false,
             },
-            Self::Constant(c1) => other.as_constant().map_or(false, |c2| *c1 == c2),
+            Self::Constant(c1) => other.as_constant().is_some_and(|c2| *c1 == c2),
             Self::Range(range, source) => other
                 .text(language)
                 .is_ok_and(|t| t == source[range.start().into()..range.end().into()]),
-            Self::File(path1) => other.as_filename().map_or(false, |path2| *path1 == path2),
+            Self::File(path1) => other.as_filename().is_some_and(|path2| *path1 == path2),
         }
     }
 

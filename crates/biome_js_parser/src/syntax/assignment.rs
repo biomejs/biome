@@ -83,17 +83,17 @@ pub(crate) fn expression_to_assignment_pattern(
     p: &mut JsParser,
     target: CompletedMarker,
     checkpoint: JsParserCheckpoint,
-) -> CompletedMarker {
+) -> ParsedSyntax {
     match target.kind(p) {
         JS_OBJECT_EXPRESSION => {
             p.rewind(checkpoint);
-            ObjectAssignmentPattern.parse_object_pattern(p).unwrap()
+            ObjectAssignmentPattern.parse_object_pattern(p)
         }
         JS_ARRAY_EXPRESSION => {
             p.rewind(checkpoint);
-            ArrayAssignmentPattern.parse_array_pattern(p).unwrap()
+            ArrayAssignmentPattern.parse_array_pattern(p)
         }
-        _ => expression_to_assignment(p, target, checkpoint),
+        _ => ParsedSyntax::Present(expression_to_assignment(p, target, checkpoint)),
     }
 }
 
@@ -119,7 +119,7 @@ pub(crate) fn parse_assignment_pattern(p: &mut JsParser) -> ParsedSyntax {
     let assignment_expression = parse_conditional_expr(p, ExpressionContext::default());
 
     assignment_expression
-        .map(|expression| expression_to_assignment_pattern(p, expression, checkpoint))
+        .and_then(|expression| expression_to_assignment_pattern(p, expression, checkpoint))
 }
 
 /// Re-parses an expression as an assignment.

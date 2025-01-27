@@ -5,6 +5,7 @@ use crate::{
     WalkEvent,
 };
 use biome_text_size::{TextRange, TextSize};
+use std::borrow::Cow;
 use std::hash::{Hash, Hasher};
 use std::iter::FusedIterator;
 use std::ops;
@@ -319,36 +320,43 @@ impl SyntaxNode {
     }
 
     pub fn token_at_offset(&self, offset: TextSize) -> TokenAtOffset<SyntaxToken> {
-        // TODO: this could be faster if we first drill-down to node, and only
-        // then switch to token search. We should also replace explicit
-        // recursion with a loop.
-        let range = self.text_range();
-        assert!(
-            range.start() <= offset && offset <= range.end(),
-            "Bad offset: range {range:?} offset {offset:?}"
-        );
-        if range.is_empty() {
-            return TokenAtOffset::None;
-        }
-
-        let mut children = self.children_with_tokens().filter(|child| {
-            let child_range = child.text_range();
-            !child_range.is_empty() && child_range.contains_inclusive(offset)
-        });
-
-        let left = children.next().unwrap();
-        let right = children.next();
-        assert!(children.next().is_none());
-
-        if let Some(right) = right {
-            match (left.token_at_offset(offset), right.token_at_offset(offset)) {
-                (TokenAtOffset::Single(left), TokenAtOffset::Single(right)) => {
-                    TokenAtOffset::Between(left, right)
-                }
-                _ => unreachable!(),
+        let mut node = Cow::Borrowed(self);
+        loop {
+            let range = node.text_range();
+            if range.is_empty() || offset < range.start() || offset > range.end() {
+                return TokenAtOffset::None;
             }
-        } else {
-            left.token_at_offset(offset)
+
+            let mut children = node.children_with_tokens().filter(|child| {
+                let child_range = child.text_range();
+                !child_range.is_empty() && child_range.contains_inclusive(offset)
+            });
+
+            let left = children.next().unwrap();
+            let right = children.next();
+            assert!(children.next().is_none());
+
+            if let Some(right) = right {
+                let token_at_offset =
+                    |node: NodeOrToken<SyntaxNode, SyntaxToken>| -> TokenAtOffset<SyntaxToken> {
+                        match node {
+                            NodeOrToken::Token(token) => TokenAtOffset::Single(token),
+                            NodeOrToken::Node(node) => node.token_at_offset(offset),
+                        }
+                    };
+
+                return match (token_at_offset(left), token_at_offset(right)) {
+                    (TokenAtOffset::Single(left), TokenAtOffset::Single(right)) => {
+                        TokenAtOffset::Between(left, right)
+                    }
+                    _ => TokenAtOffset::None,
+                };
+            }
+
+            match left {
+                NodeOrToken::Node(left) => node = Cow::Owned(left),
+                NodeOrToken::Token(left) => return TokenAtOffset::Single(left),
+            }
         }
     }
 
@@ -458,7 +466,7 @@ impl fmt::Display for SyntaxNode {
     }
 }
 
-// region: iterators
+// #region: iterators
 
 #[derive(Clone, Debug)]
 pub(crate) struct SyntaxNodeChildren {
@@ -900,7 +908,7 @@ impl<'a> Siblings<'a> {
     }
 }
 
-// endregion
+// #endregion
 
 #[cfg(test)]
 mod tests {
@@ -927,7 +935,7 @@ mod tests {
         assert_eq!(
             iter.next()
                 .and_then(|slot| slot.into_node())
-                .map(|node| node.text().to_string())
+                .map(|node| node.text_with_trivia().to_string())
                 .as_deref(),
             Some("1")
         );
@@ -937,7 +945,7 @@ mod tests {
         assert_eq!(
             iter.next_back()
                 .and_then(|slot| slot.into_node())
-                .map(|node| node.text().to_string())
+                .map(|node| node.text_with_trivia().to_string())
                 .as_deref(),
             Some("4")
         );
@@ -947,7 +955,7 @@ mod tests {
         assert_eq!(
             iter.last()
                 .and_then(|slot| slot.into_node())
-                .map(|node| node.text().to_string())
+                .map(|node| node.text_with_trivia().to_string())
                 .as_deref(),
             Some("3")
         );

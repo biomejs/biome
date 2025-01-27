@@ -144,21 +144,21 @@ pub struct SignalEntry<'phase, L: Language> {
 }
 
 // SignalEntry is ordered based on the starting point of its `text_range`
-impl<'phase, L: Language> Ord for SignalEntry<'phase, L> {
+impl<L: Language> Ord for SignalEntry<'_, L> {
     fn cmp(&self, other: &Self) -> Ordering {
         other.text_range.start().cmp(&self.text_range.start())
     }
 }
 
-impl<'phase, L: Language> PartialOrd for SignalEntry<'phase, L> {
+impl<L: Language> PartialOrd for SignalEntry<'_, L> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<'phase, L: Language> Eq for SignalEntry<'phase, L> {}
+impl<L: Language> Eq for SignalEntry<'_, L> {}
 
-impl<'phase, L: Language> PartialEq for SignalEntry<'phase, L> {
+impl<L: Language> PartialEq for SignalEntry<'_, L> {
     fn eq(&self, other: &Self) -> bool {
         self.text_range.start() == other.text_range.start()
     }
@@ -204,7 +204,7 @@ mod tests {
         ControlFlow, MetadataRegistry, Never, Phases, QueryMatcher, RuleKey, ServiceBag,
         SignalEntry, SuppressionAction, SyntaxVisitor,
     };
-    use crate::{AnalyzerOptions, SuppressionKind};
+    use crate::{AnalyzerOptions, AnalyzerSuppression};
     use biome_diagnostics::{category, DiagnosticExt};
     use biome_diagnostics::{Diagnostic, Severity};
     use biome_rowan::{
@@ -350,12 +350,13 @@ mod tests {
         };
 
         fn parse_suppression_comment(
-            comment: &'_ str,
-        ) -> Vec<Result<SuppressionKind<'_>, Infallible>> {
+            comment: &str,
+            _piece_range: TextRange,
+        ) -> Vec<Result<AnalyzerSuppression, Infallible>> {
             comment
                 .trim_start_matches("//")
                 .split(' ')
-                .map(SuppressionKind::Rule)
+                .map(AnalyzerSuppression::rule)
                 .map(Ok)
                 .collect()
         }
@@ -368,18 +369,27 @@ mod tests {
         impl SuppressionAction for TestAction {
             type Language = RawLanguage;
 
-            fn find_token_to_apply_suppression(
+            fn find_token_for_inline_suppression(
                 &self,
                 _: SyntaxToken<Self::Language>,
             ) -> Option<ApplySuppression<Self::Language>> {
                 None
             }
 
-            fn apply_suppression(
+            fn apply_inline_suppression(
                 &self,
                 _: &mut BatchMutation<Self::Language>,
                 _: ApplySuppression<Self::Language>,
                 _: &str,
+                _: &str,
+            ) {
+                unreachable!("")
+            }
+
+            fn apply_top_level_suppression(
+                &self,
+                _: &mut BatchMutation<Self::Language>,
+                _: SyntaxToken<Self::Language>,
                 _: &str,
             ) {
                 unreachable!("")

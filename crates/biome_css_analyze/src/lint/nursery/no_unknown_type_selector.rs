@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::CssTypeSelector;
+use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 
 use crate::utils::is_known_type_selector;
@@ -54,6 +55,7 @@ declare_lint_rule! {
         name: "noUnknownTypeSelector",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("selector-type-no-unknown")],
     }
 }

@@ -5,8 +5,8 @@ use crate::syntax::selector::{
     eat_or_recover_selector_function_close_token, parse_selector,
     recover_selector_function_parameter,
 };
-use biome_css_syntax::CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_SELECTOR;
 use biome_css_syntax::CssSyntaxKind::*;
+use biome_css_syntax::CssSyntaxKind::{self, CSS_PSEUDO_CLASS_FUNCTION_SELECTOR};
 use biome_css_syntax::T;
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
@@ -49,7 +49,7 @@ pub(crate) fn parse_pseudo_class_function_selector(p: &mut CssParser) -> ParsedS
 
         // Skip the entire pseudo-class function selector
         // Skip until the next closing parenthesis
-        while !p.eat(T![')']) {
+        while !p.eat(T![')']) && !p.at(CssSyntaxKind::EOF) {
             p.bump_any();
         }
 

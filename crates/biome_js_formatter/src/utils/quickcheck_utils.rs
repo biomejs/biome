@@ -10,7 +10,7 @@ impl std::ops::Deref for AsciiString {
     }
 }
 
-impl<'a> PartialEq<AsciiString> for &'a str {
+impl PartialEq<AsciiString> for &str {
     fn eq(&self, other: &AsciiString) -> bool {
         self == &other.0.as_str()
     }

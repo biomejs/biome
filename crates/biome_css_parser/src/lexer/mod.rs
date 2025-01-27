@@ -655,7 +655,7 @@ impl<'src> CssLexer<'src> {
             // U+002E FULL STOP (.) followed by a digit...
             if self
                 .current_byte()
-                .map_or(false, |byte| byte.is_ascii_digit())
+                .is_some_and(|byte| byte.is_ascii_digit())
             {
                 // While the next input code point is a digit, consume it.
                 self.consume_number_sequence();
@@ -1244,7 +1244,7 @@ impl<'src> CssLexer<'src> {
                 Some(byte) if byte.is_ascii_digit() => true,
                 // Otherwise, if the second code point is a U+002E FULL STOP (.) and the
                 // third code point is a digit, return true.
-                Some(b'.') if self.byte_at(2).map_or(false, |byte| byte.is_ascii_digit()) => true,
+                Some(b'.') if self.byte_at(2).is_some_and(|byte| byte.is_ascii_digit()) => true,
                 _ => false,
             },
             Some(b'.') => match self.peek_byte() {

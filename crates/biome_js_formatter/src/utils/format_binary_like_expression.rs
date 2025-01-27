@@ -116,7 +116,7 @@ impl Format<JsFormatContext> for AnyJsBinaryLikeExpression {
         }
 
         if let Some(first) = parts.first() {
-            let last_is_jsx = parts.last().map_or(false, |part| part.is_jsx());
+            let last_is_jsx = parts.last().is_some_and(|part| part.is_jsx());
             let tail_parts = if last_is_jsx {
                 &parts[1..parts.len() - 1]
             } else {
@@ -202,10 +202,10 @@ fn split_into_left_and_right_sides(
 ///
 /// This function checks what the parents adheres to this behaviour
 fn should_indent_if_parent_inlines(parent: Option<&JsSyntaxNode>) -> bool {
-    parent.map_or(false, |parent| match parent.kind() {
+    parent.is_some_and(|parent| match parent.kind() {
         JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION | JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER => true,
 
-        JsSyntaxKind::JS_INITIALIZER_CLAUSE => parent.parent().map_or(false, |grand_parent| {
+        JsSyntaxKind::JS_INITIALIZER_CLAUSE => parent.parent().is_some_and(|grand_parent| {
             matches!(
                 grand_parent.kind(),
                 JsSyntaxKind::JS_VARIABLE_DECLARATOR | JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER
@@ -293,14 +293,14 @@ impl Format<JsFormatContext> for BinaryLeftOrRightSide {
                 let parent = syntax.parent();
 
                 // Doesn't match prettier that only distinguishes between logical and binary
-                let parent_has_same_kind = parent.as_ref().map_or(false, |parent| {
+                let parent_has_same_kind = parent.as_ref().is_some_and(|parent| {
                     is_same_binary_expression_kind(binary_like_expression, parent)
                 });
 
                 let left_has_same_kind = binary_like_expression
                     .left()?
                     .into_expression()
-                    .map_or(false, |left| {
+                    .is_some_and(|left| {
                         is_same_binary_expression_kind(binary_like_expression, left.syntax())
                     });
                 let right_has_same_kind =

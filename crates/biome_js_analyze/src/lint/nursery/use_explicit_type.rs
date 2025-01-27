@@ -316,11 +316,11 @@ impl Rule for UseExplicitType {
                     return None;
                 }
 
-                let func_range = func.syntax().text_range();
+                let func_range = func.syntax().text_range_with_trivia();
                 if let Ok(Some(AnyJsBinding::JsIdentifierBinding(id))) = func.id() {
                     return Some(TextRange::new(
                         func_range.start(),
-                        id.syntax().text_range().end(),
+                        id.syntax().text_range_with_trivia().end(),
                     ));
                 }
 
@@ -438,7 +438,7 @@ fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
         return false;
     };
 
-    ts_ref.text() == "const"
+    ts_ref.to_trimmed_string() == "const"
 }
 
 /// Checks if a function is allowed within specific expression contexts.
@@ -632,20 +632,20 @@ fn is_property_of_object_with_type(syntax: &SyntaxNode<JsLanguage>) -> bool {
 /// const castTyped = <() => string>(() => '');
 /// ```
 fn is_type_assertion(syntax: &SyntaxNode<JsLanguage>) -> bool {
-    fn is_assertion_kind(kind: JsSyntaxKind) -> bool {
+    fn is_attribute_kind(kind: JsSyntaxKind) -> bool {
         matches!(
             kind,
             JsSyntaxKind::TS_AS_EXPRESSION | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
         )
     }
 
-    syntax.parent().map_or(false, |parent| {
+    syntax.parent().is_some_and(|parent| {
         if parent.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
             parent
                 .parent()
-                .is_some_and(|grandparent| is_assertion_kind(grandparent.kind()))
+                .is_some_and(|grandparent| is_attribute_kind(grandparent.kind()))
         } else {
-            is_assertion_kind(parent.kind())
+            is_attribute_kind(parent.kind())
         }
     })
 }

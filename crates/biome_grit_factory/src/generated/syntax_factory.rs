@@ -1391,7 +1391,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if GritPatternContainsUntilClause::can_cast(element.kind()) {
+                    if GritPatternUntilClause::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1404,32 +1404,6 @@ impl SyntaxFactory for GritSyntaxFactory {
                     );
                 }
                 slots.into_node(GRIT_PATTERN_CONTAINS, children)
-            }
-            GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![until] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyGritPattern::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE, children)
             }
             GRIT_PATTERN_DEFINITION => {
                 let mut elements = (&children).into_iter();
@@ -1802,6 +1776,32 @@ impl SyntaxFactory for GritSyntaxFactory {
                     );
                 }
                 slots.into_node(GRIT_PATTERN_OR_ELSE, children)
+            }
+            GRIT_PATTERN_UNTIL_CLAUSE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![until] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyGritPattern::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GRIT_PATTERN_UNTIL_CLAUSE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GRIT_PATTERN_UNTIL_CLAUSE, children)
             }
             GRIT_PATTERN_WHERE => {
                 let mut elements = (&children).into_iter();
@@ -3005,7 +3005,7 @@ impl SyntaxFactory for GritSyntaxFactory {
             }
             GRIT_WITHIN => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if element.kind() == T![within] {
@@ -3016,6 +3016,13 @@ impl SyntaxFactory for GritSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element {
                     if AnyGritMaybeCurlyPattern::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if GritPatternUntilClause::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }

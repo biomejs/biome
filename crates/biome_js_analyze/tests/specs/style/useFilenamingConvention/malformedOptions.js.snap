@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: malformedOptions.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 
 ```
 
@@ -22,5 +23,3 @@ malformedOptions.options:9:24 deserialize ━━━━━━━━━━━━�
   
 
 ```
-
-

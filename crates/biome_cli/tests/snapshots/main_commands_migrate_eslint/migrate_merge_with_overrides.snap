@@ -33,6 +33,21 @@ snapshot_kind: text
 # Emitted Messages
 
 ```block
+.eslintrc.json:3:47 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Incorrect type, expected a string, but received null.
+  
+    1 │ {
+    2 │         "overrides": [{
+  > 3 │             "files": ["bin/*.js", "lib/*.js", null],
+      │                                               ^^^^
+    4 │             "excludedFiles": "*.test.js",
+    5 │             "rules": {
+  
+
+```
+
+```block
 biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Configuration file can be updated.

@@ -24,7 +24,7 @@ struct JunitDiagnostic<'a> {
     diagnostic: &'a Error,
 }
 
-impl<'a> Display for JunitDiagnostic<'a> {
+impl Display for JunitDiagnostic<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         self.diagnostic.description(f)
     }
@@ -39,7 +39,7 @@ impl<'a> JunitReporterVisitor<'a> {
     }
 }
 
-impl<'a> ReporterVisitor for JunitReporterVisitor<'a> {
+impl ReporterVisitor for JunitReporterVisitor<'_> {
     fn report_summary(
         &mut self,
         _execution: &Execution,

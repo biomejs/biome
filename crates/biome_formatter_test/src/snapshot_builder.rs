@@ -4,10 +4,9 @@ use biome_diagnostics::PrintDiagnostic;
 use biome_diagnostics::{termcolor, DiagnosticExt};
 use biome_formatter::Printed;
 use biome_parser::AnyParse;
-use std::ffi::OsStr;
+use camino::Utf8Path;
 use std::fmt;
 use std::fmt::Write;
-use std::path::Path;
 
 #[derive(serde::Serialize)]
 struct TestInfo {
@@ -34,12 +33,12 @@ impl<'a> SnapshotOutput<'a> {
 }
 
 pub struct SnapshotBuilder<'a> {
-    input_file: &'a Path,
+    input_file: &'a Utf8Path,
     snapshot: String,
 }
 
 impl<'a> SnapshotBuilder<'a> {
-    pub fn new(input_file: &'a Path) -> Self {
+    pub fn new(input_file: &'a Utf8Path) -> Self {
         SnapshotBuilder {
             input_file,
             snapshot: String::new(),
@@ -140,7 +139,7 @@ impl<'a> SnapshotBuilder<'a> {
             return self;
         }
 
-        let file_name = self.input_file.file_name().and_then(OsStr::to_str).unwrap();
+        let file_name = self.input_file.file_name().unwrap();
 
         let mut buffer = termcolor::Buffer::no_color();
 
@@ -197,7 +196,7 @@ impl<'a> SnapshotBuilder<'a> {
     }
 
     pub fn finish(self, relative_file_name: &str) {
-        let file_name = self.input_file.file_name().and_then(OsStr::to_str).unwrap();
+        let file_name = self.input_file.file_name().unwrap();
 
         let info = TestInfo {
             test_file: relative_file_name.to_owned(),
@@ -216,7 +215,7 @@ impl<'a> SnapshotBuilder<'a> {
 
 impl SnapshotBuilder<'_> {
     fn write_extension(&mut self) {
-        let file_extension = self.input_file.extension().unwrap().to_str().unwrap();
+        let file_extension = self.input_file.extension().unwrap();
         writeln!(self.snapshot, "```{file_extension}").unwrap();
     }
 

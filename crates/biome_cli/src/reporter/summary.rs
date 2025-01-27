@@ -27,7 +27,7 @@ impl Reporter for SummaryReporter {
 
 pub(crate) struct SummaryReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
 
-impl<'a> ReporterVisitor for SummaryReporterVisitor<'a> {
+impl ReporterVisitor for SummaryReporterVisitor<'_> {
     fn report_summary(
         &mut self,
         execution: &Execution,
@@ -42,7 +42,7 @@ impl<'a> ReporterVisitor for SummaryReporterVisitor<'a> {
 
         if !execution.is_ci() && summary.diagnostics_not_printed > 0 {
             self.0.log(markup! {
-                <Warn>"The number of diagnostics exceeds the number allowed by Biome.\n"</Warn>
+                <Warn>"The number of diagnostics exceeds the limit allowed. Use "<Emphasis>"--max-diagnostics"</Emphasis>" to increase it.\n"</Warn>
                 <Info>"Diagnostics not shown: "</Info><Emphasis>{summary.diagnostics_not_printed}</Emphasis><Info>"."</Info>
             })
         }
@@ -72,6 +72,7 @@ impl<'a> ReporterVisitor for SummaryReporterVisitor<'a> {
 
             let category = diagnostic.category();
             let severity = &diagnostic.severity();
+
             if diagnostic.severity() >= diagnostics_payload.diagnostic_level {
                 if diagnostic.tags().is_verbose() {
                     if diagnostics_payload.verbose {
@@ -113,8 +114,8 @@ impl<'a> ReporterVisitor for SummaryReporterVisitor<'a> {
 
                 if execution.is_check() || execution.is_ci() {
                     if let Some(category) = category {
-                        if category.name() == "organizeImports" {
-                            files_to_diagnostics.insert_organize_imports(location);
+                        if category.name() == "assist" {
+                            files_to_diagnostics.insert_assist(location);
                         }
                     }
                 }
@@ -130,7 +131,7 @@ impl<'a> ReporterVisitor for SummaryReporterVisitor<'a> {
 #[derive(Debug, Default)]
 struct FileToDiagnostics {
     formats: BTreeSet<String>,
-    organize_imports: BTreeSet<String>,
+    assists: BTreeSet<String>,
     lints: LintsByCategory,
     parse: BTreeSet<String>,
 }
@@ -145,8 +146,8 @@ impl FileToDiagnostics {
         self.formats.insert(location.into());
     }
 
-    fn insert_organize_imports(&mut self, location: &str) {
-        self.organize_imports.insert(location.into());
+    fn insert_assist(&mut self, location: &str) {
+        self.assists.insert(location.into());
     }
 
     fn insert_parse(&mut self, location: &str) {
@@ -172,10 +173,10 @@ struct SummaryListDiagnostic<'a> {
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
     severity = Information,
-    category = "reporter/analyzer",
-    message = "Some analyzer rules were triggered"
+    category = "reporter/linter",
+    message = "Some lint rules were triggered"
 )]
-struct SummaryTableDiagnostic<'a> {
+struct LintSummaryDiagnostic<'a> {
     #[advice]
     tables: &'a LintsByCategory,
 }
@@ -183,7 +184,7 @@ struct SummaryTableDiagnostic<'a> {
 #[derive(Debug)]
 struct SummaryListAdvice<'a>(&'a BTreeSet<String>);
 
-impl<'a> Advices for SummaryListAdvice<'a> {
+impl Advices for SummaryListAdvice<'_> {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         let list: Vec<_> = self.0.iter().map(|s| s as &dyn Display).collect();
         visitor.record_list(&list)
@@ -224,7 +225,7 @@ impl Display for FileToDiagnostics {
             })?;
         }
 
-        if !self.organize_imports.is_empty() {
+        if !self.assists.is_empty() {
             let diagnostic = SummaryListDiagnostic {
                 message: MessageAndDescription::from(
                     markup! {
@@ -232,8 +233,8 @@ impl Display for FileToDiagnostics {
                     }
                     .to_owned(),
                 ),
-                list: SummaryListAdvice(&self.organize_imports),
-                category: category!("reporter/organizeImports"),
+                list: SummaryListAdvice(&self.assists),
+                category: category!("reporter/assist"),
             };
             fmt.write_markup(markup! {
                 {PrintDiagnostic::simple(&diagnostic)}
@@ -241,7 +242,7 @@ impl Display for FileToDiagnostics {
         }
 
         if !self.lints.0.is_empty() {
-            let diagnostic = SummaryTableDiagnostic {
+            let diagnostic = LintSummaryDiagnostic {
                 tables: &self.lints,
             };
             fmt.write_markup(markup! {
@@ -267,7 +268,7 @@ impl LintsByCategory {
     }
 }
 
-impl<'a> Advices for &'a LintsByCategory {
+impl Advices for &LintsByCategory {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         let headers = &[
             markup!("Rule Name").to_owned(),

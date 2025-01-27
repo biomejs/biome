@@ -1,0 +1,41 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: top_level.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "all": true
+    }
+  }
+}
+```
+
+# Diagnostics
+```
+top_level.json:4:7 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property all has been removed.
+  
+    2 │   "linter": {
+    3 │     "rules": {
+  > 4 │       "all": true
+      │       ^^^^^
+    5 │     }
+    6 │   }
+  
+  i Due to the increasing number of rules that span in scope and use-case, certain rules can conflict with each other. The option has become more harmful than useful.
+  
+  i Safe fix: Remove the property.
+  
+    2 2 │     "linter": {
+    3 3 │       "rules": {
+    4   │ - ······"all":·true
+    5 4 │       }
+    6 5 │     }
+  
+
+```

@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-with-shebang-comments.cjs
+---
+# Input
+```cjs
+#!/usr/bin/env node
+
+// comment
+
+```

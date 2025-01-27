@@ -1646,10 +1646,9 @@ fn parse_for_head(p: &mut JsParser, has_l_paren: bool, is_for_await: bool) -> Js
 
         if p.at(T![in]) || p.at(T![of]) {
             // for (assignment_pattern in ...
-            if let Present(assignment_expr) = init_expr {
-                let mut assignment =
-                    expression_to_assignment_pattern(p, assignment_expr, checkpoint);
-
+            if let Present(mut assignment) = init_expr.and_then(|assignment_expr| {
+                expression_to_assignment_pattern(p, assignment_expr, checkpoint)
+            }) {
                 if TypeScript.is_supported(p)
                     && p.at(T![in])
                     && matches!(

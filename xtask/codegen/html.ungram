@@ -69,6 +69,7 @@ AnyHtmlElement =
 	| HtmlElement
 	| HtmlContent
 	| HtmlComment
+	| HtmlCdataSection
 	| HtmlBogusElement
 
 
@@ -106,6 +107,13 @@ HtmlComment =
 	'<!--'
 	content: 'html_literal'
 	'-->'
+
+// <![CDATA[example]]>
+// Reference: https://html.spec.whatwg.org/multipage/syntax.html#cdata-sections
+HtmlCdataSection =
+	'<![CDATA['
+	content: 'html_literal'
+	']]>'
 
 // ==================================
 // Attributes

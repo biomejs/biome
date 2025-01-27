@@ -1,6 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, AnyJsxAttributeValue,
@@ -46,6 +47,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("img-redundant-alt")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -103,7 +105,7 @@ impl Rule for NoRedundantAlt {
                             expr.elements().into_iter().any(|template_element| {
                                 match template_element {
                                     AnyJsTemplateElement::JsTemplateChunkElement(node) => {
-                                        node.template_chunk_token().ok().map_or(false, |token| {
+                                        node.template_chunk_token().ok().is_some_and(|token| {
                                             is_redundant_alt(token.text_trimmed())
                                         })
                                     }

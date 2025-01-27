@@ -435,7 +435,7 @@ impl FormatJsAnyConditionalRule {
                     _ => None,
                 };
 
-                argument.map_or(false, |argument| argument == expression)
+                argument.is_some_and(|argument| argument == expression)
             }
         }
     }
@@ -666,7 +666,7 @@ impl AnyJsConditional {
             AnyJsConditional::JsConditionalExpression(conditional) => conditional
                 .test()
                 .ok()
-                .map_or(false, |resolved| resolved.syntax() == node),
+                .is_some_and(|resolved| resolved.syntax() == node),
             AnyJsConditional::TsConditionalType(conditional) => {
                 conditional.check_type().map(AstNode::into_syntax).as_ref() == Ok(node)
                     || conditional

@@ -3,26 +3,23 @@ use biome_analyze::{
     RuleKey, ServiceBag, SyntaxVisitor,
 };
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
-use biome_project::PackageJson;
+use biome_package::PackageJson;
 use biome_rowan::AstNode;
-use std::sync::Arc;
+use camino::Utf8PathBuf;
 
 #[derive(Debug, Clone)]
 pub struct ManifestServices {
-    pub(crate) manifest: Arc<Option<PackageJson>>,
+    pub(crate) package_path: Option<Utf8PathBuf>,
+    pub(crate) manifest: Option<PackageJson>,
 }
 
 impl ManifestServices {
     pub(crate) fn name(&self) -> Option<&str> {
-        self.manifest
-            .as_ref()
-            .as_ref()
-            .and_then(|pkg| pkg.name.as_deref())
+        self.manifest.as_ref().and_then(|pkg| pkg.name.as_deref())
     }
 
     pub(crate) fn is_dependency(&self, specifier: &str) -> bool {
         self.manifest
-            .as_ref()
             .as_ref()
             .is_some_and(|pkg| pkg.dependencies.contains(specifier))
     }
@@ -30,20 +27,17 @@ impl ManifestServices {
     pub(crate) fn is_dev_dependency(&self, specifier: &str) -> bool {
         self.manifest
             .as_ref()
-            .as_ref()
             .is_some_and(|pkg| pkg.dev_dependencies.contains(specifier))
     }
 
     pub(crate) fn is_peer_dependency(&self, specifier: &str) -> bool {
         self.manifest
             .as_ref()
-            .as_ref()
             .is_some_and(|pkg| pkg.peer_dependencies.contains(specifier))
     }
 
     pub(crate) fn is_optional_dependency(&self, specifier: &str) -> bool {
         self.manifest
-            .as_ref()
             .as_ref()
             .is_some_and(|pkg| pkg.optional_dependencies.contains(specifier))
     }
@@ -54,12 +48,19 @@ impl FromServices for ManifestServices {
         rule_key: &RuleKey,
         services: &ServiceBag,
     ) -> biome_diagnostics::Result<Self, MissingServicesDiagnostic> {
-        let manifest: &Arc<Option<PackageJson>> = services.get_service().ok_or_else(|| {
-            MissingServicesDiagnostic::new(rule_key.rule_name(), &["PackageJson"])
-        })?;
+        let manifest_info: &Option<(Utf8PathBuf, PackageJson)> =
+            services.get_service().ok_or_else(|| {
+                MissingServicesDiagnostic::new(rule_key.rule_name(), &["PackageJson"])
+            })?;
+
+        let (package_path, manifest) = match manifest_info {
+            Some((package_path, manifest)) => (Some(package_path.clone()), Some(manifest.clone())),
+            None => (None, None),
+        };
 
         Ok(Self {
-            manifest: manifest.clone(),
+            package_path,
+            manifest,
         })
     }
 }
@@ -70,7 +71,7 @@ impl Phase for ManifestServices {
     }
 }
 
-/// Query type usable by lint rules **that uses the semantic model** to match on specific [AstNode] types
+/// Query type usable by lint rules **that uses the package manifest** and matches on specific [AstNode] types.
 #[derive(Clone)]
 pub struct Manifest<N>(pub N);
 

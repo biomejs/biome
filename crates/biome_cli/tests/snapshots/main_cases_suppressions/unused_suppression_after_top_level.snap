@@ -1,0 +1,51 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+snapshot_kind: text
+---
+## `file.js`
+
+```js
+/**
+* biome-ignore-all lint/style/useConst: reason
+*/
+
+
+let foo = 2;
+/**
+* biome-ignore lint/style/useConst: reason
+*/
+let bar = 33;
+```
+
+# Emitted Messages
+
+```block
+file.js:7:1 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect because another suppression comment suppresses the same rule.
+  
+     6 │ let foo = 2;
+   > 7 │ /**
+       │ ^^^
+   > 8 │ * biome-ignore lint/style/useConst: reason
+   > 9 │ */
+       │ ^^
+    10 │ let bar = 33;
+  
+  i This is the suppression comment that was used.
+  
+  > 1 │ /**
+      │ ^^^
+  > 2 │ * biome-ignore-all lint/style/useConst: reason
+  > 3 │ */
+      │ ^^
+    4 │ 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
+```

@@ -6,7 +6,7 @@ info: js/module/assignment/assignment_ignore.js
 
 ```js
 let {
-	/* rome-ignore format: Test that the property doesn't get formatted */
+	/* biome-ignore format: Test that the property doesn't get formatted */
 	someProperty:    alias
 } = { someProperty: 20 };
 
@@ -37,7 +37,7 @@ Attribute Position: Auto
 
 ```js
 let {
-	/* rome-ignore format: Test that the property doesn't get formatted */
+	/* biome-ignore format: Test that the property doesn't get formatted */
 	someProperty:    alias,
 } = { someProperty: 20 };
 ```

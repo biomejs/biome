@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 169
 expression: snapshot
 ---
 ## Input
@@ -9,6 +8,12 @@ expression: snapshot
 :global(.class div) {}
 :local(.class div + #id) {}
 :global(.class div) .div {}
+:global( {}
+:global() {}
+:global(.div, .class) {}
+:global(.div, .class {}
+:global(.div .class {}
+:global(.div .class
 
 ```
 
@@ -106,17 +111,116 @@ CssRoot {
                 r_curly_token: R_CURLY@77..78 "}" [] [],
             },
         },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssBogusSubSelector {
+                            items: [
+                                COLON@78..80 ":" [Newline("\n")] [],
+                                GLOBAL_KW@80..86 "global" [] [],
+                                L_PAREN@86..88 "(" [] [Whitespace(" ")],
+                                L_CURLY@88..89 "{" [] [],
+                                R_CURLY@89..90 "}" [] [],
+                                COLON@90..92 ":" [Newline("\n")] [],
+                                GLOBAL_KW@92..98 "global" [] [],
+                                L_PAREN@98..99 "(" [] [],
+                                R_PAREN@99..101 ")" [] [Whitespace(" ")],
+                            ],
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@101..102 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@102..103 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssBogusSubSelector {
+                            items: [
+                                COLON@103..105 ":" [Newline("\n")] [],
+                                GLOBAL_KW@105..111 "global" [] [],
+                                L_PAREN@111..112 "(" [] [],
+                                DOT@112..113 "." [] [],
+                                IDENT@113..116 "div" [] [],
+                                COMMA@116..118 "," [] [Whitespace(" ")],
+                                DOT@118..119 "." [] [],
+                                IDENT@119..124 "class" [] [],
+                                R_PAREN@124..126 ")" [] [Whitespace(" ")],
+                            ],
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@126..127 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@127..128 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssBogusSubSelector {
+                            items: [
+                                COLON@128..130 ":" [Newline("\n")] [],
+                                GLOBAL_KW@130..136 "global" [] [],
+                                L_PAREN@136..137 "(" [] [],
+                                DOT@137..138 "." [] [],
+                                IDENT@138..141 "div" [] [],
+                                COMMA@141..143 "," [] [Whitespace(" ")],
+                                DOT@143..144 "." [] [],
+                                IDENT@144..150 "class" [] [Whitespace(" ")],
+                                L_CURLY@150..151 "{" [] [],
+                                R_CURLY@151..152 "}" [] [],
+                                COLON@152..154 ":" [Newline("\n")] [],
+                                GLOBAL_KW@154..160 "global" [] [],
+                                L_PAREN@160..161 "(" [] [],
+                                DOT@161..162 "." [] [],
+                                IDENT@162..166 "div" [] [Whitespace(" ")],
+                                DOT@166..167 "." [] [],
+                                IDENT@167..173 "class" [] [Whitespace(" ")],
+                                L_CURLY@173..174 "{" [] [],
+                                R_CURLY@174..175 "}" [] [],
+                                COLON@175..177 ":" [Newline("\n")] [],
+                                GLOBAL_KW@177..183 "global" [] [],
+                                L_PAREN@183..184 "(" [] [],
+                                DOT@184..185 "." [] [],
+                                IDENT@185..189 "div" [] [Whitespace(" ")],
+                                DOT@189..190 "." [] [],
+                                IDENT@190..195 "class" [] [],
+                            ],
+                        },
+                    ],
+                },
+            ],
+            block: CssBogusBlock {
+                items: [],
+            },
+        },
     ],
-    eof_token: EOF@78..79 "" [Newline("\n")] [],
+    eof_token: EOF@195..196 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..79
+0: CSS_ROOT@0..196
   0: (empty)
-  1: CSS_RULE_LIST@0..78
+  1: CSS_RULE_LIST@0..195
     0: CSS_QUALIFIED_RULE@0..22
       0: CSS_SELECTOR_LIST@0..20
         0: CSS_COMPOUND_SELECTOR@0..20
@@ -178,7 +282,81 @@ CssRoot {
         0: L_CURLY@76..77 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@77..77
         2: R_CURLY@77..78 "}" [] []
-  2: EOF@78..79 "" [Newline("\n")] []
+    3: CSS_QUALIFIED_RULE@78..103
+      0: CSS_SELECTOR_LIST@78..101
+        0: CSS_COMPOUND_SELECTOR@78..101
+          0: CSS_NESTED_SELECTOR_LIST@78..78
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@78..101
+            0: CSS_BOGUS_SUB_SELECTOR@78..101
+              0: COLON@78..80 ":" [Newline("\n")] []
+              1: GLOBAL_KW@80..86 "global" [] []
+              2: L_PAREN@86..88 "(" [] [Whitespace(" ")]
+              3: L_CURLY@88..89 "{" [] []
+              4: R_CURLY@89..90 "}" [] []
+              5: COLON@90..92 ":" [Newline("\n")] []
+              6: GLOBAL_KW@92..98 "global" [] []
+              7: L_PAREN@98..99 "(" [] []
+              8: R_PAREN@99..101 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@101..103
+        0: L_CURLY@101..102 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@102..102
+        2: R_CURLY@102..103 "}" [] []
+    4: CSS_QUALIFIED_RULE@103..128
+      0: CSS_SELECTOR_LIST@103..126
+        0: CSS_COMPOUND_SELECTOR@103..126
+          0: CSS_NESTED_SELECTOR_LIST@103..103
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@103..126
+            0: CSS_BOGUS_SUB_SELECTOR@103..126
+              0: COLON@103..105 ":" [Newline("\n")] []
+              1: GLOBAL_KW@105..111 "global" [] []
+              2: L_PAREN@111..112 "(" [] []
+              3: DOT@112..113 "." [] []
+              4: IDENT@113..116 "div" [] []
+              5: COMMA@116..118 "," [] [Whitespace(" ")]
+              6: DOT@118..119 "." [] []
+              7: IDENT@119..124 "class" [] []
+              8: R_PAREN@124..126 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@126..128
+        0: L_CURLY@126..127 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@127..127
+        2: R_CURLY@127..128 "}" [] []
+    5: CSS_QUALIFIED_RULE@128..195
+      0: CSS_SELECTOR_LIST@128..195
+        0: CSS_COMPOUND_SELECTOR@128..195
+          0: CSS_NESTED_SELECTOR_LIST@128..128
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@128..195
+            0: CSS_BOGUS_SUB_SELECTOR@128..195
+              0: COLON@128..130 ":" [Newline("\n")] []
+              1: GLOBAL_KW@130..136 "global" [] []
+              2: L_PAREN@136..137 "(" [] []
+              3: DOT@137..138 "." [] []
+              4: IDENT@138..141 "div" [] []
+              5: COMMA@141..143 "," [] [Whitespace(" ")]
+              6: DOT@143..144 "." [] []
+              7: IDENT@144..150 "class" [] [Whitespace(" ")]
+              8: L_CURLY@150..151 "{" [] []
+              9: R_CURLY@151..152 "}" [] []
+              10: COLON@152..154 ":" [Newline("\n")] []
+              11: GLOBAL_KW@154..160 "global" [] []
+              12: L_PAREN@160..161 "(" [] []
+              13: DOT@161..162 "." [] []
+              14: IDENT@162..166 "div" [] [Whitespace(" ")]
+              15: DOT@166..167 "." [] []
+              16: IDENT@167..173 "class" [] [Whitespace(" ")]
+              17: L_CURLY@173..174 "{" [] []
+              18: R_CURLY@174..175 "}" [] []
+              19: COLON@175..177 ":" [Newline("\n")] []
+              20: GLOBAL_KW@177..183 "global" [] []
+              21: L_PAREN@183..184 "(" [] []
+              22: DOT@184..185 "." [] []
+              23: IDENT@185..189 "div" [] [Whitespace(" ")]
+              24: DOT@189..190 "." [] []
+              25: IDENT@190..195 "class" [] []
+      1: CSS_BOGUS_BLOCK@195..195
+  2: EOF@195..196 "" [Newline("\n")] []
 
 ```
 
@@ -204,7 +382,7 @@ pseudo_class_function_selector_disabled.css:2:2 parse ━━━━━━━━�
   > 2 │ :local(.class div + #id) {}
       │  ^^^^^
     3 │ :global(.class div) .div {}
-    4 │ 
+    4 │ :global( {}
   
   i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
   
@@ -216,8 +394,64 @@ pseudo_class_function_selector_disabled.css:3:2 parse ━━━━━━━━�
     2 │ :local(.class div + #id) {}
   > 3 │ :global(.class div) .div {}
       │  ^^^^^^
-    4 │ 
+    4 │ :global( {}
+    5 │ :global() {}
   
   i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
+  
+pseudo_class_function_selector_disabled.css:4:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `:local` and `:global` pseudo-classes are not standard CSS features.
+  
+    2 │ :local(.class div + #id) {}
+    3 │ :global(.class div) .div {}
+  > 4 │ :global( {}
+      │  ^^^^^^
+    5 │ :global() {}
+    6 │ :global(.div, .class) {}
+  
+  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
+  
+pseudo_class_function_selector_disabled.css:6:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `:local` and `:global` pseudo-classes are not standard CSS features.
+  
+    4 │ :global( {}
+    5 │ :global() {}
+  > 6 │ :global(.div, .class) {}
+      │  ^^^^^^
+    7 │ :global(.div, .class {}
+    8 │ :global(.div .class {}
+  
+  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
+  
+pseudo_class_function_selector_disabled.css:7:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `:local` and `:global` pseudo-classes are not standard CSS features.
+  
+    5 │ :global() {}
+    6 │ :global(.div, .class) {}
+  > 7 │ :global(.div, .class {}
+      │  ^^^^^^
+    8 │ :global(.div .class {}
+    9 │ :global(.div .class
+  
+  i You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.
+  
+pseudo_class_function_selector_disabled.css:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead the file ends
+  
+     8 │ :global(.div .class {}
+     9 │ :global(.div .class
+  > 10 │ 
+       │ 
+  
+  i the file ends here
+  
+     8 │ :global(.div .class {}
+     9 │ :global(.div .class
+  > 10 │ 
+       │ 
   
 ```

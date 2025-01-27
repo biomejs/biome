@@ -113,7 +113,7 @@ impl TestSuite for BabelTypescriptTestSuite {
     }
 
     fn is_test(&self, path: &std::path::Path) -> bool {
-        path.extension().map_or(false, |x| x == "ts")
+        path.extension().is_some_and(|x| x == "ts")
     }
 
     fn load_test(&self, path: &std::path::Path) -> Option<Box<dyn crate::runner::TestCase>> {

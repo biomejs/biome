@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // Invalid
 var x = 9007199254740993
 var x = 9007199254740.993e3
@@ -633,5 +634,3 @@ invalid.js:36:9 lint/correctness/noPrecisionLoss ━━━━━━━━━━�
   
 
 ```
-
-

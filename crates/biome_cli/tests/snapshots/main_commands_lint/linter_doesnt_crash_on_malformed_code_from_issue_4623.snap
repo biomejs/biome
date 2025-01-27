@@ -1,0 +1,98 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "suspicious": {
+        "noCommentText": "on"
+      }
+    }
+  }
+}
+```
+
+## `issue4623.js`
+
+```js
+<b
+ //
+}
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+issue4623.js:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  
+    1 │ <b
+    2 │  //
+  > 3 │ }
+      │ ^
+  
+
+```
+
+```block
+issue4623.js:3:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `<` but instead the file ends
+  
+    1 │ <b
+    2 │  //
+  > 3 │ }
+      │  
+  
+  i the file ends here
+  
+    1 │ <b
+    2 │  //
+  > 3 │ }
+      │  
+  
+
+```
+
+```block
+issue4623.js:2:2 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Wrap comments inside children within braces.
+  
+    1 │ <b
+  > 2 │  //
+      │  ^^
+    3 │ }
+  
+  i Unsafe fix: Wrap the comments with braces
+  
+    1 1 │   <b
+    2 2 │    //
+      3 │ + 
+      4 │ + ·{/*··*/}
+    3 5 │   }
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 3 errors.
+```

@@ -2,23 +2,23 @@
 
 function supported1(){
 	return (
-		// rome-ignore format: Work around https://github.com/rome/tools/issues/3734
-		// rome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
+		// biome-ignore format: Work around https://github.com/rome/tools/issues/3734
+		// biome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
 		a && b
 	);
 }
 
 function supported2(){
 	return !(
-		// rome-ignore format: Work around https://github.com/rome/tools/issues/3734
-		// rome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
+		// biome-ignore format: Work around https://github.com/rome/tools/issues/3734
+		// biome-ignore lint/style/useOptionalChain: Optional chaining creates more complicated ES2019 code
 		a && b
 	);
 }
 
 function supported3(){
 	return (
-		// rome-ignore format:
+		// biome-ignore format:
 		aVeryLongLogicalExpression &&
 		thatBreaksOverMultipleLines
 	);

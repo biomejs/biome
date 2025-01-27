@@ -151,7 +151,7 @@ impl Rule for UseBlockStatements {
                     .syntax()
                     .first_token()
                     .and_then(|token| token.prev_token())
-                    .map_or(false, |token| {
+                    .is_some_and(|token| {
                         token
                             .trailing_trivia()
                             .pieces()
@@ -216,10 +216,8 @@ impl Rule for UseBlockStatements {
 
                     r_curly_token.with_leading_trivia(leading_trivia)
                 } else {
-                    let has_trailing_single_line_comments = stmt
-                        .syntax()
-                        .last_trailing_trivia()
-                        .map_or(false, |trivia| {
+                    let has_trailing_single_line_comments =
+                        stmt.syntax().last_trailing_trivia().is_some_and(|trivia| {
                             trivia
                                 .pieces()
                                 .any(|trivia| trivia.kind() == TriviaPieceKind::SingleLineComment)

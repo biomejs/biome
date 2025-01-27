@@ -1,0 +1,13 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: withinUntilClause
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "8:5-10:8",
+        "8:5-10:8",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}

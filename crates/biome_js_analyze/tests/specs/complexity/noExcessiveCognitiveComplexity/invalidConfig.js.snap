@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidConfig.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function simpleBranches() {
     if (firstCondition) {                 // +1
         return 1;
@@ -31,5 +32,3 @@ invalidConfig.options:9:31 deserialize ━━━━━━━━━━━━━�
   
 
 ```
-
-

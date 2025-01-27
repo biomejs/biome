@@ -7,7 +7,7 @@ mod syntax_node;
 
 pub use self::generated::*;
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
-pub use file_source::JsonFileSource;
+pub use file_source::{JsonFileSource, JsonFileVariant};
 pub use syntax_node::*;
 
 use biome_rowan::{RawSyntaxKind, SyntaxKind, TokenText};

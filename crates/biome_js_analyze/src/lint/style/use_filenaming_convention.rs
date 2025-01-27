@@ -3,7 +3,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
-use biome_deserialize::DeserializableValidator;
+use biome_deserialize::DeserializationContext;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     binding_ext::AnyJsIdentifierBinding, AnyJsIdentifierUsage, JsExportNamedSpecifier,
@@ -48,7 +48,7 @@ declare_lint_rule! {
     /// {
     ///   "overrides": [
     ///     {
-    ///        "include": ["test/**/*"],
+    ///        "includes": ["test/**/*"],
     ///        "linter": {
     ///          "rules": {
     ///            "style": {
@@ -95,9 +95,7 @@ declare_lint_rule! {
     /// When the option is set to `false`, a name may include non-ASCII characters.
     /// `café` and `안녕하세요` are so valid.
     ///
-    /// Default: `false`
-    ///
-    /// **This option will be turned on by default in Biome 2.0.**
+    /// Default: `true`
     ///
     /// ### match (Since v2.0.0)
     ///
@@ -156,7 +154,7 @@ impl Rule for UseFilenamingConvention {
     type Options = Box<FilenamingConventionOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let file_name = ctx.file_path().file_name()?.to_str()?;
+        let file_name = ctx.file_path().file_name()?;
         let options = ctx.options();
         if options.require_ascii && !file_name.is_ascii() {
             return Some(FileNamingConventionState::Ascii);
@@ -273,7 +271,7 @@ impl Rule for UseFilenamingConvention {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let file_name = ctx.file_path().file_name()?.to_str()?;
+        let file_name = ctx.file_path().file_name()?;
         let options = ctx.options();
         match state {
             FileNamingConventionState::Ascii => {
@@ -406,7 +404,7 @@ pub struct FilenamingConventionOptions {
     pub strict_case: bool,
 
     /// If `false`, then non-ASCII characters are allowed.
-    #[serde(default, skip_serializing_if = "is_default")]
+    #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
     pub require_ascii: bool,
 
     /// Regular expression to enforce
@@ -430,7 +428,7 @@ impl Default for FilenamingConventionOptions {
     fn default() -> Self {
         Self {
             strict_case: true,
-            require_ascii: false,
+            require_ascii: true,
             matching: None,
             filename_cases: FilenameCases::default(),
         }
@@ -503,15 +501,16 @@ impl Default for FilenameCases {
         }
     }
 }
-impl DeserializableValidator for FilenameCases {
+
+impl biome_deserialize::DeserializableValidator for FilenameCases {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializationContext,
         name: &str,
         range: TextRange,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> bool {
         if !self.allow_export && self.cases.is_empty() {
-            diagnostics.push(
+            ctx.report(
                 biome_deserialize::DeserializationDiagnostic::new(markup! {
                     ""<Emphasis>{name}</Emphasis>" cannot be an empty array."
                 })

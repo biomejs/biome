@@ -75,14 +75,14 @@ impl Rule for UseGoogleFontPreconnect {
         if href.starts_with("https://fonts.gstatic.com")
             && !matches!(rel.as_deref(), Some("preconnect"))
         {
-            return Some(node.syntax().text_range());
+            return Some(node.syntax().text_trimmed_range());
         }
 
         None
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
-        return Some(
+        Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 range,
@@ -93,7 +93,7 @@ impl Rule for UseGoogleFontPreconnect {
             .note(markup!{
                 "Not using "<Emphasis>"preconnect"</Emphasis>" can cause slower font loading and increase latency."
             })
-        );
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

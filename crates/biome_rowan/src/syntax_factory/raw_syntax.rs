@@ -114,7 +114,7 @@ pub struct RawSyntaxNodeRef<'a, K: SyntaxKind> {
     ph: PhantomData<K>,
 }
 
-impl<'a, K: SyntaxKind> RawSyntaxNodeRef<'a, K> {
+impl<K: SyntaxKind> RawSyntaxNodeRef<'_, K> {
     #[inline]
     pub fn kind(&self) -> K {
         K::from_raw(self.raw.kind())
@@ -138,7 +138,7 @@ pub struct RawSyntaxTokenRef<'a, K: SyntaxKind> {
     ph: PhantomData<K>,
 }
 
-impl<'a, K: SyntaxKind> RawSyntaxTokenRef<'a, K> {
+impl<K: SyntaxKind> RawSyntaxTokenRef<'_, K> {
     #[inline]
     pub fn kind(&self) -> K {
         K::from_raw(self.raw.kind())
@@ -158,7 +158,7 @@ impl<'a, K: SyntaxKind> From<&'a GreenToken> for RawSyntaxTokenRef<'a, K> {
 pub type RawSyntaxElementRef<'a, K> =
     NodeOrToken<RawSyntaxNodeRef<'a, K>, RawSyntaxTokenRef<'a, K>>;
 
-impl<'a, K: SyntaxKind> RawSyntaxElementRef<'a, K> {
+impl<K: SyntaxKind> RawSyntaxElementRef<'_, K> {
     #[inline]
     pub fn kind(&self) -> K {
         match self {

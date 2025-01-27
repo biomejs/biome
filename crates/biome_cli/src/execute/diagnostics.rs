@@ -1,7 +1,7 @@
-use biome_diagnostics::adapters::{IoError, StdError};
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticExt, DiagnosticTags, Error, Visit,
 };
+use biome_diagnostics::{IoError, StdError};
 use biome_text_edit::TextEdit;
 use std::io;
 
@@ -20,21 +20,10 @@ pub(crate) struct CIFormatDiffDiagnostic {
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
-    category = "organizeImports",
-    message = "Import statements differs from the output"
+    category = "assist",
+    message = "Applied actions differs from the output"
 )]
-pub(crate) struct CIOrganizeImportsDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
-    #[advice]
-    pub(crate) diff: ContentDiffAdvice,
-}
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "assists",
-    message = "Applied assists differs from the output"
-)]
-pub(crate) struct CIAssistsDiffDiagnostic {
+pub(crate) struct CIAssistDiffDiagnostic {
     #[location(resource)]
     pub(crate) file_name: String,
     #[advice]
@@ -56,24 +45,11 @@ pub(crate) struct FormatDiffDiagnostic {
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
-	category = "organizeImports",
-	severity = Error,
-	message = "Import statements could be sorted:"
-)]
-pub(crate) struct OrganizeImportsDiffDiagnostic {
-    #[location(resource)]
-    pub(crate) file_name: String,
-    #[advice]
-    pub(crate) diff: ContentDiffAdvice,
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "assists",
+    category = "assist",
     severity = Error,
-    message = "Not all assists were applied:"
+    message = "Not all actions were applied:"
 )]
-pub(crate) struct AssistsDiffDiagnostic {
+pub(crate) struct AssistDiffDiagnostic {
     #[location(resource)]
     pub(crate) file_name: String,
     #[advice]

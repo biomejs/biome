@@ -37,7 +37,7 @@ pub struct DomeIterator<'a> {
 
 impl<'a> DomeIterator<'a> {
     pub fn next_config(&mut self) -> Option<&'a BiomePath> {
-        return if let Some(path) = self.iter.peek() {
+        if let Some(path) = self.iter.peek() {
             if path.is_config() {
                 self.iter.next()
             } else {
@@ -45,11 +45,11 @@ impl<'a> DomeIterator<'a> {
             }
         } else {
             None
-        };
+        }
     }
 
     pub fn next_ignore(&mut self) -> Option<&'a BiomePath> {
-        return if let Some(path) = self.iter.peek() {
+        if let Some(path) = self.iter.peek() {
             if path.is_ignore() {
                 self.iter.next()
             } else {
@@ -57,11 +57,11 @@ impl<'a> DomeIterator<'a> {
             }
         } else {
             None
-        };
+        }
     }
 
     pub fn next_manifest(&mut self) -> Option<&'a BiomePath> {
-        return if let Some(path) = self.iter.peek() {
+        if let Some(path) = self.iter.peek() {
             if path.is_manifest() {
                 self.iter.next()
             } else {
@@ -69,7 +69,7 @@ impl<'a> DomeIterator<'a> {
             }
         } else {
             None
-        };
+        }
     }
 }
 
@@ -81,4 +81,4 @@ impl<'a> Iterator for DomeIterator<'a> {
     }
 }
 
-impl<'a> FusedIterator for DomeIterator<'a> {}
+impl FusedIterator for DomeIterator<'_> {}

@@ -35,7 +35,7 @@ impl FormatNodeRule<JsFormalParameter> for FormatJsFormalParameter {
             .syntax()
             .grand_parent()
             .and_then(FormatAnyJsParameters::cast)
-            .map_or(false, |parameters| {
+            .is_some_and(|parameters| {
                 should_hug_function_parameters(&parameters, f.comments(), false).unwrap_or(false)
             });
 

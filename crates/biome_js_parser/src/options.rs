@@ -1,16 +1,21 @@
 /// Options to pass to the JavaScript parser
-#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
+#[derive(Debug, Clone, Default)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct JsParserOptions {
     /// Enables parsing of Grit metavariables.
     /// Defaults to `false`.
-    #[serde(default)]
+    #[cfg_attr(feature = "serde", serde(default))]
     pub grit_metavariables: bool,
 
     /// Whether the parsing of the class parameter decorators should happen.
     ///
     /// This parameter decorators belong to the old language proposal.
-    #[serde(default)]
+    #[cfg_attr(feature = "serde", serde(default))]
     pub parse_class_parameter_decorators: bool,
 }
 

@@ -42,7 +42,7 @@ impl FormatNodeRule<JsIfStatement> for FormatJsIfStatement {
             let dangling_comments = comments.dangling_comments(node.syntax());
             let dangling_line_comment = dangling_comments
                 .last()
-                .map_or(false, |comment| comment.kind().is_line());
+                .is_some_and(|comment| comment.kind().is_line());
             let has_dangling_comments = !dangling_comments.is_empty();
 
             let trailing_line_comment = comments

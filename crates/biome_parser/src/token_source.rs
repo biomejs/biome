@@ -122,7 +122,7 @@ where
         } else {
             self.lexer()
                 .nth_non_trivia(n)
-                .map_or(false, |lookahead| lookahead.has_preceding_line_break())
+                .is_some_and(|lookahead| lookahead.has_preceding_line_break())
         }
     }
 }

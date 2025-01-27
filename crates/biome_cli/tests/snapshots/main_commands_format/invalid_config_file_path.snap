@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `file.js`
 
@@ -11,11 +12,9 @@ content
 # Termination Message
 
 ```block
-test/biome.json internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Cannot read file
-  
-  × Biome can't read the following file, maybe for permissions reasons or it doesn't exist: test/biome.json
+  × Biome couldn't find a configuration in the directory test.
   
 
 

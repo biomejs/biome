@@ -20,7 +20,8 @@ impl GritTargetTree {
 }
 
 impl Ast for GritTargetTree {
-    type Node<'a> = GritTargetNode<'a>
+    type Node<'a>
+        = GritTargetNode<'a>
     where
         Self: 'a;
 

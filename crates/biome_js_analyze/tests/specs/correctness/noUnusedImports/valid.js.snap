@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import A from "mod";
 import * as B from "mod";
 import { C } from "mod";
@@ -16,5 +17,3 @@ import { L, } from "mod";
 export { A, B, C, D, E, F, G, H, I, J, K, L };
 
 ```
-
-

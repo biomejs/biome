@@ -1,0 +1,22 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `file.js`
+
+```js
+const a = 'foo';
+```
+
+# Emitted Messages
+
+```block
+file.js:1:11 search ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1 │ const a = 'foo';
+
+```
+
+```block
+Searched 1 file in <TIME>. Found 1 match.
+```

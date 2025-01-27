@@ -16,18 +16,8 @@ console.log(a);
 ```block
 flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Incompatible arguments --apply and --fix
+  × Incompatible arguments --write and --fix
   
 
-
-```
-
-# Emitted Messages
-
-```block
-internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The argument --apply is deprecated, it will be removed in the next major release. Use --write instead.
-  
 
 ```

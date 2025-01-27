@@ -148,6 +148,10 @@ impl FormatOptions for CssFormatOptions {
         AttributePosition::default()
     }
 
+    fn bracket_same_line(&self) -> biome_formatter::BracketSameLine {
+        biome_formatter::BracketSameLine::default()
+    }
+
     fn bracket_spacing(&self) -> BracketSpacing {
         BracketSpacing::default()
     }

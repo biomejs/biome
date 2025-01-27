@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 /*before*/ A /*inner*/: /*after*/ while(true) {};
 
 A: for (let i = 0; i < 10; ++i) {

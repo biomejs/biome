@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 86
 expression: validPrototype.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 foo.call(Object.prototype.hasOwnProperty, Object.prototype.hasOwnProperty.call);
 Object.prototype;
 Object.prototype(obj, prop);

@@ -35,11 +35,8 @@ const PLATFORMS = {
 		arm64: "@biomejs/cli-linux-arm64-musl/biome",
 	},
 };
-if (env.ROME_BINARY) {
-	console.warn(`[WARN] The environment variable "ROME_BINARY" is deprecated. Use "BIOME_BINARY" instead.`)
-}
 
-const binPath = env.BIOME_BINARY || env.ROME_BINARY ||
+const binPath = env.BIOME_BINARY ||
 	(platform === "linux" && isMusl()
 		? PLATFORMS?.["linux-musl"]?.[arch]
 		: PLATFORMS?.[platform]?.[arch]

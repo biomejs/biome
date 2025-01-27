@@ -34,10 +34,6 @@ pub struct JsTargetLanguage;
 impl GritTargetLanguageImpl for JsTargetLanguage {
     type Kind = JsSyntaxKind;
 
-    fn language_name(&self) -> &'static str {
-        "JavaScript"
-    }
-
     /// Returns the syntax kind for a node by name.
     ///
     /// For compatibility with existing Grit snippets (as well as the online
@@ -117,6 +113,7 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
             ("<f>", "</f>"),
             ("<f ", " />"),
             ("function GRIT_FN(", ") {}"),
+            ("function GRIT_FN() {", "}"),
             ("var ", ";"),
             ("", " class GRIT_CLASS {}"),
             ("function GRIT_FN(GRIT_ARG:", ") { }"),
@@ -128,7 +125,7 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
 
     fn is_comment_kind(kind: GritTargetSyntaxKind) -> bool {
         kind.as_js_kind()
-            .map_or(false, |kind| COMMENT_KINDS.matches(kind))
+            .is_some_and(|kind| COMMENT_KINDS.matches(kind))
     }
 
     fn metavariable_kind() -> Self::Kind {
@@ -136,7 +133,7 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
     }
 
     fn is_alternative_metavariable_kind(kind: GritTargetSyntaxKind) -> bool {
-        kind.as_js_kind().map_or(false, |kind| {
+        kind.as_js_kind().is_some_and(|kind| {
             kind == JsSyntaxKind::JS_TEMPLATE_ELEMENT_LIST
                 || kind == JsSyntaxKind::TS_TEMPLATE_ELEMENT_LIST
         })

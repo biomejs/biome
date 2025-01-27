@@ -1,4 +1,5 @@
 mod block;
+mod bogus;
 mod break_stmt;
 mod continue_stmt;
 mod do_while;
@@ -15,6 +16,7 @@ mod variable;
 mod while_stmt;
 
 pub(super) use block::*;
+pub(super) use bogus::*;
 pub(super) use break_stmt::*;
 pub(super) use continue_stmt::*;
 pub(super) use do_while::*;

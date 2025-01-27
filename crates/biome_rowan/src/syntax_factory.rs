@@ -133,7 +133,7 @@ struct SeparatedListWithMissingNodesOrSeparatorSlotsIterator<'a, K: SyntaxKind> 
     separator: K,
 }
 
-impl<'a, K: SyntaxKind> Iterator for SeparatedListWithMissingNodesOrSeparatorSlotsIterator<'a, K> {
+impl<K: SyntaxKind> Iterator for SeparatedListWithMissingNodesOrSeparatorSlotsIterator<'_, K> {
     type Item = Option<RawSyntaxElement<K>>;
 
     #[cold]
@@ -175,13 +175,10 @@ impl<'a, K: SyntaxKind> Iterator for SeparatedListWithMissingNodesOrSeparatorSlo
     }
 }
 
-impl<'a, K: SyntaxKind> FusedIterator
-    for SeparatedListWithMissingNodesOrSeparatorSlotsIterator<'a, K>
-{
-}
+impl<K: SyntaxKind> FusedIterator for SeparatedListWithMissingNodesOrSeparatorSlotsIterator<'_, K> {}
 
-impl<'a, K: SyntaxKind> ExactSizeIterator
-    for SeparatedListWithMissingNodesOrSeparatorSlotsIterator<'a, K>
+impl<K: SyntaxKind> ExactSizeIterator
+    for SeparatedListWithMissingNodesOrSeparatorSlotsIterator<'_, K>
 {
     fn len(&self) -> usize {
         self.inner.len() + self.missing_count
@@ -250,7 +247,7 @@ struct RawNodeSlotIterator<'a, K: SyntaxKind> {
     slots: std::slice::Iter<'a, SlotContent>,
 }
 
-impl<'a, K: SyntaxKind> Iterator for RawNodeSlotIterator<'a, K> {
+impl<K: SyntaxKind> Iterator for RawNodeSlotIterator<'_, K> {
     type Item = Option<RawSyntaxElement<K>>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -271,5 +268,5 @@ impl<'a, K: SyntaxKind> Iterator for RawNodeSlotIterator<'a, K> {
     }
 }
 
-impl<'a, K: SyntaxKind> FusedIterator for RawNodeSlotIterator<'a, K> {}
-impl<'a, K: SyntaxKind> ExactSizeIterator for RawNodeSlotIterator<'a, K> {}
+impl<K: SyntaxKind> FusedIterator for RawNodeSlotIterator<'_, K> {}
+impl<K: SyntaxKind> ExactSizeIterator for RawNodeSlotIterator<'_, K> {}

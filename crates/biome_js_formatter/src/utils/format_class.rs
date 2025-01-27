@@ -61,7 +61,7 @@ impl Format<JsFormatContext> for FormatClass<'_> {
 
         write!(f, [class_token.format()])?;
 
-        let indent_only_heritage = type_parameters.as_ref().map_or(false, |type_parameters| {
+        let indent_only_heritage = type_parameters.as_ref().is_some_and(|type_parameters| {
             !f.comments()
                 .has_trailing_line_comment(type_parameters.syntax())
         }) && !(extends.is_some() && implements_clause.is_some());

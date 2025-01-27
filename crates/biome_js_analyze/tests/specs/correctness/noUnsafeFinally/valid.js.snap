@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 { var foo = function() { try { return 1; } catch(err) { return 2; } finally { console.log('hola!') } } }
 { var foo = function() { try { return 1 } catch(err) { return 2 } finally { console.log('hola!') } } }
 { var foo = function() { try { return 1 } catch(err) { return 2 } finally { function a(x) { return x } } } }
@@ -18,5 +19,3 @@ expression: valid.js
 { var foo = function() { try { return 1; } catch(err) { return 2 } finally { (x) => x } } }
 { var foo = function() { try { return 1; } finally { class bar { constructor() {} static ehm() { return 'Hola!'; } } } }; }
 ```
-
-

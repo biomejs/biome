@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -12,11 +13,10 @@ expression: content
     "useIgnoreFile": true
   },
   "files": {
-    "ignore": ["file2.js"]
+    "includes": ["**", "!file2.js"]
   },
   "formatter": {
-    "include": ["file1.js", "file2.js", "file4.js"],
-    "ignore": ["file3.js"]
+    "includes": ["file1.js", "file2.js", "file4.js", "!file3.js"]
   }
 }
 ```

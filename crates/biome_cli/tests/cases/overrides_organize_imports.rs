@@ -2,9 +2,8 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 const UNORGANIZED: &str = r#"import * as something from "../something";
 import { lorem, foom, bar } from "foo";"#;
@@ -15,37 +14,37 @@ import * as something from "../something";"#;
 fn does_handle_included_file_and_disable_organize_imports() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(
         file_path.into(),
         r#"{
   "files": {
-    "include": ["test.js", "special/**"]
+    "includes": ["test.js", "special/**"]
   },
-  "overrides": [{ "include": ["special/**"], "organizeImports": { "enabled": false } }]
+  "overrides": [{ "includes": ["special/**"], "assist": { "enabled": false } }]
 }
 
 "#
         .as_bytes(),
     );
 
-    let test = Path::new("test.js");
+    let test = Utf8Path::new("test.js");
     fs.insert(test.into(), UNORGANIZED.as_bytes());
 
-    let test2 = Path::new("special/test2.js");
+    let test2 = Utf8Path::new("special/test2.js");
     fs.insert(test2.into(), UNORGANIZED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
-                ("--apply"),
+                "check",
+                "--write",
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
-                test.as_os_str().to_str().unwrap(),
-                test2.as_os_str().to_str().unwrap(),
+                test.as_str(),
+                test2.as_str(),
             ]
             .as_slice(),
         ),

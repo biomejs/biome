@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 RegExp("\\x1f");
 RegExp("\\u{1111}*\\x1F", "u");
 new RegExp("\\x1f\\x1e");

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // ref: https://github.com/eslint/eslint/blob/main/tests/lib/rules/no-dupe-else-if.js
 
 if (isSomething(x)) {
@@ -212,5 +213,3 @@ invalid.js:69:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━�
   
 
 ```
-
-

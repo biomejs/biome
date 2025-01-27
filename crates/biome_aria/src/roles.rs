@@ -229,10 +229,10 @@ impl AriaRoles {
                 .find_attribute_by_name(|n| n == "type")
                 .as_ref()
                 .and_then(|attr| attr.value())
-                .map_or(false, |value| value.as_ref() == "hidden"),
+                .is_some_and(|value| value.as_ref() == "hidden"),
             _ => self
                 .get_implicit_role(element)
-                .map_or(false, |implicit_role| implicit_role.is_non_interactive()),
+                .is_some_and(|implicit_role| implicit_role.is_non_interactive()),
         }
     }
 

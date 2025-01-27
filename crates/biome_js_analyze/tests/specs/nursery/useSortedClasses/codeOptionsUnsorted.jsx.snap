@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: codeOptionsUnsorted.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -416,30 +417,6 @@ codeOptionsUnsorted.jsx:27:4 lint/nursery/useSortedClasses  FIXABLE  ━━━�
        27 │ + tw`foo·bar·p-4·px-2`;
     28 28 │   tw.div`px-2 foo p-4 bar`;
     29 29 │   notClassFunction("px-2 foo p-4 bar");
-  
-
-```
-
-```
-codeOptionsUnsorted.jsx:28:8 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! These CSS classes should be sorted.
-  
-    26 │ clsx("px-2 foo p-4 bar");
-    27 │ tw`px-2 foo p-4 bar`;
-  > 28 │ tw.div`px-2 foo p-4 bar`;
-       │        ^^^^^^^^^^^^^^^^
-    29 │ notClassFunction("px-2 foo p-4 bar");
-    30 │ notTemplateFunction`px-2 foo p-4 bar`;
-  
-  i Unsafe fix: Sort the classes.
-  
-    26 26 │   clsx("px-2 foo p-4 bar");
-    27 27 │   tw`px-2 foo p-4 bar`;
-    28    │ - tw.div`px-2·foo·p-4·bar`;
-       28 │ + tw.div`foo·bar·p-4·px-2`;
-    29 29 │   notClassFunction("px-2 foo p-4 bar");
-    30 30 │   notTemplateFunction`px-2 foo p-4 bar`;
   
 
 ```

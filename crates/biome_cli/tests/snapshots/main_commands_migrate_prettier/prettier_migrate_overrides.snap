@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -36,46 +37,47 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        1 │ + {
        2 │ + → "formatter":·{
        3 │ + → → "enabled":·true,
-       4 │ + → → "useEditorconfig":·true,
-       5 │ + → → "formatWithErrors":·false,
-       6 │ + → → "indentStyle":·"space",
-       7 │ + → → "indentWidth":·2,
-       8 │ + → → "lineEnding":·"lf",
-       9 │ + → → "lineWidth":·80,
-      10 │ + → → "attributePosition":·"auto",
-      11 │ + → → "bracketSpacing":·true
-      12 │ + → },
-      13 │ + → "javascript":·{
-      14 │ + → → "formatter":·{
-      15 │ + → → → "jsxQuoteStyle":·"double",
-      16 │ + → → → "quoteProperties":·"asNeeded",
-      17 │ + → → → "trailingCommas":·"all",
-      18 │ + → → → "semicolons":·"asNeeded",
-      19 │ + → → → "arrowParentheses":·"always",
-      20 │ + → → → "bracketSameLine":·false,
-      21 │ + → → → "quoteStyle":·"single",
-      22 │ + → → → "attributePosition":·"auto",
-      23 │ + → → → "bracketSpacing":·true
-      24 │ + → → }
-      25 │ + → },
-      26 │ + → "overrides":·[
-      27 │ + → → {·"include":·["**/*.test.js"],·"formatter":·{·"indentStyle":·"space"·}·},
-      28 │ + → → {
-      29 │ + → → → "include":·["**/*.spec.js"],
-      30 │ + → → → "javascript":·{
-      31 │ + → → → → "formatter":·{·"semicolons":·"always",·"quoteStyle":·"single"·}
-      32 │ + → → → }
-      33 │ + → → },
-      34 │ + → → {
-      35 │ + → → → "include":·["**/*.ts"],
-      36 │ + → → → "javascript":·{
-      37 │ + → → → → "formatter":·{·"semicolons":·"always",·"quoteStyle":·"single"·}
-      38 │ + → → → },
-      39 │ + → → → "formatter":·{·"indentStyle":·"space"·}
-      40 │ + → → }
-      41 │ + → ]
-      42 │ + }
-      43 │ + 
+       4 │ + → → "formatWithErrors":·false,
+       5 │ + → → "indentStyle":·"space",
+       6 │ + → → "indentWidth":·2,
+       7 │ + → → "lineEnding":·"lf",
+       8 │ + → → "lineWidth":·80,
+       9 │ + → → "attributePosition":·"auto",
+      10 │ + → → "bracketSameLine":·false,
+      11 │ + → → "bracketSpacing":·true,
+      12 │ + → → "useEditorconfig":·true
+      13 │ + → },
+      14 │ + → "javascript":·{
+      15 │ + → → "formatter":·{
+      16 │ + → → → "jsxQuoteStyle":·"double",
+      17 │ + → → → "quoteProperties":·"asNeeded",
+      18 │ + → → → "trailingCommas":·"all",
+      19 │ + → → → "semicolons":·"asNeeded",
+      20 │ + → → → "arrowParentheses":·"always",
+      21 │ + → → → "bracketSameLine":·false,
+      22 │ + → → → "quoteStyle":·"single",
+      23 │ + → → → "attributePosition":·"auto",
+      24 │ + → → → "bracketSpacing":·true
+      25 │ + → → }
+      26 │ + → },
+      27 │ + → "overrides":·[
+      28 │ + → → {·"include":·["**/*.test.js"],·"formatter":·{·"indentStyle":·"space"·}·},
+      29 │ + → → {
+      30 │ + → → → "include":·["**/*.spec.js"],
+      31 │ + → → → "javascript":·{
+      32 │ + → → → → "formatter":·{·"semicolons":·"always",·"quoteStyle":·"single"·}
+      33 │ + → → → }
+      34 │ + → → },
+      35 │ + → → {
+      36 │ + → → → "include":·["**/*.ts"],
+      37 │ + → → → "javascript":·{
+      38 │ + → → → → "formatter":·{·"semicolons":·"always",·"quoteStyle":·"single"·}
+      39 │ + → → → },
+      40 │ + → → → "formatter":·{·"indentStyle":·"space"·}
+      41 │ + → → }
+      42 │ + → ]
+      43 │ + }
+      44 │ + 
   
 
 ```

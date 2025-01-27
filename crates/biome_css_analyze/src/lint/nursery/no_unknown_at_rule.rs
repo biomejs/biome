@@ -69,7 +69,7 @@ impl Rule for NoUnknownAtRule {
         };
         Some(NoUnknownAtRuleState {
             range: rule.range(),
-            name: rule.text().to_string(),
+            name: rule.value_token().ok()?.text_trimmed().to_string(),
         })
     }
 

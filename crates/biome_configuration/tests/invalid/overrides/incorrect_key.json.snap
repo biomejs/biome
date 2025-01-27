@@ -1,0 +1,30 @@
+---
+source: crates/biome_configuration/tests/spec_tests.rs
+expression: incorrect_key.json
+snapshot_kind: text
+---
+incorrect_key.json:4:4 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `something`.
+  
+    2 │ 	"overrides": [
+    3 │ 		{
+  > 4 │ 			"something": {}
+      │ 			^^^^^^^^^^^
+    5 │ 		}
+    6 │ 	]
+  
+  i Known keys:
+  
+  - ignore
+  - include
+  - includes
+  - javascript
+  - json
+  - css
+  - graphql
+  - grit
+  - html
+  - formatter
+  - linter
+  - assist

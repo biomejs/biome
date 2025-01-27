@@ -1,12 +1,11 @@
 use crate::CliDiagnostic;
-use biome_configuration::PartialConfiguration;
+use biome_configuration::Configuration;
 use biome_fs::FileSystem;
-use biome_service::DynRef;
 use std::ffi::OsString;
 
 pub(crate) fn get_changed_files(
-    fs: &DynRef<'_, dyn FileSystem>,
-    configuration: &PartialConfiguration,
+    fs: &dyn FileSystem,
+    configuration: &Configuration,
     since: Option<&str>,
 ) -> Result<Vec<OsString>, CliDiagnostic> {
     let default_branch = configuration
@@ -28,9 +27,7 @@ pub(crate) fn get_changed_files(
     Ok(filtered_changed_files)
 }
 
-pub(crate) fn get_staged_files(
-    fs: &DynRef<'_, dyn FileSystem>,
-) -> Result<Vec<OsString>, CliDiagnostic> {
+pub(crate) fn get_staged_files(fs: &dyn FileSystem) -> Result<Vec<OsString>, CliDiagnostic> {
     let staged_files = fs.get_staged_files()?;
 
     let filtered_staged_files = staged_files.iter().map(OsString::from).collect::<Vec<_>>();

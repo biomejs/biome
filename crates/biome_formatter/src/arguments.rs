@@ -56,7 +56,7 @@ impl<'fmt, Context> Argument<'fmt, Context> {
     }
 }
 
-impl<'fmt, Context> Format<Context> for Argument<'fmt, Context> {
+impl<Context> Format<Context> for Argument<'_, Context> {
     #[inline(always)]
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         self.format(f)

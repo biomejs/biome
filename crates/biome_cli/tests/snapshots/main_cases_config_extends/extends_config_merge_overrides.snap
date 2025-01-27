@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -9,7 +10,7 @@ expression: content
   "extends": ["shared.json"],
   "overrides": [
     {
-      "include": ["**/*.js"],
+      "includes": ["**/*.js"],
       "linter": { "rules": { "correctness": { "noUnusedVariables": "error" } } }
     }
   ]
@@ -21,7 +22,7 @@ expression: content
 ```json
 {
             "overrides": [{
-                "include": ["**/*.js"],
+                "includes": ["**/*.js"],
                 "linter": { "rules": { "suspicious": { "noDebugger": "off" } } }
             }]
         }

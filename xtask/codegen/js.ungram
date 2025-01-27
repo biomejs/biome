@@ -1335,10 +1335,10 @@ JsShorthandNamedImportSpecifier =
     'type'?
     local_name: AnyJsBinding
 
-// import a from "mod" assert { type: "json" }
+// import a from "mod" with { type: "json" }
 //                     ^^^^^^^^^^^^^^^^^^^^^^^
 JsImportAssertion =
-    assertion_kind: ('assert' | 'with')
+    'with'
     '{'
     assertions: JsImportAssertionEntryList
     '}'
@@ -1349,7 +1349,7 @@ AnyJsImportAssertionEntry =
 	JsImportAssertionEntry
 	| JsBogusImportAssertionEntry
 
-// import a from "mod" assert { type: "json" }
+// import a from "mod" with { type: "json" }
 //                              ^^^^^^^^^^^^
 JsImportAssertionEntry =
     key: ('ident' | 'js_string_literal')
@@ -1756,7 +1756,7 @@ TsTypeAliasDeclaration =
 	ty: AnyTsType
 	';'?
 
-AnyTsIdentifierBinding = 
+AnyTsIdentifierBinding =
 	TsIdentifierBinding
 	| JsMetavariable
 
@@ -2134,8 +2134,8 @@ TsMappedTypeReadonlyModifierClause =
 
 // a: typeof import("mod", { with: { "resolution-mode": "import" } })
 //                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TsImportTypeAssertion = 
-  assertion_kind: ('assert' | 'with')
+TsImportTypeAssertion =
+  'with'
   ':'
   '{'
   assertions: JsImportAssertionEntryList

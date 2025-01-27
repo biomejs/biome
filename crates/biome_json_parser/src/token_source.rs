@@ -71,7 +71,7 @@ impl<'source> JsonTokenSource<'source> {
     }
 }
 
-impl<'source> TokenSource for JsonTokenSource<'source> {
+impl TokenSource for JsonTokenSource<'_> {
     type Kind = JsonSyntaxKind;
 
     fn current(&self) -> Self::Kind {

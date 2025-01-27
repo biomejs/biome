@@ -11,7 +11,7 @@ impl FunctionDefinitionCompiler {
         node: biome_grit_syntax::GritFunctionDefinition,
         context: &mut NodeCompilationContext,
     ) -> Result<GritFunctionDefinition<GritQueryContext>, CompileError> {
-        let name = node.name()?.text();
+        let name = node.name()?.to_trimmed_string();
         let name = name.trim();
         let mut local_vars = BTreeMap::new();
         let (scope_index, mut context) = create_scope!(context, local_vars);

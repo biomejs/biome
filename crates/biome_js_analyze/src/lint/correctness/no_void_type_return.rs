@@ -1,6 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, AnyTsReturnType, JsArrowFunctionExpression, JsFunctionDeclaration,
     JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsGetterClassMember,
@@ -90,6 +91,7 @@ declare_lint_rule! {
         name: "noVoidTypeReturn",
         language: "ts",
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

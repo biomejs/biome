@@ -1,9 +1,10 @@
 use biome_console::fmt::Display;
 use biome_console::{markup, MarkupBuf};
 use biome_deserialize::DeserializationDiagnostic;
-use biome_diagnostics::adapters::ResolveError;
+use biome_diagnostics::ResolveError;
 use biome_diagnostics::{Advices, Diagnostic, Error, LogCategory, MessageAndDescription, Visit};
 use biome_rowan::SyntaxError;
+use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Formatter};
 
@@ -34,6 +35,8 @@ pub enum BiomeDiagnostic {
     /// Thrown when the program can't serialize the configuration, while saving it
     SerializationError(SerializationError),
 
+    NoConfigurationFileFound(NoConfigurationFileFound),
+
     /// Thrown when trying to **create** a new configuration file, but it exists already
     ConfigAlreadyExists(ConfigAlreadyExists),
 
@@ -45,6 +48,9 @@ pub enum BiomeDiagnostic {
 
     /// When something is wrong with the configuration
     InvalidConfiguration(InvalidConfiguration),
+
+    /// When a user provide a configuration file path that isn't a JSON/JSONC file
+    InvalidConfigurationFile(InvalidConfigurationFile),
 
     /// Thrown when the pattern inside the `ignore` field errors
     InvalidIgnorePattern(InvalidIgnorePattern),
@@ -88,17 +94,16 @@ impl BiomeDiagnostic {
     }
 
     pub fn new_invalid_ignore_pattern_with_path(
-        pattern: impl Into<String>,
-        reason: impl Into<String>,
-        file_path: Option<impl Into<String>>,
+        pattern: impl std::fmt::Display,
+        reason: impl std::fmt::Display,
+        file_path: impl Into<String>,
     ) -> Self {
         Self::InvalidIgnorePattern(InvalidIgnorePattern {
             message: format!(
                 "Couldn't parse the pattern \"{}\". Reason: {}",
-                pattern.into(),
-                reason.into()
+                pattern, reason,
             ),
-            file_path: file_path.map(|f| f.into()),
+            file_path: Some(file_path.into()),
         })
     }
 
@@ -109,6 +114,18 @@ impl BiomeDiagnostic {
     pub fn invalid_configuration(message: impl Display) -> Self {
         Self::InvalidConfiguration(InvalidConfiguration {
             message: MessageAndDescription::from(markup! {{message}}.to_owned()),
+        })
+    }
+
+    pub fn invalid_configuration_file(path: &Utf8Path) -> Self {
+        Self::InvalidConfigurationFile(InvalidConfigurationFile {
+            path: path.to_string(),
+        })
+    }
+
+    pub fn no_configuration_file_found(path: &Utf8Path) -> Self {
+        Self::NoConfigurationFileFound(NoConfigurationFileFound {
+            path: path.to_string(),
         })
     }
 
@@ -168,6 +185,20 @@ pub struct SerializationError;
 )]
 pub struct ConfigAlreadyExists {}
 
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "configuration",
+    severity = Error,
+    message(
+        message("Biome couldn't find a configuration in the directory "<Emphasis>{self.path}</Emphasis>"."),
+        description = "Biome couldn't find a configuration in the directory {path}."
+    )
+)]
+pub struct NoConfigurationFileFound {
+    #[location(resource)]
+    path: String,
+}
+
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "configuration",
@@ -184,8 +215,8 @@ pub struct InvalidIgnorePattern {
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
-	category = "configuration",
-	severity = Error,
+    category = "configuration",
+    severity = Error,
 )]
 pub struct CantLoadExtendFile {
     #[location(resource)]
@@ -217,13 +248,27 @@ impl CantLoadExtendFile {
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
-	category = "configuration",
-	severity = Error,
+    category = "configuration",
+    severity = Error,
 )]
 pub struct InvalidConfiguration {
     #[message]
     #[description]
     message: MessageAndDescription,
+}
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "configuration",
+    severity = Error,
+    message(
+        description = "Invalid configuration file. Expected JSON or JSONC file, but got {path}.",
+        message("Invalid configuration file. Expected JSON or JSONC file, but got "{self.path}".")
+    )
+)]
+pub struct InvalidConfigurationFile {
+    #[location(resource)]
+    path: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -329,7 +374,7 @@ pub struct InvalidGlobPatternDiagnostic {
 
 #[cfg(test)]
 mod test {
-    use crate::{BiomeDiagnostic, PartialConfiguration};
+    use crate::{BiomeDiagnostic, Configuration};
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
     use biome_json_parser::JsonParserOptions;
@@ -360,11 +405,8 @@ mod test {
     #[test]
     fn deserialization_error() {
         let content = "{ \n\n\"formatter\" }";
-        let result = deserialize_from_json_str::<PartialConfiguration>(
-            content,
-            JsonParserOptions::default(),
-            "",
-        );
+        let result =
+            deserialize_from_json_str::<Configuration>(content, JsonParserOptions::default(), "");
 
         assert!(result.has_errors());
         for diagnostic in result.into_diagnostics() {
@@ -387,12 +429,9 @@ mod test {
     }
   }
 }"#;
-        let _result = deserialize_from_json_str::<PartialConfiguration>(
-            content,
-            JsonParserOptions::default(),
-            "",
-        )
-        .into_deserialized()
-        .unwrap_or_default();
+        let _result =
+            deserialize_from_json_str::<Configuration>(content, JsonParserOptions::default(), "")
+                .into_deserialized()
+                .unwrap_or_default();
     }
 }

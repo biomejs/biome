@@ -1,119 +1,130 @@
-use biome_deserialize::StringSet;
-use biome_deserialize_macros::{Deserializable, Merge, Partial};
+use crate::bool::Bool;
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
+    AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
+    LineWidth,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
+
+pub type FormatterEnabled = Bool<true>;
+pub type UseEditorconfigEnabled = Bool<false>;
+pub type FormatWithErrorsEnabled = Bool<false>;
 
 /// Generic options applied to all files
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
+#[derive(
+    Bpaf, Clone, Deserializable, Debug, Default, Deserialize, Eq, PartialEq, Merge, Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FormatterConfiguration {
     // if `false`, it disables the feature. `true` by default
-    #[partial(bpaf(hide))]
-    pub enabled: bool,
-
-    #[partial(bpaf(long("use-editorconfig"), argument("true|false"), optional))]
-    /// Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration. Default: false.
-    pub use_editorconfig: bool,
+    #[bpaf(hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<FormatterEnabled>,
 
     /// Stores whether formatting should be allowed to proceed if a given file
     /// has syntax errors
-    #[partial(bpaf(hide))]
-    pub format_with_errors: bool,
+    #[bpaf(hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub format_with_errors: Option<FormatWithErrorsEnabled>,
 
     /// The indent style.
-    #[partial(bpaf(long("indent-style"), argument("tab|space"), optional))]
-    pub indent_style: IndentStyle,
-
-    /// The size of the indentation, 2 by default (deprecated, use `indent-width`)
-    #[partial(bpaf(long("indent-size"), argument("NUMBER"), optional))]
-    #[partial(deserializable(deprecated(use_instead = "formatter.indentWidth")))]
-    pub indent_size: IndentWidth,
+    #[bpaf(long("indent-style"), argument("tab|space"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation, 2 by default
-    #[partial(bpaf(long("indent-width"), argument("NUMBER"), optional))]
-    pub indent_width: IndentWidth,
+    #[bpaf(long("indent-width"), argument("NUMBER"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub indent_width: Option<IndentWidth>,
 
     /// The type of line ending.
-    #[partial(bpaf(long("line-ending"), argument("lf|crlf|cr"), optional))]
-    pub line_ending: LineEnding,
+    #[bpaf(long("line-ending"), argument("lf|crlf|cr"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub line_ending: Option<LineEnding>,
 
     /// What's the max width of a line. Defaults to 80.
-    #[partial(bpaf(long("line-width"), argument("NUMBER"), optional))]
-    pub line_width: LineWidth,
+    #[bpaf(long("line-width"), argument("NUMBER"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub line_width: Option<LineWidth>,
 
-    /// The attribute position style in HTMLish languages. By default auto.
-    #[partial(bpaf(long("attribute-position"), argument("multiline|auto"), optional))]
-    pub attribute_position: AttributePosition,
+    /// The attribute position style in HTML-ish languages. Defaults to auto.
+    #[bpaf(long("attribute-position"), argument("multiline|auto"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub attribute_position: Option<AttributePosition>,
+
+    /// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+    #[bpaf(long("bracket-same-line"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bracket_same_line: Option<BracketSameLine>,
 
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
-    #[partial(bpaf(long("bracket-spacing"), argument("true|false"), optional))]
-    pub bracket_spacing: BracketSpacing,
+    #[bpaf(long("bracket-spacing"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bracket_spacing: Option<BracketSpacing>,
+
+    /// Use any `.editorconfig` files to configure the formatter. Configuration
+    /// in `biome.json` will override `.editorconfig` configuration.
+    ///
+    /// Default: `false`.
+    #[bpaf(long("use-editorconfig"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_editorconfig: Option<UseEditorconfigEnabled>,
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub ignore: StringSet,
+    #[bpaf(hide, pure(Default::default()))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ignore: Option<Vec<Box<str>>>,
 
     /// A list of Unix shell style patterns. The formatter will include files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub include: StringSet,
+    #[bpaf(hide, pure(Default::default()))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub include: Option<Vec<Box<str>>>,
+
+    /// A list of glob patterns. The formatter will include files/folders that will
+    /// match these patterns.
+    #[bpaf(pure(Default::default()), hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub includes: Option<Vec<biome_glob::Glob>>,
 }
 
-impl PartialFormatterConfiguration {
-    pub const fn is_disabled(&self) -> bool {
-        matches!(self.enabled, Some(false))
+impl FormatterConfiguration {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
     }
 
-    pub fn get_formatter_configuration(&self) -> FormatterConfiguration {
-        FormatterConfiguration {
-            enabled: self.enabled.unwrap_or_default(),
-            format_with_errors: self.format_with_errors.unwrap_or_default(),
-            indent_style: self.indent_style.unwrap_or_default(),
-            indent_size: self.indent_size.unwrap_or_default(),
-            indent_width: self.indent_width.unwrap_or_default(),
-            line_ending: self.line_ending.unwrap_or_default(),
-            line_width: self.line_width.unwrap_or_default(),
-            attribute_position: self.attribute_position.unwrap_or_default(),
-            bracket_spacing: self.bracket_spacing.unwrap_or_default(),
-            ignore: self.ignore.clone().unwrap_or_default(),
-            include: self.include.clone().unwrap_or_default(),
-            use_editorconfig: self.use_editorconfig.unwrap_or_default(),
-        }
+    pub fn format_with_errors_resolved(&self) -> bool {
+        self.format_with_errors.unwrap_or_default().into()
     }
-}
 
-impl Default for FormatterConfiguration {
-    fn default() -> Self {
-        Self {
-            enabled: true,
-            format_with_errors: false,
-            indent_size: IndentWidth::default(),
-            indent_width: IndentWidth::default(),
-            indent_style: IndentStyle::default(),
-            line_ending: LineEnding::default(),
-            line_width: LineWidth::default(),
-            attribute_position: AttributePosition::default(),
-            bracket_spacing: Default::default(),
-            ignore: Default::default(),
-            include: Default::default(),
-            // TODO: Biome 2.0: change to true
-            use_editorconfig: Default::default(),
-        }
+    pub fn indent_style_resolved(&self) -> IndentStyle {
+        self.indent_style.unwrap_or_default()
     }
-}
 
-/// Required by [Bpaf].
-impl FromStr for FormatterConfiguration {
-    type Err = &'static str;
+    pub fn indent_width_resolved(&self) -> IndentWidth {
+        self.indent_width.unwrap_or_default()
+    }
 
-    fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::default())
+    pub fn line_ending_resolved(&self) -> LineEnding {
+        self.line_ending.unwrap_or_default()
+    }
+
+    pub fn line_width_resolved(&self) -> LineWidth {
+        self.line_width.unwrap_or_default()
+    }
+
+    pub fn attribute_position_resolved(&self) -> AttributePosition {
+        self.attribute_position.unwrap_or_default()
+    }
+
+    pub fn bracket_spacing_resolved(&self) -> BracketSpacing {
+        self.bracket_spacing.unwrap_or_default()
+    }
+
+    pub fn use_editorconfig_resolved(&self) -> bool {
+        self.use_editorconfig.unwrap_or_default().into()
     }
 }

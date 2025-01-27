@@ -1,0 +1,214 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/import-assertions/re-export.js
+---
+# Input
+
+```js
+export { default as foo2 } from "foo.json" assert { type: "json" };
+export * from "foo.json" assert { type: "json" };
+export * as foo3 from "foo.json" assert { type: "json" };
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,3 +1,15 @@
+-export { default as foo2 } from "foo.json" assert { type: "json" };
+-export * from "foo.json" assert { type: "json" };
+-export * as foo3 from "foo.json" assert { type: "json" };
++export { default as foo2 } from "foo.json";
++assert;
++{
++  type: "json";
++}
++export * from "foo.json";
++assert;
++{
++  type: "json";
++}
++export * as foo3 from "foo.json";
++assert;
++{
++  type: "json";
++}
+```
+
+# Output
+
+```js
+export { default as foo2 } from "foo.json";
+assert;
+{
+  type: "json";
+}
+export * from "foo.json";
+assert;
+{
+  type: "json";
+}
+export * as foo3 from "foo.json";
+assert;
+{
+  type: "json";
+}
+```
+
+# Errors
+```
+re-export.js:1:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+  > 1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+      │                                            ^^^^^^
+    2 │ export * from "foo.json" assert { type: "json" };
+    3 │ export * as foo3 from "foo.json" assert { type: "json" };
+  
+  i An explicit or implicit semicolon is expected here...
+  
+  > 1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+      │                                            ^^^^^^
+    2 │ export * from "foo.json" assert { type: "json" };
+    3 │ export * as foo3 from "foo.json" assert { type: "json" };
+  
+  i ...Which is required to end this statement
+  
+  > 1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ export * from "foo.json" assert { type: "json" };
+    3 │ export * as foo3 from "foo.json" assert { type: "json" };
+  
+re-export.js:1:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+  > 1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+      │                                                   ^
+    2 │ export * from "foo.json" assert { type: "json" };
+    3 │ export * as foo3 from "foo.json" assert { type: "json" };
+  
+  i An explicit or implicit semicolon is expected here...
+  
+  > 1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+      │                                                   ^
+    2 │ export * from "foo.json" assert { type: "json" };
+    3 │ export * as foo3 from "foo.json" assert { type: "json" };
+  
+  i ...Which is required to end this statement
+  
+  > 1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+      │                                            ^^^^^^^^
+    2 │ export * from "foo.json" assert { type: "json" };
+    3 │ export * as foo3 from "foo.json" assert { type: "json" };
+  
+re-export.js:2:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+  > 2 │ export * from "foo.json" assert { type: "json" };
+      │                          ^^^^^^
+    3 │ export * as foo3 from "foo.json" assert { type: "json" };
+    4 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+  > 2 │ export * from "foo.json" assert { type: "json" };
+      │                          ^^^^^^
+    3 │ export * as foo3 from "foo.json" assert { type: "json" };
+    4 │ 
+  
+  i ...Which is required to end this statement
+  
+    1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+  > 2 │ export * from "foo.json" assert { type: "json" };
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ export * as foo3 from "foo.json" assert { type: "json" };
+    4 │ 
+  
+re-export.js:2:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+  > 2 │ export * from "foo.json" assert { type: "json" };
+      │                                 ^
+    3 │ export * as foo3 from "foo.json" assert { type: "json" };
+    4 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+  > 2 │ export * from "foo.json" assert { type: "json" };
+      │                                 ^
+    3 │ export * as foo3 from "foo.json" assert { type: "json" };
+    4 │ 
+  
+  i ...Which is required to end this statement
+  
+    1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+  > 2 │ export * from "foo.json" assert { type: "json" };
+      │                          ^^^^^^^^
+    3 │ export * as foo3 from "foo.json" assert { type: "json" };
+    4 │ 
+  
+re-export.js:3:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+    2 │ export * from "foo.json" assert { type: "json" };
+  > 3 │ export * as foo3 from "foo.json" assert { type: "json" };
+      │                                  ^^^^^^
+    4 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+    2 │ export * from "foo.json" assert { type: "json" };
+  > 3 │ export * as foo3 from "foo.json" assert { type: "json" };
+      │                                  ^^^^^^
+    4 │ 
+  
+  i ...Which is required to end this statement
+  
+    1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+    2 │ export * from "foo.json" assert { type: "json" };
+  > 3 │ export * as foo3 from "foo.json" assert { type: "json" };
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+re-export.js:3:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+    2 │ export * from "foo.json" assert { type: "json" };
+  > 3 │ export * as foo3 from "foo.json" assert { type: "json" };
+      │                                         ^
+    4 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+    2 │ export * from "foo.json" assert { type: "json" };
+  > 3 │ export * as foo3 from "foo.json" assert { type: "json" };
+      │                                         ^
+    4 │ 
+  
+  i ...Which is required to end this statement
+  
+    1 │ export { default as foo2 } from "foo.json" assert { type: "json" };
+    2 │ export * from "foo.json" assert { type: "json" };
+  > 3 │ export * as foo3 from "foo.json" assert { type: "json" };
+      │                                  ^^^^^^^^
+    4 │ 
+  
+
+```
