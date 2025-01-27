@@ -3,6 +3,7 @@
 use biome_analyze::declare_lint_group;
 
 pub mod no_common_js;
+pub mod no_destructured_props;
 pub mod no_document_cookie;
 pub mod no_document_import_in_page;
 pub mod no_duplicate_else_if;
@@ -56,6 +57,7 @@ declare_lint_group! {
         name : "nursery" ,
         rules : [
             self :: no_common_js :: NoCommonJs ,
+            self :: no_destructured_props :: NoDestructuredProps ,
             self :: no_document_cookie :: NoDocumentCookie ,
             self :: no_document_import_in_page :: NoDocumentImportInPage ,
             self :: no_duplicate_else_if :: NoDuplicateElseIf ,
