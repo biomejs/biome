@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{write, FormatRuleWithOptions};
+use biome_formatter::{write, AttributePosition, FormatRuleWithOptions};
 use biome_html_syntax::{HtmlOpeningElement, HtmlOpeningElementFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlOpeningElement {
@@ -36,14 +36,48 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
             r_angle_token,
         } = node.as_fields();
 
+        let bracket_same_line = f.options().bracket_same_line().value();
         write!(f, [l_angle_token.format(), name.format()])?;
-        if attributes.len() > 0 {
-            write!(f, [space(), attributes.format()])?
-        }
-        // When these tokens are borrowed, they are managed by the sibling `HtmlElementList` formatter.
-        if !self.r_angle_is_borrowed {
-            write!(f, [r_angle_token.format()])?;
-        }
+        let line_break = if f.options().attribute_position() == AttributePosition::Multiline {
+            hard_line_break()
+        } else {
+            soft_line_break_or_space()
+        };
+
+        let attr_group_id = f.group_id("element-attr-group-id");
+        write!(
+            f,
+            [&group(&format_with(|f| {
+                if attributes.len() > 0 {
+                    write!(
+                        f,
+                        [
+                            space(),
+                            &soft_line_indent_or_space(&format_with(|f| {
+                                f.join_with(&line_break)
+                                    .entries(attributes.iter().formatted())
+                                    .finish()?;
+
+                                Ok(())
+                            }))
+                        ]
+                    )?;
+                }
+                // Whitespace sensitivity takes precedence over bracketSameLine for correctness.
+                //
+                // The r_angle is placed inside this group because prettier always includes this token
+                // in the same group as the attributes, unless the token is being borrowed.
+                // When these tokens are borrowed, they are managed by the sibling `HtmlElementList` formatter.
+                if !bracket_same_line {
+                    write!(f, [soft_line_break()])?;
+                }
+                if !self.r_angle_is_borrowed {
+                    write!(f, [r_angle_token.format()])?;
+                }
+                Ok(())
+            }))
+            .with_group_id(Some(attr_group_id))]
+        )?;
 
         Ok(())
     }
