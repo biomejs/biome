@@ -255,6 +255,32 @@ pub fn grit_int_literal(value_token: SyntaxToken) -> GritIntLiteral {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn grit_javascript_function_definition(
+    function_token: SyntaxToken,
+    name: GritName,
+    l_paren_token: SyntaxToken,
+    args: GritVariableList,
+    r_paren_token: SyntaxToken,
+    js_token: SyntaxToken,
+    l_curly_token: SyntaxToken,
+    body_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> GritJavascriptFunctionDefinition {
+    GritJavascriptFunctionDefinition::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_JAVASCRIPT_FUNCTION_DEFINITION,
+        [
+            Some(SyntaxElement::Token(function_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(args.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+            Some(SyntaxElement::Token(js_token)),
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Token(body_token)),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn grit_language_declaration(
     language_token: SyntaxToken,
     name: AnyGritLanguageName,

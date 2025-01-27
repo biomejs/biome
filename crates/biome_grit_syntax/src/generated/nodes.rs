@@ -850,6 +850,81 @@ pub struct GritIntLiteralFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GritJavascriptFunctionDefinition {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GritJavascriptFunctionDefinition {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GritJavascriptFunctionDefinitionFields {
+        GritJavascriptFunctionDefinitionFields {
+            function_token: self.function_token(),
+            name: self.name(),
+            l_paren_token: self.l_paren_token(),
+            args: self.args(),
+            r_paren_token: self.r_paren_token(),
+            js_token: self.js_token(),
+            l_curly_token: self.l_curly_token(),
+            body_token: self.body_token(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn function_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<GritName> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn args(&self) -> GritVariableList {
+        support::list(&self.syntax, 3usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+    pub fn js_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 5usize)
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 6usize)
+    }
+    pub fn body_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 7usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 8usize)
+    }
+}
+impl Serialize for GritJavascriptFunctionDefinition {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GritJavascriptFunctionDefinitionFields {
+    pub function_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<GritName>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub args: GritVariableList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+    pub js_token: SyntaxResult<SyntaxToken>,
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub body_token: SyntaxResult<SyntaxToken>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritLanguageDeclaration {
     pub(crate) syntax: SyntaxNode,
 }
@@ -4273,6 +4348,7 @@ pub enum AnyGritDefinition {
     AnyGritPattern(AnyGritPattern),
     GritBogusDefinition(GritBogusDefinition),
     GritFunctionDefinition(GritFunctionDefinition),
+    GritJavascriptFunctionDefinition(GritJavascriptFunctionDefinition),
     GritPatternDefinition(GritPatternDefinition),
     GritPredicateDefinition(GritPredicateDefinition),
 }
@@ -4292,6 +4368,14 @@ impl AnyGritDefinition {
     pub fn as_grit_function_definition(&self) -> Option<&GritFunctionDefinition> {
         match &self {
             AnyGritDefinition::GritFunctionDefinition(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_grit_javascript_function_definition(
+        &self,
+    ) -> Option<&GritJavascriptFunctionDefinition> {
+        match &self {
+            AnyGritDefinition::GritJavascriptFunctionDefinition(item) => Some(item),
             _ => None,
         }
     }
@@ -6118,6 +6202,67 @@ impl From<GritIntLiteral> for SyntaxNode {
 }
 impl From<GritIntLiteral> for SyntaxElement {
     fn from(n: GritIntLiteral) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for GritJavascriptFunctionDefinition {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_JAVASCRIPT_FUNCTION_DEFINITION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GRIT_JAVASCRIPT_FUNCTION_DEFINITION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GritJavascriptFunctionDefinition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GritJavascriptFunctionDefinition")
+            .field(
+                "function_token",
+                &support::DebugSyntaxResult(self.function_token()),
+            )
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field(
+                "l_paren_token",
+                &support::DebugSyntaxResult(self.l_paren_token()),
+            )
+            .field("args", &self.args())
+            .field(
+                "r_paren_token",
+                &support::DebugSyntaxResult(self.r_paren_token()),
+            )
+            .field("js_token", &support::DebugSyntaxResult(self.js_token()))
+            .field(
+                "l_curly_token",
+                &support::DebugSyntaxResult(self.l_curly_token()),
+            )
+            .field("body_token", &support::DebugSyntaxResult(self.body_token()))
+            .field(
+                "r_curly_token",
+                &support::DebugSyntaxResult(self.r_curly_token()),
+            )
+            .finish()
+    }
+}
+impl From<GritJavascriptFunctionDefinition> for SyntaxNode {
+    fn from(n: GritJavascriptFunctionDefinition) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<GritJavascriptFunctionDefinition> for SyntaxElement {
+    fn from(n: GritJavascriptFunctionDefinition) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -10315,6 +10460,11 @@ impl From<GritFunctionDefinition> for AnyGritDefinition {
         AnyGritDefinition::GritFunctionDefinition(node)
     }
 }
+impl From<GritJavascriptFunctionDefinition> for AnyGritDefinition {
+    fn from(node: GritJavascriptFunctionDefinition) -> AnyGritDefinition {
+        AnyGritDefinition::GritJavascriptFunctionDefinition(node)
+    }
+}
 impl From<GritPatternDefinition> for AnyGritDefinition {
     fn from(node: GritPatternDefinition) -> AnyGritDefinition {
         AnyGritDefinition::GritPatternDefinition(node)
@@ -10330,12 +10480,14 @@ impl AstNode for AnyGritDefinition {
     const KIND_SET: SyntaxKindSet<Language> = AnyGritPattern::KIND_SET
         .union(GritBogusDefinition::KIND_SET)
         .union(GritFunctionDefinition::KIND_SET)
+        .union(GritJavascriptFunctionDefinition::KIND_SET)
         .union(GritPatternDefinition::KIND_SET)
         .union(GritPredicateDefinition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             GRIT_BOGUS_DEFINITION
             | GRIT_FUNCTION_DEFINITION
+            | GRIT_JAVASCRIPT_FUNCTION_DEFINITION
             | GRIT_PATTERN_DEFINITION
             | GRIT_PREDICATE_DEFINITION => true,
             k if AnyGritPattern::can_cast(k) => true,
@@ -10349,6 +10501,11 @@ impl AstNode for AnyGritDefinition {
             }
             GRIT_FUNCTION_DEFINITION => {
                 AnyGritDefinition::GritFunctionDefinition(GritFunctionDefinition { syntax })
+            }
+            GRIT_JAVASCRIPT_FUNCTION_DEFINITION => {
+                AnyGritDefinition::GritJavascriptFunctionDefinition(
+                    GritJavascriptFunctionDefinition { syntax },
+                )
             }
             GRIT_PATTERN_DEFINITION => {
                 AnyGritDefinition::GritPatternDefinition(GritPatternDefinition { syntax })
@@ -10369,6 +10526,7 @@ impl AstNode for AnyGritDefinition {
         match self {
             AnyGritDefinition::GritBogusDefinition(it) => &it.syntax,
             AnyGritDefinition::GritFunctionDefinition(it) => &it.syntax,
+            AnyGritDefinition::GritJavascriptFunctionDefinition(it) => &it.syntax,
             AnyGritDefinition::GritPatternDefinition(it) => &it.syntax,
             AnyGritDefinition::GritPredicateDefinition(it) => &it.syntax,
             AnyGritDefinition::AnyGritPattern(it) => it.syntax(),
@@ -10378,6 +10536,7 @@ impl AstNode for AnyGritDefinition {
         match self {
             AnyGritDefinition::GritBogusDefinition(it) => it.syntax,
             AnyGritDefinition::GritFunctionDefinition(it) => it.syntax,
+            AnyGritDefinition::GritJavascriptFunctionDefinition(it) => it.syntax,
             AnyGritDefinition::GritPatternDefinition(it) => it.syntax,
             AnyGritDefinition::GritPredicateDefinition(it) => it.syntax,
             AnyGritDefinition::AnyGritPattern(it) => it.into_syntax(),
@@ -10390,6 +10549,7 @@ impl std::fmt::Debug for AnyGritDefinition {
             AnyGritDefinition::AnyGritPattern(it) => std::fmt::Debug::fmt(it, f),
             AnyGritDefinition::GritBogusDefinition(it) => std::fmt::Debug::fmt(it, f),
             AnyGritDefinition::GritFunctionDefinition(it) => std::fmt::Debug::fmt(it, f),
+            AnyGritDefinition::GritJavascriptFunctionDefinition(it) => std::fmt::Debug::fmt(it, f),
             AnyGritDefinition::GritPatternDefinition(it) => std::fmt::Debug::fmt(it, f),
             AnyGritDefinition::GritPredicateDefinition(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -10401,6 +10561,7 @@ impl From<AnyGritDefinition> for SyntaxNode {
             AnyGritDefinition::AnyGritPattern(it) => it.into(),
             AnyGritDefinition::GritBogusDefinition(it) => it.into(),
             AnyGritDefinition::GritFunctionDefinition(it) => it.into(),
+            AnyGritDefinition::GritJavascriptFunctionDefinition(it) => it.into(),
             AnyGritDefinition::GritPatternDefinition(it) => it.into(),
             AnyGritDefinition::GritPredicateDefinition(it) => it.into(),
         }
@@ -12524,6 +12685,11 @@ impl std::fmt::Display for GritFunctionDefinition {
     }
 }
 impl std::fmt::Display for GritIntLiteral {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GritJavascriptFunctionDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
