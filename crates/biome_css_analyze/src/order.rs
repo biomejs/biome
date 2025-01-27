@@ -1,17 +1,18 @@
 use std::{collections::HashMap, sync::LazyLock};
 
-/// This is the desired order of CSS properties used by useSortedProperties.
+/// This defines the desired order of CSS properties for useSortedProperties.
 ///
-/// It's the same ordering used by stylelint-config-recess-order, except in the following ways:
-/// - Vendor prefixes removed
-/// - IE filters (progid:DXImageTransform) removed
-/// - Removed properties not known to biome:
-///   - font-effect, font-emphasize, font-emphasize-position, font-emphasize-style,
-///   - font-smooth, text-outline, text-overflow-ellipsis, text-overflow-mode, nav-index, color-profile
-pub(crate) const PROPERTY_ORDER: [&str; 370] = [
-    // the all property will always be first since it overrides everything
+/// The properties are grouped by the specification module in which they appear. Modules
+/// are ordered semantically, by importance.
+///
+/// This is the same ordering used by stylelint-config-recess-order, except that vendor prefixes
+/// and some legacy and draft properties not known to biome are removed.
+pub(crate) const PROPERTY_ORDER: [&str; 377] = [
+    // Cascade
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade#reference
     "all",
-    // position
+    // Positioned layout
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_positioned_layout#reference
     "position",
     "inset",
     "inset-block",
@@ -25,10 +26,15 @@ pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     "bottom",
     "left",
     "z-index",
-    // display
+    "float",
+    "clear",
+    // Display
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_display#reference
     "box-sizing",
     "display",
-    // layout - flex & grid
+    "visibility",
+    // Flexible box layout
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_flexible_box_layout#reference
     "flex",
     "flex-grow",
     "flex-shrink",
@@ -37,6 +43,8 @@ pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     "flex-direction",
     "flex-wrap",
     "box-orient",
+    // Grid layout
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout#reference
     "grid",
     "grid-area",
     "grid-template",
@@ -55,6 +63,8 @@ pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     "grid-gap",
     "grid-row-gap",
     "grid-column-gap",
+    // Box alignment
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_box_alignment#reference
     "gap",
     "row-gap",
     "column-gap",
@@ -67,9 +77,11 @@ pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     "justify-content",
     "justify-items",
     "justify-self",
+    // Order
+    // Part of the display module, but behaves like a box alignment property in that it affects both flex and grid.
     "order",
-    // layout - box model
-    "float",
+    // Box sizing
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_box_sizing#reference
     "inline-size",
     "min-inline-size",
     "max-inline-size",
@@ -83,6 +95,8 @@ pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     "min-height",
     "max-height",
     "aspect-ratio",
+    // Box model
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_box_model#reference
     "padding",
     "padding-block",
     "padding-block-start",
@@ -105,28 +119,37 @@ pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     "margin-right",
     "margin-bottom",
     "margin-left",
+    // Overflow
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_overflow#reference
     "overflow",
-    "overflow-block",
     "overflow-inline",
+    "overflow-block",
     "overflow-x",
     "overflow-y",
+    "scrollbar-gutter",
+    "overflow-style",
+    "text-overflow",
+    "line-clamp",
+    "line-clamp",
+    // Overscroll
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_overscroll_behavior#reference
     "overscroll-behavior",
     "overscroll-behavior-inline",
     "overscroll-behavior-block",
     "overscroll-behavior-x",
     "overscroll-behavior-y",
-    "clip",
-    "clip-path",
-    "clear",
-    // typography
+    // Fonts
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_fonts#reference
     "font",
     "font-family",
     "font-size",
+    "font-size-adjust",
     "font-variation-settings",
     "font-style",
     "font-weight",
-    "font-feature-settings",
     "font-optical-sizing",
+    "font-stretch",
+    "font-feature-settings",
     "font-kerning",
     "font-variant",
     "font-variant-ligatures",
@@ -135,13 +158,40 @@ pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     "font-variant-numeric",
     "font-variant-east-asian",
     "font-variant-position",
-    "font-size-adjust",
-    "font-stretch",
-    "hyphens",
+    "font-smoothing",
+    "osx-font-smoothing",
+    // Inline layout
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_inline_layout#reference
     "line-height",
+    "vertical-align",
+    "alignment-baseline",
+    "baseline-shift",
+    "dominant-baseline",
+    // Color
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_colors#reference
     "color",
+    "text-fill-color",
+    "text-stroke",
+    "text-stroke-width",
+    "text-stroke-color",
+    // Text
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_text#reference
     "text-align",
     "text-align-last",
+    "text-justify",
+    "text-indent",
+    "text-transform",
+    "word-spacing",
+    "letter-spacing",
+    "hyphens",
+    "word-break",
+    "text-wrap",
+    "word-wrap",
+    "overflow-wrap",
+    "tab-size",
+    "white-space",
+    // Text decoration
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_text_decoration#reference
     "text-emphasis",
     "text-emphasis-color",
     "text-emphasis-style",
@@ -153,25 +203,10 @@ pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     "text-decoration-color",
     "text-underline-position",
     "text-underline-offset",
-    "text-indent",
-    "text-justify",
-    "text-overflow",
-    "line-clamp",
     "text-shadow",
-    "text-transform",
-    "text-wrap",
-    "letter-spacing",
-    "word-break",
-    "word-spacing",
-    "word-wrap",
-    "overflow-wrap",
-    "tab-size",
-    "white-space",
-    "vertical-align",
-    "list-style",
-    "list-style-position",
-    "list-style-type",
-    "list-style-image",
+    // (The ruby layout module would go here)
+    // Font loading
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_font_loading#reference
     "src",
     "font-display",
     "unicode-range",
@@ -179,71 +214,96 @@ pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     "ascent-override",
     "descent-override",
     "line-gap-override",
-    // a11y
+    // Basic user interface
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_basic_user_interface#reference
     "appearance",
     "accent-color",
-    "color-scheme",
     "pointer-events",
     "touch-action",
     "cursor",
     "caret-color",
-    "visibility",
     "zoom",
-    "table-layout",
-    "empty-cells",
-    "caption-side",
-    "border-spacing",
-    "border-collapse",
-    "content",
-    "quotes",
-    "counter-reset",
-    "counter-set",
-    "counter-increment",
     "resize",
-    "scroll-behavior",
-    "scroll-snap-type",
-    "scroll-snap-align",
-    "scroll-snap-stop",
-    "scroll-padding",
-    "scroll-padding-inline",
-    "scroll-padding-inline-start",
-    "scroll-padding-inline-end",
-    "scroll-padding-block",
-    "scroll-padding-block-start",
-    "scroll-padding-block-end",
-    "scroll-padding-top",
-    "scroll-padding-right",
-    "scroll-padding-bottom",
-    "scroll-padding-left",
-    "scroll-margin",
-    "scroll-margin-inline",
-    "scroll-margin-inline-start",
-    "scroll-margin-inline-end",
-    "scroll-margin-block",
-    "scroll-margin-block-start",
-    "scroll-margin-block-end",
-    "scroll-margin-top",
-    "scroll-margin-right",
-    "scroll-margin-bottom",
-    "scroll-margin-left",
-    "scrollbar-color",
-    "scrollbar-gutter",
-    "scrollbar-width",
+    "user-select",
     "user-select",
     "nav-up",
     "nav-right",
     "nav-down",
     "nav-left",
-    // backgrounds
+    "outline",
+    "outline-width",
+    "outline-style",
+    "outline-color",
+    "outline-offset",
+    // Color adjustment
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_color_adjustment#reference
+    "color-scheme",
+    // Table
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_table#reference
+    "table-layout",
+    "empty-cells",
+    "caption-side",
+    "border-spacing",
+    "border-collapse",
+    // Generated content
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_generated_content#reference
+    "content",
+    "quotes",
+    // Lists and counters
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_lists#reference
+    "list-style",
+    "list-style-position",
+    "list-style-type",
+    "list-style-image",
+    "counter-reset",
+    "counter-set",
+    "counter-increment",
+    // Scroll snap
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_scroll_snap#reference
+    "scroll-snap-type",
+    "scroll-snap-align",
+    "scroll-snap-stop",
+    "scroll-padding",
+    "scroll-padding-block",
+    "scroll-padding-block-start",
+    "scroll-padding-block-end",
+    "scroll-padding-inline",
+    "scroll-padding-inline-start",
+    "scroll-padding-inline-end",
+    "scroll-padding-top",
+    "scroll-padding-right",
+    "scroll-padding-bottom",
+    "scroll-padding-left",
+    "scroll-margin",
+    "scroll-margin-block",
+    "scroll-margin-block-start",
+    "scroll-margin-block-end",
+    "scroll-margin-inline",
+    "scroll-margin-inline-start",
+    "scroll-margin-inline-end",
+    "scroll-margin-top",
+    "scroll-margin-right",
+    "scroll-margin-bottom",
+    "scroll-margin-left",
+    // (The anchor positioning module would go here)
+    // (The containment module would go here)
+    // Scrollbar styling
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_scrollbars_styling#reference
+    "scrollbar-color",
+    "scrollbar-width",
+    // Images
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_images#reference
     "object-fit",
     "object-position",
+    "interpolation-mode",
     "image-orientation",
     "image-rendering",
     "image-resolution",
+    // Backgrounds and borders
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_backgrounds_and_borders#reference
     "background",
     "background-color",
     "background-image",
-    "filter",
     "background-repeat",
     "background-attachment",
     "background-position",
@@ -252,10 +312,6 @@ pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     "background-clip",
     "background-origin",
     "background-size",
-    "background-blend-mode",
-    "isolation",
-    "backdrop-filter",
-    // borders
     "border",
     "border-color",
     "border-style",
@@ -309,15 +365,21 @@ pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     "border-image-width",
     "border-image-outset",
     "border-image-repeat",
-    "outline",
-    "outline-width",
-    "outline-style",
-    "outline-color",
-    "outline-offset",
     "box-shadow",
+    // Compositing and blending
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_compositing_and_blending#reference
+    "background-blend-mode",
+    "isolation",
     "mix-blend-mode",
     "opacity",
-    // mask
+    // Filter effects
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_filter_effects#properties
+    "filter",
+    "backdrop-filter",
+    // Masking
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_masking#reference
+    "clip",
+    "clip-path",
     "mask-border",
     "mask-border-source",
     "mask-border-slice",
@@ -334,42 +396,37 @@ pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     "mask-origin",
     "mask-size",
     "mask-composite",
-    // svg
-    "alignment-baseline",
-    "baseline-shift",
-    "dominant-baseline",
-    "text-anchor",
-    "word-spacing",
+    // (The shapes module would go here)
+    // Writing mode
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_writing_modes#reference
     "writing-mode",
+    // SVG
+    // SVG properties do not belong to any CSS spec module
+    "text-anchor",
     "fill",
-    "fill-opacity",
     "fill-rule",
+    "fill-opacity",
     "stroke",
-    "stroke-dasharray",
-    "stroke-dashoffset",
+    "stroke-opacity",
+    "stroke-width",
     "stroke-linecap",
     "stroke-linejoin",
     "stroke-miterlimit",
-    "stroke-opacity",
-    "stroke-width",
+    "stroke-dasharray",
+    "stroke-dashoffset",
     "color-interpolation",
     "color-interpolation-filters",
-    "color-rendering",
     "flood-color",
     "flood-opacity",
     "lighting-color",
     "marker-start",
     "marker-mid",
     "marker-end",
-    "shape-rendering",
     "stop-color",
     "stop-opacity",
-    // animations
-    "transition",
-    "transition-delay",
-    "transition-timing-function",
-    "transition-duration",
-    "transition-property",
+    "shape-rendering",
+    // Transforms
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_transforms#reference
     "transform",
     "transform-origin",
     "rotate",
@@ -377,21 +434,37 @@ pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     "translate",
     "perspective",
     "perspective-origin",
+    // Transitions
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_transitions#reference
+    "transition",
+    "transition-delay",
+    "transition-timing-function",
+    "transition-duration",
+    "transition-property",
+    // (The view transitions module would go here)
+    // Animations
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_animations#reference
     "animation",
     "animation-name",
     "animation-duration",
-    "animation-play-state",
     "animation-timing-function",
     "animation-delay",
     "animation-iteration-count",
     "animation-direction",
+    "animation-play-state",
+    // (The scroll-driven animations module would go here)
+    // (The motion-path module would go here)
+    // Will change
+    // There is no module page for will-change
     "will-change",
-    // pagination
+    // Fragmentation
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_fragmentation#reference
     "break-before",
-    "break-inside",
     "break-after",
-    "orphans",
+    "break-inside",
     "widows",
+    "orphans",
+    // (The multi-column layout module would go here)
 ];
 
 /// A map from CSS property names to the index at which they appear in the [PROPERTY_ORDER] array.
