@@ -64,6 +64,12 @@ Promise.all([p1, p2, p3])
 const promiseWithParentheses = (new Promise((resolve, reject) => resolve('value')));
 promiseWithParentheses;
 (returnsPromise());
+
+
+const promiseWithGlobalIdentifier = new window.Promise((resolve, reject) => resolve('value'));
+promiseWithGlobalIdentifier.then(() => { }).finally(() => { });
+globalThis.Promise.reject('value').finally();
+
 ```
 
 # Diagnostics
@@ -286,6 +292,7 @@ invalid.ts:59:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
   > 59 │ promiseWithParentheses;
        │ ^^^^^^^^^^^^^^^^^^^^^^^
     60 │ (returnsPromise());
+    61 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -301,6 +308,39 @@ invalid.ts:60:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
     59 │ promiseWithParentheses;
   > 60 │ (returnsPromise());
        │ ^^^^^^^^^^^^^^^^^^^
+    61 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:64:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    63 │ const promiseWithGlobalIdentifier = new window.Promise((resolve, reject) => resolve('value'));
+  > 64 │ promiseWithGlobalIdentifier.then(() => { }).finally(() => { });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ globalThis.Promise.reject('value').finally();
+    66 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:65:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    63 │ const promiseWithGlobalIdentifier = new window.Promise((resolve, reject) => resolve('value'));
+    64 │ promiseWithGlobalIdentifier.then(() => { }).finally(() => { });
+  > 65 │ globalThis.Promise.reject('value').finally();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

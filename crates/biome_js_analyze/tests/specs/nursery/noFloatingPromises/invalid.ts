@@ -58,3 +58,8 @@ Promise.all([p1, p2, p3])
 const promiseWithParentheses = (new Promise((resolve, reject) => resolve('value')));
 promiseWithParentheses;
 (returnsPromise());
+
+
+const promiseWithGlobalIdentifier = new window.Promise((resolve, reject) => resolve('value'));
+promiseWithGlobalIdentifier.then(() => { }).finally(() => { });
+globalThis.Promise.reject('value').finally();

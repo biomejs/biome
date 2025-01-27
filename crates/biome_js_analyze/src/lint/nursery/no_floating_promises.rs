@@ -5,10 +5,10 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, AnyJsExpression, AnyTsType, JsArrowFunctionExpression,
-    JsCallExpression, JsExpressionStatement, JsFunctionDeclaration, JsIdentifierExpression,
-    JsMethodClassMember, JsMethodObjectMember, JsStaticMemberExpression, JsSyntaxKind,
-    JsVariableDeclarator, TsReturnTypeAnnotation,
+    binding_ext::AnyJsBindingDeclaration, global_identifier, AnyJsExpression, AnyTsType,
+    JsArrowFunctionExpression, JsCallExpression, JsExpressionStatement, JsFunctionDeclaration,
+    JsIdentifierExpression, JsMethodClassMember, JsMethodObjectMember, JsStaticMemberExpression,
+    JsSyntaxKind, JsVariableDeclarator, TsReturnTypeAnnotation,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
 
@@ -376,6 +376,8 @@ fn is_handled_promise(js_call_expression: &JsCallExpression) -> Option<bool> {
 /// async function returnsPromise(): Promise<void> {}
 ///
 /// returnsPromise().then(() => null).catch(() => {});
+///
+/// globalThis.Promise.reject('value').finally();
 /// ```
 ///
 /// Example TypeScript code that would return `false`:
@@ -389,44 +391,21 @@ fn is_member_expression_callee_a_promise(
     model: &SemanticModel,
 ) -> Option<bool> {
     let expr = static_member_expr.object().ok()?;
+
+    if is_expression_an_promise(&expr) {
+        return Some(true);
+    }
+
     match expr {
         AnyJsExpression::JsCallExpression(js_call_expr) => {
             let callee = js_call_expr.callee().ok()?;
             is_callee_a_promise(&callee, model)
         }
-        AnyJsExpression::JsIdentifierExpression(js_ident_expr) => Some(
-            is_expression_an_promise(&js_ident_expr).unwrap_or_default()
-                || is_binding_a_promise(&js_ident_expr, model).unwrap_or_default(),
-        ),
+        AnyJsExpression::JsIdentifierExpression(js_ident_expr) => {
+            is_binding_a_promise(&js_ident_expr, model)
+        }
         _ => Some(false),
     }
-}
-
-/// Checks if a `JsIdentifierExpression` represents a `Promise`.
-///
-/// This function inspects a given `JsIdentifierExpression` to determine if it represents a `Promise`.
-/// It returns `Some(true)` if the identifier is `Promise`, `Some(false)` if it is not, and `None` if there is an error in the process.
-///
-/// # Arguments
-///
-/// * `js_ident_expr` - A reference to a `JsIdentifierExpression` to check.
-///
-/// # Returns
-///
-/// * `Some(true)` if the identifier is `Promise`.
-/// * `Some(false)` if the identifier is not `Promise`.
-/// * `None` if there is an error in the process.
-///
-/// # Examples
-///
-/// Example TypeScript code that would return `Some(true)`:
-/// ```typescript
-/// Promise.resolve('value').then(() => { })
-/// Promise.all([p1, p2, p3])
-/// ```
-fn is_expression_an_promise(js_ident_expr: &JsIdentifierExpression) -> Option<bool> {
-    let js_reference_identifier = js_ident_expr.name().ok()?;
-    Some(js_reference_identifier.has_name("Promise"))
 }
 
 /// Checks if the given `JsExpressionStatement` is within an async function.
@@ -495,6 +474,8 @@ fn is_in_async_function(node: &JsExpressionStatement) -> bool {
 /// }
 ///
 /// const promise = new Promise((resolve) => resolve('value'));
+///
+/// const promiseWithGlobalIdentifier = new window.Promise((resolve, reject) => resolve('value'));
 /// ```
 fn is_variable_initializer_a_promise(
     js_variable_declarator: &JsVariableDeclarator,
@@ -513,9 +494,7 @@ fn is_variable_initializer_a_promise(
         ),
         AnyJsExpression::JsNewExpression(js_new_epr) => {
             let any_js_expr = js_new_epr.callee().ok()?;
-            let js_ident_expr = any_js_expr.as_js_identifier_expression()?;
-            let reference = js_ident_expr.name().ok()?;
-            Some(reference.has_name("Promise"))
+            Some(is_expression_an_promise(&any_js_expr))
         }
         _ => Some(false),
     }
@@ -568,4 +547,36 @@ fn is_variable_annotation_a_promise(js_variable_declarator: &JsVariableDeclarato
         }
         _ => Some(false),
     }
+}
+
+/// Checks if an expression is a `Promise`.
+///
+/// This function inspects a given `AnyJsExpression` to determine if it represents a `Promise`,
+/// either as a global identifier (e.g., `window.Promise`) or directly (e.g., `Promise.resolve`).
+/// It returns `true` if the expression is a `Promise`, otherwise `false`.
+///
+/// # Arguments
+///
+/// * `expr` - A reference to an `AnyJsExpression` to check.
+///
+/// # Returns
+///
+/// * `true` if the expression is a `Promise`.
+/// * `false` otherwise.
+///
+/// # Examples
+///
+/// Example TypeScript code that would return `true`:
+/// ```typescript
+/// window.Promise.resolve();
+/// globalThis.Promise.resolve();
+/// Promise.resolve('value').then(() => { });
+/// Promise.all([p1, p2, p3]);
+/// ```
+///
+fn is_expression_an_promise(expr: &AnyJsExpression) -> bool {
+    if let Some((_, value)) = global_identifier(expr) {
+        return value.text() == "Promise";
+    }
+    false
 }
