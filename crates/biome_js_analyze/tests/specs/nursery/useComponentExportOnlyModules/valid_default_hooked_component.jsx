@@ -1,5 +1,5 @@
 import { memo } from 'react';
 
-const Component = () => <></>
+export const Component = () => <></>
 
 export default memo(Component);
