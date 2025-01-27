@@ -262,9 +262,7 @@ pub fn grit_javascript_function_definition(
     args: GritVariableList,
     r_paren_token: SyntaxToken,
     js_token: SyntaxToken,
-    l_curly_token: SyntaxToken,
-    body_token: SyntaxToken,
-    r_curly_token: SyntaxToken,
+    grit_predicate_curly: GritPredicateCurly,
 ) -> GritJavascriptFunctionDefinition {
     GritJavascriptFunctionDefinition::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_JAVASCRIPT_FUNCTION_DEFINITION,
@@ -275,9 +273,7 @@ pub fn grit_javascript_function_definition(
             Some(SyntaxElement::Node(args.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
             Some(SyntaxElement::Token(js_token)),
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Token(body_token)),
-            Some(SyntaxElement::Token(r_curly_token)),
+            Some(SyntaxElement::Node(grit_predicate_curly.into_syntax())),
         ],
     ))
 }

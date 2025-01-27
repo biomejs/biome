@@ -871,9 +871,7 @@ impl GritJavascriptFunctionDefinition {
             args: self.args(),
             r_paren_token: self.r_paren_token(),
             js_token: self.js_token(),
-            l_curly_token: self.l_curly_token(),
-            body_token: self.body_token(),
-            r_curly_token: self.r_curly_token(),
+            grit_predicate_curly: self.grit_predicate_curly(),
         }
     }
     pub fn function_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -894,14 +892,8 @@ impl GritJavascriptFunctionDefinition {
     pub fn js_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 5usize)
     }
-    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 6usize)
-    }
-    pub fn body_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 7usize)
-    }
-    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 8usize)
+    pub fn grit_predicate_curly(&self) -> SyntaxResult<GritPredicateCurly> {
+        support::required_node(&self.syntax, 6usize)
     }
 }
 impl Serialize for GritJavascriptFunctionDefinition {
@@ -920,9 +912,7 @@ pub struct GritJavascriptFunctionDefinitionFields {
     pub args: GritVariableList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
     pub js_token: SyntaxResult<SyntaxToken>,
-    pub l_curly_token: SyntaxResult<SyntaxToken>,
-    pub body_token: SyntaxResult<SyntaxToken>,
-    pub r_curly_token: SyntaxResult<SyntaxToken>,
+    pub grit_predicate_curly: SyntaxResult<GritPredicateCurly>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritLanguageDeclaration {
@@ -6249,13 +6239,8 @@ impl std::fmt::Debug for GritJavascriptFunctionDefinition {
                 )
                 .field("js_token", &support::DebugSyntaxResult(self.js_token()))
                 .field(
-                    "l_curly_token",
-                    &support::DebugSyntaxResult(self.l_curly_token()),
-                )
-                .field("body_token", &support::DebugSyntaxResult(self.body_token()))
-                .field(
-                    "r_curly_token",
-                    &support::DebugSyntaxResult(self.r_curly_token()),
+                    "grit_predicate_curly",
+                    &support::DebugSyntaxResult(self.grit_predicate_curly()),
                 )
                 .finish()
         } else {

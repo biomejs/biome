@@ -551,9 +551,7 @@ GritJavascriptFunctionDefinition =
     args: GritVariableList
     ')'
     'js'
-    '{'
-    body: 'grit_string'
-    '}'
+    GritPredicateCurly
 
 // private pattern my_function($arg1, $arg2) { ... }
 // ^^^^^^^ ^^^^^^^ ^^^^^^^^^^^^^^^^^^ ^^^^^^ ^ ^^^ ^

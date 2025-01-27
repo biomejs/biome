@@ -356,22 +356,10 @@ impl GritJavascriptFunctionDefinition {
                 .splice_slots(5usize..=5usize, once(Some(element.into()))),
         )
     }
-    pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
+    pub fn with_grit_predicate_curly(self, element: GritPredicateCurly) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(6usize..=6usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_body_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(7usize..=7usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(8usize..=8usize, once(Some(element.into()))),
+                .splice_slots(6usize..=6usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
