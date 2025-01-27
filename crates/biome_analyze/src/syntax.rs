@@ -109,7 +109,7 @@ mod tests {
         nodes: Vec<RawLanguageKind>,
     }
 
-    impl<'a> QueryMatcher<RawLanguage> for &'a mut BufferMatcher {
+    impl QueryMatcher<RawLanguage> for &mut BufferMatcher {
         fn match_query(&mut self, params: MatchQueryParams<RawLanguage>) {
             self.nodes.push(
                 params
