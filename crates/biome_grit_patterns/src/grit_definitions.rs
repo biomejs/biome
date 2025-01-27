@@ -135,7 +135,7 @@ pub fn scan_definitions(
             }
             AnyGritDefinition::GritJavascriptFunctionDefinition(func) => {
                 return Err(CompileError::UnsupportedFunctionDefinition(
-                    func.name()?.text().clone(),
+                    func.name()?.to_trimmed_string().trim().to_owned(),
                 ));
             }
             AnyGritDefinition::GritBogusDefinition(bogus) => {
