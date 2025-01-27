@@ -52,6 +52,7 @@ impl From<HtmlFormatterConfiguration> for HtmlFormatterSettings {
             line_width: config.line_width,
             indent_width: config.indent_width,
             indent_style: config.indent_style,
+            attribute_position: config.attribute_position,
             ..Default::default()
         }
     }
