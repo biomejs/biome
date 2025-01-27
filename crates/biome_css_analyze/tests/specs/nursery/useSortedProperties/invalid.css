@@ -1,0 +1,79 @@
+.not-sorted-basic {
+  color: red;
+  display: block;
+}
+
+.multiple-properties {
+  margin: 1px;
+  transition:cubic-bezier(1, 0, 0, 1);
+  color: red;
+  display: block;
+}
+
+/* leading comment above rule */
+.comments {
+  /* leading for z-index */
+  z-index: 1; /* trailing for z-index */
+  /* leading for margin */
+  margin: 1px; /* trailing for margin*/
+} /* trailing comment after rule */
+
+.oneline { color: red; display: block; }
+
+.nested-rules {
+  display: block;
+  .nested {}
+  color: red;
+  .nested {}
+  margin: 1px;
+}
+
+.at-rules {
+  display: block;
+  @media (min-width: 100px) {}
+  color: red;
+  @media (min-width: 100px) {}
+  margin: 1px;
+}
+
+.mixed-rules {
+  display: block;
+  @media (min-width: 100px) {}
+  color: red;
+  .nested {}
+  margin: 1px;
+}
+
+.vendor-prefixes {
+  margin: 1px;
+  -moz-margin: 1px;
+  -webkit-margin: 1px;
+}
+
+.case-insensitive {
+  color: red;
+  DISPLAY: block;
+}
+
+.nested-with-content {
+  .nested {
+    color: red;
+    display: block;
+  }
+}
+
+.shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
+  padding: 5px;
+  -webkit-padding-right: 10px;
+  -moz-padding: 20px;
+}
+
+.example-from-doc-comment {
+  transition: opactity 1s ease;
+  border: 1px solid black;
+  pointer-events: none;
+  color: black;
+  margin: 8px;
+  display: block;
+  --custom: 100;
+}

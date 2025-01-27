@@ -1,0 +1,87 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+.in-order {
+  display: block;
+  font-size: 10px;
+}
+
+.progressive-fixes-3 {
+  display: block;
+  margin: 1px;
+  color: red;
+  transition:cubic-bezier(1, 0, 0, 1);
+}
+
+.case-insensitive {
+  display: block;
+  COLOR: red;
+}
+
+.vendor-prefixes {
+  -moz-margin: 1px;
+  -webkit-margin: 1px;
+  margin: 1px;
+}
+
+.case-insensitive-vendor-prefixes {
+  -MOZ-margin: 1px;
+  -Moz-margin: 1px;
+  -moz-margin: 1px;
+  -moz-MARGIN: 1px;
+  -moz-Margin: 1px;
+  margin: 1px;
+}
+
+.should-ignore-shorthand-after-longhand {
+  padding-right: 10px;
+  padding: 20px;
+  border-color: red;
+  border: 1px solid black;
+}
+
+.stable-sort {
+  color: red;
+  color: blue;
+  color: green;
+  color: white;
+  color: black;
+}
+
+.nested-rules {
+  display: block;
+  .nested {}
+}
+
+.at-rules {
+  display: block;
+  @media (min-width: 100px) {}
+}
+
+.mixed-rules {
+  display: block;
+  .nested {}
+  @media (min-width: 100px) {}
+}
+
+.nested-with-content {
+  .nested {
+    display: block;
+    color: red;
+  }
+}
+
+.example-from-doc-comment {
+  --custom:·100;
+  display:·block;
+  margin:·8px;
+  color: black;
+  pointer-events:·none;
+  border:·1px·solid·black;
+  transition:·opactity·1s·ease;
+}
+
+```

@@ -124,7 +124,7 @@ pub fn is_custom_function(value: &str) -> bool {
 }
 
 // Returns the vendor prefix extracted from an input string.
-pub fn vender_prefix(prop: &str) -> &str {
+pub fn vender_prefix(prop: &str) -> &'static str {
     for prefix in VENDOR_PREFIXES.iter() {
         if prop.starts_with(prefix) {
             return prefix;
