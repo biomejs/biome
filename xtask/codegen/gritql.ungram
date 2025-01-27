@@ -523,7 +523,7 @@ GritPredicateReturn =
 AnyGritDefinition =
     GritPatternDefinition
     | GritPredicateDefinition
-		| GritJavascriptFunctionDefinition
+    | GritJavascriptFunctionDefinition
     | GritFunctionDefinition
     | AnyGritPattern // This is not allowed by the GritQL reference grammar, but
                      // we let the parser verify there is only a single pattern
@@ -552,8 +552,8 @@ GritJavascriptFunctionDefinition =
     ')'
     'js'
     '{'
-		body: 'grit_string'
-		'}'
+    body: 'grit_string'
+    '}'
 
 // private pattern my_function($arg1, $arg2) { ... }
 // ^^^^^^^ ^^^^^^^ ^^^^^^^^^^^^^^^^^^ ^^^^^^ ^ ^^^ ^
