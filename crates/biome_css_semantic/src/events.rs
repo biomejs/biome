@@ -1,9 +1,9 @@
-use std::collections::VecDeque;
-
 use biome_css_syntax::{
-    AnyCssSelector, CssDeclarationBlock, CssRelativeSelector, CssSyntaxKind::*, CssSyntaxNode,
+    AnyCssDeclarationName, AnyCssProperty, AnyCssSelector, CssDeclaration, CssPropertyAtRule,
+    CssRelativeSelector, CssSyntaxKind::*, CssSyntaxNode,
 };
-use biome_rowan::{AstNode, SyntaxNodeCast, SyntaxNodeOptionExt, TextRange};
+use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
+use std::collections::VecDeque;
 
 use crate::{
     model::{CssProperty, CssValue},
@@ -94,23 +94,52 @@ impl SemanticEventExtractor {
                 if matches!(node.parent().kind(), Some(CSS_SUPPORTS_FEATURE_DECLARATION)) {
                     return;
                 }
+                // SAFETY: checked by the previous match
+                let declaration = CssDeclaration::cast_ref(node).unwrap();
 
-                if let Some(property_name) = node.first_child().and_then(|p| p.first_child()) {
-                    if let Some(property_value) = property_name.next_sibling() {
-                        self.stash.push_back(SemanticEvent::PropertyDeclaration {
-                            node: node.clone(),
-                            property: CssProperty {
-                                node: property_name,
-                            },
-                            value: CssValue {
-                                node: property_value,
-                            },
-                        });
+                if let Ok(property) = declaration.property() {
+                    match property {
+                        AnyCssProperty::CssComposesProperty(property) => {
+                            let Ok(property_name) = property.name() else {
+                                return;
+                            };
+                            let Ok(property_value) = property.value() else {
+                                return;
+                            };
+                            self.stash.push_back(SemanticEvent::PropertyDeclaration {
+                                node: node.clone(),
+                                property: property_name.into(),
+                                value: CssValue::from(property_value.into_syntax()),
+                            });
+                        }
+                        AnyCssProperty::CssGenericProperty(generic) => {
+                            let value = generic.value();
+                            let Ok(name) = generic.name() else {
+                                return;
+                            };
+                            let property = match name {
+                                AnyCssDeclarationName::CssDashedIdentifier(name) => {
+                                    CssProperty::from(name)
+                                }
+                                AnyCssDeclarationName::CssIdentifier(name) => {
+                                    CssProperty::from(name)
+                                }
+                            };
+
+                            self.stash.push_back(SemanticEvent::PropertyDeclaration {
+                                node: node.clone(),
+                                property,
+                                value: value.into_syntax().into(),
+                            });
+                        }
+                        AnyCssProperty::CssBogusProperty(_) => {}
                     }
                 }
             }
             CSS_PROPERTY_AT_RULE => {
-                self.process_at_property(node);
+                // SAFETY: the match checks for its kind already.
+                let property = CssPropertyAtRule::cast_ref(node).unwrap();
+                self.process_at_property(property);
             }
             _ => {}
         }
@@ -148,20 +177,16 @@ impl SemanticEventExtractor {
     ///
     /// @property --my-other-property {}
     /// ```
-    fn process_at_property(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
-        let property_name = match node.first_child() {
-            Some(name) => name,
-            None => return,
+    fn process_at_property(&mut self, node: CssPropertyAtRule) {
+        let Ok(property_name) = node.name() else {
+            return;
         };
-
-        let value = match property_name.next_sibling() {
-            Some(val) => val,
-            None => return,
-        };
-
-        let decls = match value.cast::<CssDeclarationBlock>() {
-            Some(d) => d,
-            None => return,
+        let Some(decls) = node
+            .block()
+            .ok()
+            .and_then(|block| block.as_css_declaration_block().cloned())
+        else {
+            return;
         };
 
         let mut initial_value = None;
@@ -194,13 +219,11 @@ impl SemanticEventExtractor {
         }
 
         self.stash.push_back(SemanticEvent::AtProperty {
-            property: CssProperty {
-                node: property_name,
-            },
+            property: CssProperty::from(property_name),
             initial_value,
             syntax,
             inherits,
-            range: node.text_range(),
+            range: node.range(),
         });
     }
 

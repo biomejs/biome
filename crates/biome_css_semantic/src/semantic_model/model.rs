@@ -1,8 +1,10 @@
-use std::{collections::BTreeMap, rc::Rc};
-
-use biome_css_syntax::{CssRoot, CssSyntaxNode};
-use biome_rowan::{SyntaxNodeText, TextRange, TextSize};
+use biome_css_syntax::{CssDashedIdentifier, CssIdentifier, CssRoot, CssSyntaxNode};
+use biome_rowan::{
+    declare_node_union, SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText,
+};
 use rustc_hash::FxHashMap;
+use std::hash::Hash;
+use std::{collections::BTreeMap, rc::Rc};
 
 /// The façade for all semantic information of a CSS document.
 ///
@@ -258,28 +260,30 @@ impl CssDeclaration {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct CssProperty {
-    pub(crate) node: CssSyntaxNode,
+declare_node_union! {
+    pub CssProperty = CssDashedIdentifier | CssIdentifier
 }
 
 impl CssProperty {
-    pub fn node(&self) -> &CssSyntaxNode {
-        &self.node
-    }
+    pub fn value(&self) -> SyntaxResult<TokenText> {
+        let token = match self {
+            CssProperty::CssDashedIdentifier(node) => node.value_token()?,
+            CssProperty::CssIdentifier(node) => node.value_token()?,
+        };
 
-    pub fn text(&self) -> SyntaxNodeText {
-        self.node.text_trimmed()
-    }
-
-    pub fn range(&self) -> TextRange {
-        self.node.text_trimmed_range()
+        Ok(token.token_text_trimmed())
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct CssValue {
     pub(crate) node: CssSyntaxNode,
+}
+
+impl From<CssSyntaxNode> for CssValue {
+    fn from(value: CssSyntaxNode) -> Self {
+        Self { node: value }
+    }
 }
 
 impl CssValue {

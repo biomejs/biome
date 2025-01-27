@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use biome_css_syntax::CssRoot;
-use biome_rowan::TextRange;
+use biome_rowan::{AstNode, TextRange};
 use rustc_hash::FxHashMap;
 
 use super::model::{
