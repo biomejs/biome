@@ -14,7 +14,7 @@ use std::fs::read_to_string;
 use std::path::PathBuf;
 use std::{env, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.json", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{json,jsonc}", crate::run_test, "module"}
 
 fn run_test(input: &'static str, _: &str, directory_path: &str, _: &str) {
     register_leak_checker();
@@ -62,14 +62,21 @@ pub(crate) fn analyze_and_snap(
     input_file: &Utf8Path,
     directory_path: PathBuf,
 ) -> usize {
-    let parsed = parse_json(input_code, JsonParserOptions::default());
+    let parsed = parse_json(
+        input_code,
+        JsonParserOptions::default()
+            .with_allow_comments()
+            .with_allow_trailing_commas(),
+    );
     let root = parsed.tree();
 
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
-    let version = read_to_string(input_file.with_extension("version.txt"))
-        .ok()
-        .map_or_else(|| "1.5.0".to_string(), |v| v.trim().to_string());
+    let input_version_file = input_file.with_extension("version.txt");
+    let version = read_to_string(&input_version_file).ok().map_or_else(
+        || panic!("missing {input_version_file} file"),
+        |v| v.trim().to_string(),
+    );
     let rule_name = directory_path.file_name().unwrap().to_str().unwrap();
     let rule_filter = RuleFilter::Rule("migrations", rule_name);
     let filter = AnalysisFilter {
@@ -146,6 +153,11 @@ fn check_code_action(path: &Utf8Path, source: &str, action: &AnalyzerAction<Json
     }
 
     // Re-parse the modified code and panic if the resulting tree has syntax errors
-    let re_parse = parse_json(&output, JsonParserOptions::default());
+    let re_parse = parse_json(
+        &output,
+        JsonParserOptions::default()
+            .with_allow_comments()
+            .with_allow_trailing_commas(),
+    );
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 }

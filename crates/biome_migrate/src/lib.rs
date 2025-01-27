@@ -88,7 +88,7 @@ where
     let mut analyzer = Analyzer::new(
         METADATA.deref(),
         InspectMatcher::new(migration_registry, inspect_matcher),
-        |_, _| -> Vec<Result<_, Infallible>> { unreachable!() },
+        |_, _| -> Vec<Result<_, Infallible>> { Default::default() },
         Box::new(TestAction),
         &mut emit_signal,
     );
