@@ -250,7 +250,7 @@ fn is_binding_a_promise(
             Some(is_function_a_promise(&func_decl))
         }
         AnyJsBindingDeclaration::JsVariableDeclarator(js_var_decl) => Some(
-            is_variable_initializer_a_promise(&js_var_decl).unwrap_or_default()
+            is_variable_initializer_a_promise(&js_var_decl, model).unwrap_or_default()
                 || is_variable_annotation_a_promise(&js_var_decl).unwrap_or_default(),
         ),
         _ => Some(false),
@@ -392,7 +392,7 @@ fn is_member_expression_callee_a_promise(
 ) -> Option<bool> {
     let expr = static_member_expr.object().ok()?;
 
-    if is_expression_an_promise(&expr) {
+    if is_expression_an_promise(&expr, model) {
         return Some(true);
     }
 
@@ -479,6 +479,7 @@ fn is_in_async_function(node: &JsExpressionStatement) -> bool {
 /// ```
 fn is_variable_initializer_a_promise(
     js_variable_declarator: &JsVariableDeclarator,
+    model: &SemanticModel,
 ) -> Option<bool> {
     let initializer_clause = &js_variable_declarator.initializer()?;
     let expr = initializer_clause.expression().ok()?;
@@ -494,7 +495,7 @@ fn is_variable_initializer_a_promise(
         ),
         AnyJsExpression::JsNewExpression(js_new_epr) => {
             let any_js_expr = js_new_epr.callee().ok()?;
-            Some(is_expression_an_promise(&any_js_expr))
+            Some(is_expression_an_promise(&any_js_expr, model))
         }
         _ => Some(false),
     }
@@ -553,15 +554,17 @@ fn is_variable_annotation_a_promise(js_variable_declarator: &JsVariableDeclarato
 ///
 /// This function inspects a given `AnyJsExpression` to determine if it represents a `Promise`,
 /// either as a global identifier (e.g., `window.Promise`) or directly (e.g., `Promise.resolve`).
-/// It returns `true` if the expression is a `Promise`, otherwise `false`.
+/// It also checks that the found `Promise` is not a binding.
+/// It returns `true` if the expression is a `Promise` and is not a binding, otherwise `false`.
 ///
 /// # Arguments
 ///
 /// * `expr` - A reference to an `AnyJsExpression` to check.
+/// * `model` - A reference to the `SemanticModel` used for resolving bindings.
 ///
 /// # Returns
 ///
-/// * `true` if the expression is a `Promise`.
+/// * `true` if the expression is a `Promise` and is not a binding.
 /// * `false` otherwise.
 ///
 /// # Examples
@@ -574,9 +577,24 @@ fn is_variable_annotation_a_promise(js_variable_declarator: &JsVariableDeclarato
 /// Promise.all([p1, p2, p3]);
 /// ```
 ///
-fn is_expression_an_promise(expr: &AnyJsExpression) -> bool {
-    if let Some((_, value)) = global_identifier(expr) {
-        return value.text() == "Promise";
+/// Example TypeScript code that would return `false`:
+/// ```typescript
+/// const Promise = { resolve(): {} };
+/// Promise.resolve()
+/// ```
+fn is_expression_an_promise(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
+    let (reference, value) = match global_identifier(expr) {
+        Some(result) => result,
+        None => return false,
+    };
+
+    if value.text() != "Promise" {
+        return false;
     }
-    false
+
+    if model.binding(&reference).is_some() {
+        return false;
+    }
+
+    true
 }
