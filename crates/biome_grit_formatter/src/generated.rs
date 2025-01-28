@@ -737,6 +737,19 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritIntLiteral {
         )
     }
 }
+impl FormatRule < biome_grit_syntax :: GritJavascriptFunctionDefinition > for crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition { type Context = GritFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_grit_syntax :: GritJavascriptFunctionDefinition , f : & mut GritFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_grit_syntax :: GritJavascriptFunctionDefinition > :: fmt (self , node , f) } }
+impl AsFormat<GritFormatContext> for biome_grit_syntax::GritJavascriptFunctionDefinition {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_grit_syntax :: GritJavascriptFunctionDefinition , crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition :: default ())
+    }
+}
+impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritJavascriptFunctionDefinition {
+    type Format = FormatOwnedWithRule < biome_grit_syntax :: GritJavascriptFunctionDefinition , crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition :: default ())
+    }
+}
 impl FormatRule<biome_grit_syntax::GritLanguageDeclaration>
     for crate::grit::auxiliary::language_declaration::FormatGritLanguageDeclaration
 {

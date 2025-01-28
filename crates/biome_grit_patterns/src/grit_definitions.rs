@@ -45,7 +45,8 @@ pub fn compile_definitions(
             AnyGritDefinition::GritFunctionDefinition(node) => {
                 functions.push(FunctionDefinitionCompiler::from_node(node, context)?);
             }
-            AnyGritDefinition::GritBogusDefinition(_) => {
+            AnyGritDefinition::GritJavascriptFunctionDefinition(_)
+            | AnyGritDefinition::GritBogusDefinition(_) => {
                 unreachable!(); // Should be handled in `scan_definitions()`.
             }
         }
@@ -131,6 +132,11 @@ pub fn scan_definitions(
                 );
 
                 function_index += 1;
+            }
+            AnyGritDefinition::GritJavascriptFunctionDefinition(func) => {
+                return Err(CompileError::UnsupportedFunctionDefinition(
+                    func.name()?.to_trimmed_string().trim().to_owned(),
+                ));
             }
             AnyGritDefinition::GritBogusDefinition(bogus) => {
                 return Err(CompileError::UnexpectedKind(

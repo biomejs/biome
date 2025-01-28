@@ -97,6 +97,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritIntLiteral::new_unchecked(node) };
                     $body
                 }
+                $crate::GritSyntaxKind::GRIT_JAVASCRIPT_FUNCTION_DEFINITION => {
+                    let $pattern =
+                        unsafe { $crate::GritJavascriptFunctionDefinition::new_unchecked(node) };
+                    $body
+                }
                 $crate::GritSyntaxKind::GRIT_LANGUAGE_DECLARATION => {
                     let $pattern = unsafe { $crate::GritLanguageDeclaration::new_unchecked(node) };
                     $body

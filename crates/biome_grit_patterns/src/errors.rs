@@ -79,6 +79,9 @@ pub enum CompileError {
 
     /// Unknown variable.
     UnknownVariable(String),
+
+    /// Unsupported function definition: `{name}`
+    UnsupportedFunctionDefinition(String),
 }
 
 impl Diagnostic for CompileError {
@@ -161,6 +164,9 @@ impl Diagnostic for CompileError {
             }
             CompileError::UnknownVariable(var) => {
                 fmt.write_markup(markup! { "Unknown variable: "{{var}} })
+            }
+            CompileError::UnsupportedFunctionDefinition(name) => {
+                fmt.write_markup(markup! { "Unsupported foreign function definition: "{{name}} })
             }
         }
     }

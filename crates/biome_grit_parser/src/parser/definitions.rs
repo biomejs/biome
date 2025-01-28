@@ -86,7 +86,27 @@ fn parse_function_definition(p: &mut GritParser) -> ParsedSyntax {
     p.expect(T!['(']);
     VariableList.parse_list(p);
     p.expect(T![')']);
-    parse_curly_predicate_list(p).ok();
+
+    if p.at(JS_KW) {
+        p.bump(JS_KW);
+        p.expect(T!['{']);
+        // Comments inside the JS are not allowed
+        let mut brace_count = 0;
+        while !p.at(EOF) {
+            if p.at(T!['{']) {
+                brace_count += 1;
+            } else if p.at(T!['}']) {
+                if brace_count == 0 {
+                    break;
+                }
+                brace_count -= 1;
+            }
+            p.bump_any();
+        }
+        p.expect(T!['}']);
+    } else {
+        parse_curly_predicate_list(p).ok();
+    }
 
     Present(m.complete(p, GRIT_FUNCTION_DEFINITION))
 }
