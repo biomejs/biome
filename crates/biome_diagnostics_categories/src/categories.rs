@@ -168,6 +168,7 @@ define_categories! {
     "lint/nursery/noPackagePrivateImports": "https://biomejs.dev/linter/rules/no-package-private-imports",
     "lint/nursery/noProcessEnv": "https://biomejs.dev/linter/rules/no-process-env",
     "lint/nursery/noProcessGlobal": "https://biomejs.dev/linter/rules/no-process-global",
+    "lint/nursery/noDestructuredProps": "https://biomejs.dev/linter/rules/no-destructured-props",
     "lint/nursery/noReactSpecificProps": "https://biomejs.dev/linter/rules/no-react-specific-props",
     "lint/nursery/noRestrictedImports": "https://biomejs.dev/linter/rules/no-restricted-imports",
     "lint/nursery/noRestrictedTypes": "https://biomejs.dev/linter/rules/no-restricted-types",
