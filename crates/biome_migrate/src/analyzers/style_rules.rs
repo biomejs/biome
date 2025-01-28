@@ -18,9 +18,9 @@ declare_migration! {
     }
 }
 
-const STYLE_RULES_THAT_WERE_ERROR: [&str; 23] = [
+const STYLE_RULES_THAT_WERE_ERROR: [&str; 22] = [
     "useNumberNamespace",
-    "noNonnullAssertion",
+    "noNonNullAssertion",
     "useAsConstAssertion",
     "noParameterAssign",
     "noInferrableTypes",
@@ -41,7 +41,6 @@ const STYLE_RULES_THAT_WERE_ERROR: [&str; 23] = [
     "useImportType",
     "useTemplate",
     "useSingleVarDeclarator",
-    "useWhile",
 ];
 
 impl Rule for StyleRules {
@@ -97,6 +96,9 @@ impl Rule for StyleRules {
             }
         }
 
+        if nodes.is_empty() {
+            return None;
+        }
         Some(nodes)
     }
 
@@ -126,7 +128,10 @@ impl Rule for StyleRules {
                     ]),
                 ),
                 token(T![:]),
-                AnyJsonValue::JsonStringValue(json_string_value(json_string_literal("error"))),
+                AnyJsonValue::JsonStringValue(json_string_value(
+                    json_string_literal("error")
+                        .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+                )),
             );
             rule_mover.replace_rule(rule_to_move.as_ref(), member, "style");
         }

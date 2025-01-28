@@ -102,29 +102,8 @@ realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━�
   
   i Safe fix: Update the configuration to enable these rules.
   
-     1  1 │   {
-     2  2 │     "$schema": "./packages/@biomejs/biome/configuration_schema.json",
-     3    │ - ··"assist":·{
-     4    │ - ····"enabled":·true,
-     5    │ - ····"ignore":·[
-     6    │ - ······"./packages/@biomejs/biome/configuration_schema.json"
-     7    │ - ····],
-     8    │ - ····"actions":·{
-     9    │ - ······"source":·{
-    10    │ - ········"useSortedKeys":·"off"
-    11    │ - ······}
-    12    │ - ····}
-    13    │ - ··},
-    14    │ - ··"css":·{
-        3 │ + ··"css":·{
-    15  4 │       "linter": {
-    16  5 │         "enabled": true
-    ····· │ 
-    49 38 │       }
-    50 39 │     },
-    51    │ - ··"linter":·{
-    52    │ - ····"enabled":·true,
-    53    │ - ····"rules":·{
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
     54    │ - ······"recommended":·true,
     55    │ - ······"correctness":·{
     56    │ - ········"noUndeclaredDependencies":·"error"
@@ -132,65 +111,35 @@ realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━�
     58    │ - ······"style":·{
     59    │ - ········"noNonNullAssertion":·"off",
     60    │ - ········"useNodejsImportProtocol":·"error"
-       40 │ + ··"vcs":·{
-       41 │ + ····"clientKind":·"git",
-       42 │ + ····"enabled":·true,
-       43 │ + ····"useIgnoreFile":·true
-       44 │ + ··},
-       45 │ + ··"linter":·{
-       46 │ + ····"enabled":·true,
-       47 │ + ····"rules":·{
-       48 │ + ······"style":·{
-       49 │ + ········"noNonNullAssertion":·"off",
-       50 │ + ········"useNodejsImportProtocol":·"error",
-       51 │ + ········"useLiteralEnumMembers":"error",
-       52 │ + ········"noArguments":"error",
-       53 │ + ········"noParameterAssign":"error",
-       54 │ + ········"useShorthandFunctionType":"error",
-       55 │ + ········"useExportType":"error",
-       56 │ + ········"useDefaultParameterLast":"error",
-       57 │ + ········"noCommaOperator":"error",
-       58 │ + ········"useSingleVarDeclarator":"error",
-       59 │ + ········"noNonnullAssertion":"error",
-       60 │ + ········"useConst":"error",
-       61 │ + ········"noInferrableTypes":"error",
-       62 │ + ········"useExponentiationOperator":"error",
-       63 │ + ········"noUselessElse":"error",
-       64 │ + ········"useSelfClosingElements":"error",
-       65 │ + ········"useImportType":"error",
-       66 │ + ········"useNumberNamespace":"error",
-       67 │ + ········"useWhile":"error",
-       68 │ + ········"useAsConstAssertion":"error",
-       69 │ + ········"noUnusedTemplateLiteral":"error",
-       70 │ + ········"useNumericLiterals":"error",
-       71 │ + ········"useTemplate":"error",
-       72 │ + ········"useEnumInitializers":"error"
-       73 │ + ······},
-       74 │ + ······"correctness":·{
-       75 │ + ········"noUndeclaredDependencies":·"error"
-    61 76 │         },
-    62 77 │         "suspicious": {
-    ····· │ 
-    65 80 │       }
-    66 81 │     },
-    67    │ - ··"vcs":·{
-    68    │ - ····"clientKind":·"git",
-    69    │ - ····"enabled":·true,
-    70    │ - ····"useIgnoreFile":·true
-    71    │ - ··}
-       82 │ + ··"assist":·{
-       83 │ + ····"enabled":·true,
-       84 │ + ····"ignore":·[
-       85 │ + ······"./packages/@biomejs/biome/configuration_schema.json"
-       86 │ + ····],
-       87 │ + ····"actions":·{
-       88 │ + ······"source":·{
-       89 │ + ········"useSortedKeys":·"off"
-       90 │ + ······}
-       91 │ + ····}
-       92 │ + ··},
-    72 93 │   }
-    73 94 │   
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"useLiteralEnumMembers":·"error",
+       58 │ + ········"noArguments":·"error",
+       59 │ + ········"noParameterAssign":·"error",
+       60 │ + ········"useShorthandFunctionType":·"error",
+       61 │ + ········"useExportType":·"error",
+       62 │ + ········"useDefaultParameterLast":·"error",
+       63 │ + ········"noCommaOperator":·"error",
+       64 │ + ········"useSingleVarDeclarator":·"error",
+       65 │ + ········"useConst":·"error",
+       66 │ + ········"noInferrableTypes":·"error",
+       67 │ + ········"useExponentiationOperator":·"error",
+       68 │ + ········"noUselessElse":·"error",
+       69 │ + ········"useSelfClosingElements":·"error",
+       70 │ + ········"useImportType":·"error",
+       71 │ + ········"useNumberNamespace":·"error",
+       72 │ + ········"useWhile":·"error",
+       73 │ + ········"useAsConstAssertion":·"error",
+       74 │ + ········"noUnusedTemplateLiteral":·"error",
+       75 │ + ········"useNumericLiterals":·"error",
+       76 │ + ········"useTemplate":·"error",
+       77 │ + ········"useEnumInitializers":·"error"
+       78 │ + ······},
+       79 │ + ······"correctness":·{
+       80 │ + ········"noUndeclaredDependencies":·"error"
+    61 81 │         },
+    62 82 │         "suspicious": {
   
 
 ```

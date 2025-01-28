@@ -438,6 +438,24 @@ impl AnalyzerMover {
             }
         }
 
+        for _ in 0..linter_members.len().saturating_sub(1) {
+            linter_separators.push(token(T![,]));
+        }
+
+        for _ in 0..assist_members.len().saturating_sub(1) {
+            assist_separators.push(token(T![,]));
+        }
+
+        let list = self
+            .root
+            .value()
+            .ok()?
+            .as_json_object_value()?
+            .json_member_list();
+
+        let mut separators = vec![];
+        let mut top_level_members = vec![];
+
         // AKAK: linter: {}
         let linter_member = self
             .linter_member
@@ -448,55 +466,51 @@ impl AnalyzerMover {
             .assist_member
             .unwrap_or(create_new_assist_member(vec![], vec![]));
 
-        let list = self
-            .root
-            .value()
-            .ok()?
-            .as_json_object_value()?
-            .json_member_list();
+        for top_level_member in list.iter().flatten() {
+            let name = top_level_member
+                .name()
+                .ok()
+                .and_then(|n| n.inner_string_text().ok());
 
-        let mut top_level_members: Vec<_> = list
-            .iter()
-            .filter_map(|el| {
-                let el = el.ok()?;
-                let token_text = el.name().ok()?.inner_string_text().ok()?;
-                if token_text.text() == "linter"
-                    || token_text.text() == "assist"
-                    || self.filters.iter().any(|s| s.as_ref() == token_text.text())
-                {
-                    None
-                } else {
-                    Some(el)
+            if let Some(name) = name {
+                let should_filter = self
+                    .filters
+                    .iter()
+                    .any(|filter| name.text() == filter.as_ref());
+
+                if should_filter {
+                    continue;
                 }
-            })
-            .collect();
-        let mut separators: Vec<_> = list.separators().filter_map(|el| el.ok()).collect();
 
-        if !linter_members.is_empty() {
-            for _ in 0..linter_members.len() - 1 {
-                linter_separators.push(token(T![,]))
-            }
-
-            let new_linter_member =
-                add_members_to_linter_member(&linter_member, linter_members, linter_separators);
-            top_level_members.push(new_linter_member);
-            if top_level_members.len() > 1 {
-                separators.push(token(T![,]));
+                if name.text() == "linter" {
+                    if linter_members.is_empty() {
+                        top_level_members.push(top_level_member.clone());
+                    } else {
+                        let new_linter_member = add_members_to_linter_member(
+                            &linter_member,
+                            linter_members.clone(),
+                            linter_separators.clone(),
+                        );
+                        top_level_members.push(new_linter_member);
+                    }
+                } else if name.text() == "assist" {
+                    if assist_members.is_empty() {
+                        top_level_members.push(top_level_member.clone());
+                    } else {
+                        let new_assist_member = add_members_to_assist_member(
+                            &assist_memebr,
+                            assist_members.clone(),
+                            assist_separators.clone(),
+                        );
+                        top_level_members.push(new_assist_member);
+                    }
+                } else {
+                    top_level_members.push(top_level_member.clone());
+                }
             }
         }
-
-        if !assist_members.is_empty() {
-            for _ in 0..assist_members.len() - 1 {
-                assist_separators.push(token(T![,]))
-            }
-
-            let new_assist_member =
-                add_members_to_assist_member(&assist_memebr, assist_members, assist_separators);
-
-            top_level_members.push(new_assist_member);
-            if top_level_members.len() > 1 {
-                separators.push(token(T![,]));
-            }
+        for _ in 0..top_level_members.len().saturating_sub(1) {
+            separators.push(token(T![,]));
         }
 
         mutation.replace_node(list, json_member_list(top_level_members, separators));

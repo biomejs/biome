@@ -59,15 +59,11 @@ impl CommandRunner for MigrateCommandPayload {
         _workspace: &dyn Workspace,
         project_key: ProjectKey,
     ) -> Result<Execution, CliDiagnostic> {
-        if let (Some(path), Some(directory_path)) = (
-            self.configuration_file_path.clone(),
-            self.configuration_directory_path.clone(),
-        ) {
+        if let Some(path) = self.configuration_file_path.clone() {
             Ok(Execution::new(TraversalMode::Migrate {
                 project_key,
                 write: self.should_write(),
                 configuration_file_path: path,
-                configuration_directory_path: directory_path,
                 sub_command: self.sub_command.clone(),
             }))
         } else {

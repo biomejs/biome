@@ -62,12 +62,14 @@ pub(crate) fn analyze_and_snap(
     input_file: &Utf8Path,
     directory_path: PathBuf,
 ) -> usize {
-    let parsed = parse_json(
-        input_code,
+    let parse_options = if file_name.ends_with(".jsonc") {
         JsonParserOptions::default()
             .with_allow_comments()
-            .with_allow_trailing_commas(),
-    );
+            .with_allow_trailing_commas()
+    } else {
+        JsonParserOptions::default()
+    };
+    let parsed = parse_json(input_code, parse_options.clone());
     let root = parsed.tree();
 
     let mut diagnostics = Vec::new();
@@ -78,12 +80,11 @@ pub(crate) fn analyze_and_snap(
         enabled_rules: Some(slice::from_ref(&rule_filter)),
         ..Default::default()
     };
-    dbg!(&filter);
     let (_, errors) = biome_migrate::migrate_configuration(&root, filter, input_file, |event| {
         if let Some(mut diag) = event.diagnostic() {
             for action in event.actions() {
                 if !action.is_suppression() {
-                    check_code_action(input_file, input_code, &action);
+                    check_code_action(input_file, input_code, &action, parse_options.clone());
                     diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                 }
             }
@@ -95,7 +96,7 @@ pub(crate) fn analyze_and_snap(
 
         for action in event.actions() {
             if !action.is_suppression() {
-                check_code_action(input_file, input_code, &action);
+                check_code_action(input_file, input_code, &action, parse_options);
                 code_fixes.push(code_fix_to_string(input_code, action));
             }
         }
@@ -117,7 +118,12 @@ pub(crate) fn analyze_and_snap(
     diagnostics.len()
 }
 
-fn check_code_action(path: &Utf8Path, source: &str, action: &AnalyzerAction<JsonLanguage>) {
+fn check_code_action(
+    path: &Utf8Path,
+    source: &str,
+    action: &AnalyzerAction<JsonLanguage>,
+    parse_options: JsonParserOptions,
+) {
     let (new_tree, text_edit) = match action
         .mutation
         .clone()
@@ -134,20 +140,15 @@ fn check_code_action(path: &Utf8Path, source: &str, action: &AnalyzerAction<Json
     assert_eq!(new_tree.to_string(), output);
 
     if has_bogus_nodes_or_empty_slots(&new_tree) {
-        // panic!("modified tree has bogus nodes or empty slots:\n{new_tree:#?} \n\n {new_tree}")
+        panic!("modified tree has bogus nodes or empty slots:\n{new_tree:#?} \n\n {new_tree}")
     }
 
     // Checks the returned tree contains no missing children node
     if format!("{new_tree:?}").contains("missing (required)") {
-        // panic!("modified tree has missing children:\n{new_tree:#?}")
+        panic!("modified tree has missing children:\n{new_tree:#?}")
     }
 
     // Re-parse the modified code and panic if the resulting tree has syntax errors
-    let re_parse = parse_json(
-        &output,
-        JsonParserOptions::default()
-            .with_allow_comments()
-            .with_allow_trailing_commas(),
-    );
+    let re_parse = parse_json(&output, parse_options);
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 }
