@@ -17,7 +17,23 @@ use super::{
 const HTML_VERBATIM_TAGS: &[&str] = &["script", "style", "pre"];
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatHtmlElement;
+pub(crate) struct FormatHtmlElement {
+    next_sibling_is_text: bool,
+}
+
+pub(crate) struct FormatHtmlElementOptions {
+    /// Whether or not the element that follows this one is a text node.
+    pub next_sibling_is_text: bool,
+}
+
+impl FormatRuleWithOptions<HtmlElement> for FormatHtmlElement {
+    type Options = FormatHtmlElementOptions;
+
+    fn with_options(mut self, options: Self::Options) -> Self {
+        self.next_sibling_is_text = options.next_sibling_is_text;
+        self
+    }
+}
 
 impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
     fn fmt_fields(&self, node: &HtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
@@ -90,9 +106,8 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             && !children.is_empty()
             && !content_has_leading_whitespace;
         let should_borrow_closing_tag = whitespace_sensitivity.is_strict()
-            && is_inline_tag
-            && !children.is_empty()
-            && !content_has_trailing_whitespace;
+            && ((is_inline_tag && !children.is_empty() && !content_has_trailing_whitespace)
+                || self.next_sibling_is_text);
 
         let borrowed_r_angle = if should_borrow_opening_r_angle {
             opening_element.r_angle_token().ok()

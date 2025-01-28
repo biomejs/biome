@@ -1,0 +1,7 @@
+{
+  "html": {
+    "formatter": {
+      "whitespaceSensitivity": "ignore"
+    }
+  }
+}
