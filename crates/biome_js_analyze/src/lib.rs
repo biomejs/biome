@@ -198,20 +198,19 @@ mod tests {
 
     use super::*;
 
-    // #[ignore]
+    #[ignore]
     #[test]
     fn quick_test() {
         const SOURCE: &str = r#"
-let Component = ({ a }) => {
-  return <div a={a} />;
-};
+let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
+
         "#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let options = AnalyzerOptions::default();
-        let rule_filter = RuleFilter::Rule("nursery", "noPropsDestructure");
+        let rule_filter = RuleFilter::Rule("nursery", "noDestructuredProps");
 
         let mut dependencies = Dependencies::default();
         dependencies.add("buffer", "latest");
