@@ -44,9 +44,6 @@ impl Rule for DeletedRules {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if !ctx.satisfies(">=2.0.0") {
-            return vec![];
-        }
         let mut rules = vec![];
         let events = node.syntax().preorder();
 

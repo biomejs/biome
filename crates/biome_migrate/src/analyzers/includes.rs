@@ -24,9 +24,6 @@ impl Rule for Includes {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if !ctx.satisfies(">=2.0.0") {
-            return Vec::default();
-        }
         let root = ctx.query();
         let Ok(AnyJsonValue::JsonObjectValue(root)) = root.value() else {
             return Vec::default();

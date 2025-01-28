@@ -24,10 +24,6 @@ impl Rule for NoVar {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if !ctx.satisfies(">=2.0.0") {
-            return None;
-        }
-
         let name = node.name().ok()?;
         let text = name.inner_string_text().ok()?;
 
