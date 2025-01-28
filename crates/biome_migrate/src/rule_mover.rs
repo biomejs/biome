@@ -607,12 +607,11 @@ fn add_members_to_linter_member(
     let rules_members = rules_member(members, separators);
     new_list.push(rules_members);
 
-    let new_linter = create_member(
+    create_member(
         "linter",
         AnyJsonValue::JsonObjectValue(create_object(json_member_list(new_list, new_separators), 2)),
         2,
-    );
-    new_linter
+    )
 }
 
 fn add_members_to_assist_member(
@@ -639,12 +638,11 @@ fn add_members_to_assist_member(
     let actions_member = actions_member(members, separators);
     new_list.push(actions_member);
 
-    let new_assist = create_member(
+    create_member(
         "assist",
         AnyJsonValue::JsonObjectValue(create_object(json_member_list(new_list, new_separators), 2)),
         2,
-    );
-    new_assist
+    )
 }
 
 fn create_new_assist_member(
