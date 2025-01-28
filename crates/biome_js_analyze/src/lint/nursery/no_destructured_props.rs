@@ -13,6 +13,7 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, AstSeparatedList, AstSeparatedListNodesIterator, TextRange};
 use biome_string_case::Case;
 use std::collections::VecDeque;
+use std::iter::FusedIterator;
 
 declare_lint_rule! {
     /// Disallow destructuring props inside JSX components in Solid projects.
@@ -32,7 +33,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```tsx,expect_diagnostic
-    /// let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
+    /// let Component = ({ prop1 }: Props) => <div p1={prop1} />;
     /// ```
     ///
     /// ### Valid
@@ -328,3 +329,5 @@ impl Iterator for BindingPatterIterator {
         None
     }
 }
+
+impl FusedIterator for BindingPatterIterator {}
