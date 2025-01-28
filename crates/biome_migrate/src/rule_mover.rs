@@ -127,6 +127,8 @@ pub(crate) struct AnalyzerMover {
     root: JsonRoot,
     queries: Vec<Query>,
     filters: Vec<Box<str>>,
+    linter_member: Option<JsonMember>,
+    assist_member: Option<JsonMember>,
 }
 
 pub(crate) struct Query {
@@ -135,6 +137,7 @@ pub(crate) struct Query {
     rule_member: Option<JsonMember>,
 }
 
+#[derive(Debug)]
 enum QueryKind {
     Move(Category, Category),
     Replace(Category),
@@ -147,6 +150,8 @@ impl AnalyzerMover {
     pub(crate) fn from_root(root: JsonRoot) -> Self {
         let events = root.syntax().preorder();
         let mut groups = FxHashMap::default();
+        let mut linter_member = None;
+        let mut assist_member = None;
 
         for event in events {
             match event {
@@ -160,6 +165,10 @@ impl AnalyzerMover {
 
                         if let Ok(group) = Category::from_str(name.text()) {
                             groups.insert(group, member);
+                        } else if name.text() == "linter" {
+                            linter_member = Some(member);
+                        } else if name.text() == "assist" {
+                            assist_member = Some(member);
                         }
                     }
                 }
@@ -172,6 +181,8 @@ impl AnalyzerMover {
             groups,
             queries: vec![],
             filters: vec![],
+            assist_member,
+            linter_member,
         }
     }
 
@@ -427,6 +438,16 @@ impl AnalyzerMover {
             }
         }
 
+        // AKAK: linter: {}
+        let linter_member = self
+            .linter_member
+            .unwrap_or(create_new_linter_member(vec![], vec![]));
+
+        // AKAK: assist: {}
+        let assist_memebr = self
+            .assist_member
+            .unwrap_or(create_new_assist_member(vec![], vec![]));
+
         let list = self
             .root
             .value()
@@ -434,7 +455,7 @@ impl AnalyzerMover {
             .as_json_object_value()?
             .json_member_list();
 
-        let mut members: Vec<_> = list
+        let mut top_level_members: Vec<_> = list
             .iter()
             .filter_map(|el| {
                 let el = el.ok()?;
@@ -456,9 +477,10 @@ impl AnalyzerMover {
                 linter_separators.push(token(T![,]))
             }
 
-            let new_linter_member = create_new_linter_member(linter_members, linter_separators);
-            members.push(new_linter_member);
-            if members.len() > 1 {
+            let new_linter_member =
+                add_members_to_linter_member(&linter_member, linter_members, linter_separators);
+            top_level_members.push(new_linter_member);
+            if top_level_members.len() > 1 {
                 separators.push(token(T![,]));
             }
         }
@@ -468,15 +490,16 @@ impl AnalyzerMover {
                 assist_separators.push(token(T![,]))
             }
 
-            let new_assist_member = create_new_assist_member(assist_members, assist_separators);
+            let new_assist_member =
+                add_members_to_assist_member(&assist_memebr, assist_members, assist_separators);
 
-            members.push(new_assist_member);
-            if members.len() > 1 {
+            top_level_members.push(new_assist_member);
+            if top_level_members.len() > 1 {
                 separators.push(token(T![,]));
             }
         }
 
-        mutation.replace_node(list, json_member_list(members, separators));
+        mutation.replace_node(list, json_member_list(top_level_members, separators));
 
         Some(mutation)
     }
@@ -546,6 +569,70 @@ fn create_new_linter_member(
     linter_member(vec![rules], vec![])
 }
 
+fn add_members_to_linter_member(
+    linter_member: &JsonMember,
+    members: Vec<JsonMember>,
+    separators: Vec<JsonSyntaxToken>,
+) -> JsonMember {
+    let mut new_list = vec![];
+    let mut new_separators = vec![];
+    let list = linter_member
+        .value()
+        .ok()
+        .and_then(|value| value.as_json_object_value().cloned())
+        .map(|o| o.json_member_list());
+    if let Some(list) = list {
+        for item in list.iter().flatten() {
+            let name = item.name().ok().and_then(|n| n.inner_string_text().ok());
+            if !matches!(name.as_deref(), Some("rules")) {
+                new_list.push(item);
+                new_separators.push(token(T![,]));
+            }
+        }
+    }
+    let rules_members = rules_member(members, separators);
+    new_list.push(rules_members);
+
+    let new_linter = create_member(
+        "linter",
+        AnyJsonValue::JsonObjectValue(create_object(json_member_list(new_list, new_separators), 2)),
+        2,
+    );
+    new_linter
+}
+
+fn add_members_to_assist_member(
+    assist_member: &JsonMember,
+    members: Vec<JsonMember>,
+    separators: Vec<JsonSyntaxToken>,
+) -> JsonMember {
+    let mut new_list = vec![];
+    let mut new_separators = vec![];
+    let list = assist_member
+        .value()
+        .ok()
+        .and_then(|value| value.as_json_object_value().cloned())
+        .map(|o| o.json_member_list());
+    if let Some(list) = list {
+        for item in list.iter().flatten() {
+            let name = item.name().ok().and_then(|n| n.inner_string_text().ok());
+            if !matches!(name.as_deref(), Some("actions")) {
+                new_list.push(item);
+                new_separators.push(token(T![,]));
+            }
+        }
+    }
+    let actions_member = actions_member(members, separators);
+    new_list.push(actions_member);
+
+    let new_assist = create_member(
+        "assist",
+        AnyJsonValue::JsonObjectValue(create_object(json_member_list(new_list, new_separators), 2)),
+        2,
+    );
+    new_assist
+}
+
 fn create_new_assist_member(
     members: Vec<JsonMember>,
     separators: Vec<JsonSyntaxToken>,
@@ -585,6 +672,8 @@ mod tests {
             .print()
             .expect("Should be able to format");
 
+        eprintln!("{}", result.as_code());
+
         buffer.push_str(result.as_code());
         buffer.push_str("\n```");
 
@@ -596,6 +685,7 @@ mod tests {
         let source = r#"
 {
     "linter": {
+        "includes": [""],
         "rules": {
             "style": {
                 "noVar": "error"
@@ -606,6 +696,7 @@ mod tests {
         "#;
         let parsed = parse_json(source, JsonParserOptions::default());
         if parsed.has_errors() {
+            eprintln!("{}", parsed.tree().to_string());
             for diagnostic in parsed.into_diagnostics() {
                 let error = diagnostic_to_string("file.json", source, Error::from(diagnostic));
                 eprintln!("{:?}", error);

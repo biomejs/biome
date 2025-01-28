@@ -1,0 +1,196 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: realCase.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+  "assist": {
+    "enabled": true,
+    "ignore": [
+      "./packages/@biomejs/biome/configuration_schema.json"
+    ],
+    "actions": {
+      "source": {
+        "useSortedKeys": "off"
+      }
+    }
+  },
+  "css": {
+    "linter": {
+      "enabled": true
+    }
+  },
+  "files": {
+    "ignore": [
+      "crates/**",
+      "dist/**",
+      ".astro/**",
+      "assets/**",
+      "packages/@biomejs/backend-jsonrpc/src/workspace.ts",
+      "public/**",
+      "**/__snapshots__",
+      "**/undefined/**",
+      "_fonts/**",
+      "packages/@biomejs/wasm-*",
+      "benchmark/target/**"
+    ],
+    "include": [
+      "packages/aria-data/*.js",
+      "packages/@biomejs/**",
+      "packages/tailwindcss-config-analyzer/**",
+      "benchmark/**"
+    ]
+  },
+  "formatter": {
+    "ignore": [
+      "configuration_schema.json"
+    ]
+  },
+  "json": {
+    "formatter": {
+      "indentStyle": "space",
+      "lineWidth": 1
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUndeclaredDependencies": "error"
+      },
+      "style": {
+        "noNonNullAssertion": "off",
+        "useNodejsImportProtocol": "error"
+      },
+      "suspicious": {
+        "noVar": "on"
+      }
+    }
+  },
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true
+  }
+}
+
+```
+
+# Diagnostics
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rules aren't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     1  1 │   {
+     2  2 │     "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+     3    │ - ··"assist":·{
+     4    │ - ····"enabled":·true,
+     5    │ - ····"ignore":·[
+     6    │ - ······"./packages/@biomejs/biome/configuration_schema.json"
+     7    │ - ····],
+     8    │ - ····"actions":·{
+     9    │ - ······"source":·{
+    10    │ - ········"useSortedKeys":·"off"
+    11    │ - ······}
+    12    │ - ····}
+    13    │ - ··},
+    14    │ - ··"css":·{
+        3 │ + ··"css":·{
+    15  4 │       "linter": {
+    16  5 │         "enabled": true
+    ····· │ 
+    49 38 │       }
+    50 39 │     },
+    51    │ - ··"linter":·{
+    52    │ - ····"enabled":·true,
+    53    │ - ····"rules":·{
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+    57    │ - ······},
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       40 │ + ··"vcs":·{
+       41 │ + ····"clientKind":·"git",
+       42 │ + ····"enabled":·true,
+       43 │ + ····"useIgnoreFile":·true
+       44 │ + ··},
+       45 │ + ··"linter":·{
+       46 │ + ····"enabled":·true,
+       47 │ + ····"rules":·{
+       48 │ + ······"style":·{
+       49 │ + ········"noNonNullAssertion":·"off",
+       50 │ + ········"useNodejsImportProtocol":·"error",
+       51 │ + ········"useLiteralEnumMembers":"error",
+       52 │ + ········"noArguments":"error",
+       53 │ + ········"noParameterAssign":"error",
+       54 │ + ········"useShorthandFunctionType":"error",
+       55 │ + ········"useExportType":"error",
+       56 │ + ········"useDefaultParameterLast":"error",
+       57 │ + ········"noCommaOperator":"error",
+       58 │ + ········"useSingleVarDeclarator":"error",
+       59 │ + ········"noNonnullAssertion":"error",
+       60 │ + ········"useConst":"error",
+       61 │ + ········"noInferrableTypes":"error",
+       62 │ + ········"useExponentiationOperator":"error",
+       63 │ + ········"noUselessElse":"error",
+       64 │ + ········"useSelfClosingElements":"error",
+       65 │ + ········"useImportType":"error",
+       66 │ + ········"useNumberNamespace":"error",
+       67 │ + ········"useWhile":"error",
+       68 │ + ········"useAsConstAssertion":"error",
+       69 │ + ········"noUnusedTemplateLiteral":"error",
+       70 │ + ········"useNumericLiterals":"error",
+       71 │ + ········"useTemplate":"error",
+       72 │ + ········"useEnumInitializers":"error"
+       73 │ + ······},
+       74 │ + ······"correctness":·{
+       75 │ + ········"noUndeclaredDependencies":·"error"
+    61 76 │         },
+    62 77 │         "suspicious": {
+    ····· │ 
+    65 80 │       }
+    66 81 │     },
+    67    │ - ··"vcs":·{
+    68    │ - ····"clientKind":·"git",
+    69    │ - ····"enabled":·true,
+    70    │ - ····"useIgnoreFile":·true
+    71    │ - ··}
+       82 │ + ··"assist":·{
+       83 │ + ····"enabled":·true,
+       84 │ + ····"ignore":·[
+       85 │ + ······"./packages/@biomejs/biome/configuration_schema.json"
+       86 │ + ····],
+       87 │ + ····"actions":·{
+       88 │ + ······"source":·{
+       89 │ + ········"useSortedKeys":·"off"
+       90 │ + ······}
+       91 │ + ····}
+       92 │ + ··},
+    72 93 │   }
+    73 94 │   
+  
+
+```

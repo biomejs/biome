@@ -1,8 +1,7 @@
 use crate::rule_mover::AnalyzerMover;
-use crate::version_services::Version;
 use crate::{declare_migration, MigrationAction};
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Rule, RuleAction, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::{category, Applicability};
 use biome_json_factory::make::{
@@ -46,7 +45,7 @@ const STYLE_RULES_THAT_WERE_ERROR: [&str; 23] = [
 ];
 
 impl Rule for StyleRules {
-    type Query = Version<JsonRoot>;
+    type Query = Ast<JsonRoot>;
     type State = FxHashSet<Box<str>>;
     type Signals = Option<Self::State>;
     type Options = ();

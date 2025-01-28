@@ -261,7 +261,6 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     &tree,
                     AnalysisFilter::default(),
                     configuration_file_path.as_path(),
-                    biome_configuration::VERSION.to_string(),
                     |signal| {
                         let current_diagnostic = signal.diagnostic();
                         if current_diagnostic.is_some() {
