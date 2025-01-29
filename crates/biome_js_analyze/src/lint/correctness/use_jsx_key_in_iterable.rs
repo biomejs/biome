@@ -326,7 +326,7 @@ fn handle_jsx_child(node: &AnyJsxChild, model: &SemanticModel) -> Option<Vec<Tex
                     // HACK: don't flag the entire fragment if there's a conditional expression
                     AnyJsxChild::JsxExpressionChild(node) => node
                         .expression()
-                        .map_or(false, |n| n.as_js_conditional_expression().is_some()),
+                        .is_some_and(|n| n.as_js_conditional_expression().is_some()),
                     _ => false,
                 });
 

@@ -105,7 +105,7 @@ impl Rule for NoRedundantAlt {
                             expr.elements().into_iter().any(|template_element| {
                                 match template_element {
                                     AnyJsTemplateElement::JsTemplateChunkElement(node) => {
-                                        node.template_chunk_token().ok().map_or(false, |token| {
+                                        node.template_chunk_token().ok().is_some_and(|token| {
                                             is_redundant_alt(token.text_trimmed())
                                         })
                                     }

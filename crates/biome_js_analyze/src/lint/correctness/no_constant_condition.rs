@@ -432,14 +432,14 @@ fn is_logical_identity(node: AnyJsExpression, operator: JsLogicalOperator) -> bo
                 let is_left_logical_identify = node
                     .left()
                     .ok()
-                    .map_or(false, |left| is_logical_identity(left, operator));
+                    .is_some_and(|left| is_logical_identity(left, operator));
                 if is_left_logical_identify {
                     return true;
                 }
 
                 node.right()
                     .ok()
-                    .map_or(false, |right| is_logical_identity(right, operator))
+                    .is_some_and(|right| is_logical_identity(right, operator))
             } else {
                 false
             }
@@ -479,7 +479,7 @@ fn get_boolean_value(node: &AnyJsLiteralExpression) -> bool {
         JsRegexLiteralExpression(_) => true,
         _ => node
             .as_static_value()
-            .map_or(false, |value| !value.is_falsy()),
+            .is_some_and(|value| !value.is_falsy()),
     }
 }
 

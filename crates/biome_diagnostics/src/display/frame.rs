@@ -411,7 +411,7 @@ pub(super) fn print_invisibles(
 
             let next_char_is_whitespace = iter
                 .peek()
-                .map_or(false, |(_, char)| char.is_ascii_whitespace());
+                .is_some_and(|(_, char)| char.is_ascii_whitespace());
 
             if prev_char_was_whitespace || next_char_is_whitespace {
                 show_invisible = false;
@@ -436,7 +436,7 @@ pub(super) fn print_invisibles(
 
         // If we are a carriage return next to a \n then don't show the character as visible
         if options.ignore_trailing_carriage_return && char == '\r' {
-            let next_char_is_line_feed = iter.peek().map_or(false, |(_, char)| *char == '\n');
+            let next_char_is_line_feed = iter.peek().is_some_and(|(_, char)| *char == '\n');
             if next_char_is_line_feed {
                 continue;
             }

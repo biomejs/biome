@@ -67,7 +67,7 @@ impl Rule for NoAsyncPromiseExecutor {
         let is_promise_constructor = callee
             .as_js_identifier_expression()
             .and_then(|ident| ident.name().ok())
-            .map_or(false, |name| name.syntax().text_trimmed() == "Promise");
+            .is_some_and(|name| name.syntax().text_trimmed() == "Promise");
         if !is_promise_constructor {
             return None;
         }

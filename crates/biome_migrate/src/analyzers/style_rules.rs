@@ -54,9 +54,6 @@ impl Rule for StyleRules {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if !ctx.satisfies(">=2.0.0") {
-            return None;
-        }
         let mut nodes = FxHashSet::default();
         for rule in STYLE_RULES_THAT_WERE_ERROR {
             nodes.insert(Box::from(rule));

@@ -182,7 +182,7 @@ pub(crate) fn read_most_recent_log_file(
 
     let most_recent = fs::read_dir(biome_log_path)?
         .flatten()
-        .filter(|file| file.file_type().map_or(false, |ty| ty.is_file()))
+        .filter(|file| file.file_type().is_ok_and(|ty| ty.is_file()))
         .filter_map(|file| {
             match file
                 .file_name()

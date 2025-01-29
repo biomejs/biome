@@ -1,5 +1,6 @@
 use crate::analyzers::all::RulesAll;
 use crate::analyzers::deleted_rules::DeletedRules;
+use crate::analyzers::includes::Includes;
 use crate::analyzers::no_var::NoVar;
 use crate::analyzers::nursery_rules::NurseryRules;
 use crate::analyzers::organize_imports::OrganizeImports;
@@ -11,6 +12,7 @@ use biome_json_syntax::JsonLanguage;
 
 mod all;
 mod deleted_rules;
+mod includes;
 mod no_var;
 mod nursery_rules;
 mod organize_imports;
@@ -39,6 +41,7 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<DeletedRules>();
         registry.record_rule::<UseWhile>();
         registry.record_rule::<OrganizeImports>();
+        registry.record_rule::<Includes>();
     }
 }
 

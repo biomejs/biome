@@ -224,7 +224,7 @@ fn get_extensionless_import(
     let has_query_or_hash = last_component
         .as_os_str()
         .to_str()
-        .map_or(false, |last| last.contains('?') || last.contains('#'));
+        .is_some_and(|last| last.contains('?') || last.contains('#'));
 
     if has_query_or_hash {
         return Some(UseImportExtensionsState {

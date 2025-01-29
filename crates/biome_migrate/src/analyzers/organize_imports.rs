@@ -27,10 +27,6 @@ impl Rule for OrganizeImports {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if !ctx.satisfies(">=2.0.0") {
-            return None;
-        }
-
         let name = node.name().ok()?;
         let text = name.inner_string_text().ok()?;
 
@@ -66,7 +62,7 @@ impl Rule for OrganizeImports {
             }
             .to_owned(),
         ).note(markup!{
-            "The import sorting was the first assist action, however Biome analyzer infrastructure wasn't mature enough, so it was exposed as a standalone tool. The infrastructure is now read to welcome it as an assist action."
+            "The import sorting was the first assist action, however Biome analyzer infrastructure wasn't mature enough, so it was exposed as a standalone tool. The infrastructure is now ready to welcome it as an assist action."
         }))
     }
 
