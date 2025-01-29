@@ -84,7 +84,7 @@ snapshot_kind: text
 ```
 realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Biome style rules aren't recommended anymore.
+  ! Biome style rule useLiteralEnumMembers isn't recommended anymore.
   
    > 1 │ {
        │ ^
@@ -107,39 +107,816 @@ realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━�
     54    │ - ······"recommended":·true,
     55    │ - ······"correctness":·{
     56    │ - ········"noUndeclaredDependencies":·"error"
-    57    │ - ······},
-    58    │ - ······"style":·{
-    59    │ - ········"noNonNullAssertion":·"off",
-    60    │ - ········"useNodejsImportProtocol":·"error"
        54 │ + ······"style":·{
        55 │ + ········"noNonNullAssertion":·"off",
        56 │ + ········"useNodejsImportProtocol":·"error",
-       57 │ + ········"useLiteralEnumMembers":·"error",
-       58 │ + ········"noArguments":·"error",
-       59 │ + ········"noParameterAssign":·"error",
-       60 │ + ········"useShorthandFunctionType":·"error",
-       61 │ + ········"useExportType":·"error",
-       62 │ + ········"useDefaultParameterLast":·"error",
-       63 │ + ········"noCommaOperator":·"error",
-       64 │ + ········"useSingleVarDeclarator":·"error",
-       65 │ + ········"useConst":·"error",
-       66 │ + ········"noInferrableTypes":·"error",
-       67 │ + ········"useExponentiationOperator":·"error",
-       68 │ + ········"noUselessElse":·"error",
-       69 │ + ········"useSelfClosingElements":·"error",
-       70 │ + ········"useImportType":·"error",
-       71 │ + ········"useNumberNamespace":·"error",
-       72 │ + ········"useWhile":·"error",
-       73 │ + ········"useAsConstAssertion":·"error",
-       74 │ + ········"noUnusedTemplateLiteral":·"error",
-       75 │ + ········"useNumericLiterals":·"error",
-       76 │ + ········"useTemplate":·"error",
-       77 │ + ········"useEnumInitializers":·"error"
-       78 │ + ······},
-       79 │ + ······"correctness":·{
-       80 │ + ········"noUndeclaredDependencies":·"error"
-    61 81 │         },
-    62 82 │         "suspicious": {
+       57 │ + ········"useLiteralEnumMembers":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noParameterAssign isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"noParameterAssign":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noCommaOperator isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"noCommaOperator":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useNumberNamespace isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"useNumberNamespace":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useEnumInitializers isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"useEnumInitializers":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useTemplate isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"useTemplate":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useNumericLiterals isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"useNumericLiterals":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noUnusedTemplateLiteral isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"noUnusedTemplateLiteral":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useImportType isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"useImportType":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useAsConstAssertion isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"useAsConstAssertion":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useSelfClosingElements isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"useSelfClosingElements":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noUselessElse isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"noUselessElse":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useExponentiationOperator isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"useExponentiationOperator":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noInferrableTypes isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"noInferrableTypes":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useConst isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"useConst":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useDefaultParameterLast isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"useDefaultParameterLast":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"useSingleVarDeclarator":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useExportType isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"useExportType":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noArguments isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"noArguments":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
+  
+
+```
+
+```
+realCase.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useShorthandFunctionType isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+   > 3 │   "assist": {
+   > 4 │     "enabled": true,
+        ...
+  > 70 │     "useIgnoreFile": true
+  > 71 │   }
+  > 72 │ }
+       │ ^
+    73 │ 
+  
+  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+    52 52 │       "enabled": true,
+    53 53 │       "rules": {
+    54    │ - ······"recommended":·true,
+    55    │ - ······"correctness":·{
+    56    │ - ········"noUndeclaredDependencies":·"error"
+       54 │ + ······"style":·{
+       55 │ + ········"noNonNullAssertion":·"off",
+       56 │ + ········"useNodejsImportProtocol":·"error",
+       57 │ + ········"useShorthandFunctionType":·"error"
+    57 58 │         },
+    58    │ - ······"style":·{
+    59    │ - ········"noNonNullAssertion":·"off",
+    60    │ - ········"useNodejsImportProtocol":·"error"
+       59 │ + ······"correctness":·{
+       60 │ + ········"noUndeclaredDependencies":·"error"
+    61 61 │         },
+    62 62 │         "suspicious": {
   
 
 ```

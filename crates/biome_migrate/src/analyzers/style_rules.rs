@@ -45,8 +45,8 @@ const STYLE_RULES_THAT_WERE_ERROR: [&str; 22] = [
 
 impl Rule for StyleRules {
     type Query = Ast<JsonRoot>;
-    type State = FxHashSet<Box<str>>;
-    type Signals = Option<Self::State>;
+    type State = Box<str>;
+    type Signals = Vec<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -96,19 +96,16 @@ impl Rule for StyleRules {
             }
         }
 
-        if nodes.is_empty() {
-            return None;
-        }
-        Some(nodes)
+        nodes.into_iter().collect()
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, _node: &Self::State) -> Option<RuleDiagnostic> {
-        let root = _ctx.root();
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let root = ctx.root();
         Some(RuleDiagnostic::new(
             category!("migrate"),
             root.range(),
             markup! {
-                "Biome style rules aren't recommended anymore."
+                "Biome style rule "{state}" isn't recommended anymore."
             }
                 .to_owned(),
         ).note(markup!{
@@ -116,25 +113,23 @@ impl Rule for StyleRules {
         }))
     }
 
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<MigrationAction> {
+    fn action(ctx: &RuleContext<Self>, rule_to_move: &Self::State) -> Option<MigrationAction> {
         let mut rule_mover = AnalyzerMover::from_root(ctx.root());
 
-        for rule_to_move in state {
-            let member = json_member(
-                json_member_name(
-                    json_string_literal(rule_to_move.as_ref()).with_leading_trivia(vec![
-                        (TriviaPieceKind::Newline, "\n"),
-                        (TriviaPieceKind::Whitespace, " ".repeat(8).as_str()),
-                    ]),
-                ),
-                token(T![:]),
-                AnyJsonValue::JsonStringValue(json_string_value(
-                    json_string_literal("error")
-                        .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
-                )),
-            );
-            rule_mover.replace_rule(rule_to_move.as_ref(), member, "style");
-        }
+        let member = json_member(
+            json_member_name(
+                json_string_literal(rule_to_move.as_ref()).with_leading_trivia(vec![
+                    (TriviaPieceKind::Newline, "\n"),
+                    (TriviaPieceKind::Whitespace, " ".repeat(8).as_str()),
+                ]),
+            ),
+            token(T![:]),
+            AnyJsonValue::JsonStringValue(json_string_value(
+                json_string_literal("error")
+                    .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+            )),
+        );
+        rule_mover.replace_rule(rule_to_move.as_ref(), member, "style");
 
         let mutation = rule_mover.run_queries()?;
 

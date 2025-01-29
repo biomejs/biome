@@ -34,27 +34,19 @@ invalid.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━
     6 │         "useSingleCaseStatement": "error",
     7 │         "useShorthandArrayType": "error",
   
-  i Safe fix: Use the rule useConsole instead.
+  i Safe fix: Use the rule noConsoleLog instead.
   
      3  3 │       "rules": {
      4  4 │         "suspicious": {
      5    │ - ········"noConsoleLog":·"error",
-     6    │ - ········"useSingleCaseStatement":·"error",
-     7    │ - ········"useShorthandArrayType":·"error",
-     8    │ - ········"noNewSymbol":·"error",
-     9    │ - ········"noInvalidNewBuiltin":·"error"
-        5 │ + ········"useSingleCaseStatement":·"error",
-        6 │ + ········"useShorthandArrayType":·"error",
-        7 │ + ········"noNewSymbol":·"error",
-        8 │ + ········"noInvalidNewBuiltin":·"error",
-        9 │ + ········"noConsole":·{
-       10 │ + ··········"level":·"error",
-       11 │ + ··········"options":·{
-       12 │ + ············"allow":·["log"]
-       13 │ + ··········}
-       14 │ + ········}
-    10 15 │         }
-    11 16 │       }
+        5 │ + ········"noConsole":·{
+        6 │ + ··········"level":·"error",
+        7 │ + ··········"options":·{
+        8 │ + ············"allow":·["log"]
+        9 │ + ··········}
+       10 │ + ········},
+     6 11 │           "useSingleCaseStatement": "error",
+     7 12 │           "useShorthandArrayType": "error",
   
 
 ```
@@ -71,19 +63,16 @@ invalid.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━
     7 │         "useShorthandArrayType": "error",
     8 │         "noNewSymbol": "error",
   
-  i Safe fix: Use the rule useConsole instead.
+  i Safe fix: Use the rule useSingleCaseStatement instead.
   
-     8  8 │           "noNewSymbol": "error",
-     9  9 │           "noInvalidNewBuiltin": "error"
-    10    │ - ······}
-       10 │ + ······},
-       11 │ + ······"correctness":·{
-       12 │ + ········"noSwitchDeclarations":·{
-       13 │ + ··········"level":·"error"
-       14 │ + ········}
-       15 │ + ······}
-    11 16 │       }
-    12 17 │     }
+     4  4 │         "suspicious": {
+     5  5 │           "noConsoleLog": "error",
+     6    │ - ········"useSingleCaseStatement":·"error",
+        6 │ + ········"noSwitchDeclarations":·{
+        7 │ + ··········"level":·"error"
+        8 │ + ········},
+     7  9 │           "useShorthandArrayType": "error",
+     8 10 │           "noNewSymbol": "error",
   
 
 ```
@@ -100,22 +89,19 @@ invalid.json:7:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━
     8 │         "noNewSymbol": "error",
     9 │         "noInvalidNewBuiltin": "error"
   
-  i Safe fix: Use the rule useConsole instead.
+  i Safe fix: Use the rule useShorthandArrayType instead.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"suspicious":·{
-        4 │ + ······"style":·{
-        5 │ + ········"useConsistentArrayType":·{
-        6 │ + ··········"level":·"error",
-        7 │ + ··········"options":·{
-        8 │ + ············"syntax":·"shorthand"
-        9 │ + ··········}
-       10 │ + ········}
-       11 │ + ······},
-       12 │ + ······"suspicious":·{
-     5 13 │           "noConsoleLog": "error",
-     6 14 │           "useSingleCaseStatement": "error",
+     5  5 │           "noConsoleLog": "error",
+     6  6 │           "useSingleCaseStatement": "error",
+     7    │ - ········"useShorthandArrayType":·"error",
+        7 │ + ········"useConsistentArrayType":·{
+        8 │ + ··········"level":·"error",
+        9 │ + ··········"options":·{
+       10 │ + ············"syntax":·"shorthand"
+       11 │ + ··········}
+       12 │ + ········},
+     8 13 │           "noNewSymbol": "error",
+     9 14 │           "noInvalidNewBuiltin": "error"
   
 
 ```
@@ -132,19 +118,16 @@ invalid.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━
      9 │         "noInvalidNewBuiltin": "error"
     10 │       }
   
-  i Safe fix: Use the rule useConsole instead.
+  i Safe fix: Use the rule noNewSymbol instead.
   
-     8  8 │           "noNewSymbol": "error",
-     9  9 │           "noInvalidNewBuiltin": "error"
-    10    │ - ······}
-       10 │ + ······},
-       11 │ + ······"correctness":·{
-       12 │ + ········"noInvalidBuiltinInstantiation":·{
-       13 │ + ··········"level":·"error"
-       14 │ + ········}
-       15 │ + ······}
-    11 16 │       }
-    12 17 │     }
+     6  6 │           "useSingleCaseStatement": "error",
+     7  7 │           "useShorthandArrayType": "error",
+     8    │ - ········"noNewSymbol":·"error",
+        8 │ + ········"noInvalidBuiltinInstantiation":·{
+        9 │ + ··········"level":·"error"
+       10 │ + ········},
+     9 11 │           "noInvalidNewBuiltin": "error"
+    10 12 │         }
   
 
 ```

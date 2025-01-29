@@ -34,8 +34,13 @@ invalid.json:3:5 migrate  FIXABLE  ━━━━━━━━━━━━━━━
     2   │ - ··"organizeImports":·{
     3   │ - ····"enabled":·false
     4   │ - ··}
-    5 2 │   }
-    6 3 │   
+      2 │ + ··"assist":··{
+      3 │ + ······"source":··{
+      4 │ + ········"organizeImports":·"off"
+      5 │ + ······}
+      6 │ + ····}
+    5 7 │   }
+    6 8 │   
   
 
 ```

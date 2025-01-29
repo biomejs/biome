@@ -6,9 +6,7 @@ use biome_json_syntax::{
     AnyJsonValue, JsonLanguage, JsonMember, JsonMemberList, JsonObjectValue, JsonRoot,
     JsonSyntaxToken, T,
 };
-use biome_rowan::{
-    AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, TriviaPieceKind, WalkEvent,
-};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, TriviaPieceKind};
 use rustc_hash::FxHashMap;
 use std::str::FromStr;
 
@@ -126,7 +124,6 @@ pub(crate) struct AnalyzerMover {
     groups: FxHashMap<Category, JsonMember>,
     root: JsonRoot,
     queries: Vec<Query>,
-    filters: Vec<Box<str>>,
     linter_member: Option<JsonMember>,
     assist_member: Option<JsonMember>,
 }
@@ -142,68 +139,92 @@ enum QueryKind {
     Move(Category, Category),
     Replace(Category),
     Remove(Category),
-    Insert(Category),
 }
 
 impl AnalyzerMover {
     /// Attempts to find  `linter`, `linter.rules` or `linter.rules.<group>`
     pub(crate) fn from_root(root: JsonRoot) -> Self {
-        let events = root.syntax().preorder();
         let mut groups = FxHashMap::default();
         let mut linter_member = None;
         let mut assist_member = None;
 
-        for event in events {
-            match event {
-                WalkEvent::Enter(node) => {
-                    if let Some(member) = JsonMember::cast(node) {
-                        let Some(name) =
-                            member.name().ok().and_then(|n| n.inner_string_text().ok())
-                        else {
-                            continue;
-                        };
+        let object = root
+            .value()
+            .ok()
+            .and_then(|n| n.as_json_object_value().cloned());
 
-                        if let Ok(group) = Category::from_str(name.text()) {
-                            groups.insert(group, member);
-                        } else if name.text() == "linter" {
-                            linter_member = Some(member);
-                        } else if name.text() == "assist" {
-                            assist_member = Some(member);
-                        }
-                    }
+        if let Some(object) = object {
+            for member in object.json_member_list().iter().flatten() {
+                let Some(name) = member.name().ok().and_then(|n| n.inner_string_text().ok()) else {
+                    continue;
+                };
+
+                if name.text() == "linter" {
+                    linter_member = Some(member);
+                } else if name.text() == "assist" {
+                    assist_member = Some(member);
                 }
-                WalkEvent::Leave(_) => {}
             }
+        };
+
+        if let Some(member) = &linter_member {
+            Self::track_groups(member, &mut groups, "rules");
+        }
+
+        if let Some(member) = &assist_member {
+            Self::track_groups(member, &mut groups, "actions");
         }
 
         Self {
             root,
             groups,
             queries: vec![],
-            filters: vec![],
             assist_member,
             linter_member,
         }
     }
 
-    /// Register a query where it adds a new rule to a group
-    ///
-    /// ## Panics
-    ///
-    /// It panics if the group doesn't exist. This usually means that the developer must add the new group
-    pub(crate) fn insert_rule(
-        &mut self,
-        rule_name: impl ToString,
-        rule_member: JsonMember,
-        group: &str,
-    ) {
-        let category = Category::from_str(group).expect("to be a valid group");
+    fn track_groups(
+        linter_member: &JsonMember,
+        groups: &mut FxHashMap<Category, JsonMember>,
+        parent_group_name: &str,
+    ) -> Option<()> {
+        let rules_list = linter_member
+            .value()
+            .ok()
+            .and_then(|n| n.as_json_object_value().cloned())?
+            .json_member_list()
+            .iter()
+            .flatten()
+            .find_map(|member| {
+                let name = member
+                    .name()
+                    .ok()
+                    .and_then(|n| n.inner_string_text().ok())?;
+                if name.text() == parent_group_name {
+                    Some(member)
+                } else {
+                    None
+                }
+            })
+            .and_then(|member| {
+                Some(
+                    member
+                        .value()
+                        .ok()?
+                        .as_json_object_value()?
+                        .json_member_list(),
+                )
+            })?;
 
-        self.queries.push(Query {
-            rule_name: rule_name.to_string(),
-            kind: QueryKind::Insert(category),
-            rule_member: Some(rule_member),
-        })
+        for item in rules_list.iter().flatten() {
+            let name = item.name().ok().and_then(|n| n.inner_string_text().ok())?;
+            if let Ok(group) = Category::from_str(name.text()) {
+                groups.insert(group, item);
+            }
+        }
+
+        Some(())
     }
 
     /// Register a query where it adds a new rule to a group
@@ -286,6 +307,44 @@ impl AnalyzerMover {
         })
     }
 
+    fn replace_rule_in_group(
+        groups: &mut FxHashMap<Category, JsonMember>,
+        rule_name: &str,
+        rule_member: JsonMember,
+        group: &Category,
+    ) -> Option<()> {
+        if let Some(member) = groups.get_mut(group) {
+            let list = member
+                .value()
+                .ok()?
+                .as_json_object_value()?
+                .json_member_list();
+
+            let mut new_members = Vec::with_capacity(list.len());
+            let mut new_separators = Vec::with_capacity(list.len());
+            let mut rule_member_added = false;
+            for member in list.iter().flatten() {
+                if rule_name == member.name().ok()?.inner_string_text().ok()?.text() {
+                    new_members.push(rule_member.clone());
+                    rule_member_added = true;
+                } else {
+                    new_members.push(member);
+                }
+            }
+
+            if !rule_member_added {
+                new_members.push(rule_member);
+            }
+            for _ in 0..new_members.len().saturating_sub(1) {
+                new_separators.push(token(T![,]));
+            }
+
+            *member = group_member(new_members, new_separators, group.as_str());
+        }
+
+        Some(())
+    }
+
     /// Removes a rule from a group, and returns the new member list
     ///
     /// ## Panics
@@ -305,17 +364,14 @@ impl AnalyzerMover {
             let mut new_members = Vec::with_capacity(list.len());
             let mut new_separators = Vec::with_capacity(list.len());
 
-            for item in list.iter() {
-                let item = item.ok()?;
+            for item in list.iter().flatten() {
                 if rule_name != item.name().ok()?.inner_string_text().ok()?.text() {
                     new_members.push(item);
                 }
             }
 
-            for index in 0..new_members.len() {
-                if index + 1 < new_members.len() {
-                    new_separators.push(token(T![,]));
-                }
+            for _ in 0..new_members.len().saturating_sub(1) {
+                new_separators.push(token(T![,]));
             }
 
             new_members.shrink_to_fit();
@@ -366,11 +422,6 @@ impl AnalyzerMover {
 
         Some(())
     }
-
-    pub(crate) fn add_filters(&mut self, filters: &[&str]) {
-        self.filters = filters.iter().map(|s| Box::from(*s)).collect();
-    }
-
     pub(crate) fn run_queries(mut self) -> Option<BatchMutation<JsonLanguage>> {
         let mut mutation = self.root.clone().begin();
         for group in ALL_GROUPS {
@@ -402,14 +453,15 @@ impl AnalyzerMover {
                     AnalyzerMover::add_rule_to_group(&mut groups, rule_member, &to)?
                 }
                 QueryKind::Replace(group) => {
-                    AnalyzerMover::remove_rule_from_group(&mut groups, rule_name.as_str(), &group)?;
-                    AnalyzerMover::add_rule_to_group(&mut groups, rule_member, &group)?
+                    AnalyzerMover::replace_rule_in_group(
+                        &mut groups,
+                        rule_name.as_str(),
+                        rule_member,
+                        &group,
+                    )?;
                 }
                 QueryKind::Remove(group) => {
                     AnalyzerMover::remove_rule_from_group(&mut groups, rule_name.as_str(), &group)?;
-                }
-                QueryKind::Insert(group) => {
-                    AnalyzerMover::add_rule_to_group(&mut groups, rule_member, &group)?
                 }
             }
         }
@@ -438,12 +490,16 @@ impl AnalyzerMover {
             }
         }
 
-        for _ in 0..linter_members.len().saturating_sub(1) {
-            linter_separators.push(token(T![,]));
+        if linter_members.len() > 1 {
+            for _ in 0..linter_members.len().saturating_sub(1) {
+                linter_separators.push(token(T![,]));
+            }
         }
 
-        for _ in 0..assist_members.len().saturating_sub(1) {
-            assist_separators.push(token(T![,]));
+        if assist_members.len() > 1 {
+            for _ in 0..assist_members.len().saturating_sub(1) {
+                assist_separators.push(token(T![,]));
+            }
         }
 
         let list = self
@@ -457,14 +513,17 @@ impl AnalyzerMover {
         let mut top_level_members = vec![];
 
         // AKAK: linter: {}
-        let linter_member = self
-            .linter_member
-            .unwrap_or(create_new_linter_member(vec![], vec![]));
+        let linter_member =
+            self.linter_member
+                .unwrap_or(create_new_linter_member(vec![], vec![], 4));
 
         // AKAK: assist: {}
         let assist_memebr = self
             .assist_member
             .unwrap_or(create_new_assist_member(vec![], vec![]));
+
+        let mut linter_member_added = false;
+        let mut assist_member_added = false;
 
         for top_level_member in list.iter().flatten() {
             let name = top_level_member
@@ -473,15 +532,6 @@ impl AnalyzerMover {
                 .and_then(|n| n.inner_string_text().ok());
 
             if let Some(name) = name {
-                let should_filter = self
-                    .filters
-                    .iter()
-                    .any(|filter| name.text() == filter.as_ref());
-
-                if should_filter {
-                    continue;
-                }
-
                 if name.text() == "linter" {
                     if linter_members.is_empty() {
                         top_level_members.push(top_level_member.clone());
@@ -493,6 +543,7 @@ impl AnalyzerMover {
                         );
                         top_level_members.push(new_linter_member);
                     }
+                    linter_member_added = true;
                 } else if name.text() == "assist" {
                     if assist_members.is_empty() {
                         top_level_members.push(top_level_member.clone());
@@ -504,11 +555,29 @@ impl AnalyzerMover {
                         );
                         top_level_members.push(new_assist_member);
                     }
+                    assist_member_added = true;
                 } else {
                     top_level_members.push(top_level_member.clone());
                 }
             }
         }
+
+        if !assist_member_added && !assist_members.is_empty() {
+            top_level_members.push(add_members_to_assist_member(
+                &assist_memebr,
+                assist_members.clone(),
+                assist_separators.clone(),
+            ));
+        }
+
+        if !linter_member_added && !linter_members.is_empty() {
+            top_level_members.push(add_members_to_linter_member(
+                &linter_member,
+                linter_members.clone(),
+                linter_separators.clone(),
+            ));
+        }
+
         for _ in 0..top_level_members.len().saturating_sub(1) {
             separators.push(token(T![,]));
         }
@@ -551,10 +620,14 @@ fn group_member(
     create_member(group_name, AnyJsonValue::JsonObjectValue(object), 6)
 }
 
-fn rules_member(members: Vec<JsonMember>, separators: Vec<JsonSyntaxToken>) -> JsonMember {
+fn rules_member(
+    members: Vec<JsonMember>,
+    separators: Vec<JsonSyntaxToken>,
+    white_space: usize,
+) -> JsonMember {
     let list = json_member_list(members, separators);
-    let object = create_object(list, 4);
-    create_member("rules", AnyJsonValue::JsonObjectValue(object), 4)
+    let object = create_object(list, white_space);
+    create_member("rules", AnyJsonValue::JsonObjectValue(object), white_space)
 }
 
 fn actions_member(members: Vec<JsonMember>, separators: Vec<JsonSyntaxToken>) -> JsonMember {
@@ -563,10 +636,14 @@ fn actions_member(members: Vec<JsonMember>, separators: Vec<JsonSyntaxToken>) ->
     create_member("actions", AnyJsonValue::JsonObjectValue(object), 4)
 }
 
-fn linter_member(members: Vec<JsonMember>, separators: Vec<JsonSyntaxToken>) -> JsonMember {
+fn linter_member(
+    members: Vec<JsonMember>,
+    separators: Vec<JsonSyntaxToken>,
+    white_space: usize,
+) -> JsonMember {
     let list = json_member_list(members, separators);
-    let object = create_object(list, 2);
-    create_member("linter", AnyJsonValue::JsonObjectValue(object), 2)
+    let object = create_object(list, white_space);
+    create_member("linter", AnyJsonValue::JsonObjectValue(object), white_space)
 }
 
 fn assist_member(members: Vec<JsonMember>, separators: Vec<JsonSyntaxToken>) -> JsonMember {
@@ -578,9 +655,10 @@ fn assist_member(members: Vec<JsonMember>, separators: Vec<JsonSyntaxToken>) -> 
 fn create_new_linter_member(
     members: Vec<JsonMember>,
     separators: Vec<JsonSyntaxToken>,
+    white_space: usize,
 ) -> JsonMember {
-    let rules = rules_member(members, separators);
-    linter_member(vec![rules], vec![])
+    let rules = rules_member(members, separators, white_space + 2);
+    linter_member(vec![rules], vec![], white_space)
 }
 
 fn add_members_to_linter_member(
@@ -590,6 +668,15 @@ fn add_members_to_linter_member(
 ) -> JsonMember {
     let mut new_list = vec![];
     let mut new_separators = vec![];
+    let mut has_rules_member = false;
+
+    let rules_member_indentation = linter_member
+        .syntax()
+        .first_token()
+        .map(|token| token.leading_trivia().pieces())
+        .and_then(|mut pieces| pieces.find(|piece| piece.kind() == TriviaPieceKind::Whitespace))
+        .map_or(4, |piece| piece.text().len() + 2);
+
     let list = linter_member
         .value()
         .ok()
@@ -600,12 +687,30 @@ fn add_members_to_linter_member(
             let name = item.name().ok().and_then(|n| n.inner_string_text().ok());
             if !matches!(name.as_deref(), Some("rules")) {
                 new_list.push(item);
-                new_separators.push(token(T![,]));
+            } else {
+                let rules_members = rules_member(
+                    members.clone(),
+                    separators.clone(),
+                    rules_member_indentation,
+                );
+                new_list.push(rules_members);
+                has_rules_member = true;
             }
         }
     }
-    let rules_members = rules_member(members, separators);
-    new_list.push(rules_members);
+
+    if !has_rules_member {
+        let rules_members = rules_member(
+            members.clone(),
+            separators.clone(),
+            rules_member_indentation,
+        );
+        new_list.push(rules_members);
+    }
+
+    for _ in 0..new_list.len().saturating_sub(1) {
+        new_separators.push(token(T![,]));
+    }
 
     create_member(
         "linter",
@@ -621,6 +726,7 @@ fn add_members_to_assist_member(
 ) -> JsonMember {
     let mut new_list = vec![];
     let mut new_separators = vec![];
+    let mut has_actions_member = false;
     let list = assist_member
         .value()
         .ok()
@@ -631,12 +737,22 @@ fn add_members_to_assist_member(
             let name = item.name().ok().and_then(|n| n.inner_string_text().ok());
             if !matches!(name.as_deref(), Some("actions")) {
                 new_list.push(item);
-                new_separators.push(token(T![,]));
+            } else {
+                let actions_member = actions_member(members.clone(), separators.clone());
+                new_list.push(actions_member);
+                has_actions_member = true;
             }
         }
     }
-    let actions_member = actions_member(members, separators);
-    new_list.push(actions_member);
+
+    if !has_actions_member {
+        let actions_member = actions_member(members.clone(), separators.clone());
+        new_list.push(actions_member);
+    }
+
+    for _ in 0..new_list.len().saturating_sub(1) {
+        new_separators.push(token(T![,]));
+    }
 
     create_member(
         "assist",
@@ -708,7 +824,6 @@ mod tests {
         "#;
         let parsed = parse_json(source, JsonParserOptions::default());
         if parsed.has_errors() {
-            eprintln!("{}", parsed.tree().to_string());
             for diagnostic in parsed.into_diagnostics() {
                 let error = diagnostic_to_string("file.json", source, Error::from(diagnostic));
                 eprintln!("{:?}", error);

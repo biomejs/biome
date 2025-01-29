@@ -69,7 +69,7 @@ pub(crate) fn analyze_and_snap(
     } else {
         JsonParserOptions::default()
     };
-    let parsed = parse_json(input_code, parse_options.clone());
+    let parsed = parse_json(input_code, parse_options);
     let root = parsed.tree();
 
     let mut diagnostics = Vec::new();
@@ -84,7 +84,7 @@ pub(crate) fn analyze_and_snap(
         if let Some(mut diag) = event.diagnostic() {
             for action in event.actions() {
                 if !action.is_suppression() {
-                    check_code_action(input_file, input_code, &action, parse_options.clone());
+                    check_code_action(input_file, input_code, &action, parse_options);
                     diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                 }
             }

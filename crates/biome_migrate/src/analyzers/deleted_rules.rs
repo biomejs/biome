@@ -1,4 +1,3 @@
-use crate::rule_mover::AnalyzerMover;
 use crate::{declare_migration, MigrationAction};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
@@ -9,7 +8,7 @@ use biome_json_factory::make::{
     json_object_value, json_string_literal, json_string_value, token,
 };
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonRoot, JsonStringValue, T};
-use biome_rowan::{AstNode, TriviaPieceKind, WalkEvent};
+use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind, WalkEvent};
 use std::collections::HashMap;
 use std::sync::LazyLock;
 
@@ -85,10 +84,9 @@ impl Rule for DeletedRules {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<MigrationAction> {
-        let mut rule_mover = AnalyzerMover::from_root(ctx.root());
-        let member = &state.rule_member;
+        let mut mutation = ctx.root().begin();
 
-        let value = member.value().ok()?;
+        let value = state.rule_member.value().ok()?;
         let value = match value {
             AnyJsonValue::JsonStringValue(json_string_value) => Some(json_string_value),
             AnyJsonValue::JsonObjectValue(json_object_value) => {
@@ -107,27 +105,29 @@ impl Rule for DeletedRules {
             }
             _ => None,
         };
-
-        if REMOVED_RULES.contains_key(state.rule_name.as_ref()) {
-            let (member, group) = match state.rule_name.as_ref() {
-                "noConsoleLog" => (create_console_log_member(value), "suspicious"),
-                "useSingleCaseStatement" => (create_no_switch_declarations(value), "correctness"),
-                "useShorthandArrayType" => (create_consistent_array_type(value), "style"),
-                "noNewSymbol" | "noInvalidNewBuiltin" => {
-                    (create_no_invalid_builtin(value), "correctness")
-                }
-                _ => return None,
-            };
-            rule_mover.replace_rule(state.rule_name.as_ref(), member, group);
+        match state.rule_name.as_ref() {
+            "noConsoleLog" => {
+                mutation.replace_node(state.rule_member.clone(), create_console_log_member(value))
+            }
+            "useSingleCaseStatement" => mutation.replace_node(
+                state.rule_member.clone(),
+                create_no_switch_declarations(value),
+            ),
+            "useShorthandArrayType" => mutation.replace_node(
+                state.rule_member.clone(),
+                create_consistent_array_type(value),
+            ),
+            "noNewSymbol" | "noInvalidNewBuiltin" => {
+                mutation.replace_node(state.rule_member.clone(), create_no_invalid_builtin(value))
+            }
+            _ => return None,
         }
-
-        let mutation = rule_mover.run_queries()?;
 
         Some(RuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             Applicability::Always,
             markup! {
-                "Use the rule "<Emphasis>"useConsole"</Emphasis>" instead."
+                "Use the rule "<Emphasis>{state.rule_name}</Emphasis>" instead."
             }
             .to_owned(),
             mutation,

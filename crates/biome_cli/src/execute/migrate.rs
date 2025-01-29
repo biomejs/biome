@@ -301,11 +301,10 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                 if write {
                     let mut configuration_file = biome_config_file;
                     let format_options = JsonFormatOptions::default();
-                    let formatted = format_node(format_options, &tree.syntax())
+                    let formatted = format_node(format_options, tree.syntax())
                         .ok()
                         .map(|formatted| formatted.print())
-                        .and_then(|printed| printed.ok())
-                        .map(|formatted| formatted);
+                        .and_then(|printed| printed.ok());
 
                     if let Some(formatted) = formatted {
                         configuration_file.set_content(formatted.as_code().as_bytes())?;

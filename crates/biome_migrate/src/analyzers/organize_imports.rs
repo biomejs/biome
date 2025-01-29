@@ -1,14 +1,14 @@
-use crate::rule_mover::AnalyzerMover;
 use crate::{declare_migration, MigrationAction};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::{category, Applicability};
 use biome_json_factory::make::{
-    json_member, json_member_name, json_string_literal, json_string_value, token,
+    json_member, json_member_list, json_member_name, json_object_value, json_string_literal,
+    json_string_value, token,
 };
 use biome_json_syntax::{AnyJsonValue, JsonMember, T};
-use biome_rowan::{AstNode, TextRange, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPieceKind};
 
 declare_migration! {
     pub(crate) OrganizeImports {
@@ -66,8 +66,8 @@ impl Rule for OrganizeImports {
     }
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<MigrationAction> {
-        let root = ctx.root();
-        let mut rule_mover = AnalyzerMover::from_root(root.clone());
+        let query = ctx.query();
+        let mut mutation = ctx.root().begin();
         let action_member = json_member(
             json_member_name(
                 json_string_literal("organizeImports").with_leading_trivia(vec![
@@ -78,9 +78,38 @@ impl Rule for OrganizeImports {
             token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
             AnyJsonValue::JsonStringValue(json_string_value(json_string_literal("off"))),
         );
-        rule_mover.insert_rule("organizeImports", action_member, "source");
-        rule_mover.add_filters(&["organizeImports"]);
-        let mutation = rule_mover.run_queries()?;
+        let source_member = json_member(
+            json_member_name(json_string_literal("source").with_leading_trivia(vec![
+                (TriviaPieceKind::Newline, "\n"),
+                (TriviaPieceKind::Whitespace, " ".repeat(6).as_str()),
+            ])),
+            token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+            AnyJsonValue::JsonObjectValue(json_object_value(
+                token(T!['{']).with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+                json_member_list(vec![action_member], vec![]),
+                token(T!['}']).with_leading_trivia(vec![
+                    (TriviaPieceKind::Newline, "\n"),
+                    (TriviaPieceKind::Whitespace, " ".repeat(6).as_str()),
+                ]),
+            )),
+        );
+        let assist_member = json_member(
+            json_member_name(json_string_literal("assist").with_leading_trivia(vec![
+                (TriviaPieceKind::Newline, "\n"),
+                (TriviaPieceKind::Whitespace, " ".repeat(4).as_str()),
+            ])),
+            token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+            AnyJsonValue::JsonObjectValue(json_object_value(
+                token(T!['{']).with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+                json_member_list(vec![source_member], vec![]),
+                token(T!['}']).with_leading_trivia(vec![
+                    (TriviaPieceKind::Newline, "\n"),
+                    (TriviaPieceKind::Whitespace, " ".repeat(4).as_str()),
+                ]),
+            )),
+        );
+
+        mutation.replace_node(query.clone(), assist_member);
 
         Some(RuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
