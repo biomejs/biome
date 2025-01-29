@@ -138,8 +138,10 @@ snapshot_kind: text
     {
       "includes": ["**/packages/knip/fixtures/**"],
       "assist": {
-        "source": {
-          "organizeImports": "off"
+        "actions": {
+          "source": {
+            "organizeImports": "off"
+          }
         }
       },
       "linter": {

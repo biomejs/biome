@@ -1,0 +1,70 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "javascript": {
+    "formatter": {
+      "trailingComma": "always"
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingComma": "always"
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:4:7 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The option trailingComma is removed. 
+  
+    2 │   "javascript": {
+    3 │     "formatter": {
+  > 4 │       "trailingComma": "always"
+      │       ^^^^^^^^^^^^^^^
+    5 │     }
+    6 │   },
+  
+  i Safe fix: Use the option trailingCommas instead.
+  
+     2  2 │     "javascript": {
+     3  3 │       "formatter": {
+     4    │ - ······"trailingComma":·"always"
+        4 │ + ······"trailingCommas":·"always"
+     5  5 │       }
+     6  6 │     },
+  
+
+```
+
+```
+invalid.json:9:7 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The option trailingComma is removed. 
+  
+     7 │   "json": {
+     8 │     "formatter": {
+   > 9 │       "trailingComma": "always"
+       │       ^^^^^^^^^^^^^^^
+    10 │     }
+    11 │   }
+  
+  i Safe fix: Use the option trailingCommas instead.
+  
+     7  7 │     "json": {
+     8  8 │       "formatter": {
+     9    │ - ······"trailingComma":·"always"
+        9 │ + ······"trailingCommas":·"always"
+    10 10 │       }
+    11 11 │     }
+  
+
+```

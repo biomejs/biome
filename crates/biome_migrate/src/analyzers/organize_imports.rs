@@ -93,8 +93,9 @@ impl Rule for OrganizeImports {
                 ]),
             )),
         );
-        let assist_member = json_member(
-            json_member_name(json_string_literal("assist").with_leading_trivia(vec![
+
+        let actions_member = json_member(
+            json_member_name(json_string_literal("actions").with_leading_trivia(vec![
                 (TriviaPieceKind::Newline, "\n"),
                 (TriviaPieceKind::Whitespace, " ".repeat(4).as_str()),
             ])),
@@ -105,6 +106,21 @@ impl Rule for OrganizeImports {
                 token(T!['}']).with_leading_trivia(vec![
                     (TriviaPieceKind::Newline, "\n"),
                     (TriviaPieceKind::Whitespace, " ".repeat(4).as_str()),
+                ]),
+            )),
+        );
+        let assist_member = json_member(
+            json_member_name(json_string_literal("assist").with_leading_trivia(vec![
+                (TriviaPieceKind::Newline, "\n"),
+                (TriviaPieceKind::Whitespace, " ".repeat(2).as_str()),
+            ])),
+            token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+            AnyJsonValue::JsonObjectValue(json_object_value(
+                token(T!['{']).with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+                json_member_list(vec![actions_member], vec![]),
+                token(T!['}']).with_leading_trivia(vec![
+                    (TriviaPieceKind::Newline, "\n"),
+                    (TriviaPieceKind::Whitespace, " ".repeat(2).as_str()),
                 ]),
             )),
         );

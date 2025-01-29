@@ -6,6 +6,7 @@ use crate::analyzers::nursery_rules::NurseryRules;
 use crate::analyzers::organize_imports::OrganizeImports;
 use crate::analyzers::schema::Schema;
 use crate::analyzers::style_rules::StyleRules;
+use crate::analyzers::trailing_comma::TrailingComma;
 use crate::analyzers::use_while::UseWhile;
 use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
 use biome_json_syntax::JsonLanguage;
@@ -18,6 +19,7 @@ mod nursery_rules;
 mod organize_imports;
 mod schema;
 mod style_rules;
+mod trailing_comma;
 mod use_while;
 
 pub(crate) struct MigrationGroup;
@@ -42,6 +44,7 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<UseWhile>();
         registry.record_rule::<OrganizeImports>();
         registry.record_rule::<Includes>();
+        registry.record_rule::<TrailingComma>();
     }
 }
 
