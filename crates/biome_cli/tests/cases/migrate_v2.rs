@@ -20,7 +20,6 @@ fn should_successfully_migrate_knip() {
   "files": {
     "ignore": [
       "**/dist",
-      "**/tmp",
       "**/fixtures",
       "packages/knip/package.json",
       "packages/knip/vendor/bash-parser/index.js",

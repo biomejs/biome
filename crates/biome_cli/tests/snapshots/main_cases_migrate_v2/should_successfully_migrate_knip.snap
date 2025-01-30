@@ -12,7 +12,6 @@ snapshot_kind: text
     "includes": [
       "**",
       "!**/dist",
-      "!**/tmp",
       "!**/fixtures",
       "!**/packages/knip/package.json",
       "!**/packages/knip/vendor/bash-parser/index.js",
