@@ -16,6 +16,8 @@ use crate::JsRuleAction;
 declare_lint_rule! {
     /// Prevent extra closing tags for components without children
     ///
+    /// JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -91,7 +93,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintStylistic("jsx-self-closing-comp")],
         recommended: false,
         severity: Severity::Warning,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -180,7 +182,7 @@ impl Rule for UseSelfClosingElements {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Use a SelfClosingElement instead" }.to_owned(),
+            markup! { "Use a self-closing element instead." }.to_owned(),
             mutation,
         ))
     }
