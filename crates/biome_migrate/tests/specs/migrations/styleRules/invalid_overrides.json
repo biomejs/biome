@@ -1,0 +1,9 @@
+{
+  "overrides": {
+    "linter": {
+      "style": {
+        "useLiteralEnumMembers": "error"
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 ---
 source: crates/biome_migrate/tests/spec_tests.rs
-expression: invalid_with_group.json
+expression: invalid_with_complexity.json
 snapshot_kind: text
 ---
 # Input
@@ -8,13 +8,13 @@ snapshot_kind: text
 {
   "linter": {
     "rules": {
-      "suspicious": {
+      "complexity": {
         "foo": "bar",
         "join": "thebar"
       },
       "style": {
         "lorem": "ipsum",
-        "noVar": "error"
+        "useWhile": "error"
       }
     }
   }
@@ -24,28 +24,28 @@ snapshot_kind: text
 
 # Diagnostics
 ```
-invalid_with_group.json:10:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_with_complexity.json:10:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The rule style/noVar has ben moved to the suspicious group.
+  ! The rule useWhile has ben moved to the complexity group.
   
      8 │       "style": {
      9 │         "lorem": "ipsum",
-  > 10 │         "noVar": "error"
-       │         ^^^^^^^
+  > 10 │         "useWhile": "error"
+       │         ^^^^^^^^^^
     11 │       }
     12 │     }
   
   i Safe fix: Move the rule in the correct group.
   
-     4  4 │         "suspicious": {
+     4  4 │         "complexity": {
      5  5 │           "foo": "bar",
      6    │ - ········"join":·"thebar"
         6 │ + ········"join":·"thebar",
-        7 │ + ········"noVar":·"error"
+        7 │ + ········"useWhile":·"error"
      7  8 │         },
      8  9 │         "style": {
      9    │ - ········"lorem":·"ipsum",
-    10    │ - ········"noVar":·"error"
+    10    │ - ········"useWhile":·"error"
        10 │ + ········"lorem":·"ipsum"
     11 11 │         }
     12 12 │       }

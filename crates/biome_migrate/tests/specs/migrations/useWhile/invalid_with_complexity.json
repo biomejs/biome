@@ -1,13 +1,13 @@
 {
   "linter": {
     "rules": {
-      "suspicious": {
+      "complexity": {
         "foo": "bar",
         "join": "thebar"
       },
       "style": {
         "lorem": "ipsum",
-        "noVar": "error"
+        "useWhile": "error"
       }
     }
   }

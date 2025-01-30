@@ -1,7 +1,7 @@
 mod analyzers;
+mod configuration;
 mod macros;
 mod registry;
-mod rule_mover;
 
 use crate::registry::visit_migration_registry;
 pub use biome_analyze::ControlFlow;

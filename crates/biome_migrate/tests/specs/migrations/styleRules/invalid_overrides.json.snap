@@ -1,0 +1,877 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid_overrides.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "overrides": {
+    "linter": {
+      "style": {
+        "useLiteralEnumMembers": "error"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useLiteralEnumMembers isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useLiteralEnumMembers to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"useLiteralEnumMembers":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noParameterAssign isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this noParameterAssign to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"noParameterAssign":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noCommaOperator isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this noCommaOperator to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"noCommaOperator":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useSelfClosingElements isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useSelfClosingElements to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"useSelfClosingElements":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useEnumInitializers isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useEnumInitializers to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"useEnumInitializers":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useTemplate isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useTemplate to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"useTemplate":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useNumericLiterals isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useNumericLiterals to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"useNumericLiterals":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noUnusedTemplateLiteral isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this noUnusedTemplateLiteral to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"noUnusedTemplateLiteral":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useAsConstAssertion isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useAsConstAssertion to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"useAsConstAssertion":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useNumberNamespace isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useNumberNamespace to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"useNumberNamespace":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noUselessElse isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this noUselessElse to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"noUselessElse":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useImportType isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useImportType to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"useImportType":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useExponentiationOperator isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useExponentiationOperator to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"useExponentiationOperator":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noInferrableTypes isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this noInferrableTypes to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"noInferrableTypes":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noNonNullAssertion isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this noNonNullAssertion to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"noNonNullAssertion":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useConst isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useConst to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"useConst":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useNodejsImportProtocol isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useNodejsImportProtocol to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"useNodejsImportProtocol":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useDefaultParameterLast isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useDefaultParameterLast to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"useDefaultParameterLast":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useSingleVarDeclarator to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"useSingleVarDeclarator":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useExportType isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useExportType to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"useExportType":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noArguments isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this noArguments to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"noArguments":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```
+
+```
+invalid_overrides.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useShorthandFunctionType isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "overrides": {
+   > 3 │     "linter": {
+   > 4 │       "style": {
+   > 5 │         "useLiteralEnumMembers": "error"
+   > 6 │       }
+   > 7 │     }
+   > 8 │   }
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useShorthandFunctionType to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     6  6 │         }
+     7  7 │       }
+     8    │ - ··}
+        8 │ + ··},
+        9 │ + ··"linter":·{
+       10 │ + ····"rules":·{
+       11 │ + ······"style":·{
+       12 │ + ········"useShorthandFunctionType":·"error"
+       13 │ + ······}
+       14 │ + ····}
+       15 │ + ··}
+     9 16 │   }
+    10 17 │   
+  
+
+```

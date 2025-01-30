@@ -17,7 +17,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
   i Configuration file can be updated.
   
     1    │ - {·"linter":·{·"enabled":·true·}·}
-       1 │ + {·"linter":·{"enabled":·true·,
+       1 │ + {·"linter":·{·"enabled":·true·,
        2 │ + ····"rules":·{
        3 │ + ······"style":·{
        4 │ + ········"useLiteralEnumMembers":·"error",
@@ -43,8 +43,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
       24 │ + ········"useTemplate":·"error",
       25 │ + ········"useEnumInitializers":·"error"
       26 │ + ······}
-      27 │ + ····}
-      28 │ + ··}·}
+      27 │ + ····}·}·}
   
 
 ```

@@ -32,6 +32,32 @@ snapshot_kind: text
   "linter": {
     "enabled": true,
     "rules": {
+      "recommended": true,
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      },
+      "a11y": {
+        "noSvgWithoutTitle": "off",
+        "useButtonType": "off",
+        "useAnchorContent": "off",
+        "useValidAnchor": "off",
+        "useKeyWithClickEvents": "off",
+        "noAutofocus": "off",
+        "noLabelWithoutControl": "off",
+        "useSemanticElements": "off",
+        "useFocusableInteractive": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off",
+        "noShadowRestrictedNames": "off",
+        "noConfusingVoidType": "off",
+        "noArrayIndexKey": "off",
+        "noAssignInExpressions": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "off",
+        "useJsxKeyInIterable": "off"
+      },
       "style": {
         "noParameterAssign": "off",
         "noUnusedTemplateLiteral": "off",
@@ -55,31 +81,6 @@ snapshot_kind: text
         "useNumericLiterals": "error",
         "useTemplate": "error",
         "useEnumInitializers": "error"
-      },
-      "security": {
-        "noDangerouslySetInnerHtml": "off"
-      },
-      "suspicious": {
-        "noExplicitAny": "off",
-        "noShadowRestrictedNames": "off",
-        "noConfusingVoidType": "off",
-        "noArrayIndexKey": "off",
-        "noAssignInExpressions": "off"
-      },
-      "a11y": {
-        "noSvgWithoutTitle": "off",
-        "useButtonType": "off",
-        "useAnchorContent": "off",
-        "useValidAnchor": "off",
-        "useKeyWithClickEvents": "off",
-        "noAutofocus": "off",
-        "noLabelWithoutControl": "off",
-        "useSemanticElements": "off",
-        "useFocusableInteractive": "off"
-      },
-      "correctness": {
-        "useExhaustiveDependencies": "off",
-        "useJsxKeyInIterable": "off"
       }
     }
   }

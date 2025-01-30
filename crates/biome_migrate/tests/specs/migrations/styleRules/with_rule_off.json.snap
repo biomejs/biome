@@ -1,0 +1,692 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: with_rule_off.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "noParameterAssign": "off",
+        "useNodeAssertStrict": "error"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useLiteralEnumMembers isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useLiteralEnumMembers to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"useLiteralEnumMembers":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useShorthandFunctionType isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useShorthandFunctionType to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"useShorthandFunctionType":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useSingleVarDeclarator isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useSingleVarDeclarator to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"useSingleVarDeclarator":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useImportType isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useImportType to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"useImportType":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useEnumInitializers isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useEnumInitializers to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"useEnumInitializers":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useTemplate isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useTemplate to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"useTemplate":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useNumericLiterals isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useNumericLiterals to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"useNumericLiterals":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noUnusedTemplateLiteral isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this noUnusedTemplateLiteral to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"noUnusedTemplateLiteral":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useAsConstAssertion isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useAsConstAssertion to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"useAsConstAssertion":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useSelfClosingElements isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useSelfClosingElements to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"useSelfClosingElements":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useNumberNamespace isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useNumberNamespace to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"useNumberNamespace":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noUselessElse isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this noUselessElse to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"noUselessElse":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useExponentiationOperator isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useExponentiationOperator to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"useExponentiationOperator":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noInferrableTypes isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this noInferrableTypes to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"noInferrableTypes":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noNonNullAssertion isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this noNonNullAssertion to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"noNonNullAssertion":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useConst isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useConst to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"useConst":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noCommaOperator isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this noCommaOperator to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"noCommaOperator":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useNodejsImportProtocol isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useNodejsImportProtocol to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"useNodejsImportProtocol":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useDefaultParameterLast isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useDefaultParameterLast to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"useDefaultParameterLast":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule noArguments isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this noArguments to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"noArguments":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```
+
+```
+with_rule_off.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome style rule useExportType isn't recommended anymore.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "linter": {
+   > 3 │     "rules": {
+   > 4 │       "style": {
+        ...
+   > 8 │     }
+   > 9 │   }
+  > 10 │ }
+       │ ^
+    11 │ 
+  
+  i To avoid regressions with your code base, Biome will now enable this useExportType to match your current setup.
+  
+  i Safe fix: Update the configuration to enable these rules.
+  
+     4  4 │         "style": {
+     5  5 │           "noParameterAssign": "off",
+     6    │ - ········"useNodeAssertStrict":·"error"
+        6 │ + ········"useNodeAssertStrict":·"error",
+        7 │ + ········"useExportType":·"error"
+     7  8 │         }
+     8  9 │       }
+  
+
+```

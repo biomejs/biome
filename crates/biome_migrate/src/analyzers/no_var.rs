@@ -1,13 +1,14 @@
+use crate::configuration::{
+    create_formatted_object_value, create_group_member, create_rules_member,
+    replace_value_to_member, seek_rules_configuration,
+};
 use crate::{declare_migration, MigrationAction};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::{category, Applicability};
-use biome_json_factory::make::{
-    json_member, json_member_list, json_member_name, json_object_value, json_string_literal, token,
-};
-use biome_json_syntax::{AnyJsonValue, JsonMember, T};
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_json_syntax::{JsonMember, TextRange};
+use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_migration! {
     pub(crate) NoVar {
@@ -18,7 +19,7 @@ declare_migration! {
 
 impl Rule for NoVar {
     type Query = Ast<JsonMember>;
-    type State = JsonMember;
+    type State = (TextRange, JsonMember);
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -28,7 +29,6 @@ impl Rule for NoVar {
         let name = node.name().ok()?;
         let text = name.inner_string_text().ok()?;
 
-        let mut no_var_member = None;
         if text.text() == "style" {
             let object = node.value().ok()?;
             let object = object.as_json_object_value()?;
@@ -36,18 +36,18 @@ impl Rule for NoVar {
                 let name = item.name().ok()?;
                 let text = name.inner_string_text().ok()?;
                 if text.text() == "noVar" {
-                    no_var_member = Some(item);
+                    return Some((name.range(), item));
                 }
             }
         }
 
-        no_var_member
+        None
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_ctx: &RuleContext<Self>, (range, _): &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             category!("migrate"),
-            state.range(),
+            range,
             markup! {
                 "The rule "<Emphasis>"style/noVar"</Emphasis>" has ben moved to the "<Emphasis>"suspicious"</Emphasis>" group."
             }
@@ -55,139 +55,58 @@ impl Rule for NoVar {
         ))
     }
 
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<MigrationAction> {
-        let mut mutation = ctx.root().begin();
-        let no_var_member = state;
+    fn action(
+        ctx: &RuleContext<Self>,
+        (_, no_var_member): &Self::State,
+    ) -> Option<MigrationAction> {
         let style_member = ctx.query();
-
-        let style_member_list = style_member
-            .value()
-            .ok()?
-            .as_json_object_value()?
-            .json_member_list()
-            .iter()
-            .flatten()
+        let root = ctx.root();
+        // we create a new style member without the useWhile rule
+        let style_list = style_member.map_members()?;
+        let style_list: Vec<_> = style_list
+            .into_iter()
             .filter_map(|member| {
-                let name = member.name().ok()?;
-                let text = name.inner_string_text().ok()?;
-                if text.text() == "noVar" {
-                    None
-                } else {
-                    Some(member)
-                }
-            })
-            .collect::<Vec<_>>();
-
-        let mut separators = vec![];
-        for _ in 0..style_member_list.len().saturating_sub(1) {
-            separators.push(token(T![,]))
-        }
-
-        let rules_member = style_member.syntax().ancestors().find_map(|node| {
-            let member = JsonMember::cast(node)?;
-            let name = member.name().ok()?;
-            let text = name.inner_string_text().ok()?;
-            if text.text() == "rules" {
-                Some(member)
-            } else {
-                None
-            }
-        })?;
-
-        let style_member = json_member(
-            style_member.name().ok()?,
-            style_member.colon_token().ok()?,
-            AnyJsonValue::JsonObjectValue(json_object_value(
-                token(T!['{']).with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
-                json_member_list(style_member_list, separators),
-                token(T!['}']).with_leading_trivia(vec![
-                    (TriviaPieceKind::Newline, "\n"),
-                    (TriviaPieceKind::Whitespace, " ".repeat(6).as_str()),
-                ]),
-            )),
-        );
-
-        let linter_member_list = rules_member
-            .value()
-            .ok()?
-            .as_json_object_value()?
-            .json_member_list();
-
-        let suspicious_member = linter_member_list
-            .iter()
-            .flatten()
-            .find_map(|member| {
                 let name = member.name().ok()?.inner_string_text().ok()?;
-                if name.text() == "suspicious" {
-                    Some(member)
-                } else {
+                if name.text() == "noVar" {
                     None
+                } else {
+                    Some(member)
                 }
             })
-            .and_then(|suspicious_member| {
-                // we inject the new member here
-                let (list, mut separators) = suspicious_member.unzip_elements()?;
-                for _ in 0..list.len().saturating_sub(1) {
-                    separators.push(token(T![,]))
-                }
+            .collect();
 
-                Some(json_member(
-                    suspicious_member.name().ok()?,
-                    suspicious_member.colon_token().ok()?,
-                    AnyJsonValue::JsonObjectValue(json_object_value(
-                        suspicious_member
-                            .value()
-                            .ok()?
-                            .as_json_object_value()?
-                            .l_curly_token()
-                            .ok()?,
-                        json_member_list(list, separators),
-                        suspicious_member
-                            .value()
-                            .ok()?
-                            .as_json_object_value()?
-                            .r_curly_token()
-                            .ok()?,
-                    )),
-                ))
-            })
-            .unwrap_or(json_member(
-                json_member_name(json_string_literal("suspicious").with_leading_trivia(vec![
-                    (TriviaPieceKind::Newline, "\n"),
-                    (TriviaPieceKind::Whitespace, " ".repeat(4).as_str()),
-                ])),
-                token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
-                AnyJsonValue::JsonObjectValue(json_object_value(
-                    token(T!['{']).with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
-                    json_member_list(vec![no_var_member.clone()], vec![]),
-                    token(T!['}']).with_leading_trivia(vec![
-                        (TriviaPieceKind::Newline, "\n"),
-                        (TriviaPieceKind::Whitespace, " ".repeat(4).as_str()),
-                    ]),
-                )),
-            ));
+        let linter_member = style_member.find_member_by_name_upwards("linter")?;
+        let style_member =
+            replace_value_to_member(style_member, create_formatted_object_value(style_list, 6))?;
 
-        let mut separators = vec![];
-        let mut new_members = vec![];
-        for item in linter_member_list.iter().flatten() {
+        let rules_member = seek_rules_configuration(&linter_member)?;
+
+        let rules_list = rules_member.map_members()?;
+        let mut new_list = vec![];
+        let mut suspicious_member_added = false;
+        for item in rules_list {
             let name = item.name().ok()?.inner_string_text().ok()?;
-            if name.text() != "suspicious" {
-                new_members.push(suspicious_member.clone());
-            } else if name.text() == "style" {
-                new_members.push(style_member.clone());
+            if name == "style" {
+                new_list.push(style_member.clone());
+            } else if name == "suspicious" {
+                let mut members = item.map_members()?;
+                members.push(no_var_member.clone());
+                new_list.push(create_group_member("suspicious", members));
+                suspicious_member_added = true;
             } else {
-                new_members.push(item);
+                new_list.push(item);
             }
         }
-        new_members.push(suspicious_member);
-        for _ in 0..new_members.len().saturating_sub(1) {
-            separators.push(token(T![,]))
+
+        if !suspicious_member_added {
+            new_list.push(create_group_member(
+                "suspicious",
+                vec![no_var_member.clone()],
+            ));
         }
 
-        mutation.replace_node(
-            linter_member_list,
-            json_member_list(new_members, separators),
-        );
+        let mut mutation = root.begin();
+        mutation.replace_node(rules_member.clone(), create_rules_member(new_list));
 
         Some(RuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),

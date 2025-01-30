@@ -1,18 +1,4 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
-  "files": {
-    "ignore": [
-      "**/dist",
-      "**/tmp",
-      "**/fixtures",
-      "packages/knip/package.json",
-      "packages/knip/vendor/bash-parser/index.js",
-      "packages/docs/.astro"
-    ]
-  },
-  "organizeImports": {
-    "enabled": true
-  },
   "linter": {
     "rules": {
       "style": {
@@ -61,29 +47,6 @@
       }
     }
   },
-  "formatter": {
-    "enabled": true,
-    "lineWidth": 120,
-    "indentStyle": "space",
-    "formatWithErrors": true
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "single",
-      "arrowParentheses": "asNeeded",
-      "trailingCommas": "es5"
-    }
-  },
-  "json": {
-    "formatter": {
-      "lineWidth": 80
-    }
-  },
-  "css": {
-    "formatter": {
-      "quoteStyle": "single"
-    }
-  },
   "overrides": [
     {
       "include": ["*.astro"],
@@ -97,14 +60,6 @@
       }
     },
     {
-      "include": [
-        "packages/docs",
-        "packages/knip/scripts",
-        "packages/knip/src/cli.ts",
-        "packages/knip/src/reporters",
-        "packages/knip/src/util/cli-arguments.ts",
-        "packages/knip/src/util/debug.ts"
-      ],
       "linter": {
         "rules": {
           "suspicious": {
@@ -114,10 +69,7 @@
       }
     },
     {
-      "include": ["packages/knip/fixtures"],
-      "organizeImports": {
-        "enabled": false
-      },
+
       "linter": {
         "rules": {
           "correctness": {
@@ -128,12 +80,6 @@
             "useImportType": "off"
           }
         }
-      }
-    },
-    {
-      "include": ["packages/knip/test/util/get-inputs-from-scripts.test.ts"],
-      "formatter": {
-        "lineWidth": 200
       }
     }
   ]

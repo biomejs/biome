@@ -1,0 +1,10 @@
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "noParameterAssign": "off",
+        "useNodeAssertStrict": "error"
+      }
+    }
+  }
+}

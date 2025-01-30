@@ -24,7 +24,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this useLiteralEnumMembers to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -33,11 +33,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useLiteralEnumMembers":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -56,7 +56,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this noParameterAssign to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -65,11 +65,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"noParameterAssign":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -88,7 +88,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this noCommaOperator to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -97,11 +97,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"noCommaOperator":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -120,7 +120,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this useSelfClosingElements to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -129,11 +129,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useSelfClosingElements":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -152,7 +152,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this useEnumInitializers to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -161,11 +161,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useEnumInitializers":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -184,7 +184,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this useTemplate to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -193,11 +193,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useTemplate":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -216,7 +216,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this useNumericLiterals to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -225,11 +225,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useNumericLiterals":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -248,7 +248,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this noUnusedTemplateLiteral to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -257,11 +257,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"noUnusedTemplateLiteral":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -280,7 +280,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this useAsConstAssertion to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -289,11 +289,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useAsConstAssertion":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -312,7 +312,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this useNumberNamespace to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -321,11 +321,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useNumberNamespace":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -344,7 +344,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this noUselessElse to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -353,11 +353,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"noUselessElse":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -376,7 +376,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this useImportType to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -385,11 +385,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useImportType":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -408,7 +408,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this useExponentiationOperator to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -417,11 +417,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useExponentiationOperator":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -440,7 +440,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this noInferrableTypes to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -449,11 +449,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"noInferrableTypes":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -472,7 +472,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this noNonNullAssertion to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -481,11 +481,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"noNonNullAssertion":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -504,7 +504,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this useConst to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -513,11 +513,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useConst":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -536,7 +536,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this useNodejsImportProtocol to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -545,11 +545,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useNodejsImportProtocol":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -568,7 +568,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this useDefaultParameterLast to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -577,11 +577,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useDefaultParameterLast":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -600,7 +600,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this useSingleVarDeclarator to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -609,11 +609,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useSingleVarDeclarator":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -632,7 +632,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this useExportType to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -641,11 +641,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useExportType":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -664,7 +664,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this noArguments to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -673,11 +673,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"noArguments":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   
@@ -696,7 +696,7 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
   > 4 │ }
       │ ^
   
-  i To avoid regressions with your code base, Biome will update the configuration file to maintain the compatibility with your current setup.
+  i To avoid regressions with your code base, Biome will now enable this useShorthandFunctionType to match your current setup.
   
   i Safe fix: Update the configuration to enable these rules.
   
@@ -705,11 +705,11 @@ empty.json:1:1 migrate  FIXABLE  ━━━━━━━━━━━━━━━�
     3    │ - ··"javascript":·{}
        3 │ + ··"javascript":·{},
        4 │ + ··"linter":·{
-       5 │ + ······"rules":·{
+       5 │ + ····"rules":·{
        6 │ + ······"style":·{
        7 │ + ········"useShorthandFunctionType":·"error"
        8 │ + ······}
-       9 │ + ······}
+       9 │ + ····}
       10 │ + ··}
     4 11 │   }
   

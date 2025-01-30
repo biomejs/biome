@@ -24,6 +24,25 @@ snapshot_kind: text
   "linter": {
     "enabled": true,
     "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error"
+      },
+      "complexity": {
+        "useLiteralKeys": "off"
+      },
+      "nursery": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "node:path": "Please use src/util/path.js instead.",
+              "path": "Please use src/util/path.js instead."
+            }
+          }
+        }
+      },
       "style": {
         "noParameterAssign": "off",
         "useNodeAssertStrict": "error",
@@ -41,26 +60,13 @@ snapshot_kind: text
         "useExponentiationOperator": "error",
         "noUselessElse": "error",
         "useSelfClosingElements": "error",
+        "useImportType": "error",
         "useNumberNamespace": "error",
         "useAsConstAssertion": "error",
         "noUnusedTemplateLiteral": "error",
         "useNumericLiterals": "error",
         "useTemplate": "error",
         "useEnumInitializers": "error"
-      },
-      "nursery": {
-        "noRestrictedImports": {
-          "level": "error",
-          "options": {
-            "paths": {
-              "node:path": "Please use src/util/path.js instead.",
-              "path": "Please use src/util/path.js instead."
-            }
-          }
-        }
-      },
-      "complexity": {
-        "useLiteralKeys": "off"
       },
       "suspicious": {
         "noConsole": {
@@ -70,10 +76,6 @@ snapshot_kind: text
           }
         },
         "noExplicitAny": "off"
-      },
-      "correctness": {
-        "noUnusedVariables": "error",
-        "noUnusedImports": "error"
       }
     }
   },
