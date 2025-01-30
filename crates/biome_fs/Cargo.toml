@@ -15,7 +15,7 @@ version              = "0.5.7"
 [dependencies]
 biome_diagnostics = { workspace = true }
 crossbeam         = { workspace = true }
-directories       = "5.0.1"
+directories       = "6.0.0"
 enumflags2        = { workspace = true, features = ["serde"] }
 indexmap          = { workspace = true }
 oxc_resolver      = { workspace = true }
