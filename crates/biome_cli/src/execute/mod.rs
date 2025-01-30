@@ -164,8 +164,6 @@ pub enum TraversalMode {
         write: bool,
         /// The path to `biome.json`
         configuration_file_path: Utf8PathBuf,
-        /// The path directory where `biome.json` is placed
-        configuration_directory_path: Utf8PathBuf,
         sub_command: Option<MigrateSubCommand>,
     },
     /// This mode is enabled when running the command `biome search`
@@ -509,7 +507,6 @@ pub fn execute_mode(
         project_key,
         write,
         configuration_file_path,
-        configuration_directory_path,
         sub_command,
     } = execution.traversal_mode
     {
@@ -518,7 +515,6 @@ pub fn execute_mode(
             project_key,
             write,
             configuration_file_path,
-            configuration_directory_path,
             verbose: cli_options.verbose,
             sub_command,
         };

@@ -1,0 +1,140 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "files": {
+    "ignore": [
+      "**/dist",
+      "**/tmp",
+      "**/fixtures",
+      "packages/knip/package.json",
+      "packages/knip/vendor/bash-parser/index.js",
+      "packages/docs/.astro"
+    ]
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "rules": {
+      "style": {
+        "useImportType": "off",
+        "useLiteralEnumMembers": "error",
+        "noArguments": "error",
+        "useShorthandFunctionType": "error",
+        "useExportType": "error",
+        "useDefaultParameterLast": "error",
+        "noCommaOperator": "error",
+        "useSingleVarDeclarator": "error",
+        "useNodejsImportProtocol": "error",
+        "useConst": "error",
+        "noNonNullAssertion": "error",
+        "noInferrableTypes": "error",
+        "useExponentiationOperator": "error",
+        "noUselessElse": "error",
+        "useSelfClosingElements": "error",
+        "useNumberNamespace": "error",
+        "useAsConstAssertion": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumericLiterals": "error",
+        "useTemplate": "error",
+        "useEnumInitializers": "error"
+      },
+      "nursery": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "node:path": "Please use src/util/path.js instead.",
+              "path": "Please use src/util/path.js instead."
+            }
+          }
+        }
+      },
+      "complexity": {
+        "useLiteralKeys": "off"
+      },
+      "suspicious": {
+        "noConsoleLog": "off"
+      },
+      "correctness": {
+        "noUnusedVariables": "off",
+        "noUnusedImports": "off"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "lineWidth": 120,
+    "indentStyle": "space",
+    "formatWithErrors": true
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "arrowParentheses": "asNeeded",
+      "trailingCommas": "es5"
+    }
+  },
+  "json": {
+    "formatter": {
+      "lineWidth": 80
+    }
+  },
+  "css": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  },
+  "overrides": [
+    {
+      "include": ["*.astro"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": [
+        "packages/docs",
+        "packages/knip/scripts",
+        "packages/knip/src/cli.ts",
+        "packages/knip/src/reporters",
+        "packages/knip/src/util/cli-arguments.ts",
+        "packages/knip/src/util/debug.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsoleLog": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["packages/knip/fixtures"],
+      "organizeImports": {
+        "enabled": false
+      },
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          },
+          "style": {
+            "useImportType": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["packages/knip/test/util/get-inputs-from-scripts.test.ts"],
+      "formatter": {
+        "lineWidth": 200
+      }
+    }
+  ]
+}

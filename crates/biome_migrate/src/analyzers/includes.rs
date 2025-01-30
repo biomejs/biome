@@ -1,9 +1,8 @@
 use std::str::FromStr;
 
-use crate::version_services::Version;
 use crate::{declare_migration, MigrationAction};
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Rule, RuleAction, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::{category, Applicability};
 use biome_json_factory::make;
@@ -18,7 +17,7 @@ declare_migration! {
 }
 
 impl Rule for Includes {
-    type Query = Version<JsonRoot>;
+    type Query = Ast<JsonRoot>;
     type State = State;
     type Signals = Vec<Self::State>;
     type Options = ();

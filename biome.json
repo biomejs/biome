@@ -1,72 +1,85 @@
 {
-  "$schema": "./packages/@biomejs/biome/configuration_schema.json",
-  "assist": {
-    "enabled": true,
-    "ignore": [
-      "./packages/@biomejs/biome/configuration_schema.json"
-    ],
-    "actions": {
-      "source": {
-        "useSortedKeys": "off"
-      }
-    }
-  },
-  "css": {
-    "linter": {
-      "enabled": true
-    }
-  },
-  "files": {
-    "ignore": [
-      "crates/**",
-      "dist/**",
-      ".astro/**",
-      "assets/**",
-      "packages/@biomejs/backend-jsonrpc/src/workspace.ts",
-      "public/**",
-      "**/__snapshots__",
-      "**/undefined/**",
-      "_fonts/**",
-      "packages/@biomejs/wasm-*",
-      "benchmark/target/**"
-    ],
-    "include": [
-      "packages/aria-data/*.js",
-      "packages/@biomejs/**",
-      "packages/tailwindcss-config-analyzer/**",
-      "benchmark/**"
-    ]
-  },
-  "formatter": {
-    "ignore": [
-      "configuration_schema.json"
-    ]
-  },
-  "json": {
-    "formatter": {
-      "indentStyle": "space",
-      "lineWidth": 1
-    }
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true,
-      "correctness": {
-        "noUndeclaredDependencies": "error"
-      },
-      "style": {
-        "noNonNullAssertion": "off",
-        "useNodejsImportProtocol": "error"
-      },
-      "suspicious": {
-        "noVar": "on"
-      }
-    }
-  },
-  "vcs": {
-    "clientKind": "git",
-    "enabled": true,
-    "useIgnoreFile": true
-  }
+	"$schema": "./packages/@biomejs/biome/configuration_schema.json",
+	"assist": {
+		"enabled": true,
+		"ignore": ["./packages/@biomejs/biome/configuration_schema.json"],
+		"actions": {
+			"source": {
+				"useSortedKeys": "off"
+			}
+		}
+	},
+	"css": {
+		"linter": {
+			"enabled": true
+		}
+	},
+	"files": {
+		"includes": [
+			"**/packages/aria-data/*.js",
+			"**/packages/@biomejs/**",
+			"**/packages/tailwindcss-config-analyzer/**",
+			"**/benchmark/**",
+			"!**/crates/**",
+			"!**/dist/**",
+			"!**/.astro/**",
+			"!**/assets/**",
+			"!**/packages/@biomejs/backend-jsonrpc/src/workspace.ts",
+			"!**/public/**",
+			"!**/__snapshots__",
+			"!**/undefined/**",
+			"!**/_fonts/**",
+			"!**/packages/@biomejs/wasm-*",
+			"!**/benchmark/target/**"
+		]
+	},
+	"formatter": {
+		"includes": ["**", "!**/configuration_schema.json"]
+	},
+	"json": {
+		"formatter": {
+			"indentStyle": "space",
+			"lineWidth": 1
+		}
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"style": {
+				"noNonNullAssertion": "off",
+				"useNodejsImportProtocol": "error",
+				"useLiteralEnumMembers": "error",
+				"noArguments": "error",
+				"noParameterAssign": "error",
+				"useShorthandFunctionType": "error",
+				"useExportType": "error",
+				"useDefaultParameterLast": "error",
+				"noCommaOperator": "error",
+				"useSingleVarDeclarator": "error",
+				"useConst": "error",
+				"noInferrableTypes": "error",
+				"useExponentiationOperator": "error",
+				"noUselessElse": "error",
+				"useSelfClosingElements": "error",
+				"useImportType": "error",
+				"useNumberNamespace": "error",
+				"useAsConstAssertion": "error",
+				"noUnusedTemplateLiteral": "error",
+				"useNumericLiterals": "error",
+				"useTemplate": "error",
+				"useEnumInitializers": "error"
+			},
+			"correctness": {
+				"noUndeclaredDependencies": "error"
+			},
+			"suspicious": {
+				"noVar": "on"
+			}
+		}
+	},
+	"vcs": {
+		"clientKind": "git",
+		"enabled": true,
+		"useIgnoreFile": true
+	}
 }

@@ -26,7 +26,7 @@ invalid.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━
     3 │     "rules": {
     4 │       "style": {
   > 5 │         "noVar": "error"
-      │         ^^^^^^^
+      │         ^^^^^^^^^^^^^^^^
     6 │       }
     7 │     }
   
@@ -35,9 +35,15 @@ invalid.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━
      2  2 │     "linter": {
      3  3 │       "rules": {
      4    │ - ······"style":·{
-        4 │ + ······"suspicious":·{
-     5  5 │           "noVar": "error"
-     6  6 │         }
+        4 │ + ······"suspicious":··{
+        5 │ + ········"noVar":·"error"
+        6 │ + ····},
+        7 │ + ····"suspicious":··{
+     5  8 │           "noVar": "error"
+     6    │ - ······}
+        9 │ + ····}
+     7 10 │       }
+     8 11 │     }
   
 
 ```

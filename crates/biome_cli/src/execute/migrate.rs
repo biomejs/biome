@@ -10,7 +10,9 @@ use biome_deserialize::Merge;
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::{category, PrintDiagnostic};
 use biome_formatter::ParseFormatNumberError;
-use biome_fs::{BiomePath, ConfigName, FileSystemExt, OpenOptions};
+use biome_fs::{BiomePath, OpenOptions};
+use biome_json_formatter::context::JsonFormatOptions;
+use biome_json_formatter::format_node;
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::{JsonFileSource, JsonRoot};
 use biome_migrate::{migrate_configuration, ControlFlow};
@@ -38,7 +40,6 @@ pub(crate) struct MigratePayload<'a> {
     pub(crate) project_key: ProjectKey,
     pub(crate) write: bool,
     pub(crate) configuration_file_path: Utf8PathBuf,
-    pub(crate) configuration_directory_path: Utf8PathBuf,
     pub(crate) verbose: bool,
     pub(crate) sub_command: Option<MigrateSubCommand>,
 }
@@ -49,7 +50,6 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         project_key,
         write,
         configuration_file_path,
-        configuration_directory_path,
         verbose,
         sub_command,
     } = migrate_payload;
@@ -69,6 +69,12 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     biome_config_file.read_to_string(&mut biome_config_content)?;
 
     let biome_path = BiomePath::new(configuration_file_path.as_path());
+    let parse_options = match configuration_file_path.extension() {
+        Some("jsonc") => JsonParserOptions::default()
+            .with_allow_comments()
+            .with_allow_trailing_commas(),
+        _ => JsonParserOptions::default(),
+    };
     workspace.open_file(OpenFileParams {
         project_key,
         path: biome_path.clone(),
@@ -77,11 +83,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         document_file_source: Some(JsonFileSource::json().into()),
         persist_node_cache: false,
     })?;
-    let parsed = parse_json_with_cache(
-        &biome_config_content,
-        &mut cache,
-        JsonParserOptions::default(),
-    );
+    let parsed = parse_json_with_cache(&biome_config_content, &mut cache, parse_options);
 
     match sub_command {
         Some(MigrateSubCommand::Prettier) => {
@@ -250,9 +252,6 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
             }
         }
         None => {
-            let has_deprecated_configuration =
-                configuration_file_path.file_name() == Some("rome.json");
-
             let mut errors = 0;
             let mut tree = parsed.tree();
             let mut actions = Vec::new();
@@ -261,7 +260,6 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     &tree,
                     AnalysisFilter::default(),
                     configuration_file_path.as_path(),
-                    biome_configuration::VERSION.to_string(),
                     |signal| {
                         let current_diagnostic = signal.diagnostic();
                         if current_diagnostic.is_some() {
@@ -299,16 +297,20 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
             }
 
             let new_configuration_content = tree.to_string();
-            if biome_config_content != new_configuration_content || has_deprecated_configuration {
+            if biome_config_content != new_configuration_content {
                 if write {
-                    let mut configuration_file = if has_deprecated_configuration {
-                        let biome_file_path =
-                            configuration_directory_path.join(ConfigName::biome_json());
-                        fs.create_new(biome_file_path.as_path())?
+                    let mut configuration_file = biome_config_file;
+                    let format_options = JsonFormatOptions::default();
+                    let formatted = format_node(format_options, tree.syntax())
+                        .ok()
+                        .map(|formatted| formatted.print())
+                        .and_then(|printed| printed.ok());
+
+                    if let Some(formatted) = formatted {
+                        configuration_file.set_content(formatted.as_code().as_bytes())?;
                     } else {
-                        biome_config_file
-                    };
-                    configuration_file.set_content(tree.to_string().as_bytes())?;
+                        configuration_file.set_content(new_configuration_content.as_bytes())?;
+                    }
                     console.log(markup!{
                             <Info>"The configuration "<Emphasis>{{configuration_file_path.to_string()}}</Emphasis>" has been successfully migrated."</Info>
                         })
