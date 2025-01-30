@@ -134,7 +134,11 @@ export class Biome {
 		}
 	}
 
-	registerProjectFolder(): void;
+	/**
+	 * Register a possible workspace project folder. Returns the key of said project. Use this key when you want to switch to different projects.
+	 *
+	 * @param {string} [path]
+	 */
 	registerProjectFolder(path?: string): void {
 		this.workspace.registerProjectFolder({
 			path,
