@@ -23,7 +23,7 @@ invalidCheckHtmlElementsFalse.tsx:2:1 lint/style/useSelfClosingElements  FIXABLE
     3 │ <Foo.bar></Foo.bar>;
     4 │ <Generic<true>></Generic>;
   
-  i Unsafe fix: Use a SelfClosingElement instead
+  i Safe fix: Use a self-closing element instead.
   
     1 1 │   // invalid
     2   │ - <Component></Component>;
@@ -46,7 +46,7 @@ invalidCheckHtmlElementsFalse.tsx:3:1 lint/style/useSelfClosingElements  FIXABLE
     4 │ <Generic<true>></Generic>;
     5 │ 
   
-  i Unsafe fix: Use a SelfClosingElement instead
+  i Safe fix: Use a self-closing element instead.
   
     1 1 │   // invalid
     2 2 │   <Component></Component>;
@@ -69,7 +69,7 @@ invalidCheckHtmlElementsFalse.tsx:4:1 lint/style/useSelfClosingElements  FIXABLE
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ 
   
-  i Unsafe fix: Use a SelfClosingElement instead
+  i Safe fix: Use a self-closing element instead.
   
     2 2 │   <Component></Component>;
     3 3 │   <Foo.bar></Foo.bar>;
