@@ -153,12 +153,12 @@ impl Rule for UseSortedProperties {
         let mut mutation = ctx.root().begin();
         mutation.replace_node(state.block.items(), sorted_properties.as_sorted()?);
 
-        return Some(CssRuleAction::new(
+        Some(CssRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Sort these properties" }.to_owned(),
             mutation,
-        ));
+        ))
     }
 }
 
