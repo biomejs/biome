@@ -86,7 +86,7 @@ cargo install just
 
 But we **highly recommend** to [install it using an OS package manager](https://github.com/casey/just#packages),  so you won't need to prefix every command with `cargo`.
 
-Once installed, run the following command install the required tools:
+Once installed, run the following command to install the required tools:
 
 ```shell
 just install-tools
@@ -104,7 +104,7 @@ And you're good to go hack with Biome and Rust! 🚀
 
 You can either use `cargo` or `just` to run tests. For simplicity and running tests real quick, use `cargo`.
 
-With `cargo`, you can run tests with using the `test` command:
+With `cargo`, you can run tests by using the `test` command:
 
 ```shell
 # run tests
@@ -131,7 +131,7 @@ cd crates/biome_js_formatter
 cargo t quick_test
 ```
 
-This will run the `quick_test` test inside he `biome_js_formatter` crate. You should see an output similar to this:
+This will run the `quick_test` test inside the `biome_js_formatter` crate. You should see an output similar to this:
 
 ```shell
 running 1 test

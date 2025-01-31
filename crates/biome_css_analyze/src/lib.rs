@@ -1,6 +1,7 @@
 mod keywords;
 mod lint;
 pub mod options;
+mod order;
 mod registry;
 mod services;
 mod suppression_action;
@@ -10,7 +11,7 @@ pub use crate::registry::visit_registry;
 use crate::suppression_action::CssSuppressionAction;
 use biome_analyze::{
     to_analyzer_suppressions, AnalysisFilter, AnalyzerOptions, AnalyzerPlugin, AnalyzerSignal,
-    AnalyzerSuppression, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry,
+    AnalyzerSuppression, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction,
     RuleRegistry,
 };
 use biome_css_syntax::{CssLanguage, TextRange};
@@ -18,6 +19,8 @@ use biome_diagnostics::Error;
 use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
 use std::ops::Deref;
 use std::sync::LazyLock;
+
+pub(crate) type CssRuleAction = RuleAction<CssLanguage>;
 
 pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
     let mut metadata = MetadataRegistry::default();
