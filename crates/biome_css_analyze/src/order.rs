@@ -7,7 +7,7 @@ use std::{collections::HashMap, sync::LazyLock};
 ///
 /// This is the same ordering used by stylelint-config-recess-order, except that vendor prefixes
 /// and some legacy and draft properties not known to biome are removed.
-pub(crate) const PROPERTY_ORDER: [&str; 377] = [
+pub(crate) const PROPERTY_ORDER: [&str; 375] = [
     // Cascade
     // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade#reference
     "all",
@@ -130,7 +130,6 @@ pub(crate) const PROPERTY_ORDER: [&str; 377] = [
     "overflow-style",
     "text-overflow",
     "line-clamp",
-    "line-clamp",
     // Overscroll
     // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_overscroll_behavior#reference
     "overscroll-behavior",
@@ -224,7 +223,6 @@ pub(crate) const PROPERTY_ORDER: [&str; 377] = [
     "caret-color",
     "zoom",
     "resize",
-    "user-select",
     "user-select",
     "nav-up",
     "nav-right",
@@ -522,6 +520,19 @@ mod tests {
                 "{} should not have a vendor prefix",
                 prop
             );
+        }
+    }
+
+    #[test]
+    fn test_no_duplicates() {
+        let mut disallowed = HashSet::<&str>::new();
+        for p in PROPERTY_ORDER.iter() {
+            assert!(
+                !disallowed.contains(p),
+                "{} appears twice in the order array",
+                p
+            );
+            disallowed.insert(*p);
         }
     }
 
