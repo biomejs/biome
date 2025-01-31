@@ -90,7 +90,8 @@ impl Properties {
     fn fetch() -> Result<Self> {
         let raw = ureq::get("http://www.unicode.org/Public/UNIDATA/DerivedCoreProperties.txt")
             .call()?
-            .into_string()?;
+            .into_body()
+            .read_to_string()?;
 
         println!("Loaded properties from `unicode.org`");
 

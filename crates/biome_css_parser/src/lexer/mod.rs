@@ -396,7 +396,7 @@ impl<'src> CssLexer<'src> {
         match current {
             b'u' | b'U' if matches!(self.peek_byte(), Some(b'+')) => {
                 self.advance(1);
-                self.consume_byte(T![U+])
+                self.consume_byte(T!["U+"])
             }
             b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' | b'?' => self.consume_unicode_range(),
             b'-' => self.consume_byte(T![-]),

@@ -14,7 +14,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
         if "{}[]()`".contains(token) {
             let c = token.chars().next().unwrap();
             quote! { #c }
-        } else if matches!(*token, "$=" | "$_" | "<![CDATA[" | "]]>") {
+        } else if matches!(*token, "$=" | "$_" | "<![CDATA[" | "]]>" | "U+" | "   " | "_") {
             let token = Literal::string(token);
             quote! { #token }
         } else {
