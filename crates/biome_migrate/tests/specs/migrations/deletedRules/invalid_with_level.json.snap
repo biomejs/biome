@@ -44,36 +44,19 @@ invalid_with_level.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━�
     6 │           "level": "warn"
     7 │         },
   
-  i Safe fix: Use the rule useConsole instead.
+  i Safe fix: Use the rule noConsoleLog instead.
   
      3  3 │       "rules": {
      4  4 │         "suspicious": {
      5    │ - ········"noConsoleLog":·{
      6    │ - ··········"level":·"warn"
-        5 │ + ········"useSingleCaseStatement":·{
-        6 │ + ··········"level":·"error"
-     7  7 │           },
-     8    │ - ········"useSingleCaseStatement":·{
-        8 │ + ········"useShorthandArrayType":·{
-     9  9 │             "level": "error"
-    10 10 │           },
-    11    │ - ········"useShorthandArrayType":·{
-       11 │ + ········"noNewSymbol":·{
-    12 12 │             "level": "error"
-    13 13 │           },
-    14    │ - ········"noNewSymbol":·{
-       14 │ + ········"noInvalidNewBuiltin":·{
-    15 15 │             "level": "error"
-    16 16 │           },
-    17    │ - ········"noInvalidNewBuiltin":·{
-    18    │ - ··········"level":·"error"
-       17 │ + ········"noConsole":·{
-       18 │ + ··········"level":·"warn",
-       19 │ + ··········"options":·{
-       20 │ + ············"allow":·["log"]
-       21 │ + ··········}
-    19 22 │           }
-    20 23 │         }
+        5 │ + ········"noConsole":·{
+        6 │ + ··········"level":·"warn",
+        7 │ + ··········"options":·{
+        8 │ + ············"allow":·["log"]
+        9 │ + ··········}
+     7 10 │           },
+     8 11 │           "useSingleCaseStatement": {
   
 
 ```
@@ -90,19 +73,14 @@ invalid_with_level.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━�
      9 │           "level": "error"
     10 │         },
   
-  i Safe fix: Use the rule useConsole instead.
+  i Safe fix: Use the rule useSingleCaseStatement instead.
   
-    18 18 │             "level": "error"
-    19 19 │           }
-    20    │ - ······}
-       20 │ + ······},
-       21 │ + ······"correctness":·{
-       22 │ + ········"noSwitchDeclarations":·{
-       23 │ + ··········"level":·"error"
-       24 │ + ········}
-       25 │ + ······}
-    21 26 │       }
-    22 27 │     }
+     6  6 │             "level": "warn"
+     7  7 │           },
+     8    │ - ········"useSingleCaseStatement":·{
+        8 │ + ········"noSwitchDeclarations":·{
+     9  9 │             "level": "error"
+    10 10 │           },
   
 
 ```
@@ -119,22 +97,19 @@ invalid_with_level.json:11:9 migrate  FIXABLE  ━━━━━━━━━━━
     12 │           "level": "error"
     13 │         },
   
-  i Safe fix: Use the rule useConsole instead.
+  i Safe fix: Use the rule useShorthandArrayType instead.
   
-     2  2 │     "linter": {
-     3  3 │       "rules": {
-     4    │ - ······"suspicious":·{
-        4 │ + ······"style":·{
-        5 │ + ········"useConsistentArrayType":·{
-        6 │ + ··········"level":·"error",
-        7 │ + ··········"options":·{
-        8 │ + ············"syntax":·"shorthand"
-        9 │ + ··········}
-       10 │ + ········}
-       11 │ + ······},
-       12 │ + ······"suspicious":·{
-     5 13 │           "noConsoleLog": {
-     6 14 │             "level": "warn"
+     9  9 │             "level": "error"
+    10 10 │           },
+    11    │ - ········"useShorthandArrayType":·{
+    12    │ - ··········"level":·"error"
+       11 │ + ········"useConsistentArrayType":·{
+       12 │ + ··········"level":·"error",
+       13 │ + ··········"options":·{
+       14 │ + ············"syntax":·"shorthand"
+       15 │ + ··········}
+    13 16 │           },
+    14 17 │           "noNewSymbol": {
   
 
 ```
@@ -151,19 +126,14 @@ invalid_with_level.json:14:9 migrate  FIXABLE  ━━━━━━━━━━━
     15 │           "level": "error"
     16 │         },
   
-  i Safe fix: Use the rule useConsole instead.
+  i Safe fix: Use the rule noNewSymbol instead.
   
-    18 18 │             "level": "error"
-    19 19 │           }
-    20    │ - ······}
-       20 │ + ······},
-       21 │ + ······"correctness":·{
-       22 │ + ········"noInvalidBuiltinInstantiation":·{
-       23 │ + ··········"level":·"error"
-       24 │ + ········}
-       25 │ + ······}
-    21 26 │       }
-    22 27 │     }
+    12 12 │             "level": "error"
+    13 13 │           },
+    14    │ - ········"noNewSymbol":·{
+       14 │ + ········"noInvalidBuiltinInstantiation":·{
+    15 15 │             "level": "error"
+    16 16 │           },
   
 
 ```

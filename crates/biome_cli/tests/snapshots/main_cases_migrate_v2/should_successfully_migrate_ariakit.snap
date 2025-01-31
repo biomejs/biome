@@ -1,0 +1,93 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `biome.json`
+
+```json
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!**/website/.next/**",
+      "!**/website/.pages/**",
+      "!**/*.css"
+    ]
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space"
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "style": {
+        "noParameterAssign": "off",
+        "noUnusedTemplateLiteral": "off",
+        "noNonNullAssertion": "off",
+        "noUselessElse": "off",
+        "useLiteralEnumMembers": "error",
+        "noArguments": "error",
+        "useShorthandFunctionType": "error",
+        "useExportType": "error",
+        "useDefaultParameterLast": "error",
+        "noCommaOperator": "error",
+        "useSingleVarDeclarator": "error",
+        "useNodejsImportProtocol": "error",
+        "useConst": "error",
+        "noInferrableTypes": "error",
+        "useExponentiationOperator": "error",
+        "useSelfClosingElements": "error",
+        "useImportType": "error",
+        "useNumberNamespace": "error",
+        "useAsConstAssertion": "error",
+        "useNumericLiterals": "error",
+        "useTemplate": "error",
+        "useEnumInitializers": "error"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off",
+        "noShadowRestrictedNames": "off",
+        "noConfusingVoidType": "off",
+        "noArrayIndexKey": "off",
+        "noAssignInExpressions": "off"
+      },
+      "a11y": {
+        "noSvgWithoutTitle": "off",
+        "useButtonType": "off",
+        "useAnchorContent": "off",
+        "useValidAnchor": "off",
+        "useKeyWithClickEvents": "off",
+        "noAutofocus": "off",
+        "noLabelWithoutControl": "off",
+        "useSemanticElements": "off",
+        "useFocusableInteractive": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "off",
+        "useJsxKeyInIterable": "off"
+      }
+    }
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+The configuration biome.json has been successfully migrated.
+```

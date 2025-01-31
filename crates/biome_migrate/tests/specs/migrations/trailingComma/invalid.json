@@ -1,0 +1,12 @@
+{
+  "javascript": {
+    "formatter": {
+      "trailingComma": "always"
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingComma": "always"
+    }
+  }
+}

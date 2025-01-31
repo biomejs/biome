@@ -1,7 +1,6 @@
-use crate::version_services::Version;
 use crate::{declare_migration, MigrationAction};
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Rule, RuleAction, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::{category, Applicability};
 use biome_json_factory::make::{ident, json_string_value};
@@ -17,7 +16,7 @@ declare_migration! {
 }
 
 impl Rule for Schema {
-    type Query = Version<JsonMember>;
+    type Query = Ast<JsonMember>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
