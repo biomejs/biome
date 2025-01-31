@@ -62,7 +62,7 @@ impl TestCase {
                 );
                 match ureq::get(file_url).call() {
                     Ok(response) => {
-                        let mut reader = response.into_reader();
+                        let mut reader = response.into_body().into_reader();
 
                         let mut writer = std::fs::File::create(&path).map_err(err_to_string)?;
                         if let Err(err) = std::io::copy(&mut reader, &mut writer) {
