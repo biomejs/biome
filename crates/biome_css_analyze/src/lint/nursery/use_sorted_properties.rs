@@ -1,5 +1,6 @@
 use std::{
     borrow::Cow,
+    cmp::Ordering,
     collections::{BTreeSet, HashSet},
 };
 
@@ -137,7 +138,7 @@ impl Rule for UseSortedProperties {
         let Some(sorted_properties) = &state.sorted_properties else {
             return None;
         };
-        if sorted_properties.is_sorted() {
+        if sorted_properties.is_sorted(&state.original_properties) {
             return None;
         }
 
@@ -159,15 +160,12 @@ impl Rule for UseSortedProperties {
         let Some(sorted_properties) = &state.sorted_properties else {
             return None;
         };
-        if sorted_properties.is_sorted() {
+        if sorted_properties.is_sorted(&state.original_properties) {
             return None;
         }
 
         let mut mutation = ctx.root().begin();
-        mutation.replace_node(
-            state.block.items(),
-            sorted_properties.as_sorted(&state.original_properties)?,
-        );
+        mutation.replace_node(state.block.items(), sorted_properties.as_sorted()?);
 
         return Some(CssRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -181,46 +179,169 @@ impl Rule for UseSortedProperties {
 /// "Recess order" is a semantic ordering that mimics the behavior of [stylelint-config-recess-order](https://github.com/stormwarning/stylelint-config-recess-order).
 ///
 /// Which in turn mimics the behavior of twitter's [RECESS](https://github.com/twitter-archive/recess/blob/29bccc870b7b4ccaa0a138e504caf608a6606b59/lib/lint/strict-property-order.js).
-pub struct RecessOrderProperties(pub BTreeSet<SortInfo>);
+pub struct RecessOrderProperties(pub BTreeSet<RecessOrderMember>);
 
 impl RecessOrderProperties {
     pub fn new(items: &[AnyCssDeclarationOrRule]) -> Self {
-        RecessOrderProperties(
+        Self(
             items
                 .iter()
-                .enumerate()
-                .map(|(position, node)| {
-                    let mut sort_info = SortInfo::from(node);
-                    sort_info.original_position = position;
-                    sort_info
-                })
-                .collect::<BTreeSet<SortInfo>>(),
+                .map(|item| RecessOrderMember(item.clone()))
+                .collect::<BTreeSet<RecessOrderMember>>(),
         )
     }
 
-    pub fn is_sorted(&self) -> bool {
-        // The list is sorted if the original_position field equals the actual position for every item
+    /// Checks if self's order matches the provided list's order.
+    pub fn is_sorted(&self, original_items: &[AnyCssDeclarationOrRule]) -> bool {
         self.0
             .iter()
-            .enumerate()
-            .all(|(position, item)| position == item.original_position)
+            .zip(original_items.iter())
+            .all(|(a, b)| a.0 == *b)
     }
 
-    pub fn as_sorted(
-        &self,
-        original_items: &[AnyCssDeclarationOrRule],
-    ) -> Option<CssDeclarationOrRuleList> {
+    /// Wrap the sorted list in a CssDeclarationOrRuleList.
+    pub fn as_sorted(&self) -> Option<CssDeclarationOrRuleList> {
+        let slots = self
+            .0
+            .iter()
+            .map(|item| Some(NodeOrToken::Node(item.0.clone().into_syntax())));
         CssDeclarationOrRuleList::cast(SyntaxNode::new_detached(
             CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST,
-            self.0.iter().map(|sort_info| {
-                original_items
-                    .get(sort_info.original_position)
-                    .map(|node| NodeOrToken::Node(node.clone().into_syntax()))
-            }),
+            slots,
         ))
     }
 }
 
+/// Defines the ordering of different kinds of css nodes, e.g. declaration nodes should be before at-rules.
+// The order of these enum members controls the sort order of the css nodes.
+#[derive(PartialEq, Eq, PartialOrd, Ord)]
+pub enum NodeKindOrder {
+    /// e.g. --custom-property: red;
+    CustomProperty,
+    /// e.g. composes: .rule;
+    ComposesProperty,
+    /// e.g. color: red;
+    Declaration,
+    /// Nested items, e.g. .nested {}
+    NestedRuleOrAtRule,
+    /// Everything else
+    UnknownKind,
+}
+
+#[derive(PartialEq, Eq)]
+pub struct RecessOrderMember(AnyCssDeclarationOrRule);
+
+impl RecessOrderMember {
+    /// Returns the kind of node for ordering purposes. The nodes are sorted in the order they're declared in [NodeKindOrder].
+    pub fn kind(&self) -> NodeKindOrder {
+        match &self.0 {
+            AnyCssDeclarationOrRule::CssEmptyDeclaration(_) => NodeKindOrder::UnknownKind,
+            AnyCssDeclarationOrRule::CssBogus(_) => NodeKindOrder::UnknownKind,
+            AnyCssDeclarationOrRule::CssMetavariable(_) => NodeKindOrder::UnknownKind,
+            AnyCssDeclarationOrRule::AnyCssRule(rule) => match rule {
+                AnyCssRule::CssAtRule(_) => NodeKindOrder::NestedRuleOrAtRule,
+                AnyCssRule::CssBogusRule(_) => NodeKindOrder::UnknownKind,
+                AnyCssRule::CssNestedQualifiedRule(_) => NodeKindOrder::NestedRuleOrAtRule,
+                AnyCssRule::CssQualifiedRule(_) => NodeKindOrder::UnknownKind,
+            },
+            AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(decl_with_semicolon) => {
+                let Some(decl) = decl_with_semicolon.declaration().ok() else {
+                    return NodeKindOrder::UnknownKind;
+                };
+                let Some(prop) = decl.property().ok() else {
+                    return NodeKindOrder::UnknownKind;
+                };
+                match prop {
+                    AnyCssProperty::CssBogusProperty(_) => NodeKindOrder::UnknownKind,
+                    AnyCssProperty::CssComposesProperty(_) => NodeKindOrder::ComposesProperty,
+                    AnyCssProperty::CssGenericProperty(prop) => {
+                        let Some(prop) = prop.name().ok() else {
+                            return NodeKindOrder::UnknownKind;
+                        };
+                        match prop {
+                            AnyCssDeclarationName::CssDashedIdentifier(_) => {
+                                NodeKindOrder::CustomProperty
+                            }
+                            AnyCssDeclarationName::CssIdentifier(_) => NodeKindOrder::Declaration,
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// Returns the index of the property name in [crate::order::PROPERTY_ORDER].
+    /// If none found, returns usize::MAX, causing unknown properties to be ordered after known properties.
+    pub fn property_index(&self) -> usize {
+        let Some(prop_text) = &self
+            .0
+            .as_css_declaration_with_semicolon()
+            .and_then(css_declaration_to_prop_text)
+        else {
+            return usize::MAX;
+        };
+
+        let unprefixed = prop_text_to_unprefixed(prop_text);
+        *PROPERTY_ORDER_MAP.get(unprefixed.as_ref()).unwrap_or(&0)
+    }
+
+    /// Returns the index of the property's vendor prefix in [VENDOR_PREFIXES].
+    /// If no vendor prefix, returns usize::MAX, causing unprefixed properties to be ordered after prefixed properties.
+    pub fn vendor_prefix_index(&self) -> usize {
+        let Some(prop_text) = &self
+            .0
+            .as_css_declaration_with_semicolon()
+            .and_then(css_declaration_to_prop_text)
+        else {
+            return usize::MAX;
+        };
+
+        if let Some(prefix) = prop_text_to_prefix(prop_text) {
+            VENDOR_PREFIXES
+                .iter()
+                .position(|vp| vp == &prefix)
+                .unwrap_or(usize::MAX)
+        } else {
+            usize::MAX
+        }
+    }
+}
+
+impl Ord for RecessOrderMember {
+    /// First, sort by node kind. Use the order of declaration of the enum [NodeKindOrder].
+    /// Then, sort by property name. Use the index at which the property appears in [crate::order::PROPERTY_ORDER].
+    /// Then, sort by vendor prefix. Use the index at which the prefix appears in [VENDOR_PREFIXES]
+    /// Then, sort by text range.
+    fn cmp(&self, other: &Self) -> Ordering {
+        let self_kind = self.kind();
+        let other_kind = other.kind();
+        if self_kind != other_kind {
+            return self_kind.cmp(&other_kind);
+        }
+
+        let self_property_index = self.property_index();
+        let other_property_index = other.property_index();
+        if self_property_index != other_property_index {
+            return self_property_index.cmp(&other_property_index);
+        }
+
+        let self_vendor_prefix = self.vendor_prefix_index();
+        let other_vendor_prefix = other.vendor_prefix_index();
+        if self_vendor_prefix != other_vendor_prefix {
+            return self_vendor_prefix.cmp(&other_vendor_prefix);
+        }
+
+        self.0.range().cmp(&other.0.range())
+    }
+}
+
+impl PartialOrd for RecessOrderMember {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+/// Returns the css property name, if the node is a property.
 fn css_declaration_to_prop_text(
     decl_with_semicolon: &CssDeclarationWithSemicolon,
 ) -> Option<TokenText> {
@@ -265,134 +386,6 @@ fn prop_text_to_unprefixed(tok_text: &TokenText) -> Cow<'_, str> {
             .map(|stripped| Cow::Owned(stripped.to_owned())),
     };
     unprefixed.unwrap_or(prop_lowercase)
-}
-
-/// Defines the ordering of different kinds of css nodes, e.g. declaration nodes should be before at-rules.
-// The order of these enum members controls the sort order of the css nodes.
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
-enum NodeKindOrder {
-    /// e.g. --custom-property: red;
-    CustomProperty,
-    /// e.g. composes: .rule;
-    ComposesProperty,
-    /// e.g. color: red;
-    Declaration,
-    /// CSS declarations that aren't in [PROPERTY_ORDER_MAP], e.g. abc: red;
-    UnknownDeclaration,
-    /// Nested items, e.g. .nested {}
-    NestedRuleOrAtRule,
-    /// Everything else
-    UnknownKind,
-}
-
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
-/// Defines sort order using lexographical sorting of this struct's fields
-pub struct SortInfo {
-    /// Nodes are ordered by their node kind, in the order defined by [NodeKindOrder].
-    kind: NodeKindOrder,
-    /// Property nodes are sorted by the value stored in [PROPERTY_ORDER_MAP]. This value is the index at which the property appears in the [crate::order::PROPERTY_ORDER] array.
-    property_index: usize,
-    /// Vendor prefixes are sorted by the index at which they appear in [VENDOR_PREFIXES]. Non-prefixed properties go after prefixed properties.
-    vendor_prefix_index: usize,
-    /// The index of this node within its containing rule, to make the sort stable. Additionally used to retrieve the original node in [RecessOrderProperties::as_sorted].
-    original_position: usize,
-}
-
-impl SortInfo {
-    fn from_kind(kind: NodeKindOrder) -> Self {
-        Self {
-            kind,
-            property_index: 0,
-            vendor_prefix_index: 0,
-            original_position: 0,
-        }
-    }
-    fn from_declaration(property_index: usize, vendor_prefix_index: usize) -> Self {
-        Self {
-            kind: NodeKindOrder::Declaration,
-            property_index,
-            vendor_prefix_index,
-            original_position: 0,
-        }
-    }
-    fn unknown() -> Self {
-        Self {
-            kind: NodeKindOrder::UnknownKind,
-            property_index: 0,
-            vendor_prefix_index: 0,
-            original_position: 0,
-        }
-    }
-}
-
-impl From<&AnyCssDeclarationOrRule> for SortInfo {
-    fn from(node: &AnyCssDeclarationOrRule) -> SortInfo {
-        match node {
-            AnyCssDeclarationOrRule::CssEmptyDeclaration(_) => SortInfo::unknown(),
-            AnyCssDeclarationOrRule::CssBogus(_) => SortInfo::unknown(),
-            AnyCssDeclarationOrRule::CssMetavariable(_) => SortInfo::unknown(),
-            AnyCssDeclarationOrRule::AnyCssRule(rule) => match rule {
-                AnyCssRule::CssAtRule(_) => SortInfo::from_kind(NodeKindOrder::NestedRuleOrAtRule),
-                AnyCssRule::CssBogusRule(_) => SortInfo::unknown(),
-                AnyCssRule::CssNestedQualifiedRule(_) => {
-                    SortInfo::from_kind(NodeKindOrder::NestedRuleOrAtRule)
-                }
-                AnyCssRule::CssQualifiedRule(_) => SortInfo::unknown(),
-            },
-            AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(decl_with_semicolon) => {
-                let prop = decl_with_semicolon
-                    .declaration()
-                    .ok()
-                    .and_then(|decl| decl.property().ok());
-
-                let Some(prop) = prop else {
-                    return SortInfo::unknown();
-                };
-
-                // composes property is a unique node type
-                if let AnyCssProperty::CssComposesProperty(_) = prop {
-                    return SortInfo::from_kind(NodeKindOrder::ComposesProperty);
-                }
-
-                let AnyCssProperty::CssGenericProperty(prop) = prop else {
-                    return SortInfo::unknown();
-                };
-                let Some(prop) = prop.name().ok() else {
-                    return SortInfo::unknown();
-                };
-
-                match prop {
-                    AnyCssDeclarationName::CssDashedIdentifier(_) => {
-                        SortInfo::from_kind(NodeKindOrder::CustomProperty)
-                    }
-                    AnyCssDeclarationName::CssIdentifier(ident) => {
-                        let tok = ident.value_token().ok();
-                        let Some(tok) = tok else {
-                            return SortInfo::unknown();
-                        };
-                        let prop_text = tok.token_text_trimmed();
-
-                        let prefix = prop_text_to_prefix(&prop_text);
-                        let unprefixed = prop_text_to_unprefixed(&prop_text);
-
-                        let vendor_prefix_index = match prefix {
-                            Some(prefix) => VENDOR_PREFIXES
-                                .iter()
-                                .position(|vp| vp == &prefix)
-                                .unwrap_or(usize::MAX),
-                            None => usize::MAX,
-                        };
-
-                        if let Some(property_index) = PROPERTY_ORDER_MAP.get(unprefixed.as_ref()) {
-                            SortInfo::from_declaration(*property_index, vendor_prefix_index)
-                        } else {
-                            SortInfo::from_kind(NodeKindOrder::UnknownDeclaration)
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 /// Check if any shortand property (e.g. margin) appears after any of its longhand sub properties (e.g. margin-top).
