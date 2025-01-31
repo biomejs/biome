@@ -1,8 +1,7 @@
 use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
 use biome_analyze::{
-    context::RuleContext, declare_source_rule, ActionCategory, Ast, Rule, RuleAction, RuleSource,
-    RuleSourceKind, SourceActionKind,
+    context::RuleContext, declare_source_rule, Ast, Rule, RuleAction, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;

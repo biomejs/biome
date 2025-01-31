@@ -1,10 +1,4 @@
-use std::{
-    borrow::Cow,
-    cmp::Ordering,
-    collections::{BTreeSet, HashSet},
-};
-
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_source_rule, Ast, FixKind, Rule};
 use biome_console::markup;
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssDeclarationOrRule, AnyCssProperty, AnyCssRule,
@@ -13,6 +7,11 @@ use biome_css_syntax::{
 };
 use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, SyntaxNode, TokenText};
 use biome_string_case::StrOnlyExtension;
+use std::{
+    borrow::Cow,
+    cmp::Ordering,
+    collections::{BTreeSet, HashSet},
+};
 
 use crate::{
     keywords::VENDOR_PREFIXES,
@@ -21,10 +20,10 @@ use crate::{
     CssRuleAction,
 };
 
-declare_lint_rule! {
+declare_source_rule! {
     /// Enforce ordering of CSS properties and nested rules.
     ///
-    /// This rule ensures the contents of a CSS rule are ordered consistantly.
+    /// This rule ensures the contents of a CSS rule are ordered consistently.
     ///
     /// Properties are ordered semantically, with more important properties near the top and
     /// similar properties grouped together. Nested rules and at-rules are placed after properties.
@@ -127,33 +126,20 @@ impl Rule for UseSortedProperties {
         }
 
         let sorted_properties = Some(RecessOrderProperties::new(&original_properties));
-        Some(UseSortedPropertiesState {
+        let state = UseSortedPropertiesState {
             block: node.clone(),
             original_properties,
             sorted_properties,
-        })
-    }
+        };
 
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let Some(sorted_properties) = &state.sorted_properties else {
             return None;
         };
         if sorted_properties.is_sorted(&state.original_properties) {
             return None;
-        }
+        };
 
-        return Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                state.block.range(),
-                markup! {
-                    "Properties can be sorted."
-                },
-            )
-            .note(markup! {
-                "Consistently ordering CSS properties can improve readability."
-            }),
-        );
+        Some(state)
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<CssRuleAction> {

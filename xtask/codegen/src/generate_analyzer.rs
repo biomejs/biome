@@ -47,6 +47,10 @@ fn generate_css_analyzer() -> Result<()> {
     let base_path = project_root().join("crates/biome_css_analyze/src");
     let mut analyzers = BTreeMap::new();
     generate_category("lint", &mut analyzers, &base_path)?;
+
+    let mut assist = BTreeMap::new();
+    generate_category("assist", &mut assist, &base_path)?;
+
     generate_options(&base_path)?;
     update_css_registry_builder(analyzers)
 }

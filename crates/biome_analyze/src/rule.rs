@@ -809,7 +809,7 @@ macro_rules! declare_source_rule {
         /// This macro returns the corresponding [ActionCategory] to use inside the [RuleAction]
         #[expect(unused_macros)]
         macro_rules! rule_action_category {
-            () => { ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed($name)))  };
+            () => { biome_analyze::ActionCategory::Source(biome_analyze::SourceActionKind::Other(Cow::Borrowed($name)))  };
         }
     };
 }

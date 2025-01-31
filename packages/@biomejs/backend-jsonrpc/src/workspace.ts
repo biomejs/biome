@@ -1696,10 +1696,6 @@ export interface Nursery {
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UtilityClassSortingOptions;
 	/**
-	 * Enforce ordering of CSS properties and nested rules.
-	 */
-	useSortedProperties?: RuleFixConfiguration_for_Null;
-	/**
 	 * Enforce the use of the directive "use strict" in script files.
 	 */
 	useStrictMode?: RuleFixConfiguration_for_Null;

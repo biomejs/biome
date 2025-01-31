@@ -1,3 +1,4 @@
+mod assist;
 mod keywords;
 mod lint;
 pub mod options;
