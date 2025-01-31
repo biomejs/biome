@@ -396,7 +396,7 @@ impl<'src> CssLexer<'src> {
         match current {
             b'u' | b'U' if matches!(self.peek_byte(), Some(b'+')) => {
                 self.advance(1);
-                self.consume_byte(T![U+])
+                self.consume_byte(T!["U+"])
             }
             b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' | b'?' => self.consume_unicode_range(),
             b'-' => self.consume_byte(T![-]),
@@ -573,738 +573,738 @@ impl<'src> CssLexer<'src> {
 
                 _ => self.advance(1),
             }
-        }
+}
 
-        match state {
-            LexStringState::Terminated => CSS_STRING_LITERAL,
-            LexStringState::InString => {
-                let unterminated =
-                    ParseDiagnostic::new("Missing closing quote", start..self.text_position())
-                        .with_detail(
-                            self.source.text_len()..self.source.text_len(),
-                            "file ends here",
-                        );
-                self.diagnostics.push(unterminated);
+match state {
+LexStringState::Terminated => CSS_STRING_LITERAL,
+LexStringState::InString => {
+let unterminated =
+ParseDiagnostic::new("Missing closing quote", start..self.text_position())
+.with_detail(
+self.source.text_len()..self.source.text_len(),
+"file ends here",
+);
+self.diagnostics.push(unterminated);
 
-                ERROR_TOKEN
-            }
-            LexStringState::InvalidEscapeSequence => ERROR_TOKEN,
-        }
-    }
+ERROR_TOKEN
+}
+LexStringState::InvalidEscapeSequence => ERROR_TOKEN,
+}
+}
 
-    fn consume_escape_sequence(&mut self, current: u8) -> char {
-        debug_assert!(current.is_ascii_hexdigit());
+fn consume_escape_sequence(&mut self, current: u8) -> char {
+    debug_assert!(current.is_ascii_hexdigit());
 
-        // SAFETY: The current byte is a hex digit.
-        let mut hex = (current as char).to_digit(16).unwrap();
-        self.advance(1);
-        // Consume as many hex digits as possible, but no more than 6.
-        // Note that this means 1-6 hex digits have been consumed in total.
-        for _ in 0..5 {
-            let Some(digit) = self.current_byte().and_then(|c| {
-                if c.is_ascii_hexdigit() {
-                    (c as char).to_digit(16)
-                } else {
-                    None
-                }
-            }) else {
-                break;
-            };
-            self.advance(1);
-
-            hex = hex * 16 + digit;
-        }
-
-        // If the next input code point is whitespace, consume it as well.
-        if matches!(self.current_byte(), Some(b'\t' | b' ')) {
-            self.advance(1);
-        }
-
-        // Interpret the hex digits as a hexadecimal number. If this number is zero, or
-        // is for a surrogate, or is greater than the maximum allowed code point, return
-        // U+FFFD REPLACEMENT CHARACTER (�).
-        match hex {
-            // If this number is zero
-            0 => REPLACEMENT_CHARACTER,
-            // or is for a surrogate
-            55_296..=57_343 => REPLACEMENT_CHARACTER,
-            // or is greater than the maximum allowed code point
-            1_114_112.. => REPLACEMENT_CHARACTER,
-            _ => char::from_u32(hex).unwrap_or(REPLACEMENT_CHARACTER),
-        }
-    }
-
-    /// Lexes a CSS number literal
-    fn consume_number(&mut self, current: u8) -> CssSyntaxKind {
-        debug_assert!(self.is_number_start());
-
-        if matches!(current, b'+' | b'-') {
-            self.advance(1);
-        }
-
-        // While the next input code point is a digit, consume it.
-        self.consume_number_sequence();
-
-        // According to the spec if the next 2 input code points are U+002E FULL STOP (.) followed by a digit we need to consume them.
-        // However we want to parse numbers like `1.` and `1.e10` where we don't have a number after (.)
-        // If the next input code points are U+002E FULL STOP (.)...
-        if matches!(self.current_byte(), Some(b'.')) {
-            // Consume it.
-            self.advance(1);
-
-            // U+002E FULL STOP (.) followed by a digit...
-            if self
-                .current_byte()
-                .map_or(false, |byte| byte.is_ascii_digit())
-            {
-                // While the next input code point is a digit, consume it.
-                self.consume_number_sequence();
-            }
-        }
-
-        // If the next 2 or 3 input code points are U+0045 LATIN CAPITAL LETTER E (E) or
-        // U+0065 LATIN SMALL LETTER E (e), optionally followed by U+002D HYPHEN-MINUS
-        // (-) or U+002B PLUS SIGN (+), followed by a digit, then:
-        if matches!(self.current_byte(), Some(b'e' | b'E')) {
-            match (self.peek_byte(), self.byte_at(2)) {
-                (Some(b'-' | b'+'), Some(byte)) if byte.is_ascii_digit() => {
-                    // Consume them.
-                    self.advance(3);
-
-                    // While the next input code point is a digit, consume it.
-                    self.consume_number_sequence()
-                }
-                (Some(byte), _) if byte.is_ascii_digit() => {
-                    // Consume them.
-                    self.advance(2);
-
-                    // While the next input code point is a digit, consume it.
-                    self.consume_number_sequence()
-                }
-                _ => {}
-            }
-        }
-
-        // A Number immediately followed by an identifier is considered a single
-        // <dimension> token according to the spec: https://www.w3.org/TR/css-values-4/#dimensions.
-        // Spaces are not allowed, but by default this lexer will skip over
-        // whitespace tokens, making it difficult to determine on the next token
-        // if it is actually a dimension unit or a separated identifier. So, if
-        // the next characters constitute an identifier after parsing a number,
-        // this special CSS_DIMENSION_VALUE token will indicate to the parser
-        // that it is part of a dimension and the next token can safely be
-        // consumed as the unit.
-        //
-        // The parser will re-cast these tokens as CSS_NUMBER_LITERALs when
-        // creating the Dimension node to hide this internal detail.
-        if matches!(self.current_byte(), Some(b'%')) {
-            CSS_PERCENTAGE_VALUE
-        } else if self.is_ident_start() {
-            CSS_DIMENSION_VALUE
-        } else {
-            CSS_NUMBER_LITERAL
-        }
-    }
-
-    fn consume_number_sequence(&mut self) {
-        // While the next input code point is a digit, consume it.
-        while let Some(b'0'..=b'9') = self.current_byte() {
-            self.advance(1);
-        }
-    }
-
-    fn consume_identifier(&mut self) -> CssSyntaxKind {
-        debug_assert!(self.is_ident_start());
-
-        // Note to keep the buffer large enough to fit every possible keyword that
-        // the lexer can return
-        let mut buf = [0u8; 22];
-        let (count, only_ascii_used) = self.consume_ident_sequence(&mut buf);
-
-        if !only_ascii_used {
-            return IDENT;
-        }
-
-        match &buf[..count] {
-            b"media" => MEDIA_KW,
-            b"keyframes" => KEYFRAMES_KW,
-            b"-webkit-keyframes" => KEYFRAMES_KW,
-            b"-moz-keyframes" => KEYFRAMES_KW,
-            b"-o-keyframes" => KEYFRAMES_KW,
-            b"-ms-keyframes" => KEYFRAMES_KW,
-            b"and" => AND_KW,
-            b"only" => ONLY_KW,
-            b"or" => OR_KW,
-            b"i" => I_KW,
-            b"important" => IMPORTANT_KW,
-            b"from" => FROM_KW,
-            b"to" => TO_KW,
-            b"var" => VAR_KW,
-            b"highlight" => HIGHLIGHT_KW,
-            b"part" => PART_KW,
-            b"has" => HAS_KW,
-            b"dir" => DIR_KW,
-            b"global" => GLOBAL_KW,
-            b"local" => LOCAL_KW,
-            b"-moz-any" => ANY_KW,
-            b"-webkit-any" => ANY_KW,
-            b"past" => PAST_KW,
-            b"current" => CURRENT_KW,
-            b"future" => FUTURE_KW,
-            b"host" => HOST_KW,
-            b"host-context" => HOST_CONTEXT_KW,
-            b"not" => NOT_KW,
-            b"matches" => MATCHES_KW,
-            b"is" => IS_KW,
-            b"where" => WHERE_KW,
-            b"lang" => LANG_KW,
-            b"of" => OF_KW,
-            b"n" => N_KW,
-            b"even" => EVEN_KW,
-            b"odd" => ODD_KW,
-            b"nth-child" => NTH_CHILD_KW,
-            b"nth-last-child" => NTH_LAST_CHILD_KW,
-            b"nth-of-type" => NTH_OF_TYPE_KW,
-            b"nth-last-of-type" => NTH_LAST_OF_TYPE_KW,
-            b"nth-col" => NTH_COL_KW,
-            b"nth-last-col" => NTH_LAST_COL_KW,
-            b"ltr" => LTR_KW,
-            b"rtl" => RTL_KW,
-            b"charset" => CHARSET_KW,
-            b"color-profile" => COLOR_PROFILE_KW,
-            b"counter-style" => COUNTER_STYLE_KW,
-            b"property" => PROPERTY_KW,
-            b"container" => CONTAINER_KW,
-            b"style" => STYLE_KW,
-            b"font-face" => FONT_FACE_KW,
-            b"font-feature-values" => FONT_FEATURE_VALUES_KW,
-            // font-feature-values items
-            b"stylistic" => STYLISTIC_KW,
-            b"historical-forms" => HISTORICAL_FORMS_KW,
-            b"styleset" => STYLESET_KW,
-            b"character-variant" => CHARACTER_VARIANT_KW,
-            b"swash" => SWASH_KW,
-            b"ornaments" => ORNAMENTS_KW,
-            b"annotation" => ANNOTATION_KW,
-            b"font-palette-values" => FONT_PALETTE_VALUES_KW,
-            b"auto" => AUTO_KW,
-            b"thin" => THIN_KW,
-            b"medium" => MEDIUM_KW,
-            b"thick" => THICK_KW,
-            b"none" => NONE_KW,
-            b"hidden" => HIDDEN_KW,
-            b"dotted" => DOTTED_KW,
-            b"dashed" => DASHED_KW,
-            b"solid" => SOLID_KW,
-            b"double" => DOUBLE_KW,
-            b"groove" => GROOVE_KW,
-            b"ridge" => RIDGE_KW,
-            b"inset" => INSET_KW,
-            b"outset" => OUTSET_KW,
-            // CSS-Wide keywords
-            b"initial" => INITIAL_KW,
-            b"inherit" => INHERIT_KW,
-            b"unset" => UNSET_KW,
-            b"revert" => REVERT_KW,
-            b"revert-layer" => REVERT_LAYER_KW,
-            b"default" => DEFAULT_KW,
-            // length units
-            b"em" => EM_KW,
-            b"rem" => REM_KW,
-            b"ex" => EX_KW,
-            b"rex" => REX_KW,
-            b"cap" => CAP_KW,
-            b"rcap" => RCAP_KW,
-            b"ch" => CH_KW,
-            b"rch" => RCH_KW,
-            b"ic" => IC_KW,
-            b"ric" => RIC_KW,
-            b"lh" => LH_KW,
-            b"rlh" => RLH_KW,
-            // Viewport-percentage Lengths
-            b"vw" => VW_KW,
-            b"svw" => SVW_KW,
-            b"lvw" => LVW_KW,
-            b"dvw" => DVW_KW,
-            b"vh" => VH_KW,
-            b"svh" => SVW_KW,
-            b"lvh" => LVH_KW,
-            b"dvh" => DVH_KW,
-            b"vi" => VI_KW,
-            b"svi" => SVI_KW,
-            b"lvi" => LVI_KW,
-            b"dvi" => DVI_KW,
-            b"vb" => VB_KW,
-            b"svb" => SVB_KW,
-            b"lvb" => LVB_KW,
-            b"dvb" => DVB_KW,
-            b"vmin" => VMIN_KW,
-            b"svmin" => SVMIN_KW,
-            b"lvmin" => LVMIN_KW,
-            b"dvmin" => DVMIN_KW,
-            b"vmax" => VMAX_KW,
-            b"svmax" => SVMAX_KW,
-            b"lvmax" => LVMAX_KW,
-            b"dvmax" => DVMAX_KW,
-            // Absolute lengths
-            b"cm" => CM_KW,
-            b"mm" => MM_KW,
-            b"q" => Q_KW,
-            b"in" => IN_KW,
-            b"pc" => PC_KW,
-            b"pt" => PT_KW,
-            b"px" => PX_KW,
-            b"mozmm" => MOZMM_KW,
-            // mini app
-            b"rpx" => RPX_KW,
-            // container lengths
-            b"cqw" => CQW_KW,
-            b"cqh" => CQH_KW,
-            b"cqi" => CQI_KW,
-            b"cqb" => CQB_KW,
-            b"cqmin" => CQMIN_KW,
-            b"cqmax" => CQMAX_KW,
-            // angle units
-            b"deg" => DEG_KW,
-            b"grad" => GRAD_KW,
-            b"rad" => RAD_KW,
-            b"turn" => TURN_KW,
-            // time units
-            b"s" => S_KW,
-            b"ms" => MS_KW,
-            // frequency units
-            b"hz" => HZ_KW,
-            b"khz" => KHZ_KW,
-            // resolution units
-            b"dpi" => DPI_KW,
-            b"dpcm" => DPCM_KW,
-            b"dppx" => DPPX_KW,
-            b"x" => X_KW,
-            // flex units
-            b"fr" => FR_KW,
-            // page at rule
-            b"left" => LEFT_KW,
-            b"right" => RIGHT_KW,
-            b"first" => FIRST_KW,
-            b"blank" => BLANK_KW,
-            b"page" => PAGE_KW,
-            b"top-left-corner" => TOP_LEFT_CORNER_KW,
-            b"top-left" => TOP_LEFT_KW,
-            b"top-center" => TOP_CENTER_KW,
-            b"top-right" => TOP_RIGHT_KW,
-            b"top-right-corner" => TOP_RIGHT_CORNER_KW,
-            b"bottom-left-corner" => BOTTOM_LEFT_CORNER_KW,
-            b"bottom-left" => BOTTOM_LEFT_KW,
-            b"bottom-center" => BOTTOM_CENTER_KW,
-            b"bottom-right" => BOTTOM_RIGHT_KW,
-            b"bottom-right-corner" => BOTTOM_RIGHT_CORNER_KW,
-            b"left-top" => LEFT_TOP_KW,
-            b"left-middle" => LEFT_MIDDLE_KW,
-            b"left-bottom" => LEFT_BOTTOM_KW,
-            b"right-top" => RIGHT_TOP_KW,
-            b"right-middle" => RIGHT_MIDDLE_KW,
-            b"right-bottom" => RIGHT_BOTTOM_KW,
-            b"layer" => LAYER_KW,
-            b"supports" => SUPPORTS_KW,
-            b"selector" => SELECTOR_KW,
-            b"url" => URL_KW,
-            b"src" => SRC_KW,
-            b"scope" => SCOPE_KW,
-            b"import" => IMPORT_KW,
-            b"namespace" => NAMESPACE_KW,
-            b"starting-style" => STARTING_STYLE_KW,
-            b"document" => DOCUMENT_KW,
-            b"-moz-document" => DOCUMENT_KW,
-            b"url-prefix" => URL_PREFIX_KW,
-            b"domain" => DOMAIN_KW,
-            b"media-document" => MEDIA_DOCUMENT_KW,
-            b"regexp" => REGEXP_KW,
-            b"value" => VALUE_KW,
-            b"as" => AS_KW,
-            b"composes" => COMPOSES_KW,
-            b"position-try" => POSITION_TRY_KW,
-            b"view-transition" => VIEW_TRANSITION_KW,
-            _ => IDENT,
-        }
-    }
-
-    /// Consumes a sequence of identifier characters from a byte stream, appending
-    /// them to the provided buffer in lowercase ASCII form.
-    ///
-    /// This function iteratively processes bytes from the stream, which are part
-    /// of an identifier, and appends their lowercase ASCII representation to the buffer.
-    /// It stops processing either when the buffer is full or when a non-identifier
-    /// character is encountered.
-    ///
-    /// # Arguments
-    ///
-    /// * `buf` - A mutable reference to a byte array where the identifier characters
-    ///           will be appended. This buffer should be pre-allocated and have enough
-    ///           space to hold the expected identifier.
-    ///
-    /// # Returns
-    ///
-    /// A tuple containing:
-    ///
-    /// * The number of bytes appended to the buffer (`usize`).
-    /// * A boolean indicating whether only ASCII characters were used (`true` if so).
-    ///
-    /// # Panics
-    ///
-    /// This function will panic if the first character to be consumed is not a valid
-    /// start of an identifier, as determined by `self.is_ident_start()`.
-    fn consume_ident_sequence(&mut self, buf: &mut [u8]) -> (usize, bool) {
-        debug_assert!(self.is_ident_start());
-
-        let mut idx = 0;
-        let mut only_ascii_used = true;
-        // Repeatedly consume the next input code point from the stream.
-        while let Some(current) = self.current_byte() {
-            if let Some(part) = self.consume_ident_part(current) {
-                if only_ascii_used && !part.is_ascii() {
-                    only_ascii_used = false;
-                }
-
-                if only_ascii_used {
-                    // Ensure that there is space in the buffer.
-                    // Since we're only dealing with ASCII, we need at most 1 byte.
-                    if let Some(buf) = buf.get_mut(idx..idx + 1) {
-                        // Convert the ASCII character to lowercase.
-                        buf[0] = part.to_ascii_lowercase() as u8;
-                        idx += 1;
-                    }
-                }
+    // SAFETY: The current byte is a hex digit.
+    let mut hex = (current as char).to_digit(16).unwrap();
+    self.advance(1);
+    // Consume as many hex digits as possible, but no more than 6.
+    // Note that this means 1-6 hex digits have been consumed in total.
+    for _ in 0..5 {
+        let Some(digit) = self.current_byte().and_then(|c| {
+            if c.is_ascii_hexdigit() {
+                (c as char).to_digit(16)
             } else {
-                break;
+                None
             }
-        }
+        }) else {
+            break;
+        };
+        self.advance(1);
 
-        (idx, only_ascii_used)
+        hex = hex * 16 + digit;
     }
 
-    /// Consume a character that forms part of a CSS identifier.
-    ///
-    /// Before calling this function, you should make sure that there is a valid identifier start
-    /// using [Self::is_ident_start].
-    ///
-    /// Also handles CSS escape sequences in identifiers and attach appropriate diagnostics for invalid cases.
-    ///
-    /// Returns the consumed character wrapped in `Some` if it is part of an identifier,
-    /// and `None` if it is not.
-    fn consume_ident_part(&mut self, current: u8) -> Option<char> {
-        let chr = match lookup_byte(current) {
-            IDT | MIN | DIG | ZER => {
-                self.advance(1);
-                // SAFETY: We know that the current byte is a hyphen or a number.
-                current as char
+    // If the next input code point is whitespace, consume it as well.
+    if matches!(self.current_byte(), Some(b'\t' | b' ')) {
+        self.advance(1);
+    }
+
+    // Interpret the hex digits as a hexadecimal number. If this number is zero, or
+    // is for a surrogate, or is greater than the maximum allowed code point, return
+    // U+FFFD REPLACEMENT CHARACTER (�).
+    match hex {
+        // If this number is zero
+        0 => REPLACEMENT_CHARACTER,
+        // or is for a surrogate
+        55_296..=57_343 => REPLACEMENT_CHARACTER,
+        // or is greater than the maximum allowed code point
+        1_114_112.. => REPLACEMENT_CHARACTER,
+        _ => char::from_u32(hex).unwrap_or(REPLACEMENT_CHARACTER),
+    }
+}
+
+/// Lexes a CSS number literal
+fn consume_number(&mut self, current: u8) -> CssSyntaxKind {
+    debug_assert!(self.is_number_start());
+
+    if matches!(current, b'+' | b'-') {
+        self.advance(1);
+    }
+
+    // While the next input code point is a digit, consume it.
+    self.consume_number_sequence();
+
+    // According to the spec if the next 2 input code points are U+002E FULL STOP (.) followed by a digit we need to consume them.
+    // However we want to parse numbers like `1.` and `1.e10` where we don't have a number after (.)
+    // If the next input code points are U+002E FULL STOP (.)...
+    if matches!(self.current_byte(), Some(b'.')) {
+        // Consume it.
+        self.advance(1);
+
+        // U+002E FULL STOP (.) followed by a digit...
+        if self
+            .current_byte()
+            .map_or(false, |byte| byte.is_ascii_digit())
+        {
+            // While the next input code point is a digit, consume it.
+            self.consume_number_sequence();
+        }
+    }
+
+    // If the next 2 or 3 input code points are U+0045 LATIN CAPITAL LETTER E (E) or
+    // U+0065 LATIN SMALL LETTER E (e), optionally followed by U+002D HYPHEN-MINUS
+    // (-) or U+002B PLUS SIGN (+), followed by a digit, then:
+    if matches!(self.current_byte(), Some(b'e' | b'E')) {
+        match (self.peek_byte(), self.byte_at(2)) {
+            (Some(b'-' | b'+'), Some(byte)) if byte.is_ascii_digit() => {
+                // Consume them.
+                self.advance(3);
+
+                // While the next input code point is a digit, consume it.
+                self.consume_number_sequence()
             }
-            // name code point
-            UNI => {
-                // SAFETY: We know that the current byte is a valid unicode code point
-                let chr = self.current_char_unchecked();
-                if is_css_non_ascii(chr) {
+            (Some(byte), _) if byte.is_ascii_digit() => {
+                // Consume them.
+                self.advance(2);
+
+                // While the next input code point is a digit, consume it.
+                self.consume_number_sequence()
+            }
+            _ => {}
+        }
+    }
+
+    // A Number immediately followed by an identifier is considered a single
+    // <dimension> token according to the spec: https://www.w3.org/TR/css-values-4/#dimensions.
+    // Spaces are not allowed, but by default this lexer will skip over
+    // whitespace tokens, making it difficult to determine on the next token
+    // if it is actually a dimension unit or a separated identifier. So, if
+    // the next characters constitute an identifier after parsing a number,
+    // this special CSS_DIMENSION_VALUE token will indicate to the parser
+    // that it is part of a dimension and the next token can safely be
+    // consumed as the unit.
+    //
+    // The parser will re-cast these tokens as CSS_NUMBER_LITERALs when
+    // creating the Dimension node to hide this internal detail.
+    if matches!(self.current_byte(), Some(b'%')) {
+        CSS_PERCENTAGE_VALUE
+    } else if self.is_ident_start() {
+        CSS_DIMENSION_VALUE
+    } else {
+        CSS_NUMBER_LITERAL
+    }
+}
+
+fn consume_number_sequence(&mut self) {
+    // While the next input code point is a digit, consume it.
+    while let Some(b'0'..=b'9') = self.current_byte() {
+        self.advance(1);
+    }
+}
+
+fn consume_identifier(&mut self) -> CssSyntaxKind {
+    debug_assert!(self.is_ident_start());
+
+    // Note to keep the buffer large enough to fit every possible keyword that
+    // the lexer can return
+    let mut buf = [0u8; 22];
+    let (count, only_ascii_used) = self.consume_ident_sequence(&mut buf);
+
+    if !only_ascii_used {
+        return IDENT;
+    }
+
+    match &buf[..count] {
+        b"media" => MEDIA_KW,
+        b"keyframes" => KEYFRAMES_KW,
+        b"-webkit-keyframes" => KEYFRAMES_KW,
+        b"-moz-keyframes" => KEYFRAMES_KW,
+        b"-o-keyframes" => KEYFRAMES_KW,
+        b"-ms-keyframes" => KEYFRAMES_KW,
+        b"and" => AND_KW,
+        b"only" => ONLY_KW,
+        b"or" => OR_KW,
+        b"i" => I_KW,
+        b"important" => IMPORTANT_KW,
+        b"from" => FROM_KW,
+        b"to" => TO_KW,
+        b"var" => VAR_KW,
+        b"highlight" => HIGHLIGHT_KW,
+        b"part" => PART_KW,
+        b"has" => HAS_KW,
+        b"dir" => DIR_KW,
+        b"global" => GLOBAL_KW,
+        b"local" => LOCAL_KW,
+        b"-moz-any" => ANY_KW,
+        b"-webkit-any" => ANY_KW,
+        b"past" => PAST_KW,
+        b"current" => CURRENT_KW,
+        b"future" => FUTURE_KW,
+        b"host" => HOST_KW,
+        b"host-context" => HOST_CONTEXT_KW,
+        b"not" => NOT_KW,
+        b"matches" => MATCHES_KW,
+        b"is" => IS_KW,
+        b"where" => WHERE_KW,
+        b"lang" => LANG_KW,
+        b"of" => OF_KW,
+        b"n" => N_KW,
+        b"even" => EVEN_KW,
+        b"odd" => ODD_KW,
+        b"nth-child" => NTH_CHILD_KW,
+        b"nth-last-child" => NTH_LAST_CHILD_KW,
+        b"nth-of-type" => NTH_OF_TYPE_KW,
+        b"nth-last-of-type" => NTH_LAST_OF_TYPE_KW,
+        b"nth-col" => NTH_COL_KW,
+        b"nth-last-col" => NTH_LAST_COL_KW,
+        b"ltr" => LTR_KW,
+        b"rtl" => RTL_KW,
+        b"charset" => CHARSET_KW,
+        b"color-profile" => COLOR_PROFILE_KW,
+        b"counter-style" => COUNTER_STYLE_KW,
+        b"property" => PROPERTY_KW,
+        b"container" => CONTAINER_KW,
+        b"style" => STYLE_KW,
+        b"font-face" => FONT_FACE_KW,
+        b"font-feature-values" => FONT_FEATURE_VALUES_KW,
+        // font-feature-values items
+        b"stylistic" => STYLISTIC_KW,
+        b"historical-forms" => HISTORICAL_FORMS_KW,
+        b"styleset" => STYLESET_KW,
+        b"character-variant" => CHARACTER_VARIANT_KW,
+        b"swash" => SWASH_KW,
+        b"ornaments" => ORNAMENTS_KW,
+        b"annotation" => ANNOTATION_KW,
+        b"font-palette-values" => FONT_PALETTE_VALUES_KW,
+        b"auto" => AUTO_KW,
+        b"thin" => THIN_KW,
+        b"medium" => MEDIUM_KW,
+        b"thick" => THICK_KW,
+        b"none" => NONE_KW,
+        b"hidden" => HIDDEN_KW,
+        b"dotted" => DOTTED_KW,
+        b"dashed" => DASHED_KW,
+        b"solid" => SOLID_KW,
+        b"double" => DOUBLE_KW,
+        b"groove" => GROOVE_KW,
+        b"ridge" => RIDGE_KW,
+        b"inset" => INSET_KW,
+        b"outset" => OUTSET_KW,
+        // CSS-Wide keywords
+        b"initial" => INITIAL_KW,
+        b"inherit" => INHERIT_KW,
+        b"unset" => UNSET_KW,
+        b"revert" => REVERT_KW,
+        b"revert-layer" => REVERT_LAYER_KW,
+        b"default" => DEFAULT_KW,
+        // length units
+        b"em" => EM_KW,
+        b"rem" => REM_KW,
+        b"ex" => EX_KW,
+        b"rex" => REX_KW,
+        b"cap" => CAP_KW,
+        b"rcap" => RCAP_KW,
+        b"ch" => CH_KW,
+        b"rch" => RCH_KW,
+        b"ic" => IC_KW,
+        b"ric" => RIC_KW,
+        b"lh" => LH_KW,
+        b"rlh" => RLH_KW,
+        // Viewport-percentage Lengths
+        b"vw" => VW_KW,
+        b"svw" => SVW_KW,
+        b"lvw" => LVW_KW,
+        b"dvw" => DVW_KW,
+        b"vh" => VH_KW,
+        b"svh" => SVW_KW,
+        b"lvh" => LVH_KW,
+        b"dvh" => DVH_KW,
+        b"vi" => VI_KW,
+        b"svi" => SVI_KW,
+        b"lvi" => LVI_KW,
+        b"dvi" => DVI_KW,
+        b"vb" => VB_KW,
+        b"svb" => SVB_KW,
+        b"lvb" => LVB_KW,
+        b"dvb" => DVB_KW,
+        b"vmin" => VMIN_KW,
+        b"svmin" => SVMIN_KW,
+        b"lvmin" => LVMIN_KW,
+        b"dvmin" => DVMIN_KW,
+        b"vmax" => VMAX_KW,
+        b"svmax" => SVMAX_KW,
+        b"lvmax" => LVMAX_KW,
+        b"dvmax" => DVMAX_KW,
+        // Absolute lengths
+        b"cm" => CM_KW,
+        b"mm" => MM_KW,
+        b"q" => Q_KW,
+        b"in" => IN_KW,
+        b"pc" => PC_KW,
+        b"pt" => PT_KW,
+        b"px" => PX_KW,
+        b"mozmm" => MOZMM_KW,
+        // mini app
+        b"rpx" => RPX_KW,
+        // container lengths
+        b"cqw" => CQW_KW,
+        b"cqh" => CQH_KW,
+        b"cqi" => CQI_KW,
+        b"cqb" => CQB_KW,
+        b"cqmin" => CQMIN_KW,
+        b"cqmax" => CQMAX_KW,
+        // angle units
+        b"deg" => DEG_KW,
+        b"grad" => GRAD_KW,
+        b"rad" => RAD_KW,
+        b"turn" => TURN_KW,
+        // time units
+        b"s" => S_KW,
+        b"ms" => MS_KW,
+        // frequency units
+        b"hz" => HZ_KW,
+        b"khz" => KHZ_KW,
+        // resolution units
+        b"dpi" => DPI_KW,
+        b"dpcm" => DPCM_KW,
+        b"dppx" => DPPX_KW,
+        b"x" => X_KW,
+        // flex units
+        b"fr" => FR_KW,
+        // page at rule
+        b"left" => LEFT_KW,
+        b"right" => RIGHT_KW,
+        b"first" => FIRST_KW,
+        b"blank" => BLANK_KW,
+        b"page" => PAGE_KW,
+        b"top-left-corner" => TOP_LEFT_CORNER_KW,
+        b"top-left" => TOP_LEFT_KW,
+        b"top-center" => TOP_CENTER_KW,
+        b"top-right" => TOP_RIGHT_KW,
+        b"top-right-corner" => TOP_RIGHT_CORNER_KW,
+        b"bottom-left-corner" => BOTTOM_LEFT_CORNER_KW,
+        b"bottom-left" => BOTTOM_LEFT_KW,
+        b"bottom-center" => BOTTOM_CENTER_KW,
+        b"bottom-right" => BOTTOM_RIGHT_KW,
+        b"bottom-right-corner" => BOTTOM_RIGHT_CORNER_KW,
+        b"left-top" => LEFT_TOP_KW,
+        b"left-middle" => LEFT_MIDDLE_KW,
+        b"left-bottom" => LEFT_BOTTOM_KW,
+        b"right-top" => RIGHT_TOP_KW,
+        b"right-middle" => RIGHT_MIDDLE_KW,
+        b"right-bottom" => RIGHT_BOTTOM_KW,
+        b"layer" => LAYER_KW,
+        b"supports" => SUPPORTS_KW,
+        b"selector" => SELECTOR_KW,
+        b"url" => URL_KW,
+        b"src" => SRC_KW,
+        b"scope" => SCOPE_KW,
+        b"import" => IMPORT_KW,
+        b"namespace" => NAMESPACE_KW,
+        b"starting-style" => STARTING_STYLE_KW,
+        b"document" => DOCUMENT_KW,
+        b"-moz-document" => DOCUMENT_KW,
+        b"url-prefix" => URL_PREFIX_KW,
+        b"domain" => DOMAIN_KW,
+        b"media-document" => MEDIA_DOCUMENT_KW,
+        b"regexp" => REGEXP_KW,
+        b"value" => VALUE_KW,
+        b"as" => AS_KW,
+        b"composes" => COMPOSES_KW,
+        b"position-try" => POSITION_TRY_KW,
+        b"view-transition" => VIEW_TRANSITION_KW,
+        _ => IDENT,
+    }
+}
+
+/// Consumes a sequence of identifier characters from a byte stream, appending
+/// them to the provided buffer in lowercase ASCII form.
+///
+/// This function iteratively processes bytes from the stream, which are part
+/// of an identifier, and appends their lowercase ASCII representation to the buffer.
+/// It stops processing either when the buffer is full or when a non-identifier
+/// character is encountered.
+///
+/// # Arguments
+///
+/// * `buf` - A mutable reference to a byte array where the identifier characters
+///           will be appended. This buffer should be pre-allocated and have enough
+///           space to hold the expected identifier.
+///
+/// # Returns
+///
+/// A tuple containing:
+///
+/// * The number of bytes appended to the buffer (`usize`).
+/// * A boolean indicating whether only ASCII characters were used (`true` if so).
+///
+/// # Panics
+///
+/// This function will panic if the first character to be consumed is not a valid
+/// start of an identifier, as determined by `self.is_ident_start()`.
+fn consume_ident_sequence(&mut self, buf: &mut [u8]) -> (usize, bool) {
+    debug_assert!(self.is_ident_start());
+
+    let mut idx = 0;
+    let mut only_ascii_used = true;
+    // Repeatedly consume the next input code point from the stream.
+    while let Some(current) = self.current_byte() {
+        if let Some(part) = self.consume_ident_part(current) {
+            if only_ascii_used && !part.is_ascii() {
+                only_ascii_used = false;
+            }
+
+            if only_ascii_used {
+                // Ensure that there is space in the buffer.
+                // Since we're only dealing with ASCII, we need at most 1 byte.
+                if let Some(buf) = buf.get_mut(idx..idx + 1) {
+                    // Convert the ASCII character to lowercase.
+                    buf[0] = part.to_ascii_lowercase() as u8;
+                    idx += 1;
+                }
+            }
+        } else {
+            break;
+        }
+    }
+
+    (idx, only_ascii_used)
+}
+
+/// Consume a character that forms part of a CSS identifier.
+///
+/// Before calling this function, you should make sure that there is a valid identifier start
+/// using [Self::is_ident_start].
+///
+/// Also handles CSS escape sequences in identifiers and attach appropriate diagnostics for invalid cases.
+///
+/// Returns the consumed character wrapped in `Some` if it is part of an identifier,
+/// and `None` if it is not.
+fn consume_ident_part(&mut self, current: u8) -> Option<char> {
+    let chr = match lookup_byte(current) {
+        IDT | MIN | DIG | ZER => {
+            self.advance(1);
+            // SAFETY: We know that the current byte is a hyphen or a number.
+            current as char
+        }
+        // name code point
+        UNI => {
+            // SAFETY: We know that the current byte is a valid unicode code point
+            let chr = self.current_char_unchecked();
+            if is_css_non_ascii(chr) {
+                self.advance(chr.len_utf8());
+                chr
+            } else {
+                return None;
+            }
+        }
+        // U+005C REVERSE SOLIDUS (\)
+        // If the first and second code points are a valid escape, continue consume.
+        // Otherwise, break.
+        // BSL if self.is_valid_escape_at(1) => '\\',
+        BSL if self.is_valid_escape_at(1) => {
+            let escape_start = self.text_position();
+            self.advance(1);
+
+            match self.current_byte() {
+                // Any valid escape sequence can be used as an identifier,
+                // even if it becomes the REPLACEMENT CHARACTER (like `\0`).
+                // This is important to handle for cases like the "media
+                // min-width hack": http://browserbu.gs/css-hacks/media-min-width-0-backslash-0/.
+                Some(c) if c.is_ascii_hexdigit() => self.consume_escape_sequence(c),
+
+                Some(_) => {
+                    let chr = self.current_char_unchecked();
                     self.advance(chr.len_utf8());
                     chr
-                } else {
+                }
+
+                None => {
+                    let diagnostic = ParseDiagnostic::new(
+                        "Invalid escape sequence",
+                        escape_start..self.text_position(),
+                    );
+                    self.diagnostics.push(diagnostic);
+
                     return None;
                 }
             }
-            // U+005C REVERSE SOLIDUS (\)
-            // If the first and second code points are a valid escape, continue consume.
-            // Otherwise, break.
-            // BSL if self.is_valid_escape_at(1) => '\\',
-            BSL if self.is_valid_escape_at(1) => {
-                let escape_start = self.text_position();
-                self.advance(1);
+        }
+        _ => return None,
+    };
 
-                match self.current_byte() {
-                    // Any valid escape sequence can be used as an identifier,
-                    // even if it becomes the REPLACEMENT CHARACTER (like `\0`).
-                    // This is important to handle for cases like the "media
-                    // min-width hack": http://browserbu.gs/css-hacks/media-min-width-0-backslash-0/.
-                    Some(c) if c.is_ascii_hexdigit() => self.consume_escape_sequence(c),
+    Some(chr)
+}
 
-                    Some(_) => {
-                        let chr = self.current_char_unchecked();
-                        self.advance(chr.len_utf8());
-                        chr
+/// Lexes a comment.
+fn consume_slash(&mut self) -> CssSyntaxKind {
+    self.assert_byte(b'/');
+
+    match self.peek_byte() {
+        Some(b'*') => {
+            let start = self.text_position();
+
+            // eat `/*`
+            self.advance(2);
+
+            let mut has_newline = false;
+
+            while let Some(chr) = self.current_byte() {
+                match chr {
+                    b'*' if self.peek_byte() == Some(b'/') => {
+                        self.advance(2);
+
+                        if has_newline {
+                            self.after_newline = true;
+                            return MULTILINE_COMMENT;
+                        } else {
+                            return COMMENT;
+                        }
                     }
-
-                    None => {
-                        let diagnostic = ParseDiagnostic::new(
-                            "Invalid escape sequence",
-                            escape_start..self.text_position(),
-                        );
-                        self.diagnostics.push(diagnostic);
-
-                        return None;
+                    b'\n' | b'\r' => {
+                        has_newline = true;
+                        self.advance(1)
                     }
+                    chr => self.advance_byte_or_char(chr),
                 }
             }
-            _ => return None,
-        };
 
-        Some(chr)
-    }
+            let err =
+                ParseDiagnostic::new("Unterminated block comment", start..self.text_position())
+                    .with_detail(
+                        self.position..self.position + 1,
+                        "... but the file ends here",
+                    );
 
-    /// Lexes a comment.
-    fn consume_slash(&mut self) -> CssSyntaxKind {
-        self.assert_byte(b'/');
+            self.diagnostics.push(err);
 
-        match self.peek_byte() {
-            Some(b'*') => {
-                let start = self.text_position();
-
-                // eat `/*`
-                self.advance(2);
-
-                let mut has_newline = false;
-
-                while let Some(chr) = self.current_byte() {
-                    match chr {
-                        b'*' if self.peek_byte() == Some(b'/') => {
-                            self.advance(2);
-
-                            if has_newline {
-                                self.after_newline = true;
-                                return MULTILINE_COMMENT;
-                            } else {
-                                return COMMENT;
-                            }
-                        }
-                        b'\n' | b'\r' => {
-                            has_newline = true;
-                            self.advance(1)
-                        }
-                        chr => self.advance_byte_or_char(chr),
-                    }
-                }
-
-                let err =
-                    ParseDiagnostic::new("Unterminated block comment", start..self.text_position())
-                        .with_detail(
-                            self.position..self.position + 1,
-                            "... but the file ends here",
-                        );
-
-                self.diagnostics.push(err);
-
-                if has_newline {
-                    MULTILINE_COMMENT
-                } else {
-                    COMMENT
-                }
-            }
-            Some(b'/') if self.options.allow_wrong_line_comments => {
-                self.advance(2);
-
-                while let Some(chr) = self.current_byte() {
-                    match chr {
-                        b'\n' | b'\r' => return COMMENT,
-                        chr => self.advance_byte_or_char(chr),
-                    }
-                }
-
+            if has_newline {
+                MULTILINE_COMMENT
+            } else {
                 COMMENT
             }
-            _ => self.consume_byte(T![/]),
         }
-    }
+        Some(b'/') if self.options.allow_wrong_line_comments => {
+            self.advance(2);
 
-    #[inline]
-    fn consume_pipe(&mut self) -> CssSyntaxKind {
-        self.assert_byte(b'|');
-
-        match self.next_byte() {
-            Some(b'|') => self.consume_byte(T![||]),
-            Some(b'=') => self.consume_byte(T![|=]),
-            _ => T![|],
-        }
-    }
-
-    #[inline]
-    fn consume_mor(&mut self) -> CssSyntaxKind {
-        self.assert_byte(b'>');
-
-        match self.next_byte() {
-            Some(b'=') => self.consume_byte(T![>=]),
-            _ => T![>],
-        }
-    }
-
-    #[inline]
-    fn consume_tilde(&mut self) -> CssSyntaxKind {
-        self.assert_byte(b'~');
-
-        match self.next_byte() {
-            Some(b'=') => self.consume_byte(T![~=]),
-            _ => T![~],
-        }
-    }
-
-    #[inline]
-    fn consume_col(&mut self) -> CssSyntaxKind {
-        self.assert_byte(b':');
-
-        match self.next_byte() {
-            Some(b':') => self.consume_byte(T![::]),
-            _ => T![:],
-        }
-    }
-
-    #[inline]
-    fn consume_mul(&mut self) -> CssSyntaxKind {
-        self.assert_byte(b'*');
-
-        match self.next_byte() {
-            Some(b'=') => self.consume_byte(T![*=]),
-            _ => T![*],
-        }
-    }
-
-    #[inline]
-    fn consume_ctr(&mut self) -> CssSyntaxKind {
-        self.assert_byte(b'^');
-
-        match self.next_byte() {
-            Some(b'=') => self.consume_byte(T![^=]),
-            _ => T![^],
-        }
-    }
-
-    #[inline]
-    fn consume_lss(&mut self) -> CssSyntaxKind {
-        self.assert_byte(b'<');
-
-        // If the next 3 input code points are U+0021 EXCLAMATION MARK U+002D
-        // HYPHEN-MINUS U+002D HYPHEN-MINUS (!--), consume them and return a CDO.
-        if self.peek_byte() == Some(b'!')
-            && self.byte_at(2) == Some(b'-')
-            && self.byte_at(3) == Some(b'-')
-        {
-            self.advance(4);
-            return CDO;
-        }
-
-        match self.next_byte() {
-            Some(b'=') => self.consume_byte(T![<=]),
-            _ => T![<],
-        }
-    }
-
-    #[inline]
-    fn consume_min(&mut self, current: u8) -> CssSyntaxKind {
-        self.assert_byte(b'-');
-
-        if self.is_number_start() {
-            return self.consume_number(current);
-        }
-
-        // GREATER-THAN SIGN (->), consume them and return a CDC.
-        if self.peek_byte() == Some(b'-') {
-            if self.byte_at(2) == Some(b'>') {
-                self.advance(3);
-                return CDC;
+            while let Some(chr) = self.current_byte() {
+                match chr {
+                    b'\n' | b'\r' => return COMMENT,
+                    chr => self.advance_byte_or_char(chr),
+                }
             }
 
-            // --dashed-identifier
-            if self.is_ident_start() {
-                return self.consume_identifier();
-            }
+            COMMENT
+        }
+        _ => self.consume_byte(T![/]),
+    }
+}
+
+#[inline]
+fn consume_pipe(&mut self) -> CssSyntaxKind {
+    self.assert_byte(b'|');
+
+    match self.next_byte() {
+        Some(b'|') => self.consume_byte(T![||]),
+        Some(b'=') => self.consume_byte(T![|=]),
+        _ => T![|],
+    }
+}
+
+#[inline]
+fn consume_mor(&mut self) -> CssSyntaxKind {
+    self.assert_byte(b'>');
+
+    match self.next_byte() {
+        Some(b'=') => self.consume_byte(T![>=]),
+        _ => T![>],
+    }
+}
+
+#[inline]
+fn consume_tilde(&mut self) -> CssSyntaxKind {
+    self.assert_byte(b'~');
+
+    match self.next_byte() {
+        Some(b'=') => self.consume_byte(T![~=]),
+        _ => T![~],
+    }
+}
+
+#[inline]
+fn consume_col(&mut self) -> CssSyntaxKind {
+    self.assert_byte(b':');
+
+    match self.next_byte() {
+        Some(b':') => self.consume_byte(T![::]),
+        _ => T![:],
+    }
+}
+
+#[inline]
+fn consume_mul(&mut self) -> CssSyntaxKind {
+    self.assert_byte(b'*');
+
+    match self.next_byte() {
+        Some(b'=') => self.consume_byte(T![*=]),
+        _ => T![*],
+    }
+}
+
+#[inline]
+fn consume_ctr(&mut self) -> CssSyntaxKind {
+    self.assert_byte(b'^');
+
+    match self.next_byte() {
+        Some(b'=') => self.consume_byte(T![^=]),
+        _ => T![^],
+    }
+}
+
+#[inline]
+fn consume_lss(&mut self) -> CssSyntaxKind {
+    self.assert_byte(b'<');
+
+    // If the next 3 input code points are U+0021 EXCLAMATION MARK U+002D
+    // HYPHEN-MINUS U+002D HYPHEN-MINUS (!--), consume them and return a CDO.
+    if self.peek_byte() == Some(b'!')
+        && self.byte_at(2) == Some(b'-')
+        && self.byte_at(3) == Some(b'-')
+    {
+        self.advance(4);
+        return CDO;
+    }
+
+    match self.next_byte() {
+        Some(b'=') => self.consume_byte(T![<=]),
+        _ => T![<],
+    }
+}
+
+#[inline]
+fn consume_min(&mut self, current: u8) -> CssSyntaxKind {
+    self.assert_byte(b'-');
+
+    if self.is_number_start() {
+        return self.consume_number(current);
+    }
+
+    // GREATER-THAN SIGN (->), consume them and return a CDC.
+    if self.peek_byte() == Some(b'-') {
+        if self.byte_at(2) == Some(b'>') {
+            self.advance(3);
+            return CDC;
         }
 
-        // -identifier
+        // --dashed-identifier
         if self.is_ident_start() {
             return self.consume_identifier();
         }
-
-        self.consume_byte(T![-])
     }
 
-    #[inline]
-    fn consume_unexpected_character(&mut self) -> CssSyntaxKind {
-        self.assert_current_char_boundary();
-
-        let char = self.current_char_unchecked();
-        let err = ParseDiagnostic::new(
-            format!("unexpected character `{char}`"),
-            self.text_position()..self.text_position() + char.text_len(),
-        );
-        self.diagnostics.push(err);
-        self.advance(char.len_utf8());
-
-        ERROR_TOKEN
+    // -identifier
+    if self.is_ident_start() {
+        return self.consume_identifier();
     }
 
-    /// Check if the lexer starts a number.
-    fn is_number_start(&self) -> bool {
-        match self.current_byte() {
-            Some(b'+' | b'-') => match self.peek_byte() {
-                // If the second code point is a digit, return true.
-                Some(byte) if byte.is_ascii_digit() => true,
-                // Otherwise, if the second code point is a U+002E FULL STOP (.) and the
-                // third code point is a digit, return true.
-                Some(b'.') if self.byte_at(2).map_or(false, |byte| byte.is_ascii_digit()) => true,
-                _ => false,
-            },
-            Some(b'.') => match self.peek_byte() {
-                // If the second code point is a digit, return true.
-                Some(byte) if byte.is_ascii_digit() => true,
-                _ => false,
-            },
-            Some(byte) => byte.is_ascii_digit(),
+    self.consume_byte(T![-])
+}
+
+#[inline]
+fn consume_unexpected_character(&mut self) -> CssSyntaxKind {
+    self.assert_current_char_boundary();
+
+    let char = self.current_char_unchecked();
+    let err = ParseDiagnostic::new(
+        format!("unexpected character `{char}`"),
+        self.text_position()..self.text_position() + char.text_len(),
+    );
+    self.diagnostics.push(err);
+    self.advance(char.len_utf8());
+
+    ERROR_TOKEN
+}
+
+/// Check if the lexer starts a number.
+fn is_number_start(&self) -> bool {
+    match self.current_byte() {
+        Some(b'+' | b'-') => match self.peek_byte() {
+            // If the second code point is a digit, return true.
+            Some(byte) if byte.is_ascii_digit() => true,
+            // Otherwise, if the second code point is a U+002E FULL STOP (.) and the
+            // third code point is a digit, return true.
+            Some(b'.') if self.byte_at(2).map_or(false, |byte| byte.is_ascii_digit()) => true,
             _ => false,
-        }
+        },
+        Some(b'.') => match self.peek_byte() {
+            // If the second code point is a digit, return true.
+            Some(byte) if byte.is_ascii_digit() => true,
+            _ => false,
+        },
+        Some(byte) => byte.is_ascii_digit(),
+        _ => false,
     }
+}
 
-    /// Check if the lexer starts an identifier.
-    fn is_ident_start(&self) -> bool {
-        // See https://drafts.csswg.org/css-syntax-3/#typedef-ident-token
-        let Some(current) = self.current_byte() else {
-            return false;
-        };
-        // Look at the first code point:
-        match lookup_byte(current) {
-            // U+002D HYPHEN-MINUS
-            MIN => {
-                let Some(next) = self.peek_byte() else {
-                    return false;
-                };
-                match lookup_byte(next) {
-                    MIN => {
-                        let Some(next) = self.byte_at(2) else {
-                            return false;
-                        };
-                        match lookup_byte(next) {
-                            IDT | MIN | DIG | ZER => true,
-                            // If the third code point is a name-start code point
-                            // return true.
-                            UNI => is_css_non_ascii(self.char_unchecked_at(2)),
-                            // or the third and fourth code points are a valid escape
-                            // return true.
-                            BSL => self.is_valid_escape_at(3),
-                            _ => false,
-                        }
+/// Check if the lexer starts an identifier.
+fn is_ident_start(&self) -> bool {
+    // See https://drafts.csswg.org/css-syntax-3/#typedef-ident-token
+    let Some(current) = self.current_byte() else {
+        return false;
+    };
+    // Look at the first code point:
+    match lookup_byte(current) {
+        // U+002D HYPHEN-MINUS
+        MIN => {
+            let Some(next) = self.peek_byte() else {
+                return false;
+            };
+            match lookup_byte(next) {
+                MIN => {
+                    let Some(next) = self.byte_at(2) else {
+                        return false;
+                    };
+                    match lookup_byte(next) {
+                        IDT | MIN | DIG | ZER => true,
+                        // If the third code point is a name-start code point
+                        // return true.
+                        UNI => is_css_non_ascii(self.char_unchecked_at(2)),
+                        // or the third and fourth code points are a valid escape
+                        // return true.
+                        BSL => self.is_valid_escape_at(3),
+                        _ => false,
                     }
-                    IDT => true,
-                    // If the second code point is a name-start code point
-                    // return true.
-                    UNI => is_css_non_ascii(self.peek_char_unchecked()),
-                    // or the second and third code points are a valid escape
-                    // return true.
-                    BSL => self.is_valid_escape_at(2),
-                    _ => false,
                 }
+                IDT => true,
+                // If the second code point is a name-start code point
+                // return true.
+                UNI => is_css_non_ascii(self.peek_char_unchecked()),
+                // or the second and third code points are a valid escape
+                // return true.
+                BSL => self.is_valid_escape_at(2),
+                _ => false,
             }
-            IDT => true,
-            UNI => is_css_non_ascii(self.current_char_unchecked()),
-            // U+005C REVERSE SOLIDUS (\)
-            // If the first and second code points are a valid escape, return true. Otherwise,
-            // return false.
-            BSL => self.is_valid_escape_at(1),
-            _ => false,
         }
+        IDT => true,
+        UNI => is_css_non_ascii(self.current_char_unchecked()),
+        // U+005C REVERSE SOLIDUS (\)
+        // If the first and second code points are a valid escape, return true. Otherwise,
+        // return false.
+        BSL => self.is_valid_escape_at(1),
+        _ => false,
     }
+}
 }
 
 impl<'src> ReLexer<'src> for CssLexer<'src> {
