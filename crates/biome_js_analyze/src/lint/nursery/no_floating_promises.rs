@@ -392,7 +392,7 @@ fn is_member_expression_callee_a_promise(
 ) -> Option<bool> {
     let expr = static_member_expr.object().ok()?;
 
-    if is_expression_an_promise(&expr, model) {
+    if is_expression_a_promise(&expr, model) {
         return Some(true);
     }
 
@@ -495,7 +495,7 @@ fn is_variable_initializer_a_promise(
         ),
         AnyJsExpression::JsNewExpression(js_new_epr) => {
             let any_js_expr = js_new_epr.callee().ok()?;
-            Some(is_expression_an_promise(&any_js_expr, model))
+            Some(is_expression_a_promise(&any_js_expr, model))
         }
         _ => Some(false),
     }
@@ -582,7 +582,7 @@ fn is_variable_annotation_a_promise(js_variable_declarator: &JsVariableDeclarato
 /// const Promise = { resolve(): {} };
 /// Promise.resolve()
 /// ```
-fn is_expression_an_promise(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
+fn is_expression_a_promise(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
     let (reference, value) = match global_identifier(expr) {
         Some(result) => result,
         None => return false,
