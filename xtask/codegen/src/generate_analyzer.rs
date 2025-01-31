@@ -3,9 +3,9 @@ use std::{collections::BTreeMap, path::Path};
 
 use anyhow::{Context, Ok, Result};
 use biome_string_case::Case;
-use proc_macro2::{Punct, Spacing, TokenStream};
+use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use xtask::{glue::fs2, project_root};
+use xtask::{glue::fs2, project_root, reformat};
 
 pub fn generate_analyzer() -> Result<()> {
     generate_js_analyzer()?;
@@ -62,7 +62,6 @@ fn generate_graphql_analyzer() -> Result<()> {
 fn generate_options(base_path: &Path) -> Result<()> {
     let mut rules_options = BTreeMap::new();
     let mut crates = vec![];
-    let nl = Punct::new('\n', Spacing::Alone);
     for category in ["lint", "assists"] {
         let category_path = base_path.join(category);
         if !category_path.exists() {
@@ -83,21 +82,21 @@ fn generate_options(base_path: &Path) -> Result<()> {
         }
         if category == "lint" {
             crates.push(quote! {
-                use crate::lint; #nl
+                use crate::lint;
             })
         } else if category == "assists" {
             crates.push(quote! {
-                use crate::assists; #nl
+                use crate::assists;
             })
         }
     }
     let rules_options = rules_options.values();
     let tokens = xtask::reformat(quote! {
         #( #crates )*
-        #nl
 
         #( #rules_options )*
     })?;
+    let tokens = reformat(tokens)?;
     fs2::write(base_path.join("options.rs"), tokens)?;
 
     Ok(())
@@ -175,6 +174,7 @@ fn generate_category(
         }
     })?;
 
+    let tokens = reformat(tokens)?;
     fs2::write(base_path.join(format!("{name}.rs")), tokens)?;
 
     Ok(())
@@ -215,9 +215,6 @@ fn generate_group(category: &'static str, group: &str, base_path: &Path) -> Resu
 
     let (rule_imports, rule_names): (Vec<_>, Vec<_>) = rules.into_values().unzip();
 
-    let nl = Punct::new('\n', Spacing::Alone);
-    let sp = Punct::new(' ', Spacing::Joint);
-    let sp4 = quote! { #sp #sp #sp #sp };
     let (import_macro, use_macro) = match category {
         "lint" => (
             quote!(
@@ -242,19 +239,21 @@ fn generate_group(category: &'static str, group: &str, base_path: &Path) -> Resu
     };
     let tokens = xtask::reformat(quote! {
         #import_macro;
-        #nl #nl
+
         #( #rule_imports )*
-        #nl #nl
-        #use_macro! { #nl
-            #sp4 pub #group_name { #nl
-                #sp4 #sp4 name: #group, #nl
-                #sp4 #sp4 rules: [ #nl
-                    #( #sp4 #sp4 #sp4 #rule_names, #nl )*
-                #sp4 #sp4 ] #nl
-            #sp4 } #nl
+
+
+        #use_macro! {
+            pub #group_name {
+                name: #group,
+                 rules: [
+                    #( #rule_names,  )*
+                 ]
+            }
         }
     })?;
 
+    let tokens = reformat(tokens)?;
     fs2::write(base_path.join(category).join(format!("{group}.rs")), tokens)?;
 
     Ok(())
@@ -307,6 +306,7 @@ fn update_json_registry_builder(
         }
     })?;
 
+    let tokens = reformat(tokens)?;
     fs2::write(path, tokens)?;
 
     Ok(())
@@ -326,6 +326,7 @@ fn update_css_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -
         }
     })?;
 
+    let tokens = reformat(tokens)?;
     fs2::write(path, tokens)?;
 
     Ok(())

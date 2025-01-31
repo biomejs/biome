@@ -1,7 +1,8 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use crate::lint;
+//! Generated file, do not edit by hand, see `xtask/codegen`
 
+use crate::lint;
 pub type NoDescendingSpecificity = < lint :: nursery :: no_descending_specificity :: NoDescendingSpecificity as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateAtImportRules = < lint :: suspicious :: no_duplicate_at_import_rules :: NoDuplicateAtImportRules as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateCustomProperties = < lint :: nursery :: no_duplicate_custom_properties :: NoDuplicateCustomProperties as biome_analyze :: Rule > :: Options ;
