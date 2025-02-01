@@ -15,7 +15,10 @@ where
         if "{}[]()`".contains(token) {
             let c = token.chars().next().unwrap();
             quote! { #c }
-        } else if matches!(*token, "$=" | "$_") {
+        } else if matches!(
+            *token,
+            "$=" | "$_" | "<![CDATA[" | "]]>" | "U+" | "   " | "_"
+        ) {
             let token = Literal::string(token);
             quote! { #token }
         } else {
