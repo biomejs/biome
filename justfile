@@ -44,7 +44,7 @@ gen-lint:
 gen-formatter:
   cargo run -p xtask_codegen -- formatter
 
-# Generates the Tailwind CSS preset for utility class sorting (requires Bun)
+# Generates the Tailwind CSS preset for utility class sorting
 [working-directory: 'packages/tailwindcss-config-analyzer']
 gen-tw:
   pnpm build
