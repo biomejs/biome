@@ -131,11 +131,19 @@ pub struct Source {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_keys:
         Option<RuleAssistConfiguration<biome_json_analyze::options::UseSortedKeys>>,
+    #[doc = "Enforce ordering of CSS properties and nested rules."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_sorted_properties:
+        Option<RuleAssistConfiguration<biome_css_analyze::options::UseSortedProperties>>,
 }
 impl Source {
     const GROUP_NAME: &'static str = "source";
-    pub(crate) const GROUP_RULES: &'static [&'static str] =
-        &["organizeImports", "useSortedAttributes", "useSortedKeys"];
+    pub(crate) const GROUP_RULES: &'static [&'static str] = &[
+        "organizeImports",
+        "useSortedAttributes",
+        "useSortedKeys",
+        "useSortedProperties",
+    ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] =
         &[RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0])];
     pub(crate) fn recommended_rules_as_filters() -> &'static [RuleFilter<'static>] {
@@ -165,6 +173,11 @@ impl Source {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
+        if let Some(rule) = self.use_sorted_properties.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
+            }
+        }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
@@ -182,6 +195,11 @@ impl Source {
         if let Some(rule) = self.use_sorted_keys.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_properties.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
             }
         }
         index_set
@@ -215,6 +233,10 @@ impl Source {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useSortedKeys" => self
                 .use_sorted_keys
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useSortedProperties" => self
+                .use_sorted_properties
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
