@@ -172,6 +172,7 @@ dependencies = [
  "biome_flags",
  "biome_formatter",
  "biome_fs",
+ "biome_glob",
  "biome_grit_patterns",
  "biome_js_analyze",
  "biome_js_formatter",

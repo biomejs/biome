@@ -19,13 +19,14 @@ pub(crate) fn read_ignore_file(
 
 #[derive(Debug)]
 pub(crate) struct IgnorePatterns {
-    pub(crate) patterns: Box<[Box<str>]>,
-    pub(crate) has_negated_patterns: bool,
+    pub(crate) patterns: Box<[biome_glob::Glob]>,
 }
 impl IgnorePatterns {
     pub(crate) fn from(content: &str) -> Self {
-        let mut has_negated_patterns = false;
         let mut patterns = Vec::new();
+        if let Ok(glob) = "**".parse() {
+            patterns.push(glob);
+        }
         for line in content.lines() {
             // Trailing spaces are ignored
             let line = line.trim_end();
@@ -33,42 +34,35 @@ impl IgnorePatterns {
             if line.is_empty() || line.starts_with('#') {
                 continue;
             }
-            match convert_pattern(line) {
-                Ok(pattern) => {
-                    patterns.push(pattern.into_boxed_str());
-                }
-                Err(_) => {
-                    has_negated_patterns = true;
-                    // Skip negated patterns because we don't support them.
-                    continue;
-                }
+            if let Ok(glob) = convert_pattern(line).parse() {
+                patterns.push(glob);
             }
         }
         IgnorePatterns {
             patterns: patterns.into_boxed_slice(),
-            has_negated_patterns,
         }
     }
 }
 
-pub(crate) fn convert_pattern(line: &str) -> Result<String, &'static str> {
-    if line.starts_with('!') {
-        // Skip negated patterns because we don't support them.
-        return Err("Negated patterns are not supported.");
-    }
+pub(crate) fn convert_pattern(line: &str) -> String {
+    let (negation, line) = if let Some(rest) = line.strip_prefix('!') {
+        ("", rest)
+    } else {
+        ("!", line)
+    };
     let result = if let Some(stripped_line) = line.strip_prefix('/') {
-        // Patterns tha tstarts with `/` are relative to the ignore file
-        format!("./{stripped_line}")
+        // Patterns that starts with `/` are relative to the ignore file
+        format!("{negation}./{stripped_line}")
     } else if line.find('/').is_some_and(|index| index < (line.len() - 1))
         || line == "**"
         || line == "**/"
     {
         // Patterns that includes at least one `/` in the middle are relatives paths
-        line.to_string()
+        format!("{negation}{line}")
     } else {
-        format!("**/{line}")
+        format!("{negation}**/{line}")
     };
-    Ok(result)
+    result
 }
 
 #[cfg(test)]
@@ -80,8 +74,7 @@ mod tests {
         const IGNORE_FILE_CONTENT: &str = r#""#;
         let result = IgnorePatterns::from(IGNORE_FILE_CONTENT);
 
-        assert!(!result.has_negated_patterns);
-        assert!(result.patterns.is_empty());
+        assert_eq!(result.patterns.as_ref(), ["**".parse().unwrap(),]);
     }
 
     #[test]
@@ -96,8 +89,7 @@ mod tests {
         "#;
         let result = IgnorePatterns::from(IGNORE_FILE_CONTENT);
 
-        assert!(!result.has_negated_patterns);
-        assert!(result.patterns.is_empty());
+        assert_eq!(result.patterns.as_ref(), ["**".parse().unwrap(),]);
     }
 
     #[test]
@@ -112,16 +104,16 @@ dir/
 "#;
         let result = IgnorePatterns::from(IGNORE_FILE_CONTENT);
 
-        assert!(!result.has_negated_patterns);
         assert_eq!(
             result.patterns.as_ref(),
             [
-                "**/file-or-dir".into(),
-                "**/dir/".into(),
-                "**".into(),
-                "**/".into(),
-                "**/*".into(),
-                "**/*/".into(),
+                "**".parse().unwrap(),
+                "!**/file-or-dir".parse().unwrap(),
+                "!**/dir/".parse().unwrap(),
+                "!**".parse().unwrap(),
+                "!**/".parse().unwrap(),
+                "!**/*".parse().unwrap(),
+                "!**/*/".parse().unwrap(),
             ]
         );
     }
@@ -138,16 +130,16 @@ dir/subdir/
 "#;
         let result = IgnorePatterns::from(IGNORE_FILE_CONTENT);
 
-        assert!(!result.has_negated_patterns);
         assert_eq!(
             result.patterns.as_ref(),
             [
-                "dir/dubfile-or-subdir".into(),
-                "dir/subdir/".into(),
-                "**/*".into(),
-                "**/*/".into(),
-                "**/a/b".into(),
-                "**/a/b/".into(),
+                "**".parse().unwrap(),
+                "!dir/dubfile-or-subdir".parse().unwrap(),
+                "!dir/subdir/".parse().unwrap(),
+                "!**/*".parse().unwrap(),
+                "!**/*/".parse().unwrap(),
+                "!**/a/b".parse().unwrap(),
+                "!**/a/b/".parse().unwrap(),
             ]
         );
     }
@@ -164,16 +156,16 @@ dir/subdir/
 "#;
         let result = IgnorePatterns::from(IGNORE_FILE_CONTENT);
 
-        assert!(!result.has_negated_patterns);
         assert_eq!(
             result.patterns.as_ref(),
             [
-                "./dir/dubfile-or-subdir".into(),
-                "./dir/subdir/".into(),
-                "./**/*".into(),
-                "./**/*/".into(),
-                "./**/a/b".into(),
-                "./**/a/b/".into(),
+                "**".parse().unwrap(),
+                "!./dir/dubfile-or-subdir".parse().unwrap(),
+                "!./dir/subdir/".parse().unwrap(),
+                "!./**/*".parse().unwrap(),
+                "!./**/*/".parse().unwrap(),
+                "!./**/a/b".parse().unwrap(),
+                "!./**/a/b/".parse().unwrap(),
             ]
         );
     }
@@ -183,8 +175,10 @@ dir/subdir/
         const IGNORE_FILE_CONTENT: &str = r#"!a"#;
         let result = IgnorePatterns::from(IGNORE_FILE_CONTENT);
 
-        assert!(result.has_negated_patterns);
-        assert!(result.patterns.is_empty());
+        assert_eq!(
+            result.patterns.as_ref(),
+            ["**".parse().unwrap(), "**/a".parse().unwrap(),]
+        );
     }
 
     #[test]
@@ -194,10 +188,14 @@ dir/subdir/
         "#;
         let result = IgnorePatterns::from(IGNORE_FILE_CONTENT);
 
-        assert!(!result.has_negated_patterns);
         assert_eq!(
             result.patterns.as_ref(),
-            ["**/    # This is not a comment because there is some leading spaces".into()]
+            [
+                "**".parse().unwrap(),
+                "!**/    # This is not a comment because there is some leading spaces"
+                    .parse()
+                    .unwrap(),
+            ]
         );
     }
 }
