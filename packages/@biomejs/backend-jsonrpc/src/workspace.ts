@@ -1462,7 +1462,7 @@ export interface Nursery {
 	 */
 	noDescendingSpecificity?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow destructuring props inside JSX components in Solid projects.
 	 */
 	noDestructuredProps?: RuleConfiguration_for_Null;
 	/**

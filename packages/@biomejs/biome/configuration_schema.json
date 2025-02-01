@@ -2481,7 +2481,7 @@
 					]
 				},
 				"noDestructuredProps": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow destructuring props inside JSX components in Solid projects.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
