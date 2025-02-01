@@ -60,6 +60,11 @@ a {
     view-transition-name: --bbb;
 }
 
+@property --foo {}
+a {
+	container-name: --foo;
+}
+
 .parent {
     color: --foo;
     .child {
