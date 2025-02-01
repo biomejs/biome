@@ -3916,6 +3916,13 @@
 						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
 						{ "type": "null" }
 					]
+				},
+				"useSortedProperties": {
+					"description": "Enforce ordering of CSS properties and nested rules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false

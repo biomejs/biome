@@ -831,6 +831,10 @@ export interface Source {
 	 * Sorts the keys of a JSON object in natural order
 	 */
 	useSortedKeys?: RuleAssistConfiguration_for_Null;
+	/**
+	 * Enforce ordering of CSS properties and nested rules.
+	 */
+	useSortedProperties?: RuleAssistConfiguration_for_Null;
 }
 export type QuoteStyle = "double" | "single";
 /**
