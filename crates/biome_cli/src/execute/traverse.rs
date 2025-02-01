@@ -15,7 +15,7 @@ use biome_service::dome::Dome;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{DropPatternParams, IsPathIgnoredParams};
 use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::{unbounded, Receiver, Sender};
 use rustc_hash::FxHashSet;
 use std::collections::BTreeSet;
@@ -85,7 +85,8 @@ pub(crate) fn traverse(
     let max_diagnostics = execution.get_max_diagnostics();
     let remaining_diagnostics = AtomicU32::new(max_diagnostics);
 
-    let printer = DiagnosticsPrinter::new(execution)
+    let working_directory = fs.working_directory();
+    let printer = DiagnosticsPrinter::new(execution, working_directory.as_deref())
         .with_verbose(cli_options.verbose)
         .with_diagnostic_level(cli_options.diagnostic_level)
         .with_max_diagnostics(max_diagnostics);
@@ -215,10 +216,13 @@ struct DiagnosticsPrinter<'ctx> {
     not_printed_diagnostics: AtomicU32,
     printed_diagnostics: AtomicU32,
     total_skipped_suggested_fixes: AtomicU32,
+
+    /// The current working directory, borrowed from [FileSystem]
+    working_directory: Option<&'ctx Utf8Path>,
 }
 
 impl<'ctx> DiagnosticsPrinter<'ctx> {
-    fn new(execution: &'ctx Execution) -> Self {
+    fn new(execution: &'ctx Execution, working_directory: Option<&'ctx Utf8Path>) -> Self {
         Self {
             errors: AtomicU32::new(0),
             warnings: AtomicU32::new(0),
@@ -230,6 +234,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
             not_printed_diagnostics: AtomicU32::new(0),
             printed_diagnostics: AtomicU32::new(0),
             total_skipped_suggested_fixes: AtomicU32::new(0),
+            working_directory,
         }
     }
 
@@ -358,7 +363,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                 }
 
                 Message::Diagnostics {
-                    name,
+                    file_path,
                     content,
                     diagnostics,
                     skipped_diagnostics,
@@ -381,7 +386,13 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                 self.warnings.fetch_add(1, Ordering::Relaxed);
                             }
 
-                            let diag = diag.with_file_path(&name).with_file_source_code(&content);
+                            let file_path = self
+                                .working_directory
+                                .and_then(|wd| file_path.strip_prefix(wd.as_str()))
+                                .unwrap_or(file_path.as_str());
+                            let diag = diag
+                                .with_file_path(file_path)
+                                .with_file_source_code(&content);
                             diagnostics_to_print.push(diag);
                         }
                     } else {
@@ -400,8 +411,13 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                             let should_print = self.should_print();
 
                             if should_print {
-                                let diag =
-                                    diag.with_file_path(&name).with_file_source_code(&content);
+                                let file_path = self
+                                    .working_directory
+                                    .and_then(|wd| file_path.strip_prefix(wd.as_str()))
+                                    .unwrap_or(file_path.as_str());
+                                let diag = diag
+                                    .with_file_path(file_path)
+                                    .with_file_source_code(&content);
                                 diagnostics_to_print.push(diag)
                             }
                         }
@@ -413,6 +429,10 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                     new,
                     diff_kind,
                 } => {
+                    let file_name = self
+                        .working_directory
+                        .and_then(|wd| file_name.strip_prefix(wd.as_str()))
+                        .unwrap_or(file_name.as_str());
                     // A diff is an error in CI mode and in format check mode
                     let is_error = self.execution.is_ci() || !self.execution.is_format_write();
                     if is_error {
@@ -437,7 +457,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                             match diff_kind {
                                 DiffKind::Format => {
                                     let diag = CIFormatDiffDiagnostic {
-                                        file_name: file_name.clone(),
+                                        file_name: file_name.to_string(),
                                         diff: ContentDiffAdvice {
                                             old: old.clone(),
                                             new: new.clone(),
@@ -450,7 +470,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                 }
                                 DiffKind::Assist => {
                                     let diag = CIAssistDiffDiagnostic {
-                                        file_name: file_name.clone(),
+                                        file_name: file_name.to_string(),
                                         diff: ContentDiffAdvice {
                                             old: old.clone(),
                                             new: new.clone(),
@@ -466,7 +486,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                             match diff_kind {
                                 DiffKind::Format => {
                                     let diag = FormatDiffDiagnostic {
-                                        file_name: file_name.clone(),
+                                        file_name: file_name.to_string(),
                                         diff: ContentDiffAdvice {
                                             old: old.clone(),
                                             new: new.clone(),
@@ -479,7 +499,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                 }
                                 DiffKind::Assist => {
                                     let diag = AssistDiffDiagnostic {
-                                        file_name: file_name.clone(),
+                                        file_name: file_name.to_string(),
                                         diff: ContentDiffAdvice {
                                             old: old.clone(),
                                             new: new.clone(),

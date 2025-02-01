@@ -16,7 +16,7 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
-    "outDir": "dist",
+    "outDir": "dist"
   },
   "include": [
     "src/**/*"

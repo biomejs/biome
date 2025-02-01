@@ -524,9 +524,7 @@ impl ConfigurationExt for Configuration {
                 .map_err(|err| FileSystemDiagnostic {
                     path: external_resolution_base_path.to_string(),
                     severity: Severity::Error,
-                    error_kind: FsErrorKind::CantReadFile(
-                        external_resolution_base_path.to_string(),
-                    ),
+                    error_kind: FsErrorKind::CantReadFile,
                     source: Some(Error::from(CaminoError::from(err))),
                 })?
             };
