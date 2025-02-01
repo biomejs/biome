@@ -60,9 +60,9 @@ a {
     view-transition-name: --bbb;
 }
 
-@property --foo {}
+@property --baz {}
 a {
-	container-name: --foo;
+	container-name: --baz;
 }
 
 .parent {
