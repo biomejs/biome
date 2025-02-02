@@ -83,6 +83,9 @@ versioned_files = ["crates/biome_css_parser/Cargo.toml"]
 [packages.biome_css_syntax]
 changelog       = "crates/biome_css_syntax/CHANGELOG.md"
 versioned_files = ["crates/biome_css_syntax/Cargo.toml"]
+[packages.biome_css_analyze]
+changelog       = "crates/biome_css_analyze/CHANGELOG.md"
+versioned_files = ["crates/biome_css_analyze/Cargo.toml"]
 [packages.biome_deserialize]
 changelog       = "crates/biome_deserialize/CHANGELOG.md"
 versioned_files = ["crates/biome_deserialize/Cargo.toml"]
