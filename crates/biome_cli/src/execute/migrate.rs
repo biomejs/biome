@@ -111,15 +111,11 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     biome_config
                         .formatter
                         .get_or_insert(Default::default())
-                        .ignore
+                        .includes
                         .get_or_insert(Default::default())
                         .extend(ignore_patterns.patterns);
                 }
-                if ignore_patterns.has_negated_patterns {
-                    console.log(markup! {
-                        <Warn><Emphasis>{prettier::IGNORE_FILE}</Emphasis>" contains negated glob patterns that start with "<Emphasis>"!"</Emphasis>".\nThese patterns cannot be migrated because Biome doesn't support them."</Warn>
-                    })
-                } else if write && biome_config != old_biome_config {
+                if write && biome_config != old_biome_config {
                     console.log(markup!{
                         <Info><Emphasis>{prettier::IGNORE_FILE}</Emphasis>" has been successfully migrated."</Info>
                     });
@@ -191,15 +187,11 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     biome_config
                         .linter
                         .get_or_insert(Default::default())
-                        .ignore
+                        .includes
                         .get_or_insert(Default::default())
                         .extend(ignore_patterns.patterns);
                 }
-                if ignore_patterns.has_negated_patterns {
-                    console.log(markup! {
-                        <Warn><Emphasis>{eslint::IGNORE_FILE}</Emphasis>" contains negated glob patterns that start with "<Emphasis>"!"</Emphasis>".\nThese patterns cannot be migrated because Biome doesn't support them."</Warn>
-                    })
-                } else if write && biome_config != old_biome_config {
+                if write && biome_config != old_biome_config {
                     console.log(markup!{
                         <Info><Emphasis>{eslint::IGNORE_FILE}</Emphasis>" has been successfully migrated."</Info>
                     });

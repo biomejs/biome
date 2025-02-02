@@ -122,6 +122,11 @@ impl Deref for IgnorePattern {
         &self.0
     }
 }
+impl AsRef<str> for IgnorePattern {
+    fn as_ref(&self) -> &str {
+        self.0.as_ref()
+    }
+}
 impl biome_deserialize::Deserializable for IgnorePattern {
     fn deserialize(
         ctx: &mut impl DeserializationContext,
@@ -129,13 +134,7 @@ impl biome_deserialize::Deserializable for IgnorePattern {
         name: &str,
     ) -> Option<Self> {
         let s = biome_deserialize::Text::deserialize(ctx, value, name)?;
-        match ignorefile::convert_pattern(s.text()) {
-            Ok(pattern) => Some(Self(pattern.into_boxed_str())),
-            Err(msg) => {
-                ctx.report(DeserializationDiagnostic::new(msg).with_range(value.range()));
-                None
-            }
-        }
+        Some(Self(ignorefile::convert_pattern(s.text()).into_boxed_str()))
     }
 }
 
