@@ -531,6 +531,7 @@ dependencies = [
  "oxc_resolver",
  "papaya",
  "parking_lot",
+ "path-absolutize",
  "rayon",
  "rustc-hash 2.1.0",
  "schemars",
