@@ -35,7 +35,7 @@ Line ending: LF
 Line width: 80
 Attribute Position: Auto
 Bracket same line: false
-Whitespace sensitivity: strict
+Whitespace sensitivity: css
 Indent script and style: false
 -----
 
