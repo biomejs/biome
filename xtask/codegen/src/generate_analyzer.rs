@@ -258,7 +258,7 @@ fn generate_group(category: &'static str, group: &str, base_path: &Path) -> Resu
 fn update_js_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -> Result<()> {
     let path = project_root().join("crates/biome_js_analyze/src/registry.rs");
 
-    let categories = analyzers.into_iter().map(|(_, tokens)| tokens);
+    let categories = analyzers.into_values();
 
     let tokens = xtask::reformat(quote! {
         use biome_analyze::RegistryVisitor;
@@ -277,7 +277,7 @@ fn update_js_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) ->
 fn update_json_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -> Result<()> {
     let path = project_root().join("crates/biome_json_analyze/src/registry.rs");
 
-    let categories = analyzers.into_iter().map(|(_, tokens)| tokens);
+    let categories = analyzers.into_values();
 
     let tokens = xtask::reformat(quote! {
         use biome_analyze::RegistryVisitor;
@@ -297,7 +297,7 @@ fn update_json_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) 
 fn update_css_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -> Result<()> {
     let path = project_root().join("crates/biome_css_analyze/src/registry.rs");
 
-    let categories = analyzers.into_iter().map(|(_, tokens)| tokens);
+    let categories = analyzers.into_values();
 
     let tokens = xtask::reformat(quote! {
         use biome_analyze::RegistryVisitor;
