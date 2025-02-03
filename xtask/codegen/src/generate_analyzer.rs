@@ -19,39 +19,32 @@ fn generate_js_analyzer() -> Result<()> {
     let base_path = project_root().join("crates/biome_js_analyze/src");
     let mut analyzers = BTreeMap::new();
     generate_category("lint", &mut analyzers, &base_path)?;
-
-    let mut assist = BTreeMap::new();
-    generate_category("assist", &mut assist, &base_path)?;
-
-    let mut syntax = BTreeMap::new();
-    generate_category("syntax", &mut syntax, &base_path)?;
+    generate_category("assist", &mut analyzers, &base_path)?;
+    generate_category("syntax", &mut analyzers, &base_path)?;
 
     generate_options(&base_path)?;
 
-    update_js_registry_builder(analyzers, assist, syntax)
+    update_js_registry_builder(analyzers)
 }
 
 fn generate_json_analyzer() -> Result<()> {
     let base_path = project_root().join("crates/biome_json_analyze/src");
     let mut analyzers = BTreeMap::new();
     generate_category("lint", &mut analyzers, &base_path)?;
-
-    let mut assist = BTreeMap::new();
-    generate_category("assist", &mut assist, &base_path)?;
+    generate_category("assist", &mut analyzers, &base_path)?;
 
     generate_options(&base_path)?;
-    update_json_registry_builder(analyzers, assist)
+    update_json_registry_builder(analyzers)
 }
 
 fn generate_css_analyzer() -> Result<()> {
     let base_path = project_root().join("crates/biome_css_analyze/src");
     let mut analyzers = BTreeMap::new();
     generate_category("lint", &mut analyzers, &base_path)?;
-
     generate_category("assist", &mut analyzers, &base_path)?;
 
     generate_options(&base_path)?;
-    update_css_registry_builder(analyzers, assist)
+    update_css_registry_builder(analyzers)
 }
 
 fn generate_graphql_analyzer() -> Result<()> {
@@ -262,18 +255,10 @@ fn generate_group(category: &'static str, group: &str, base_path: &Path) -> Resu
     Ok(())
 }
 
-fn update_js_registry_builder(
-    rules: BTreeMap<&'static str, TokenStream>,
-    assist: BTreeMap<&'static str, TokenStream>,
-    syntax: BTreeMap<&'static str, TokenStream>,
-) -> Result<()> {
+fn update_js_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -> Result<()> {
     let path = project_root().join("crates/biome_js_analyze/src/registry.rs");
 
-    let categories = rules
-        .into_iter()
-        .chain(assist)
-        .chain(syntax)
-        .map(|(_, tokens)| tokens);
+    let categories = analyzers.into_iter().map(|(_, tokens)| tokens);
 
     let tokens = xtask::reformat(quote! {
         use biome_analyze::RegistryVisitor;
@@ -289,16 +274,10 @@ fn update_js_registry_builder(
     Ok(())
 }
 
-fn update_json_registry_builder(
-    analyzers: BTreeMap<&'static str, TokenStream>,
-    assist: BTreeMap<&'static str, TokenStream>,
-) -> Result<()> {
+fn update_json_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -> Result<()> {
     let path = project_root().join("crates/biome_json_analyze/src/registry.rs");
 
-    let categories = analyzers
-        .into_iter()
-        .chain(assist)
-        .map(|(_, tokens)| tokens);
+    let categories = analyzers.into_iter().map(|(_, tokens)| tokens);
 
     let tokens = xtask::reformat(quote! {
         use biome_analyze::RegistryVisitor;
@@ -315,13 +294,10 @@ fn update_json_registry_builder(
     Ok(())
 }
 
-fn update_css_registry_builder(
-    rules: BTreeMap<&'static str, TokenStream>,
-    assist: BTreeMap<&'static str, TokenStream>,
-) -> Result<()> {
+fn update_css_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -> Result<()> {
     let path = project_root().join("crates/biome_css_analyze/src/registry.rs");
 
-    let categories = rules.into_iter().chain(assist).map(|(_, tokens)| tokens);
+    let categories = analyzers.into_iter().map(|(_, tokens)| tokens);
 
     let tokens = xtask::reformat(quote! {
         use biome_analyze::RegistryVisitor;
