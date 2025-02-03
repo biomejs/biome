@@ -152,7 +152,7 @@ importers:
         version: 3.4.17
     devDependencies:
       '@types/node':
-        specifier: ^22.13.0
+        specifier: 22.13.0
         version: 22.13.0
       read-package-up:
         specifier: 11.0.0
