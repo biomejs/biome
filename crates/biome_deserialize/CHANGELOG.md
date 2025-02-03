@@ -1,9 +1,9 @@
----
-biome_deserialize: minor
-biome_deserialize_macros: minor
----
+# `biome_deserialize`
 
-# Replace `diagnostics` with `context`
+## v1.0.0
+
+
+### Replace `diagnostics` with `context`
 
 This is a **breaking change**.
 You have to update all manual implementations of the `Deserializable` trait.
@@ -53,3 +53,28 @@ This no longer sets the name of the deserialized root value.
 The name of the deserialized root value is now the empty string.
 
 Also, the `passthrough_name` macro attribute was removed because we now have a way of retrieving an identfiier from the context.
+
+### Add the `indexmap` Cargo feature
+
+This is a **breaking change**.
+
+Previously, `biome_deserialize` required `serde` and `indexmap` as dependencies.
+Its dependencies are now optional.
+
+If you need the implementation of `Deserializable` for `indexmap::IndexMap` and `indexmap::IndexSet`, then you have to use the `indexmap` feature.
+Update your `Cargo.toml` as follows:
+
+```diff
+  [dependencies]
+- biome_deserialize = { version: "<version>" }
++ biome_deserialize = { version: "<version>", features = ["indexmap"] }
+```
+
+### Remove `biome_deserialize::StringSet`
+
+This is a **breaking change**.
+
+`biome_deserialize::StringSet` is now removed.
+Use `indexmap::IndexSet<String>` instead.
+
+As a consequence the cargo feature `schema` has been removed.

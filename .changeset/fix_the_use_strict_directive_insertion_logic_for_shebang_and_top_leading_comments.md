@@ -1,8 +1,8 @@
 ---
-biome_js_analyze: patch
+"@biomejs/biome": patch
 ---
 
-# Fix [#4841](https://github.com/biomejs/biome/issues/4841), shebang and top leading comments in cjs files are now handled correctly
+Fix [#4841](https://github.com/biomejs/biome/issues/4841), shebang and top leading comments in cjs files are now handled correctly
 
 - shebang only (keep it as is)
 

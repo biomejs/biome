@@ -1,8 +1,8 @@
 ---
-cli: major
+"@biomejs/biome": major
 ---
 
-# Removed `--apply` and `--apply-unsafe`
+Removed `--apply` and `--apply-unsafe`.
 
 The CLI options `--apply` and `--apply-unasfe` aren't accepted anymore. Use `--write` and `--write --unafe` instead:
 

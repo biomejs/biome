@@ -1,6 +1,5 @@
 ---
-cli: patch
-biome_js_analyze: patch
+"@biomejs/biome": patch
 ---
 
-# mark `useSelfClosingElements` as safe and improve error message
+Mark `useSelfClosingElements` as safe and improve error message.

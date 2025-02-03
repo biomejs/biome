@@ -1,9 +1,6 @@
 ---
-cli: patch
-biome_js_analyze: patch
+"@biomejs/biome": patch
 ---
-
-# `useNamingConvention` preserves capitalization
 
 The `useNamingConvention` rule now suggests a rename that preserves uppercase if possible.
 

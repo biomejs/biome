@@ -1,9 +1,6 @@
 ---
-biome_js_analyze: major
-cli: major
+"@biomejs/biome": major
 ---
-
-# `useFilenamingConvention` and `useNamingConvention` now require ASCII names by default
 
 Prior to Biome 2.0, non-ASCII names were accepted by default.
 They are now rejected.

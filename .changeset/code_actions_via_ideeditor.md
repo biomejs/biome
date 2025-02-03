@@ -1,8 +1,6 @@
 ---
-cli: minor
+"@biomejs/biome": minor
 ---
-
-# Code actions via IDE/editor
 
 Biome users can now configure code actions from linter rules as well as assist actions directly in the settings of their IDE/editor.
 

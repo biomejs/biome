@@ -1,8 +1,6 @@
 ---
-cli: major
+"@biomejs/biome": major
 ---
-
-# Reworked how large files behave
 
 Previously, files that should exceed the configured size limit would throw an error, and the CLI would exit with an error code.
 
