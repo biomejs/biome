@@ -26,3 +26,41 @@ Promise.resolve()
 async function bindingPromiseInsideFunction() {
   Promise.resolve()
 }
+
+
+class ValidTestClass {
+  returnsPromiseProperty: Promise<void>
+  constructor() {
+    this.returnsPromiseProperty = new Promise((resolve, reject) => { })
+  }
+
+  async returnsPromiseMethod(): Promise<string> {
+    return 'value';
+  }
+  async someMethod() {
+    this.returnsPromiseMethod().catch(() => { });
+  }
+
+  returnsString(): string {
+    return 'value';
+  }
+  async someMethod2() {
+    this.returnsString();
+  }
+
+  async someMethod3() {
+    this.returnsPromiseProperty.then(() => { }, () => { });
+  }
+
+  returnsPromiseFunction = async function (): Promise<string> {
+    return 'value';
+  }
+  returnsPromiseArrowFunction = async (): Promise<string> => {
+    return 'value';
+  }
+
+  async someMetho3() {
+    await this.returnsPromiseFunction().then(() => { });
+    this.returnsPromiseArrowFunction().catch(() => { });
+  }
+}

@@ -5,10 +5,11 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, global_identifier, AnyJsExpression, AnyTsType,
-    JsArrowFunctionExpression, JsCallExpression, JsExpressionStatement, JsFunctionDeclaration,
-    JsIdentifierExpression, JsMethodClassMember, JsMethodObjectMember, JsStaticMemberExpression,
-    JsSyntaxKind, JsVariableDeclarator, TsReturnTypeAnnotation,
+    binding_ext::AnyJsBindingDeclaration, global_identifier, AnyJsClassMember, AnyJsExpression,
+    AnyTsType, JsArrowFunctionExpression, JsCallExpression, JsClassDeclaration, JsClassMemberList,
+    JsExpressionStatement, JsFunctionDeclaration, JsIdentifierExpression, JsInitializerClause,
+    JsMethodClassMember, JsMethodObjectMember, JsStaticMemberExpression, JsSyntaxKind,
+    JsThisExpression, JsVariableDeclarator, TsReturnTypeAnnotation,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
 
@@ -63,6 +64,31 @@ declare_lint_rule! {
     /// Promise.all([p1, p2, p3])
     /// ```
     ///
+    /// ```ts,expect_diagnostic
+    /// class Api {
+    ///   async returnsPromise(): Promise<string> {
+    ///     return 'value';
+    ///   }
+    ///   async someMethod() {
+    ///     this.returnsPromise();
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// class Parent {
+    ///   async returnsPromise(): Promise<string> {
+    ///     return 'value';
+    ///   }
+    /// }
+    ///
+    /// class Child extends Parent {
+    ///   async someMethod() {
+    ///     this.returnsPromise();
+    ///   }
+    /// }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```ts
@@ -84,6 +110,15 @@ declare_lint_rule! {
     /// returnsPromise().catch(() => {});
     ///
     /// await Promise.all([p1, p2, p3])
+    ///
+    /// class Api {
+    ///   async returnsPromise(): Promise<string> {
+    ///     return 'value';
+    ///   }
+    ///   async someMethod() {
+    ///     await this.returnsPromise();
+    ///   }
+    /// }
     /// ```
     ///
     pub NoFloatingPromises {
@@ -125,6 +160,12 @@ impl Rule for NoFloatingPromises {
                     return None;
                 }
 
+                Some(())
+            }
+            AnyJsExpression::JsStaticMemberExpression(static_member_expr) => {
+                if !check_this_expression_in_static_member_expression(&static_member_expr, model)? {
+                    return None;
+                }
                 Some(())
             }
             _ => None,
@@ -250,7 +291,7 @@ fn is_binding_a_promise(
             Some(is_function_a_promise(&func_decl))
         }
         AnyJsBindingDeclaration::JsVariableDeclarator(js_var_decl) => Some(
-            is_variable_initializer_a_promise(&js_var_decl, model).unwrap_or_default()
+            is_initializer_a_promise(&js_var_decl.initializer()?, model).unwrap_or_default()
                 || is_variable_annotation_a_promise(&js_var_decl).unwrap_or_default(),
         ),
         _ => Some(false),
@@ -404,6 +445,17 @@ fn is_member_expression_callee_a_promise(
         AnyJsExpression::JsIdentifierExpression(js_ident_expr) => {
             is_binding_a_promise(&js_ident_expr, model)
         }
+        AnyJsExpression::JsThisExpression(js_this_expr) => {
+            let js_name = static_member_expr.member().ok()?;
+            let value_token = js_name.value_token().ok()?;
+            check_this_expression(&js_this_expr, &value_token.to_string(), model)
+        }
+        AnyJsExpression::JsStaticMemberExpression(static_member_expr) => {
+            if !check_this_expression_in_static_member_expression(&static_member_expr, model)? {
+                return None;
+            }
+            Some(true)
+        }
         _ => Some(false),
     }
 }
@@ -444,7 +496,7 @@ fn is_in_async_function(node: &JsExpressionStatement) -> bool {
         .is_some()
 }
 
-/// Checks if the initializer of a `JsVariableDeclarator` is an async function or returns a promise.
+/// Checks if the initializer is an async function or returns a promise.
 ///
 /// This function inspects the initializer of a given `JsVariableDeclarator` to determine
 /// if it is an async function or returns a promise. It returns `Some(true)` if the initializer
@@ -477,11 +529,10 @@ fn is_in_async_function(node: &JsExpressionStatement) -> bool {
 ///
 /// const promiseWithGlobalIdentifier = new window.Promise((resolve, reject) => resolve('value'));
 /// ```
-fn is_variable_initializer_a_promise(
-    js_variable_declarator: &JsVariableDeclarator,
+fn is_initializer_a_promise(
+    initializer_clause: &JsInitializerClause,
     model: &SemanticModel,
 ) -> Option<bool> {
-    let initializer_clause = &js_variable_declarator.initializer()?;
     let expr = initializer_clause.expression().ok()?;
     match expr.omit_parentheses() {
         AnyJsExpression::JsArrowFunctionExpression(arrow_func) => Some(
@@ -531,23 +582,7 @@ fn is_variable_annotation_a_promise(js_variable_declarator: &JsVariableDeclarato
     let any_ts_var_anno = js_variable_declarator.variable_annotation()?;
     let ts_type_anno = any_ts_var_anno.as_ts_type_annotation()?;
     let any_ts_type = ts_type_anno.ty().ok()?;
-    match any_ts_type {
-        AnyTsType::TsFunctionType(func_type) => {
-            let return_type = func_type.return_type().ok()?;
-            let ref_type = return_type.as_any_ts_type()?.as_ts_reference_type()?;
-            let name = ref_type.name().ok()?;
-            let identifier = name.as_js_reference_identifier()?;
-
-            Some(identifier.has_name("Promise"))
-        }
-        AnyTsType::TsReferenceType(ts_ref_type) => {
-            let name = ts_ref_type.name().ok()?;
-            let identifier = name.as_js_reference_identifier()?;
-
-            Some(identifier.has_name("Promise"))
-        }
-        _ => Some(false),
-    }
+    is_ts_type_a_promise(&any_ts_type)
 }
 
 /// Checks if an expression is a `Promise`.
@@ -597,4 +632,186 @@ fn is_expression_a_promise(expr: &AnyJsExpression, model: &SemanticModel) -> boo
     }
 
     true
+}
+
+/// Traverses up the syntax tree to find the class declaration and checks if a method is a promise.
+///
+/// This function traverses up the syntax tree from the given `JsThisExpression` to find the nearest
+/// class declaration. It then searches for a method or property in the class that matches the provided
+/// `target_name`. If a matching member is found, it checks if the member is a promise.
+///
+/// # Arguments
+///
+/// * `js_this_expression` - A `JsThisExpression` representing the `this` keyword in the syntax tree.
+/// * `target_name` - The name of the method or property to search for.
+/// * `model` - A reference to the `SemanticModel` used for resolving bindings.
+///
+/// # Returns
+///
+/// * `Some(true)` if the class member is a promise.
+/// * `Some(false)` if the class member is not a promise.
+/// * `None` if there is an error in the process or if the class member is not found.
+///
+/// # Examples
+///
+/// Example TypeScript code that would return `Some(true)`:
+/// ```typescript
+/// class Api {
+///   async returnsPromise(): Promise<string> {
+///     return 'value';
+///   }
+///   async someMethod() {
+///     this.returnsPromise();
+///   }
+/// }
+/// ```
+///
+/// Example TypeScript code that would return `Some(false)`:
+/// ```typescript
+/// class Api {
+///   returnsString(){
+///     return 'value';
+///   }
+///   async someMethod() {
+///     this.returnsString();
+///   }
+/// }
+/// ```
+fn check_this_expression(
+    js_this_expression: &JsThisExpression,
+    target_name: &str,
+    model: &SemanticModel,
+) -> Option<bool> {
+    js_this_expression
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(|ancestor| {
+            if ancestor.kind() == JsSyntaxKind::JS_CLASS_DECLARATION {
+                let class_decl = JsClassDeclaration::cast(ancestor)?;
+                return find_and_check_class_member(&class_decl, target_name, model);
+            }
+            None
+        })
+}
+
+fn check_this_expression_in_static_member_expression(
+    static_member_expr: &JsStaticMemberExpression,
+    model: &SemanticModel,
+) -> Option<bool> {
+    let any_js_expression = static_member_expr.object().ok()?;
+    let js_this_expression = any_js_expression.as_js_this_expression()?;
+    let js_name = static_member_expr.member().ok()?;
+    let value_token = js_name.value_token().ok()?;
+    if !check_this_expression(js_this_expression, &value_token.to_string(), model)? {
+        return None;
+    }
+    Some(true)
+}
+
+/// Finds a class method or property by matching the given name and checks if it is a promise.
+///
+/// This function searches for a class method or property in the given `JsClassDeclaration`
+/// by matching the provided `target_name`. If a matching member is found, it checks if the member
+/// is a promise. If no matching member is found, it checks the parent class (if any) and recursively
+/// checks the method or property in the parent class.
+///
+/// # Arguments
+///
+/// * `class_decl` - A reference to a `JsClassDeclaration` representing the class to search in.
+/// * `target_name` - The name of the method or property to search for.
+/// * `model` - A reference to the `SemanticModel` used for resolving bindings.
+///
+/// # Returns
+///
+/// * `Some(true)` if the class member is a promise.
+/// * `Some(false)` if the class member is not a promise.
+/// * `None` if there is an error in the process or if the class member is not found.
+///
+fn find_and_check_class_member(
+    class_decl: &JsClassDeclaration,
+    target_name: &str,
+    model: &SemanticModel,
+) -> Option<bool> {
+    let class_member_list = class_decl.members();
+    if let Some(member) = find_class_method_or_property(class_member_list, target_name) {
+        return is_class_member_a_promise(&member, model);
+    }
+
+    let extends_clause = class_decl.extends_clause()?;
+    let super_class = extends_clause.super_class().ok()?;
+    let identifier_expression = super_class.as_js_identifier_expression()?;
+    let reference = identifier_expression.name().ok()?;
+    let binding = model.binding(&reference)?;
+    let any_js_binding_decl = binding.tree().declaration()?;
+    let AnyJsBindingDeclaration::JsClassDeclaration(parent_class_decl) = any_js_binding_decl else {
+        return None;
+    };
+    find_and_check_class_member(&parent_class_decl, target_name, model)
+}
+
+fn find_class_method_or_property(
+    class_member_list: JsClassMemberList,
+    target_name: &str,
+) -> Option<AnyJsClassMember> {
+    class_member_list.into_iter().find(|member| match member {
+        AnyJsClassMember::JsMethodClassMember(method) => method
+            .name()
+            .ok()
+            .and_then(|name| name.name())
+            .is_some_and(|class_member_name| class_member_name.text() == target_name),
+        AnyJsClassMember::JsPropertyClassMember(property) => property
+            .name()
+            .ok()
+            .and_then(|name| name.name())
+            .is_some_and(|class_member_name| class_member_name.text() == target_name),
+        _ => false,
+    })
+}
+
+fn is_class_member_a_promise(
+    class_member: &AnyJsClassMember,
+    model: &SemanticModel,
+) -> Option<bool> {
+    match class_member {
+        AnyJsClassMember::JsMethodClassMember(method) => Some(
+            method.async_token().is_some()
+                || is_return_type_a_promise(method.return_type_annotation()).unwrap_or_default(),
+        ),
+        AnyJsClassMember::JsPropertyClassMember(property) => {
+            if let Some(property_annotation) = property.property_annotation() {
+                let ts_type_annotation = property_annotation.as_ts_type_annotation()?;
+                let any_ts_type = ts_type_annotation.ty().ok()?;
+
+                return is_ts_type_a_promise(&any_ts_type);
+            }
+
+            if let Some(initializer_clause) = property.value() {
+                return is_initializer_a_promise(&initializer_clause, model);
+            }
+
+            None
+        }
+        _ => None,
+    }
+}
+
+fn is_ts_type_a_promise(any_ts_type: &AnyTsType) -> Option<bool> {
+    match any_ts_type {
+        AnyTsType::TsFunctionType(func_type) => {
+            let return_type = func_type.return_type().ok()?;
+            let ref_type = return_type.as_any_ts_type()?.as_ts_reference_type()?;
+            let name = ref_type.name().ok()?;
+            let identifier = name.as_js_reference_identifier()?;
+
+            Some(identifier.has_name("Promise"))
+        }
+        AnyTsType::TsReferenceType(ts_ref_type) => {
+            let name = ts_ref_type.name().ok()?;
+            let identifier = name.as_js_reference_identifier()?;
+
+            Some(identifier.has_name("Promise"))
+        }
+        _ => None,
+    }
 }
