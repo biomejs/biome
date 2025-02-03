@@ -5,8 +5,12 @@ use std::cell::RefCell;
 use crate::{
     comments::HtmlComments,
     prelude::*,
-    utils::children::{
-        html_split_children, is_meaningful_html_text, HtmlChild, HtmlChildrenIterator, HtmlSpace,
+    utils::{
+        children::{
+            html_split_children, is_meaningful_html_text, HtmlChild, HtmlChildrenIterator,
+            HtmlSpace,
+        },
+        metadata::is_element_whitespace_sensitive,
     },
 };
 use biome_formatter::{best_fitting, prelude::*, CstFormatContext, FormatRuleWithOptions};
@@ -171,6 +175,9 @@ impl FormatHtmlElementList {
                                 next_child,
                                 AnyHtmlElement::HtmlSelfClosingElement(_)
                             ) || word.is_single_character(),
+                            is_next_element_whitespace_sensitive: is_element_whitespace_sensitive(
+                                f, next_child,
+                            ),
                         }),
 
                         Some(HtmlChild::Newline | HtmlChild::Whitespace | HtmlChild::EmptyLine) => {
@@ -275,15 +282,20 @@ impl FormatHtmlElementList {
                     let line_mode = match children_iter.peek() {
                         Some(HtmlChild::Word(word)) => {
                             // Break if the current or next element is a self closing element
-                            // ```javascript
+                            // ```html
                             // <pre className="h-screen overflow-y-scroll" />adefg
                             // ```
                             // Becomes
-                            // ```javascript
+                            // ```html
                             // <pre className="h-screen overflow-y-scroll" />
                             // adefg
                             // ```
-                            if matches!(non_text, AnyHtmlElement::HtmlSelfClosingElement(_))
+                            let is_current_whitespace_sensitive =
+                                is_element_whitespace_sensitive(f, non_text);
+                            if is_current_whitespace_sensitive {
+                                // we can't add any whitespace if the element is whitespace sensitive
+                                None
+                            } else if matches!(non_text, AnyHtmlElement::HtmlSelfClosingElement(_))
                                 && !word.is_single_character()
                             {
                                 Some(LineMode::Hard)
@@ -481,7 +493,10 @@ enum WordSeparator {
     ///     </div>
     /// );
     /// ```
-    EndOfText { is_soft_line_break: bool },
+    EndOfText {
+        is_soft_line_break: bool,
+        is_next_element_whitespace_sensitive: bool,
+    },
 }
 
 impl WordSeparator {
@@ -491,6 +506,7 @@ impl WordSeparator {
             self,
             WordSeparator::EndOfText {
                 is_soft_line_break: false,
+                is_next_element_whitespace_sensitive: _
             }
         )
     }
@@ -500,16 +516,23 @@ impl Format<HtmlFormatContext> for WordSeparator {
     fn fmt(&self, f: &mut Formatter<HtmlFormatContext>) -> FormatResult<()> {
         match self {
             WordSeparator::BetweenWords => soft_line_break_or_space().fmt(f),
-            WordSeparator::EndOfText { is_soft_line_break } => {
+            WordSeparator::EndOfText {
+                is_soft_line_break,
+                is_next_element_whitespace_sensitive,
+            } => {
+                // If the next element is whitespace sensitive, we can't insert any whitespace.
+                if *is_next_element_whitespace_sensitive {
+                    return Ok(());
+                }
                 if *is_soft_line_break {
                     soft_line_break().fmt(f)
                 }
-                // ```javascript
+                // ```html
                 // <div>ab<br/></div>
                 // ```
                 // Becomes
                 //
-                // ```javascript
+                // ```html
                 // <div>
                 //  ab
                 //  <br />
