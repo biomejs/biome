@@ -18,7 +18,7 @@ pub const HTML_INLINE_TAGS: &[&str] = &[
     "b", "i", "u", "span", "a", "strong", "em", "small", "big",
 ];
 
-/// Whether or not an element should be considered whitespace sensitive, considering the element's tag name and the
+/// Whether an element should be considered whitespace sensitive, considering the element's tag name and the
 /// formatter's whitespace sensitivity options.
 pub(crate) fn is_element_whitespace_sensitive(f: &HtmlFormatter, element: &AnyHtmlElement) -> bool {
     let name = match element {
