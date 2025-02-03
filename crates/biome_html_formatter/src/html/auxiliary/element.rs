@@ -103,9 +103,11 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             None
         };
 
+        let attr_group_id = f.group_id("element-attr-group-id");
         FormatNodeRule::fmt(
             &FormatHtmlOpeningElement::default().with_options(FormatHtmlOpeningElementOptions {
                 r_angle_is_borrowed: borrowed_r_angle.is_some(),
+                attr_group_id,
             }),
             &opening_element,
             f,
@@ -130,10 +132,16 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
                 } => {
                     write!(
                         f,
-                        [best_fitting![
-                            format_args![flat_children],
-                            format_args![expanded_children]
-                        ]]
+                        [
+                            // If the attribute group breaks, prettier always breaks the children as well.
+                            &if_group_breaks(&expanded_children).with_group_id(Some(attr_group_id)),
+                            // If the attribute group does NOT break, print whatever fits best for the children.
+                            &if_group_fits_on_line(&best_fitting![
+                                format_args![flat_children],
+                                format_args![expanded_children]
+                            ])
+                            .with_group_id(Some(attr_group_id)),
+                        ]
                     )?;
                 }
             }
