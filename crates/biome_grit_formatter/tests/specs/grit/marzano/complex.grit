@@ -8,8 +8,13 @@ function concat($list_a, $list_b) {
   return $new_list
 }
 
-// Note this is a foreign function
-function sort_internal() js {
+// Note this is a foreign function written in JavaScript
+function sort_internal() js					 {
+	const foo = 9 + 10;
+	// This is a comment... {
+	while (1 < 0) {
+		console.log("hello")
+	}
 	return "ok"
 }
 

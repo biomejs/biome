@@ -255,6 +255,12 @@ pub fn grit_int_literal(value_token: SyntaxToken) -> GritIntLiteral {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn grit_javascript_body_wrapper(value_token: SyntaxToken) -> GritJavascriptBodyWrapper {
+    GritJavascriptBodyWrapper::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_JAVASCRIPT_BODY_WRAPPER,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn grit_javascript_function_definition(
     function_token: SyntaxToken,
     name: GritName,
@@ -262,7 +268,7 @@ pub fn grit_javascript_function_definition(
     args: GritVariableList,
     r_paren_token: SyntaxToken,
     js_token: SyntaxToken,
-    grit_predicate_curly: GritPredicateCurly,
+    grit_javascript_body_wrapper: GritJavascriptBodyWrapper,
 ) -> GritJavascriptFunctionDefinition {
     GritJavascriptFunctionDefinition::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_JAVASCRIPT_FUNCTION_DEFINITION,
@@ -273,7 +279,9 @@ pub fn grit_javascript_function_definition(
             Some(SyntaxElement::Node(args.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
             Some(SyntaxElement::Token(js_token)),
-            Some(SyntaxElement::Node(grit_predicate_curly.into_syntax())),
+            Some(SyntaxElement::Node(
+                grit_javascript_body_wrapper.into_syntax(),
+            )),
         ],
     ))
 }

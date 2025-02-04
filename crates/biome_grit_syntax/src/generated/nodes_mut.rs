@@ -319,6 +319,14 @@ impl GritIntLiteral {
         )
     }
 }
+impl GritJavascriptBodyWrapper {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl GritJavascriptFunctionDefinition {
     pub fn with_function_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -356,7 +364,7 @@ impl GritJavascriptFunctionDefinition {
                 .splice_slots(5usize..=5usize, once(Some(element.into()))),
         )
     }
-    pub fn with_grit_predicate_curly(self, element: GritPredicateCurly) -> Self {
+    pub fn with_grit_javascript_body_wrapper(self, element: GritJavascriptBodyWrapper) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(6usize..=6usize, once(Some(element.into_syntax().into()))),

@@ -585,6 +585,25 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.into_node(GRIT_INT_LITERAL, children)
             }
+            GRIT_JAVASCRIPT_BODY_WRAPPER => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == GRIT_JAVASCRIPT_BODY {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        GRIT_JAVASCRIPT_BODY_WRAPPER.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(GRIT_JAVASCRIPT_BODY_WRAPPER, children)
+            }
             GRIT_JAVASCRIPT_FUNCTION_DEFINITION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<7usize> = RawNodeSlots::default();
@@ -632,7 +651,7 @@ impl SyntaxFactory for GritSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if GritPredicateCurly::can_cast(element.kind()) {
+                    if GritJavascriptBodyWrapper::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
