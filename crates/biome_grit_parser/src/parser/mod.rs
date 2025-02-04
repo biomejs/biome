@@ -3,6 +3,7 @@ mod literals;
 mod parse_error;
 mod patterns;
 mod predicates;
+mod tests;
 
 use crate::constants::*;
 use crate::token_source::GritTokenSource;
