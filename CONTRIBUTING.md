@@ -348,7 +348,7 @@ Please use the template provided.
 
 ### Changelog
 
-This repository uses [changeset](https://github.com/changesets/changesets) to automate the releases of Biome's binaries, the JavaScript libraries and the creation of the `CHANGELOG.md` for each library.
+This repository uses [changesets](https://github.com/changesets/changesets) to automate the releases of Biome's binaries, the JavaScript libraries and the creation of the `CHANGELOG.md` for each library.
 
 If the PR you're about to open is a bugfix/feature visible to users of the Biome toolchain or of the published Biome crates, you are encouraged to provide a **changeset** . To *create* a changeset, use the following command (*don't create it manually*):
 
