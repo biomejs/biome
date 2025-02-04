@@ -60,7 +60,7 @@ pub(crate) fn format_with_guard<'ctx>(
     }
 
     ctx.push_message(Message::Diagnostics {
-        name: workspace_file.path.to_string(),
+        file_path: workspace_file.path.to_string(),
         content: input.clone(),
         diagnostics: diagnostics_result
             .diagnostics

@@ -118,8 +118,8 @@ impl FileSystem for OsFileSystem {
             Err(error) => Err(FileSystemDiagnostic {
                 path: path.to_string(),
                 severity: Severity::Error,
-                error_kind: FsErrorKind::CantReadFile(error.to_string()),
-                source: None,
+                error_kind: FsErrorKind::CantReadFile,
+                source: Some(Error::from(IoError::from(error))),
             }),
         }
     }
@@ -422,7 +422,7 @@ fn expand_symbolic_link(
             let path = path.to_string();
             ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
                 path: path.clone(),
-                error_kind: FsErrorKind::DeeplyNestedSymlinkExpansion(path),
+                error_kind: FsErrorKind::DeeplyNestedSymlinkExpansion,
                 severity: Severity::Warning,
                 source: None,
             }));
@@ -464,9 +464,9 @@ fn follow_symlink(
                 let path = path.to_string();
                 ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
                     path: path.clone(),
-                    error_kind: FsErrorKind::DereferencedSymlink(path),
+                    error_kind: FsErrorKind::DereferencedSymlink,
                     severity: Severity::Warning,
-                    source: None,
+                    source: Some(Error::from(IoError::from(err))),
                 }));
             } else {
                 ctx.push_diagnostic(IoError::from(err).with_file_path(path.to_string()));

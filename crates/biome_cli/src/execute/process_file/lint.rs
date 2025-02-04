@@ -129,7 +129,7 @@ pub(crate) fn lint_with_guard<'ctx>(
         };
 
         ctx.push_message(Message::Diagnostics {
-            name: workspace_file.path.to_string(),
+            file_path: workspace_file.path.to_string(),
             content: input,
             diagnostics: pull_diagnostics_result
                 .diagnostics

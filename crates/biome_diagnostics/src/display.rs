@@ -138,6 +138,8 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
                     })?;
                 } else if is_jetbrains {
                     fmt.write_str(&format!(" at {name}"))?;
+                } else if cfg!(debug_assertions) && cfg!(windows) {
+                    fmt.write_str(name.replace('\\', "/").as_str())?;
                 } else {
                     fmt.write_str(name)?;
                 }

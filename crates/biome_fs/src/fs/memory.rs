@@ -332,13 +332,9 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
                     path: path.to_string(),
                     error_kind: match entry {
                         ErrorEntry::UnknownFileType => FsErrorKind::UnknownFileType,
-                        ErrorEntry::DereferencedSymlink(path) => {
-                            FsErrorKind::DereferencedSymlink(path.to_string_lossy().to_string())
-                        }
-                        ErrorEntry::DeeplyNestedSymlinkExpansion(path) => {
-                            FsErrorKind::DeeplyNestedSymlinkExpansion(
-                                path.to_string_lossy().to_string(),
-                            )
+                        ErrorEntry::DereferencedSymlink(_) => FsErrorKind::DereferencedSymlink,
+                        ErrorEntry::DeeplyNestedSymlinkExpansion(_) => {
+                            FsErrorKind::DeeplyNestedSymlinkExpansion
                         }
                     },
                     severity: Severity::Warning,
