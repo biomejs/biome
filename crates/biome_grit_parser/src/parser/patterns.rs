@@ -101,7 +101,8 @@ fn parse_pattern_non_greedy(p: &mut GritParser) -> ParsedSyntax {
         T![.] => parse_dot(p),
         SOME_KW => parse_some(p),
         EVERY_KW => parse_every(p),
-        GRIT_UNDERSCORE => parse_grit_undescore(p),
+        DOLLAR_UNDERSCORE => parse_grit_underscore(p),
+        GRIT_UNDERSCORE => parse_grit_underscore(p),
         GRIT_VARIABLE => parse_variable(p),
         GRIT_REGEX | GRIT_SNIPPET_REGEX => parse_regex_pattern(p),
         LIKE_KW => parse_like(p),
@@ -273,13 +274,13 @@ fn parse_files(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_grit_undescore(p: &mut GritParser) -> ParsedSyntax {
-    if !p.at(GRIT_UNDERSCORE) {
+fn parse_grit_underscore(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at(GRIT_UNDERSCORE) && !p.at(DOLLAR_UNDERSCORE) {
         return Absent;
     }
 
     let m = p.start();
-    p.bump(GRIT_UNDERSCORE);
+    p.bump_any();
     Present(m.complete(p, GRIT_UNDERSCORE))
 }
 

@@ -31,6 +31,10 @@ pub(crate) struct GritLexer<'src> {
     /// and the next non-trivia token.
     after_newline: bool,
 
+    /// `true` if the last thing we parsed was a `js` keyword
+    /// This is used to flip into the js lexer when we see a `js` keyword
+    in_js: bool,
+
     diagnostics: Vec<ParseDiagnostic>,
 }
 
@@ -74,6 +78,7 @@ impl<'src> Lexer<'src> for GritLexer<'src> {
 
         if !kind.is_trivia() {
             self.after_newline = false;
+            self.in_js = matches!(kind, GritSyntaxKind::JS_KW);
         }
 
         kind
@@ -124,6 +129,7 @@ impl<'src> GritLexer<'src> {
             current_start: TextSize::from(0),
             after_newline: false,
             diagnostics: Vec::new(),
+            in_js: false,
         }
     }
 
@@ -193,7 +199,13 @@ impl<'src> GritLexer<'src> {
             b'%' => self.consume_byte(T![%]),
             b'[' => self.consume_byte(T!['[']),
             b']' => self.consume_byte(T![']']),
-            b'{' => self.consume_byte(T!['{']),
+            b'{' => {
+                if self.in_js {
+                    self.consume_js_body()
+                } else {
+                    self.consume_byte(T!['{'])
+                }
+            }
             b'}' => self.consume_byte(T!['}']),
             b'(' => self.consume_byte(T!['(']),
             b')' => self.consume_byte(T![')']),
@@ -572,6 +584,57 @@ impl<'src> GritLexer<'src> {
                 ERROR_TOKEN
             }
             LexStringState::InvalidEscapeSequence => ERROR_TOKEN,
+        }
+    }
+
+    fn consume_js_body(&mut self) -> GritSyntaxKind {
+        self.assert_current_char_boundary();
+        let start = self.text_position();
+
+        self.advance(1); // Skip over the opening brace
+        let mut state = LexJavaScriptBody::InBody;
+        let mut brace_depth = 0;
+
+        while let Some(chr) = self.current_byte() {
+            match chr {
+                b'}' => {
+                    self.advance(1);
+                    if matches!(state, LexJavaScriptBody::InBody) {
+                        if brace_depth == 0 {
+                            state = LexJavaScriptBody::Terminated;
+                            break;
+                        } else {
+                            brace_depth -= 1;
+                        }
+                    }
+                }
+                b'{' => {
+                    self.advance(1);
+                    if matches!(state, LexJavaScriptBody::InBody) {
+                        brace_depth += 1;
+                    }
+                }
+                b'/' => {
+                    // Consume the comment without using it.
+                    let _comment = self.consume_comment_or_slash();
+                }
+                _ => self.advance_char_unchecked(),
+            }
+        }
+
+        match state {
+            LexJavaScriptBody::Terminated => GRIT_JAVASCRIPT_BODY,
+            LexJavaScriptBody::InBody => {
+                let unterminated =
+                    ParseDiagnostic::new("Missing closing brace", start..self.text_position())
+                        .with_detail(
+                            self.source.text_len()..self.source.text_len(),
+                            "file ends here",
+                        );
+                self.diagnostics.push(unterminated);
+
+                ERROR_TOKEN
+            }
         }
     }
 
@@ -1036,6 +1099,15 @@ enum LexBacktickSnippet {
     InvalidEscapeSequence,
 
     /// Properly terminated snippet.
+    Terminated,
+}
+
+#[derive(Copy, Clone, Debug)]
+enum LexJavaScriptBody {
+    /// Inside a js body
+    InBody,
+
+    /// Properly terminated body
     Terminated,
 }
 
