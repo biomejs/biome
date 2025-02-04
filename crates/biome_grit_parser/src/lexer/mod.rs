@@ -180,7 +180,7 @@ impl<'src> GritLexer<'src> {
     fn lex_token(&mut self, current: u8) -> GritSyntaxKind {
         match current {
             b'\n' | b'\r' => {
-                assert!(self.consume_newline());
+                self.consume_newline();
                 NEWLINE
             }
             b'\t' | b' ' => self.consume_whitespaces(),
