@@ -1,8 +1,8 @@
 ---
-biome_cli: minor
+"@biomejs/biome": minor
 ---
 
-# Biome migrate eslint outputs a better overriding behavior
+Biome migrate eslint outputs a better overriding behavior.
 
 A Biome rule can have multiple ESLint equivalent rules.
 For example, [useLiteralKeys](https://biomejs.dev/linter/rules/use-literal-keys/) has two ESLint equivalent rules: [dot-notation](https://eslint.org/docs/latest/rules/dot-notation) and [@typescript-eslint/dot-notation](https://typescript-eslint.io/rules/dot-notation/).

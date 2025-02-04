@@ -1,8 +1,8 @@
 ---
-cli: minor
+"@biomejs/biome": minor
 ---
 
-# Introduce `includes`
+Introduce `includes`.
 
 Biome allows users to `include` and `ignore` files in its configuration using glob patterns.
 

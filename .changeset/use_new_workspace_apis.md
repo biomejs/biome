@@ -1,8 +1,6 @@
 ---
-js-api: minor
-cli: minor
+"@biomejs/js-api": minor
+"@biomejs/biome": minor
 ---
-
-# Use new Workspace APIs
 
 The package now requires `v2` of the WebAssembly packages. The internal APIs of Workspace are now `camelCase`.

@@ -1,8 +1,8 @@
 ---
-cli: major
+"@biomejs/biome": major
 ---
 
-# Remove deprecated rules
+Remove deprecated rules.
 
 The following _deprecated_ rules have been deleted:
 

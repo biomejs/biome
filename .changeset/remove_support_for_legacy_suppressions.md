@@ -1,8 +1,8 @@
 ---
-cli: major
+"@biomejs/biome": major
 ---
 
-# Remove support for legacy suppressions
+Remove support for legacy suppressions.
 
 Biome used to support "legacy suppressions" that looked like this:
 

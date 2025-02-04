@@ -1,14 +1,11 @@
 ---
-cli: patch
-biome_js_parser: patch
+"@biomejs/biome": patch
 ---
 
-# Export Named Type support `default` parser
+Export Named Type support `default` parser.
 
-The following code:
+The following code is now parsed successfully:
 
 ```ts
 export { type A as default } from './b.ts';
 ```
-
-Should be parsed successfully.

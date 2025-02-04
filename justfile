@@ -165,15 +165,9 @@ ready:
   just test-doc
   git diff --exit-code --quiet
 
-# Creates a new crate
-new-crate name:
-  cargo new --lib crates/{{snakecase(name)}}
-  cargo run -p xtask_codegen -- new-crate --name={{snakecase(name)}}
-  just f
-
 # Creates a new changeset for the final changelog
 new-changeset:
-    knope document-change
+    pnpm changeset
 
 # Dry-run of the release
 dry-run-release *args='':

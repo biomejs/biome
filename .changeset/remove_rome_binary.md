@@ -1,9 +1,7 @@
 ---
-cli: major
+"@biomejs/biome": major
 ---
 
-# Remove `ROME_BINARY`
+Remove `ROME_BINARY`. Use `BIOME_BINARY` instead.
 
-The environment variable `ROME_BINARY` isn't supported anymore.
 
-Use `BIOME_BINARY` instead.
