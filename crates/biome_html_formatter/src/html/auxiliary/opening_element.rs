@@ -36,14 +36,30 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
             r_angle_token,
         } = node.as_fields();
 
+        let bracket_same_line = f.options().bracket_same_line().value();
         write!(f, [l_angle_token.format(), name.format()])?;
-        if attributes.len() > 0 {
-            write!(f, [space(), attributes.format()])?
-        }
-        // When these tokens are borrowed, they are managed by the sibling `HtmlElementList` formatter.
-        if !self.r_angle_is_borrowed {
-            write!(f, [r_angle_token.format()])?;
-        }
+
+        let attr_group_id = f.group_id("element-attr-group-id");
+        write!(
+            f,
+            [&group(&format_with(|f| {
+                attributes.format().fmt(f)?;
+
+                // Whitespace sensitivity takes precedence over bracketSameLine for correctness.
+                //
+                // The r_angle is placed inside this group because prettier always includes this token
+                // in the same group as the attributes, unless the token is being borrowed.
+                // When these tokens are borrowed, they are managed by the sibling `HtmlElementList` formatter.
+                if !bracket_same_line {
+                    write!(f, [soft_line_break()])?;
+                }
+                if !self.r_angle_is_borrowed {
+                    write!(f, [r_angle_token.format()])?;
+                }
+                Ok(())
+            }))
+            .with_group_id(Some(attr_group_id))]
+        )?;
 
         Ok(())
     }

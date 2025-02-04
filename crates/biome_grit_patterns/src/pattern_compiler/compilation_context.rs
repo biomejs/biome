@@ -1,3 +1,4 @@
+#![allow(clippy::needless_lifetimes)]
 use grit_pattern_matcher::pattern::VariableSource;
 use grit_util::ByteRange;
 

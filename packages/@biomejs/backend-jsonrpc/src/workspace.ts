@@ -831,6 +831,10 @@ export interface Source {
 	 * Sorts the keys of a JSON object in natural order
 	 */
 	useSortedKeys?: RuleAssistConfiguration_for_Null;
+	/**
+	 * Enforce ordering of CSS properties and nested rules.
+	 */
+	useSortedProperties?: RuleAssistConfiguration_for_Null;
 }
 export type QuoteStyle = "double" | "single";
 /**
@@ -852,7 +856,7 @@ As a consequence of this, the formatter must format blocks that look like this (
 
 Note that this is only necessary for inline elements. Block elements do not have this restriction. 
 	 */
-export type WhitespaceSensitivity = "strict" | "ignore";
+export type WhitespaceSensitivity = "css" | "strict" | "ignore";
 export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteProperties = "asNeeded" | "preserve";
 export type Semicolons = "always" | "asNeeded";
@@ -3368,6 +3372,7 @@ export type Category =
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useParseIntRadix"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useTrimStartEnd"
 	| "lint/nursery/useValidAutocomplete"

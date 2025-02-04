@@ -1,8 +1,5 @@
 use crate::JsonRuleAction;
-use biome_analyze::{
-    context::RuleContext, declare_source_rule, ActionCategory, Ast, Rule, RuleAction,
-    SourceActionKind,
-};
+use biome_analyze::{context::RuleContext, declare_source_rule, Ast, Rule, RuleAction};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_json_factory::make::{json_member_list, token};

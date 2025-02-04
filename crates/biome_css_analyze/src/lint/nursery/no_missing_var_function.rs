@@ -123,9 +123,10 @@ declare_lint_rule! {
     }
 }
 
-pub const IGNORED_PROPERTIES: [&str; 17] = [
+pub const IGNORED_PROPERTIES: [&str; 18] = [
     "animation",
     "animation-name",
+    "container-name",
     "counter-increment",
     "counter-reset",
     "counter-set",

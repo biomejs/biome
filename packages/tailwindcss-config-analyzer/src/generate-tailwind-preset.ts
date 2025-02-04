@@ -1,15 +1,14 @@
 // run this script: $ just gen-tw
-// requires Bun installed globally: bun.sh
 
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { readPackageUp } from "read-package-up";
 import { introspectTailwindConfig } from "./introspect.js";
 import { type SortConfig, sortConfigFromSpec } from "./sort-config.js";
+import fs from "node:fs"
 
 const ROOT_PACKAGE_NAME = "@biomejs/monorepo";
-const OUTPUT_PATH =
-	"crates/biome_js_analyze/src/semantic_analyzers/nursery/use_sorted_classes/tailwind_preset.rs";
+const OUTPUT_PATH = "crates/biome_js_analyze/src/lint/nursery/use_sorted_classes/tailwind_preset.rs";
 
 const EXCLUDED_LAYERS = ["defaults", "base"];
 const LAYER_ORDER = ["components", "utilities"];
@@ -106,7 +105,7 @@ async function generateTailwindPreset() {
 	const file = generateFile(sortConfig);
 	const rootPath = await findRoot();
 	const outputPath = path.join(rootPath, OUTPUT_PATH);
-	await Bun.write(outputPath, file);
+	await fs.promises.writeFile(outputPath, file);
 }
 
 await generateTailwindPreset();

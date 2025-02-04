@@ -17,7 +17,6 @@ allow_attributes        = "deny"
 cargo_common_metadata   = "allow"
 empty_docs              = "allow" # there are some false positives inside biome_wasm
 multiple_crate_versions = "allow"
-needless_lifetimes      = "allow"
 
 # pedantic
 assigning_clones             = "warn"
@@ -193,7 +192,7 @@ grit-pattern-matcher = "0.5"
 grit-util            = "0.5"
 ignore               = "0.4.23"
 indexmap             = { version = "2.7.1" }
-insta                = "1.42.0"
+insta                = "1.42.1"
 natord               = "1.0.9"
 oxc_resolver         = "4.0"
 papaya               = "0.1.8"

@@ -14,7 +14,7 @@ use std::fs::read_to_string;
 use std::path::PathBuf;
 use std::{env, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.json", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{json,jsonc}", crate::run_test, "module"}
 
 fn run_test(input: &'static str, _: &str, directory_path: &str, _: &str) {
     register_leak_checker();
@@ -62,49 +62,47 @@ pub(crate) fn analyze_and_snap(
     input_file: &Utf8Path,
     directory_path: PathBuf,
 ) -> usize {
-    let parsed = parse_json(input_code, JsonParserOptions::default());
+    let parse_options = if file_name.ends_with(".jsonc") {
+        JsonParserOptions::default()
+            .with_allow_comments()
+            .with_allow_trailing_commas()
+    } else {
+        JsonParserOptions::default()
+    };
+    let parsed = parse_json(input_code, parse_options);
     let root = parsed.tree();
 
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
-    let version = read_to_string(input_file.with_extension("version.txt"))
-        .ok()
-        .map_or_else(|| "1.5.0".to_string(), |v| v.trim().to_string());
     let rule_name = directory_path.file_name().unwrap().to_str().unwrap();
     let rule_filter = RuleFilter::Rule("migrations", rule_name);
     let filter = AnalysisFilter {
         enabled_rules: Some(slice::from_ref(&rule_filter)),
         ..Default::default()
     };
-    let (_, errors) = biome_migrate::migrate_configuration(
-        &root,
-        filter,
-        input_file,
-        version.to_string(),
-        |event| {
-            if let Some(mut diag) = event.diagnostic() {
-                for action in event.actions() {
-                    if !action.is_suppression() {
-                        check_code_action(input_file, input_code, &action);
-                        diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
-                    }
-                }
-
-                let error = diag.with_severity(Severity::Warning);
-                diagnostics.push(diagnostic_to_string(file_name, input_code, error));
-                return ControlFlow::Continue(());
-            }
-
+    let (_, errors) = biome_migrate::migrate_configuration(&root, filter, input_file, |event| {
+        if let Some(mut diag) = event.diagnostic() {
             for action in event.actions() {
                 if !action.is_suppression() {
-                    check_code_action(input_file, input_code, &action);
-                    code_fixes.push(code_fix_to_string(input_code, action));
+                    check_code_action(input_file, input_code, &action, parse_options);
+                    diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                 }
             }
 
-            ControlFlow::<Never>::Continue(())
-        },
-    );
+            let error = diag.with_severity(Severity::Warning);
+            diagnostics.push(diagnostic_to_string(file_name, input_code, error));
+            return ControlFlow::Continue(());
+        }
+
+        for action in event.actions() {
+            if !action.is_suppression() {
+                check_code_action(input_file, input_code, &action, parse_options);
+                code_fixes.push(code_fix_to_string(input_code, action));
+            }
+        }
+
+        ControlFlow::<Never>::Continue(())
+    });
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));
@@ -120,7 +118,12 @@ pub(crate) fn analyze_and_snap(
     diagnostics.len()
 }
 
-fn check_code_action(path: &Utf8Path, source: &str, action: &AnalyzerAction<JsonLanguage>) {
+fn check_code_action(
+    path: &Utf8Path,
+    source: &str,
+    action: &AnalyzerAction<JsonLanguage>,
+    parse_options: JsonParserOptions,
+) {
     let (new_tree, text_edit) = match action
         .mutation
         .clone()
@@ -146,6 +149,6 @@ fn check_code_action(path: &Utf8Path, source: &str, action: &AnalyzerAction<Json
     }
 
     // Re-parse the modified code and panic if the resulting tree has syntax errors
-    let re_parse = parse_json(&output, JsonParserOptions::default());
+    let re_parse = parse_json(&output, parse_options);
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 }

@@ -3916,6 +3916,13 @@
 						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
 						{ "type": "null" }
 					]
+				},
+				"useSortedProperties": {
+					"description": "Enforce ordering of CSS properties and nested rules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -5018,7 +5025,12 @@
 			"description": "Whitespace sensitivity for HTML formatting.\n\nThe following two cases won't produce the same output:\n\n|                |      html      |    output    | | -------------- | :------------: | :----------: | | with spaces    | `1<b> 2 </b>3` | 1<b> 2 </b>3 | | without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |\n\nThis happens because whitespace is significant in inline elements.\n\nAs a consequence of this, the formatter must format blocks that look like this (assume a small line width, <20): ```html <span>really long content</span> ``` as this, where the content hugs the tags: ```html <span >really long content</span > ```\n\nNote that this is only necessary for inline elements. Block elements do not have this restriction.",
 			"oneOf": [
 				{
-					"description": "Leading and trailing whitespace in content is considered significant for inline elements.\n\nThe formatter should leave at least one whitespace character if whitespace is present. Otherwise, if there is no whitespace, it should not add any after `>` or before `<`. In other words, if there's no whitespace, the text content should hug the tags.\n\nExample of text hugging the tags: ```html <b >content</b > ```",
+					"description": "The formatter considers whitespace significant for elements that have an \"inline\" display style by default in browser's user agent style sheets.",
+					"type": "string",
+					"enum": ["css"]
+				},
+				{
+					"description": "Leading and trailing whitespace in content is considered significant for all elements.\n\nThe formatter should leave at least one whitespace character if whitespace is present. Otherwise, if there is no whitespace, it should not add any after `>` or before `<`. In other words, if there's no whitespace, the text content should hug the tags.\n\nExample of text hugging the tags: ```html <b >content</b > ```",
 					"type": "string",
 					"enum": ["strict"]
 				},

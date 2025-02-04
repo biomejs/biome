@@ -1,0 +1,53 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid_with_group.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "foo": "bar"
+      },
+      "style": {
+        "lorem": "ipsum",
+        "noVar": "error"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid_with_group.json:9:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rule style/noVar has ben moved to the suspicious group.
+  
+     7 │       "style": {
+     8 │         "lorem": "ipsum",
+   > 9 │         "noVar": "error"
+       │         ^^^^^^^^^^^^^^^^
+    10 │       }
+    11 │     }
+  
+  i Safe fix: Move the rule in the correct group.
+  
+     5  5 │           "foo": "bar"
+     6  6 │         },
+     7    │ - ······"style":·{
+     8    │ - ········"lorem":·"ipsum",
+     9    │ - ········"noVar":·"error"
+        7 │ + ······"suspicious":·{
+        8 │ + ········"foo":·"bar"
+        9 │ + ······},
+       10 │ + ······"suspicious":·{
+       11 │ + ········"foo":·"bar"
+    10 12 │         }
+    11 13 │       }
+  
+
+```

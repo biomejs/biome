@@ -2,10 +2,8 @@ mod analyzers;
 mod macros;
 mod registry;
 mod rule_mover;
-mod version_services;
 
 use crate::registry::visit_migration_registry;
-use crate::version_services::TheVersion;
 pub use biome_analyze::ControlFlow;
 use biome_analyze::{
     AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ApplySuppression,
@@ -18,7 +16,7 @@ use biome_rowan::{BatchMutation, SyntaxToken};
 use camino::Utf8Path;
 use std::convert::Infallible;
 use std::ops::Deref;
-use std::sync::{Arc, LazyLock};
+use std::sync::LazyLock;
 
 /// Return the static [MetadataRegistry] for the JS analyzer rules
 static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
@@ -37,7 +35,6 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     root: &LanguageRoot<JsonLanguage>,
     filter: AnalysisFilter,
     configuration_file_path: &'a Utf8Path,
-    version: String,
     inspect_matcher: V,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
@@ -50,7 +47,7 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_migration_registry(&mut registry);
 
-    let (migration_registry, mut services, diagnostics, visitors) = registry.build();
+    let (migration_registry, services, diagnostics, visitors) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -88,7 +85,7 @@ where
     let mut analyzer = Analyzer::new(
         METADATA.deref(),
         InspectMatcher::new(migration_registry, inspect_matcher),
-        |_, _| -> Vec<Result<_, Infallible>> { unreachable!() },
+        |_, _| -> Vec<Result<_, Infallible>> { Default::default() },
         Box::new(TestAction),
         &mut emit_signal,
     );
@@ -96,8 +93,6 @@ where
     for ((phase, _), visitor) in visitors {
         analyzer.add_visitor(phase, visitor);
     }
-
-    services.insert_service(Arc::new(TheVersion::new(version.as_str())));
 
     (
         analyzer.run(AnalyzerContext {
@@ -114,21 +109,13 @@ pub fn migrate_configuration<'a, F, B>(
     root: &LanguageRoot<JsonLanguage>,
     filter: AnalysisFilter,
     configuration_file_path: &'a Utf8Path,
-    version: String,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
     F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    analyze_with_inspect_matcher(
-        root,
-        filter,
-        configuration_file_path,
-        version,
-        |_| {},
-        emit_signal,
-    )
+    analyze_with_inspect_matcher(root, filter, configuration_file_path, |_| {}, emit_signal)
 }
 
 pub(crate) type MigrationAction = RuleAction<JsonLanguage>;
@@ -184,7 +171,6 @@ mod test {
             &parsed.tree(),
             AnalysisFilter::default(),
             Utf8Path::new(""),
-            "1.5.0".to_string(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     let error = diag

@@ -128,7 +128,7 @@
 //!
 
 /// A Biome glob pattern.
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Glob {
@@ -147,6 +147,22 @@ impl Glob {
     /// ```
     pub fn is_negated(&self) -> bool {
         self.is_negated
+    }
+
+    /// Returns the negated version of this glob.
+    ///
+    /// ```
+    /// let glob = "!*.js".parse::<biome_glob::Glob>().unwrap();
+    /// assert!(!glob.negated().is_negated());
+    ///
+    /// let glob = "*.js".parse::<biome_glob::Glob>().unwrap();
+    /// assert!(glob.negated().is_negated());
+    /// ```
+    pub fn negated(self) -> Self {
+        Self {
+            is_negated: !self.is_negated,
+            glob: self.glob,
+        }
     }
 
     /// Tests whether the given path matches this pattern.
@@ -186,6 +202,11 @@ impl std::fmt::Display for Glob {
         let repr = self.glob.glob();
         let negation = if self.is_negated { "!" } else { "" };
         write!(f, "{negation}{repr}")
+    }
+}
+impl std::fmt::Debug for Glob {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self, f)
     }
 }
 impl From<Glob> for String {

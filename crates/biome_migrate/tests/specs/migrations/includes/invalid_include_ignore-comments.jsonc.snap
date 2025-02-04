@@ -1,0 +1,75 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid_include_ignore-comments.jsonc
+---
+# Input
+```json
+{
+  "files": {
+    // Comment
+    "include": ["./src", "*.js"],
+    // Comment
+    "ignore": ["tests", "*.test.js"],
+  },
+  "formatter": {
+    // Comment
+    "include": ["src/**/*.js"],
+    // Comment
+    "ignore": ["*.gen.js"],
+  },
+}
+
+```
+
+# Diagnostics
+```
+invalid_include_ignore-comments.jsonc:4:5 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! include and ignore configurations have been replaced by the includes configuration.
+  
+    2 │   "files": {
+    3 │     // Comment
+  > 4 │     "include": ["./src", "*.js"],
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │     // Comment
+    6 │     "ignore": ["tests", "*.test.js"],
+  
+  i Safe fix: Use includes instead.
+  
+     2  2 │     "files": {
+     3  3 │       // Comment
+     4    │ - ····"include":·["./src",·"*.js"],
+     5    │ - ····//·Comment
+     6    │ - ····"ignore":·["tests",·"*.test.js"],
+        4 │ + ····"includes":·["src/**",·"**/*.js",·"!**/tests",·"!**/*.test.js"],
+     7  5 │     },
+     8  6 │     "formatter": {
+  
+
+```
+
+```
+invalid_include_ignore-comments.jsonc:10:5 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! include and ignore configurations have been replaced by the includes configuration.
+  
+     8 │   "formatter": {
+     9 │     // Comment
+  > 10 │     "include": ["src/**/*.js"],
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │     // Comment
+    12 │     "ignore": ["*.gen.js"],
+  
+  i Safe fix: Use includes instead.
+  
+     8  8 │     "formatter": {
+     9  9 │       // Comment
+    10    │ - ····"include":·["src/**/*.js"],
+    11    │ - ····//·Comment
+    12    │ - ····"ignore":·["*.gen.js"],
+       10 │ + ····"includes":·["**/src/**/*.js",·"!**/*.gen.js"],
+    13 11 │     },
+    14 12 │   }
+  
+
+```

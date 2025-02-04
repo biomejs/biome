@@ -53,8 +53,10 @@ gen-formatter:
   cargo run -p xtask_codegen -- formatter
 
 # Generates the Tailwind CSS preset for utility class sorting (requires Bun)
+[working-directory: 'packages/tailwindcss-config-analyzer']
 gen-tw:
-  bun packages/tailwindcss-config-analyzer/src/generate-tailwind-preset.ts
+  pnpm build
+  pnpm execute
 
 # Generates the code of the grammars available in Biome
 gen-grammar *args='':

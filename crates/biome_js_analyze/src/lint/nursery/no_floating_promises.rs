@@ -5,10 +5,10 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, AnyJsExpression, JsArrowFunctionExpression,
-    JsCallExpression, JsExpressionStatement, JsFunctionDeclaration, JsMethodClassMember,
-    JsMethodObjectMember, JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator,
-    TsReturnTypeAnnotation,
+    binding_ext::AnyJsBindingDeclaration, global_identifier, AnyJsExpression, AnyTsType,
+    JsArrowFunctionExpression, JsCallExpression, JsExpressionStatement, JsFunctionDeclaration,
+    JsIdentifierExpression, JsMethodClassMember, JsMethodObjectMember, JsStaticMemberExpression,
+    JsSyntaxKind, JsVariableDeclarator, TsReturnTypeAnnotation,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
 
@@ -54,6 +54,15 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```ts,expect_diagnostic
+    /// const promise = new Promise((resolve) => resolve('value'));
+    /// promise.then(() => { }).finally(() => { });
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// Promise.all([p1, p2, p3])
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```ts
@@ -73,6 +82,8 @@ declare_lint_rule! {
     ///
     /// // Calling .catch() with one argument
     /// returnsPromise().catch(() => {});
+    ///
+    /// await Promise.all([p1, p2, p3])
     /// ```
     ///
     pub NoFloatingPromises {
@@ -95,22 +106,29 @@ impl Rule for NoFloatingPromises {
         let node = ctx.query();
         let model = ctx.model();
         let expression = node.expression().ok()?;
-        if let AnyJsExpression::JsCallExpression(js_call_expression) = expression {
-            let Ok(any_js_expression) = js_call_expression.callee() else {
-                return None;
-            };
+        match expression.omit_parentheses() {
+            AnyJsExpression::JsCallExpression(js_call_expression) => {
+                let any_js_expression = js_call_expression.callee().ok()?;
 
-            if !is_callee_a_promise(&any_js_expression, model)? {
-                return None;
+                if !is_callee_a_promise(&any_js_expression, model)? {
+                    return None;
+                }
+
+                if is_handled_promise(&js_call_expression).unwrap_or_default() {
+                    return None;
+                }
+
+                Some(())
             }
+            AnyJsExpression::JsIdentifierExpression(js_identifier_expression) => {
+                if !is_binding_a_promise(&js_identifier_expression, model)? {
+                    return None;
+                }
 
-            if is_handled_promise(&js_call_expression).unwrap_or(false) {
-                return None;
+                Some(())
             }
-
-            return Some(());
+            _ => None,
         }
-        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -192,21 +210,8 @@ impl Rule for NoFloatingPromises {
 /// ```
 fn is_callee_a_promise(callee: &AnyJsExpression, model: &SemanticModel) -> Option<bool> {
     match callee {
-        AnyJsExpression::JsIdentifierExpression(ident_expr) => {
-            let reference = ident_expr.name().ok()?;
-            let binding = model.binding(&reference)?;
-            let any_js_binding_decl = binding.tree().declaration()?;
-
-            match any_js_binding_decl {
-                AnyJsBindingDeclaration::JsFunctionDeclaration(func_decl) => {
-                    Some(is_function_a_promise(&func_decl))
-                }
-                AnyJsBindingDeclaration::JsVariableDeclarator(js_var_decl) => Some(
-                    is_variable_initializer_a_promise(&js_var_decl).unwrap_or(false)
-                        || is_variable_annotation_a_promise(&js_var_decl).unwrap_or(false),
-                ),
-                _ => Some(false),
-            }
+        AnyJsExpression::JsIdentifierExpression(js_ident_expr) => {
+            is_binding_a_promise(js_ident_expr, model)
         }
         AnyJsExpression::JsStaticMemberExpression(static_member_expr) => {
             is_member_expression_callee_a_promise(static_member_expr, model)
@@ -215,9 +220,46 @@ fn is_callee_a_promise(callee: &AnyJsExpression, model: &SemanticModel) -> Optio
     }
 }
 
+/// Checks if a binding is a promise.
+///
+/// This function inspects the binding of a given `JsIdentifierExpression` to determine
+/// if it is a promise. It returns `Some(true)` if the binding is a promise, `Some(false)` if it is not,
+/// and `None` if there is an error in the process.
+///
+/// # Arguments
+///
+/// * `js_ident_expr` - A reference to a `JsIdentifierExpression` representing the identifier to check.
+/// * `model` - A reference to the `SemanticModel` used for resolving bindings.
+///
+/// # Returns
+///
+/// * `Some(true)` if the binding is a promise.
+/// * `Some(false)` if the binding is not a promise.
+/// * `None` if there is an error in the process.
+///
+fn is_binding_a_promise(
+    js_ident_expr: &JsIdentifierExpression,
+    model: &SemanticModel,
+) -> Option<bool> {
+    let reference = js_ident_expr.name().ok()?;
+    let binding = model.binding(&reference)?;
+    let any_js_binding_decl = binding.tree().declaration()?;
+
+    match any_js_binding_decl {
+        AnyJsBindingDeclaration::JsFunctionDeclaration(func_decl) => {
+            Some(is_function_a_promise(&func_decl))
+        }
+        AnyJsBindingDeclaration::JsVariableDeclarator(js_var_decl) => Some(
+            is_variable_initializer_a_promise(&js_var_decl, model).unwrap_or_default()
+                || is_variable_annotation_a_promise(&js_var_decl).unwrap_or_default(),
+        ),
+        _ => Some(false),
+    }
+}
+
 fn is_function_a_promise(func_decl: &JsFunctionDeclaration) -> bool {
     func_decl.async_token().is_some()
-        || is_return_type_a_promise(func_decl.return_type_annotation()).unwrap_or(false)
+        || is_return_type_a_promise(func_decl.return_type_annotation()).unwrap_or_default()
 }
 
 /// Checks if a TypeScript return type annotation is a `Promise`.
@@ -334,6 +376,8 @@ fn is_handled_promise(js_call_expression: &JsCallExpression) -> Option<bool> {
 /// async function returnsPromise(): Promise<void> {}
 ///
 /// returnsPromise().then(() => null).catch(() => {});
+///
+/// globalThis.Promise.reject('value').finally();
 /// ```
 ///
 /// Example TypeScript code that would return `false`:
@@ -347,10 +391,21 @@ fn is_member_expression_callee_a_promise(
     model: &SemanticModel,
 ) -> Option<bool> {
     let expr = static_member_expr.object().ok()?;
-    let js_call_expr = expr.as_js_call_expression()?;
-    let callee = js_call_expr.callee().ok()?;
 
-    is_callee_a_promise(&callee, model)
+    if is_expression_a_promise(&expr, model) {
+        return Some(true);
+    }
+
+    match expr {
+        AnyJsExpression::JsCallExpression(js_call_expr) => {
+            let callee = js_call_expr.callee().ok()?;
+            is_callee_a_promise(&callee, model)
+        }
+        AnyJsExpression::JsIdentifierExpression(js_ident_expr) => {
+            is_binding_a_promise(&js_ident_expr, model)
+        }
+        _ => Some(false),
+    }
 }
 
 /// Checks if the given `JsExpressionStatement` is within an async function.
@@ -417,21 +472,31 @@ fn is_in_async_function(node: &JsExpressionStatement) -> bool {
 /// const returnsPromise = async function (): Promise<string> {
 ///   return 'value'
 /// }
+///
+/// const promise = new Promise((resolve) => resolve('value'));
+///
+/// const promiseWithGlobalIdentifier = new window.Promise((resolve, reject) => resolve('value'));
 /// ```
 fn is_variable_initializer_a_promise(
     js_variable_declarator: &JsVariableDeclarator,
+    model: &SemanticModel,
 ) -> Option<bool> {
     let initializer_clause = &js_variable_declarator.initializer()?;
     let expr = initializer_clause.expression().ok()?;
-    match expr {
+    match expr.omit_parentheses() {
         AnyJsExpression::JsArrowFunctionExpression(arrow_func) => Some(
             arrow_func.async_token().is_some()
-                || is_return_type_a_promise(arrow_func.return_type_annotation()).unwrap_or(false),
+                || is_return_type_a_promise(arrow_func.return_type_annotation())
+                    .unwrap_or_default(),
         ),
         AnyJsExpression::JsFunctionExpression(func_expr) => Some(
             func_expr.async_token().is_some()
-                || is_return_type_a_promise(func_expr.return_type_annotation()).unwrap_or(false),
+                || is_return_type_a_promise(func_expr.return_type_annotation()).unwrap_or_default(),
         ),
+        AnyJsExpression::JsNewExpression(js_new_epr) => {
+            let any_js_expr = js_new_epr.callee().ok()?;
+            Some(is_expression_a_promise(&any_js_expr, model))
+        }
         _ => Some(false),
     }
 }
@@ -459,16 +524,77 @@ fn is_variable_initializer_a_promise(
 /// const returnsPromise: () => Promise<string> = () => {
 ///   return Promise.resolve("value")
 /// }
+///
+/// const promise: Promise<string> = new Promise((resolve) => resolve('value'));
 /// ```
 fn is_variable_annotation_a_promise(js_variable_declarator: &JsVariableDeclarator) -> Option<bool> {
     let any_ts_var_anno = js_variable_declarator.variable_annotation()?;
     let ts_type_anno = any_ts_var_anno.as_ts_type_annotation()?;
     let any_ts_type = ts_type_anno.ty().ok()?;
-    let func_type = any_ts_type.as_ts_function_type()?;
-    let return_type = func_type.return_type().ok()?;
-    let ref_type = return_type.as_any_ts_type()?.as_ts_reference_type()?;
-    let name = ref_type.name().ok()?;
-    let identifier = name.as_js_reference_identifier()?;
+    match any_ts_type {
+        AnyTsType::TsFunctionType(func_type) => {
+            let return_type = func_type.return_type().ok()?;
+            let ref_type = return_type.as_any_ts_type()?.as_ts_reference_type()?;
+            let name = ref_type.name().ok()?;
+            let identifier = name.as_js_reference_identifier()?;
 
-    Some(identifier.has_name("Promise"))
+            Some(identifier.has_name("Promise"))
+        }
+        AnyTsType::TsReferenceType(ts_ref_type) => {
+            let name = ts_ref_type.name().ok()?;
+            let identifier = name.as_js_reference_identifier()?;
+
+            Some(identifier.has_name("Promise"))
+        }
+        _ => Some(false),
+    }
+}
+
+/// Checks if an expression is a `Promise`.
+///
+/// This function inspects a given `AnyJsExpression` to determine if it represents a `Promise`,
+/// either as a global identifier (e.g., `window.Promise`) or directly (e.g., `Promise.resolve`).
+/// It also checks that the found `Promise` is not a binding.
+/// It returns `true` if the expression is a `Promise` and is not a binding, otherwise `false`.
+///
+/// # Arguments
+///
+/// * `expr` - A reference to an `AnyJsExpression` to check.
+/// * `model` - A reference to the `SemanticModel` used for resolving bindings.
+///
+/// # Returns
+///
+/// * `true` if the expression is a `Promise` and is not a binding.
+/// * `false` otherwise.
+///
+/// # Examples
+///
+/// Example TypeScript code that would return `true`:
+/// ```typescript
+/// window.Promise.resolve();
+/// globalThis.Promise.resolve();
+/// Promise.resolve('value').then(() => { });
+/// Promise.all([p1, p2, p3]);
+/// ```
+///
+/// Example TypeScript code that would return `false`:
+/// ```typescript
+/// const Promise = { resolve(): {} };
+/// Promise.resolve()
+/// ```
+fn is_expression_a_promise(expr: &AnyJsExpression, model: &SemanticModel) -> bool {
+    let (reference, value) = match global_identifier(expr) {
+        Some(result) => result,
+        None => return false,
+    };
+
+    if value.text() != "Promise" {
+        return false;
+    }
+
+    if model.binding(&reference).is_some() {
+        return false;
+    }
+
+    true
 }

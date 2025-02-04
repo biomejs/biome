@@ -1,8 +1,7 @@
 use crate::rule_mover::AnalyzerMover;
-use crate::version_services::Version;
 use crate::{declare_migration, MigrationAction};
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Rule, RuleAction, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::{category, Applicability};
 use biome_json_factory::make::{
@@ -19,9 +18,9 @@ declare_migration! {
     }
 }
 
-const STYLE_RULES_THAT_WERE_ERROR: [&str; 23] = [
+const STYLE_RULES_THAT_WERE_ERROR: [&str; 22] = [
     "useNumberNamespace",
-    "noNonnullAssertion",
+    "noNonNullAssertion",
     "useAsConstAssertion",
     "noParameterAssign",
     "noInferrableTypes",
@@ -42,21 +41,17 @@ const STYLE_RULES_THAT_WERE_ERROR: [&str; 23] = [
     "useImportType",
     "useTemplate",
     "useSingleVarDeclarator",
-    "useWhile",
 ];
 
 impl Rule for StyleRules {
-    type Query = Version<JsonRoot>;
-    type State = FxHashSet<Box<str>>;
-    type Signals = Option<Self::State>;
+    type Query = Ast<JsonRoot>;
+    type State = Box<str>;
+    type Signals = Vec<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if !ctx.satisfies(">=2.0.0") {
-            return None;
-        }
         let mut nodes = FxHashSet::default();
         for rule in STYLE_RULES_THAT_WERE_ERROR {
             nodes.insert(Box::from(rule));
@@ -101,16 +96,16 @@ impl Rule for StyleRules {
             }
         }
 
-        Some(nodes)
+        nodes.into_iter().collect()
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, _node: &Self::State) -> Option<RuleDiagnostic> {
-        let root = _ctx.root();
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let root = ctx.root();
         Some(RuleDiagnostic::new(
             category!("migrate"),
             root.range(),
             markup! {
-                "Biome style rules aren't recommended anymore."
+                "Biome style rule "{state}" isn't recommended anymore."
             }
                 .to_owned(),
         ).note(markup!{
@@ -118,22 +113,23 @@ impl Rule for StyleRules {
         }))
     }
 
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<MigrationAction> {
+    fn action(ctx: &RuleContext<Self>, rule_to_move: &Self::State) -> Option<MigrationAction> {
         let mut rule_mover = AnalyzerMover::from_root(ctx.root());
 
-        for rule_to_move in state {
-            let member = json_member(
-                json_member_name(
-                    json_string_literal(rule_to_move.as_ref()).with_leading_trivia(vec![
-                        (TriviaPieceKind::Newline, "\n"),
-                        (TriviaPieceKind::Whitespace, " ".repeat(8).as_str()),
-                    ]),
-                ),
-                token(T![:]),
-                AnyJsonValue::JsonStringValue(json_string_value(json_string_literal("error"))),
-            );
-            rule_mover.replace_rule(rule_to_move.as_ref(), member, "style");
-        }
+        let member = json_member(
+            json_member_name(
+                json_string_literal(rule_to_move.as_ref()).with_leading_trivia(vec![
+                    (TriviaPieceKind::Newline, "\n"),
+                    (TriviaPieceKind::Whitespace, " ".repeat(8).as_str()),
+                ]),
+            ),
+            token(T![:]),
+            AnyJsonValue::JsonStringValue(json_string_value(
+                json_string_literal("error")
+                    .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+            )),
+        );
+        rule_mover.replace_rule(rule_to_move.as_ref(), member, "style");
 
         let mutation = rule_mover.run_queries()?;
 

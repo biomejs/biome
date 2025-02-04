@@ -40,3 +40,5 @@ The previous configuration must be updated as follows:
     }
 }
 ```
+
+You can run `biome migrate` to automatically convert from `include` and `ignore` to `includes`.

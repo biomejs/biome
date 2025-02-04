@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: elements/inline/tags-hug-content-longer.html
+info: elements/inline/tags-hug-content-longer-w-attr.html
 ---
 # Input
 
@@ -22,7 +22,7 @@ Line ending: LF
 Line width: 80
 Attribute Position: Auto
 Bracket same line: false
-Whitespace sensitivity: strict
+Whitespace sensitivity: css
 Indent script and style: false
 -----
 

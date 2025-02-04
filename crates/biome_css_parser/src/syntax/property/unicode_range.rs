@@ -55,13 +55,13 @@ pub(crate) fn parse_unicode_range(p: &mut CssParser) -> ParsedSyntax {
     let kind = p.re_lex(CssReLexContext::UnicodeRange);
 
     // If the parser is not positioned to parse a Unicode range, return an absent value.
-    if kind != T![U+] {
+    if kind != T!["U+"] {
         return Absent;
     }
 
     let m = p.start();
 
-    p.bump_with_context(T![U+], CssLexContext::UnicodeRange);
+    p.bump_with_context(T!["U+"], CssLexContext::UnicodeRange);
 
     // Checks if the parser is positioned to parse a Unicode range wildcard.
     // A wildcard cannot be combined with a range interval. For example, `U+????-U+????` is invalid.

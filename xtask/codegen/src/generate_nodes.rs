@@ -1015,7 +1015,7 @@ pub(crate) fn token_kind_to_code(name: &str, language_kind: LanguageKind) -> Tok
     } else {
         // `$`, `[`, and `]` is valid syntax in rust and it's part of macros,
         // so we need to decorate the tokens with quotes
-        if matches!(name, "$=" | "$_" | "<![CDATA[" | "]]>") {
+        if should_token_be_quoted(name) {
             let token = Literal::string(name);
             quote! { T![#token] }
         } else {
@@ -1178,4 +1178,14 @@ pub(crate) fn group_fields_for_ordering(node: &AstNodeSrc) -> Vec<Vec<&Field>> {
 
     groups.push(current_group);
     groups
+}
+
+/// Whether or not a token should be surrounded by quotes when being printed in the generated code.
+///
+/// Some tokens need to be quoted in the `T![]` macro because they conflict with Rust syntax.
+pub fn should_token_be_quoted(token: &str) -> bool {
+    matches!(
+        token,
+        "$=" | "$_" | "U+" | "<![CDATA[" | "]]>" | "   " | "_"
+    )
 }

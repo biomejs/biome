@@ -1,8 +1,7 @@
 use crate::rule_mover::AnalyzerMover;
-use crate::version_services::Version;
 use crate::{declare_migration, MigrationAction};
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Rule, RuleAction, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::{category, Applicability};
 use biome_json_syntax::JsonMember;
@@ -16,17 +15,13 @@ declare_migration! {
 }
 
 impl Rule for UseWhile {
-    type Query = Version<JsonMember>;
+    type Query = Ast<JsonMember>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-
-        if !ctx.satisfies(">=2.0.0") {
-            return None;
-        }
 
         let name = node.name().ok()?;
         let text = name.inner_string_text().ok()?;
