@@ -9,3 +9,6 @@
 .parent~.child {}
 .parent ~ .child {}
 .parent  ~  .child {}
+
+/* a comment */
+.parent>.child>.child2{}
