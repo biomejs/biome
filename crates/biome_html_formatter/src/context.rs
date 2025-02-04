@@ -245,7 +245,11 @@ impl FormatOptions for HtmlFormatOptions {
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum WhitespaceSensitivity {
-    /// Leading and trailing whitespace in content is considered significant for inline elements.
+    /// The formatter considers whitespace significant for elements that have an "inline" display style by default in
+    /// browser's user agent style sheets.
+    #[default]
+    Css,
+    /// Leading and trailing whitespace in content is considered significant for all elements.
     ///
     /// The formatter should leave at least one whitespace character if whitespace is present.
     /// Otherwise, if there is no whitespace, it should not add any after `>` or before `<`. In other words, if there's no whitespace, the text content should hug the tags.
@@ -256,7 +260,6 @@ pub enum WhitespaceSensitivity {
     ///     >content</b
     /// >
     /// ```
-    #[default]
     Strict,
     /// Whitespace is considered insignificant. The formatter is free to remove or add whitespace as it sees fit.
     Ignore,
@@ -265,6 +268,7 @@ pub enum WhitespaceSensitivity {
 impl fmt::Display for WhitespaceSensitivity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::Css => std::write!(f, "css"),
             Self::Strict => std::write!(f, "strict"),
             Self::Ignore => std::write!(f, "ignore"),
         }
@@ -276,14 +280,19 @@ impl FromStr for WhitespaceSensitivity {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "css" => Ok(Self::Css),
             "strict" => Ok(Self::Strict),
             "ignore" => Ok(Self::Ignore),
-            _ => Err("Value not supported for WhitespaceSensitivity. Supported values are 'strict' and 'ignore'."),
+            _ => Err("Value not supported for WhitespaceSensitivity. Supported values are 'css', 'strict' and 'ignore'."),
         }
     }
 }
 
 impl WhitespaceSensitivity {
+    pub const fn is_css(&self) -> bool {
+        matches!(self, Self::Css)
+    }
+
     pub const fn is_strict(&self) -> bool {
         matches!(self, Self::Strict)
     }

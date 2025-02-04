@@ -1,8 +1,6 @@
 ---
-cli: minor
+"@biomejs/biome": minor
 ---
-
-# Enable rule with default severity
 
 You can now enable lint rules using the default severity suggested by Biome using the new variant `"on"`, when enabling a rule.
 

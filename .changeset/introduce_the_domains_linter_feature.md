@@ -1,10 +1,8 @@
 ---
-cli: minor
+"@biomejs/biome": minor
 ---
 
-# Introduce the `domains` linter feature
-
-The Biome linter now has a new way to opt-in rules, with a concept called `domains`.
+Introduce the `domains` linter feature. The Biome linter now has a new way to opt-in rules, with a concept called `domains`.
 
 Domains can be seen as concepts shared by different rules.
 

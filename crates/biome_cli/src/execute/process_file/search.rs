@@ -41,7 +41,7 @@ pub(crate) fn search_with_guard<'ctx>(
     let matches_len = result.matches.len();
 
     let search_results = Message::Diagnostics {
-        name: file_name,
+        file_path: file_name,
         content: input,
         diagnostics: result
             .matches

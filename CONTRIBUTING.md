@@ -348,7 +348,7 @@ Please use the template provided.
 
 ### Changelog
 
-This repository uses [knope](https://knope.tech/) to automate the releases of Biome's binaries, the Rust crates, the JavaScript libraries and the creation of the `CHANGELOG.md` for each library/crate.
+This repository uses [changesets](https://github.com/changesets/changesets) to automate the releases of Biome's binaries, the JavaScript libraries and the creation of the `CHANGELOG.md` for each library.
 
 If the PR you're about to open is a bugfix/feature visible to users of the Biome toolchain or of the published Biome crates, you are encouraged to provide a **changeset** . To *create* a changeset, use the following command (*don't create it manually*):
 
@@ -361,108 +361,35 @@ The command will create the changeset(s) in the `.changeset` folder. You're free
 
 #### Choose the correct packages
 
-In the vast majority of cases, you want to choose the `cli` package, which represents the main binary (AKA the npm package `@biomejs/biome`). If your PR also changes any *public* crate that is published, you'll have to select it too.
+In the vast majority of cases, you want to choose the `@biomejs/biome` package, which represents the main package.
 
-For example, if your PR fixes a *JavaScript* lint rule and changes a public of the crate `biome_js_syntax`, you'll select:
-- `cli`
-- `biome_js_analyze`
-- `biome_js_syntax`
-
-And the frontmatter of the changset will look like this:
+The frontmatter of the changset will look like this:
 
 ```markdown
 ---
-cli: patch
-biome_js_analyze: patch
-biome_js_syntax: patch
+"@biomejs/biome": patch
 ---
-```
-With this, the description will be the same for all three packages.
 
-However, there are cases where **you don't want** that, because we want to write a specific message for `cli` and another for `biome_js_syntax`. In this case, you're free to create **multiple changesets** in the *same PR*. In the example above, you would need to run `just new-chageset` twice, select `cli` the first time, and select `biome_js_syntax` and `biome_js_analyze` the second time.
+Description here...
+```
 
 #### Choose the correct type of change
 
-We are very strict about `major` changes in the `cli` package. To better understand type of your change *for this package*, please refer to our [versioning page](https://biomejs.dev/internals/versioning/). Generally:
+We are very strict about `major` changes in the `@biomejs/biome` package. To better understand type of your change *for this package*, please refer to our [versioning page](https://biomejs.dev/internals/versioning/). Generally:
 - `patch`: any sort of change that fixes a bug.
 - `minor`: new features available to the users.
 - `major`: a change that breaks a user API.
 
-We are very liberal for the `biome_` crates, so don't be afraid to break the developer-facing APIs, as long as the change is properly described.
-
 #### Writing a changeset
 
-`knope` allows to generate two types of changesets, and you can use the one that you see fit:
-1. A changeset with a single header (`#`). When there's a single header, `knope` will transform it into a single bullet point inside the `CHANGELOG.md`.
-2. A changeset with a single header (`#`) and a paragraph beneath. `knope` will transform it into a specialised header inside the `CHANGELOG.md`.
-
-For example, you have a PR that ships a bug fix, and a new feature, and you want to document both of them. The bugfix doesn't require a long description, while the feature might need some explanation. So create two changesets, that might look like this:
-
-This is the changeset for the bugfix:
-```markdown
----
-biome_js_syntax: patch
----
-
-# Fix [#000](https://path/to/000), where the parameter `foo` wasn't read by the function `apply_foo()`
-```
-
-This is the changeset for the feature, where you show the feature usage by having an example of configuration, with the shell result:
-``````markdown
----
-cli: minor
----
-
-# Add the X feature
-
-This feature does wonders, and you can use it with this configuration:
-
-```json
-{
-    "configuration": "here"
-}
-```
-
-And this happens:
-
-```shell
-
-```
-``````
-
-These two changesets will be compiled by `knope`, and the final result in the `CHANGELOG.md` will be as follows:
-
-``````markdown
-### Patches
-
-- Fix [#000](https://path/to/000), where the parameter `foo` wasn't read by the function `apply_foo()`
-
-### Features
-
-#### Add the X feature
-
-This feature does wonders, and you can use it with this configuration:
-
-```json
-{
-    "configuration": "here"
-}
-```
-
-And this happens:
-
-```shell
-
-```
-``````
-
-Regarding the description of the changeset, try to follow the these guidelines:
+The description of the changeset should follow the these guidelines:
 
 - Use the present tense, e.g. "Add new feature", "Fix edge case".
 - If you fix a bug, please add the link to the issue, e.g. "Fix edge case [#4444]()".
 - Whenever applicable, add a code block to show your new changes. For example, for a new
   rule you might want to show an invalid case, for the formatter you might want to show
   how the new formatting changes, and so on.
+- End each sentence with fullstops.
 
 If in doubt, take a look at existing or past changesets.
 

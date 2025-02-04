@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 ## `biome.json`
 
@@ -61,15 +60,15 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
       25 │ + → → }
       26 │ + → },
       27 │ + → "overrides":·[
-      28 │ + → → {·"include":·["**/*.test.js"],·"formatter":·{·"indentStyle":·"space"·}·},
+      28 │ + → → {·"includes":·["**/*.test.js"],·"formatter":·{·"indentStyle":·"space"·}·},
       29 │ + → → {
-      30 │ + → → → "include":·["**/*.spec.js"],
+      30 │ + → → → "includes":·["**/*.spec.js"],
       31 │ + → → → "javascript":·{
       32 │ + → → → → "formatter":·{·"semicolons":·"always",·"quoteStyle":·"single"·}
       33 │ + → → → }
       34 │ + → → },
       35 │ + → → {
-      36 │ + → → → "include":·["**/*.ts"],
+      36 │ + → → → "includes":·["**/*.ts"],
       37 │ + → → → "javascript":·{
       38 │ + → → → → "formatter":·{·"semicolons":·"always",·"quoteStyle":·"single"·}
       39 │ + → → → },

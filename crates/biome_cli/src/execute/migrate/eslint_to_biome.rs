@@ -73,13 +73,9 @@ impl eslint_eslint::FlatConfigData {
                         };
                         override_pat.javascript = Some(js_config)
                     }
-                    if !flat_config_object.ignores.is_empty() {
-                        override_pat.ignore =
-                            Some(flat_config_object.ignores.into_iter().collect());
-                    }
-                    if !flat_config_object.files.is_empty() {
-                        override_pat.include = Some(flat_config_object.files.into_iter().collect());
-                    }
+                    let includes =
+                        to_biome_includes(&flat_config_object.files, &flat_config_object.ignores);
+                    override_pat.includes = (!includes.is_empty()).then_some(includes);
                     if let Some(rules) = flat_config_object.rules {
                         if !rules.is_empty() {
                             override_pat.linter = Some(biome_config::OverrideLinterConfiguration {
@@ -114,12 +110,9 @@ impl eslint_eslint::FlatConfigData {
         }
         rules.recommended = Some(false);
         linter.rules = Some(rules);
-        if !global_config_object.ignores.is_empty() {
-            linter.ignore = Some(global_config_object.ignores.into_iter().collect());
-        }
-        if !global_config_object.files.is_empty() {
-            linter.include = Some(global_config_object.files.into_iter().collect());
-        }
+        let includes =
+            to_biome_includes(&global_config_object.files, &global_config_object.ignores);
+        linter.includes = (!includes.is_empty()).then_some(includes);
         biome_config.linter = Some(linter);
         (biome_config, results)
     }
@@ -144,14 +137,8 @@ impl eslint_eslint::LegacyConfigData {
         let mut rules = self.rules.into_biome_rules(options, &mut results);
         rules.recommended = Some(false);
         linter.rules = Some(rules);
-        if !self.ignore_patterns.is_empty() {
-            let ignore = self
-                .ignore_patterns
-                .into_iter()
-                .map(|p| p.0)
-                .collect::<Vec<_>>();
-            linter.ignore = Some(ignore);
-        }
+        let includes = to_biome_includes(&[] as &[&str], self.ignore_patterns.as_slice());
+        linter.includes = (!includes.is_empty()).then_some(includes);
         if !self.overrides.is_empty() {
             let mut overrides = biome_config::Overrides::default();
             for override_elt in self.overrides {
@@ -167,13 +154,8 @@ impl eslint_eslint::LegacyConfigData {
                     };
                     override_pattern.javascript = Some(js_config)
                 }
-                if !override_elt.excluded_files.is_empty() {
-                    override_pattern.ignore =
-                        Some(override_elt.excluded_files.into_iter().collect());
-                }
-                if !override_elt.files.is_empty() {
-                    override_pattern.include = Some(override_elt.files.into_iter().collect());
-                }
+                let includes = to_biome_includes(&override_elt.files, &override_elt.excluded_files);
+                override_pattern.includes = (!includes.is_empty()).then_some(includes);
                 if !override_elt.rules.is_empty() {
                     override_pattern.linter = Some(biome_config::OverrideLinterConfiguration {
                         rules: Some(override_elt.rules.into_biome_rules(options, &mut results)),
@@ -344,6 +326,32 @@ fn migrate_eslint_rule(
     }
 }
 
+fn to_biome_includes(
+    files: &[impl AsRef<str>],
+    ignores: &[impl AsRef<str>],
+) -> Vec<biome_glob::Glob> {
+    let mut includes = Vec::new();
+    if !files.is_empty() {
+        includes.extend(files.iter().filter_map(|glob| glob.as_ref().parse().ok()));
+    } else if let Ok(glob) = "**".parse() {
+        includes.push(glob);
+    }
+    if !ignores.is_empty() {
+        includes.extend(ignores.iter().filter_map(|glob| {
+            // ESLint supports negation: https://eslint.org/docs/latest/use/configure/ignore#unignoring-files-and-directories
+            if let Some(rest) = glob.as_ref().strip_prefix('!') {
+                rest.parse()
+            } else {
+                glob.as_ref()
+                    .parse()
+                    .map(|glob: biome_glob::Glob| glob.negated())
+            }
+            .ok()
+        }));
+    }
+    includes
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -369,8 +377,10 @@ mod tests {
         assert!(biome_config.formatter.is_none());
         assert!(biome_config.assist.is_none());
         let linter = biome_config.linter.unwrap();
-        assert_eq!(linter.include.unwrap(), ["*.js".into()],);
-        assert_eq!(linter.ignore.unwrap(), ["*.test.js".into()],);
+        assert_eq!(
+            linter.includes.unwrap(),
+            ["*.js".parse().unwrap(), "!*.test.js".parse().unwrap()],
+        );
         assert!(linter.rules.is_some());
     }
 
@@ -416,10 +426,13 @@ mod tests {
         assert!(biome_config.formatter.is_none());
         assert!(biome_config.assist.is_none());
         let linter = biome_config.linter.unwrap();
-        assert!(linter.include.is_none());
         assert_eq!(
-            linter.ignore.unwrap(),
-            ["*.test.js".into(), "*.spec.js".into()]
+            linter.includes.unwrap(),
+            [
+                "**".parse().unwrap(),
+                "!*.test.js".parse().unwrap(),
+                "!*.spec.js".parse().unwrap()
+            ]
         );
         assert_eq!(
             linter
@@ -436,8 +449,7 @@ mod tests {
         let overrides = biome_config.overrides.unwrap();
         assert_eq!(overrides.0.len(), 1);
         let override0 = overrides.0.into_iter().next().unwrap();
-        assert_eq!(override0.include.unwrap(), ["*.ts".into()],);
-        assert!(override0.ignore.is_none());
+        assert_eq!(override0.includes.unwrap(), ["*.ts".parse().unwrap()],);
         assert_eq!(
             override0
                 .linter

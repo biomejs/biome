@@ -1,8 +1,6 @@
 ---
-cli: minor
+"@biomejs/biome": minor
 ---
-
-# Biome assist
 
 Biome assist is a new feature of the Biome analyzer. The assist is meant to provide **actions**. Actions differ from linter rules in that they aren't meant to signal errors.
 

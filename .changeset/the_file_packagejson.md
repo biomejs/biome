@@ -1,8 +1,8 @@
 ---
-cli: major
+"@biomejs/biome": major
 ---
 
-# Changed default formatting of `package.json`
+Changed default formatting of `package.json`.
 
 When Biome encounters a file called `package.json`, by default it will format the file with all objects and arrays expanded.
 

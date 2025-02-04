@@ -1,10 +1,8 @@
 ---
-cli: minor
+"@biomejs/biome": minor
 ---
 
-# New top-level suppression for the analyzer
-
-The Biome analyzer now supports a new top-level suppression. These suppression have to be placed at the top of the file, and they must be followed by two newlines (`\n\n\`). 
+The Biome analyzer now supports a new top-level suppression. These suppression have to be placed at the top of the file, and they must be followed by two newlines (`\n\n\`).
 
 The analyzer rules specified inside the block comment will be suppressed for the whole file.
 
@@ -26,7 +24,7 @@ In this other example, we suppress `lint/suspicious/noEmptyBlock` for a whole CS
 
 ```css
 /**
-/* biome-ignore-all lint/suspicious/noEmptyBlock: it's fine to have empty blocks 
+/* biome-ignore-all lint/suspicious/noEmptyBlock: it's fine to have empty blocks
 */
 
 a {}
@@ -40,7 +38,7 @@ A new diagnostic is emitted if `biome-ignore-all` suppression isn't placed at th
 file.js:3:1 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Top level suppressions can only be used at the beginning of the file.
-  
+
     2 │ let foo = 2;
   > 3 │ /**
       │ ^^^
@@ -48,15 +46,15 @@ file.js:3:1 suppressions/incorrect ━━━━━━━━━━━━━━━
   > 5 │ */
       │ ^^
     6 │ let bar = 33;
-  
+
   i Rename this to biome-ignore
-  
+
     2 │ let foo = 2;
     3 │ /**
   > 4 │ * biome-ignore-all lint/style/useConst: reason
       │   ^^^^^^^^^^^^^^^^
     5 │ */
     6 │ let bar = 33;
-  
+
 
 ```

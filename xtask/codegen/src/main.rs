@@ -25,8 +25,8 @@ use crate::promote_rule::promote_rule;
 
 use xtask::Mode::Overwrite;
 use xtask_codegen::{
-    generate_analyzer, generate_ast, generate_crate, generate_formatters,
-    generate_new_analyzer_rule, generate_tables, task_command, TaskCommand,
+    generate_analyzer, generate_ast, generate_formatters, generate_new_analyzer_rule,
+    generate_tables, task_command, TaskCommand,
 };
 
 fn main() -> Result<()> {
@@ -87,9 +87,6 @@ fn main() -> Result<()> {
             generate_configuration_schema(Overwrite)?;
             #[cfg(feature = "schema")]
             generate_workspace_bindings(Overwrite)?;
-        }
-        TaskCommand::NewCrate { name } => {
-            generate_crate(name)?;
         }
     }
 

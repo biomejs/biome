@@ -1,5 +1,5 @@
 ---
-cli: major
+"@biomejs/biome": major
 ---
 
-# Remove support for `rome.json`
+Remove support for `rome.json`.

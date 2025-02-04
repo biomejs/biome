@@ -856,7 +856,7 @@ As a consequence of this, the formatter must format blocks that look like this (
 
 Note that this is only necessary for inline elements. Block elements do not have this restriction. 
 	 */
-export type WhitespaceSensitivity = "strict" | "ignore";
+export type WhitespaceSensitivity = "css" | "strict" | "ignore";
 export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteProperties = "asNeeded" | "preserve";
 export type Semicolons = "always" | "asNeeded";
