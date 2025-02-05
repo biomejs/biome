@@ -2,5 +2,5 @@ engine marzano(0.1)
 language js
 
 file($x) where {
-	$x <: contains bubble `foo`
+	$x <: contains bubble { `foo` }
 }
