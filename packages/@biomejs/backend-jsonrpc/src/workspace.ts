@@ -10,7 +10,7 @@ export type BiomePath = string;
 export type ProjectKey = number;
 export type FeatureKind = "format" | "lint" | "search" | "assist" | "debug";
 export interface FileFeaturesResult {
-	featuresSupported: {};
+	featuresSupported: Map<FeatureKind, SupportKind>;
 }
 export interface UpdateSettingsParams {
 	configuration: Configuration;
@@ -3814,6 +3814,12 @@ export interface SearchResults {
 export interface DropPatternParams {
 	pattern: PatternId;
 }
+export type SupportKind =
+	| "supported"
+	| "ignored"
+	| "protected"
+	| "featureNotEnabled"
+	| "fileNotSupported";
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;
