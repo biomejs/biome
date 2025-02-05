@@ -1,8 +1,7 @@
 
 pattern identifier_scope($name) {
   or {
-		// The "function" AST name can conflict with the "function" keyword
-    function($parameters) where {
+function($parameters) where {
       $parameters <: contains $name
     },
   }
