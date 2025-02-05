@@ -1,6 +1,5 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.0.5/schema.json",
-  "changelog": ["@changesets/changelog-github", { "repo": "withastro/astro" }],
   "commit": false,
   "fixed": [
     [

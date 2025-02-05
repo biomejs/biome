@@ -47,7 +47,7 @@ function copyBinaryToNativePackage(platform, arch) {
 	);
 
 	const manifestPath = resolve(packageRoot, "package.json");
-	console.log(`Update manifest ${manifestPath}`);
+	console.info(`Update manifest ${manifestPath}`);
 	fs.writeFileSync(manifestPath, manifest);
 
 	// Copy the CLI binary
@@ -65,11 +65,16 @@ function copyBinaryToNativePackage(platform, arch) {
 		process.exit(1);
 	}
 
-	console.log(`Copy binary ${binaryTarget}`);
+	console.info(`Copy binary ${binaryTarget}`);
 	fs.copyFileSync(binarySource, binaryTarget);
 	fs.chmodSync(binaryTarget, 0o755);
 }
 
+/**
+ * The wasm-pack binary changes the package name and version to use the ones coming from `biome_wasm/Cargo.toml`.
+ * This function updates name and version of the `package.json` to match the ones of `@biomejs/biome`
+ * @param target
+ */
 function updateWasmPackage(target) {
 	const packageName = `@biomejs/wasm-${target}`;
 	const packageRoot = resolve(PACKAGES_ROOT, `wasm-${target}`);
@@ -81,30 +86,8 @@ function updateWasmPackage(target) {
 	manifest.name = packageName;
 	manifest.version = version;
 
-	console.log(`Update manifest ${manifestPath}`);
+	console.info(`Update manifest ${manifestPath}`);
 	fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-}
-
-function writeManifest(packagePath) {
-	const manifestPath = resolve(PACKAGES_ROOT, packagePath, "package.json");
-
-	const manifestData = JSON.parse(
-		fs.readFileSync(manifestPath).toString("utf-8"),
-	);
-
-	const nativePackages = PLATFORMS.flatMap((platform) =>
-		ARCHITECTURES.map((arch) => [
-			`@biomejs/${getName(platform, arch)}`,
-			rootManifest.version,
-		]),
-	);
-
-	manifestData.version = rootManifest.version;
-	manifestData.optionalDependencies = Object.fromEntries(nativePackages);
-
-	console.log(`Update manifest ${manifestPath}`);
-	const content = JSON.stringify(manifestData, null, 2);
-	fs.writeFileSync(manifestPath, content);
 }
 
 const PLATFORMS = ["win32-%s", "darwin-%s", "linux-%s", "linux-%s-musl"];
@@ -120,6 +103,3 @@ for (const platform of PLATFORMS) {
 		copyBinaryToNativePackage(platform, arch);
 	}
 }
-
-writeManifest("biome");
-writeManifest("backend-jsonrpc");
