@@ -153,8 +153,7 @@ fn parse_bubble(p: &mut GritParser) -> ParsedSyntax {
     p.bump(BUBBLE_KW);
 
     parse_bubble_scope(p).ok();
-
-    parse_expected_pattern_with_precedence(p, PRECEDENCE_PATTERN);
+    parse_maybe_curly_pattern(p).ok();
 
     Present(m.complete(p, GRIT_BUBBLE))
 }

@@ -872,7 +872,14 @@ impl<'src> GritLexer<'src> {
             b"private" => PRIVATE_KW,
             b"pattern" => PATTERN_KW,
             b"predicate" => PREDICATE_KW,
-            b"function" => FUNCTION_KW,
+            b"function" => {
+                // Function is also an AST node name, so we need to check if the next token is a `(`
+                if self.current_byte() == Some(b'(') {
+                    GRIT_NAME
+                } else {
+                    FUNCTION_KW
+                }
+            }
             b"true" => TRUE_KW,
             b"false" => FALSE_KW,
             b"undefined" => UNDEFINED_KW,
