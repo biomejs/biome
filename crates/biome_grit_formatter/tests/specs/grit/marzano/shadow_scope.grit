@@ -1,28 +1,9 @@
 
 pattern identifier_scope($name) {
   or {
-    statement_block($statements) where {
-      $statements <: some variable($declarations) where {
-        $declarations <: contains variable_declarator(name=$name)
-      }
-    },
+		// The "function" AST name can conflict with the "function" keyword
     function($parameters) where {
       $parameters <: contains $name
-    },
-    arrow_function($parameters) where {
-      $parameters <: contains $name
-    },
-    function_declaration($parameters) where {
-      $parameters <: contains $name
-    },
-    for_in_statement() as $statement where {
-      $statement <: contains $name
-    },
-    for_statement() as $statement where {
-      $statement <: contains $name
-    },
-    `try { $_ } catch($catch) { $_ }` where {
-      $catch <: contains $name
     },
   }
 }
