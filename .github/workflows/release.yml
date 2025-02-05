@@ -36,18 +36,19 @@ jobs:
       - name: Create Release Pull Request
         uses: changesets/action@v1
         with:
-          # this expects you to have a npm script called version that runs some logic and then calls `changeset version`.
-          version: changeset version
+          version: pnpm run version
           commit: "ci: release"
           title: "ci: release"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # Retrieve version of `@biomejs/biome` and `@biomejs/js-api`
   version:
     needs: changesets
     if: steps.changesets.outputs.hasChangesets == 'false' && github.head_ref == 'changeset-release/main'
     outputs:
-      version: ${{ env.version }}
+      cli-version: ${{ env.cli-version }}
+      js-api-version: ${{ env.cli-js-api-version }}
 
     steps:
       - name: Setup Node.js 20.x
@@ -55,13 +56,30 @@ jobs:
         with:
           node-version: 20.x
 
+      - name: Check CLI version changes
+        uses: EndBug/version-check@36ff30f37c7deabe56a30caa043d127be658c425 # v2.1.5
+        id: cli-version-changed
+        with:
+          diff-search: true
+          file-name: packages/@biomejs/biome/package.json
+
+      - name: Check JS API version changes
+        uses: EndBug/version-check@36ff30f37c7deabe56a30caa043d127be658c425 # v2.1.5
+        id: js-api-version-changed
+        with:
+          diff-search: true
+          file-name: packages/@biomejs/js-api/package.json
+
       - name: Set Biome Version as Environment Variable
         run: |
-          BIOME_VERSION=$(node -p "require('./packages/@biomejs/biome/package.json').version")
-          echo "version=$BIOME_VERSION" >> $GITHUB_ENV
+          echo "cli-version=${{ steps.cli-version-changed.outputs.version }}" >> $GITHUB_ENV
+          echo "js-api-version=${{ steps.js-api-version-changed.outputs.version }}" >> $GITHUB_ENV
+
+  # Building jobs
 
   build-binaries:
     needs: version
+    if: steps.cli-version-changed.outputs.changed == 'true'
     strategy:
       matrix:
         include:
@@ -135,7 +153,7 @@ jobs:
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
           # Inline the version of the npm package in the CLI binary
-          BIOME_VERSION: ${{ env.version }}
+          BIOME_VERSION: ${{ env.cli-version }}
 
       # Copy the CLI binary and rename it to include the name of the target platform
       - name: Copy CLI binary
@@ -161,6 +179,7 @@ jobs:
     name: Build WASM
     runs-on: ubuntu-latest
     needs: version
+    if: steps.cli-version-changed.outputs.changed == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -189,7 +208,7 @@ jobs:
     name: Package JavaScript APIs
     runs-on: ubuntu-latest
     needs: version
-
+    if: steps.js-api-version-changed.outputs.changed == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -232,7 +251,9 @@ jobs:
             ./packages/@biomejs/js-api/dist
           if-no-files-found: error
 
-  publish:
+  # Publishing jobs
+
+  publish-cli:
     name: Publish
     runs-on: ubuntu-latest
     needs:
@@ -267,24 +288,38 @@ jobs:
         run: node packages/@biomejs/biome/scripts/generate-packages.mjs
 
       - name: Publish npm packages as latest
-        run: for package in packages/@biomejs/*; do npm publish $package --tag latest --access public --provenance; fi; done
+        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package --tag latest --access public --provenance; fi; done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Extract changelog
+      - name: Upload assets to the latest tag
         run: |
-          bash scripts/print-changelog.sh ${{ needs.build.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
-      - name: Create GitHub release and tag
-        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          files=$(ls biome-* | tr '\n' ' ')
+          gh release upload @biomejs/biome@${{ env.cli-version }} $files
+
+  publish-js-api:
+    name: Publish
+    runs-on: ubuntu-latest
+    needs: build-js-api
+    environment: npm-publish
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Download package artifact
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-          name: CLI v${{ needs.build.outputs.version }}
-          tag_name: cli/v${{ needs.build.outputs.version }}
-          draft: false
-          prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
-          body_path: ${{ github.workspace }}/RELEASE_NOTES
-          files: |
-            biome-*
-          fail_on_unmatched_files: true
-          generate_release_notes: true
+          name: js-api
+          path: packages/@biomejs/js-api/dist
+
+      - name: Install Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+      - name: Publish npm package as latest
+        run: npm publish packages/@biomejs/js-api --tag latest --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
