@@ -51,11 +51,6 @@ jobs:
       js-api-version: ${{ env.cli-js-api-version }}
 
     steps:
-      - name: Setup Node.js 20.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20.x
-
       - name: Check CLI version changes
         uses: EndBug/version-check@36ff30f37c7deabe56a30caa043d127be658c425 # v2.1.5
         id: cli-version-changed
