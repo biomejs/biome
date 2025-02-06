@@ -51,7 +51,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintNext("google-font-preconnect")],
         source_kind: RuleSourceKind::SameLogic,
-        recommended: false,
+        recommended: true,
         fix_kind: FixKind::Safe,
         domains: &[RuleDomain::Next],
     }

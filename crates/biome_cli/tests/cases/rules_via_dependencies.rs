@@ -161,3 +161,55 @@ function Component2() {
         result,
     ));
 }
+
+#[test]
+fn enables_next_rules_via_dependencies() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("package.json");
+
+    fs.insert(
+        file_path.into(),
+        r#"{
+    "dependencies": {
+        "next": ">=14.0.0"
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let test_file = Utf8Path::new("test.jsx");
+    fs.insert(
+        test_file.into(),
+        r#"import React from 'react';
+
+function IndexPage() {
+    return (
+        <div>
+            <img alt="Foo" />
+            <p>Some content</p>
+        </div>
+    );
+}
+
+export default IndexPage;
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "enables_next_rules_via_dependencies",
+        fs,
+        console,
+        result,
+    ));
+}

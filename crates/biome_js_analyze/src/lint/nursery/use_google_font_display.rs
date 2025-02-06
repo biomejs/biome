@@ -55,7 +55,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintNext("google-font-display")],
         source_kind: RuleSourceKind::SameLogic,
-        recommended: false,
+        recommended: true,
         domains: &[RuleDomain::Next],
     }
 }
