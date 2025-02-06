@@ -1,6 +1,6 @@
 use crate::react::{is_react_call_api, ReactLibrary};
 use crate::services::semantic::Semantic;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleDomain};
 use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -44,6 +44,7 @@ declare_lint_rule! {
         source_kind: RuleSourceKind::SameLogic,
         recommended: true,
         severity: Severity::Error,
+        domains: &[RuleDomain::React],
     }
 }
 
