@@ -6,9 +6,9 @@
 
 Here is an example:
 
-  ```diff
-    // Orphan comment
+```diff
+  // Orphan comment
 
-  - // Header comment
-  - import {} from "mod";
-  ```
+- // Header comment
+- import {} from "mod";
+```
