@@ -1,6 +1,6 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleDomain,
+    RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -53,6 +53,7 @@ declare_lint_rule! {
         source_kind: RuleSourceKind::SameLogic,
         recommended: false,
         fix_kind: FixKind::Safe,
+        domains: &[RuleDomain::Next],
     }
 }
 
