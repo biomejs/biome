@@ -17,10 +17,7 @@ impl FormatNodeRule<CssRegularDimension> for FormatCssRegularDimension {
         write!(
             f,
             [
-                format_number_token(
-                    &value_token?,
-                    NumberFormatOptions::default().remove_trailing_zero()
-                ),
+                format_number_token(&value_token?, NumberFormatOptions::default()),
                 FormatTokenAsLowercase::from(unit_token?),
             ]
         )

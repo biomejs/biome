@@ -17,7 +17,10 @@ impl FormatNodeRule<TsNumberLiteralType> for FormatTsNumberLiteralType {
             f,
             [
                 minus_token.format(),
-                format_number_token(&literal_token?, NumberFormatOptions::default())
+                format_number_token(
+                    &literal_token?,
+                    NumberFormatOptions::default().keep_one_trailing_decimal_zero()
+                )
             ]
         ]
     }

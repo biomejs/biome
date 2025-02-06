@@ -6,10 +6,6 @@ use biome_formatter::token::number::{format_number_token, NumberFormatOptions};
 pub(crate) struct FormatCssNumber;
 impl FormatNodeRule<CssNumber> for FormatCssNumber {
     fn fmt_fields(&self, node: &CssNumber, f: &mut CssFormatter) -> FormatResult<()> {
-        format_number_token(
-            &node.value_token()?,
-            NumberFormatOptions::default().remove_trailing_zero(),
-        )
-        .fmt(f)
+        format_number_token(&node.value_token()?, NumberFormatOptions::default()).fmt(f)
     }
 }

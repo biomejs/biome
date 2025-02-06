@@ -8,13 +8,18 @@ use crate::{CstFormatContext, Format};
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct NumberFormatOptions {
-    remove_trailing_zero: bool,
+    /// Controls how numbers with trailing decimal zeroes are formatted.
+    ///
+    /// Prettier behaves differently when printing numbers like `x.00000` in different languages:
+    /// - In JavaScript: `x.00000` is printed as `x.0`
+    /// - In CSS: `x.00000` is printed as `x`
+    keep_one_trailing_decimal_zero: bool,
 }
 
 impl NumberFormatOptions {
-    pub fn remove_trailing_zero(self) -> Self {
+    pub fn keep_one_trailing_decimal_zero(self) -> Self {
         Self {
-            remove_trailing_zero: true,
+            keep_one_trailing_decimal_zero: true,
             ..self
         }
     }
@@ -111,9 +116,8 @@ fn format_trimmed_number(text: &str, options: NumberFormatOptions) -> Cow<str> {
                 }),
                 (curr_index, Some(b'e') | None),
             ) => {
-                // The decimal part equals zero, ignore it completely.
-                // Caveat: Prettier still prints a single `.0` unless there was *only* a trailing dot.
-                if curr_index > dot_index + 1 && !options.remove_trailing_zero {
+                // The decimal part equals zero, ignore it completely. However when the `keep_one_trailing_decimal_zero` option is enabled, print `.0` unless there was *only* a trailing dot.
+                if curr_index > dot_index + 1 && options.keep_one_trailing_decimal_zero {
                     cleaned_text.push_str(&text[copied_or_ignored_chars..=*dot_index]);
                     cleaned_text.push('0');
                 } else {
@@ -319,7 +323,12 @@ mod tests {
     fn keeps_one_trailing_decimal_zero() {
         assert_eq!(
             "0.0",
-            format_trimmed_number("0.00", NumberFormatOptions::default())
+            format_trimmed_number(
+                "0.00",
+                NumberFormatOptions {
+                    keep_one_trailing_decimal_zero: true
+                }
+            )
         );
     }
 
@@ -335,7 +344,12 @@ mod tests {
     fn cleans_all_at_once() {
         assert_eq!(
             "0.0",
-            format_trimmed_number(".00e-0", NumberFormatOptions::default())
+            format_trimmed_number(
+                ".00e-0",
+                NumberFormatOptions {
+                    keep_one_trailing_decimal_zero: true
+                }
+            )
         );
     }
 
@@ -348,15 +362,10 @@ mod tests {
     }
 
     #[test]
-    fn remove_trailing_zero() {
+    fn keep_one_trailing_decimal_zero() {
         assert_eq!(
             "1",
-            format_trimmed_number(
-                "1.0",
-                NumberFormatOptions {
-                    remove_trailing_zero: true
-                }
-            )
+            format_trimmed_number("1.0", NumberFormatOptions::default())
         );
     }
 }

@@ -16,7 +16,11 @@ impl FormatNodeRule<JsNumberLiteralExpression> for FormatJsNumberLiteralExpressi
         f: &mut JsFormatter,
     ) -> FormatResult<()> {
         let JsNumberLiteralExpressionFields { value_token } = node.as_fields();
-        format_number_token(&value_token?, NumberFormatOptions::default()).fmt(f)
+        format_number_token(
+            &value_token?,
+            NumberFormatOptions::default().keep_one_trailing_decimal_zero(),
+        )
+        .fmt(f)
     }
 
     fn needs_parentheses(&self, item: &JsNumberLiteralExpression) -> bool {
