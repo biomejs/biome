@@ -320,6 +320,7 @@ pub type UseConsistentArrayType = < lint :: style :: use_consistent_array_type :
 pub type UseConsistentBuiltinInstantiation = < lint :: style :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation as biome_analyze :: Rule > :: Options ;
 pub type UseConsistentCurlyBraces = < lint :: nursery :: use_consistent_curly_braces :: UseConsistentCurlyBraces as biome_analyze :: Rule > :: Options ;
 pub type UseConsistentMemberAccessibility = < lint :: nursery :: use_consistent_member_accessibility :: UseConsistentMemberAccessibility as biome_analyze :: Rule > :: Options ;
+pub type UseConsistentObjectLiterals = < lint :: nursery :: use_consistent_object_literals :: UseConsistentObjectLiterals as biome_analyze :: Rule > :: Options ;
 pub type UseConst = <lint::style::use_const::UseConst as biome_analyze::Rule>::Options;
 pub type UseDateNow = <lint::complexity::use_date_now::UseDateNow as biome_analyze::Rule>::Options;
 pub type UseDefaultParameterLast = < lint :: style :: use_default_parameter_last :: UseDefaultParameterLast as biome_analyze :: Rule > :: Options ;

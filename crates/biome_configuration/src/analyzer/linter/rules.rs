@@ -3202,6 +3202,10 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_member_accessibility:
         Option<RuleConfiguration<biome_js_analyze::options::UseConsistentMemberAccessibility>>,
+    #[doc = "Require consistently using either explicit object property assignment or the newer shorthand syntax, when possible."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_consistent_object_literals:
+        Option<RuleConfiguration<biome_js_analyze::options::UseConsistentObjectLiterals>>,
     #[doc = "Require specifying the reason argument when using @deprecated directive"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_deprecated_reason:
@@ -3302,6 +3306,7 @@ impl Nursery {
         "useComponentExportOnlyModules",
         "useConsistentCurlyBraces",
         "useConsistentMemberAccessibility",
+        "useConsistentObjectLiterals",
         "useDeprecatedReason",
         "useExplicitType",
         "useExportsLast",
@@ -3331,10 +3336,10 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -3398,6 +3403,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[60]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[61]),
     ];
 }
 impl RuleGroupExt for Nursery {
@@ -3649,69 +3655,74 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
-        if let Some(rule) = self.use_deprecated_reason.as_ref() {
+        if let Some(rule) = self.use_consistent_object_literals.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
             }
         }
-        if let Some(rule) = self.use_explicit_type.as_ref() {
+        if let Some(rule) = self.use_deprecated_reason.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]));
             }
         }
-        if let Some(rule) = self.use_exports_last.as_ref() {
+        if let Some(rule) = self.use_explicit_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]));
             }
         }
-        if let Some(rule) = self.use_google_font_display.as_ref() {
+        if let Some(rule) = self.use_exports_last.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]));
             }
         }
-        if let Some(rule) = self.use_google_font_preconnect.as_ref() {
+        if let Some(rule) = self.use_google_font_display.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]));
             }
         }
-        if let Some(rule) = self.use_guard_for_in.as_ref() {
+        if let Some(rule) = self.use_google_font_preconnect.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]));
             }
         }
-        if let Some(rule) = self.use_named_operation.as_ref() {
+        if let Some(rule) = self.use_guard_for_in.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]));
             }
         }
-        if let Some(rule) = self.use_naming_convention.as_ref() {
+        if let Some(rule) = self.use_named_operation.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]));
             }
         }
-        if let Some(rule) = self.use_parse_int_radix.as_ref() {
+        if let Some(rule) = self.use_naming_convention.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_parse_int_radix.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]));
             }
         }
-        if let Some(rule) = self.use_strict_mode.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
+        if let Some(rule) = self.use_strict_mode.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]));
             }
         }
-        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[60]));
+            }
+        }
+        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[61]));
             }
         }
         index_set
@@ -3958,69 +3969,74 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
-        if let Some(rule) = self.use_deprecated_reason.as_ref() {
+        if let Some(rule) = self.use_consistent_object_literals.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
             }
         }
-        if let Some(rule) = self.use_explicit_type.as_ref() {
+        if let Some(rule) = self.use_deprecated_reason.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]));
             }
         }
-        if let Some(rule) = self.use_exports_last.as_ref() {
+        if let Some(rule) = self.use_explicit_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]));
             }
         }
-        if let Some(rule) = self.use_google_font_display.as_ref() {
+        if let Some(rule) = self.use_exports_last.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]));
             }
         }
-        if let Some(rule) = self.use_google_font_preconnect.as_ref() {
+        if let Some(rule) = self.use_google_font_display.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]));
             }
         }
-        if let Some(rule) = self.use_guard_for_in.as_ref() {
+        if let Some(rule) = self.use_google_font_preconnect.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]));
             }
         }
-        if let Some(rule) = self.use_named_operation.as_ref() {
+        if let Some(rule) = self.use_guard_for_in.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]));
             }
         }
-        if let Some(rule) = self.use_naming_convention.as_ref() {
+        if let Some(rule) = self.use_named_operation.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]));
             }
         }
-        if let Some(rule) = self.use_parse_int_radix.as_ref() {
+        if let Some(rule) = self.use_naming_convention.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_parse_int_radix.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]));
             }
         }
-        if let Some(rule) = self.use_strict_mode.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
+        if let Some(rule) = self.use_strict_mode.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]));
             }
         }
-        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[60]));
+            }
+        }
+        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[61]));
             }
         }
         index_set
@@ -4243,6 +4259,10 @@ impl RuleGroupExt for Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useConsistentMemberAccessibility" => self
                 .use_consistent_member_accessibility
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useConsistentObjectLiterals" => self
+                .use_consistent_object_literals
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useDeprecatedReason" => self

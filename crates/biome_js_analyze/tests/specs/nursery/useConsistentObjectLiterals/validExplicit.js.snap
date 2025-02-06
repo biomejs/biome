@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validExplicit.js
+---
+# Input
+```js
+const obj = {
+    foo: foo,
+    bar: function () { return "bar"; },
+    arrow: () => { "arrow" },
+    get getter() { return "getter"; },
+    set setter(value) { this._setter = value; }
+};
+
+```

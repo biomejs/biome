@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidShorthand.js
+---
+# Input
+```js
+const obj = {
+    foo,
+    bar() { return "bar"; },
+};
+
+```
+
+# Diagnostics
+```
+invalidShorthand.js:2:5 lint/nursery/useConsistentObjectLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Always use explicit object property assignment syntax.
+  
+    1 │ const obj = {
+  > 2 │     foo,
+      │     ^^^
+    3 │     bar() { return "bar"; },
+    4 │ };
+  
+  i Using a consistent object literal syntax makes it easier to anticipate the structure of an object.
+  
+
+```
+
+```
+invalidShorthand.js:3:5 lint/nursery/useConsistentObjectLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Always use explicit object property assignment syntax.
+  
+    1 │ const obj = {
+    2 │     foo,
+  > 3 │     bar() { return "bar"; },
+      │     ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ };
+    5 │ 
+  
+  i Using a consistent object literal syntax makes it easier to anticipate the structure of an object.
+  
+
+```
