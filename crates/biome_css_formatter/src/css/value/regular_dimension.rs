@@ -1,6 +1,9 @@
 use crate::{prelude::*, utils::string_utils::FormatTokenAsLowercase};
 use biome_css_syntax::{CssRegularDimension, CssRegularDimensionFields};
-use biome_formatter::write;
+use biome_formatter::{
+    token::number::{format_number_token, NumberFormatOptions},
+    write,
+};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssRegularDimension;
@@ -14,7 +17,10 @@ impl FormatNodeRule<CssRegularDimension> for FormatCssRegularDimension {
         write!(
             f,
             [
-                FormatTokenAsLowercase::from(value_token?),
+                format_number_token(
+                    &value_token?,
+                    NumberFormatOptions::default().remove_trailing_zero()
+                ),
                 FormatTokenAsLowercase::from(unit_token?),
             ]
         )
