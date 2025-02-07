@@ -159,17 +159,23 @@ impl Rule for UseConsistentObjectDefinition {
 
         let title = match options.syntax {
             ObjectPropertySyntax::Shorthand => {
-                "Use shorthand object property syntax whenever possible."
+                "Do not use explicit object property syntax when shorthand syntax is possible."
+            }
+            ObjectPropertySyntax::Explicit => "Do not use shorthand object property syntax.",
+        };
+
+        let note = match options.syntax {
+            ObjectPropertySyntax::Shorthand => {
+                "Using shorthand object property syntax makes object definitions more concise."
             }
             ObjectPropertySyntax::Explicit => {
-                "Always use explicit object property assignment syntax."
+                "Using explicit object property syntax makes object definitions more readable and consistent."
             }
         };
 
         Some(
-            RuleDiagnostic::new(rule_category!(), node.range(), markup! {{title}}).note(
-                markup! { "Using consistent object definitions makes it easier to anticipate the structure of an object." },
-            ),
+            RuleDiagnostic::new(rule_category!(), node.range(), markup! {{title}})
+                .note(markup! {{note}}),
         )
     }
 }

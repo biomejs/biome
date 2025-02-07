@@ -15,7 +15,7 @@ const obj = {
 ```
 invalidShorthand.js:2:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Always use explicit object property assignment syntax.
+  ! Do not use shorthand object property syntax.
   
     1 │ const obj = {
   > 2 │     foo,
@@ -23,7 +23,7 @@ invalidShorthand.js:2:5 lint/nursery/useConsistentObjectDefinition ━━━━�
     3 │     bar() { return "bar"; },
     4 │ };
   
-  i Using consistent object definitions makes it easier to anticipate the structure of an object.
+  i Using explicit object property syntax makes object definitions more readable and consistent.
   
 
 ```
@@ -31,7 +31,7 @@ invalidShorthand.js:2:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidShorthand.js:3:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Always use explicit object property assignment syntax.
+  ! Do not use shorthand object property syntax.
   
     1 │ const obj = {
     2 │     foo,
@@ -40,7 +40,7 @@ invalidShorthand.js:3:5 lint/nursery/useConsistentObjectDefinition ━━━━�
     4 │ };
     5 │ 
   
-  i Using consistent object definitions makes it easier to anticipate the structure of an object.
+  i Using explicit object property syntax makes object definitions more readable and consistent.
   
 
 ```
