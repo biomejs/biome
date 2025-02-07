@@ -115,7 +115,8 @@ _touch file:
 
 [windows]
 _touch file:
-  (gci {{file}}).LastWriteTime = Get-Date
+  powershell -Command "(Get-Item {{file}}).LastWriteTime = Get-Date"
+
 
 # Run tests of all crates
 test:
