@@ -1,11 +1,13 @@
-use biome_css_syntax::{CssDashedIdentifier, CssIdentifier, CssRoot, CssSyntaxNode};
+use biome_css_syntax::{
+    CssComposesPropertyValue, CssDashedIdentifier, CssGenericComponentValueList, CssIdentifier,
+    CssRoot, CssSyntaxNode,
+};
 use biome_rowan::{
     declare_node_union, SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText,
 };
 use rustc_hash::FxHashMap;
 use std::hash::Hash;
 use std::{collections::BTreeMap, rc::Rc};
-
 /// The façade for all semantic information of a CSS document.
 ///
 /// This struct provides access to the root, rules, and individual nodes of the CSS document.
@@ -275,29 +277,8 @@ impl CssProperty {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct CssValue {
-    pub(crate) node: CssSyntaxNode,
-}
-
-impl From<CssSyntaxNode> for CssValue {
-    fn from(value: CssSyntaxNode) -> Self {
-        Self { node: value }
-    }
-}
-
-impl CssValue {
-    pub fn node(&self) -> &CssSyntaxNode {
-        &self.node
-    }
-
-    pub fn text(&self) -> SyntaxNodeText {
-        self.node.text_trimmed()
-    }
-
-    pub fn range(&self) -> TextRange {
-        self.node.text_trimmed_range()
-    }
+declare_node_union! {
+    pub CssValue = CssGenericComponentValueList | CssComposesPropertyValue
 }
 
 /// Represents a CSS global custom variable declaration.

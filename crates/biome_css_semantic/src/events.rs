@@ -109,14 +109,15 @@ impl SemanticEventExtractor {
                             self.stash.push_back(SemanticEvent::PropertyDeclaration {
                                 node: node.clone(),
                                 property: property_name.into(),
-                                value: CssValue::from(property_value.into_syntax()),
+                                value: CssValue::from(property_value),
                             });
                         }
                         AnyCssProperty::CssGenericProperty(generic) => {
-                            let value = generic.value();
                             let Ok(name) = generic.name() else {
                                 return;
                             };
+                            let value = CssValue::from(generic.value());
+
                             let property = match name {
                                 AnyCssDeclarationName::CssDashedIdentifier(name) => {
                                     CssProperty::from(name)
@@ -129,7 +130,7 @@ impl SemanticEventExtractor {
                             self.stash.push_back(SemanticEvent::PropertyDeclaration {
                                 node: node.clone(),
                                 property,
-                                value: value.into_syntax().into(),
+                                value,
                             });
                         }
                         AnyCssProperty::CssBogusProperty(_) => {}
@@ -204,7 +205,7 @@ impl SemanticEventExtractor {
                 if let Ok(prop_name) = prop.name() {
                     match prop_name.text().as_str() {
                         "initial-value" => {
-                            initial_value = Some(CssValue { node: prop.into() });
+                            initial_value = Some(CssValue::from(prop.value()));
                         }
                         "syntax" => {
                             syntax = Some(prop.value().text().to_string());
