@@ -1,0 +1,42 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: content-breaks-when-attr-breaks.html
+---
+# Input
+
+```html
+<div
+  test="content must break if attributes break"
+  explanation="This group of attributes should break and become multiline."
+  details="The content must do the same, despite it being short."
+>short content</div>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+-----
+
+```html
+<div
+	test="content must break if attributes break"
+	explanation="This group of attributes should break and become multiline."
+	details="The content must do the same, despite it being short."
+>
+	short content
+</div>
+```

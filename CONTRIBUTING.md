@@ -98,6 +98,8 @@ This command will install:
 - `taplo-cli`, a small tool for formatting TOML files.
 - `wasm-pack` and `wasm-tools` for managing the WASM build of Biome.
 
+You'll also need to have `pnpm` installed on your machine, and run `pnpm install` from the root of the repository. `pnpm` is needed to [create changesets](#create-a-changeset)
+
 And you're good to go hack with Biome and Rust! 🚀
 
 ## Testing
@@ -262,11 +264,10 @@ things you would need to run and check:
 If you happen to create a new _crate_ inside the workspace, use the command `just new-crate`, e.g.:
 
 ```shell
-just new-crate biome_new_crate
+cargo new crates/biome_new_crate --lib
 ```
 
-Where `biome_new_crate` is going to be the name of the new crate. This script takes care of adding the correct template for the `Cargo.toml` file, and it adds the crate
-to the `knope.toml` file, which we use for changelog generation.
+Where `biome_new_crate` is going to be the name of the new crate. The `--lib` option tells `cargo` to create the crate as library, so you will probably see a `src/lib.rs` file.
 
 ### Analyzers and lint rules
 
@@ -350,11 +351,16 @@ Please use the template provided.
 
 This repository uses [changesets](https://github.com/changesets/changesets) to automate the releases of Biome's binaries, the JavaScript libraries and the creation of the `CHANGELOG.md` for each library.
 
+#### Create a changeset
+
 If the PR you're about to open is a bugfix/feature visible to users of the Biome toolchain or of the published Biome crates, you are encouraged to provide a **changeset** . To *create* a changeset, use the following command (*don't create it manually*):
 
 ```shell
 just new-changeset
 ```
+> [!NOTE]
+> The script uses `pnpm` under the hoods, so make sure to have ran `pnpm i` from the root of the repository before running this script.
+
 The command will present a prompt where you need to choose the libraries involved by the PR, the type of change (`major`, `minor` or `patch`) for each library, and a description of the change. The description will be used as name of the file.
 
 The command will create the changeset(s) in the `.changeset` folder. You're free to open the file, and add more information in it.
@@ -363,7 +369,7 @@ The command will create the changeset(s) in the `.changeset` folder. You're free
 
 In the vast majority of cases, you want to choose the `@biomejs/biome` package, which represents the main package.
 
-The frontmatter of the changset will look like this:
+The frontmatter of the changeset will look like this:
 
 ```markdown
 ---
@@ -413,20 +419,13 @@ When releasing a new version of a Biome, follow these steps:
    You can filter [merged PRs that don't update the changelog](https://github.com/biomejs/biome/pulls?q=is%3Apr+is%3Amerged+-label%3AA-Changelog).
    Read our [guidelines for editing the changelog](#changelog).
 
-1. [ ] Based on the [changelog](./CHANGELOG.md), determine which version number to use.
-   See our [versioning guide](https://biomejs.dev/internals/versioning/) for more details.
-
-1. [ ] Rename `Unreleased` to `<version> (iso-date)` in the [changelog](./CHANGELOG.md).
-
-1. [ ] Update `version` in [Biome's `package.json`](./packages/@biomejs/biome/package.json) if applicable.
-
-1. [ ] **Update to the same `version` in all crates** if you publish crates. (`Cargo.toml` and `crates/**/Cargo.toml`)
+1. [ ] **Update to the same `version` in all crates** if you publish crates if applicable. (`Cargo.toml` and `crates/**/Cargo.toml`)
 
 1. [ ] Linter rules have a `version` metadata directly defined in their implementation.
    This field is set to `next` for newly created rules.
    This field must be updated to the new version.
 
-1. [ ] Once the PR is merged, the CI will trigger the `Release: *` workflows. Once these workflows finish compiling the final artefact, **they need to be approved manually**.
+1. [ ] Merge the PR `ci: release`, and the release workflow will run. Once these workflows finish compiling the final artefact, **they need to be approved manually** by a member of the **Core Contributors**.
 
 1. [ ] Open a new PR in the [website repository](https://github.com/biomejs/website) to update the website with the new version number:
    `BIOME_VERSION=<version> pnpm run codegen:all`.

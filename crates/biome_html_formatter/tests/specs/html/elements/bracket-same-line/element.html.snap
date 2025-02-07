@@ -42,7 +42,9 @@ Indent script and style: false
 	style="color: red"
 	data-foo="bar"
 	data-bar="foo"
->hello world</div>
+>
+	hello world
+</div>
 ```
 
 ## Output 1
@@ -64,5 +66,7 @@ Indent script and style: false
 	class="world really-long-class-name another-really-long-class-name"
 	style="color: red"
 	data-foo="bar"
-	data-bar="foo">hello world</div>
+	data-bar="foo">
+	hello world
+</div>
 ```
