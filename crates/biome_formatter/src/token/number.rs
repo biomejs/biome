@@ -20,7 +20,6 @@ impl NumberFormatOptions {
     pub fn keep_one_trailing_decimal_zero(self) -> Self {
         Self {
             keep_one_trailing_decimal_zero: true,
-            ..self
         }
     }
 }
