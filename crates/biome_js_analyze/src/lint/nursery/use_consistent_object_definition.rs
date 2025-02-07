@@ -76,13 +76,13 @@ declare_lint_rule! {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseConsistentObjectDefinitionOptions {
-    syntax: ObjectLiteralSyntax,
+    syntax: ObjectPropertySyntax,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub enum ObjectLiteralSyntax {
+pub enum ObjectPropertySyntax {
     #[default]
     Explicit,
     Shorthand,
@@ -99,8 +99,8 @@ impl Rule for UseConsistentObjectDefinition {
         let options = ctx.options();
         match binding {
             AnyJsObjectMember::JsShorthandPropertyObjectMember(_) => match options.syntax {
-                ObjectLiteralSyntax::Shorthand => None,
-                ObjectLiteralSyntax::Explicit => Some(()),
+                ObjectPropertySyntax::Shorthand => None,
+                ObjectPropertySyntax::Explicit => Some(()),
             },
             AnyJsObjectMember::JsPropertyObjectMember(source) => {
                 let member_token = source
@@ -135,19 +135,19 @@ impl Rule for UseConsistentObjectDefinition {
                 };
 
                 match options.syntax {
-                    ObjectLiteralSyntax::Shorthand => {
+                    ObjectPropertySyntax::Shorthand => {
                         if member_id == reference_id || "function" == reference_id {
                             Some(())
                         } else {
                             None
                         }
                     }
-                    ObjectLiteralSyntax::Explicit => None,
+                    ObjectPropertySyntax::Explicit => None,
                 }
             }
             AnyJsObjectMember::JsMethodObjectMember(_) => match options.syntax {
-                ObjectLiteralSyntax::Shorthand => None,
-                ObjectLiteralSyntax::Explicit => Some(()),
+                ObjectPropertySyntax::Shorthand => None,
+                ObjectPropertySyntax::Explicit => Some(()),
             },
             _ => None,
         }
@@ -158,10 +158,10 @@ impl Rule for UseConsistentObjectDefinition {
         let options = ctx.options();
 
         let title = match options.syntax {
-            ObjectLiteralSyntax::Shorthand => {
+            ObjectPropertySyntax::Shorthand => {
                 "Use shorthand object property syntax whenever possible."
             }
-            ObjectLiteralSyntax::Explicit => {
+            ObjectPropertySyntax::Explicit => {
                 "Always use explicit object property assignment syntax."
             }
         };

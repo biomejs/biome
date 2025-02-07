@@ -2791,7 +2791,7 @@ export interface ConsistentMemberAccessibilityOptions {
 	accessibility?: Accessibility;
 }
 export interface UseConsistentObjectDefinitionOptions {
-	syntax?: ObjectLiteralSyntax;
+	syntax?: ObjectPropertySyntax;
 }
 export interface UtilityClassSortingOptions {
 	/**
@@ -2919,7 +2919,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	stableResult?: StableHookResult;
 }
 export type Accessibility = "noPublic" | "explicit" | "none";
-export type ObjectLiteralSyntax = "explicit" | "shorthand";
+export type ObjectPropertySyntax = "explicit" | "shorthand";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
 export type Regex = string;

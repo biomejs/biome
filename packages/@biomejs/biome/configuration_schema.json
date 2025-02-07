@@ -2924,7 +2924,7 @@
 			},
 			"additionalProperties": false
 		},
-		"ObjectLiteralSyntax": {
+		"ObjectPropertySyntax": {
 			"type": "string",
 			"enum": ["explicit", "shorthand"]
 		},
@@ -4902,7 +4902,7 @@
 			"properties": {
 				"syntax": {
 					"default": "explicit",
-					"allOf": [{ "$ref": "#/definitions/ObjectLiteralSyntax" }]
+					"allOf": [{ "$ref": "#/definitions/ObjectPropertySyntax" }]
 				}
 			},
 			"additionalProperties": false
