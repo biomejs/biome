@@ -4,7 +4,7 @@
         "enabled": true,
         "rules": {
             "nursery": {
-                "useConsistentObjectLiterals": {
+                "useConsistentObjectDefinition": {
                     "level": "error",
                     "options": {
                         "syntax": "explicit"

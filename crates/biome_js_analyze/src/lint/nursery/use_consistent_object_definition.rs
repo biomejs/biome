@@ -8,7 +8,7 @@ use biome_rowan::AstNode;
 use serde::{Deserialize, Serialize};
 
 declare_lint_rule! {
-    /// Require consistently using either explicit object property assignment or the newer shorthand syntax, when possible.
+    /// Require the consistent declaration of object literals. Defaults to explicit definitions.
     ///
     /// ECMAScript 6 provides two ways to define an object literal: `{foo: foo}` and `{foo}`.
     /// The two styles are functionally equivalent.
@@ -60,10 +60,11 @@ declare_lint_rule! {
     /// - `explicit`: enforces the use of explicit object property syntax in every case
     /// - `shorthand`: enforces the use of shorthand object property syntax when possible
     ///
-    /// Default: `explicit`
-    pub UseConsistentObjectLiterals {
+    /// **Default:** `explicit`
+    ///
+    pub UseConsistentObjectDefinition {
         version: "next",
-        name: "useConsistentObjectLiterals",
+        name: "useConsistentObjectDefinition",
         language: "js",
         recommended: false,
         sources: &[RuleSource::Eslint("object-shorthand")],
@@ -74,7 +75,7 @@ declare_lint_rule! {
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseConsistentObjectLiteralsOptions {
+pub struct UseConsistentObjectDefinitionOptions {
     syntax: ObjectLiteralSyntax,
 }
 
@@ -87,25 +88,20 @@ pub enum ObjectLiteralSyntax {
     Shorthand,
 }
 
-impl Rule for UseConsistentObjectLiterals {
+impl Rule for UseConsistentObjectDefinition {
     type Query = Ast<AnyJsObjectMember>;
-    type State = String;
+    type State = ();
     type Signals = Option<Self::State>;
-    type Options = UseConsistentObjectLiteralsOptions;
+    type Options = UseConsistentObjectDefinitionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();
         let options = ctx.options();
         match binding {
-            AnyJsObjectMember::JsShorthandPropertyObjectMember(source) => {
-                let member_token = source.name().ok()?.value_token().ok()?;
-                let member_id = inner_string_text(&member_token);
-
-                match options.syntax {
-                    ObjectLiteralSyntax::Shorthand => None,
-                    ObjectLiteralSyntax::Explicit => Some(member_id.to_string()),
-                }
-            }
+            AnyJsObjectMember::JsShorthandPropertyObjectMember(_) => match options.syntax {
+                ObjectLiteralSyntax::Shorthand => None,
+                ObjectLiteralSyntax::Explicit => Some(()),
+            },
             AnyJsObjectMember::JsPropertyObjectMember(source) => {
                 let member_token = source
                     .name()
@@ -141,7 +137,7 @@ impl Rule for UseConsistentObjectLiterals {
                 match options.syntax {
                     ObjectLiteralSyntax::Shorthand => {
                         if member_id == reference_id || "function" == reference_id {
-                            Some(member_id.to_string())
+                            Some(())
                         } else {
                             None
                         }
@@ -149,20 +145,10 @@ impl Rule for UseConsistentObjectLiterals {
                     ObjectLiteralSyntax::Explicit => None,
                 }
             }
-            AnyJsObjectMember::JsMethodObjectMember(source) => {
-                let member_token = source
-                    .name()
-                    .ok()?
-                    .as_js_literal_member_name()?
-                    .value()
-                    .ok()?;
-                let member_id = inner_string_text(&member_token);
-
-                match options.syntax {
-                    ObjectLiteralSyntax::Shorthand => None,
-                    ObjectLiteralSyntax::Explicit => Some(member_id.to_string()),
-                }
-            }
+            AnyJsObjectMember::JsMethodObjectMember(_) => match options.syntax {
+                ObjectLiteralSyntax::Shorthand => None,
+                ObjectLiteralSyntax::Explicit => Some(()),
+            },
             _ => None,
         }
     }
@@ -182,7 +168,7 @@ impl Rule for UseConsistentObjectLiterals {
 
         Some(
             RuleDiagnostic::new(rule_category!(), node.range(), markup! {{title}}).note(
-                markup! { "Using a consistent object literal syntax makes it easier to anticipate the structure of an object." },
+                markup! { "Using consistent object definitions makes it easier to anticipate the structure of an object." },
             ),
         )
     }

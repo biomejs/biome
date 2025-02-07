@@ -13,7 +13,7 @@ const obj = {
 
 # Diagnostics
 ```
-invalidExplicit.js:2:5 lint/nursery/useConsistentObjectLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidExplicit.js:2:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand object property syntax whenever possible.
   
@@ -23,13 +23,13 @@ invalidExplicit.js:2:5 lint/nursery/useConsistentObjectLiterals ━━━━━�
     3 │     bar: function () { return "bar"; },
     4 │ };
   
-  i Using a consistent object literal syntax makes it easier to anticipate the structure of an object.
+  i Using consistent object definitions makes it easier to anticipate the structure of an object.
   
 
 ```
 
 ```
-invalidExplicit.js:3:5 lint/nursery/useConsistentObjectLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidExplicit.js:3:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand object property syntax whenever possible.
   
@@ -40,7 +40,7 @@ invalidExplicit.js:3:5 lint/nursery/useConsistentObjectLiterals ━━━━━�
     4 │ };
     5 │ 
   
-  i Using a consistent object literal syntax makes it easier to anticipate the structure of an object.
+  i Using consistent object definitions makes it easier to anticipate the structure of an object.
   
 
 ```

@@ -2,4 +2,4 @@
 "@biomejs/biome": minor
 ---
 
-Add the useConsistentObjectLiterals rule.
+Add the useConsistentObjectDefinition rule.

@@ -3202,10 +3202,10 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_member_accessibility:
         Option<RuleConfiguration<biome_js_analyze::options::UseConsistentMemberAccessibility>>,
-    #[doc = "Require consistently using either explicit object property assignment or the newer shorthand syntax, when possible."]
+    #[doc = "Require the consistent declaration of object literals. Defaults to explicit definitions."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_consistent_object_literals:
-        Option<RuleConfiguration<biome_js_analyze::options::UseConsistentObjectLiterals>>,
+    pub use_consistent_object_definition:
+        Option<RuleConfiguration<biome_js_analyze::options::UseConsistentObjectDefinition>>,
     #[doc = "Require specifying the reason argument when using @deprecated directive"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_deprecated_reason:
@@ -3306,7 +3306,7 @@ impl Nursery {
         "useComponentExportOnlyModules",
         "useConsistentCurlyBraces",
         "useConsistentMemberAccessibility",
-        "useConsistentObjectLiterals",
+        "useConsistentObjectDefinition",
         "useDeprecatedReason",
         "useExplicitType",
         "useExportsLast",
@@ -3655,7 +3655,7 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
-        if let Some(rule) = self.use_consistent_object_literals.as_ref() {
+        if let Some(rule) = self.use_consistent_object_definition.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
             }
@@ -3969,7 +3969,7 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
-        if let Some(rule) = self.use_consistent_object_literals.as_ref() {
+        if let Some(rule) = self.use_consistent_object_definition.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
             }
@@ -4261,8 +4261,8 @@ impl RuleGroupExt for Nursery {
                 .use_consistent_member_accessibility
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "useConsistentObjectLiterals" => self
-                .use_consistent_object_literals
+            "useConsistentObjectDefinition" => self
+                .use_consistent_object_definition
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useDeprecatedReason" => self

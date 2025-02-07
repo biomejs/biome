@@ -203,7 +203,7 @@ define_categories! {
     "lint/nursery/useComponentExportOnlyModules": "https://biomejs.dev/linter/rules/use-components-only-module",
     "lint/nursery/useConsistentCurlyBraces": "https://biomejs.dev/linter/rules/use-consistent-curly-braces",
     "lint/nursery/useConsistentMemberAccessibility": "https://biomejs.dev/linter/rules/use-consistent-member-accessibility",
-    "lint/nursery/useConsistentObjectLiterals": "https://biomejs.dev/linter/rules/use-consistent-object-literals",
+    "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-literals",
     "lint/nursery/useDeprecatedReason": "https://biomejs.dev/linter/rules/use-deprecated-reason",
     "lint/nursery/useExplicitFunctionReturnType": "https://biomejs.dev/linter/rules/use-explicit-type",
     "lint/nursery/useExplicitType": "https://biomejs.dev/linter/rules/use-explicit-type",

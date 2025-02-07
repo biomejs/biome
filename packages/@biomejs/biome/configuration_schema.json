@@ -2821,11 +2821,11 @@
 						{ "type": "null" }
 					]
 				},
-				"useConsistentObjectLiterals": {
-					"description": "Require consistently using either explicit object property assignment or the newer shorthand syntax, when possible.",
+				"useConsistentObjectDefinition": {
+					"description": "Require the consistent declaration of object literals. Defaults to explicit definitions.",
 					"anyOf": [
 						{
-							"$ref": "#/definitions/UseConsistentObjectLiteralsConfiguration"
+							"$ref": "#/definitions/UseConsistentObjectDefinitionConfiguration"
 						},
 						{ "type": "null" }
 					]
@@ -3635,7 +3635,7 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithUseConsistentObjectLiteralsOptions": {
+		"RuleWithUseConsistentObjectDefinitionOptions": {
 			"type": "object",
 			"required": ["level"],
 			"properties": {
@@ -3646,7 +3646,7 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [
-						{ "$ref": "#/definitions/UseConsistentObjectLiteralsOptions" }
+						{ "$ref": "#/definitions/UseConsistentObjectDefinitionOptions" }
 					]
 				}
 			},
@@ -4891,13 +4891,13 @@
 			},
 			"additionalProperties": false
 		},
-		"UseConsistentObjectLiteralsConfiguration": {
+		"UseConsistentObjectDefinitionConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseConsistentObjectLiteralsOptions" }
+				{ "$ref": "#/definitions/RuleWithUseConsistentObjectDefinitionOptions" }
 			]
 		},
-		"UseConsistentObjectLiteralsOptions": {
+		"UseConsistentObjectDefinitionOptions": {
 			"type": "object",
 			"properties": {
 				"syntax": {
