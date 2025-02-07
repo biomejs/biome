@@ -130,35 +130,20 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
                     flat_children,
                     expanded_children,
                 } => {
-                    // FIXME: `if_group_breaks` and `if_group_fits_on_line` are supposed to be inverses of each other,
-                    // and they are. However, if the condition in the `if` below is not met, then neither of the 2
-                    // calls print any content. This is a bug.
-                    if opening_element.attributes().len() > 1 {
-                        write!(
-                            f,
-                            [
-                                // If the attribute group breaks, prettier always breaks the children as well.
-                                &if_group_breaks(&expanded_children)
-                                    .with_group_id(Some(attr_group_id)),
-                                // If the attribute group does NOT break, print whatever fits best for the children.
-                                &if_group_fits_on_line(&best_fitting![
-                                    format_args![flat_children],
-                                    format_args![expanded_children]
-                                ])
-                                .with_group_id(Some(attr_group_id)),
-                            ]
-                        )?;
-                    } else {
-                        // The workaround for the bug mentioned above is to unconditionally print the children in the
-                        // cases where the previous block would not print anything.
-                        write!(
-                            f,
-                            [&best_fitting![
+                    let expanded_children = expanded_children.memoized();
+                    write!(
+                        f,
+                        [
+                            // If the attribute group breaks, prettier always breaks the children as well.
+                            &if_group_breaks(&expanded_children).with_group_id(Some(attr_group_id)),
+                            // If the attribute group does NOT break, print whatever fits best for the children.
+                            &if_group_fits_on_line(&best_fitting![
                                 format_args![flat_children],
-                                format_args![expanded_children]
-                            ]]
-                        )?;
-                    }
+                                format_args![expanded_children],
+                            ])
+                            .with_group_id(Some(attr_group_id)),
+                        ]
+                    )?;
                 }
             }
         }
