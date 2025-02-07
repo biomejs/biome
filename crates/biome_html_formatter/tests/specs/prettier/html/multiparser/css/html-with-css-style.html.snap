@@ -1,0 +1,60 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/multiparser/css/html-with-css-style.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+    blink{
+
+        display:  none ;}
+    </style>
+</head>
+<body></body>
+</html>
+
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,10 @@
+-<!doctype html>
++<!DOCTYPE html>
+ <html lang="en">
+   <head>
+     <style>
+-      blink {
+-        display: none;
+-      }
++    blink{
++
++        display:  none ;}
+     </style>
+   </head>
+   <body></body>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <style>
+    blink{
+
+        display:  none ;}
+    </style>
+  </head>
+  <body></body>
+</html>
+```

@@ -1,0 +1,101 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/tags/textarea.html
+---
+# Input
+
+```html
+<div>
+  <div>
+    <div>
+      <div>
+        <div>
+          <div>
+            <div>
+              <div>
+                <div>
+                  <div>
+                    <div>
+                      <div>
+                        <textarea rows="10" cols="45" name="text">
+                        String
+                        </textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<textarea></textarea>
+
+<div><textarea>lorem ipsum</textarea></div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -11,7 +11,7 @@
+                     <div>
+                       <div>
+                         <textarea rows="10" cols="45" name="text">
+-                        String
++                          String
+                         </textarea>
+                       </div>
+                     </div>
+@@ -27,4 +27,6 @@
+ </div>
+ <textarea></textarea>
+ 
+-<div><textarea>lorem ipsum</textarea></div>
++<div>
++  <textarea>lorem ipsum</textarea>
++</div>
+```
+
+# Output
+
+```html
+<div>
+  <div>
+    <div>
+      <div>
+        <div>
+          <div>
+            <div>
+              <div>
+                <div>
+                  <div>
+                    <div>
+                      <div>
+                        <textarea rows="10" cols="45" name="text">
+                          String
+                        </textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<textarea></textarea>
+
+<div>
+  <textarea>lorem ipsum</textarea>
+</div>
+```

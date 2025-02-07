@@ -1,0 +1,87 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/multiparser/ts/html-with-ts-script.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script lang="ts">
+    type X = { [
+        K in keyof Y
+    ]: Partial < K >  } ;
+
+    class   Foo< T >{
+
+        constructor ( private foo: keyof Apple ){
+
+
+        }
+    }
+    </script>
+</head>
+<body></body>
+</html>
+
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,14 +1,18 @@
+-<!doctype html>
++<!DOCTYPE html>
+ <html lang="en">
+   <head>
+     <script lang="ts">
+-      type X = {
+-        [K in keyof Y]: Partial<K>;
+-      };
++    type X = { [
++        K in keyof Y
++    ]: Partial < K >  } ;
++
++    class   Foo< T >{
++
++        constructor ( private foo: keyof Apple ){
+ 
+-      class Foo<T> {
+-        constructor(private foo: keyof Apple) {}
+-      }
++
++        }
++    }
+     </script>
+   </head>
+   <body></body>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script lang="ts">
+    type X = { [
+        K in keyof Y
+    ]: Partial < K >  } ;
+
+    class   Foo< T >{
+
+        constructor ( private foo: keyof Apple ){
+
+
+        }
+    }
+    </script>
+  </head>
+  <body></body>
+</html>
+```
