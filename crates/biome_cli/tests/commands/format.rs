@@ -178,15 +178,6 @@ const APPLY_ATTRIBUTE_POSITION_AFTER: &str = r#"<Foo
 </Foo>;
 "#;
 
-const DEFAULT_CONFIGURATION_BEFORE: &str = r#"function f() {
-    return { a, b }
-  }"#;
-
-const DEFAULT_CONFIGURATION_AFTER: &str = "function f() {
-      return { a, b };
-}
-";
-
 const CUSTOM_CONFIGURATION_BEFORE: &str = r#"function f() {
   return { a, b }
 }"#;
