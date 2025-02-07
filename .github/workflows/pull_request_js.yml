@@ -6,9 +6,9 @@ on:
       - main
       - next
     paths: # Only run when changes are made to js code
-      - 'editors/**'
-      #     - 'crates/**'
-      - 'packages/@biomejs/js-api/**'
+      - 'packages/@biomejs/**'
+      - 'packages/aria-data/**'
+      - 'packages/tailwindcss-config-analyzer/**'
 
 # Cancel jobs when the PR is updated
 concurrency:
@@ -36,7 +36,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-
       - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
-      - name: Run Biome Format
+      - name: Run Biome CI check
         run: |
           pnpm i
           pnpm run ci
