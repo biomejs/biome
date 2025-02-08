@@ -3,7 +3,7 @@ use biome_diagnostics::{console, Advices, Diagnostic, IoError, LogCategory, Visi
 use biome_diagnostics::{Error, Severity};
 use camino::{Utf8Path, Utf8PathBuf};
 pub use memory::{ErrorEntry, MemoryFileSystem};
-pub use os::OsFileSystem;
+pub use os::{OsFileSystem, TemporaryFs};
 use oxc_resolver::{FsResolution, ResolveError};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;

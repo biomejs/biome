@@ -40,7 +40,7 @@ use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{declare_node_union, FileSourceError, NodeCache};
+use biome_rowan::{FileSourceError, NodeCache};
 use biome_string_case::StrLikeExtension;
 
 use camino::Utf8Path;
@@ -991,19 +991,17 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         L: biome_rowan::Language,
         R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
+        let path = self.path.expect("File path");
         let no_only = self.only.is_some_and(|only| only.is_empty());
         let no_domains = self
             .settings
-            .and_then(|settings| settings.as_linter_domains(self.path.expect("File path")))
+            .and_then(|settings| settings.as_linter_domains(path))
             .is_none_or(|d| d.is_empty());
         if !(no_only && no_domains) {
             return;
         }
 
-        if let Some((_, manifest)) = self
-            .path
-            .and_then(|path| self.project_layout.get_node_manifest_for_path(path))
-        {
+        if let Some((_, manifest)) = self.project_layout.get_node_manifest_for_path(path) {
             for domain in R::METADATA.domains {
                 self.analyzer_options
                     .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
@@ -1037,7 +1035,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             .settings
             .and_then(|settings| settings.as_linter_domains(self.path.expect("File path")));
 
-        // domains, no need to record the rule
+        // no domains, no need to record the rule
         if domains.as_ref().is_none_or(|d| d.is_empty()) {
             return;
         }
