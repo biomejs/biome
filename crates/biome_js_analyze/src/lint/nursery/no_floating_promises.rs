@@ -11,7 +11,9 @@ use biome_js_syntax::{
     JsMethodClassMember, JsMethodObjectMember, JsStaticMemberExpression, JsSyntaxKind,
     JsThisExpression, JsVariableDeclarator, TsReturnTypeAnnotation,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind};
+use biome_rowan::{
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind,
+};
 
 use crate::{services::semantic::Semantic, JsRuleAction};
 
@@ -755,7 +757,7 @@ fn find_class_method_or_property(
     class_member_list: JsClassMemberList,
     target_name: &str,
 ) -> Option<AnyJsClassMember> {
-    class_member_list.into_iter().find(|member| match member {
+    class_member_list.iter().find(|member| match member {
         AnyJsClassMember::JsMethodClassMember(method) => method
             .name()
             .ok()
