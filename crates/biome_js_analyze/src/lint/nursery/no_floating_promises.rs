@@ -737,7 +737,7 @@ fn find_and_check_class_member(
     model: &SemanticModel,
 ) -> Option<bool> {
     let class_member_list = class_decl.members();
-    if let Some(member) = find_class_method_or_property(class_member_list, target_name) {
+    if let Some(member) = find_class_method_or_property(&class_member_list, target_name) {
         return is_class_member_a_promise(&member, model);
     }
 
@@ -754,7 +754,7 @@ fn find_and_check_class_member(
 }
 
 fn find_class_method_or_property(
-    class_member_list: JsClassMemberList,
+    class_member_list: &JsClassMemberList,
     target_name: &str,
 ) -> Option<AnyJsClassMember> {
     class_member_list.iter().find(|member| match member {
