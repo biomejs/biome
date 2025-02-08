@@ -84,7 +84,7 @@ HtmlSelfClosingElement =
 HtmlElement =
 	opening_element: HtmlOpeningElement
 	children: HtmlElementList
-	closing_element: HtmlClosingElement
+	closing_element: HtmlClosingElement?
 
 
 // <a href="">

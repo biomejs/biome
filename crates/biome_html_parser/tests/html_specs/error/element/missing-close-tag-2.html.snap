@@ -27,7 +27,7 @@ HtmlRoot {
                 r_angle_token: R_ANGLE@4..5 ">" [] [],
             },
             children: HtmlElementList [],
-            closing_element: missing (required),
+            closing_element: missing (optional),
         },
     ],
     eof_token: EOF@5..6 "" [Newline("\n")] [],

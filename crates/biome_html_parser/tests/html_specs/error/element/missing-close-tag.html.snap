@@ -31,7 +31,7 @@ HtmlRoot {
                     value_token: HTML_LITERAL@5..8 "foo" [] [],
                 },
             ],
-            closing_element: missing (required),
+            closing_element: missing (optional),
         },
     ],
     eof_token: EOF@8..9 "" [Newline("\n")] [],
