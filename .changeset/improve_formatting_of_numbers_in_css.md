@@ -2,7 +2,13 @@
 "@biomejs/biome": patch
 ---
 
-Fixes [#5031](https://github.com/biomejs/biome/issues/5031). Improve CSS numeric formatting with two changes:
+Fix [#5031](https://github.com/biomejs/biome/issues/5031). Improve CSS formatting for numbers:
 
-- Adds leading zeros to value with unit `.5em` => `0.5em`
-- Removes trailing zeros. `1.0` => `1`
+```diff
+.class {
+-	padding: .5em;
+-	marding: 1.0;
++	padding: 0.5em;	
++	marding: 1;
+}
+```
