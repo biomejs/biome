@@ -1,6 +1,6 @@
 use biome_analyze::RuleSourceKind;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource,
 };
 use biome_console::markup;
 use biome_js_syntax::JsxOpeningElement;
@@ -49,7 +49,8 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintNext("no-head-element")],
         source_kind: RuleSourceKind::SameLogic,
-        recommended: false,
+        recommended: true,
+        domains: &[RuleDomain::Next],
     }
 }
 

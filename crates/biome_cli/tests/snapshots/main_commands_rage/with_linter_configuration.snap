@@ -68,7 +68,6 @@ Linter:
   Enabled rules:
     complexity/noBannedTypes
     complexity/noEmptyTypeParameters
-    complexity/noExcessiveNestedTestSuites
     complexity/noExtraBooleanCast
     complexity/noForEach
     complexity/noMultipleSpacesInRegularExpressionLiterals
