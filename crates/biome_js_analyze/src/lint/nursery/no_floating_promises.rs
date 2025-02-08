@@ -372,7 +372,8 @@ fn is_handled_promise(js_call_expression: &JsCallExpression) -> Option<bool> {
     let static_member_expr = expr.as_js_static_member_expression()?;
     let member = static_member_expr.member().ok()?;
     let js_name = member.as_js_name()?;
-    let name = js_name.to_string();
+    let value_token = js_name.value_token().ok()?;
+    let name = value_token.text_trimmed();
 
     if name == "finally" {
         let expr = static_member_expr.object().ok()?;
@@ -448,7 +449,7 @@ fn is_member_expression_callee_a_promise(
         AnyJsExpression::JsThisExpression(js_this_expr) => {
             let js_name = static_member_expr.member().ok()?;
             let value_token = js_name.value_token().ok()?;
-            check_this_expression(&js_this_expr, &value_token.to_string(), model)
+            check_this_expression(&js_this_expr, value_token.text_trimmed(), model)
         }
         AnyJsExpression::JsStaticMemberExpression(static_member_expr) => {
             if !check_this_expression_in_static_member_expression(&static_member_expr, model)? {
@@ -703,7 +704,7 @@ fn check_this_expression_in_static_member_expression(
     let js_this_expression = any_js_expression.as_js_this_expression()?;
     let js_name = static_member_expr.member().ok()?;
     let value_token = js_name.value_token().ok()?;
-    if !check_this_expression(js_this_expression, &value_token.to_string(), model)? {
+    if !check_this_expression(js_this_expression, value_token.text_trimmed(), model)? {
         return None;
     }
     Some(true)
