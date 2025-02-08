@@ -1165,7 +1165,12 @@ fn parse_ts_import_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax 
     p.eat(T![typeof]);
     p.expect(T![import]);
 
-    parse_ts_import_type_arguments(p, context).ok();
+    if parse_ts_import_type_arguments(p, context).ok().is_none() {
+        p.error(p.err_builder(
+            format!("Expected '(', but got '{}'", p.cur_text()),
+            p.cur_range(),
+        ));
+    };
 
     if p.at(T![.]) {
         let qualifier = p.start();
