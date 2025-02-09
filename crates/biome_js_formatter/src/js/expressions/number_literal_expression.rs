@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 use biome_formatter::token::number::format_number_token;
+use biome_formatter::token::number::NumberFormatOptions;
 use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsNumberLiteralExpression;
 use biome_js_syntax::JsNumberLiteralExpressionFields;
@@ -15,7 +16,11 @@ impl FormatNodeRule<JsNumberLiteralExpression> for FormatJsNumberLiteralExpressi
         f: &mut JsFormatter,
     ) -> FormatResult<()> {
         let JsNumberLiteralExpressionFields { value_token } = node.as_fields();
-        format_number_token(&value_token?).fmt(f)
+        format_number_token(
+            &value_token?,
+            NumberFormatOptions::default().keep_one_trailing_decimal_zero(),
+        )
+        .fmt(f)
     }
 
     fn needs_parentheses(&self, item: &JsNumberLiteralExpression) -> bool {
