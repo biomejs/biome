@@ -91,6 +91,15 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```ts,expect_diagnostic
+    /// class Api {
+    ///   async returnsPromise(): Promise<string> {
+    ///     return 'value';
+    ///   }
+    /// }
+    /// const api = new Api();
+    /// api.returnsPromise().then(() => {}).finally(() => {});
+    /// ```
     /// ### Valid
     ///
     /// ```ts
@@ -158,14 +167,14 @@ impl Rule for NoFloatingPromises {
                 Some(())
             }
             AnyJsExpression::JsIdentifierExpression(js_identifier_expression) => {
-                if !is_binding_a_promise(&js_identifier_expression, model)? {
+                if !is_binding_a_promise(&js_identifier_expression, model, None)? {
                     return None;
                 }
 
                 Some(())
             }
             AnyJsExpression::JsStaticMemberExpression(static_member_expr) => {
-                if !check_this_expression_in_static_member_expression(&static_member_expr, model)? {
+                if !is_member_expression_callee_a_promise(&static_member_expr, model)? {
                     return None;
                 }
                 Some(())
@@ -254,7 +263,7 @@ impl Rule for NoFloatingPromises {
 fn is_callee_a_promise(callee: &AnyJsExpression, model: &SemanticModel) -> Option<bool> {
     match callee {
         AnyJsExpression::JsIdentifierExpression(js_ident_expr) => {
-            is_binding_a_promise(js_ident_expr, model)
+            is_binding_a_promise(js_ident_expr, model, None)
         }
         AnyJsExpression::JsStaticMemberExpression(static_member_expr) => {
             is_member_expression_callee_a_promise(static_member_expr, model)
@@ -273,6 +282,7 @@ fn is_callee_a_promise(callee: &AnyJsExpression, model: &SemanticModel) -> Optio
 ///
 /// * `js_ident_expr` - A reference to a `JsIdentifierExpression` representing the identifier to check.
 /// * `model` - A reference to the `SemanticModel` used for resolving bindings.
+/// * `target_method_name` - An optional name of the method to check if it is a promise.
 ///
 /// # Returns
 ///
@@ -283,6 +293,7 @@ fn is_callee_a_promise(callee: &AnyJsExpression, model: &SemanticModel) -> Optio
 fn is_binding_a_promise(
     js_ident_expr: &JsIdentifierExpression,
     model: &SemanticModel,
+    target_method_name: Option<&str>,
 ) -> Option<bool> {
     let reference = js_ident_expr.name().ok()?;
     let binding = model.binding(&reference)?;
@@ -293,7 +304,8 @@ fn is_binding_a_promise(
             Some(is_function_a_promise(&func_decl))
         }
         AnyJsBindingDeclaration::JsVariableDeclarator(js_var_decl) => Some(
-            is_initializer_a_promise(&js_var_decl.initializer()?, model).unwrap_or_default()
+            is_initializer_a_promise(&js_var_decl.initializer()?, model, target_method_name)
+                .unwrap_or_default()
                 || is_variable_annotation_a_promise(&js_var_decl).unwrap_or_default(),
         ),
         _ => Some(false),
@@ -446,7 +458,15 @@ fn is_member_expression_callee_a_promise(
             is_callee_a_promise(&callee, model)
         }
         AnyJsExpression::JsIdentifierExpression(js_ident_expr) => {
-            is_binding_a_promise(&js_ident_expr, model)
+            let value_token = static_member_expr
+                .member()
+                .ok()
+                .and_then(|js_name| js_name.value_token().ok());
+
+            if let Some(token) = value_token {
+                return is_binding_a_promise(&js_ident_expr, model, Some(token.text_trimmed()));
+            }
+            is_binding_a_promise(&js_ident_expr, model, None)
         }
         AnyJsExpression::JsThisExpression(js_this_expr) => {
             let js_name = static_member_expr.member().ok()?;
@@ -454,10 +474,7 @@ fn is_member_expression_callee_a_promise(
             check_this_expression(&js_this_expr, value_token.text_trimmed(), model)
         }
         AnyJsExpression::JsStaticMemberExpression(static_member_expr) => {
-            if !check_this_expression_in_static_member_expression(&static_member_expr, model)? {
-                return None;
-            }
-            Some(true)
+            is_member_expression_callee_a_promise(&static_member_expr, model)
         }
         _ => Some(false),
     }
@@ -508,6 +525,8 @@ fn is_in_async_function(node: &JsExpressionStatement) -> bool {
 /// # Arguments
 ///
 /// * `js_variable_declarator` - A reference to a `JsVariableDeclarator` to check.
+/// * `model` - A reference to the `SemanticModel` used for resolving bindings.
+/// * `target_method_name` - An optional name of the method to check if it is a promise.
 ///
 /// # Returns
 ///
@@ -535,6 +554,7 @@ fn is_in_async_function(node: &JsExpressionStatement) -> bool {
 fn is_initializer_a_promise(
     initializer_clause: &JsInitializerClause,
     model: &SemanticModel,
+    target_method_name: Option<&str>,
 ) -> Option<bool> {
     let expr = initializer_clause.expression().ok()?;
     match expr.omit_parentheses() {
@@ -549,7 +569,18 @@ fn is_initializer_a_promise(
         ),
         AnyJsExpression::JsNewExpression(js_new_epr) => {
             let any_js_expr = js_new_epr.callee().ok()?;
-            Some(is_expression_a_promise(&any_js_expr, model))
+            if is_expression_a_promise(&any_js_expr, model) {
+                return Some(true);
+            }
+            let ident_expr = any_js_expr.as_js_identifier_expression()?;
+            let reference = ident_expr.name().ok()?;
+            let binding = model.binding(&reference)?;
+            let any_js_binding_decl = binding.tree().declaration()?;
+            let AnyJsBindingDeclaration::JsClassDeclaration(class_decl) = any_js_binding_decl
+            else {
+                return None;
+            };
+            find_and_check_class_member(&class_decl, target_method_name?, model)
         }
         _ => Some(false),
     }
@@ -698,20 +729,6 @@ fn check_this_expression(
         })
 }
 
-fn check_this_expression_in_static_member_expression(
-    static_member_expr: &JsStaticMemberExpression,
-    model: &SemanticModel,
-) -> Option<bool> {
-    let any_js_expression = static_member_expr.object().ok()?;
-    let js_this_expression = any_js_expression.as_js_this_expression()?;
-    let js_name = static_member_expr.member().ok()?;
-    let value_token = js_name.value_token().ok()?;
-    if !check_this_expression(js_this_expression, value_token.text_trimmed(), model)? {
-        return None;
-    }
-    Some(true)
-}
-
 /// Finds a class method or property by matching the given name and checks if it is a promise.
 ///
 /// This function searches for a class method or property in the given `JsClassDeclaration`
@@ -790,7 +807,7 @@ fn is_class_member_a_promise(
             }
 
             if let Some(initializer_clause) = property.value() {
-                return is_initializer_a_promise(&initializer_clause, model);
+                return is_initializer_a_promise(&initializer_clause, model, None);
             }
 
             None

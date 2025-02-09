@@ -118,3 +118,8 @@ class InvalidTestClass extends InvalidTestClassParent {
   }
 }
 
+const invalidTestClass = new InvalidTestClass();
+invalidTestClass.returnsPromiseMethod().then(() => { }).finally(() => { });
+invalidTestClass.returnsPromiseFunctionProperty();
+invalidTestClass.returnsPromiseProperty
+invalidTestClass.returnsPromiseProperty.then(() => { }).finally(() => { });

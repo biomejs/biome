@@ -29,8 +29,10 @@ async function bindingPromiseInsideFunction() {
 
 
 class ValidTestClass {
+  returnsPromiseFunctionProperty: () => Promise<void>
   returnsPromiseProperty: Promise<void>
   constructor() {
+    this.returnsPromiseFunctionProperty = () => Promise.resolve();
     this.returnsPromiseProperty = new Promise((resolve, reject) => { })
   }
 
@@ -63,4 +65,13 @@ class ValidTestClass {
     await this.returnsPromiseFunction().then(() => { });
     this.returnsPromiseArrowFunction().catch(() => { });
   }
+}
+
+const validTestClass = new ValidTestClass();
+async function testClassExpression(): Promise<string> {
+  await validTestClass.returnsPromiseMethod();
+  validTestClass.returnsPromiseMethod().catch(() => { });
+  validTestClass.returnsPromiseFunctionProperty().then(() => { }, () => { }).finally(() => { });
+  validTestClass.returnsPromiseProperty.catch(() => { });
+  return validTestClass.returnsPromiseArrowFunction();
 }

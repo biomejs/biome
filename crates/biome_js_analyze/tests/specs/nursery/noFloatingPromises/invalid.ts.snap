@@ -124,7 +124,11 @@ class InvalidTestClass extends InvalidTestClassParent {
   }
 }
 
-
+const invalidTestClass = new InvalidTestClass();
+invalidTestClass.returnsPromiseMethod().then(() => { }).finally(() => { });
+invalidTestClass.returnsPromiseFunctionProperty();
+invalidTestClass.returnsPromiseProperty
+invalidTestClass.returnsPromiseProperty.then(() => { }).finally(() => { });
 ```
 
 # Diagnostics
@@ -542,5 +546,69 @@ invalid.ts:117:5 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
     117 │ ····await·this.returnsPromiseArrowFunction();
         │     ++++++                                   
+
+```
+
+```
+invalid.ts:122:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    121 │ const invalidTestClass = new InvalidTestClass();
+  > 122 │ invalidTestClass.returnsPromiseMethod().then(() => { }).finally(() => { });
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    123 │ invalidTestClass.returnsPromiseFunctionProperty();
+    124 │ invalidTestClass.returnsPromiseProperty
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:123:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    121 │ const invalidTestClass = new InvalidTestClass();
+    122 │ invalidTestClass.returnsPromiseMethod().then(() => { }).finally(() => { });
+  > 123 │ invalidTestClass.returnsPromiseFunctionProperty();
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    124 │ invalidTestClass.returnsPromiseProperty
+    125 │ invalidTestClass.returnsPromiseProperty.then(() => { }).finally(() => { });
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:124:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    122 │ invalidTestClass.returnsPromiseMethod().then(() => { }).finally(() => { });
+    123 │ invalidTestClass.returnsPromiseFunctionProperty();
+  > 124 │ invalidTestClass.returnsPromiseProperty
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    125 │ invalidTestClass.returnsPromiseProperty.then(() => { }).finally(() => { });
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:125:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    123 │ invalidTestClass.returnsPromiseFunctionProperty();
+    124 │ invalidTestClass.returnsPromiseProperty
+  > 125 │ invalidTestClass.returnsPromiseProperty.then(() => { }).finally(() => { });
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
 
 ```
