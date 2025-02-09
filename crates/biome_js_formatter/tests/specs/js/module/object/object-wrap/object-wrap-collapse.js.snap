@@ -1,0 +1,120 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/object/object-wrap/object-wrap-collapse.js
+---
+# Input
+
+```js
+const a = { already: "collapsed" };
+
+const b = {
+	needs: "to",
+	be: "collapsed",
+};
+
+const c = { very: "long", object: "literal", with: "many", properties: "it", needs: "to", be: "expanded"  };
+
+const d = {
+	very: "long",
+	object: "literal",
+	but: "it",
+	is: "already",
+	expanded: "so",
+	do: "nothing",
+};
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Object wrap: Preserve
+-----
+
+```js
+const a = { already: "collapsed" };
+
+const b = {
+	needs: "to",
+	be: "collapsed",
+};
+
+const c = {
+	very: "long",
+	object: "literal",
+	with: "many",
+	properties: "it",
+	needs: "to",
+	be: "expanded",
+};
+
+const d = {
+	very: "long",
+	object: "literal",
+	but: "it",
+	is: "already",
+	expanded: "so",
+	do: "nothing",
+};
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Object wrap: Collapse
+-----
+
+```js
+const a = { already: "collapsed" };
+
+const b = { needs: "to", be: "collapsed" };
+
+const c = {
+	very: "long",
+	object: "literal",
+	with: "many",
+	properties: "it",
+	needs: "to",
+	be: "expanded",
+};
+
+const d = {
+	very: "long",
+	object: "literal",
+	but: "it",
+	is: "already",
+	expanded: "so",
+	do: "nothing",
+};
+```
