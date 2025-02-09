@@ -1,8 +1,8 @@
 ---
-cli: major
+"@biomejs/biome": major
 ---
 
-# Removed support for `assert` syntax
+Removed support for `assert` syntax.
 
 Biome now longer supports the `assert` syntax, use the new `with` syntax instead
 

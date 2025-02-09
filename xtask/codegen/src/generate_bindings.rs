@@ -10,6 +10,7 @@ use biome_js_syntax::{
 use biome_rowan::AstNode;
 use biome_service::workspace_types::{generate_type, methods, ModuleQueue};
 use biome_string_case::Case;
+use schemars::gen::{SchemaGenerator, SchemaSettings};
 use xtask::{project_root, Mode, Result};
 use xtask_codegen::update;
 
@@ -153,6 +154,10 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
             .build(),
         ));
     }
+    // HACK: SupportKind doesn't get picked up in the loop above, so we add it manually
+    let support_kind_schema = SchemaGenerator::from(SchemaSettings::openapi3())
+        .root_schema_for::<biome_service::workspace::SupportKind>();
+    generate_type(&mut declarations, &mut queue, &support_kind_schema);
 
     let leading_comment = [
         (

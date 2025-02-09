@@ -1,5 +1,5 @@
 {
-  "name": "@biomejs/biome_wasm",
+  "name": "@biomejs/wasm-bundler",
   "type": "module",
   "collaborators": [
     "Biome Developers and Contributors"

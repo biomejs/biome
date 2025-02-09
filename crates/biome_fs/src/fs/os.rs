@@ -3,12 +3,13 @@ use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind, PathKind};
 use crate::fs::OpenOptions;
 use crate::{
     fs::{TraversalContext, TraversalScope},
-    BiomePath, FileSystem,
+    BiomePath, FileSystem, MemoryFileSystem,
 };
 use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
 use camino::{Utf8DirEntry, Utf8Path, Utf8PathBuf};
 use oxc_resolver::{FsResolution, ResolveError, ResolveOptions, Resolver};
 use rayon::{scope, Scope};
+use std::env::temp_dir;
 use std::fs::FileType;
 use std::panic::AssertUnwindSafe;
 use std::process::Command;
@@ -118,8 +119,8 @@ impl FileSystem for OsFileSystem {
             Err(error) => Err(FileSystemDiagnostic {
                 path: path.to_string(),
                 severity: Severity::Error,
-                error_kind: FsErrorKind::CantReadFile(error.to_string()),
-                source: None,
+                error_kind: FsErrorKind::CantReadFile,
+                source: Some(Error::from(IoError::from(error))),
             }),
         }
     }
@@ -422,7 +423,7 @@ fn expand_symbolic_link(
             let path = path.to_string();
             ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
                 path: path.clone(),
-                error_kind: FsErrorKind::DeeplyNestedSymlinkExpansion(path),
+                error_kind: FsErrorKind::DeeplyNestedSymlinkExpansion,
                 severity: Severity::Warning,
                 source: None,
             }));
@@ -464,9 +465,9 @@ fn follow_symlink(
                 let path = path.to_string();
                 ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
                     path: path.clone(),
-                    error_kind: FsErrorKind::DereferencedSymlink(path),
+                    error_kind: FsErrorKind::DereferencedSymlink,
                     severity: Severity::Warning,
-                    source: None,
+                    source: Some(Error::from(IoError::from(err))),
                 }));
             } else {
                 ctx.push_diagnostic(IoError::from(err).with_file_path(path.to_string()));
@@ -481,5 +482,64 @@ fn follow_symlink(
 impl From<FileType> for FsErrorKind {
     fn from(_: FileType) -> Self {
         Self::UnknownFileType
+    }
+}
+
+/// Testing utility that creates a working directory inside the
+/// temporary OS folder.
+pub struct TemporaryFs {
+    /// The current working directory. It's the OS temporary folder joined with a file
+    /// name passed in the [TemporaryFs::new] function
+    working_directory: Utf8PathBuf,
+    files: Vec<(Utf8PathBuf, String)>,
+}
+
+impl TemporaryFs {
+    /// Creates a temporary directory named using `directory_name`
+    pub fn new(directory_name: &str) -> Self {
+        let path = temp_dir().join(directory_name);
+        if path.exists() {
+            fs::remove_dir_all(path.as_path()).unwrap();
+        }
+        fs::create_dir(&path).unwrap();
+        Self {
+            working_directory: Utf8PathBuf::from_path_buf(path).unwrap(),
+            files: Vec::new(),
+        }
+    }
+
+    /// Creates a file under the working directory
+    pub fn create_file(&mut self, name: &str, content: &str) {
+        let path = self.working_directory.join(name);
+        std::fs::write(path.as_std_path(), content)
+            .expect("Temporary directory to exist and being writable");
+        self.files.push((path, content.to_string()));
+    }
+
+    /// Returns the path to use when running the CLI
+    pub fn cli_path(&self) -> &str {
+        self.working_directory.as_str()
+    }
+
+    /// Returns an instance of [OsFileSystem] given the current working directory
+    pub fn create_os(&self) -> OsFileSystem {
+        OsFileSystem::new(self.working_directory.clone())
+    }
+
+    /// Returns an instance of [MemoryFileSystem]. The files saved in the file system
+    /// will be stripped of the working directory path, making snapshots predictable.
+    pub fn create_mem(&self) -> MemoryFileSystem {
+        let mut fs = MemoryFileSystem::default();
+        for (path, content) in self.files.iter() {
+            fs.insert(
+                path.clone()
+                    .strip_prefix(self.working_directory.as_str())
+                    .expect("Working directory")
+                    .to_path_buf(),
+                content.as_bytes(),
+            );
+        }
+
+        fs
     }
 }

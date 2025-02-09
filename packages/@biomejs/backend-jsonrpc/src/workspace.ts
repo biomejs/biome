@@ -10,7 +10,7 @@ export type BiomePath = string;
 export type ProjectKey = number;
 export type FeatureKind = "format" | "lint" | "search" | "assist" | "debug";
 export interface FileFeaturesResult {
-	featuresSupported: {};
+	featuresSupported: Map<FeatureKind, SupportKind>;
 }
 export interface UpdateSettingsParams {
 	configuration: Configuration;
@@ -856,7 +856,7 @@ As a consequence of this, the formatter must format blocks that look like this (
 
 Note that this is only necessary for inline elements. Block elements do not have this restriction. 
 	 */
-export type WhitespaceSensitivity = "strict" | "ignore";
+export type WhitespaceSensitivity = "css" | "strict" | "ignore";
 export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteProperties = "asNeeded" | "preserve";
 export type Semicolons = "always" | "asNeeded";
@@ -3814,6 +3814,12 @@ export interface SearchResults {
 export interface DropPatternParams {
 	pattern: PatternId;
 }
+export type SupportKind =
+	| "supported"
+	| "ignored"
+	| "protected"
+	| "featureNotEnabled"
+	| "fileNotSupported";
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;

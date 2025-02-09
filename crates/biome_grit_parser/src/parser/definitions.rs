@@ -74,6 +74,17 @@ fn parse_definition(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
+fn parse_javascript_body_wrapper(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at(GRIT_JAVASCRIPT_BODY) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(GRIT_JAVASCRIPT_BODY);
+    Present(m.complete(p, GRIT_JAVASCRIPT_BODY_WRAPPER))
+}
+
+#[inline]
 fn parse_function_definition(p: &mut GritParser) -> ParsedSyntax {
     if !p.at(FUNCTION_KW) {
         return Absent;
@@ -86,9 +97,15 @@ fn parse_function_definition(p: &mut GritParser) -> ParsedSyntax {
     p.expect(T!['(']);
     VariableList.parse_list(p);
     p.expect(T![')']);
-    parse_curly_predicate_list(p).ok();
 
-    Present(m.complete(p, GRIT_FUNCTION_DEFINITION))
+    if p.at(JS_KW) {
+        p.bump(JS_KW);
+        parse_javascript_body_wrapper(p).ok();
+        Present(m.complete(p, GRIT_JAVASCRIPT_FUNCTION_DEFINITION))
+    } else {
+        parse_curly_predicate_list(p).ok();
+        Present(m.complete(p, GRIT_FUNCTION_DEFINITION))
+    }
 }
 
 #[inline]

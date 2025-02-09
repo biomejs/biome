@@ -1,5 +1,5 @@
 ---
-biome_js_analyze: patch
+"@biomejs/biome": patch
 ---
 
-# Fix #1597, useExhaustiveDependencies now consider React hooks stable within parentheses or type assertions
+Fix #1597, useExhaustiveDependencies now consider React hooks stable within parentheses or type assertions.

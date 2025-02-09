@@ -1,15 +1,14 @@
 use crate::{BiomePath, PathInterner};
-use biome_diagnostics::{console, Advices, Diagnostic, LogCategory, Visit};
+use biome_diagnostics::{console, Advices, Diagnostic, IoError, LogCategory, Visit};
 use biome_diagnostics::{Error, Severity};
 use camino::{Utf8Path, Utf8PathBuf};
 pub use memory::{ErrorEntry, MemoryFileSystem};
-pub use os::OsFileSystem;
+pub use os::{OsFileSystem, TemporaryFs};
 use oxc_resolver::{FsResolution, ResolveError};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::fmt::{Debug, Display, Formatter};
 use std::panic::RefUnwindSafe;
-use std::path::PathBuf;
 use std::sync::Arc;
 use std::{fmt, io};
 use tracing::{error, info};
@@ -180,8 +179,8 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                         Err(FileSystemDiagnostic {
                             path: file_path.to_string(),
                             severity: Severity::Error,
-                            error_kind: FsErrorKind::CantReadFile(file_path.to_string()),
-                            source: None,
+                            error_kind: FsErrorKind::CantReadFile,
+                            source: Some(Error::from(IoError::from(err))),
                         })
                     }
                 }
@@ -194,8 +193,8 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                 Err(FileSystemDiagnostic {
                     path: file_path.to_string(),
                     severity: Severity::Error,
-                    error_kind: FsErrorKind::CantReadFile(file_path.to_string()),
-                    source: None,
+                    error_kind: FsErrorKind::CantReadFile,
+                    source: Some(Error::from(IoError::from(err))),
                 })
             }
         }
@@ -454,27 +453,25 @@ impl Display for FileSystemDiagnostic {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum FsErrorKind {
     /// File not found
-    CantReadFile(String),
+    CantReadFile,
     /// Unknown file type
     UnknownFileType,
     /// Dereferenced (broken) symbolic link
-    DereferencedSymlink(String),
+    DereferencedSymlink,
     /// Too deeply nested symbolic link expansion
-    DeeplyNestedSymlinkExpansion(String),
+    DeeplyNestedSymlinkExpansion,
     /// Invalid UTF-8 characters in path.
-    NonUtf8Path(PathBuf),
+    NonUtf8Path,
 }
 
 impl console::fmt::Display for FsErrorKind {
     fn fmt(&self, fmt: &mut console::fmt::Formatter) -> io::Result<()> {
         match self {
-            Self::CantReadFile(_) => fmt.write_str("Cannot read file"),
-            Self::UnknownFileType => fmt.write_str("Unknown file type"),
-            Self::DereferencedSymlink(_) => fmt.write_str("Dereferenced symlink"),
-            Self::DeeplyNestedSymlinkExpansion(_) => {
-                fmt.write_str("Deeply nested symlink expansion")
-            }
-            Self::NonUtf8Path(_) => fmt.write_str("Invalid UTF-8 characters in path"),
+            Self::CantReadFile => fmt.write_str("Cannot read file."),
+            Self::UnknownFileType => fmt.write_str("Unknown file type."),
+            Self::DereferencedSymlink => fmt.write_str("Dereferenced symlink."),
+            Self::DeeplyNestedSymlinkExpansion => fmt.write_str("Deeply nested symlink expansion."),
+            Self::NonUtf8Path => fmt.write_str("Invalid UTF-8 characters in path."),
         }
     }
 }
@@ -482,13 +479,13 @@ impl console::fmt::Display for FsErrorKind {
 impl std::fmt::Display for FsErrorKind {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::CantReadFile(_) => fmt.write_str("Cannot read file"),
-            Self::UnknownFileType => write!(fmt, "Unknown file type"),
-            Self::DereferencedSymlink(_) => write!(fmt, "Dereferenced symlink"),
-            Self::DeeplyNestedSymlinkExpansion(_) => {
-                write!(fmt, "Deeply nested symlink expansion")
+            Self::CantReadFile => fmt.write_str("Cannot read file."),
+            Self::UnknownFileType => write!(fmt, "Unknown file type."),
+            Self::DereferencedSymlink => write!(fmt, "Dereferenced symlink."),
+            Self::DeeplyNestedSymlinkExpansion => {
+                write!(fmt, "Deeply nested symlink expansion.")
             }
-            Self::NonUtf8Path(_) => write!(fmt, "Invalid UTF-8 characters in path"),
+            Self::NonUtf8Path => write!(fmt, "Invalid UTF-8 characters in path."),
         }
     }
 }
@@ -496,25 +493,25 @@ impl std::fmt::Display for FsErrorKind {
 impl Advices for FsErrorKind {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         match self {
-			Self::CantReadFile(path) => visitor.record_log(
+			Self::CantReadFile => visitor.record_log(
 		        LogCategory::Error,
-			    &format!("Biome can't read the following file, maybe for permissions reasons or it doesn't exist: {path}")
+			    &"Biome can't read the following file, maybe for permissions reasons or it doesn't exist."
 			),
             Self::UnknownFileType => visitor.record_log(
                 LogCategory::Info,
                 &"Biome encountered a file system entry that's neither a file, directory or symbolic link",
             ),
-            Self::DereferencedSymlink(path) => visitor.record_log(
+            Self::DereferencedSymlink => visitor.record_log(
                 LogCategory::Info,
-                &format!("Biome encountered a file system entry that is a broken symbolic link: {path}"),
+                &"Biome encountered a file system entry that is a broken symbolic link.",
             ),
-            Self::DeeplyNestedSymlinkExpansion(path) => visitor.record_log(
+            Self::DeeplyNestedSymlinkExpansion => visitor.record_log(
                 LogCategory::Error,
-                &format!("Biome encountered a file system entry with too many nested symbolic links, possibly forming an infinite cycle: {path}"),
+                &"Biome encountered a file system entry with too many nested symbolic links, possibly forming an infinite cycle.",
             ),
-            Self::NonUtf8Path(path) => visitor.record_log(
+            Self::NonUtf8Path => visitor.record_log(
                 LogCategory::Error,
-                &format!("Biome encountered a path with invalid UTF-8 characters: {}", path.display())
+                &"Biome encountered a path with invalid UTF-8 characters."
             )
         }
     }

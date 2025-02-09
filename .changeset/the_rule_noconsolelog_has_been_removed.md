@@ -1,5 +1,5 @@
 ---
-cli: major
+"@biomejs/biome": major
 ---
 
-# The rule `noConsoleLog` has been removed
+The rule `noConsoleLog` has been removed

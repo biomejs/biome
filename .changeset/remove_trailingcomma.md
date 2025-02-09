@@ -1,8 +1,6 @@
 ---
-cli: major
+"@biomejs/biome": major
 ---
-
-# Remove `trailingComma`
 
 Removed the option `trailingComma` from the configuration and the CLI. Use the option `trailingCommas` instead:
 

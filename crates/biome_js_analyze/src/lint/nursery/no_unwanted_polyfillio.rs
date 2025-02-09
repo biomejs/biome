@@ -54,7 +54,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintNext("no-unwanted-polyfillio")],
         source_kind: RuleSourceKind::SameLogic,
-        recommended: false,
+        recommended: true,
         severity: Severity::Warning,
         domains: &[RuleDomain::Next],
     }

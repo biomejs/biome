@@ -1,5 +1,6 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
@@ -54,7 +55,8 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintNext("google-font-display")],
         source_kind: RuleSourceKind::SameLogic,
-        recommended: false,
+        recommended: true,
+        domains: &[RuleDomain::Next],
     }
 }
 

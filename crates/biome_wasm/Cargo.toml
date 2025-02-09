@@ -42,6 +42,7 @@ biome_js_formatter = { workspace = true }
 biome_rowan        = { workspace = true }
 biome_service      = { workspace = true, features = ["schema"] }
 quote              = "1.0.14"
+schemars           = { workspace = true }
 
 [lints]
 workspace = true

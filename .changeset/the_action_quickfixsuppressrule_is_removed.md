@@ -1,8 +1,8 @@
 ---
-cli: major
+"@biomejs/biome": major
 ---
 
-# Remove the code action `quickfix.suppressRule`
+Remove the code action `quickfix.suppressRule`.
 
 The code action `quickfix.suppressRule` was removed in favour of two new code actions:
 

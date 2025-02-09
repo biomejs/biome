@@ -991,25 +991,24 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         L: biome_rowan::Language,
         R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
+        let path = self.path.expect("File path");
         let no_only = self.only.is_some_and(|only| only.is_empty());
         let no_domains = self
             .settings
-            .and_then(|settings| settings.as_linter_domains(self.path.expect("File path")))
+            .and_then(|settings| settings.as_linter_domains(path))
             .is_none_or(|d| d.is_empty());
+        if !(no_only && no_domains) {
+            return;
+        }
 
-        if no_only && no_domains {
-            if let Some((_, manifest)) = self
-                .path
-                .and_then(|path| self.project_layout.get_node_manifest_for_path(path))
-            {
-                for domain in R::METADATA.domains {
-                    self.analyzer_options
-                        .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
+        if let Some((_, manifest)) = self.project_layout.get_node_manifest_for_path(path) {
+            for domain in R::METADATA.domains {
+                self.analyzer_options
+                    .push_globals(domain.globals().iter().map(|s| Box::from(*s)).collect());
 
-                    for (dependency, range) in domain.manifest_dependencies() {
-                        if manifest.matches_dependency(dependency, range) {
-                            self.enabled_rules.insert(rule_filter);
-                        }
+                for (dependency, range) in domain.manifest_dependencies() {
+                    if manifest.matches_dependency(dependency, range) {
+                        self.enabled_rules.insert(rule_filter);
                     }
                 }
             }
@@ -1028,32 +1027,50 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     {
         let no_only = self.only.is_some_and(|only| only.is_empty());
 
-        if no_only {
-            let domains = self
-                .settings
-                .and_then(|settings| settings.as_linter_domains(self.path.expect("File path")));
+        if !no_only {
+            return;
+        }
 
-            // domains, no need to record the rule
-            if domains.as_ref().is_none_or(|d| d.is_empty()) {
-                return;
-            }
+        let domains = self
+            .settings
+            .and_then(|settings| settings.as_linter_domains(self.path.expect("File path")));
 
-            // If the rule is recommended, and it has some domains, it should be disabled, but only if the configuration doesn't enable some domains.
-            if R::METADATA.recommended
-                && !R::METADATA.domains.is_empty()
-                && domains.as_ref().is_none_or(|d| d.is_empty())
+        // no domains, no need to record the rule
+        if domains.as_ref().is_none_or(|d| d.is_empty()) {
+            return;
+        }
+
+        // If the rule is recommended, and it has some domains, it should be disabled, but only if the configuration doesn't enable some domains.
+        if R::METADATA.recommended
+            && !R::METADATA.domains.is_empty()
+            && domains.as_ref().is_none_or(|d| d.is_empty())
+        {
+            self.disabled_rules.insert(rule_filter);
+            return;
+        }
+
+        for rule_domain in R::METADATA.domains {
+            if let Some((configured_domain, configured_domain_value)) = domains
+                .as_ref()
+                .and_then(|domains| domains.get_key_value(rule_domain))
             {
-                self.disabled_rules.insert(rule_filter);
-                return;
-            }
+                match configured_domain_value {
+                    RuleDomainValue::All => {
+                        self.enabled_rules.insert(rule_filter);
 
-            for rule_domain in R::METADATA.domains {
-                if let Some((configured_domain, configured_domain_value)) = domains
-                    .as_ref()
-                    .and_then(|domains| domains.get_key_value(rule_domain))
-                {
-                    match configured_domain_value {
-                        RuleDomainValue::All => {
+                        self.analyzer_options.push_globals(
+                            configured_domain
+                                .globals()
+                                .iter()
+                                .map(|s| Box::from(*s))
+                                .collect::<Vec<_>>(),
+                        );
+                    }
+                    RuleDomainValue::None => {
+                        self.disabled_rules.insert(rule_filter);
+                    }
+                    RuleDomainValue::Recommended => {
+                        if R::METADATA.recommended {
                             self.enabled_rules.insert(rule_filter);
 
                             self.analyzer_options.push_globals(
@@ -1063,22 +1080,6 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                                     .map(|s| Box::from(*s))
                                     .collect::<Vec<_>>(),
                             );
-                        }
-                        RuleDomainValue::None => {
-                            self.disabled_rules.insert(rule_filter);
-                        }
-                        RuleDomainValue::Recommended => {
-                            if R::METADATA.recommended {
-                                self.enabled_rules.insert(rule_filter);
-
-                                self.analyzer_options.push_globals(
-                                    configured_domain
-                                        .globals()
-                                        .iter()
-                                        .map(|s| Box::from(*s))
-                                        .collect::<Vec<_>>(),
-                                );
-                            }
                         }
                     }
                 }

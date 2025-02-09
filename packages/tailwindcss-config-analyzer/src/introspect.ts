@@ -1,5 +1,5 @@
 import type { Config } from "tailwindcss";
-// @ts-ignore
+// @ts-expect-error
 import pkg from "tailwindcss/lib/lib/setupContextUtils.js";
 import resolveConfig from "tailwindcss/resolveConfig.js";
 import type { TailwindContext } from "./types.js";

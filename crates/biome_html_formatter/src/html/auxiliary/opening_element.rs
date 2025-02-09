@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{write, FormatRuleWithOptions};
+use biome_formatter::{write, FormatRuleWithOptions, GroupId};
 use biome_html_syntax::{HtmlOpeningElement, HtmlOpeningElementFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlOpeningElement {
@@ -11,11 +11,15 @@ pub(crate) struct FormatHtmlOpeningElement {
     /// [FormatHtmlElementList]: crate::html::lists::element_list::FormatHtmlElementList
     /// [HtmlElementList]: biome_html_syntax::HtmlElementList
     r_angle_is_borrowed: bool,
+
+    attr_group_id: Option<GroupId>,
 }
 
 pub(crate) struct FormatHtmlOpeningElementOptions {
     /// Whether or not the r_angle is borrowed, and therefore managed by a different formatter.
     pub r_angle_is_borrowed: bool,
+
+    pub attr_group_id: GroupId,
 }
 
 impl FormatRuleWithOptions<HtmlOpeningElement> for FormatHtmlOpeningElement {
@@ -23,6 +27,7 @@ impl FormatRuleWithOptions<HtmlOpeningElement> for FormatHtmlOpeningElement {
 
     fn with_options(mut self, options: Self::Options) -> Self {
         self.r_angle_is_borrowed = options.r_angle_is_borrowed;
+        self.attr_group_id = Some(options.attr_group_id);
         self
     }
 }
@@ -39,7 +44,6 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
         let bracket_same_line = f.options().bracket_same_line().value();
         write!(f, [l_angle_token.format(), name.format()])?;
 
-        let attr_group_id = f.group_id("element-attr-group-id");
         write!(
             f,
             [&group(&format_with(|f| {
@@ -58,7 +62,7 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
                 }
                 Ok(())
             }))
-            .with_group_id(Some(attr_group_id))]
+            .with_group_id(self.attr_group_id)]
         )?;
 
         Ok(())

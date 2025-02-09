@@ -50,7 +50,7 @@ pub(crate) enum Message {
     Failure,
     Error(Error),
     Diagnostics {
-        name: String,
+        file_path: String,
         content: String,
         diagnostics: Vec<Error>,
         skipped_diagnostics: u32,

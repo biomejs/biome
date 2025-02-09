@@ -68,7 +68,13 @@ impl FormatNodeRule<CssComplexSelector> for FormatCssComplexSelector {
         if has_leading_comments && !is_selector_list_first_child {
             write!(
                 f,
-                [left.format(), formatted_combinator, space(), right.format()]
+                [
+                    left.format(),
+                    space(),
+                    formatted_combinator,
+                    space(),
+                    right.format()
+                ]
             )
         } else {
             write!(

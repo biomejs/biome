@@ -1,11 +1,10 @@
 ---
-cli: patch
-biome_analyze: patch
+"@biomejs/biome": patch
 ---
 
-# Suppression comment should not fail with inner comments in functions
+Suppression comment should not fail with inner comments in functions.
 
-The follwing code:
+The following code:
 
 ```ts
 // biome-ignore lint/complexity/useArrowFunction: not work

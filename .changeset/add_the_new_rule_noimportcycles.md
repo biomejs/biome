@@ -1,5 +1,5 @@
 ---
-cli: minor
+"@biomejs/biome": minor
 ---
 
-# Add the new rule [`noImportCycles`](https://biomejs.dev/linter/rules/no-import-cycles)
+Add the new rule [`noImportCycles`](https://biomejs.dev/linter/rules/no-import-cycles).

@@ -1,6 +1,5 @@
 ---
-cli: patch
-biome_json_syntax: patch
+"@biomejs/biome": patch
 ---
 
-# `tsconfig.*.json` files will now be treated the same as `tsconfig.json` files.
+`tsconfig.*.json` files will now be treated the same as `tsconfig.json` files.

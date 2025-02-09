@@ -11,12 +11,12 @@ alias qt := test-quick
 # Installs the tools needed to develop
 install-tools:
 	cargo install cargo-binstall
-	cargo binstall cargo-insta taplo-cli wasm-pack wasm-tools knope
+	cargo binstall cargo-insta taplo-cli wasm-pack wasm-tools
 
 # Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
-	cargo binstall cargo-insta taplo-cli wasm-pack wasm-tools knope --force
+	cargo binstall cargo-insta taplo-cli wasm-pack wasm-tools --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
 gen-all:
@@ -52,7 +52,7 @@ gen-migrate:
 gen-formatter:
   cargo run -p xtask_codegen -- formatter
 
-# Generates the Tailwind CSS preset for utility class sorting (requires Bun)
+# Generates the Tailwind CSS preset for utility class sorting
 [working-directory: 'packages/tailwindcss-config-analyzer']
 gen-tw:
   pnpm build
@@ -115,7 +115,8 @@ _touch file:
 
 [windows]
 _touch file:
-  (gci {{file}}).LastWriteTime = Get-Date
+  powershell -Command "(Get-Item {{file}}).LastWriteTime = Get-Date"
+
 
 # Run tests of all crates
 test:
@@ -165,16 +166,6 @@ ready:
   just test-doc
   git diff --exit-code --quiet
 
-# Creates a new crate
-new-crate name:
-  cargo new --lib crates/{{snakecase(name)}}
-  cargo run -p xtask_codegen -- new-crate --name={{snakecase(name)}}
-  just f
-
 # Creates a new changeset for the final changelog
 new-changeset:
-    knope document-change
-
-# Dry-run of the release
-dry-run-release *args='':
-    knope release --dry-run {{args}}
+    pnpm changeset

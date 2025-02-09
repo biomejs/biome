@@ -1,0 +1,8 @@
+
+pattern identifier_scope($name) {
+  or {
+function($parameters) where {
+      $parameters <: contains $name
+    },
+  }
+}

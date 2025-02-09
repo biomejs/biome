@@ -1,14 +1,15 @@
 // run this script: $ just gen-tw
 
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { readPackageUp } from "read-package-up";
 import { introspectTailwindConfig } from "./introspect.js";
 import { type SortConfig, sortConfigFromSpec } from "./sort-config.js";
-import fs from "node:fs"
 
 const ROOT_PACKAGE_NAME = "@biomejs/monorepo";
-const OUTPUT_PATH = "crates/biome_js_analyze/src/lint/nursery/use_sorted_classes/tailwind_preset.rs";
+const OUTPUT_PATH =
+	"crates/biome_js_analyze/src/lint/nursery/use_sorted_classes/tailwind_preset.rs";
 
 const EXCLUDED_LAYERS = ["defaults", "base"];
 const LAYER_ORDER = ["components", "utilities"];

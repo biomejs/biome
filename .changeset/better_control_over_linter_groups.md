@@ -1,8 +1,6 @@
 ---
-cli: minor
+"@biomejs/biome": minor
 ---
-
-# Better control over linter groups
 
 Linter groups now accept new options to enable/disable all rules that belong to a group, and control the severity
 of the rules that belong to those groups.

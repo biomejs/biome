@@ -46,6 +46,8 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
                 .as_ref()
                 .is_some_and(|tag_name| tag_name.text().eq_ignore_ascii_case(tag))
         });
+        let is_whitespace_sensitive = whitespace_sensitivity.is_strict()
+            || (whitespace_sensitivity.is_css() && is_inline_tag);
 
         let content_has_leading_whitespace = children
             .syntax()
@@ -85,14 +87,10 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         // to borrow, while the child formatters are responsible for actually printing
         // the tokens. `HtmlElementList` prints them if they are borrowed, otherwise
         // they are printed by their original formatter.
-        let should_borrow_opening_r_angle = whitespace_sensitivity.is_strict()
-            && is_inline_tag
-            && !children.is_empty()
-            && !content_has_leading_whitespace;
-        let should_borrow_closing_tag = whitespace_sensitivity.is_strict()
-            && is_inline_tag
-            && !children.is_empty()
-            && !content_has_trailing_whitespace;
+        let should_borrow_opening_r_angle =
+            is_whitespace_sensitive && !children.is_empty() && !content_has_leading_whitespace;
+        let should_borrow_closing_tag =
+            is_whitespace_sensitive && !children.is_empty() && !content_has_trailing_whitespace;
 
         let borrowed_r_angle = if should_borrow_opening_r_angle {
             opening_element.r_angle_token().ok()
@@ -105,9 +103,11 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             None
         };
 
+        let attr_group_id = f.group_id("element-attr-group-id");
         FormatNodeRule::fmt(
             &FormatHtmlOpeningElement::default().with_options(FormatHtmlOpeningElementOptions {
                 r_angle_is_borrowed: borrowed_r_angle.is_some(),
+                attr_group_id,
             }),
             &opening_element,
             f,
@@ -130,12 +130,19 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
                     flat_children,
                     expanded_children,
                 } => {
+                    let expanded_children = expanded_children.memoized();
                     write!(
                         f,
-                        [best_fitting![
-                            format_args![flat_children],
-                            format_args![expanded_children]
-                        ]]
+                        [
+                            // If the attribute group breaks, prettier always breaks the children as well.
+                            &if_group_breaks(&expanded_children).with_group_id(Some(attr_group_id)),
+                            // If the attribute group does NOT break, print whatever fits best for the children.
+                            &if_group_fits_on_line(&best_fitting![
+                                format_args![flat_children],
+                                format_args![expanded_children],
+                            ])
+                            .with_group_id(Some(attr_group_id)),
+                        ]
                     )?;
                 }
             }

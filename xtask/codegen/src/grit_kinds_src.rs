@@ -109,6 +109,8 @@ pub const GRIT_KINDS_SRC: KindsSrc = KindsSrc {
         "GRIT_RAW_BACKTICK_SNIPPET",
         "GRIT_NAME",
         "GRIT_VARIABLE",
+        // we do not attempt to parse the inside of a JS body
+        "GRIT_JAVASCRIPT_BODY",
     ],
     nodes: &[
         "GRIT_BRACKETED_PATTERN",
@@ -177,6 +179,8 @@ pub const GRIT_KINDS_SRC: KindsSrc = KindsSrc {
         "GRIT_PREDICATE_CURLY",
         "GRIT_PREDICATE_DEFINITION",
         "GRIT_FUNCTION_DEFINITION",
+        "GRIT_JAVASCRIPT_FUNCTION_DEFINITION",
+        "GRIT_JAVASCRIPT_BODY_WRAPPER",
         "GRIT_PREDICATE_NOT",
         "GRIT_PREDICATE_MAYBE",
         "GRIT_PREDICATE_AND",

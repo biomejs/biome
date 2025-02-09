@@ -1,8 +1,8 @@
 ---
-cli: major
+"@biomejs/biome": major
 ---
 
-# `style` rules aren't recommended anymore
+The `style` rules aren't recommended anymore.
 
 Linting rules that belong to the group `style` aren't recommended anymore. Here's the list of rules that aren't recommended anymore:
 

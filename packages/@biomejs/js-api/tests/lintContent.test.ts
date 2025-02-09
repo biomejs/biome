@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { ProjectKey } from "../../backend-jsonrpc/dist";
+import type { ProjectKey } from "../../backend-jsonrpc/dist";
 import { Biome, Distribution } from "../dist";
 
 describe("Biome WebAssembly lintContent", () => {
