@@ -89,8 +89,7 @@ impl Rule for NoConsole {
         let node = ctx.query();
         let parent = node.clone().syntax().parent()?;
         let range = JsExpressionStatement::cast_ref(&parent)
-            .map(|node| node.syntax().text_trimmed_range())
-            .unwrap_or(node.range());
+            .map_or(node.range(), |node| node.syntax().text_trimmed_range());
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -112,8 +111,10 @@ impl Rule for NoConsole {
         if let Some(stmt) = JsExpressionStatement::cast(parent.clone()) {
             if stmt.semicolon_token().is_some() {
                 mutation.remove_node(stmt);
+            } else {
+                mutation.remove_node(call_expression.clone());
             }
-        } else if let Some(_) = JsArrowFunctionExpression::cast(parent) {
+        } else if JsArrowFunctionExpression::cast(parent).is_some() {
             let new_body = js_function_body(
                 token(T!['{']),
                 js_directive_list(vec![]),
@@ -121,8 +122,6 @@ impl Rule for NoConsole {
                 token(T!['}']),
             );
             mutation.replace_element(call_expression.clone().into(), new_body.into());
-        } else {
-            mutation.remove_node(call_expression.clone());
         }
 
         Some(JsRuleAction::new(

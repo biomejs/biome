@@ -250,7 +250,11 @@ fn check_code_action(
 
     // Checks that applying the text edits returned by the BatchMutation
     // returns the same code as printing the modified syntax tree
-    assert_eq!(new_tree.to_string(), output);
+    assert_eq!(
+        new_tree.to_string(),
+        output,
+        "Code action and syntax tree differ"
+    );
 
     if has_bogus_nodes_or_empty_slots(&new_tree) {
         panic!("modified tree has bogus nodes or empty slots:\n{new_tree:#?} \n\n {new_tree}")
