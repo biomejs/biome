@@ -1,17 +1,17 @@
-const a = { already: "collapsed" };
-
-const b = {
-	needs: "to",
-	be: "collapsed",
+const a = {
+	name1: "value1",
+	name2: "value2",
 };
 
-const c = { very: "long", object: "literal", with: "many", properties: "it", needs: "to", be: "expanded"  };
+const b = { name1: "value1",
+	name2: "value2",
+};
+
+const c = {
+	name1: "value1", name2: "value2",
+};
 
 const d = {
-	very: "long",
-	object: "literal",
-	but: "it",
-	is: "already",
-	expanded: "so",
-	do: "nothing",
-};
+	name1: "value1", name2: "value2", };
+
+const e = { name1: "value1", name2: "value2", };
