@@ -6,10 +6,11 @@ use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, global_identifier, AnyJsClassMember, AnyJsExpression,
-    AnyTsType, JsArrowFunctionExpression, JsCallExpression, JsClassDeclaration, JsClassMemberList,
-    JsExpressionStatement, JsFunctionDeclaration, JsIdentifierExpression, JsInitializerClause,
-    JsMethodClassMember, JsMethodObjectMember, JsStaticMemberExpression, JsSyntaxKind,
-    JsThisExpression, JsVariableDeclarator, TsReturnTypeAnnotation,
+    AnyTsType, JsArrowFunctionExpression, JsCallExpression, JsClassDeclaration, JsClassExpression,
+    JsClassMemberList, JsExpressionStatement, JsExtendsClause, JsFunctionDeclaration,
+    JsIdentifierExpression, JsInitializerClause, JsMethodClassMember, JsMethodObjectMember,
+    JsStaticMemberExpression, JsSyntaxKind, JsThisExpression, JsVariableDeclarator,
+    TsReturnTypeAnnotation,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind,
@@ -576,11 +577,19 @@ fn is_initializer_a_promise(
             let reference = ident_expr.name().ok()?;
             let binding = model.binding(&reference)?;
             let any_js_binding_decl = binding.tree().declaration()?;
-            let AnyJsBindingDeclaration::JsClassDeclaration(class_decl) = any_js_binding_decl
-            else {
-                return None;
-            };
-            find_and_check_class_member(&class_decl, target_method_name?, model)
+            match any_js_binding_decl {
+                AnyJsBindingDeclaration::JsClassDeclaration(class_decl) => {
+                    find_and_check_class_member(&class_decl.members(), target_method_name?, model)
+                }
+                AnyJsBindingDeclaration::JsVariableDeclarator(js_var_decl) => {
+                    let initializer = js_var_decl.initializer()?;
+                    is_initializer_a_promise(&initializer, model, target_method_name)
+                }
+                _ => None,
+            }
+        }
+        AnyJsExpression::JsClassExpression(class_expr) => {
+            find_and_check_class_member(&class_expr.members(), target_method_name?, model)
         }
         _ => Some(false),
     }
@@ -721,9 +730,9 @@ fn check_this_expression(
         .ancestors()
         .skip(1)
         .find_map(|ancestor| {
-            if ancestor.kind() == JsSyntaxKind::JS_CLASS_DECLARATION {
-                let class_decl = JsClassDeclaration::cast(ancestor)?;
-                return find_and_check_class_member(&class_decl, target_name, model);
+            if ancestor.kind() == JsSyntaxKind::JS_CLASS_MEMBER_LIST {
+                let class_member_list = JsClassMemberList::cast(ancestor)?;
+                return find_and_check_class_member(&class_member_list, target_name, model);
             }
             None
         })
@@ -731,14 +740,14 @@ fn check_this_expression(
 
 /// Finds a class method or property by matching the given name and checks if it is a promise.
 ///
-/// This function searches for a class method or property in the given `JsClassDeclaration`
+/// This function searches for a class method or property in the given `JsClassMemberList`
 /// by matching the provided `target_name`. If a matching member is found, it checks if the member
 /// is a promise. If no matching member is found, it checks the parent class (if any) and recursively
 /// checks the method or property in the parent class.
 ///
 /// # Arguments
 ///
-/// * `class_decl` - A reference to a `JsClassDeclaration` representing the class to search in.
+/// * `class_member_list` - A reference to a `JsClassMemberList` representing the class members to search in.
 /// * `target_name` - The name of the method or property to search for.
 /// * `model` - A reference to the `SemanticModel` used for resolving bindings.
 ///
@@ -749,25 +758,51 @@ fn check_this_expression(
 /// * `None` if there is an error in the process or if the class member is not found.
 ///
 fn find_and_check_class_member(
-    class_decl: &JsClassDeclaration,
+    class_member_list: &JsClassMemberList,
     target_name: &str,
     model: &SemanticModel,
 ) -> Option<bool> {
-    let class_member_list = class_decl.members();
-    if let Some(member) = find_class_method_or_property(&class_member_list, target_name) {
+    // Check current class first
+    if let Some(member) = find_class_method_or_property(class_member_list, target_name) {
         return is_class_member_a_promise(&member, model);
     }
 
-    let extends_clause = class_decl.extends_clause()?;
+    // Check parent class if exists
+    check_parent_class(class_member_list, target_name, model)
+}
+
+fn check_parent_class(
+    class_member_list: &JsClassMemberList,
+    target_name: &str,
+    model: &SemanticModel,
+) -> Option<bool> {
+    let parent_class_decl =
+        if let Some(class_decl) = class_member_list.parent::<JsClassDeclaration>() {
+            get_parent_class_declaration(&class_decl.extends_clause()?, model)?
+        } else if let Some(class_expr) = class_member_list.parent::<JsClassExpression>() {
+            get_parent_class_declaration(&class_expr.extends_clause()?, model)?
+        } else {
+            return None;
+        };
+
+    find_and_check_class_member(&parent_class_decl.members(), target_name, model)
+}
+
+/// Extracts the parent class declaration from an extends clause
+fn get_parent_class_declaration(
+    extends_clause: &JsExtendsClause,
+    model: &SemanticModel,
+) -> Option<JsClassDeclaration> {
     let super_class = extends_clause.super_class().ok()?;
     let identifier_expression = super_class.as_js_identifier_expression()?;
     let reference = identifier_expression.name().ok()?;
     let binding = model.binding(&reference)?;
     let any_js_binding_decl = binding.tree().declaration()?;
-    let AnyJsBindingDeclaration::JsClassDeclaration(parent_class_decl) = any_js_binding_decl else {
-        return None;
-    };
-    find_and_check_class_member(&parent_class_decl, target_name, model)
+
+    match any_js_binding_decl {
+        AnyJsBindingDeclaration::JsClassDeclaration(parent_class_decl) => Some(parent_class_decl),
+        _ => None,
+    }
 }
 
 fn find_class_method_or_property(
