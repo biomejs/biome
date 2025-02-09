@@ -5,7 +5,7 @@ use biome_formatter::{
     LineWidth, QuoteStyle,
 };
 use biome_js_formatter::context::{
-    trailing_commas::TrailingCommas, ArrowParentheses, QuoteProperties, Semicolons,
+    trailing_commas::TrailingCommas, ArrowParentheses, ObjectWrap, QuoteProperties, Semicolons,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -103,6 +103,11 @@ pub struct JsFormatterConfiguration {
     #[bpaf(long("bracket-spacing"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
+
+    /// Whether to enforce collapsing object literals when possible. Defaults to preserve.
+    #[bpaf(long("object-wrap"), argument("preserve|collapse"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub object_wrap: Option<ObjectWrap>,
 }
 
 impl JsFormatterConfiguration {
@@ -136,5 +141,9 @@ impl JsFormatterConfiguration {
 
     pub fn quote_style_resolved(&self) -> QuoteStyle {
         self.quote_style.unwrap_or_default()
+    }
+
+    pub fn object_wrap_resolved(&self) -> ObjectWrap {
+        self.object_wrap.unwrap_or_default()
     }
 }

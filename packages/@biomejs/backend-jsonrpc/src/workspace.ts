@@ -636,6 +636,10 @@ export interface JsFormatterConfiguration {
 	 */
 	lineWidth?: LineWidth;
 	/**
+	 * Whether to enforce collapsing object literals when possible. Defaults to preserve.
+	 */
+	objectWrap?: ObjectWrap;
+	/**
 	 * When properties in objects are quoted. Defaults to asNeeded.
 	 */
 	quoteProperties?: QuoteProperties;
@@ -858,6 +862,7 @@ Note that this is only necessary for inline elements. Block elements do not have
 	 */
 export type WhitespaceSensitivity = "css" | "strict" | "ignore";
 export type ArrowParentheses = "always" | "asNeeded";
+export type ObjectWrap = "preserve" | "collapse";
 export type QuoteProperties = "asNeeded" | "preserve";
 export type Semicolons = "always" | "asNeeded";
 /**

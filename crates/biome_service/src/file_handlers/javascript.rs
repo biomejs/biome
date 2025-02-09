@@ -43,7 +43,9 @@ use biome_js_analyze::{
     analyze, analyze_with_inspect_matcher, ControlFlowGraph, JsAnalyzerServices,
 };
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
-use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, QuoteProperties, Semicolons};
+use biome_js_formatter::context::{
+    ArrowParentheses, JsFormatOptions, ObjectWrap, QuoteProperties, Semicolons,
+};
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{semantic_model, SemanticModelOptions};
@@ -76,6 +78,7 @@ pub struct JsFormatterSettings {
     pub indent_style: Option<IndentStyle>,
     pub enabled: Option<JsFormatterEnabled>,
     pub attribute_position: Option<AttributePosition>,
+    pub object_wrap: Option<ObjectWrap>,
 }
 
 impl From<JsFormatterConfiguration> for JsFormatterSettings {
@@ -95,6 +98,7 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
             indent_width: value.indent_width,
             indent_style: value.indent_style,
             line_ending: value.line_ending,
+            object_wrap: value.object_wrap,
         }
     }
 }
@@ -243,7 +247,8 @@ impl ServiceLanguage for JsLanguage {
                 .and_then(|l| l.attribute_position)
                 .or(global.and_then(|g| g.attribute_position))
                 .unwrap_or_default(),
-        );
+        )
+        .with_object_wrap(language.and_then(|l| l.object_wrap).unwrap_or_default());
 
         if let Some(overrides) = overrides {
             overrides.override_js_format_options(path, options)

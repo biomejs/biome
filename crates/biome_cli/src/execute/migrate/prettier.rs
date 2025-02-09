@@ -11,7 +11,9 @@ use biome_formatter::{
     QuoteStyle,
 };
 use biome_fs::{FileSystem, OpenOptions};
-use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
+use biome_js_formatter::context::{
+    ArrowParentheses, ObjectWrap, QuoteProperties, Semicolons, TrailingCommas,
+};
 use biome_json_parser::JsonParserOptions;
 use camino::Utf8Path;
 
@@ -248,6 +250,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             bracket_spacing: Some(value.bracket_spacing.into()),
             jsx_quote_style: Some(jsx_quote_style),
             attribute_position: Some(AttributePosition::default()),
+            object_wrap: Some(ObjectWrap::default()), // TODO(siketyan): Prettier migration support
         };
         let js_config = biome_configuration::JsConfiguration {
             formatter: Some(js_formatter),
