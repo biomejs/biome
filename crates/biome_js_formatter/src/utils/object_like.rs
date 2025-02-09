@@ -61,7 +61,9 @@ impl Format<JsFormatContext> for JsObjectLike {
             )?;
         } else {
             let should_insert_space_around_brackets = f.options().bracket_spacing().value();
-            let should_expand = self.members_have_leading_newline();
+            let should_expand =
+                f.options().object_wrap().is_preserve() && self.members_have_leading_newline();
+
             write!(
                 f,
                 [group(&soft_block_indent_with_maybe_space(
