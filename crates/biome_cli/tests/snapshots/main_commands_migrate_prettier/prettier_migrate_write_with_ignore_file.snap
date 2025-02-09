@@ -30,7 +30,8 @@ expression: redactor(content)
       "bracketSameLine": false,
       "quoteStyle": "single",
       "attributePosition": "auto",
-      "bracketSpacing": true
+      "bracketSpacing": true,
+      "objectWrap": "preserve"
     }
   }
 }

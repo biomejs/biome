@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 # Emitted Messages
 
@@ -72,6 +71,8 @@ The configuration that is contained inside the file `biome.json`
                               code. Defaults to double.
         --javascript-attribute-position=<multiline|auto>  The attribute position style in jsx
                               elements. Defaults to auto.
+        --object-wrap=<preserve|collapse>  Whether to enforce collapsing object literals when
+                              possible. Defaults to preserve.
         --javascript-linter-enabled=<true|false>  Control the linter for JavaScript (and its super
                               languages) files.
         --javascript-assist-enabled=<true|false>  Control the assist for JavaScript (and its super
