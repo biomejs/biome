@@ -1468,6 +1468,10 @@ export interface Nursery {
 	 */
 	noCommonJs?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow expressions where the operation doesn't affect the value
+	 */
+	noConstantBinaryExpression?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow a lower specificity selector from coming after a higher specificity selector.
 	 */
 	noDescendingSpecificity?: RuleConfiguration_for_Null;
@@ -3293,6 +3297,7 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"
+	| "lint/nursery/noConstantBinaryExpression"
 	| "lint/nursery/noDescendingSpecificity"
 	| "lint/nursery/noDocumentCookie"
 	| "lint/nursery/noDocumentImportInPage"

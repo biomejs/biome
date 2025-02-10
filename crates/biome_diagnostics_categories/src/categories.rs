@@ -137,6 +137,7 @@ define_categories! {
     "lint/nursery/noColorInvalidHex": "https://biomejs.dev/linter/rules/no-color-invalid-hex",
     "lint/nursery/noCommonJs": "https://biomejs.dev/linter/rules/no-common-js",
     "lint/nursery/noConsole": "https://biomejs.dev/linter/rules/no-console",
+    "lint/nursery/noConstantBinaryExpression": "https://biomejs.dev/linter/rules/no-constant-binary-expression",
     "lint/nursery/noDescendingSpecificity": "https://biomejs.dev/linter/rules/no-descending-specificity",
     "lint/nursery/noDocumentCookie": "https://biomejs.dev/linter/rules/no-document-cookie",
     "lint/nursery/noDocumentImportInPage": "https://biomejs.dev/linter/rules/no-document-import-in-page",
