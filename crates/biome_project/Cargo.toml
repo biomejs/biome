@@ -22,7 +22,7 @@ biome_json_syntax        = { workspace = true }
 biome_parser             = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_text_size          = { workspace = true }
-node-semver              = "2.1.0"
+node-semver              = "2.2.0"
 rustc-hash               = { workspace = true }
 serde                    = { workspace = true }
 
