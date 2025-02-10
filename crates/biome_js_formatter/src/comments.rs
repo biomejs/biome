@@ -119,7 +119,8 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_switch_default_case_comment)
                 .or_else(handle_after_arrow_fat_arrow_comment)
                 .or_else(handle_import_export_specifier_comment)
-                .or_else(handle_import_named_clause_comments),
+                .or_else(handle_import_named_clause_comments)
+                .or_else(handle_array_expression),
             CommentTextPosition::OwnLine => handle_member_expression_comment(comment)
                 .or_else(handle_function_comment)
                 .or_else(handle_if_statement_comment)
@@ -1360,6 +1361,17 @@ fn handle_import_named_clause_comments(
             CommentPlacement::Default(comment)
         }
         _ => CommentPlacement::Default(comment),
+    }
+}
+
+fn handle_array_expression(comment: DecoratedComment<JsLanguage>) -> CommentPlacement<JsLanguage> {
+    if let Some(preceding) = comment
+        .preceding_node()
+        .and_then(|node| JsArrayHole::cast_ref(node))
+    {
+        CommentPlacement::leading(preceding.into_syntax(), comment)
+    } else {
+        CommentPlacement::Default(comment)
     }
 }
 
