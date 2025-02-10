@@ -105,6 +105,13 @@ impl WorkspaceError {
             verbose_advice: ProtectedFileAdvice,
         })
     }
+
+    pub fn is_editor_config_error(&self) -> bool {
+        matches!(
+            self,
+            WorkspaceError::Configuration(ConfigurationDiagnostic::EditorConfig(_))
+        )
+    }
 }
 
 impl Error for WorkspaceError {}
