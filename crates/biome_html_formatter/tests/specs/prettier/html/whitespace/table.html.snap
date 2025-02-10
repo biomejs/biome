@@ -1,0 +1,90 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/whitespace/table.html
+---
+# Input
+
+```html
+<table>
+  <thead>
+    <tr>
+      <th>A</th>
+      <th>B</th>
+      <th>C</th>
+    </tr>
+  </thead>
+</table>
+
+<table><thead><tr><th>A</th><th>B</th><th>C</th></tr></thead></table>
+
+<table> <thead> <tr> <th> A </th> <th> B </th> <th> C </th> </tr> </thead> </table>
+
+<table>
+  <thead>
+    <tr>
+    </tr>
+  </thead>
+</table>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -21,9 +21,9 @@
+ <table>
+   <thead>
+     <tr>
+-      <th>A</th>
+-      <th>B</th>
+-      <th>C</th>
++      <th>A </th>
++      <th>B </th>
++      <th>C </th>
+     </tr>
+   </thead>
+ </table>
+```
+
+# Output
+
+```html
+<table>
+  <thead>
+    <tr>
+      <th>A</th>
+      <th>B</th>
+      <th>C</th>
+    </tr>
+  </thead>
+</table>
+
+<table>
+  <thead>
+    <tr>
+      <th>A</th>
+      <th>B</th>
+      <th>C</th>
+    </tr>
+  </thead>
+</table>
+
+<table>
+  <thead>
+    <tr>
+      <th>A </th>
+      <th>B </th>
+      <th>C </th>
+    </tr>
+  </thead>
+</table>
+
+<table>
+  <thead>
+    <tr></tr>
+  </thead>
+</table>
+```

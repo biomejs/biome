@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/magic_comments/display.html
+---
+# Input
+
+```html
+<div>
+    <!-- display: inline -->
+    <p>Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long</p>
+</div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,7 @@
+ <div>
+   <!-- display: inline -->
+-  <p
+-    >Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long
+-    Long Long Long</p
+-  >
++  <p>
++    Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long
++    Long Long Long
++  </p>
+ </div>
+```
+
+# Output
+
+```html
+<div>
+  <!-- display: inline -->
+  <p>
+    Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long
+    Long Long Long
+  </p>
+</div>
+```

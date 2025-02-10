@@ -1,0 +1,249 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/attributes/style.html
+---
+# Input
+
+```html
+<div style="
+
+color:
+#fFf
+
+"></div>
+
+<div style=" "></div>
+<div style></div>
+
+<div style="
+
+all: initial;display: block;
+contain: content;text-align: center;
+
+
+
+background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+max-width: 500px;margin: 0 auto;
+border-radius: 8px;transition: transform .2s ease-out;
+
+"></div>
+
+
+
+<div style="
+background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+"></div>
+
+<div style="   color : red;
+            display    :inline ">
+  </div>
+
+
+<div style="  
+
+color: green;
+
+display: inline 
+
+">
+  </div>
+
+<div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 
+style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+ attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+  </div>
+
+<div style="{{ ...styles }}" 
+></div>
+
+<div style="color: red; {{ otherStyles }}"
+></div>
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,50 +1,50 @@
+-<div style="color: #fff"></div>
++<div
++  style="
++
++color:
++#fFf
++
++"
++></div>
+ 
+-<div style=""></div>
++<div style=" "></div>
+ <div style></div>
+ 
+ <div
+   style="
+-    all: initial;
+-    display: block;
+-    contain: content;
+-    text-align: center;
+ 
+-    background: linear-gradient(
+-      to left,
+-      hotpink,
+-      #fff00f,
+-      #ccc,
+-      hsla(240, 100%, 50%, 0.05),
+-      transparent
+-    );
+-    background: linear-gradient(to left, hsla(240, 100%, 50%, 0.05), red);
+-    max-width: 500px;
+-    margin: 0 auto;
+-    border-radius: 8px;
+-    transition: transform 0.2s ease-out;
+-  "
++all: initial;display: block;
++contain: content;text-align: center;
++
++
++
++background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
++background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
++max-width: 500px;margin: 0 auto;
++border-radius: 8px;transition: transform .2s ease-out;
++
++"
+ ></div>
+ 
+ <div
+   style="
+-    background: linear-gradient(
+-      to left,
+-      hotpink,
+-      hsla(240, 100%, 50%, 0.05),
+-      transparent
+-    );
+-  "
++background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
++"
+ ></div>
+ 
+-<div style="color: red; display: inline"></div>
++<div
++  style="   color : red;
++            display    :inline "
++></div>
+ 
+ <div
+-  style="
+-    color: green;
++  style="  
++
++color: green;
++
++display: inline 
+ 
+-    display: inline;
+-  "
++"
+ ></div>
+ 
+ <div
+@@ -55,12 +55,7 @@
+   attribute-5
+   attribute-6
+   attribute-7
+-  style="
+-    css-prop-1: css-value;
+-    css-prop-2: css-value;
+-    css-prop-3: css-value;
+-    css-prop-4: css-value;
+-  "
++  style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+   attribute-1
+   attribute-2
+   attribute-3
+```
+
+# Output
+
+```html
+<div
+  style="
+
+color:
+#fFf
+
+"
+></div>
+
+<div style=" "></div>
+<div style></div>
+
+<div
+  style="
+
+all: initial;display: block;
+contain: content;text-align: center;
+
+
+
+background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+max-width: 500px;margin: 0 auto;
+border-radius: 8px;transition: transform .2s ease-out;
+
+"
+></div>
+
+<div
+  style="
+background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+"
+></div>
+
+<div
+  style="   color : red;
+            display    :inline "
+></div>
+
+<div
+  style="  
+
+color: green;
+
+display: inline 
+
+"
+></div>
+
+<div
+  attribute-1
+  attribute-2
+  attribute-3
+  attribute-4
+  attribute-5
+  attribute-6
+  attribute-7
+  style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+  attribute-1
+  attribute-2
+  attribute-3
+  attribute-4
+  attribute-5
+  attribute-6
+  attribute-7
+></div>
+
+<div style="{{ ...styles }}"></div>
+
+<div style="color: red; {{ otherStyles }}"></div>
+```
+
+# Lines exceeding max width of 80 characters
+```
+   21: background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+   31: background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+   58:   style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+```

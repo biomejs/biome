@@ -1,0 +1,48 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/css/single-style.html
+---
+# Input
+
+```html
+<style>a { color: red; }</style>
+<style>
+  h1 {
+    font-size: 120%;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    color: #333366;
+  }
+</style>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,4 @@
+-<style>
+-  a {
+-    color: red;
+-  }
+-</style>
++<style>a { color: red; }</style>
+ <style>
+   h1 {
+     font-size: 120%;
+```
+
+# Output
+
+```html
+<style>a { color: red; }</style>
+<style>
+  h1 {
+    font-size: 120%;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    color: #333366;
+  }
+</style>
+```
