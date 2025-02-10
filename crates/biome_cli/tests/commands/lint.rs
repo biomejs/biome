@@ -4084,7 +4084,7 @@ fn fs_handle_relative_path_in_cli_parameter() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["lint", "--write", fs.cli_path()].as_slice()),
+        Args::from(["lint", "--write", "."].as_slice()),
     );
 
     assert_cli_snapshot(SnapshotPayload::new(

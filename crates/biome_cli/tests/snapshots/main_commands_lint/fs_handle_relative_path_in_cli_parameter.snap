@@ -22,9 +22,9 @@ debugger;
 # Termination Message
 
 ```block
-lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Some errors were emitted while running checks.
+  × No files were processed in the specified paths.
   
 
 
@@ -33,21 +33,5 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-/file.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This is an unexpected use of the debugger statement.
-  
-  > 1 │ debugger;
-      │ ^^^^^^^^^
-  
-  i Unsafe fix: Remove debugger statement
-  
-    1 │ debugger;
-      │ ---------
-
-```
-
-```block
-Checked 2 files in <TIME>. No fixes applied.
-Found 1 error.
+Checked 0 files in <TIME>. No fixes applied.
 ```
