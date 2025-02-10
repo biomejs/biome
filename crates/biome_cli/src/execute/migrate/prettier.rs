@@ -11,7 +11,9 @@ use biome_formatter::{
     QuoteStyle,
 };
 use biome_fs::{FileSystem, OpenOptions};
-use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
+use biome_js_formatter::context::{
+    ArrowParentheses, ObjectWrap as BiomeObjectWrap, QuoteProperties, Semicolons, TrailingCommas,
+};
 use biome_json_parser::JsonParserOptions;
 use camino::Utf8Path;
 
@@ -56,6 +58,8 @@ pub(crate) struct PrettierConfiguration {
     arrow_parens: ArrowParens,
     /// https://prettier.io/docs/en/options#end-of-line
     end_of_line: EndOfLine,
+    /// https://prettier.io/docs/options#object-wrap
+    object_wrap: ObjectWrap,
     /// https://prettier.io/docs/en/configuration.html#configuration-overrides
     overrides: Vec<Override>,
 }
@@ -75,6 +79,7 @@ impl Default for PrettierConfiguration {
             jsx_single_quote: false,
             arrow_parens: ArrowParens::default(),
             end_of_line: EndOfLine::default(),
+            object_wrap: ObjectWrap::default(),
             overrides: vec![],
         }
     }
@@ -113,6 +118,8 @@ pub(crate) struct OverrideOptions {
     arrow_parens: Option<ArrowParens>,
     /// https://prettier.io/docs/en/options#end-of-line
     end_of_line: Option<EndOfLine>,
+    /// https://prettier.io/docs/options#object-wrap
+    object_wrap: ObjectWrap,
 }
 
 #[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
@@ -145,6 +152,13 @@ enum QuoteProps {
     #[deserializable(rename = "as-needed")]
     AsNeeded,
     Preserve,
+}
+
+#[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
+enum ObjectWrap {
+    #[default]
+    Preserve,
+    Collapse,
 }
 
 impl From<PrettierTrailingComma> for TrailingCommas {
@@ -182,6 +196,15 @@ impl From<QuoteProps> for QuoteProperties {
         match value {
             QuoteProps::AsNeeded => Self::AsNeeded,
             QuoteProps::Preserve => Self::Preserve,
+        }
+    }
+}
+
+impl From<ObjectWrap> for BiomeObjectWrap {
+    fn from(value: ObjectWrap) -> Self {
+        match value {
+            ObjectWrap::Preserve => Self::Preserve,
+            ObjectWrap::Collapse => Self::Collapse,
         }
     }
 }
@@ -248,6 +271,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             bracket_spacing: Some(value.bracket_spacing.into()),
             jsx_quote_style: Some(jsx_quote_style),
             attribute_position: Some(AttributePosition::default()),
+            object_wrap: Some(value.object_wrap.into()),
         };
         let js_config = biome_configuration::JsConfiguration {
             formatter: Some(js_formatter),
