@@ -579,8 +579,8 @@ impl FromStr for ObjectWrap {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "as-needed"  => Ok(Self::Preserve),
-            "always"  => Ok(Self::Collapse),
+            "preserve"  => Ok(Self::Preserve),
+            "contains"  => Ok(Self::Collapse),
             _ => Err("Value not supported for objectWrap. Supported values are 'preserve' and 'collapse'."),
         }
     }
