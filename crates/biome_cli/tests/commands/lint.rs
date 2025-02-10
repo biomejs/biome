@@ -4069,3 +4069,29 @@ fn linter_doesnt_crash_on_malformed_code_from_issue_4723() {
         result,
     ));
 }
+
+#[test]
+fn fs_handle_relative_path_in_cli_parameter() {
+    let mut fs = biome_fs::TemporaryFs::new("fs_handle_relative_path_in_cli_parameter");
+    let mut console = BufferConsole::default();
+
+    fs.create_file("file.js", "debugger;");
+    fs.create_file("biome.json", r#"{
+        "files": { "includes": ["**"] },
+        "linter": { "rules": { "recommended": true, "suspicious": { "noDebugger": "error" } } }
+    }"#);
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", "--write", fs.cli_path()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "fs_handle_relative_path_in_cli_parameter",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
