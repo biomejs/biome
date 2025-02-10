@@ -1365,10 +1365,7 @@ fn handle_import_named_clause_comments(
 }
 
 fn handle_array_expression(comment: DecoratedComment<JsLanguage>) -> CommentPlacement<JsLanguage> {
-    if let Some(preceding) = comment
-        .preceding_node()
-        .and_then(|node| JsArrayHole::cast_ref(node))
-    {
+    if let Some(preceding) = comment.preceding_node().and_then(JsArrayHole::cast_ref) {
         CommentPlacement::leading(preceding.into_syntax(), comment)
     } else {
         CommentPlacement::Default(comment)
