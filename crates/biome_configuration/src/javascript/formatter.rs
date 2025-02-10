@@ -1,6 +1,7 @@
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{
     AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
+    SpaceInsideStuff,
 };
 use biome_js_formatter::context::{
     trailing_commas::TrailingCommas, ArrowParentheses, QuoteProperties, Semicolons,
@@ -88,6 +89,10 @@ pub struct JavascriptFormatter {
     #[partial(bpaf(long("quote-style"), argument("double|single"), optional))]
     pub quote_style: QuoteStyle,
 
+    /// @todo
+    #[partial(bpaf(long("space-inside-stuff"), argument("true|false"), optional))]
+    pub space_inside_stuff: SpaceInsideStuff,
+
     // it's also a top-level configurable property.
     /// The attribute position style in jsx elements. Defaults to auto.
     #[partial(bpaf(
@@ -122,6 +127,7 @@ impl PartialJavascriptFormatter {
             line_width: self.line_width,
             quote_style: self.quote_style.unwrap_or_default(),
             attribute_position: self.attribute_position,
+            space_inside_stuff: self.space_inside_stuff.unwrap_or_default(),
         }
     }
 }
@@ -145,6 +151,7 @@ impl Default for JavascriptFormatter {
             line_width: Default::default(),
             quote_style: Default::default(),
             attribute_position: Default::default(),
+            space_inside_stuff: Default::default(),
         }
     }
 }

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/module/import_type/import_types.ts
+snapshot_kind: text
 ---
 # Input
 
@@ -51,6 +52,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Space inside stuff: false
 -----
 
 ```ts
@@ -87,6 +89,7 @@ Arrow parentheses: Always
 Bracket spacing: false
 Bracket same line: false
 Attribute Position: Auto
+Space inside stuff: false
 -----
 
 ```ts

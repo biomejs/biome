@@ -5,7 +5,8 @@ use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
     AttributePosition, BracketSpacing, CstFormatContext, FormatContext, FormatElement,
-    FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TransformSourceMap,
+    FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, SpaceInsideStuff,
+    TransformSourceMap,
 };
 use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
 use std::fmt;
@@ -172,6 +173,9 @@ pub struct JsFormatOptions {
 
     /// Attribute position style. By default auto.
     attribute_position: AttributePosition,
+
+    // @todo
+    space_inside_stuff: SpaceInsideStuff,
 }
 
 impl JsFormatOptions {
@@ -191,6 +195,7 @@ impl JsFormatOptions {
             bracket_spacing: BracketSpacing::default(),
             bracket_same_line: BracketSameLine::default(),
             attribute_position: AttributePosition::default(),
+            space_inside_stuff: SpaceInsideStuff::default(),
         }
     }
 
@@ -201,6 +206,11 @@ impl JsFormatOptions {
 
     pub fn with_bracket_spacing(mut self, bracket_spacing: BracketSpacing) -> Self {
         self.bracket_spacing = bracket_spacing;
+        self
+    }
+
+    pub fn with_space_inside_stuff(mut self, space_inside_stuff: SpaceInsideStuff) -> Self {
+        self.space_inside_stuff = space_inside_stuff;
         self
     }
 
@@ -271,6 +281,10 @@ impl JsFormatOptions {
         self.bracket_same_line = bracket_same_line;
     }
 
+    pub fn set_space_inside_stuff(&mut self, space_inside_stuff: SpaceInsideStuff) {
+        self.space_inside_stuff = space_inside_stuff;
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -316,6 +330,10 @@ impl JsFormatOptions {
 
     pub fn bracket_spacing(&self) -> BracketSpacing {
         self.bracket_spacing
+    }
+
+    pub fn space_inside_stuff(&self) -> SpaceInsideStuff {
+        self.space_inside_stuff
     }
 
     pub fn bracket_same_line(&self) -> BracketSameLine {
@@ -399,7 +417,8 @@ impl fmt::Display for JsFormatOptions {
         writeln!(f, "Arrow parentheses: {}", self.arrow_parentheses)?;
         writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
         writeln!(f, "Bracket same line: {}", self.bracket_same_line.value())?;
-        writeln!(f, "Attribute Position: {}", self.attribute_position)
+        writeln!(f, "Attribute Position: {}", self.attribute_position)?;
+        writeln!(f, "Space inside stuff: {}", self.space_inside_stuff)
     }
 }
 

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: ts/arrow/parameter_default_binding_line_break.ts
+snapshot_kind: text
 ---
 # Input
 
@@ -49,6 +50,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Space inside stuff: false
 -----
 
 ```ts
@@ -84,6 +86,7 @@ Arrow parentheses: As needed
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Space inside stuff: false
 -----
 
 ```ts
