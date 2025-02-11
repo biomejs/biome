@@ -1,3 +1,6 @@
+use std::str::FromStr;
+
+use camino::Utf8PathBuf;
 use serde::{Deserialize, Serialize};
 use serde_json::{Error, Value};
 use tracing::debug;
@@ -28,6 +31,9 @@ pub struct WorkspaceSettings {
 pub struct ExperimentalSettings {
     /// Enable experimental symbol renaming
     pub rename: Option<bool>,
+
+    /// Path to the configuration file to prefer over the default `biome.json`.
+    pub configuration_path: Option<String>,
 }
 
 /// The `biome.*` extension settings
@@ -67,5 +73,13 @@ impl ExtensionSettings {
 
     pub(crate) fn requires_configuration(&self) -> bool {
         self.settings.require_configuration.unwrap_or_default()
+    }
+
+    pub(crate) fn configuration_path(&self) -> Option<Utf8PathBuf> {
+        self.settings
+            .experimental
+            .as_ref()
+            .and_then(|e| e.configuration_path.as_deref())
+            .map(|config_path| Utf8PathBuf::from_str(config_path).unwrap()) // infallible
     }
 }
