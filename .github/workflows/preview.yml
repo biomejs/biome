@@ -108,7 +108,7 @@ jobs:
           result-encoding: string
 
       - name: Send Discord message
-        uses: tsickert/discord-webhook
+        uses: tsickert/discord-webhook@v6.0.0
         with:
           webhook-url: ${{ secrets.DISCORD_PREVIEW_RELEASES_HOOK }}
           content: ${{ steps.version-msg.outputs.result }}
