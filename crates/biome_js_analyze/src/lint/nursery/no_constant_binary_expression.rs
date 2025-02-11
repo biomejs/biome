@@ -118,17 +118,37 @@ impl Display for Property {
 }
 
 pub enum Issue {
+    /// A binary expression leads to a constant result, so it can be simplified.
+    /// For example, `[] == true` is always true, while `[] === true` is always false.
     ConstantBinaryOperand {
+        /// An operand in the expression that will always lead to the same result on comparison
+        /// with  `==`, `!=`, `===`, or `!==` operator.
         operand: AnyJsExpression,
     },
+
+    /// The left-hand of a logical expression leads to a constant result, so it can be simplified.
+    /// For example, `{} ?? foo` will always return the left-hand value, while `null ?? foo` will
+    /// always return the right-hand value.
     ConstantShortCircuit {
+        /// Left-hand operand of the expression.
         left: AnyJsExpression,
+
+        /// Right-hand operand of the expression.
         right: AnyJsExpression,
+
+        /// Which property the expression will have constantly, truthiness or nullishness.
         property: Property,
     },
+
+    /// A binary expression that always compare to a new object, so it can be simplified.
+    /// For example, the result of `foo === []` is always false.
     AlwaysNew {
+        /// An operand in the expression that will always construct a new object.
         operand: AnyJsExpression,
     },
+
+    /// A strict binary expression that always compare two new objects, so it can be simplified.
+    /// For example, the result of `[] != []` is always true.
     BothAlwaysNew,
 }
 
