@@ -2502,6 +2502,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDestructuredProps": {
+					"description": "Disallow destructuring props inside JSX components in Solid projects.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDocumentCookie": {
 					"description": "Disallow direct assignments to document.cookie.",
 					"anyOf": [

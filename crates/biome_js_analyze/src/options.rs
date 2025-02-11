@@ -55,6 +55,8 @@ pub type NoDebugger = <lint::suspicious::no_debugger::NoDebugger as biome_analyz
 pub type NoDefaultExport =
     <lint::style::no_default_export::NoDefaultExport as biome_analyze::Rule>::Options;
 pub type NoDelete = <lint::performance::no_delete::NoDelete as biome_analyze::Rule>::Options;
+pub type NoDestructuredProps =
+    <lint::nursery::no_destructured_props::NoDestructuredProps as biome_analyze::Rule>::Options;
 pub type NoDistractingElements =
     <lint::a11y::no_distracting_elements::NoDistractingElements as biome_analyze::Rule>::Options;
 pub type NoDocumentCookie =
