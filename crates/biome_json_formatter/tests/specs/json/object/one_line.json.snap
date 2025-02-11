@@ -24,6 +24,7 @@ Line width: 80
 Trailing commas: None
 Expand: Follow Source
 Bracket spacing: true
+Object wrap: Preserve
 -----
 
 ```json
