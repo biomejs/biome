@@ -689,6 +689,50 @@ impl FromStr for BracketSameLine {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum ObjectWrap {
+    #[default]
+    Preserve,
+    Collapse,
+}
+
+impl ObjectWrap {
+    pub const fn is_preserve(&self) -> bool {
+        matches!(self, Self::Preserve)
+    }
+
+    pub const fn is_collapse(&self) -> bool {
+        matches!(self, Self::Collapse)
+    }
+}
+
+impl FromStr for ObjectWrap {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "preserve"  => Ok(Self::Preserve),
+            "contains"  => Ok(Self::Collapse),
+            _ => Err("Value not supported for objectWrap. Supported values are 'preserve' and 'collapse'."),
+        }
+    }
+}
+
+impl Display for ObjectWrap {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Preserve => std::write!(f, "Preserve"),
+            Self::Collapse => std::write!(f, "Collapse"),
+        }
+    }
+}
+
 /// Context object storing data relevant when formatting an object.
 pub trait FormatContext {
     type Options: FormatOptions;
@@ -706,8 +750,8 @@ pub trait FormatContext {
 
 /// Options customizing how the source code should be formatted.
 ///
-/// **Note**: This trait should **only** contain the essential abstractions required for the printing phase.  
-/// For example, do not add a `fn bracket_spacing(&self) -> BracketSpacing` method here,  
+/// **Note**: This trait should **only** contain the essential abstractions required for the printing phase.
+/// For example, do not add a `fn bracket_spacing(&self) -> BracketSpacing` method here,
 /// as the [BracketSpacing] option is not needed during the printing phase
 /// and enforcing its implementation for all structs using this trait is unnecessary.
 pub trait FormatOptions {
