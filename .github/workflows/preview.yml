@@ -94,7 +94,7 @@ jobs:
           --json output.json --comment=off
 
       - name: Read published version
-      - uses: actions/github-script@v7
+        uses: actions/github-script@v7
         id: version-msg
         with:
           script: |
