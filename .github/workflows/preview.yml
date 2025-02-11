@@ -85,13 +85,30 @@ jobs:
       - name: Generate npm packages
         run: node packages/@biomejs/biome/scripts/generate-packages.mjs
 
-      - name: Run changesets version
-        run: pnpm exec changeset version --snapshot preview
-
       - name: Publish version
-        run: pnpm exec changeset publish  --tag preview
-        env:
-          # Needs access to publish to npm
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          pnpx pkg-pr-new publish --compact \
+          './packages/@biomejs/biome' \
+          './packages/@biomejs/cli-*' \
+          './packages/@biomejs/wasm-*' \
+          --json output.json --comment=off
 
+      - name: Read published version
+      - uses: actions/github-script@v7
+        id: version-msg
+        with:
+          script: |
+            const fs = require('fs');
+            const output = JSON.parse(fs.readFileSync('output.json', 'utf8'));
+            const biomePackage = output.packages
+              .find((p) => p.name === "@biomejs/biome");
+
+            return "New preview release available for `@biomejs/biome`. Install using the following command:\n\n ```bash\n npm i " + biomePackage.url + "\n```";
+
+          result-encoding: string
+
+      - name: Send Discord message
+        uses: tsickert/discord-webhook
+        with:
+          webhook-url: ${{ secrets.DISCORD_PREVIEW_RELEASES_HOOK }}
+          content: ${{ steps.version-msg.outputs.result }}

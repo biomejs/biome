@@ -1,5 +1,5 @@
 ---
-@biomejs/biome: major
+"@biomejs/biome": major
 ---
 
 The rule `lint/a11y/useAltText` doesn't check the element's attributes containing object spread.
