@@ -67,7 +67,7 @@ declare_source_rule! {
     /// }
     /// ```
     pub UseSortedObjectProperties {
-        version: "1.0.0",
+        version: "next",
         name: "useSortedObjectProperties",
         language: "js",
         recommended: false,
