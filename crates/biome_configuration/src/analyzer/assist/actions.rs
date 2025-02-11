@@ -131,6 +131,10 @@ pub struct Source {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_keys:
         Option<RuleAssistConfiguration<biome_json_analyze::options::UseSortedKeys>>,
+    #[doc = "Enforce ordering of JS objects properties."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_sorted_object_properties:
+        Option<RuleAssistConfiguration<biome_js_analyze::options::UseSortedObjectProperties>>,
     #[doc = "Enforce ordering of CSS properties and nested rules."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_properties:
@@ -142,6 +146,7 @@ impl Source {
         "organizeImports",
         "useSortedAttributes",
         "useSortedKeys",
+        "useSortedObjectProperties",
         "useSortedProperties",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] =
@@ -173,9 +178,14 @@ impl Source {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
-        if let Some(rule) = self.use_sorted_properties.as_ref() {
+        if let Some(rule) = self.use_sorted_object_properties.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_properties.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
         index_set
@@ -197,9 +207,14 @@ impl Source {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
-        if let Some(rule) = self.use_sorted_properties.as_ref() {
+        if let Some(rule) = self.use_sorted_object_properties.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_properties.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
         index_set
@@ -233,6 +248,10 @@ impl Source {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useSortedKeys" => self
                 .use_sorted_keys
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useSortedObjectProperties" => self
+                .use_sorted_object_properties
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useSortedProperties" => self
