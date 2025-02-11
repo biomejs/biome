@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{write, FormatOptions};
+use biome_formatter::write;
 use biome_grit_syntax::{GritPredicateOr, GritPredicateOrFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritPredicateOr;

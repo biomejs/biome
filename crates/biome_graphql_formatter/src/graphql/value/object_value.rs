@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{format_args, write, FormatOptions};
+use biome_formatter::{format_args, write};
 use biome_graphql_syntax::{GraphqlObjectValue, GraphqlObjectValueFields};
 
 #[derive(Debug, Clone, Default)]

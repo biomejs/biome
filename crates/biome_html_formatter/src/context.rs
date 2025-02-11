@@ -2,9 +2,8 @@ use std::{fmt, rc::Rc, str::FromStr};
 
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    printer::PrinterOptions, AttributePosition, BracketSameLine, BracketSpacing, CstFormatContext,
-    FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
-    TransformSourceMap,
+    printer::PrinterOptions, AttributePosition, BracketSameLine, CstFormatContext, FormatContext,
+    FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, TransformSourceMap,
 };
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 
@@ -195,18 +194,6 @@ impl FormatOptions for HtmlFormatOptions {
 
     fn line_width(&self) -> LineWidth {
         self.line_width
-    }
-
-    fn attribute_position(&self) -> AttributePosition {
-        self.attribute_position
-    }
-
-    fn bracket_same_line(&self) -> BracketSameLine {
-        self.bracket_same_line
-    }
-
-    fn bracket_spacing(&self) -> biome_formatter::BracketSpacing {
-        BracketSpacing::default()
     }
 
     fn as_print_options(&self) -> biome_formatter::prelude::PrinterOptions {

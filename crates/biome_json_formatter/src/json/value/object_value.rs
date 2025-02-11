@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{format_args, write, FormatContext, FormatOptions};
+use biome_formatter::{format_args, write, FormatContext};
 use biome_json_syntax::JsonObjectValue;
 use biome_rowan::AstNode;
 
