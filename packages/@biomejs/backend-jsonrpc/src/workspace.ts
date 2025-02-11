@@ -732,6 +732,10 @@ export interface JsonFormatterConfiguration {
 	 */
 	lineWidth?: LineWidth;
 	/**
+	 * Whether to enforce collapsing object literals when possible. Defaults to preserve.
+	 */
+	objectWrap?: ObjectWrap;
+	/**
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
 	 */
 	trailingCommas?: TrailingCommas2;
