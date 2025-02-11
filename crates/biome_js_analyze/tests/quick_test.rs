@@ -16,7 +16,7 @@ use std::{fs::read_to_string, slice};
 #[ignore]
 #[test]
 fn quick_test() {
-    let input_file = Utf8Path::new("tests/specs/nursery/noImportCycles/invalidFoobar.js");
+    let input_file = Utf8Path::new("tests/specs/a11y/useAltText/img.jsx");
     let file_name = input_file.file_name().unwrap();
 
     let (group, rule) = parse_test_path(input_file);
