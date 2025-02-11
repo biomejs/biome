@@ -1,13 +1,17 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 84
+assertion_line: 86
 expression: valid_non_components_only.jsx
 ---
 # Input
 ```jsx
 export const sampleConst = 100
-export function hoge () {
+export function foo () {
   return 100
 }
+
+export const nonComponent = foo(sampleConst)
+
+export default Foo.bar(()=>{})
 
 ```

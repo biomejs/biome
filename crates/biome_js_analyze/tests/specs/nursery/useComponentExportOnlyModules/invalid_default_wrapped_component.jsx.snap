@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: invalid_default_wrapped_component.jsx
+---
+# Input
+```jsx
+const Component = () => <></>
+const func = () => {}
+export default func(Component)
+
+```
+
+# Diagnostics
+```
+invalid_default_wrapped_component.jsx:1:7 lint/nursery/useComponentExportOnlyModules ━━━━━━━━━━━━━━━
+
+  ! Components should be exported.
+  
+  > 1 │ const Component = () => <></>
+      │       ^^^^^^^^^
+    2 │ const func = () => {}
+    3 │ export default func(Component)
+  
+  i Fast Refresh only works when a file only exports components.
+  
+  i Consider separating component exports into a new file.
+  
+  i If it is not a component, it may not be following the variable naming conventions.
+  
+
+```
