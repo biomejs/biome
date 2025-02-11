@@ -1500,6 +1500,10 @@
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
+				"objectWrap": {
+					"description": "Whether to enforce collapsing object literals when possible. Defaults to preserve.",
+					"anyOf": [{ "$ref": "#/definitions/ObjectWrap" }, { "type": "null" }]
+				},
 				"useEditorconfig": {
 					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.\n\nDefault: `false`.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
@@ -3017,6 +3021,10 @@
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"objectWrap": {
+					"description": "Whether to enforce collapsing object literals when possible. Defaults to preserve.",
+					"anyOf": [{ "$ref": "#/definitions/ObjectWrap" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
