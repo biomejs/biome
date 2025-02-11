@@ -63,3 +63,118 @@ promiseWithParentheses;
 const promiseWithGlobalIdentifier = new window.Promise((resolve, reject) => resolve('value'));
 promiseWithGlobalIdentifier.then(() => { }).finally(() => { });
 globalThis.Promise.reject('value').finally();
+
+
+class InvalidTestClassParent {
+  async returnsPromiseFromParent(): Promise<string> {
+    return 'value';
+  }
+}
+class InvalidTestClass extends InvalidTestClassParent {
+  returnsPromiseFunctionProperty: () => Promise<void>
+  returnsPromiseProperty: Promise<void>
+  constructor() {
+    super();
+    this.returnsPromiseFunctionProperty = () => Promise.resolve();
+    this.returnsPromiseProperty = new Promise((resolve, reject) => { })
+  }
+
+  async returnsPromiseMethod(): Promise<string> {
+    return 'value';
+  }
+  async someMethod() {
+    this.returnsPromiseMethod();
+  }
+
+  async someMethod2() {
+    this.returnsPromiseFromParent().then(() => { }).finally(() => { });
+  }
+
+  async someMethod3() {
+    this.returnsPromiseFunctionProperty();
+  }
+
+  async someMethod4() {
+    this.returnsPromiseProperty.then(() => { }).finally(() => { });
+  }
+
+  async #returnsPromisePrivateMethod(): Promise<string> {
+    return 'value';
+  }
+  async someMethod5() {
+    this.#returnsPromisePrivateMethod().then(() => { }).finally(() => { });
+  }
+
+  returnsPromiseFunction = async function (): Promise<string> {
+    return 'value';
+  }
+  returnsPromiseArrowFunction = async (): Promise<string> => {
+    return 'value';
+  }
+
+  async someMetho3() {
+    this.returnsPromiseFunction().then(() => { }).finally(() => { });
+    this.returnsPromiseArrowFunction();
+  }
+}
+
+const invalidTestClass = new InvalidTestClass();
+invalidTestClass.returnsPromiseMethod().then(() => { }).finally(() => { });
+invalidTestClass.returnsPromiseFunctionProperty();
+invalidTestClass.returnsPromiseProperty
+invalidTestClass.returnsPromiseProperty.then(() => { }).finally(() => { });
+
+
+const invalidTestClassInitializedExpression = class InvalidTestClass extends InvalidTestClassParent {
+  returnsPromiseFunctionProperty: () => Promise<void>
+  returnsPromiseProperty: Promise<void>
+  constructor() {
+    super();
+    this.returnsPromiseFunctionProperty = () => Promise.resolve();
+    this.returnsPromiseProperty = new Promise((resolve, reject) => { })
+  }
+
+  async returnsPromiseMethod(): Promise<string> {
+    return 'value';
+  }
+  async someMethod() {
+    this.returnsPromiseMethod();
+  }
+
+  async someMethod2() {
+    this.returnsPromiseFromParent().then(() => { }).finally(() => { });
+  }
+
+  async someMethod3() {
+    this.returnsPromiseFunctionProperty();
+  }
+
+  async someMethod4() {
+    this.returnsPromiseProperty.then(() => { }).finally(() => { });
+  }
+
+  async #returnsPromisePrivateMethod(): Promise<string> {
+    return 'value';
+  }
+  async someMethod5() {
+    this.#returnsPromisePrivateMethod().then(() => { }).finally(() => { });
+  }
+
+  returnsPromiseFunction = async function (): Promise<string> {
+    return 'value';
+  }
+  returnsPromiseArrowFunction = async (): Promise<string> => {
+    return 'value';
+  }
+
+  async someMetho3() {
+    this.returnsPromiseFunction().then(() => { }).finally(() => { });
+    this.returnsPromiseArrowFunction();
+  }
+}
+
+const invalidTestClassExpression = new invalidTestClassInitializedExpression();
+invalidTestClassExpression.returnsPromiseMethod().then(() => { }).finally(() => { });
+invalidTestClassExpression.returnsPromiseFunctionProperty();
+invalidTestClassExpression.returnsPromiseProperty
+invalidTestClassExpression.returnsPromiseProperty.then(() => { }).finally(() => { });
