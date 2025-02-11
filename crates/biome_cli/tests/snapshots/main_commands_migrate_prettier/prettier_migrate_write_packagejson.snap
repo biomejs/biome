@@ -16,6 +16,7 @@ expression: redactor(content)
     "attributePosition": "auto",
     "bracketSameLine": false,
     "bracketSpacing": true,
+    "objectWrap": "preserve",
     "useEditorconfig": true
   },
   "linter": { "enabled": true },
@@ -29,8 +30,7 @@ expression: redactor(content)
       "bracketSameLine": false,
       "quoteStyle": "single",
       "attributePosition": "auto",
-      "bracketSpacing": true,
-      "objectWrap": "preserve"
+      "bracketSpacing": true
     }
   }
 }
