@@ -1,0 +1,129 @@
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, QueryMatch, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind,
+};
+use biome_console::markup;
+use biome_js_syntax::{
+    JsAwaitExpression, JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement,
+    JsInitializerClause, JsSyntaxKind, JsSyntaxNode, JsWhileStatement, JsWithStatement,
+};
+use biome_rowan::{declare_node_union, AstNode, WalkEvent};
+
+declare_lint_rule! {
+    /// Disallow `await` inside loops.
+    ///
+    /// Using `await` in a loop makes your asynchronous operations run one after another instead of all at once. This can slow things down and might cause unhandled errors. Instead, create all the promises together and then wait for them simultaneously using methods like `Promise.all()`.
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```js,expect_diagnostic
+    /// async function invalid() {
+    ///     for (const thing of things) {
+    ///         const result = await asyncWork();
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js
+    /// async function valid() {
+    ///     await Promise.all(things.map((thing) => asyncWork(thing)))
+    /// }
+    /// ```
+    ///
+    pub NoAwaitInLoop {
+        version: "next",
+        name: "noAwaitInLoop",
+        language: "js",
+        sources: &[RuleSource::Eslint("no-await-in-loop")],
+        source_kind: RuleSourceKind::SameLogic,
+        recommended: false,
+    }
+}
+
+declare_node_union! {
+    pub AnyLoopNode = JsForStatement | JsForInStatement | JsForOfStatement | JsWhileStatement | JsDoWhileStatement | JsWithStatement
+}
+
+impl Rule for NoAwaitInLoop {
+    type Query = Ast<AnyLoopNode>;
+    type State = JsSyntaxNode;
+    type Signals = Option<Self::State>;
+    type Options = ();
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let loop_node = ctx.query();
+
+        // skip "for await ... of"
+        if let AnyLoopNode::JsForOfStatement(for_of) = loop_node {
+            if for_of.await_token().is_some() {
+                return None;
+            }
+        }
+
+        for event in loop_node.syntax().preorder() {
+            match event {
+                WalkEvent::Enter(node) => {
+                    if is_boundary(&node) {
+                        break;
+                    }
+
+                    // e.g. while (baz) { for await (x of xs)}
+                    if JsForOfStatement::can_cast(node.kind()) {
+                        if let Some(for_of) = JsForOfStatement::cast(node.clone()) {
+                            if for_of.await_token().is_some() {
+                                return Some(node.clone());
+                            }
+                        }
+                    }
+
+                    if JsAwaitExpression::can_cast(node.kind()) {
+                        // skip valid cases for example:
+                        // - async function foo() { for (var bar in await baz) { } }
+                        // - async function foo() { for (var bar of await baz) { } }
+                        // - async function foo() { for (var bar = await baz in qux) {} }
+                        if let Some(parent) = node.parent() {
+                            if JsForOfStatement::can_cast(parent.kind())
+                                || JsForInStatement::can_cast(parent.kind())
+                                || JsInitializerClause::can_cast(parent.kind())
+                            {
+                                continue;
+                            }
+                        }
+                        return Some(node.clone());
+                    }
+                }
+                WalkEvent::Leave(_) => {}
+            }
+        }
+        None
+    }
+
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.text_range(),
+                markup! { "Avoid using "<Emphasis>"await"</Emphasis>" inside loops." },
+            )
+            .note(markup! {
+                "Using "<Emphasis>"await"</Emphasis>" inside loops might cause performance issues or unintended sequential execution."
+            }),
+        )
+    }
+}
+
+/// check whether it should stop traversing ancestors at the given node
+fn is_boundary(node: &JsSyntaxNode) -> bool {
+    let kind = node.kind();
+    matches!(
+        kind,
+        JsSyntaxKind::JS_FUNCTION_DECLARATION
+            | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+            | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
+            | JsSyntaxKind::JS_METHOD_CLASS_MEMBER
+    )
+}

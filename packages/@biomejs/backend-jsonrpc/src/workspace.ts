@@ -1464,6 +1464,10 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
+	 * Disallow await inside loops.
+	 */
+	noAwaitInLoop?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
 	noCommonJs?: RuleConfiguration_for_Null;
@@ -3290,6 +3294,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
+	| "lint/nursery/noAwaitInLoop"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"

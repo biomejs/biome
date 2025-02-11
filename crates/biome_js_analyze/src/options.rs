@@ -15,6 +15,8 @@ pub type NoArrayIndexKey =
 pub type NoAssignInExpressions = < lint :: suspicious :: no_assign_in_expressions :: NoAssignInExpressions as biome_analyze :: Rule > :: Options ;
 pub type NoAsyncPromiseExecutor = < lint :: suspicious :: no_async_promise_executor :: NoAsyncPromiseExecutor as biome_analyze :: Rule > :: Options ;
 pub type NoAutofocus = <lint::a11y::no_autofocus::NoAutofocus as biome_analyze::Rule>::Options;
+pub type NoAwaitInLoop =
+    <lint::nursery::no_await_in_loop::NoAwaitInLoop as biome_analyze::Rule>::Options;
 pub type NoBannedTypes =
     <lint::complexity::no_banned_types::NoBannedTypes as biome_analyze::Rule>::Options;
 pub type NoBarrelFile =
