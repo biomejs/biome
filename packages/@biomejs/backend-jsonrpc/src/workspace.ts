@@ -210,6 +210,10 @@ export interface FormatterConfiguration {
 	 */
 	lineWidth?: LineWidth;
 	/**
+	 * Whether to enforce collapsing object literals when possible. Defaults to preserve.
+	 */
+	objectWrap?: ObjectWrap;
+	/**
 	* Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.
 
 Default: `false`. 
@@ -452,6 +456,7 @@ export type LineEnding = "lf" | "crlf" | "cr";
 The allowed range of values is 1..=320 
 	 */
 export type LineWidth = number;
+export type ObjectWrap = "preserve" | "collapse";
 /**
  * Options that changes how the GraphQL linter behaves
  */
@@ -866,7 +871,6 @@ Note that this is only necessary for inline elements. Block elements do not have
 	 */
 export type WhitespaceSensitivity = "css" | "strict" | "ignore";
 export type ArrowParentheses = "always" | "asNeeded";
-export type ObjectWrap = "preserve" | "collapse";
 export type QuoteProperties = "asNeeded" | "preserve";
 export type Semicolons = "always" | "asNeeded";
 /**
@@ -939,6 +943,10 @@ export interface OverrideFormatterConfiguration {
 	 * What's the max width of a line. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	/**
+	 * Whether to enforce collapsing object literals when possible. Defaults to preserve.
+	 */
+	objectWrap?: ObjectWrap;
 }
 export interface OverrideLinterConfiguration {
 	/**
