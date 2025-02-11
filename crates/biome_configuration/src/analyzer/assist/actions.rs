@@ -131,7 +131,7 @@ pub struct Source {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_keys:
         Option<RuleAssistConfiguration<biome_json_analyze::options::UseSortedKeys>>,
-    #[doc = "Enforce ordering of JS objects properties."]
+    #[doc = "Enforce ordering of a JS object properties."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_object_properties:
         Option<RuleAssistConfiguration<biome_js_analyze::options::UseSortedObjectProperties>>,
