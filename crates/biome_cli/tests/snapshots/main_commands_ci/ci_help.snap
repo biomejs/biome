@@ -94,6 +94,8 @@ The configuration that is contained inside the file `biome.json`
                               multiple lines, regardless of length of the list. When formatting
                               `package.json`, Biome will use `always` unless configured otherwise.
                               Defaults to "followSource".
+        --json-formatter-bracket-spacing=<true|false>  Whether to insert spaces around brackets in
+                              object literals. Defaults to true.
         --json-linter-enabled=<true|false>  Control the linter for JSON (and its super languages)
                               files.
         --json-assist-enabled=<true|false>  Control the assist for JSON (and its super languages)

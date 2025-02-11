@@ -133,6 +133,8 @@ Available options:
                               multiple lines, regardless of length of the list. When formatting
                               `package.json`, Biome will use `always` unless configured otherwise.
                               Defaults to "followSource".
+        --json-formatter-bracket-spacing=<true|false>  Whether to insert spaces around brackets in
+                              object literals. Defaults to true.
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension
