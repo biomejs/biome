@@ -2495,6 +2495,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noConstantBinaryExpression": {
+					"description": "Disallow expressions where the operation doesn't affect the value",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDescendingSpecificity": {
 					"description": "Disallow a lower specificity selector from coming after a higher specificity selector.",
 					"anyOf": [
