@@ -2057,6 +2057,13 @@
 		"JsonFormatterConfiguration": {
 			"type": "object",
 			"properties": {
+				"bracketSpacing": {
+					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSpacing" },
+						{ "type": "null" }
+					]
+				},
 				"enabled": {
 					"description": "Control the formatter for JSON (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]

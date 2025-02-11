@@ -699,6 +699,10 @@ export interface JsonAssistConfiguration {
 }
 export interface JsonFormatterConfiguration {
 	/**
+	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	 */
+	bracketSpacing?: BracketSpacing;
+	/**
 	 * Control the formatter for JSON (and its super languages) files.
 	 */
 	enabled?: Bool;
