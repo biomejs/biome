@@ -1,6 +1,5 @@
 ---
-cli: minor
-biome_js_analyze: minor
+@biomejs/biome: major
 ---
 
 # Rule `lint/a11y/useAltText` don't check element's attributes contain object spread.
