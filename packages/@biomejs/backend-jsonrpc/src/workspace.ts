@@ -840,6 +840,10 @@ export interface Source {
 	 */
 	useSortedKeys?: RuleAssistConfiguration_for_Null;
 	/**
+	 * Enforce ordering of JS objects properties.
+	 */
+	useSortedObjectProperties?: RuleAssistConfiguration_for_Null;
+	/**
 	 * Enforce ordering of CSS properties and nested rules.
 	 */
 	useSortedProperties?: RuleAssistConfiguration_for_Null;

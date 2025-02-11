@@ -1,0 +1,54 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unsorted.js
+---
+# Input
+```js
+const obj = {
+	b: 1,
+	a: 1,
+	...g,
+	ba: 2,
+	ab: 1,
+	set aab(v) {
+		this._aab = v;
+	},
+	[getProp()]: 2,
+	aba: 2,
+	abc: 3,
+	abb: 3,
+	get aaa() {
+		return "";
+	},
+};
+
+```
+
+# Actions
+```diff
+@@ -1,17 +1,17 @@
+ const obj = {
++	a: 1,
+ 	b: 1,
+-	a: 1,
+ 	...g,
+-	ba: 2,
+-	ab: 1,
+ 	set aab(v) {
+ 		this._aab = v;
+ 	},
++	ab: 1,
++	ba: 2,
+ 	[getProp()]: 2,
+-	aba: 2,
+-	abc: 3,
+-	abb: 3,
+ 	get aaa() {
+ 		return "";
+ 	},
++	aba: 2,
++	abb: 3,
++	abc: 3,
+ };
+
+```
