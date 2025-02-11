@@ -68,6 +68,7 @@ pub struct JsonFormatOptions {
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
     trailing_commas: TrailingCommas,
     expand: Expand,
+    bracket_spacing: BracketSpacing,
     /// The kind of file
     file_source: JsonFileSource,
 }
@@ -179,6 +180,11 @@ impl JsonFormatOptions {
         self
     }
 
+    pub fn with_bracket_spacing(mut self, bracket_spacing: BracketSpacing) -> Self {
+        self.bracket_spacing = bracket_spacing;
+        self
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -197,6 +203,10 @@ impl JsonFormatOptions {
 
     pub fn set_trailing_commas(&mut self, trailing_commas: TrailingCommas) {
         self.trailing_commas = trailing_commas;
+    }
+
+    pub fn set_bracket_spacing(&mut self, bracket_spacing: BracketSpacing) {
+        self.bracket_spacing = bracket_spacing;
     }
 
     /// Set `expand_lists`
@@ -246,7 +256,7 @@ impl FormatOptions for JsonFormatOptions {
     }
 
     fn bracket_spacing(&self) -> BracketSpacing {
-        BracketSpacing::default()
+        self.bracket_spacing
     }
 
     fn as_print_options(&self) -> PrinterOptions {
@@ -262,6 +272,7 @@ impl fmt::Display for JsonFormatOptions {
         writeln!(f, "Line width: {}", self.line_width.value())?;
         writeln!(f, "Trailing commas: {}", self.trailing_commas)?;
         writeln!(f, "Expand: {}", self.expand)?;
+        writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
 
         Ok(())
     }
