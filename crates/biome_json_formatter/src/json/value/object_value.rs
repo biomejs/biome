@@ -9,7 +9,8 @@ pub(crate) struct FormatJsonObjectValue;
 impl FormatNodeRule<JsonObjectValue> for FormatJsonObjectValue {
     fn fmt_fields(&self, node: &JsonObjectValue, f: &mut JsonFormatter) -> FormatResult<()> {
         let should_insert_space_around_brackets = f.context().options().bracket_spacing().value();
-        let should_expand = node.json_member_list().syntax().has_leading_newline()
+        let should_expand = (f.context().options().object_wrap().is_preserve()
+            && node.json_member_list().syntax().has_leading_newline())
             || f.comments().has_dangling_comments(node.syntax())
             || f.context().options().expand();
 
