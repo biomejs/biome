@@ -2,7 +2,7 @@
 @biomejs/biome: major
 ---
 
-# Rule `lint/a11y/useAltText` don't check element's attributes contain object spread.
+The rule `lint/a11y/useAltText` doesn't check the element's attributes containing object spread.
 
 The following code can pass check:
 
