@@ -413,7 +413,8 @@ pub type UseSortedAttributes =
     <assist::source::use_sorted_attributes::UseSortedAttributes as biome_analyze::Rule>::Options;
 pub type UseSortedClasses =
     <lint::nursery::use_sorted_classes::UseSortedClasses as biome_analyze::Rule>::Options;
-pub type UseSortedObjectProperties = < assist :: source :: use_sorted_object_properties :: UseSortedObjectProperties as biome_analyze :: Rule > :: Options ;
+pub type UseSortedKeys =
+    <assist::source::use_sorted_keys::UseSortedKeys as biome_analyze::Rule>::Options;
 pub type UseStrictMode =
     <lint::nursery::use_strict_mode::UseStrictMode as biome_analyze::Rule>::Options;
 pub type UseTemplate = <lint::style::use_template::UseTemplate as biome_analyze::Rule>::Options;

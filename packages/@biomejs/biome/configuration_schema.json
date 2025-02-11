@@ -3943,13 +3943,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useSortedObjectProperties": {
-					"description": "Enforce ordering of a JS object properties.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
-						{ "type": "null" }
-					]
-				},
 				"useSortedProperties": {
 					"description": "Enforce ordering of CSS properties and nested rules.",
 					"anyOf": [

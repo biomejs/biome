@@ -66,15 +66,15 @@ declare_source_rule! {
     ///   q: 1,
     /// }
     /// ```
-    pub UseSortedObjectProperties {
+    pub UseSortedKeys {
         version: "next",
-        name: "useSortedObjectProperties",
+        name: "useSortedKeys",
         language: "js",
         recommended: false,
     }
 }
 
-impl Rule for UseSortedObjectProperties {
+impl Rule for UseSortedKeys {
     type Query = Ast<JsObjectMemberList>;
     type State = Vec<Vec<ObjectMember>>;
     type Signals = Option<Self::State>;

@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Add a new assist rule - `useSortedObjectProperties` which enforces ordering of a JS object properties.
+Add a new JS assist rule - `useSortedKeys` which enforces ordering of a JS object properties.
 This rule will consider spread/calculated keys e.g `[k]: 1` as non-sortable.
 Instead, whenever it encounters a non-sortable key, it will sort all the
 previous sortable keys up until the nearest non-sortable key, if one exist.

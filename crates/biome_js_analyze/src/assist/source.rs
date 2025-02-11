@@ -5,5 +5,5 @@
 use biome_analyze::declare_assist_group;
 pub mod organize_imports;
 pub mod use_sorted_attributes;
-pub mod use_sorted_object_properties;
-declare_assist_group! { pub Source { name : "source" , rules : [self :: organize_imports :: OrganizeImports , self :: use_sorted_attributes :: UseSortedAttributes , self :: use_sorted_object_properties :: UseSortedObjectProperties ,] } }
+pub mod use_sorted_keys;
+declare_assist_group! { pub Source { name : "source" , rules : [self :: organize_imports :: OrganizeImports , self :: use_sorted_attributes :: UseSortedAttributes , self :: use_sorted_keys :: UseSortedKeys ,] } }
