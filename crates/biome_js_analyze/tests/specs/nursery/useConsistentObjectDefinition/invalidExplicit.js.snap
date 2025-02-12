@@ -4,24 +4,41 @@ expression: invalidExplicit.js
 ---
 # Input
 ```js
-const obj = {
+const invalidExplicit = {
+    // Basic property shorthand violations
     foo: foo,
-    bar: function () { return "bar"; },
+    bar: bar,
+    baz: baz,
+
+    // Method shorthand violations
+    method: function () { return "method"; },
+    async: async function () { return "async"; },
+    generator: function* () { yield "gen"; },
+    asyncGenerator: async function* () { yield "async gen"; },
+
+    // Computed methods shorthand violations
+    [computed]: function () { return "computed"; },
+    [computed]: async function () { return "async computed"; },
+    [computed]: function* () { yield "computed gen"; },
+    ["computed-string"]: function () { return "computed string"; },
+    ["comp" + "uted" + "-con" + "cat"]: function () { return "computed concat"; },
+    [computed()]: function () { return "computed dynamic"; },
 };
 
 ```
 
 # Diagnostics
 ```
-invalidExplicit.js:2:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidExplicit.js:3:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Do not use explicit object property syntax when shorthand syntax is possible.
   
-    1 │ const obj = {
-  > 2 │     foo: foo,
+    1 │ const invalidExplicit = {
+    2 │     // Basic property shorthand violations
+  > 3 │     foo: foo,
       │     ^^^^^^^^
-    3 │     bar: function () { return "bar"; },
-    4 │ };
+    4 │     bar: bar,
+    5 │     baz: baz,
   
   i Using shorthand object property syntax makes object definitions more concise.
   
@@ -29,16 +46,201 @@ invalidExplicit.js:2:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 
 ```
-invalidExplicit.js:3:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidExplicit.js:4:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Do not use explicit object property syntax when shorthand syntax is possible.
   
-    1 │ const obj = {
-    2 │     foo: foo,
-  > 3 │     bar: function () { return "bar"; },
-      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ };
-    5 │ 
+    2 │     // Basic property shorthand violations
+    3 │     foo: foo,
+  > 4 │     bar: bar,
+      │     ^^^^^^^^
+    5 │     baz: baz,
+    6 │ 
+  
+  i Using shorthand object property syntax makes object definitions more concise.
+  
+
+```
+
+```
+invalidExplicit.js:5:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  
+    3 │     foo: foo,
+    4 │     bar: bar,
+  > 5 │     baz: baz,
+      │     ^^^^^^^^
+    6 │ 
+    7 │     // Method shorthand violations
+  
+  i Using shorthand object property syntax makes object definitions more concise.
+  
+
+```
+
+```
+invalidExplicit.js:8:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  
+     7 │     // Method shorthand violations
+   > 8 │     method: function () { return "method"; },
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │     async: async function () { return "async"; },
+    10 │     generator: function* () { yield "gen"; },
+  
+  i Using shorthand object property syntax makes object definitions more concise.
+  
+
+```
+
+```
+invalidExplicit.js:9:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  
+     7 │     // Method shorthand violations
+     8 │     method: function () { return "method"; },
+   > 9 │     async: async function () { return "async"; },
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     generator: function* () { yield "gen"; },
+    11 │     asyncGenerator: async function* () { yield "async gen"; },
+  
+  i Using shorthand object property syntax makes object definitions more concise.
+  
+
+```
+
+```
+invalidExplicit.js:10:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  
+     8 │     method: function () { return "method"; },
+     9 │     async: async function () { return "async"; },
+  > 10 │     generator: function* () { yield "gen"; },
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │     asyncGenerator: async function* () { yield "async gen"; },
+    12 │ 
+  
+  i Using shorthand object property syntax makes object definitions more concise.
+  
+
+```
+
+```
+invalidExplicit.js:11:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  
+     9 │     async: async function () { return "async"; },
+    10 │     generator: function* () { yield "gen"; },
+  > 11 │     asyncGenerator: async function* () { yield "async gen"; },
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │     // Computed methods shorthand violations
+  
+  i Using shorthand object property syntax makes object definitions more concise.
+  
+
+```
+
+```
+invalidExplicit.js:14:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  
+    13 │     // Computed methods shorthand violations
+  > 14 │     [computed]: function () { return "computed"; },
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │     [computed]: async function () { return "async computed"; },
+    16 │     [computed]: function* () { yield "computed gen"; },
+  
+  i Using shorthand object property syntax makes object definitions more concise.
+  
+
+```
+
+```
+invalidExplicit.js:15:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  
+    13 │     // Computed methods shorthand violations
+    14 │     [computed]: function () { return "computed"; },
+  > 15 │     [computed]: async function () { return "async computed"; },
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │     [computed]: function* () { yield "computed gen"; },
+    17 │     ["computed-string"]: function () { return "computed string"; },
+  
+  i Using shorthand object property syntax makes object definitions more concise.
+  
+
+```
+
+```
+invalidExplicit.js:16:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  
+    14 │     [computed]: function () { return "computed"; },
+    15 │     [computed]: async function () { return "async computed"; },
+  > 16 │     [computed]: function* () { yield "computed gen"; },
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │     ["computed-string"]: function () { return "computed string"; },
+    18 │     ["comp" + "uted" + "-con" + "cat"]: function () { return "computed concat"; },
+  
+  i Using shorthand object property syntax makes object definitions more concise.
+  
+
+```
+
+```
+invalidExplicit.js:17:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  
+    15 │     [computed]: async function () { return "async computed"; },
+    16 │     [computed]: function* () { yield "computed gen"; },
+  > 17 │     ["computed-string"]: function () { return "computed string"; },
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │     ["comp" + "uted" + "-con" + "cat"]: function () { return "computed concat"; },
+    19 │     [computed()]: function () { return "computed dynamic"; },
+  
+  i Using shorthand object property syntax makes object definitions more concise.
+  
+
+```
+
+```
+invalidExplicit.js:18:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  
+    16 │     [computed]: function* () { yield "computed gen"; },
+    17 │     ["computed-string"]: function () { return "computed string"; },
+  > 18 │     ["comp" + "uted" + "-con" + "cat"]: function () { return "computed concat"; },
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │     [computed()]: function () { return "computed dynamic"; },
+    20 │ };
+  
+  i Using shorthand object property syntax makes object definitions more concise.
+  
+
+```
+
+```
+invalidExplicit.js:19:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  
+    17 │     ["computed-string"]: function () { return "computed string"; },
+    18 │     ["comp" + "uted" + "-con" + "cat"]: function () { return "computed concat"; },
+  > 19 │     [computed()]: function () { return "computed dynamic"; },
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ };
+    21 │ 
   
   i Using shorthand object property syntax makes object definitions more concise.
   

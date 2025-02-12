@@ -2925,8 +2925,10 @@
 			"additionalProperties": false
 		},
 		"ObjectPropertySyntax": {
-			"type": "string",
-			"enum": ["explicit", "shorthand"]
+			"oneOf": [
+				{ "description": "{foo: foo}", "type": "string", "enum": ["explicit"] },
+				{ "description": "{foo}", "type": "string", "enum": ["shorthand"] }
+			]
 		},
 		"Options": {
 			"type": "object",

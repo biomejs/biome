@@ -3,7 +3,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
-use biome_js_syntax::{inner_string_text, AnyJsExpression, AnyJsObjectMember};
+use biome_diagnostics::Severity;
+use biome_js_syntax::{
+    inner_string_text, AnyJsExpression, AnyJsObjectMember, AnyJsObjectMemberName,
+};
 use biome_rowan::AstNode;
 use serde::{Deserialize, Serialize};
 
@@ -36,9 +39,6 @@ declare_lint_rule! {
     /// let valid = {
     ///     foo: foo,
     ///     bar: function() { return "bar"; },
-    ///     arrow: () => { "arrow" },
-    ///     get getter() { return "getter"; },
-    ///     set setter(value) { this._setter = value; }
     /// };
     /// ```
     ///
@@ -67,6 +67,7 @@ declare_lint_rule! {
         name: "useConsistentObjectDefinition",
         language: "js",
         recommended: false,
+        severity: Severity::Error,
         sources: &[RuleSource::Eslint("object-shorthand")],
         source_kind: RuleSourceKind::Inspired,
     }
@@ -83,8 +84,10 @@ pub struct UseConsistentObjectDefinitionOptions {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub enum ObjectPropertySyntax {
+    /// {foo: foo}
     #[default]
     Explicit,
+    /// {foo}
     Shorthand,
 }
 
@@ -103,29 +106,29 @@ impl Rule for UseConsistentObjectDefinition {
                 ObjectPropertySyntax::Explicit => Some(()),
             },
             AnyJsObjectMember::JsPropertyObjectMember(source) => {
-                let member_token = source
-                    .name()
-                    .ok()?
-                    .as_js_literal_member_name()?
-                    .value()
-                    .ok()?;
-                let member_id = inner_string_text(&member_token);
+                let member_token = source.name().ok()?;
+                let member_id = match member_token {
+                    AnyJsObjectMemberName::JsLiteralMemberName(literal) => {
+                        let literal_token = literal.value().ok()?;
+                        inner_string_text(&literal_token)
+                    }
+                    AnyJsObjectMemberName::JsComputedMemberName(_computed) => {
+                        let reference_token = source.value().ok()?;
+                        match reference_token {
+                            AnyJsExpression::JsFunctionExpression(function) => {
+                                let function_token = function.function_token().ok()?;
+                                inner_string_text(&function_token)
+                            }
+                            _ => return None,
+                        }
+                    }
+                    _ => return None,
+                };
                 let reference_token = source.value().ok()?;
                 let reference_id = match reference_token {
                     AnyJsExpression::JsIdentifierExpression(identifier) => {
                         let variable_token = identifier.name().ok()?.value_token().ok()?;
                         inner_string_text(&variable_token)
-                    }
-                    AnyJsExpression::JsCallExpression(call) => {
-                        let callee_token = call
-                            .callee()
-                            .ok()?
-                            .as_js_identifier_expression()?
-                            .name()
-                            .ok()?
-                            .value_token()
-                            .ok()?;
-                        inner_string_text(&callee_token)
                     }
                     AnyJsExpression::JsFunctionExpression(function) => {
                         let function_token = function.function_token().ok()?;
