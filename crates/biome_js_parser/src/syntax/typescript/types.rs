@@ -1731,6 +1731,10 @@ fn parse_ts_import_type_assertion_block(p: &mut JsParser) -> ParsedSyntax {
 
 fn parse_ts_import_type_arguments(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
     if !p.at(T!['(']) {
+        p.error(p.err_builder(
+            format!("Expected '(', but got '{}' here", p.cur_text()),
+            p.cur_range(),
+        ));
         return Absent;
     }
     let m = p.start();
