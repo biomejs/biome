@@ -705,6 +705,11 @@ pub trait FormatContext {
 }
 
 /// Options customizing how the source code should be formatted.
+///
+/// **Note**: This trait should **only** contain the essential abstractions required for the printing phase.  
+/// For example, do not add a `fn bracket_spacing(&self) -> BracketSpacing` method here,  
+/// as the [BracketSpacing] option is not needed during the printing phase
+/// and enforcing its implementation for all structs using this trait is unnecessary.
 pub trait FormatOptions {
     /// The indent style.
     fn indent_style(&self) -> IndentStyle;
