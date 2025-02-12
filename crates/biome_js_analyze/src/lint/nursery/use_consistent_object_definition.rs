@@ -56,10 +56,11 @@ declare_lint_rule! {
     ///
     /// ```json,options
     /// {
-    ///    "options": {
-    ///       "syntax": "shorthand"
-    ///    }
+    ///     "options": {
+    ///         "syntax": "shorthand"
+    ///     }
     /// }
+    /// ```
     ///
     /// ```js,expect_diagnostic,use_options
     /// let foo = 1;
@@ -82,7 +83,7 @@ declare_lint_rule! {
     ///     foo,
     ///     bar() { return "bar"; },
     /// };
-    ///
+    /// ```
     ///
     /// ## Options
     ///
