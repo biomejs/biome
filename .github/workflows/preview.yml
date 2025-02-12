@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Run build
-        uses: ./.github/actions/build
+        uses: ./.github/actions/build-cli
         with:
           os: ${{ matrix.os }}
           target: ${{ matrix.target }}
