@@ -6,14 +6,15 @@ use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, global_identifier, AnyJsClassMember, AnyJsExpression,
-    AnyTsType, JsArrowFunctionExpression, JsCallExpression, JsClassDeclaration, JsClassExpression,
-    JsClassMemberList, JsExpressionStatement, JsExtendsClause, JsFunctionDeclaration,
-    JsIdentifierExpression, JsInitializerClause, JsMethodClassMember, JsMethodObjectMember,
-    JsStaticMemberExpression, JsSyntaxKind, JsThisExpression, JsVariableDeclarator,
-    TsReturnTypeAnnotation,
+    AnyJsObjectMember, AnyTsType, JsArrowFunctionExpression, JsCallExpression, JsClassDeclaration,
+    JsClassExpression, JsClassMemberList, JsExpressionStatement, JsExtendsClause,
+    JsFunctionDeclaration, JsIdentifierExpression, JsInitializerClause, JsMethodClassMember,
+    JsMethodObjectMember, JsObjectMemberList, JsStaticMemberExpression, JsSyntaxKind,
+    JsSyntaxToken, JsThisExpression, JsVariableDeclarator, TsReturnTypeAnnotation,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TokenText,
+    TriviaPieceKind,
 };
 
 use crate::{services::semantic::Semantic, JsRuleAction};
@@ -100,6 +101,16 @@ declare_lint_rule! {
     /// }
     /// const api = new Api();
     /// api.returnsPromise().then(() => {}).finally(() => {});
+    /// ```
+    ///
+    /// ```typescript
+    /// const obj = {
+    ///   async returnsPromise(): Promise<string> {
+    ///     return 'value';
+    ///   },
+    /// };
+    ///
+    /// obj.returnsPromise();
     /// ```
     /// ### Valid
     ///
@@ -253,6 +264,16 @@ impl Rule for NoFloatingPromises {
 /// returnsPromise().then(() => {});
 /// ```
 ///
+/// ```typescript
+/// const obj = {
+///   async returnsPromise(): Promise<string> {
+///     return 'value';
+///   },
+/// };
+///
+/// obj['returnsPromise']();
+/// ```
+///
 /// Example JavaScript code that would return `false`:
 /// ```typescript
 /// function doesNotReturnPromise() {
@@ -268,6 +289,16 @@ fn is_callee_a_promise(callee: &AnyJsExpression, model: &SemanticModel) -> Optio
         }
         AnyJsExpression::JsStaticMemberExpression(static_member_expr) => {
             is_member_expression_callee_a_promise(static_member_expr, model)
+        }
+        AnyJsExpression::JsComputedMemberExpression(computed_member_expr) => {
+            let object = computed_member_expr.object().ok()?;
+            let js_ident_expr = object.as_js_identifier_expression()?;
+            let member = computed_member_expr.member().ok()?;
+            let literal_expr = member.as_any_js_literal_expression()?;
+            let string_literal = literal_expr.as_js_string_literal_expression()?;
+            let value_token = string_literal.inner_string_text().ok()?;
+
+            is_binding_a_promise(js_ident_expr, model, Some(value_token.text()))
         }
         _ => Some(false),
     }
@@ -591,6 +622,9 @@ fn is_initializer_a_promise(
         AnyJsExpression::JsClassExpression(class_expr) => {
             find_and_check_class_member(&class_expr.members(), target_method_name?, model)
         }
+        AnyJsExpression::JsObjectExpression(object_expr) => {
+            find_and_check_object_member(&object_expr.members(), target_method_name?)
+        }
         _ => Some(false),
     }
 }
@@ -729,12 +763,16 @@ fn check_this_expression(
         .syntax()
         .ancestors()
         .skip(1)
-        .find_map(|ancestor| {
-            if ancestor.kind() == JsSyntaxKind::JS_CLASS_MEMBER_LIST {
+        .find_map(|ancestor| match ancestor.kind() {
+            JsSyntaxKind::JS_CLASS_MEMBER_LIST => {
                 let class_member_list = JsClassMemberList::cast(ancestor)?;
-                return find_and_check_class_member(&class_member_list, target_name, model);
+                find_and_check_class_member(&class_member_list, target_name, model)
             }
-            None
+            JsSyntaxKind::JS_OBJECT_MEMBER_LIST => {
+                let object_member_list = JsObjectMemberList::cast(ancestor)?;
+                find_and_check_object_member(&object_member_list, target_name)
+            }
+            _ => None,
         })
 }
 
@@ -866,6 +904,73 @@ fn is_ts_type_a_promise(any_ts_type: &AnyTsType) -> Option<bool> {
             let identifier = name.as_js_reference_identifier()?;
 
             Some(identifier.has_name("Promise"))
+        }
+        _ => None,
+    }
+}
+
+/// Finds a object method or property by matching the given name and checks if it is a promise.
+///
+/// This function searches for a object method or property in the given `JsObjectMemberList`
+/// by matching the provided `target_name`. If a matching member is found, it checks if the member
+/// is a promise.
+///
+/// # Arguments
+///
+/// * `object_member_list` - A reference to a `JsObjectMemberList` representing the object members to search in.
+/// * `target_name` - The name of the method or property to search for.
+/// * `model` - A reference to the `SemanticModel` used for resolving bindings.
+///
+/// # Returns
+///
+/// * `Some(true)` if the class member is a promise.
+/// * `Some(false)` if the class member is not a promise.
+/// * `None` if there is an error in the process or if the class member is not found.
+///
+fn find_and_check_object_member(
+    object_member_list: &JsObjectMemberList,
+    target_name: &str,
+) -> Option<bool> {
+    fn extract_member_name(member: &AnyJsObjectMember) -> Option<TokenText> {
+        match member {
+            AnyJsObjectMember::JsPropertyObjectMember(property) => property.name().ok()?.name(),
+            AnyJsObjectMember::JsMethodObjectMember(method) => method.name().ok()?.name(),
+            _ => None,
+        }
+    }
+
+    fn is_async_or_promise(
+        async_token: &Option<JsSyntaxToken>,
+        return_type: Option<TsReturnTypeAnnotation>,
+    ) -> bool {
+        async_token.is_some() || is_return_type_a_promise(return_type).unwrap_or_default()
+    }
+
+    let object_member = object_member_list.iter().find_map(|member| {
+        let member = member.ok()?;
+        (extract_member_name(&member)? == target_name).then_some(member)
+    })?;
+
+    match object_member {
+        AnyJsObjectMember::JsMethodObjectMember(method) => Some(is_async_or_promise(
+            &method.async_token(),
+            method.return_type_annotation(),
+        )),
+        AnyJsObjectMember::JsPropertyObjectMember(property) => {
+            let value = property.value().ok()?;
+            match value {
+                AnyJsExpression::JsArrowFunctionExpression(arrow_func) => {
+                    Some(is_async_or_promise(
+                        &arrow_func.async_token(),
+                        arrow_func.return_type_annotation(),
+                    ))
+                }
+                AnyJsExpression::JsFunctionExpression(func_expr) => Some(is_async_or_promise(
+                    &func_expr.async_token(),
+                    func_expr.return_type_annotation(),
+                )),
+                _ => None,
+            }
         }
         _ => None,
     }

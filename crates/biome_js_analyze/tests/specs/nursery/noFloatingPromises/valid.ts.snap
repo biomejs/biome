@@ -196,4 +196,30 @@ async function testUnnamedClassExpressionMethodCalls(): Promise<string> {
   unnamedValidClassExpression.returnsPromiseProperty.catch(() => { });
   return unnamedValidClassExpression.returnsPromiseArrowFunction();
 }
+
+const validTestObject = {
+  returnsPromiseArrowFunction: async (): Promise<string> => {
+    return 'value';
+  },
+
+  returnsPromiseFunction: async function (): Promise<string> {
+    return 'value';
+  },
+
+  async returnsPromiseMethod(): Promise<string> {
+    return 'value';
+  },
+
+  async someMethod() {
+		await this.returnsPromiseArrowFunction();
+		this.returnsPromiseFunction().then(() => {}, () => {}).finally(() => {});
+		this.returnsPromiseMethod().catch(() => {});
+	},
+}
+async function testValidObejctMethodCalls(): Promise<string> {
+  await validTestObject.returnsPromiseArrowFunction();
+  validTestObject.returnsPromiseFunction().catch(() => { });
+  validTestObject.returnsPromiseMethod().then(() => { }, () => { }).finally(() => { });
+  return validTestObject['returnsPromiseMethod']();
+}
 ```
