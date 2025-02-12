@@ -20,27 +20,69 @@ declare_lint_rule! {
     /// ## Example
     ///
     /// ### Invalid
-    /// ```js,expect_diagnostic
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "syntax": "explicit"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
     /// let foo = 1;
     /// let invalid = {
     ///     foo
     /// };
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,use_options
     /// let invalid = {
     ///     bar() { return "bar"; },
     /// };
     /// ```
     ///
     /// ### Valid
-    /// ```js
+    ///
+    /// ```js,use_options
     /// let foo = 1;
     /// let valid = {
     ///     foo: foo,
     ///     bar: function() { return "bar"; },
     /// };
     /// ```
+    ///
+    /// ### Invalid
+    ///
+    /// ```json,options
+    /// {
+    ///    "options": {
+    ///       "syntax": "shorthand"
+    ///    }
+    /// }
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// let foo = 1;
+    /// let invalid = {
+    ///     foo: foo
+    /// };
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// let invalid = {
+    ///     bar: function() { return "bar"; },
+    /// };
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js,use_options
+    /// let foo = 1;
+    /// let valid = {
+    ///     foo,
+    ///     bar() { return "bar"; },
+    /// };
+    ///
     ///
     /// ## Options
     ///
