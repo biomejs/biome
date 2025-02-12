@@ -44,6 +44,7 @@ jobs:
 
   # Retrieve version of `@biomejs/biome` and `@biomejs/js-api`
   version:
+    runs-on: ubuntu-latest
     needs: changesets
     if: steps.changesets.outputs.hasChangesets == 'false' && github.head_ref == 'changeset-release/main'
     outputs:

@@ -3,7 +3,20 @@ on:
   workflow_dispatch:
 
 jobs:
+  version:
+    name: Generate version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ env.version }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set version
+        run: |
+          echo "version=$(node packages/@biomejs/biome/scripts/update-nightly-version.mjs)" >> $GITHUB_ENV
+
   build-binaries:
+    needs: version
     strategy:
       matrix:
         include:
@@ -37,12 +50,12 @@ jobs:
 
     steps:
       - name: Run build
-        uses: ./.github/actions/build
+        uses: ./.github/actions/build-cli
         with:
           os: ${{ matrix.os }}
           target: ${{ matrix.target }}
           code-target: ${{ matrix.code-target }}
-          version: ${{ env.cli-version }}
+          version: ${{ needs.version.outputs.version }}
 
   publish:
     name: Publish
