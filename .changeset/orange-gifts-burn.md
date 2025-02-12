@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-`useTemplate` lint rule now ignores concatenated literals that is fold to multiple lines
+Fix [#4947](https://github.com/biomejs/biome/issues/4947): the `useTemplate` lint rule now ignores concatenated literals folded to multiple lines.
