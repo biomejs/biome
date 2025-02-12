@@ -8,7 +8,7 @@ use crate::deserializable_derive::enum_variant_attrs::EnumVariantAttrs;
 use crate::deserializable_derive::struct_field_attrs::StructFieldAttrs;
 use biome_string_case::Case;
 use proc_macro2::{Ident, TokenStream};
-use proc_macro_error::*;
+use proc_macro_error2::*;
 use quote::quote;
 use syn::{Data, GenericParam, Generics, Path, Type};
 

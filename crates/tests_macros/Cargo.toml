@@ -17,7 +17,7 @@ proc-macro = true
 biome_string_case = { workspace = true }
 case              = "1.0.0"
 globwalk          = "0.9.1"
-proc-macro-error  = "1.0.4"
+proc-macro-error2 = { workspace = true }
 proc-macro2       = { workspace = true }
 quote             = "1.0.14"
 syn               = "2.0.59"
