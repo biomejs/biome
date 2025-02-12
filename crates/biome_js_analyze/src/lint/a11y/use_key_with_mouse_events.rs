@@ -2,6 +2,7 @@ use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::{markup, MarkupBuf};
+use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
 
@@ -45,6 +46,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("mouse-events-have-key-events")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -106,9 +108,9 @@ impl Rule for UseKeyWithMouseEvents {
 fn has_valid_focus_attributes(elem: &AnyJsxElement) -> bool {
     if let Some(on_mouse_over_attribute) = elem.find_attribute_by_name("onMouseOver") {
         if !elem.has_trailing_spread_prop(&on_mouse_over_attribute) {
-            return elem.find_attribute_by_name("onFocus").map_or(false, |it| {
+            return elem.find_attribute_by_name("onFocus").is_some_and(|it| {
                 !it.as_static_value()
-                    .map_or(false, |value| value.is_null_or_undefined())
+                    .is_some_and(|value| value.is_null_or_undefined())
             });
         }
     }
@@ -118,9 +120,9 @@ fn has_valid_focus_attributes(elem: &AnyJsxElement) -> bool {
 fn has_valid_blur_attributes(elem: &AnyJsxElement) -> bool {
     if let Some(on_mouse_attribute) = elem.find_attribute_by_name("onMouseOut") {
         if !elem.has_trailing_spread_prop(&on_mouse_attribute) {
-            return elem.find_attribute_by_name("onBlur").map_or(false, |it| {
+            return elem.find_attribute_by_name("onBlur").is_some_and(|it| {
                 !it.as_static_value()
-                    .map_or(false, |value| value.is_null_or_undefined())
+                    .is_some_and(|value| value.is_null_or_undefined())
             });
         }
     }

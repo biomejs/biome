@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: lambdas.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function lambdas(array) {
     for (item of array) {              // +1, nesting = 1
         if (item) {                    // +2, nesting = 2
@@ -104,5 +105,3 @@ lambdas.js:22:32 lint/complexity/noExcessiveCognitiveComplexity ━━━━━�
   
 
 ```
-
-

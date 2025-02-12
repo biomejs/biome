@@ -1,0 +1,28 @@
+language universal
+
+// Concat two lists together
+function concat($list_a, $list_b) {
+  $new_list = [],
+			$list_a <: some 			bubble($new_list) $item where $new_list += $item,
+  $list_b <: some bubble($new_list) $item where $new_list += $item,
+  return $new_list
+}
+
+// Note this is a foreign function written in JavaScript
+function sort_internal() js					 {
+	const foo = 9 + 10;
+	// This is a comment... {
+	while (1 < 0) {
+		console.log("hello")
+	}
+	return "ok"
+}
+
+
+// Sort a list
+function sort($list) {
+$new_list = join($list, "|||GRIT_SORT_SEP|||"),
+	$sorted = sort_internal($new_list),
+			$split = split($sorted, "|||GRIT_SORT_SEP|||"),
+  return $split
+}

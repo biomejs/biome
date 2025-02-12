@@ -25,6 +25,7 @@ biome_json_parser       = { workspace = true }
 biome_json_syntax       = { workspace = true }
 biome_parser            = { workspace = true }
 biome_rowan             = { workspace = true }
+camino                  = { workspace = true }
 
 ansi_rgb                  = "0.2.0"
 codspeed-criterion-compat = { version = "2.7.2", optional = true }

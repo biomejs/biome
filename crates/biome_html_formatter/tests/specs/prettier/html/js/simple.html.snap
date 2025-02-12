@@ -1,0 +1,67 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/js/simple.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sample styled page</title>
+    <script>alert('test');</script>
+    <script>
+      var message = "Alert!";
+
+      alert(message);
+    </script>
+  </head>
+  <body>
+    <h1>Sample styled page</h1>
+    <p>This page is just a demo.</p>
+  </body>
+</html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,8 @@
+-<!doctype html>
++<!DOCTYPE html>
+ <html>
+   <head>
+     <title>Sample styled page</title>
+-    <script>
+-      alert("test");
+-    </script>
++    <script>alert('test');</script>
+     <script>
+       var message = "Alert!";
+ 
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sample styled page</title>
+    <script>alert('test');</script>
+    <script>
+      var message = "Alert!";
+
+      alert(message);
+    </script>
+  </head>
+  <body>
+    <h1>Sample styled page</h1>
+    <p>This page is just a demo.</p>
+  </body>
+</html>
+```

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -15,7 +16,7 @@ expression: content
   },
   "overrides": [
     {
-      "include": ["*.js"],
+      "includes": ["*.js"],
       "linter": {
         "rules": {
           "suspicious": {
@@ -25,7 +26,7 @@ expression: content
       }
     },
     {
-      "include": ["test.js"],
+      "includes": ["test.js"],
       "linter": {
         "rules": {
           "suspicious": {
@@ -35,7 +36,7 @@ expression: content
       }
     },
     {
-      "include": ["test3.js"]
+      "includes": ["test3.js"]
     }
   ]
 }

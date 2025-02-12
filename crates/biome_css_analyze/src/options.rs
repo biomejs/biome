@@ -2,6 +2,7 @@
 
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
+use crate::assist;
 use crate::lint;
 pub type NoDescendingSpecificity = < lint :: nursery :: no_descending_specificity :: NoDescendingSpecificity as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateAtImportRules = < lint :: suspicious :: no_duplicate_at_import_rules :: NoDuplicateAtImportRules as biome_analyze :: Rule > :: Options ;
@@ -41,4 +42,4 @@ pub type NoValueAtRule =
 pub type UseGenericFontNames =
     <lint::a11y::use_generic_font_names::UseGenericFontNames as biome_analyze::Rule>::Options;
 pub type UseSortedProperties =
-    <lint::nursery::use_sorted_properties::UseSortedProperties as biome_analyze::Rule>::Options;
+    <assist::source::use_sorted_properties::UseSortedProperties as biome_analyze::Rule>::Options;

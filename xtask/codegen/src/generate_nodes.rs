@@ -238,6 +238,27 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 Default::default()
             };
 
+            let debug_fmt_impl = if fields.len() > 0 {
+                quote! {
+                    thread_local! { static DEPTH: std::cell::Cell<u8> = const { std::cell::Cell::new(0) } };
+                    let current_depth = DEPTH.get();
+                    let result = if current_depth < 16 {
+                        DEPTH.set(current_depth + 1);
+                        f.debug_struct(#string_name)
+                            #(#fields)*
+                            .finish()
+                    } else {
+                        f.debug_struct(#string_name).finish()
+                    };
+                    DEPTH.set(current_depth);
+                    result
+                }
+            } else {
+                quote! {
+                    f.debug_struct(#string_name).finish()
+                }
+            };
+
             (
                 quote! {
                     // TODO: review documentation
@@ -295,9 +316,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
                     impl std::fmt::Debug for #name {
                         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                            f.debug_struct(#string_name)
-                                #(#fields)*
-                                .finish()
+                            #debug_fmt_impl
                         }
                     }
 
@@ -708,6 +727,29 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         }
     });
 
+    let any_bogus = {
+        let kinds = ast.bogus.iter().enumerate().map(|(i, bogus_name)| {
+            let ident = format_ident!("{bogus_name}");
+            if i == 0 {
+                quote! { #ident }
+            } else {
+                quote! { | #ident }
+            }
+        });
+        let ident = format_ident!(
+            "Any{}BogusNode",
+            ast.bogus
+                .iter()
+                .find_map(|bogus_name| bogus_name.strip_suffix("Bogus"))
+                .expect("expected a plain *Bogus node")
+        );
+        quote! {
+            biome_rowan::declare_node_union! {
+                pub #ident = #(#kinds)*
+            }
+        }
+    };
+
     let lists = ast.lists().map(|(name, list)| {
         let list_name = format_ident!("{}", name);
         let list_kind = format_ident!("{}", Case::Constant.convert(name));
@@ -910,6 +952,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         #(#union_boilerplate_impls)*
         #(#display_impls)*
         #(#bogus)*
+        #any_bogus
         #(#lists)*
 
         #[derive(Clone)]
@@ -970,9 +1013,9 @@ pub(crate) fn token_kind_to_code(name: &str, language_kind: LanguageKind) -> Tok
         let token: TokenStream = token.parse().unwrap();
         quote! { T![#token] }
     } else {
-        // $ is valid syntax in rust and it's part of macros,
+        // `$`, `[`, and `]` is valid syntax in rust and it's part of macros,
         // so we need to decorate the tokens with quotes
-        if matches!(name, "$=" | "$_") {
+        if should_token_be_quoted(name) {
             let token = Literal::string(name);
             quote! { T![#token] }
         } else {
@@ -1135,4 +1178,14 @@ pub(crate) fn group_fields_for_ordering(node: &AstNodeSrc) -> Vec<Vec<&Field>> {
 
     groups.push(current_group);
     groups
+}
+
+/// Whether or not a token should be surrounded by quotes when being printed in the generated code.
+///
+/// Some tokens need to be quoted in the `T![]` macro because they conflict with Rust syntax.
+pub fn should_token_be_quoted(token: &str) -> bool {
+    matches!(
+        token,
+        "$=" | "$_" | "U+" | "<![CDATA[" | "]]>" | "   " | "_"
+    )
 }

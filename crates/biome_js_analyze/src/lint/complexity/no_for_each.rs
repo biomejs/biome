@@ -2,8 +2,11 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
+use biome_deserialize::{
+    DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
+};
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, AnyJsMemberExpression, JsCallExpression};
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use serde::{Deserialize, Serialize};
@@ -97,6 +100,7 @@ declare_lint_rule! {
             RuleSource::Clippy("needless_for_each"),
         ],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -176,17 +180,17 @@ pub struct NoForEachOptions {
 impl DeserializableValidator for NoForEachOptions {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializationContext,
         _name: &str,
         range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         if self
             .allowed_identifiers
             .iter()
             .any(|identifier| identifier.is_empty() || identifier.contains('.'))
         {
-            diagnostics
-                .push(
+            ctx
+                .report(
                     DeserializationDiagnostic::new(markup!(
                         <Emphasis>"'allowedIdentifiers'"</Emphasis>" does not accept empty values or values with dots."
                     ))

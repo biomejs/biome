@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@/services": [
+        "services",
+        "vendor/services"
+      ]
+    }
+  },
+}

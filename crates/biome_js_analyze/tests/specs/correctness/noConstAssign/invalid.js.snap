@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 const a = 1;
 a = 2;
 
@@ -518,5 +519,3 @@ invalid.js:57:1 lint/correctness/noConstAssign  FIXABLE  ━━━━━━━�
   
 
 ```
-
-

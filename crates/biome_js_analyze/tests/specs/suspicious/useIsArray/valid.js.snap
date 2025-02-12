@@ -1,13 +1,12 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 Array.isArray(arr)
 arr instanceof Object
 a instanceof ns.Array
 a.x[2] instanceof foo()
 ```
-
-

@@ -11,14 +11,14 @@
 
 use std::{collections::HashMap, str::FromStr};
 
-use biome_diagnostics::{adapters::IniError, Error};
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
+use biome_diagnostics::{Error, IniError};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding};
 use serde::{Deserialize, Deserializer};
 
 use crate::{
     diagnostics::{EditorConfigDiagnostic, ParseFailedDiagnostic},
-    OverrideFormatterConfiguration, OverridePattern, Overrides, PartialConfiguration,
-    PartialFormatterConfiguration,
+    Configuration, FormatterConfiguration, OverrideFormatterConfiguration, OverridePattern,
+    Overrides,
 };
 
 pub fn parse_str(s: &str) -> Result<EditorConfig, EditorConfigDiagnostic> {
@@ -41,10 +41,10 @@ pub struct EditorConfig {
 }
 
 impl EditorConfig {
-    pub fn to_biome(mut self) -> (Option<PartialConfiguration>, Vec<EditorConfigDiagnostic>) {
+    pub fn to_biome(mut self) -> (Option<Configuration>, Vec<EditorConfigDiagnostic>) {
         let diagnostics = self.validate();
 
-        let mut config = PartialConfiguration {
+        let mut config = Configuration {
             formatter: self.options.remove("*").map(|o| o.to_biome()),
             ..Default::default()
         };
@@ -54,15 +54,19 @@ impl EditorConfig {
             .into_iter()
             .map(|(k, v)| {
                 let patterns = match expand_unknown_glob_patterns(&k) {
-                    Ok(patterns) => patterns.into_iter().map(hack_convert_double_star).collect(),
+                    Ok(patterns) => patterns
+                        .into_iter()
+                        .map(hack_convert_double_star)
+                        .map(String::into_boxed_str)
+                        .collect(),
                     Err(err) => {
                         errors.push(err);
-                        vec![k]
+                        vec![k.into_boxed_str()]
                     }
                 };
 
                 OverridePattern {
-                    include: Some(patterns.into_iter().collect()),
+                    include: Some(patterns),
                     formatter: Some(v.to_biome_override()),
                     ..Default::default()
                 }
@@ -89,20 +93,17 @@ pub struct EditorConfigOptions {
     indent_size: EditorconfigValue<IndentWidth>,
     #[serde(deserialize_with = "deserialize_optional_value_from_string")]
     end_of_line: EditorconfigValue<LineEnding>,
-    #[serde(deserialize_with = "deserialize_optional_value_from_string")]
-    max_line_length: EditorconfigValue<LineWidth>,
     // Not a biome option, but we need it to emit a diagnostic when this is set to false.
-    #[serde(deserialize_with = "deserialize_optional_bool_from_string")]
-    insert_final_newline: Option<bool>,
+    #[serde(deserialize_with = "deserialize_optional_value_from_string")]
+    insert_final_newline: EditorconfigValue<bool>,
 }
 
 impl EditorConfigOptions {
-    pub fn to_biome(self) -> PartialFormatterConfiguration {
-        PartialFormatterConfiguration {
+    pub fn to_biome(self) -> FormatterConfiguration {
+        FormatterConfiguration {
             indent_style: self.indent_style.into(),
             indent_width: self.indent_size.into(),
             line_ending: self.end_of_line.into(),
-            line_width: self.max_line_length.into(),
             ..Default::default()
         }
     }
@@ -112,7 +113,6 @@ impl EditorConfigOptions {
             indent_style: self.indent_style.into(),
             indent_width: self.indent_size.into(),
             line_ending: self.end_of_line.into(),
-            line_width: self.max_line_length.into(),
             ..Default::default()
         }
     }
@@ -120,7 +120,7 @@ impl EditorConfigOptions {
     fn validate(&self) -> Vec<EditorConfigDiagnostic> {
         let mut errors = vec![];
         // `insert_final_newline = false` results in formatting behavior that is incompatible with biome
-        if let Some(false) = self.insert_final_newline {
+        if let EditorconfigValue::Explicit(false) = self.insert_final_newline {
             errors.push(EditorConfigDiagnostic::incompatible(
                 "insert_final_newline",
                 "Biome always inserts a final newline. Set this option to true.",
@@ -167,13 +167,6 @@ where
     }
 }
 
-fn deserialize_optional_bool_from_string<'de, D>(deserializer: D) -> Result<Option<bool>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    deserialize_bool_from_string(deserializer).map(Some)
-}
-
 fn deserialize_optional_value_from_string<'de, D, T>(
     deserializer: D,
 ) -> Result<EditorconfigValue<T>, D::Error>
@@ -194,7 +187,7 @@ where
 /// Turn an unknown glob pattern into a list of known glob patterns. This is part of a hack to support all editorconfig patterns.
 ///
 /// TODO: remove in biome 2.0
-fn expand_unknown_glob_patterns(pattern: &str) -> Result<Vec<String>, EditorConfigDiagnostic> {
+fn expand_unknown_glob_patterns(pattern: &str) -> Result<Vec<Box<str>>, EditorConfigDiagnostic> {
     struct Variants {
         /// index of the { character
         start: usize,
@@ -300,24 +293,24 @@ fn expand_unknown_glob_patterns(pattern: &str) -> Result<Vec<String>, EditorConf
     }
 
     if all_variants.is_empty() {
-        return Ok(vec![pattern.to_string()]);
+        return Ok(vec![pattern.to_string().into_boxed_str()]);
     }
 
-    let mut expanded_patterns = vec![];
+    let mut expanded_patterns = Vec::new();
     for variants in all_variants.iter().rev() {
         if expanded_patterns.is_empty() {
             for variant in &variants.variants() {
                 let mut pattern = pattern.to_string();
                 pattern.replace_range(variants.start..=variants.end, variant);
-                expanded_patterns.push(pattern);
+                expanded_patterns.push(pattern.into_boxed_str());
             }
         } else {
-            let mut new_patterns = vec![];
+            let mut new_patterns = Vec::new();
             for existing in &expanded_patterns {
                 for variant in &variants.variants() {
-                    let mut pattern = existing.clone();
+                    let mut pattern = existing.to_string();
                     pattern.replace_range(variants.start..=variants.end, variant);
-                    new_patterns.push(pattern);
+                    new_patterns.push(pattern.into_boxed_str());
                 }
             }
             expanded_patterns = new_patterns;
@@ -328,9 +321,9 @@ fn expand_unknown_glob_patterns(pattern: &str) -> Result<Vec<String>, EditorConf
 }
 
 /// The EditorConfig spec allows for patterns like `**.yml`, which is not supported by biome. This function corrects such patterns so that they can be parsed by biome's glob parser.
-fn hack_convert_double_star(pattern: impl Into<String>) -> String {
+fn hack_convert_double_star(pattern: impl AsRef<str>) -> String {
     pattern
-        .into()
+        .as_ref()
         .split('/')
         .map(|component| {
             if component == "**" {
@@ -402,7 +395,6 @@ insert_final_newline = true
 end_of_line = crlf
 indent_style = space
 indent_size = 4
-max_line_length = 80
 "#;
 
         let conf = parse_str(input).expect("Failed to parse editorconfig");
@@ -412,7 +404,6 @@ max_line_length = 80
         assert_eq!(formatter.indent_style, Some(IndentStyle::Space));
         assert_eq!(formatter.indent_width.unwrap().value(), 4);
         assert_eq!(formatter.line_ending, Some(LineEnding::Crlf));
-        assert_eq!(formatter.line_width.map(|v| v.value()), Some(80));
     }
 
     #[test]
@@ -440,6 +431,7 @@ indent_style = unset
 indent_size = unset
 end_of_line = unset
 max_line_length = unset
+insert_final_newline = unset
 "#;
 
         let conf = parse_str(input).expect("Failed to parse editorconfig");
@@ -455,26 +447,6 @@ max_line_length = unset
             conf.options["*"].end_of_line,
             EditorconfigValue::Default
         ));
-        assert!(matches!(
-            conf.options["*"].max_line_length,
-            EditorconfigValue::Default
-        ));
-    }
-
-    #[test]
-    fn should_parse_editorconfig_with_max_line_length_off() {
-        let input = r#"
-root = true
-
-[*]
-max_line_length = off
-"#;
-
-        let conf = parse_str(input).expect("Failed to parse editorconfig");
-        assert!(matches!(
-            conf.options["*"].max_line_length,
-            EditorconfigValue::Default,
-        ));
     }
 
     #[test]
@@ -483,13 +455,13 @@ max_line_length = off
         let mut expanded =
             expand_unknown_glob_patterns(pattern).expect("Failed to expand glob pattern");
         expanded.sort();
-        assert_eq!(expanded, vec!["package.json"]);
+        assert_eq!(expanded, ["package.json".into()]);
 
         let pattern = "{package.json,.travis.yml}";
         let mut expanded =
             expand_unknown_glob_patterns(pattern).expect("Failed to expand glob pattern");
         expanded.sort();
-        assert_eq!(expanded, vec![".travis.yml", "package.json"]);
+        assert_eq!(expanded, [".travis.yml".into(), "package.json".into()]);
     }
 
     #[test]
@@ -500,11 +472,11 @@ max_line_length = off
         expanded.sort();
         assert_eq!(
             expanded,
-            vec![
-                "**/bar.spec.js",
-                "**/bar.test.js",
-                "**/foo.spec.js",
-                "**/foo.test.js",
+            [
+                "**/bar.spec.js".into(),
+                "**/bar.test.js".into(),
+                "**/foo.spec.js".into(),
+                "**/foo.test.js".into(),
             ]
         );
     }
@@ -517,7 +489,12 @@ max_line_length = off
         expanded.sort();
         assert_eq!(
             expanded,
-            vec!["**/bar.1.js", "**/bar.2.js", "**/bar.3.js", "**/bar.4.js",]
+            [
+                "**/bar.1.js".into(),
+                "**/bar.2.js".into(),
+                "**/bar.3.js".into(),
+                "**/bar.4.js".into()
+            ]
         );
     }
 

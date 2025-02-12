@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: checkHooksImportedFromReact.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function MyComponent1() {
   let a = 1;
   React.useEffect(() => {
@@ -53,5 +54,3 @@ checkHooksImportedFromReact.js:3:9 lint/correctness/useExhaustiveDependencies â”
   
 
 ```
-
-

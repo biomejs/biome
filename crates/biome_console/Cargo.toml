@@ -24,8 +24,10 @@ unicode-width        = { workspace = true }
 [dev-dependencies]
 trybuild = "1.0.103"
 
+
 [features]
-serde_markup = ["serde", "schemars"]
+schema = ["dep:schemars", "serde", "biome_text_size/schema"]
+serde  = ["dep:serde"]
 
 [lints]
 workspace = true

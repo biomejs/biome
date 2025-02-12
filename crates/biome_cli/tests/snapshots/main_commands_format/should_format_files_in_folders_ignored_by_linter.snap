@@ -1,17 +1,18 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `biome.json`
 
 ```json
 {
   "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
-  "organizeImports": {
+  "assist": {
     "enabled": true
   },
   "linter": {
-    "ignore": ["**/build"],
+    "includes": ["**", "!**/build"],
     "enabled": true,
     "rules": {
       "recommended": true

@@ -2,6 +2,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_aria_metadata::{is_valid_country, is_valid_language};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
 declare_lint_rule! {
@@ -34,6 +35,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("lang")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

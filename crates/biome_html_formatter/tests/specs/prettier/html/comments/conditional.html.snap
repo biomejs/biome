@@ -1,0 +1,416 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/comments/conditional.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html>
+  <body>
+
+    <!--[if IE 5]>This is IE 5<br><![endif]-->
+    <!--[if IE 6]>This is IE 6<br><![endif]-->
+    <!--[if IE 7]>This is IE 7<br><![endif]-->
+    <!--[if IE 8]>This is IE 8<br><![endif]-->
+    <!--[if IE 9]>This is IE 9<br><![endif]-->
+
+  </body>
+</html>
+
+<!DOCTYPE html>
+<!--[if lt IE 9]><html lang="zh-CN"><![endif]-->
+<html lang="zh-CN">
+  <head></head>
+  <body></body>
+</html>
+
+<!DOCTYPE html>
+<!--[if lt IE 9]><html lang="zh-CN"><div><![endif]-->
+<html lang="zh-CN">
+  <head></head>
+  <body></body>
+</html>
+
+<!DOCTYPE html>
+<!--[if lt IE 9]><html lang="zh-CN"><div></div><![endif]-->
+<html lang="zh-CN">
+  <head></head>
+  <body></body>
+</html>
+
+<body width="100%" align="center">
+  <center  >                                        
+    <!--[if (gte mso 9)|(IE)]><table cellpadding="0" cellspacing="0" border="0" width="600" align="center"><tr><td><![endif]-->
+    <div>  </div>
+    <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
+  </center  >
+</body>
+
+<!DOCTYPE html>
+<!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+<!--[if gte IE 9]><!--><html><!--<![endif]-->
+  <head></head>
+  <body></body>
+</html>
+
+<!DOCTYPE html>
+<!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+<!--[if gte IE 9]><!--><html hello><!--<![endif]-->
+  <head></head>
+  <body></body>
+</html>
+
+<!DOCTYPE html>
+<!--[if lt IE 9]><html class="legacy-ie"><head><![endif]-->
+<!--[if gte IE 9]><!--><html><head><!--<![endif]-->
+  </head>
+  <body></body>
+</html>
+
+<!DOCTYPE html>
+<!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+<!--[if gte IE 9
+]><!--><html><!--<![endif]-->
+  <head></head>
+  <body></body>
+</html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,29 +1,29 @@
+-<!doctype html>
++<!DOCTYPE html>
+ <html>
+   <body>
+-    <!--[if IE 5]>This is IE 5<br /><![endif]-->
+-    <!--[if IE 6]>This is IE 6<br /><![endif]-->
+-    <!--[if IE 7]>This is IE 7<br /><![endif]-->
+-    <!--[if IE 8]>This is IE 8<br /><![endif]-->
+-    <!--[if IE 9]>This is IE 9<br /><![endif]-->
++    <!--[if IE 5]>This is IE 5<br><![endif]-->
++    <!--[if IE 6]>This is IE 6<br><![endif]-->
++    <!--[if IE 7]>This is IE 7<br><![endif]-->
++    <!--[if IE 8]>This is IE 8<br><![endif]-->
++    <!--[if IE 9]>This is IE 9<br><![endif]-->
+   </body>
+ </html>
+ 
+-<!doctype html>
++<!DOCTYPE html>
+ <!--[if lt IE 9]><html lang="zh-CN"><![endif]-->
+ <html lang="zh-CN">
+   <head></head>
+   <body></body>
+ </html>
+ 
+-<!doctype html>
++<!DOCTYPE html>
+ <!--[if lt IE 9]><html lang="zh-CN"><div><![endif]-->
+ <html lang="zh-CN">
+   <head></head>
+   <body></body>
+ </html>
+ 
+-<!doctype html>
++<!DOCTYPE html>
+ <!--[if lt IE 9]><html lang="zh-CN"><div></div><![endif]-->
+ <html lang="zh-CN">
+   <head></head>
+@@ -31,40 +31,38 @@
+ </html>
+ 
+ <body width="100%" align="center">
+-  <center>
++  <center  >                                        
+     <!--[if (gte mso 9)|(IE)]><table cellpadding="0" cellspacing="0" border="0" width="600" align="center"><tr><td><![endif]-->
+-    <div></div>
++    <div>  </div>
+     <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
+-  </center>
++  </center  >
+ </body>
+ 
+-<!doctype html>
++<!DOCTYPE html>
+ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+ <!--[if gte IE 9]><!--><html><!--<![endif]-->
+   <head></head>
+   <body></body>
+ </html>
+ 
+-<!doctype html>
++<!DOCTYPE html>
+ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+ <!--[if gte IE 9]><!--><html hello><!--<![endif]-->
+   <head></head>
+   <body></body>
+ </html>
+ 
+-<!doctype html>
++<!DOCTYPE html>
+ <!--[if lt IE 9]><html class="legacy-ie"><head><![endif]-->
+-<!--[if gte IE 9]><!-->
+-<html>
+-  <head>
+-    <!--<![endif]-->
++<!--[if gte IE 9]><!--><html><head><!--<![endif]-->
+   </head>
+   <body></body>
+ </html>
+ 
+-<!doctype html>
++<!DOCTYPE html>
+ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+-<!--[if gte IE 9]><!--><html><!--<![endif]-->
++<!--[if gte IE 9
++]><!--><html><!--<![endif]-->
+   <head></head>
+   <body></body>
+ </html>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html>
+  <body>
+    <!--[if IE 5]>This is IE 5<br><![endif]-->
+    <!--[if IE 6]>This is IE 6<br><![endif]-->
+    <!--[if IE 7]>This is IE 7<br><![endif]-->
+    <!--[if IE 8]>This is IE 8<br><![endif]-->
+    <!--[if IE 9]>This is IE 9<br><![endif]-->
+  </body>
+</html>
+
+<!DOCTYPE html>
+<!--[if lt IE 9]><html lang="zh-CN"><![endif]-->
+<html lang="zh-CN">
+  <head></head>
+  <body></body>
+</html>
+
+<!DOCTYPE html>
+<!--[if lt IE 9]><html lang="zh-CN"><div><![endif]-->
+<html lang="zh-CN">
+  <head></head>
+  <body></body>
+</html>
+
+<!DOCTYPE html>
+<!--[if lt IE 9]><html lang="zh-CN"><div></div><![endif]-->
+<html lang="zh-CN">
+  <head></head>
+  <body></body>
+</html>
+
+<body width="100%" align="center">
+  <center  >                                        
+    <!--[if (gte mso 9)|(IE)]><table cellpadding="0" cellspacing="0" border="0" width="600" align="center"><tr><td><![endif]-->
+    <div>  </div>
+    <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
+  </center  >
+</body>
+
+<!DOCTYPE html>
+<!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+<!--[if gte IE 9]><!--><html><!--<![endif]-->
+  <head></head>
+  <body></body>
+</html>
+
+<!DOCTYPE html>
+<!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+<!--[if gte IE 9]><!--><html hello><!--<![endif]-->
+  <head></head>
+  <body></body>
+</html>
+
+<!DOCTYPE html>
+<!--[if lt IE 9]><html class="legacy-ie"><head><![endif]-->
+<!--[if gte IE 9]><!--><html><head><!--<![endif]-->
+  </head>
+  <body></body>
+</html>
+
+<!DOCTYPE html>
+<!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+<!--[if gte IE 9
+]><!--><html><!--<![endif]-->
+  <head></head>
+  <body></body>
+</html>
+```
+
+# Errors
+```
+conditional.html:14:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an element name but instead found '!'.
+  
+    12 │ </html>
+    13 │ 
+  > 14 │ <!DOCTYPE html>
+       │  ^
+    15 │ <!--[if lt IE 9]><html lang="zh-CN"><![endif]-->
+    16 │ <html lang="zh-CN">
+  
+  i Expected an element name here.
+  
+    12 │ </html>
+    13 │ 
+  > 14 │ <!DOCTYPE html>
+       │  ^
+    15 │ <!--[if lt IE 9]><html lang="zh-CN"><![endif]-->
+    16 │ <html lang="zh-CN">
+  
+conditional.html:21:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an element name but instead found '!'.
+  
+    19 │ </html>
+    20 │ 
+  > 21 │ <!DOCTYPE html>
+       │  ^
+    22 │ <!--[if lt IE 9]><html lang="zh-CN"><div><![endif]-->
+    23 │ <html lang="zh-CN">
+  
+  i Expected an element name here.
+  
+    19 │ </html>
+    20 │ 
+  > 21 │ <!DOCTYPE html>
+       │  ^
+    22 │ <!--[if lt IE 9]><html lang="zh-CN"><div><![endif]-->
+    23 │ <html lang="zh-CN">
+  
+conditional.html:28:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an element name but instead found '!'.
+  
+    26 │ </html>
+    27 │ 
+  > 28 │ <!DOCTYPE html>
+       │  ^
+    29 │ <!--[if lt IE 9]><html lang="zh-CN"><div></div><![endif]-->
+    30 │ <html lang="zh-CN">
+  
+  i Expected an element name here.
+  
+    26 │ </html>
+    27 │ 
+  > 28 │ <!DOCTYPE html>
+       │  ^
+    29 │ <!--[if lt IE 9]><html lang="zh-CN"><div></div><![endif]-->
+    30 │ <html lang="zh-CN">
+  
+conditional.html:43:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an element name but instead found '!'.
+  
+    41 │ </body>
+    42 │ 
+  > 43 │ <!DOCTYPE html>
+       │  ^
+    44 │ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+    45 │ <!--[if gte IE 9]><!--><html><!--<![endif]-->
+  
+  i Expected an element name here.
+  
+    41 │ </body>
+    42 │ 
+  > 43 │ <!DOCTYPE html>
+       │  ^
+    44 │ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+    45 │ <!--[if gte IE 9]><!--><html><!--<![endif]-->
+  
+conditional.html:50:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an element name but instead found '!'.
+  
+    48 │ </html>
+    49 │ 
+  > 50 │ <!DOCTYPE html>
+       │  ^
+    51 │ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+    52 │ <!--[if gte IE 9]><!--><html hello><!--<![endif]-->
+  
+  i Expected an element name here.
+  
+    48 │ </html>
+    49 │ 
+  > 50 │ <!DOCTYPE html>
+       │  ^
+    51 │ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+    52 │ <!--[if gte IE 9]><!--><html hello><!--<![endif]-->
+  
+conditional.html:57:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an element name but instead found '!'.
+  
+    55 │ </html>
+    56 │ 
+  > 57 │ <!DOCTYPE html>
+       │  ^
+    58 │ <!--[if lt IE 9]><html class="legacy-ie"><head><![endif]-->
+    59 │ <!--[if gte IE 9]><!--><html><head><!--<![endif]-->
+  
+  i Expected an element name here.
+  
+    55 │ </html>
+    56 │ 
+  > 57 │ <!DOCTYPE html>
+       │  ^
+    58 │ <!--[if lt IE 9]><html class="legacy-ie"><head><![endif]-->
+    59 │ <!--[if gte IE 9]><!--><html><head><!--<![endif]-->
+  
+conditional.html:64:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an element name but instead found '!'.
+  
+    62 │ </html>
+    63 │ 
+  > 64 │ <!DOCTYPE html>
+       │  ^
+    65 │ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+    66 │ <!--[if gte IE 9
+  
+  i Expected an element name here.
+  
+    62 │ </html>
+    63 │ 
+  > 64 │ <!DOCTYPE html>
+       │  ^
+    65 │ <!--[if lt IE 9]><html class="legacy-ie"><![endif]-->
+    66 │ <!--[if gte IE 9
+  
+conditional.html:71:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a closing tag but instead found the end of the file.
+  
+    69 │   <body></body>
+    70 │ </html>
+  > 71 │ 
+       │ 
+  
+  i Expected a closing tag here.
+  
+    69 │   <body></body>
+    70 │ </html>
+  > 71 │ 
+       │ 
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   35:     <!--[if (gte mso 9)|(IE)]><table cellpadding="0" cellspacing="0" border="0" width="600" align="center"><tr><td><![endif]-->
+```

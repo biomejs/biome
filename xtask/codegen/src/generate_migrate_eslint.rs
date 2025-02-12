@@ -19,7 +19,7 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
         let group_ident = format_ident!("{group_name}");
         let is_inspuired = rule_metadata
             .source_kind
-            .map_or(false, |source_kind| source_kind.is_inspired());
+            .is_some_and(|source_kind| source_kind.is_inspired());
         let check_inspired = if is_inspuired {
             quote! {
                 if !options.include_inspired {
@@ -44,8 +44,8 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
                 #check_inspired
                 #check_nursery
                 let group = rules.#group_ident.get_or_insert_with(Default::default);
-                let rule = group.#name_ident.get_or_insert(Default::default());
-                rule.set_level(rule_severity.into());
+                let rule = group.unwrap_group_as_mut().#name_ident.get_or_insert(Default::default());
+                rule.set_level(rule.level().max(rule_severity.into()));
             }
         });
     }

@@ -1,0 +1,72 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `package.json`
+
+```json
+{
+    "dependencies": {
+        "react": "^16.0.0"
+    }
+}
+
+```
+
+## `test.jsx`
+
+```jsx
+
+import { useCallback } from "react";
+
+function Component2() {
+    const [local,SetLocal] = useState(0);
+    const handle = useCallback(() => {
+      console.log(local);
+    }, [local, local]);
+}
+    
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+/test.jsx:6:20 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook specifies more dependencies than necessary: local
+  
+    4 │ function Component2() {
+    5 │     const [local,SetLocal] = useState(0);
+  > 6 │     const handle = useCallback(() => {
+      │                    ^^^^^^^^^^^
+    7 │       console.log(local);
+    8 │     }, [local, local]);
+  
+  i This dependency can be removed from the list.
+  
+     6 │     const handle = useCallback(() => {
+     7 │       console.log(local);
+   > 8 │     }, [local, local]);
+       │                ^^^^^
+     9 │ }
+    10 │     
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 1 error.
+```

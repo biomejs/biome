@@ -1,0 +1,280 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/tags/pre.html
+---
+# Input
+
+```html
+<pre>
+--------------------------------------------------------------------------------
+
+
+                                      *         *       *
+                                     **        **      ***
+                                     **        **       *
+   ****    ***  ****               ********  ********                   ***  ****
+  * ***  *  **** **** *    ***    ********  ********  ***        ***     **** **** *
+ *   ****    **   ****    * ***      **        **      ***      * ***     **   ****
+**    **     **          *   ***     **        **       **     *   ***    **
+**    **     **         **    ***    **        **       **    **    ***   **
+**    **     **         ********     **        **       **    ********    **
+**    **     **         *******      **        **       **    *******     **
+**    **     **         **           **        **       **    **          **
+*******      ***        ****    *    **        **       **    ****    *   ***
+******        ***        *******      **        **      *** *  *******     ***
+**                        *****                          ***    *****
+**
+**
+ **
+
+--------------------------------------------------------------------------------
+</pre>
+<pre>
+
+        Text in a pre element
+
+    is displayed in a fixed-width
+
+   font, and it preserves
+
+   both             spaces and
+
+   line breaks
+
+</pre>
+<pre>     Foo     Bar     </pre>
+<pre>
+     Foo     Bar
+</pre>
+<pre>Foo     Bar
+</pre>
+<pre>
+     Foo     Bar</pre>
+<figure role="img" aria-labelledby="cow-caption">
+  <pre>
+___________________________
+< I'm an expert in my field. >
+---------------------------
+     \   ^__^
+      \  (oo)\_______
+         (__)\       )\/\
+             ||----w |
+             ||     ||
+___________________________
+  </pre>
+  <figcaption id="cow-caption">
+    A cow saying, "I'm an expert in my field." The cow is illustrated using preformatted text characters.
+  </figcaption>
+</figure>
+<pre data-attr-1="foo" data-attr-2="foo" data-attr-3="foo" data-attr-4="foo" data-attr-5="foo" data-attr-6="foo">
+     Foo     Bar
+</pre>
+<div>
+  <div>
+    <div>
+      <div>
+        <pre>
+          ______
+          STRING
+          ______
+        </pre>
+      </div>
+    </div>
+  </div>
+</div>
+<pre></pre>
+
+<pre><code #foo></code></pre>
+
+<details>
+  <pre><!--Comments-->
+  </pre></details>
+
+<details><pre>
+  <!--Comments-->
+</pre>
+</details>
+
+<!-- #6028 -->
+<pre><br></pre>
+<PRE><HR></PRE>
+<pre><br/></pre>
+<PRE><HR/></PRE>
+<pre><br /></pre>
+<PRE><HR /></PRE>
+<pre><span></span></pre>
+<PRE><DIV></DIV></PRE>
+<pre><br/>long long long text long long long text long long long text long long long text <br></pre>
+<pre><br>long long long text long long long text long long long text long long long text <BR/></pre>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -39,10 +39,10 @@
+ <pre>
+      Foo     Bar
+ </pre>
+-<pre>
+-Foo     Bar
++<pre>Foo     Bar
+ </pre>
+-<pre>     Foo     Bar</pre>
++<pre>
++     Foo     Bar</pre>
+ <figure role="img" aria-labelledby="cow-caption">
+   <pre>
+ ___________________________
+@@ -100,12 +100,14 @@
+ 
+ <!-- #6028 -->
+ <pre><br></pre>
+-<pre><HR></pre>
++<PRE><HR></PRE>
+ <pre><br/></pre>
+-<pre><HR/></pre>
++<PRE><HR/></PRE>
+ <pre><br /></pre>
+-<pre><HR /></pre>
++<PRE><HR /></PRE>
+ <pre><span></span></pre>
+-<pre><DIV></DIV></pre>
+-<pre><br/>long long long text long long long text long long long text long long long text <br></pre>
+-<pre><br>long long long text long long long text long long long text long long long text <BR/></pre>
++<PRE><DIV></DIV></PRE>
++<pre
++><br/>long long long text long long long text long long long text long long long text <br></pre>
++<pre
++><br>long long long text long long long text long long long text long long long text <BR/></pre>
+```
+
+# Output
+
+```html
+<pre>
+--------------------------------------------------------------------------------
+
+
+                                      *         *       *
+                                     **        **      ***
+                                     **        **       *
+   ****    ***  ****               ********  ********                   ***  ****
+  * ***  *  **** **** *    ***    ********  ********  ***        ***     **** **** *
+ *   ****    **   ****    * ***      **        **      ***      * ***     **   ****
+**    **     **          *   ***     **        **       **     *   ***    **
+**    **     **         **    ***    **        **       **    **    ***   **
+**    **     **         ********     **        **       **    ********    **
+**    **     **         *******      **        **       **    *******     **
+**    **     **         **           **        **       **    **          **
+*******      ***        ****    *    **        **       **    ****    *   ***
+******        ***        *******      **        **      *** *  *******     ***
+**                        *****                          ***    *****
+**
+**
+ **
+
+--------------------------------------------------------------------------------
+</pre>
+<pre>
+
+        Text in a pre element
+
+    is displayed in a fixed-width
+
+   font, and it preserves
+
+   both             spaces and
+
+   line breaks
+
+</pre>
+<pre>     Foo     Bar     </pre>
+<pre>
+     Foo     Bar
+</pre>
+<pre>Foo     Bar
+</pre>
+<pre>
+     Foo     Bar</pre>
+<figure role="img" aria-labelledby="cow-caption">
+  <pre>
+___________________________
+< I'm an expert in my field. >
+---------------------------
+     \   ^__^
+      \  (oo)\_______
+         (__)\       )\/\
+             ||----w |
+             ||     ||
+___________________________
+  </pre>
+  <figcaption id="cow-caption">
+    A cow saying, "I'm an expert in my field." The cow is illustrated using
+    preformatted text characters.
+  </figcaption>
+</figure>
+<pre
+  data-attr-1="foo"
+  data-attr-2="foo"
+  data-attr-3="foo"
+  data-attr-4="foo"
+  data-attr-5="foo"
+  data-attr-6="foo"
+>
+     Foo     Bar
+</pre>
+<div>
+  <div>
+    <div>
+      <div>
+        <pre>
+          ______
+          STRING
+          ______
+        </pre>
+      </div>
+    </div>
+  </div>
+</div>
+<pre></pre>
+
+<pre><code #foo></code></pre>
+
+<details>
+  <pre><!--Comments-->
+  </pre>
+</details>
+
+<details>
+  <pre>
+  <!--Comments-->
+</pre>
+</details>
+
+<!-- #6028 -->
+<pre><br></pre>
+<PRE><HR></PRE>
+<pre><br/></pre>
+<PRE><HR/></PRE>
+<pre><br /></pre>
+<PRE><HR /></PRE>
+<pre><span></span></pre>
+<PRE><DIV></DIV></PRE>
+<pre
+><br/>long long long text long long long text long long long text long long long text <br></pre>
+<pre
+><br>long long long text long long long text long long long text long long long text <BR/></pre>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    8:    ****    ***  ****               ********  ********                   ***  ****
+    9:   * ***  *  **** **** *    ***    ********  ********  ***        ***     **** **** *
+   10:  *   ****    **   ****    * ***      **        **      ***      * ***     **   ****
+  111: ><br/>long long long text long long long text long long long text long long long text <br></pre>
+  113: ><br>long long long text long long long text long long long text long long long text <BR/></pre>
+```

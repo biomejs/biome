@@ -1,15 +1,15 @@
 use crate::react::hooks::{is_react_component, is_react_hook, is_react_hook_call};
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
-use biome_analyze::RuleSource;
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, AddVisitor, FromServices, MissingServicesDiagnostic,
     Phase, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey, ServiceBag, Visitor,
     VisitorContext, VisitorFinishContext,
 };
+use biome_analyze::{RuleDomain, RuleSource};
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
-    DeserializationVisitor, Text,
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
+    DeserializationDiagnostic, DeserializationVisitor, Text,
 };
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
@@ -24,6 +24,7 @@ use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
 
+use biome_diagnostics::Severity;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
@@ -69,7 +70,9 @@ declare_lint_rule! {
         name: "useHookAtTopLevel",
         language: "jsx",
         sources: &[RuleSource::EslintReactHooks("rules-of-hooks")],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Error,
+        domains: &[RuleDomain::React, RuleDomain::Next],
     }
 }
 
@@ -90,12 +93,15 @@ impl AnyJsFunctionOrMethod {
 
     fn name(&self) -> Option<String> {
         match self {
-            AnyJsFunctionOrMethod::AnyJsFunction(function) => {
-                function.binding().as_ref().map(AnyJsBinding::text)
-            }
-            AnyJsFunctionOrMethod::JsMethodObjectMember(method) => {
-                method.name().ok().as_ref().map(AnyJsObjectMemberName::text)
-            }
+            AnyJsFunctionOrMethod::AnyJsFunction(function) => function
+                .binding()
+                .as_ref()
+                .map(AnyJsBinding::to_trimmed_string),
+            AnyJsFunctionOrMethod::JsMethodObjectMember(method) => method
+                .name()
+                .ok()
+                .as_ref()
+                .map(AnyJsObjectMemberName::to_trimmed_string),
         }
     }
 }
@@ -291,7 +297,7 @@ impl Visitor for EarlyReturnDetectionVisitor {
 
                 if let Some(entry) = self.stack.last_mut() {
                     if JsReturnStatement::can_cast(node.kind()) {
-                        entry.early_return = Some(node.text_range());
+                        entry.early_return = Some(node.text_range_with_trivia());
                     } else if let Some(call) = JsCallExpression::cast_ref(node) {
                         if let Some(early_return) = entry.early_return {
                             self.early_returns.insert(call.clone(), early_return);
@@ -428,7 +434,7 @@ impl Rule for UseHookAtTopLevel {
         let mut calls = vec![root];
 
         while let Some(CallPath { call, path }) = calls.pop() {
-            let range = call.syntax().text_range();
+            let range = call.syntax().text_range_with_trivia();
 
             let mut path = path.clone();
             path.push(range);
@@ -558,11 +564,11 @@ pub struct DeprecatedHooksOptions {}
 
 impl Deserializable for DeprecatedHooksOptions {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(DeprecatedHooksOptionsVisitor, name, diagnostics)
+        value.deserialize(ctx, DeprecatedHooksOptionsVisitor, name)
     }
 }
 
@@ -575,19 +581,19 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
 
     fn visit_map(
         self,
+        ctx: &mut impl DeserializationContext,
         members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         _range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["hooks"];
         for (key, value) in members.flatten() {
-            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+            let Some(key_text) = Text::deserialize(ctx, &key, "") else {
                 continue;
             };
             match key_text.text() {
                 "hooks" => {
-                    diagnostics.push(
+                    ctx.report(
                         DeserializationDiagnostic::new_deprecated(
                             key_text.text(),
                             value.range()
@@ -597,7 +603,7 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
                         })
                     );
                 }
-                text => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                text => ctx.report(DeserializationDiagnostic::new_unknown_key(
                     text,
                     key.range(),
                     ALLOWED_KEYS,

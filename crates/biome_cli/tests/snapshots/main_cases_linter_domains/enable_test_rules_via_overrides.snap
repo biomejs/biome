@@ -1,0 +1,85 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "domains": {
+      "test": "none"
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["test1.js"],
+      "linter": {
+        "domains": {
+          "test": "all"
+        }
+      }
+    }
+  ]
+}
+```
+
+## `test1.js`
+
+```js
+describe.only("bar", () => {});
+
+```
+
+## `test2.js`
+
+```js
+
+describe("foo", () => {
+	beforeEach(() => {});
+    beforeEach(() => {});
+    test("bar", () => {
+        someFn();
+    });
+});
+    
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test1.js:1:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't focus the test.
+  
+  > 1 │ describe.only("bar", () => {});
+      │          ^^^^
+    2 │ 
+  
+  i The 'only' method is often used for debugging or during implementation. It should be removed before deploying to production.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    1 │ describe.only("bar",·()·=>·{});
+      │         -----                  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 1 error.
+```

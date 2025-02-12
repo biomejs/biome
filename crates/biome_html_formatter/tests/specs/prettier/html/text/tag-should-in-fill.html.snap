@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/text/tag-should-in-fill.html
+---
+# Input
+
+```html
+<a-long-long-long-element>foo bar foo bar
+  foo bar foo bar foo bar foo bar foo bar
+  foo bar foo bar</a-long-long-long-element>
+<!-- The end tag should stay in 80 print width -->
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,4 @@
+-<a-long-long-long-element
+-  >foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo
+-  bar</a-long-long-long-element
++<a -long-long-long-element
++  >foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar</a-long-long-long-element
+ >
+ <!-- The end tag should stay in 80 print width -->
+```
+
+# Output
+
+```html
+<a -long-long-long-element
+  >foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar</a-long-long-long-element
+>
+<!-- The end tag should stay in 80 print width -->
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2:   >foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar foo bar</a-long-long-long-element
+```

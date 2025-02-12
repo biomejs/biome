@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // Comment
 if (!true) { // a
 	consequent;
@@ -216,5 +217,3 @@ invalid.js:22:6 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
   
 
 ```
-
-

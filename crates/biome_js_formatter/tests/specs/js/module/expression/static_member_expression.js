@@ -14,7 +14,7 @@ something()[1]()[3]().items.item.what_else[3]().something().something().then().c
 
 
 some.member.with.
-	// rome-ignore format: Verify that formatting calls into right.format()
+	// biome-ignore format: Verify that formatting calls into right.format()
 	rather.hard.to.test.because.name.doesnt.format
 
 	. being.ignored;

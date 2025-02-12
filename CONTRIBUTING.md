@@ -3,39 +3,39 @@
 We can use help in a bunch of areas and any help is greatly appreciated!
 
 ## Table of Contents
-
 - [🚀 Contributing](#-contributing)
-  - [Table of Contents](#table-of-contents)
-  - [Asking questions, making proposals](#asking-questions-making-proposals)
-  - [Reporting bugs](#reporting-bugs)
-  - [Getting Started](#getting-started)
-  - [Install the required tools](#install-the-required-tools)
-  - [Testing](#testing)
-    - [Debugging](#debugging)
-  - [Debug binaries](#debug-binaries)
-  - [Production binaries](#production-binaries)
-  - [Checks](#checks)
-  - [Crates development](#crates-development)
-    - [Create new crates](#create-new-crates)
-    - [Analyzers and lint rules](#analyzers-and-lint-rules)
-    - [Parser](#parser)
-    - [Formatter](#formatter)
-  - [Crate dependencies](#crate-dependencies)
-  - [Node.js development](#nodejs-development)
-    - [Translations](#translations)
-  - [Commit messages](#commit-messages)
-  - [Creating pull requests](#creating-pull-requests)
-    - [Changelog](#changelog)
-      - [Writing a changelog line](#writing-a-changelog-line)
-    - [Documentation](#documentation)
-    - [Versioning](#versioning)
-  - [Releasing](#releasing)
-  - [Resources](#resources)
-  - [Current Members](#current-members)
-    - [Lead team](#lead-team)
-    - [Core Contributors team](#core-contributors-team)
-    - [Maintainers team](#maintainers-team)
-    - [Past Maintainers](#past-maintainers)
+  * [Asking questions, making proposals](#asking-questions-making-proposals)
+  * [Reporting bugs](#reporting-bugs)
+  * [Getting Started](#getting-started)
+  * [Install the required tools](#install-the-required-tools)
+  * [Testing](#testing)
+    + [Debugging](#debugging)
+  * [Debug binaries](#debug-binaries)
+  * [Production binaries](#production-binaries)
+  * [Checks](#checks)
+  * [Crates development](#crates-development)
+    + [Create new crates](#create-new-crates)
+    + [Analyzers and lint rules](#analyzers-and-lint-rules)
+    + [Parser](#parser)
+    + [Formatter](#formatter)
+  * [Crate dependencies](#crate-dependencies)
+  * [Node.js development](#nodejs-development)
+    + [Translations](#translations)
+  * [Commit messages](#commit-messages)
+  * [Creating pull requests](#creating-pull-requests)
+    + [Changelog](#changelog)
+      - [Choose the correct packages](#choose-the-correct-packages)
+      - [Choose the correct type of change](#choose-the-correct-type-of-change)
+      - [Writing a changeset](#writing-a-changeset)
+    + [Documentation](#documentation)
+    + [Versioning](#versioning)
+  * [Releasing](#releasing)
+  * [Resources](#resources)
+  * [Current Members](#current-members)
+    + [Lead team](#lead-team)
+    + [Core Contributors team](#core-contributors-team)
+    + [Maintainers team](#maintainers-team)
+    + [Past Maintainers](#past-maintainers)
 
 ## Asking questions, making proposals
 
@@ -97,6 +97,8 @@ This command will install:
 - `cargo-insta`, a `cargo` extension to manage snapshot testing inside the repository.
 - `taplo-cli`, a small tool for formatting TOML files.
 - `wasm-pack` and `wasm-tools` for managing the WASM build of Biome.
+
+You'll also need to have `pnpm` installed on your machine, and run `pnpm install` from the root of the repository. `pnpm` is needed to [create changesets](#create-a-changeset)
 
 And you're good to go hack with Biome and Rust! 🚀
 
@@ -249,7 +251,7 @@ things you would need to run and check:
 - `just f` (alias for `just format`), formats Rust and TOML files.
 - `just l` (alias for `just lint`), run the linter for the whole project.
 - Code generation. The code generation of the repository is spread in the different parts of the code base. Sometimes is needed and sometime it isn't:
-  - run `just gen-lint` when you're working on the **linter**;
+  - run `just gen-analyzer` when you're working on the **linter**;
   - run `just gen-bindings` in case you worked around the **workspace**.
 
 > [!NOTE]
@@ -262,11 +264,10 @@ things you would need to run and check:
 If you happen to create a new _crate_ inside the workspace, use the command `just new-crate`, e.g.:
 
 ```shell
-just new-crate biome_new_crate
+cargo new crates/biome_new_crate --lib
 ```
 
-Where `biome_new_crate` is going to be the name of the new crate. This script takes care of adding the correct template for the `Cargo.toml` file, and it adds the crate
-to the `knope.toml` file, which we use for changelog generation.
+Where `biome_new_crate` is going to be the name of the new crate. The `--lib` option tells `cargo` to create the crate as library, so you will probably see a `src/lib.rs` file.
 
 ### Analyzers and lint rules
 
@@ -348,62 +349,55 @@ Please use the template provided.
 
 ### Changelog
 
-If the PR you're about to open is a bugfix/feature visible to Biome users, you CAN add a new bullet point to [CHANGELOG.md](./CHANGELOG.md). Although **not required**, we appreciate the effort.
+This repository uses [changesets](https://github.com/changesets/changesets) to automate the releases of Biome's binaries, the JavaScript libraries and the creation of the `CHANGELOG.md` for each library.
 
-At the top of the file you will see a `Unreleased` section.
-The headings divide the sections by "scope"; you should be able to identify the scope that belongs to your change. If the change belongs to multiple scopes, you can copy the same sentence under those scopes.
+#### Create a changeset
 
-Here's a sample of the headings:
+If the PR you're about to open is a bugfix/feature visible to users of the Biome toolchain or of the published Biome crates, you are encouraged to provide a **changeset** . To *create* a changeset, use the following command (*don't create it manually*):
+
+```shell
+just new-changeset
+```
+> [!NOTE]
+> The script uses `pnpm` under the hoods, so make sure to have ran `pnpm i` from the root of the repository before running this script.
+
+The command will present a prompt where you need to choose the libraries involved by the PR, the type of change (`major`, `minor` or `patch`) for each library, and a description of the change. The description will be used as name of the file.
+
+The command will create the changeset(s) in the `.changeset` folder. You're free to open the file, and add more information in it.
+
+#### Choose the correct packages
+
+In the vast majority of cases, you want to choose the `@biomejs/biome` package, which represents the main package.
+
+The frontmatter of the changeset will look like this:
 
 ```markdown
-## Unreleased
+---
+"@biomejs/biome": patch
+---
 
-### Analyzer
-
-### CLI
-
-### Configuration
-
-### Editors
-
-### Formatter
-
-### JavaScript APIs
-
-### Linter
-
-### Parser
+Description here...
 ```
 
-When you edit a blank section:
+#### Choose the correct type of change
 
-- If your PR adds a **breaking change**, create a new heading called `#### BREAKING CHANGES` and add
-  bullet point that explains the breaking changes; provide a migration path if possible.
-  Read [how we version Biome](https://biomejs.dev/internals/versioning/) to determine if your change is breaking. A breaking change results in a major release.
-- If your PR adds a new feature, enhances an existing feature, or fixes a bug, create a new heading called `#### New features`, `#### Enhancements`, or `#### Bug fixes`. Ultimately, add a bullet point that explains the change.
+We are very strict about `major` changes in the `@biomejs/biome` package. To better understand type of your change *for this package*, please refer to our [versioning page](https://biomejs.dev/internals/versioning/). Generally:
+- `patch`: any sort of change that fixes a bug.
+- `minor`: new features available to the users.
+- `major`: a change that breaks a user API.
 
-Make sure that the created subsections are ordered in the following order:
+#### Writing a changeset
 
-```md
-#### BREAKING CHANGES
-
-#### New features
-
-#### Enhancements
-
-#### Bug fixes
-```
-
-#### Writing a changelog line
+The description of the changeset should follow the these guidelines:
 
 - Use the present tense, e.g. "Add new feature", "Fix edge case".
 - If you fix a bug, please add the link to the issue, e.g. "Fix edge case [#4444]()".
-- You can add a mention `@user` for every contributor of the change.
 - Whenever applicable, add a code block to show your new changes. For example, for a new
   rule you might want to show an invalid case, for the formatter you might want to show
   how the new formatting changes, and so on.
+- End each sentence with fullstops.
 
-If in doubt, take a look to existing changelog lines.
+If in doubt, take a look at existing or past changesets.
 
 ### Documentation
 
@@ -425,20 +419,13 @@ When releasing a new version of a Biome, follow these steps:
    You can filter [merged PRs that don't update the changelog](https://github.com/biomejs/biome/pulls?q=is%3Apr+is%3Amerged+-label%3AA-Changelog).
    Read our [guidelines for editing the changelog](#changelog).
 
-1. [ ] Based on the [changelog](./CHANGELOG.md), determine which version number to use.
-   See our [versioning guide](https://biomejs.dev/internals/versioning/) for more details.
-
-1. [ ] Rename `Unreleased` to `<version> (iso-date)` in the [changelog](./CHANGELOG.md).
-
-1. [ ] Update `version` in [Biome's `package.json`](./packages/@biomejs/biome/package.json) if applicable.
-
-1. [ ] **Update to the same `version` in all crates** if you publish crates. (`Cargo.toml` and `crates/**/Cargo.toml`)
+1. [ ] **Update to the same `version` in all crates** if you publish crates if applicable. (`Cargo.toml` and `crates/**/Cargo.toml`)
 
 1. [ ] Linter rules have a `version` metadata directly defined in their implementation.
    This field is set to `next` for newly created rules.
    This field must be updated to the new version.
 
-1. [ ] Once the PR is merged, the CI will trigger the `Release: *` workflows. Once these workflows finish compiling the final artefact, **they need to be approved manually**.
+1. [ ] Merge the PR `ci: release`, and the release workflow will run. Once these workflows finish compiling the final artefact, **they need to be approved manually** by a member of the **Core Contributors**.
 
 1. [ ] Open a new PR in the [website repository](https://github.com/biomejs/website) to update the website with the new version number:
    `BIOME_VERSION=<version> pnpm run codegen:all`.

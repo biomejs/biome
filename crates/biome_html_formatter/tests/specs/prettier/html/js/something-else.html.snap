@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/js/something-else.html
+---
+# Input
+
+```html
+<script type="text/template">
+ <div>
+    </div>
+</script>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ <script type="text/template">
+-  <div>
+-     </div>
++ <div>
++    </div>
+ </script>
+```
+
+# Output
+
+```html
+<script type="text/template">
+ <div>
+    </div>
+</script>
+```

@@ -45,7 +45,7 @@ impl VariableLocations {
 /// the variable contents.
 pub(crate) struct VarRegistry<'a>(VarRegistryVector<'a>);
 
-impl<'a> VarRegistry<'a> {
+impl VarRegistry<'_> {
     pub(crate) fn from_locations(locations: &VariableLocations) -> Self {
         let vector = locations
             .0

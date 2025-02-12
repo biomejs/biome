@@ -1,0 +1,14 @@
+{
+  "files": {
+    // Comment
+    "include": ["./src", "*.js"],
+    // Comment
+    "ignore": ["tests", "*.test.js"],
+  },
+  "formatter": {
+    // Comment
+    "include": ["src/**/*.js"],
+    // Comment
+    "ignore": ["*.gen.js"],
+  },
+}

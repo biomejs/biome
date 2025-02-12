@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 describe.skip("test", () => {});
 it.skip("test", () => {});
 test.skip("test", () => {});
@@ -11,5 +12,3 @@ xdescribe("test", () => {});
 xit("test", () => {})
 
 ```
-
-

@@ -54,4 +54,7 @@
   <img aria-labelledby="id1" />
   <img aria-hidden />
   <img aria-hidden={true} />
+  <img alt="alt tag" src="" {...(flag && { referrerPolicy: 'no-referrer' })}></img>
+  <img src="test" alt="this is a cool image" {...restProps}></img>
+  <img alt={alt || ""} {...props} />
 </>;

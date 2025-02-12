@@ -413,8 +413,8 @@ mod tests {
     #[test]
     fn test_text_equality() {
         fn do_check(t1: &[&str], t2: &[&str]) {
-            let t1 = build_tree(t1).text();
-            let t2 = build_tree(t2).text();
+            let t1 = build_tree(t1).text_with_trivia();
+            let t2 = build_tree(t2).text_with_trivia();
             let expected = t1.to_string() == t2.to_string();
             let actual = t1 == t2;
             assert_eq!(expected, actual, "`{t1}` (SyntaxText) `{t2}` (SyntaxText)");
@@ -442,7 +442,7 @@ mod tests {
     #[test]
     fn test_chars() {
         fn check(t1: &[&str], expected: &str) {
-            let t1 = build_tree(t1).text();
+            let t1 = build_tree(t1).text_with_trivia();
             let actual = t1.chars().collect::<String>();
 
             assert_eq!(

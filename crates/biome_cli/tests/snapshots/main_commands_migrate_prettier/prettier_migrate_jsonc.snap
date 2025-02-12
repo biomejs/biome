@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `biome.jsonc`
 
@@ -25,31 +25,33 @@ biome.jsonc migrate ━━━━━━━━━━━━━━━━━━━━
        1 │ + {
        2 │ + → "formatter":·{
        3 │ + → → "enabled":·true,
-       4 │ + → → "useEditorconfig":·true,
-       5 │ + → → "formatWithErrors":·false,
-       6 │ + → → "indentStyle":·"space",
-       7 │ + → → "indentWidth":·2,
-       8 │ + → → "lineEnding":·"lf",
-       9 │ + → → "lineWidth":·80,
-      10 │ + → → "attributePosition":·"auto",
-      11 │ + → → "bracketSpacing":·true
-      12 │ + → },
-      13 │ + → "linter":·{·"enabled":·true·},
-      14 │ + → "javascript":·{
-      15 │ + → → "formatter":·{
-      16 │ + → → → "jsxQuoteStyle":·"double",
-      17 │ + → → → "quoteProperties":·"asNeeded",
-      18 │ + → → → "trailingCommas":·"all",
-      19 │ + → → → "semicolons":·"always",
-      20 │ + → → → "arrowParentheses":·"always",
-      21 │ + → → → "bracketSameLine":·false,
-      22 │ + → → → "quoteStyle":·"single",
-      23 │ + → → → "attributePosition":·"auto",
-      24 │ + → → → "bracketSpacing":·true
-      25 │ + → → }
-      26 │ + → }
-      27 │ + }
-      28 │ + 
+       4 │ + → → "formatWithErrors":·false,
+       5 │ + → → "indentStyle":·"space",
+       6 │ + → → "indentWidth":·2,
+       7 │ + → → "lineEnding":·"lf",
+       8 │ + → → "lineWidth":·80,
+       9 │ + → → "attributePosition":·"auto",
+      10 │ + → → "bracketSameLine":·false,
+      11 │ + → → "bracketSpacing":·true,
+      12 │ + → → "useEditorconfig":·true
+      13 │ + → },
+      14 │ + → "linter":·{·"enabled":·true·},
+      15 │ + → "javascript":·{
+      16 │ + → → "formatter":·{
+      17 │ + → → → "jsxQuoteStyle":·"double",
+      18 │ + → → → "quoteProperties":·"asNeeded",
+      19 │ + → → → "trailingCommas":·"all",
+      20 │ + → → → "semicolons":·"always",
+      21 │ + → → → "arrowParentheses":·"always",
+      22 │ + → → → "bracketSameLine":·false,
+      23 │ + → → → "quoteStyle":·"single",
+      24 │ + → → → "attributePosition":·"auto",
+      25 │ + → → → "bracketSpacing":·true,
+      26 │ + → → → "objectWrap":·"preserve"
+      27 │ + → → }
+      28 │ + → }
+      29 │ + }
+      30 │ + 
   
 
 ```

@@ -2,9 +2,8 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 const UNFORMATTED: &str = r#"type Query {
             me: User
@@ -26,13 +25,13 @@ fn format_graphql_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.graphql");
+    let file_path = Utf8Path::new("file.graphql");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("format"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -53,20 +52,13 @@ fn format_and_write_graphql_files() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.graphql");
+    let file_path = Utf8Path::new("file.graphql");
     fs.insert(file_path.into(), UNFORMATTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("format"),
-                "--write",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -87,17 +79,17 @@ fn lint_single_rule() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("file.graphql");
+    let file_path = Utf8Path::new("file.graphql");
     fs.insert(file_path.into(), MISSING_REASON.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=nursery/useDeprecatedReason",
-                file_path.as_os_str().to_str().unwrap(),
+                file_path.as_str(),
             ]
             .as_slice(),
         ),

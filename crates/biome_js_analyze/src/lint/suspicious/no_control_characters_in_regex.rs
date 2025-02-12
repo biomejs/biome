@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     static_value::StaticValue, AnyJsExpression, JsCallArguments, JsCallExpression, JsNewExpression,
     JsRegexLiteralExpression,
@@ -65,6 +66,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-control-regex")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

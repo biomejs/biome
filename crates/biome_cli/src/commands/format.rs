@@ -1,29 +1,28 @@
 use crate::cli_options::CliOptions;
 use crate::commands::{get_files_to_process_with_cli_options, CommandRunner, LoadEditorConfig};
-use crate::diagnostics::DeprecatedArgument;
 use crate::{CliDiagnostic, Execution, TraversalMode};
-use biome_configuration::vcs::PartialVcsConfiguration;
-use biome_configuration::{
-    PartialConfiguration, PartialCssFormatter, PartialFilesConfiguration,
-    PartialFormatterConfiguration, PartialGraphqlFormatter, PartialJavascriptFormatter,
-    PartialJsonFormatter,
-};
-use biome_console::{markup, Console, ConsoleExt};
+use biome_configuration::css::CssFormatterConfiguration;
+use biome_configuration::graphql::GraphqlFormatterConfiguration;
+use biome_configuration::javascript::JsFormatterConfiguration;
+use biome_configuration::json::JsonFormatterConfiguration;
+use biome_configuration::vcs::VcsConfiguration;
+use biome_configuration::{Configuration, FilesConfiguration, FormatterConfiguration};
+use biome_console::Console;
 use biome_deserialize::Merge;
-use biome_diagnostics::PrintDiagnostic;
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
-use biome_service::{DynRef, Workspace, WorkspaceError};
+use biome_service::projects::ProjectKey;
+use biome_service::{Workspace, WorkspaceError};
 use std::ffi::OsString;
 
 pub(crate) struct FormatCommandPayload {
-    pub(crate) javascript_formatter: Option<PartialJavascriptFormatter>,
-    pub(crate) json_formatter: Option<PartialJsonFormatter>,
-    pub(crate) css_formatter: Option<PartialCssFormatter>,
-    pub(crate) graphql_formatter: Option<PartialGraphqlFormatter>,
-    pub(crate) formatter_configuration: Option<PartialFormatterConfiguration>,
-    pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
-    pub(crate) files_configuration: Option<PartialFilesConfiguration>,
+    pub(crate) javascript_formatter: Option<JsFormatterConfiguration>,
+    pub(crate) json_formatter: Option<JsonFormatterConfiguration>,
+    pub(crate) css_formatter: Option<CssFormatterConfiguration>,
+    pub(crate) graphql_formatter: Option<GraphqlFormatterConfiguration>,
+    pub(crate) formatter_configuration: Option<FormatterConfiguration>,
+    pub(crate) vcs_configuration: Option<VcsConfiguration>,
+    pub(crate) files_configuration: Option<FilesConfiguration>,
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) write: bool,
     pub(crate) fix: bool,
@@ -34,11 +33,11 @@ pub(crate) struct FormatCommandPayload {
 }
 
 impl LoadEditorConfig for FormatCommandPayload {
-    fn should_load_editor_config(&self, fs_configuration: &PartialConfiguration) -> bool {
+    fn should_load_editor_config(&self, fs_configuration: &Configuration) -> bool {
         self.formatter_configuration
             .as_ref()
-            .and_then(|c| c.use_editorconfig)
-            .unwrap_or(fs_configuration.use_editorconfig().unwrap_or_default())
+            .is_some_and(|c| c.use_editorconfig_resolved())
+            || fs_configuration.use_editorconfig()
     }
 }
 
@@ -48,9 +47,9 @@ impl CommandRunner for FormatCommandPayload {
     fn merge_configuration(
         &mut self,
         loaded_configuration: LoadedConfiguration,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         console: &mut dyn Console,
-    ) -> Result<PartialConfiguration, WorkspaceError> {
+    ) -> Result<Configuration, WorkspaceError> {
         let LoadedConfiguration {
             configuration: biome_configuration,
             directory_path: configuration_path,
@@ -63,77 +62,18 @@ impl CommandRunner for FormatCommandPayload {
         fs_configuration.merge_with(biome_configuration);
         let mut configuration = fs_configuration;
 
-        // TODO: remove in biome 2.0
-        if let Some(config) = self.formatter_configuration.as_mut() {
-            if let Some(indent_size) = config.indent_size {
-                let diagnostic = DeprecatedArgument::new(markup! {
-                    "The argument "<Emphasis>"--indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--indent-width"</Emphasis>" instead."
-                });
-                console.error(markup! {
-                    {PrintDiagnostic::simple(&diagnostic)}
-                });
-
-                if config.indent_width.is_none() {
-                    config.indent_width = Some(indent_size);
-                }
-            }
-        }
-        // TODO: remove in biome 2.0
-        if let Some(js_formatter) = self.javascript_formatter.as_mut() {
-            if let Some(indent_size) = js_formatter.indent_size {
-                let diagnostic = DeprecatedArgument::new(markup! {
-                    "The argument "<Emphasis>"--javascript-formatter-indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--javascript-formatter-indent-width"</Emphasis>" instead."
-                });
-                console.error(markup! {
-                    {PrintDiagnostic::simple(&diagnostic)}
-                });
-
-                if js_formatter.indent_width.is_none() {
-                    js_formatter.indent_width = Some(indent_size);
-                }
-            }
-
-            if let Some(trailing_comma) = js_formatter.trailing_comma {
-                let diagnostic = DeprecatedArgument::new(markup! {
-                    "The argument "<Emphasis>"--trailing-comma"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--trailing-commas"</Emphasis>" instead."
-                });
-                console.error(markup! {
-                    {PrintDiagnostic::simple(&diagnostic)}
-                });
-
-                if js_formatter.trailing_commas.is_none() {
-                    js_formatter.trailing_commas = Some(trailing_comma);
-                }
-            }
-        }
-        // TODO: remove in biome 2.0
-        if let Some(json_formatter) = self.json_formatter.as_mut() {
-            if let Some(indent_size) = json_formatter.indent_size {
-                let diagnostic = DeprecatedArgument::new(markup! {
-                    "The argument "<Emphasis>"--json-formatter-indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--json-formatter-indent-width"</Emphasis>" instead."
-                });
-                console.error(markup! {
-                    {PrintDiagnostic::simple(&diagnostic)}
-                });
-
-                if json_formatter.indent_width.is_none() {
-                    json_formatter.indent_width = Some(indent_size);
-                }
-            }
-        }
-
         // merge formatter options
-        if !configuration
+        if configuration
             .formatter
             .as_ref()
-            .is_some_and(PartialFormatterConfiguration::is_disabled)
+            .is_none_or(|f| f.is_enabled())
         {
             let formatter = configuration.formatter.get_or_insert_with(Default::default);
             if let Some(formatter_configuration) = self.formatter_configuration.clone() {
                 formatter.merge_with(formatter_configuration);
             }
 
-            formatter.enabled = Some(true);
+            formatter.enabled = Some(true.into());
         }
         if self.css_formatter.is_some() {
             let css = configuration.css.get_or_insert_with(Default::default);
@@ -167,8 +107,8 @@ impl CommandRunner for FormatCommandPayload {
 
     fn get_files_to_process(
         &self,
-        fs: &DynRef<'_, dyn FileSystem>,
-        configuration: &PartialConfiguration,
+        fs: &dyn FileSystem,
+        configuration: &Configuration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
         let paths = get_files_to_process_with_cli_options(
             self.since.as_deref(),
@@ -195,8 +135,10 @@ impl CommandRunner for FormatCommandPayload {
         cli_options: &CliOptions,
         console: &mut dyn Console,
         _workspace: &dyn Workspace,
+        project_key: ProjectKey,
     ) -> Result<Execution, CliDiagnostic> {
         Ok(Execution::new(TraversalMode::Format {
+            project_key,
             ignore_errors: cli_options.skip_errors,
             write: self.should_write(),
             stdin: self.get_stdin(console)?,

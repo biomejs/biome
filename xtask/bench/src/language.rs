@@ -1,6 +1,9 @@
 use crate::test_case::TestCase;
 use biome_analyze::options::JsxRuntime;
-use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategoriesBuilder};
+use biome_analyze::{
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+    RuleCategoriesBuilder,
+};
 use biome_css_formatter::context::{CssFormatContext, CssFormatOptions};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
@@ -24,7 +27,7 @@ pub enum Parse<'a> {
     Graphql(&'a str),
 }
 
-impl<'a> Parse<'a> {
+impl Parse<'_> {
     pub fn try_from_case(case: &TestCase) -> Option<Parse> {
         match JsFileSource::try_from(case.path()) {
             Ok(source_type) => Some(Parse::JavaScript(source_type, case.code())),
@@ -187,14 +190,16 @@ impl Analyze {
                         .build(),
                     ..AnalysisFilter::default()
                 };
-                let mut options = AnalyzerOptions::default();
-                options.configuration.jsx_runtime = Some(JsxRuntime::default());
+                let options = AnalyzerOptions::default().with_configuration(
+                    AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::default()),
+                );
+
                 biome_js_analyze::analyze(
                     root,
                     filter,
                     &options,
-                    JsFileSource::default(),
-                    None,
+                    Vec::new(),
+                    Default::default(),
                     |event| {
                         black_box(event.diagnostic());
                         black_box(event.actions());
@@ -211,7 +216,7 @@ impl Analyze {
                     ..AnalysisFilter::default()
                 };
                 let options = AnalyzerOptions::default();
-                biome_css_analyze::analyze(root, filter, &options, |event| {
+                biome_css_analyze::analyze(root, filter, &options, Vec::new(), |event| {
                     black_box(event.diagnostic());
                     black_box(event.actions());
                     ControlFlow::<Never>::Continue(())

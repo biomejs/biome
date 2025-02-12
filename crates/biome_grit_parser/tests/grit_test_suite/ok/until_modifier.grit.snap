@@ -41,7 +41,7 @@ GritRoot {
                                     value_token: GRIT_BACKTICK_SNIPPET@54..63 "`secret`" [] [Whitespace(" ")],
                                 },
                             },
-                            until_clause: GritPatternContainsUntilClause {
+                            until_clause: GritPatternUntilClause {
                                 until_token: UNTIL_KW@63..69 "until" [] [Whitespace(" ")],
                                 until: GritCodeSnippet {
                                     source: GritBacktickSnippetLiteral {
@@ -86,7 +86,7 @@ GritRoot {
               1: GRIT_CODE_SNIPPET@54..63
                 0: GRIT_BACKTICK_SNIPPET_LITERAL@54..63
                   0: GRIT_BACKTICK_SNIPPET@54..63 "`secret`" [] [Whitespace(" ")]
-              2: GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE@63..84
+              2: GRIT_PATTERN_UNTIL_CLAUSE@63..84
                 0: UNTIL_KW@63..69 "until" [] [Whitespace(" ")]
                 1: GRIT_CODE_SNIPPET@69..84
                   0: GRIT_BACKTICK_SNIPPET_LITERAL@69..84

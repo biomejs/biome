@@ -1,33 +1,35 @@
 //! Implementation of the [FileSystem] and related traits for the underlying OS filesystem
-use super::{BoxedTraversal, ErrorKind, File, FileSystemDiagnostic};
+use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind, PathKind};
 use crate::fs::OpenOptions;
 use crate::{
     fs::{TraversalContext, TraversalScope},
-    BiomePath, FileSystem,
+    BiomePath, FileSystem, MemoryFileSystem,
 };
-use biome_diagnostics::{adapters::IoError, DiagnosticExt, Error, Severity};
-use oxc_resolver::{Resolution, ResolveError, ResolveOptions, Resolver};
+use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
+use camino::{Utf8DirEntry, Utf8Path, Utf8PathBuf};
+use oxc_resolver::{FsResolution, ResolveError, ResolveOptions, Resolver};
 use rayon::{scope, Scope};
-use std::fs::{DirEntry, FileType};
+use std::env::temp_dir;
+use std::fs::FileType;
 use std::panic::AssertUnwindSafe;
 use std::process::Command;
 use std::{
     env, fs,
     io::{self, ErrorKind as IoErrorKind, Read, Seek, Write},
     mem,
-    path::{Path, PathBuf},
 };
+use tracing::instrument;
 
 const MAX_SYMLINK_DEPTH: u8 = 3;
 
 /// Implementation of [FileSystem] that directly calls through to the underlying OS
 pub struct OsFileSystem {
-    pub working_directory: Option<PathBuf>,
+    pub working_directory: Option<Utf8PathBuf>,
     pub configuration_resolver: AssertUnwindSafe<Resolver>,
 }
 
 impl OsFileSystem {
-    pub fn new(working_directory: PathBuf) -> Self {
+    pub fn new(working_directory: Utf8PathBuf) -> Self {
         Self {
             working_directory: Some(working_directory),
             configuration_resolver: AssertUnwindSafe(Resolver::new(ResolveOptions {
@@ -41,8 +43,11 @@ impl OsFileSystem {
 
 impl Default for OsFileSystem {
     fn default() -> Self {
+        let working_directory = env::current_dir()
+            .map(|p| Utf8PathBuf::from_path_buf(p).expect("To be a UTF-8 path"))
+            .ok();
         Self {
-            working_directory: env::current_dir().ok(),
+            working_directory,
             configuration_resolver: AssertUnwindSafe(Resolver::new(ResolveOptions {
                 condition_names: vec!["node".to_string(), "import".to_string()],
                 extensions: vec![".json".to_string(), ".jsonc".to_string()],
@@ -53,7 +58,11 @@ impl Default for OsFileSystem {
 }
 
 impl FileSystem for OsFileSystem {
-    fn open_with_options(&self, path: &Path, options: OpenOptions) -> io::Result<Box<dyn File>> {
+    fn open_with_options(
+        &self,
+        path: &Utf8Path,
+        options: OpenOptions,
+    ) -> io::Result<Box<dyn File>> {
         tracing::debug_span!("OsFileSystem::open_with_options", path = ?path, options = ?options)
             .in_scope(move || -> io::Result<Box<dyn File>> {
                 let mut fs_options = fs::File::options();
@@ -70,31 +79,61 @@ impl FileSystem for OsFileSystem {
         })
     }
 
-    fn working_directory(&self) -> Option<PathBuf> {
+    fn working_directory(&self) -> Option<Utf8PathBuf> {
         self.working_directory.clone()
     }
 
-    fn path_exists(&self, path: &Path) -> bool {
+    fn path_exists(&self, path: &Utf8Path) -> bool {
         path.exists()
     }
 
-    fn path_is_file(&self, path: &Path) -> bool {
+    fn path_is_file(&self, path: &Utf8Path) -> bool {
         path.is_file()
     }
 
-    fn path_is_dir(&self, path: &Path) -> bool {
+    fn path_is_dir(&self, path: &Utf8Path) -> bool {
         path.is_dir()
     }
 
-    fn path_is_symlink(&self, path: &Path) -> bool {
+    fn path_is_symlink(&self, path: &Utf8Path) -> bool {
         path.is_symlink()
+    }
+
+    fn path_kind(&self, path: &Utf8Path) -> Result<PathKind, FileSystemDiagnostic> {
+        match path.metadata() {
+            Ok(metadata) => {
+                let is_symlink = metadata.is_symlink();
+                if metadata.is_file() {
+                    Ok(PathKind::File { is_symlink })
+                } else if metadata.is_dir() {
+                    Ok(PathKind::Directory { is_symlink })
+                } else {
+                    Err(FileSystemDiagnostic {
+                        path: path.to_string(),
+                        severity: Severity::Error,
+                        error_kind: FsErrorKind::UnknownFileType,
+                        source: None,
+                    })
+                }
+            }
+            Err(error) => Err(FileSystemDiagnostic {
+                path: path.to_string(),
+                severity: Severity::Error,
+                error_kind: FsErrorKind::CantReadFile,
+                source: Some(Error::from(IoError::from(error))),
+            }),
+        }
+    }
+
+    fn read_link(&self, path: &Utf8Path) -> io::Result<Utf8PathBuf> {
+        path.read_link_utf8()
     }
 
     fn resolve_configuration(
         &self,
         specifier: &str,
-        path: &Path,
-    ) -> Result<Resolution, ResolveError> {
+        path: &Utf8Path,
+    ) -> Result<FsResolution, ResolveError> {
         self.configuration_resolver.resolve(path, specifier)
     }
 
@@ -139,34 +178,33 @@ impl FileSystem for OsFileSystem {
     }
 }
 
+#[derive(Debug)]
 struct OsFile {
     inner: fs::File,
     version: i32,
 }
 
 impl File for OsFile {
+    #[instrument(level = "debug")]
     fn read_to_string(&mut self, buffer: &mut String) -> io::Result<()> {
-        tracing::debug_span!("OsFile::read_to_string").in_scope(move || {
-            // Reset the cursor to the starting position
-            self.inner.rewind()?;
-            // Read the file content
-            self.inner.read_to_string(buffer)?;
-            Ok(())
-        })
+        // Reset the cursor to the starting position
+        self.inner.rewind()?;
+        // Read the file content
+        self.inner.read_to_string(buffer)?;
+        Ok(())
     }
 
+    #[instrument(level = "debug")]
     fn set_content(&mut self, content: &[u8]) -> io::Result<()> {
-        tracing::trace_span!("OsFile::set_content").in_scope(move || {
-            // Truncate the file
-            self.inner.set_len(0)?;
-            // Reset the cursor to the starting position
-            self.inner.rewind()?;
-            // Write the byte slice
-            self.inner.write_all(content)?;
-            // new version stored
-            self.version += 1;
-            Ok(())
-        })
+        // Truncate the file
+        self.inner.set_len(0)?;
+        // Reset the cursor to the starting position
+        self.inner.rewind()?;
+        // Write the byte slice
+        self.inner.write_all(content)?;
+        // new version stored
+        self.version += 1;
+        Ok(())
     }
 
     fn file_version(&self) -> i32 {
@@ -196,20 +234,18 @@ impl<'scope> OsTraversalScope<'scope> {
 }
 
 impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
-    fn evaluate(&self, ctx: &'scope dyn TraversalContext, path: PathBuf) {
+    fn evaluate(&self, ctx: &'scope dyn TraversalContext, path: Utf8PathBuf) {
         let file_type = match path.metadata() {
             Ok(meta) => meta.file_type(),
             Err(err) => {
-                ctx.push_diagnostic(
-                    IoError::from(err).with_file_path(path.to_string_lossy().to_string()),
-                );
+                ctx.push_diagnostic(IoError::from(err).with_file_path(path.to_string()));
                 return;
             }
         };
         handle_any_file(&self.scope, ctx, path, file_type, None);
     }
 
-    fn handle(&self, context: &'scope dyn TraversalContext, path: PathBuf) {
+    fn handle(&self, context: &'scope dyn TraversalContext, path: Utf8PathBuf) {
         self.scope.spawn(move |_| {
             context.handle_path(BiomePath::new(path));
         });
@@ -219,25 +255,25 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
 // TODO: remove in Biome 2.0, and directly use `.gitignore`
 /// Default list of ignored directories, in the future will be supplanted by
 /// detecting and parsing .ignore files
-const DEFAULT_IGNORE: &[&[u8]] = &[b".git", b".svn", b".hg", b".yarn", b"node_modules"];
+const DEFAULT_IGNORE: &[&str] = &[".git", ".svn", ".hg", ".yarn", "node_modules"];
 
 /// Traverse a single directory
 fn handle_dir<'scope>(
     scope: &Scope<'scope>,
     ctx: &'scope dyn TraversalContext,
-    path: &Path,
+    path: &Utf8Path,
     // The unresolved origin path in case the directory is behind a symbolic link
-    origin_path: Option<PathBuf>,
+    origin_path: Option<Utf8PathBuf>,
 ) {
     if let Some(file_name) = path.file_name() {
-        if DEFAULT_IGNORE.contains(&file_name.as_encoded_bytes()) {
+        if DEFAULT_IGNORE.contains(&file_name) {
             return;
         }
     }
-    let iter = match fs::read_dir(path) {
+    let iter = match path.read_dir_utf8() {
         Ok(iter) => iter,
         Err(err) => {
-            ctx.push_diagnostic(IoError::from(err).with_file_path(path.display().to_string()));
+            ctx.push_diagnostic(IoError::from(err).with_file_path(path.to_string()));
             return;
         }
     };
@@ -246,7 +282,7 @@ fn handle_dir<'scope>(
         match entry {
             Ok(entry) => handle_dir_entry(scope, ctx, entry, origin_path.clone()),
             Err(err) => {
-                ctx.push_diagnostic(IoError::from(err).with_file_path(path.display().to_string()));
+                ctx.push_diagnostic(IoError::from(err).with_file_path(path.to_string()));
             }
         }
     }
@@ -257,30 +293,28 @@ fn handle_dir<'scope>(
 fn handle_dir_entry<'scope>(
     scope: &Scope<'scope>,
     ctx: &'scope dyn TraversalContext,
-    entry: DirEntry,
+    entry: Utf8DirEntry,
     // The unresolved origin path in case the directory is behind a symbolic link
-    origin_path: Option<PathBuf>,
+    origin_path: Option<Utf8PathBuf>,
 ) {
     let path = entry.path();
     let file_type = match entry.file_type() {
         Ok(file_type) => file_type,
         Err(err) => {
-            ctx.push_diagnostic(
-                IoError::from(err).with_file_path(path.to_string_lossy().to_string()),
-            );
+            ctx.push_diagnostic(IoError::from(err).with_file_path(path.to_string()));
             return;
         }
     };
-    handle_any_file(scope, ctx, path, file_type, origin_path);
+    handle_any_file(scope, ctx, path.to_path_buf(), file_type, origin_path);
 }
 
 fn handle_any_file<'scope>(
     scope: &Scope<'scope>,
     ctx: &'scope dyn TraversalContext,
-    mut path: PathBuf,
+    mut path: Utf8PathBuf,
     mut file_type: FileType,
     // The unresolved origin path in case the directory is behind a symbolic link
-    mut origin_path: Option<PathBuf>,
+    mut origin_path: Option<Utf8PathBuf>,
 ) {
     if !ctx.interner().intern_path(path.clone()) {
         // If the path was already inserted, it could have been pointed at by
@@ -323,9 +357,10 @@ fn handle_any_file<'scope>(
             BiomePath::new(new_origin_path)
         } else {
             ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
-                path: path.to_string_lossy().to_string(),
-                error_kind: ErrorKind::UnknownFileType,
+                path: path.to_string(),
+                error_kind: FsErrorKind::UnknownFileType,
                 severity: Severity::Warning,
+                source: None,
             }));
             return;
         }
@@ -357,9 +392,10 @@ fn handle_any_file<'scope>(
     }
 
     ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
-        path: path.to_string_lossy().to_string(),
-        error_kind: ErrorKind::from(file_type),
+        path: path.to_string(),
+        error_kind: FsErrorKind::from(file_type),
         severity: Severity::Warning,
+        source: None,
     }));
 }
 
@@ -377,18 +413,19 @@ struct SymlinkExpansionError;
 /// Returns a tuple where the first argument is the target path being pointed to
 /// and the second argument is the target file type.
 fn expand_symbolic_link(
-    mut path: PathBuf,
+    mut path: Utf8PathBuf,
     ctx: &dyn TraversalContext,
-) -> Result<(PathBuf, FileType), SymlinkExpansionError> {
+) -> Result<(Utf8PathBuf, FileType), SymlinkExpansionError> {
     let mut symlink_depth = 0;
     loop {
         symlink_depth += 1;
         if symlink_depth > MAX_SYMLINK_DEPTH {
-            let path = path.to_string_lossy().to_string();
+            let path = path.to_string();
             ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
                 path: path.clone(),
-                error_kind: ErrorKind::DeeplyNestedSymlinkExpansion(path),
+                error_kind: FsErrorKind::DeeplyNestedSymlinkExpansion,
                 severity: Severity::Warning,
+                source: None,
             }));
             return Err(SymlinkExpansionError);
         }
@@ -405,13 +442,13 @@ fn expand_symbolic_link(
 }
 
 fn follow_symlink(
-    path: &Path,
+    path: &Utf8Path,
     ctx: &dyn TraversalContext,
-) -> Result<(PathBuf, FileType), SymlinkExpansionError> {
+) -> Result<(Utf8PathBuf, FileType), SymlinkExpansionError> {
     tracing::info!("Translating symlink: {path:?}");
 
-    let target_path = fs::read_link(path).map_err(|err| {
-        ctx.push_diagnostic(IoError::from(err).with_file_path(path.to_string_lossy().to_string()));
+    let target_path = path.read_link_utf8().map_err(|err| {
+        ctx.push_diagnostic(IoError::from(err).with_file_path(path.to_string()));
         SymlinkExpansionError
     })?;
 
@@ -425,16 +462,15 @@ fn follow_symlink(
         Ok(meta) => meta.file_type(),
         Err(err) => {
             if err.kind() == IoErrorKind::NotFound {
-                let path = path.to_string_lossy().to_string();
+                let path = path.to_string();
                 ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
                     path: path.clone(),
-                    error_kind: ErrorKind::DereferencedSymlink(path),
+                    error_kind: FsErrorKind::DereferencedSymlink,
                     severity: Severity::Warning,
+                    source: Some(Error::from(IoError::from(err))),
                 }));
             } else {
-                ctx.push_diagnostic(
-                    IoError::from(err).with_file_path(path.to_string_lossy().to_string()),
-                );
+                ctx.push_diagnostic(IoError::from(err).with_file_path(path.to_string()));
             }
             return Err(SymlinkExpansionError);
         }
@@ -443,8 +479,67 @@ fn follow_symlink(
     Ok((target_path, target_file_type))
 }
 
-impl From<FileType> for ErrorKind {
+impl From<FileType> for FsErrorKind {
     fn from(_: FileType) -> Self {
         Self::UnknownFileType
+    }
+}
+
+/// Testing utility that creates a working directory inside the
+/// temporary OS folder.
+pub struct TemporaryFs {
+    /// The current working directory. It's the OS temporary folder joined with a file
+    /// name passed in the [TemporaryFs::new] function
+    working_directory: Utf8PathBuf,
+    files: Vec<(Utf8PathBuf, String)>,
+}
+
+impl TemporaryFs {
+    /// Creates a temporary directory named using `directory_name`
+    pub fn new(directory_name: &str) -> Self {
+        let path = temp_dir().join(directory_name);
+        if path.exists() {
+            fs::remove_dir_all(path.as_path()).unwrap();
+        }
+        fs::create_dir(&path).unwrap();
+        Self {
+            working_directory: Utf8PathBuf::from_path_buf(path).unwrap(),
+            files: Vec::new(),
+        }
+    }
+
+    /// Creates a file under the working directory
+    pub fn create_file(&mut self, name: &str, content: &str) {
+        let path = self.working_directory.join(name);
+        std::fs::write(path.as_std_path(), content)
+            .expect("Temporary directory to exist and being writable");
+        self.files.push((path, content.to_string()));
+    }
+
+    /// Returns the path to use when running the CLI
+    pub fn cli_path(&self) -> &str {
+        self.working_directory.as_str()
+    }
+
+    /// Returns an instance of [OsFileSystem] given the current working directory
+    pub fn create_os(&self) -> OsFileSystem {
+        OsFileSystem::new(self.working_directory.clone())
+    }
+
+    /// Returns an instance of [MemoryFileSystem]. The files saved in the file system
+    /// will be stripped of the working directory path, making snapshots predictable.
+    pub fn create_mem(&self) -> MemoryFileSystem {
+        let mut fs = MemoryFileSystem::default();
+        for (path, content) in self.files.iter() {
+            fs.insert(
+                path.clone()
+                    .strip_prefix(self.working_directory.as_str())
+                    .expect("Working directory")
+                    .to_path_buf(),
+                content.as_bytes(),
+            );
+        }
+
+        fs
     }
 }

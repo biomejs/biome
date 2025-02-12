@@ -75,7 +75,7 @@ impl AnyJsImportClause {
         })
     }
 
-    /// Assertion of this import clause.
+    /// Attribute of this import clause.
     ///
     /// ```
     /// use biome_js_factory::make;
@@ -88,7 +88,7 @@ impl AnyJsImportClause {
     ///
     /// assert_eq!(clause.source().unwrap().as_js_module_source().unwrap().inner_string_text().unwrap().text(), "react");
     /// ```
-    pub fn assertion(&self) -> Option<JsImportAssertion> {
+    pub fn attribute(&self) -> Option<JsImportAssertion> {
         match self {
             Self::JsImportBareClause(clause) => clause.assertion(),
             Self::JsImportDefaultClause(clause) => clause.assertion(),

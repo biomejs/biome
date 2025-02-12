@@ -56,9 +56,6 @@ const x = a + ("b") + c;
 
 //a
 /*b*/ foo /*c*/ + /*d*/ 'baz' /*e*/ + /*f*/ 1 //g
-+ //h
-bar //i
-
 
 // parentheses and type coercion
 

@@ -1,0 +1,77 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/basics/void-elements-2.html
+---
+# Input
+
+```html
+<video controls width="250">
+    <source src="/media/examples/flower.webm"
+            type="video/webm">
+    <source src="/media/examples/flower.mp4"
+            type="video/mp4"
+></video>text after
+
+<!-- #8626 -->
+<object data="horse.wav"><param name="autoplay" value="true"
+><param name="autoplay" value="true"
+></object>1
+
+<span><img  src="1.png"
+><img src="1.png"
+></span>1
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,12 +1,17 @@
+ <video controls width="250">
+   <source src="/media/examples/flower.webm" type="video/webm" />
+-  <source src="/media/examples/flower.mp4" type="video/mp4" /></video
+->text after
++  <source src="/media/examples/flower.mp4" type="video/mp4" />
++</video>
++text after
+ 
+ <!-- #8626 -->
+ <object data="horse.wav">
+   <param name="autoplay" value="true" />
+-  <param name="autoplay" value="true" /></object
+->1
++  <param name="autoplay" value="true" />
++</object>
++1
+ 
+-<span><img src="1.png" /><img src="1.png" /></span>1
++<span
++  ><img src="1.png" />
++  <img src="1.png" /></span
++>1
+```
+
+# Output
+
+```html
+<video controls width="250">
+  <source src="/media/examples/flower.webm" type="video/webm" />
+  <source src="/media/examples/flower.mp4" type="video/mp4" />
+</video>
+text after
+
+<!-- #8626 -->
+<object data="horse.wav">
+  <param name="autoplay" value="true" />
+  <param name="autoplay" value="true" />
+</object>
+1
+
+<span
+  ><img src="1.png" />
+  <img src="1.png" /></span
+>1
+```

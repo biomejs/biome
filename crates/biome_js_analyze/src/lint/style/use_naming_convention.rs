@@ -13,7 +13,9 @@ use biome_analyze::{
     RuleSourceKind,
 };
 use biome_console::markup;
-use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
+use biome_deserialize::{
+    DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
+};
 use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
@@ -305,7 +307,7 @@ declare_lint_rule! {
     ///       // ...
     ///       "overrides": [
     ///         {
-    ///           "include": ["typings/*.d.ts"],
+    ///           "includes": ["typings/*.d.ts"],
     ///           "linter": {
     ///             "rules": {
     ///               "style": {
@@ -336,7 +338,7 @@ declare_lint_rule! {
     /// {
     ///     "options": {
     ///         "strictCase": false,
-    ///         "requireAscii": true,
+    ///         "requireAscii": false,
     ///         "enumMemberCase": "CONSTANT_CASE",
     ///         "conventions": [
     ///             {
@@ -398,9 +400,7 @@ declare_lint_rule! {
     /// When `requireAscii` is set to `false`, names may include non-ASCII characters.
     /// For example, `café` and `안녕하세요` would be considered valid then.
     ///
-    /// **Default:** `false`
-    ///
-    /// **This option will be turned on by default in Biome 2.0.**
+    /// **Default:** `true`
     ///
     /// ### enumMemberCase
     ///
@@ -895,7 +895,16 @@ impl Rule for UseNamingConvention {
             // This assertion hold because only identifiers are renamable.
             debug_assert!(name_token.kind() != JsSyntaxKind::JS_STRING_LITERAL);
             let name = name_token.text_trimmed();
-            let preferred_case = expected_cases.into_iter().next()?;
+            let is_name_capitalized = name.chars().next().is_some_and(|c| c.is_uppercase());
+            let preferred_case = if is_name_capitalized {
+                // Try to preserve the capitalization by preferring cases starting with a capital letter
+                expected_cases
+                    .into_iter()
+                    .find(|&case| Cases::from(case).contains(Case::NumberableCapital))
+                    .unwrap_or(expected_cases.into_iter().next()?)
+            } else {
+                expected_cases.into_iter().next()?
+            };
             let new_name_part =
                 preferred_case.convert(&name[(name_range.start as _)..(name_range.end as _)]);
             let mut new_name =
@@ -1018,7 +1027,7 @@ pub struct NamingConventionOptions {
     pub strict_case: bool,
 
     /// If `false`, then non-ASCII characters are allowed.
-    #[serde(default, skip_serializing_if = "is_default")]
+    #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
     pub require_ascii: bool,
 
     /// Custom conventions.
@@ -1033,7 +1042,7 @@ impl Default for NamingConventionOptions {
     fn default() -> Self {
         Self {
             strict_case: true,
-            require_ascii: false,
+            require_ascii: true,
             conventions: Vec::new().into_boxed_slice(),
             enum_member_case: Format::default(),
         }
@@ -1070,12 +1079,12 @@ pub struct Convention {
 impl DeserializableValidator for Convention {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializationContext,
         _name: &str,
         range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> bool {
         if self.formats.is_empty() && self.matching.is_none() {
-            diagnostics.push(
+            ctx.report(
                 DeserializationDiagnostic::new(
                     "At least one field among `format` and `match` must be set.",
                 )
@@ -1208,13 +1217,12 @@ impl Selector {
 impl DeserializableValidator for Selector {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializationContext,
         _name: &str,
         range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> bool {
         if let Err(error) = self.check() {
-            diagnostics
-                .push(DeserializationDiagnostic::new(format_args!("{error}")).with_range(range));
+            ctx.report(DeserializationDiagnostic::new(format_args!("{error}")).with_range(range));
             return false;
         }
         true

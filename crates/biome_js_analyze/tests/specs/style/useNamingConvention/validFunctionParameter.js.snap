@@ -1,8 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validFunctionParameter.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function f(a, PascalCase, specialParameter, _unused, $1, stream$, _, $, __doubledUnderscore, __) {}
 ```

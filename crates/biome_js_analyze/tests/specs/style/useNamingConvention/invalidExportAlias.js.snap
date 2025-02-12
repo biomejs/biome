@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidExportAlias.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export { X as XxXX }
 
 export { Y as snake_case  }

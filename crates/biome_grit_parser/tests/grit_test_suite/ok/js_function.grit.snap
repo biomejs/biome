@@ -1,0 +1,239 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+language js
+
+// define a javascript function
+function simple_js($string) js {
+    return "this is code";
+}
+
+// a native function now
+function native_gritql($string) {
+    return `code here`
+}
+
+// another javascript function, with nested braces
+function nested_js($string) js {
+	while (1 < 0) {
+		console.log("hello")
+	}
+	return "hello world";
+}
+
+// a javascript function with a line comment
+function line_comment_js($string) js {
+	// this is a line comment where we do {
+	while (1 < 0) {
+		console.log("hello")
+	}
+	return "hello world";
+}
+
+
+`console.log("hello")` => `console.log("world")`
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: GritLanguageDeclaration {
+        language_token: LANGUAGE_KW@0..9 "language" [] [Whitespace(" ")],
+        name: GritLanguageName {
+            language_kind: JS_KW@9..11 "js" [] [],
+        },
+        flavor: missing (optional),
+        semicolon_token: missing (optional),
+    },
+    definitions: GritDefinitionList [
+        GritJavascriptFunctionDefinition {
+            function_token: FUNCTION_KW@11..54 "function" [Newline("\n"), Newline("\n"), Comments("// define a javascrip ..."), Newline("\n")] [Whitespace(" ")],
+            name: GritName {
+                value_token: GRIT_NAME@54..63 "simple_js" [] [],
+            },
+            l_paren_token: L_PAREN@63..64 "(" [] [],
+            args: GritVariableList [
+                GritVariable {
+                    value_token: GRIT_VARIABLE@64..71 "$string" [] [],
+                },
+            ],
+            r_paren_token: R_PAREN@71..73 ")" [] [Whitespace(" ")],
+            js_token: JS_KW@73..76 "js" [] [Whitespace(" ")],
+            grit_javascript_body_wrapper: GritJavascriptBodyWrapper {
+                value_token: GRIT_JAVASCRIPT_BODY@76..106 "{\n    return \"this is code\";\n}" [] [],
+            },
+        },
+        missing separator,
+        GritFunctionDefinition {
+            function_token: FUNCTION_KW@106..142 "function" [Newline("\n"), Newline("\n"), Comments("// a native function now"), Newline("\n")] [Whitespace(" ")],
+            name: GritName {
+                value_token: GRIT_NAME@142..155 "native_gritql" [] [],
+            },
+            l_paren_token: L_PAREN@155..156 "(" [] [],
+            args: GritVariableList [
+                GritVariable {
+                    value_token: GRIT_VARIABLE@156..163 "$string" [] [],
+                },
+            ],
+            r_paren_token: R_PAREN@163..165 ")" [] [Whitespace(" ")],
+            body: GritPredicateCurly {
+                l_curly_token: L_CURLY@165..166 "{" [] [],
+                predicates: GritPredicateList [
+                    GritPredicateReturn {
+                        return_token: RETURN_KW@166..178 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        pattern: GritCodeSnippet {
+                            source: GritBacktickSnippetLiteral {
+                                value_token: GRIT_BACKTICK_SNIPPET@178..189 "`code here`" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@189..191 "}" [Newline("\n")] [],
+            },
+        },
+        missing separator,
+        GritJavascriptFunctionDefinition {
+            function_token: FUNCTION_KW@191..253 "function" [Newline("\n"), Newline("\n"), Comments("// another javascript ..."), Newline("\n")] [Whitespace(" ")],
+            name: GritName {
+                value_token: GRIT_NAME@253..262 "nested_js" [] [],
+            },
+            l_paren_token: L_PAREN@262..263 "(" [] [],
+            args: GritVariableList [
+                GritVariable {
+                    value_token: GRIT_VARIABLE@263..270 "$string" [] [],
+                },
+            ],
+            r_paren_token: R_PAREN@270..272 ")" [] [Whitespace(" ")],
+            js_token: JS_KW@272..275 "js" [] [Whitespace(" ")],
+            grit_javascript_body_wrapper: GritJavascriptBodyWrapper {
+                value_token: GRIT_JAVASCRIPT_BODY@275..344 "{\n\twhile (1 < 0) {\n\t\tconsole.log(\"hello\")\n\t}\n\treturn \"hello world\";\n}" [] [],
+            },
+        },
+        missing separator,
+        GritJavascriptFunctionDefinition {
+            function_token: FUNCTION_KW@344..400 "function" [Newline("\n"), Newline("\n"), Comments("// a javascript funct ..."), Newline("\n")] [Whitespace(" ")],
+            name: GritName {
+                value_token: GRIT_NAME@400..415 "line_comment_js" [] [],
+            },
+            l_paren_token: L_PAREN@415..416 "(" [] [],
+            args: GritVariableList [
+                GritVariable {
+                    value_token: GRIT_VARIABLE@416..423 "$string" [] [],
+                },
+            ],
+            r_paren_token: R_PAREN@423..425 ")" [] [Whitespace(" ")],
+            js_token: JS_KW@425..428 "js" [] [Whitespace(" ")],
+            grit_javascript_body_wrapper: GritJavascriptBodyWrapper {
+                value_token: GRIT_JAVASCRIPT_BODY@428..538 "{\n\t// this is a line comment where we do {\n\twhile (1 < 0) {\n\t\tconsole.log(\"hello\")\n\t}\n\treturn \"hello world\";\n}" [] [],
+            },
+        },
+        missing separator,
+        GritRewrite {
+            left: GritCodeSnippet {
+                source: GritBacktickSnippetLiteral {
+                    value_token: GRIT_BACKTICK_SNIPPET@538..564 "`console.log(\"hello\")`" [Newline("\n"), Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                },
+            },
+            annotation: missing (optional),
+            fat_arrow_token: FAT_ARROW@564..567 "=>" [] [Whitespace(" ")],
+            right: GritCodeSnippet {
+                source: GritBacktickSnippetLiteral {
+                    value_token: GRIT_BACKTICK_SNIPPET@567..589 "`console.log(\"world\")`" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@589..590 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..590
+  0: (empty)
+  1: (empty)
+  2: GRIT_LANGUAGE_DECLARATION@0..11
+    0: LANGUAGE_KW@0..9 "language" [] [Whitespace(" ")]
+    1: GRIT_LANGUAGE_NAME@9..11
+      0: JS_KW@9..11 "js" [] []
+    2: (empty)
+    3: (empty)
+  3: GRIT_DEFINITION_LIST@11..589
+    0: GRIT_JAVASCRIPT_FUNCTION_DEFINITION@11..106
+      0: FUNCTION_KW@11..54 "function" [Newline("\n"), Newline("\n"), Comments("// define a javascrip ..."), Newline("\n")] [Whitespace(" ")]
+      1: GRIT_NAME@54..63
+        0: GRIT_NAME@54..63 "simple_js" [] []
+      2: L_PAREN@63..64 "(" [] []
+      3: GRIT_VARIABLE_LIST@64..71
+        0: GRIT_VARIABLE@64..71
+          0: GRIT_VARIABLE@64..71 "$string" [] []
+      4: R_PAREN@71..73 ")" [] [Whitespace(" ")]
+      5: JS_KW@73..76 "js" [] [Whitespace(" ")]
+      6: GRIT_JAVASCRIPT_BODY_WRAPPER@76..106
+        0: GRIT_JAVASCRIPT_BODY@76..106 "{\n    return \"this is code\";\n}" [] []
+    1: (empty)
+    2: GRIT_FUNCTION_DEFINITION@106..191
+      0: FUNCTION_KW@106..142 "function" [Newline("\n"), Newline("\n"), Comments("// a native function now"), Newline("\n")] [Whitespace(" ")]
+      1: GRIT_NAME@142..155
+        0: GRIT_NAME@142..155 "native_gritql" [] []
+      2: L_PAREN@155..156 "(" [] []
+      3: GRIT_VARIABLE_LIST@156..163
+        0: GRIT_VARIABLE@156..163
+          0: GRIT_VARIABLE@156..163 "$string" [] []
+      4: R_PAREN@163..165 ")" [] [Whitespace(" ")]
+      5: GRIT_PREDICATE_CURLY@165..191
+        0: L_CURLY@165..166 "{" [] []
+        1: GRIT_PREDICATE_LIST@166..189
+          0: GRIT_PREDICATE_RETURN@166..189
+            0: RETURN_KW@166..178 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: GRIT_CODE_SNIPPET@178..189
+              0: GRIT_BACKTICK_SNIPPET_LITERAL@178..189
+                0: GRIT_BACKTICK_SNIPPET@178..189 "`code here`" [] []
+        2: R_CURLY@189..191 "}" [Newline("\n")] []
+    3: (empty)
+    4: GRIT_JAVASCRIPT_FUNCTION_DEFINITION@191..344
+      0: FUNCTION_KW@191..253 "function" [Newline("\n"), Newline("\n"), Comments("// another javascript ..."), Newline("\n")] [Whitespace(" ")]
+      1: GRIT_NAME@253..262
+        0: GRIT_NAME@253..262 "nested_js" [] []
+      2: L_PAREN@262..263 "(" [] []
+      3: GRIT_VARIABLE_LIST@263..270
+        0: GRIT_VARIABLE@263..270
+          0: GRIT_VARIABLE@263..270 "$string" [] []
+      4: R_PAREN@270..272 ")" [] [Whitespace(" ")]
+      5: JS_KW@272..275 "js" [] [Whitespace(" ")]
+      6: GRIT_JAVASCRIPT_BODY_WRAPPER@275..344
+        0: GRIT_JAVASCRIPT_BODY@275..344 "{\n\twhile (1 < 0) {\n\t\tconsole.log(\"hello\")\n\t}\n\treturn \"hello world\";\n}" [] []
+    5: (empty)
+    6: GRIT_JAVASCRIPT_FUNCTION_DEFINITION@344..538
+      0: FUNCTION_KW@344..400 "function" [Newline("\n"), Newline("\n"), Comments("// a javascript funct ..."), Newline("\n")] [Whitespace(" ")]
+      1: GRIT_NAME@400..415
+        0: GRIT_NAME@400..415 "line_comment_js" [] []
+      2: L_PAREN@415..416 "(" [] []
+      3: GRIT_VARIABLE_LIST@416..423
+        0: GRIT_VARIABLE@416..423
+          0: GRIT_VARIABLE@416..423 "$string" [] []
+      4: R_PAREN@423..425 ")" [] [Whitespace(" ")]
+      5: JS_KW@425..428 "js" [] [Whitespace(" ")]
+      6: GRIT_JAVASCRIPT_BODY_WRAPPER@428..538
+        0: GRIT_JAVASCRIPT_BODY@428..538 "{\n\t// this is a line comment where we do {\n\twhile (1 < 0) {\n\t\tconsole.log(\"hello\")\n\t}\n\treturn \"hello world\";\n}" [] []
+    7: (empty)
+    8: GRIT_REWRITE@538..589
+      0: GRIT_CODE_SNIPPET@538..564
+        0: GRIT_BACKTICK_SNIPPET_LITERAL@538..564
+          0: GRIT_BACKTICK_SNIPPET@538..564 "`console.log(\"hello\")`" [Newline("\n"), Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: (empty)
+      2: FAT_ARROW@564..567 "=>" [] [Whitespace(" ")]
+      3: GRIT_CODE_SNIPPET@567..589
+        0: GRIT_BACKTICK_SNIPPET_LITERAL@567..589
+          0: GRIT_BACKTICK_SNIPPET@567..589 "`console.log(\"world\")`" [] []
+  4: EOF@589..590 "" [Newline("\n")] []
+
+```

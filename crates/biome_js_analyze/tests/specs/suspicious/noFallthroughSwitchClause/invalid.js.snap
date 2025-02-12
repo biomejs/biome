@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 switch(bar) { case 0: a(); case 1: b() }
 
 switch(foo) { case 0: a(); default: b() }
@@ -426,5 +427,3 @@ invalid.js:46:16 lint/suspicious/noFallthroughSwitchClause ━━━━━━━
   
 
 ```
-
-

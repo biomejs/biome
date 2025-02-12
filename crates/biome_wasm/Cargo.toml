@@ -9,7 +9,7 @@ license     = "MIT OR Apache-2.0"
 name        = "biome_wasm"
 publish     = false
 repository  = "https://github.com/biomejs/biome"
-version     = "1.7.3"
+version     = "1.9.4"
 
 
 [lib]
@@ -22,6 +22,7 @@ experimental-html = ["biome_service/experimental-html"]
 [dependencies]
 biome_console      = { workspace = true }
 biome_diagnostics  = { workspace = true }
+biome_fs           = { workspace = true }
 biome_service      = { workspace = true }
 js-sys             = "0.3.77"
 serde              = { workspace = true }
@@ -41,6 +42,7 @@ biome_js_formatter = { workspace = true }
 biome_rowan        = { workspace = true }
 biome_service      = { workspace = true, features = ["schema"] }
 quote              = "1.0.14"
+schemars           = { workspace = true }
 
 [lints]
 workspace = true

@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: elements/inline/tags-hug-content-w-attr.html
+---
+# Input
+
+```html
+<b class="really long really long really long really long really long">asdfasdf foo bar things</b>
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+-----
+
+```html
+<b class="really long really long really long really long really long"
+	>asdfasdf foo bar things</b
+>
+```

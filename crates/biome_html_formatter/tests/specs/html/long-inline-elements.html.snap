@@ -1,0 +1,58 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: long-inline-elements.html
+---
+# Input
+
+```html
+Lorem ipsum<span />dolor sit amet, consectetur adipiscing elit. Sed eu diam vel
+sem congue pulvinar at vitae purus. Morbi volutpat arcu massa, eu laoreet eros
+feugiat ac.<b
+  attribute="really long for this example"
+  actually="so long it should break and become multiline"
+  >Etiam sit amet turpis blandit, volutpat magna nec, luctus justo. Nam nec
+  augue mauris. Nullam sit amet blandit massa, at finibus felis. Nunc ut
+  vestibulum nulla.</b
+>Donec maximus euismod egestas. Sed tempus semper efficitur. Suspendisse maximus
+ut risus vel sollicitudin. Maecenas eu bibendum lorem.<span
+  attribute="really long for this example"
+  actually="so long it should break and become multiline"
+/>Sed porttitor commodo commodo. Morbi luctus consequat maximus. Vestibulum
+viverra libero quis lacus euismod, ut consequat ante convallis.
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+-----
+
+```html
+Lorem ipsum<span />dolor sit amet, consectetur adipiscing elit. Sed eu diam vel
+sem congue pulvinar at vitae purus. Morbi volutpat arcu massa, eu laoreet eros
+feugiat ac.<b
+	attribute="really long for this example"
+	actually="so long it should break and become multiline"
+	>Etiam sit amet turpis blandit, volutpat magna nec, luctus justo. Nam nec
+	augue mauris. Nullam sit amet blandit massa, at finibus felis. Nunc ut
+	vestibulum nulla.</b
+>Donec maximus euismod egestas. Sed tempus semper efficitur. Suspendisse maximus
+ut risus vel sollicitudin. Maecenas eu bibendum lorem.<span
+	attribute="really long for this example"
+	actually="so long it should break and become multiline"
+/>Sed porttitor commodo commodo. Morbi luctus consequat maximus. Vestibulum
+viverra libero quis lacus euismod, ut consequat ante convallis.
+```

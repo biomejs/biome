@@ -1,11 +1,12 @@
 use biome_rowan::FileSourceError;
 use biome_string_case::StrLikeExtension;
-use std::{ffi::OsStr, path::Path};
+use camino::Utf8Path;
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 pub struct CssFileSource {
     variant: CssVariant,
 }
@@ -18,6 +19,7 @@ pub struct CssFileSource {
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 enum CssVariant {
     #[default]
     Standard,
@@ -31,16 +33,16 @@ impl CssFileSource {
     }
 
     /// Try to return the CSS file source corresponding to this file name from well-known files
-    pub fn try_from_well_known(_: &Path) -> Result<Self, FileSourceError> {
+    pub fn try_from_well_known(_: &Utf8Path) -> Result<Self, FileSourceError> {
         // TODO: to be implemented
         Err(FileSourceError::UnknownFileName)
     }
 
     /// Try to return the CSS file source corresponding to this file extension
-    pub fn try_from_extension(extension: &OsStr) -> Result<Self, FileSourceError> {
+    pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         // We assume the file extension is normalized to lowercase
-        match extension.as_encoded_bytes() {
-            b"css" => Ok(Self::css()),
+        match extension {
+            "css" => Ok(Self::css()),
             _ => Err(FileSourceError::UnknownExtension),
         }
     }
@@ -59,10 +61,10 @@ impl CssFileSource {
     }
 }
 
-impl TryFrom<&Path> for CssFileSource {
+impl TryFrom<&Utf8Path> for CssFileSource {
     type Error = FileSourceError;
 
-    fn try_from(path: &Path) -> Result<Self, Self::Error> {
+    fn try_from(path: &Utf8Path) -> Result<Self, Self::Error> {
         if let Ok(file_source) = Self::try_from_well_known(path) {
             return Ok(file_source);
         }

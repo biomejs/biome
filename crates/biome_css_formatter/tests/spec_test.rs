@@ -1,8 +1,9 @@
-use biome_configuration::{PartialConfiguration, PartialCssConfiguration, PartialCssFormatter};
+use biome_configuration::css::CssFormatterConfiguration;
+use biome_configuration::{Configuration, CssConfiguration};
 use biome_css_formatter::{context::CssFormatOptions, CssFormatLanguage};
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_service::workspace::UpdateSettingsParams;
-use std::path::Path;
+use camino::Utf8Path;
 
 mod language {
     include!("language.rs");
@@ -26,25 +27,27 @@ mod language {
 /// * `css/null` -> input: `tests/specs/css/null.css`, expected output: `tests/specs/css/null.css.snap`
 /// * `null` -> input: `tests/specs/null.css`, expected output: `tests/specs/null.css.snap`
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _file_type: &str) {
-    let root_path = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
-    let settings = UpdateSettingsParams {
-        configuration: PartialConfiguration {
-            css: Some(PartialCssConfiguration {
-                formatter: Some(PartialCssFormatter {
-                    enabled: Some(true),
+    let root_path = Utf8Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
+    let settings = |project_key| {
+        Some(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration {
+                css: Some(CssConfiguration {
+                    formatter: Some(CssFormatterConfiguration {
+                        enabled: Some(true.into()),
+                        ..Default::default()
+                    }),
                     ..Default::default()
                 }),
                 ..Default::default()
-            }),
-            ..Default::default()
-        },
-        vcs_base_path: None,
-        gitignore_matches: vec![],
-        workspace_directory: None,
+            },
+            vcs_base_path: None,
+            gitignore_matches: vec![],
+            workspace_directory: None,
+        })
     };
 
-    let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path, Some(settings))
-    else {
+    let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path, settings) else {
         return;
     };
 

@@ -1,0 +1,86 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/js/js.html
+---
+# Input
+
+```html
+<script type="text/javascript">
+  var message = "Alert!";
+
+  alert(message);
+</script>
+<script type="application/javascript">
+  var message = "Alert!";
+
+  alert(message);
+</script>
+<script>
+  var message = "Alert!";
+
+  alert(message);
+</script>
+<script type="text/babel">
+            const    someJS    =   'this should be formatted'
+</script>
+<script type="module">
+      import lib from './lib.js';
+  
+        function myFunction() { return 'foo'; }
+  </script>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -14,12 +14,10 @@
+   alert(message);
+ </script>
+ <script type="text/babel">
+-  const someJS = "this should be formatted";
++            const    someJS    =   'this should be formatted'
+ </script>
+ <script type="module">
+-  import lib from "./lib.js";
+-
+-  function myFunction() {
+-    return "foo";
+-  }
+-</script>
++      import lib from './lib.js';
++  
++        function myFunction() { return 'foo'; }
++  </script>
+```
+
+# Output
+
+```html
+<script type="text/javascript">
+  var message = "Alert!";
+
+  alert(message);
+</script>
+<script type="application/javascript">
+  var message = "Alert!";
+
+  alert(message);
+</script>
+<script>
+  var message = "Alert!";
+
+  alert(message);
+</script>
+<script type="text/babel">
+            const    someJS    =   'this should be formatted'
+</script>
+<script type="module">
+      import lib from './lib.js';
+  
+        function myFunction() { return 'foo'; }
+  </script>
+```

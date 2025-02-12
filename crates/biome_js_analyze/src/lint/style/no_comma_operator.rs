@@ -1,5 +1,6 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsForStatement, JsSequenceExpression};
 use biome_rowan::AstNode;
 
@@ -41,7 +42,8 @@ declare_lint_rule! {
         name: "noCommaOperator",
         language: "js",
         sources: &[RuleSource::Eslint("no-sequences")],
-        recommended: true,
+        recommended: false,
+        severity: Severity::Warning,
     }
 }
 

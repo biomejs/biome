@@ -107,7 +107,7 @@ impl AnyClassStringLike {
                         if let Some(AnyJsExpression::JsStaticMemberExpression(tag)) =
                             template_expression.tag()
                         {
-                            if options.match_function(tag.text().as_ref()) {
+                            if options.match_function(tag.to_string().as_ref()) {
                                 return Some(true);
                             }
                         }

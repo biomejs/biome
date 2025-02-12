@@ -1,90 +1,47 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: SuppressionComments.js
+snapshot_kind: text
 ---
 # Input
-```jsx
-// rome-ignore lint/correctness/noUnreachable: this comment does nothing
+```js
+// biome-ignore lint/correctness/noUnreachable: this comment does nothing
 function SuppressionComments1() {
-    beforeReturn();
-    return;
-    afterReturn();
+	beforeReturn();
+	return;
+	afterReturn();
 }
 
 function SuppressionComments2() {
-    beforeReturn();
-    return;
-    // rome-ignore lint/correctness/noUnreachable: supress warning
-    afterReturn();
+	beforeReturn();
+	return;
+	// biome-ignore lint/correctness/noUnreachable: supress warning
+	afterReturn();
 }
 
 ```
 
 # Diagnostics
 ```
-SuppressionComments.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━━━━━━━━━━
-
-  ! // rome-ignore is deprecated, use // biome-ignore instead
-  
-  > 1 │ // rome-ignore lint/correctness/noUnreachable: this comment does nothing
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ function SuppressionComments1() {
-    3 │     beforeReturn();
-  
-  i Unsafe fix: Use // biome-ignore instead
-  
-     1    │ - //·rome-ignore·lint/correctness/noUnreachable:·this·comment·does·nothing
-        1 │ + //·biome-ignore·lint/correctness/noUnreachable:·this·comment·does·nothing
-     2  2 │   function SuppressionComments1() {
-     3  3 │       beforeReturn();
-  
-
-```
-
-```
-SuppressionComments.js:5:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SuppressionComments.js:5:2 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This code will never be reached ...
   
-    3 │     beforeReturn();
-    4 │     return;
-  > 5 │     afterReturn();
-      │     ^^^^^^^^^^^^^^
+    3 │ 	beforeReturn();
+    4 │ 	return;
+  > 5 │ 	afterReturn();
+      │ 	^^^^^^^^^^^^^^
     6 │ }
     7 │ 
   
   i ... because this statement will return from the function beforehand
   
     2 │ function SuppressionComments1() {
-    3 │     beforeReturn();
-  > 4 │     return;
-      │     ^^^^^^^
-    5 │     afterReturn();
+    3 │ 	beforeReturn();
+  > 4 │ 	return;
+      │ 	^^^^^^^
+    5 │ 	afterReturn();
     6 │ }
-  
-
-```
-
-```
-SuppressionComments.js:11:5 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━━━━━━━━━━
-
-  ! // rome-ignore is deprecated, use // biome-ignore instead
-  
-     9 │     beforeReturn();
-    10 │     return;
-  > 11 │     // rome-ignore lint/correctness/noUnreachable: supress warning
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │     afterReturn();
-    13 │ }
-  
-  i Unsafe fix: Use // biome-ignore instead
-  
-     9  9 │       beforeReturn();
-    10 10 │       return;
-    11    │ - ····//·rome-ignore·lint/correctness/noUnreachable:·supress·warning
-       11 │ + ····//·biome-ignore·lint/correctness/noUnreachable:·supress·warning
-    12 12 │       afterReturn();
-    13 13 │   }
   
 
 ```
@@ -94,10 +51,10 @@ SuppressionComments.js:1:1 suppressions/unused ━━━━━━━━━━━
 
   ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
   
-  > 1 │ // rome-ignore lint/correctness/noUnreachable: this comment does nothing
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 1 │ // biome-ignore lint/correctness/noUnreachable: this comment does nothing
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ function SuppressionComments1() {
-    3 │     beforeReturn();
+    3 │ 	beforeReturn();
   
 
 ```

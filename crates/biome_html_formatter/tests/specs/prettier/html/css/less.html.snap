@@ -1,0 +1,65 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/css/less.html
+---
+# Input
+
+```html
+<style type="text/less">
+  @nice-blue: #5B83AD;
+  @light-blue: @nice-blue + #111;
+
+  #header {
+    color: @light-blue;
+  }
+</style>
+
+<style lang="less">
+  @nice-blue: #5B83AD;
+  @light-blue: @nice-blue + #111;
+
+  #header {
+    color: @light-blue;
+  }
+</style>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -8,7 +8,7 @@
+ </style>
+ 
+ <style lang="less">
+-  @nice-blue: #5b83ad;
++  @nice-blue: #5B83AD;
+   @light-blue: @nice-blue + #111;
+ 
+   #header {
+```
+
+# Output
+
+```html
+<style type="text/less">
+  @nice-blue: #5B83AD;
+  @light-blue: @nice-blue + #111;
+
+  #header {
+    color: @light-blue;
+  }
+</style>
+
+<style lang="less">
+  @nice-blue: #5B83AD;
+  @light-blue: @nice-blue + #111;
+
+  #header {
+    color: @light-blue;
+  }
+</style>
+```

@@ -1,0 +1,74 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/attributes/class-bem1.html
+---
+# Input
+
+```html
+<div class="ProviderMeasuresContainer__heading-row
+  d-flex
+  flex-column flex-lg-row
+  justify-content-start justify-content-lg-between
+  align-items-start align-items-lg-center">Foo</div>
+
+<div  class="a-bem-block a-bem-block--with-modifer ">
+<div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block" >
+<div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block__element">
+</div></div> </div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,10 +1,14 @@
+ <div
+-  class="ProviderMeasuresContainer__heading-row d-flex flex-column flex-lg-row justify-content-start justify-content-lg-between align-items-start align-items-lg-center"
++  class="ProviderMeasuresContainer__heading-row
++  d-flex
++  flex-column flex-lg-row
++  justify-content-start justify-content-lg-between
++  align-items-start align-items-lg-center"
+ >
+   Foo
+ </div>
+ 
+-<div class="a-bem-block a-bem-block--with-modifer">
++<div class="a-bem-block a-bem-block--with-modifer ">
+   <div
+     class="a-bem-block__element a-bem-block__element--with-modifer also-another-block"
+   >
+```
+
+# Output
+
+```html
+<div
+  class="ProviderMeasuresContainer__heading-row
+  d-flex
+  flex-column flex-lg-row
+  justify-content-start justify-content-lg-between
+  align-items-start align-items-lg-center"
+>
+  Foo
+</div>
+
+<div class="a-bem-block a-bem-block--with-modifer ">
+  <div
+    class="a-bem-block__element a-bem-block__element--with-modifer also-another-block"
+  >
+    <div
+      class="a-bem-block__element a-bem-block__element--with-modifer also-another-block__element"
+    ></div>
+  </div>
+</div>
+```
+
+# Lines exceeding max width of 80 characters
+```
+   13:     class="a-bem-block__element a-bem-block__element--with-modifer also-another-block"
+   16:       class="a-bem-block__element a-bem-block__element--with-modifer also-another-block__element"
+```

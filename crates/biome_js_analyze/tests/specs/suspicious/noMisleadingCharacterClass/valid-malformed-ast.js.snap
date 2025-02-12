@@ -4,6 +4,6 @@ expression: valid-malformed-ast.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 /[\u0E0�]
 ```

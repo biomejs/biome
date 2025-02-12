@@ -101,7 +101,8 @@ fn parse_pattern_non_greedy(p: &mut GritParser) -> ParsedSyntax {
         T![.] => parse_dot(p),
         SOME_KW => parse_some(p),
         EVERY_KW => parse_every(p),
-        GRIT_UNDERSCORE => parse_grit_undescore(p),
+        DOLLAR_UNDERSCORE => parse_grit_underscore(p),
+        GRIT_UNDERSCORE => parse_grit_underscore(p),
         GRIT_VARIABLE => parse_variable(p),
         GRIT_REGEX | GRIT_SNIPPET_REGEX => parse_regex_pattern(p),
         LIKE_KW => parse_like(p),
@@ -152,8 +153,7 @@ fn parse_bubble(p: &mut GritParser) -> ParsedSyntax {
     p.bump(BUBBLE_KW);
 
     parse_bubble_scope(p).ok();
-
-    parse_expected_pattern_with_precedence(p, PRECEDENCE_PATTERN);
+    parse_maybe_curly_pattern(p).ok();
 
     Present(m.complete(p, GRIT_BUBBLE))
 }
@@ -273,13 +273,13 @@ fn parse_files(p: &mut GritParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_grit_undescore(p: &mut GritParser) -> ParsedSyntax {
-    if !p.at(GRIT_UNDERSCORE) {
+fn parse_grit_underscore(p: &mut GritParser) -> ParsedSyntax {
+    if !p.at(GRIT_UNDERSCORE) && !p.at(DOLLAR_UNDERSCORE) {
         return Absent;
     }
 
     let m = p.start();
-    p.bump(GRIT_UNDERSCORE);
+    p.bump_any();
     Present(m.complete(p, GRIT_UNDERSCORE))
 }
 
@@ -662,13 +662,13 @@ fn parse_pattern_contains(p: &mut GritParser) -> ParsedSyntax {
             expected_pattern,
         )
         .ok();
-    parse_pattern_contains_until_clause(p).ok();
+    parse_pattern_until_clause(p).ok();
 
     Present(m.complete(p, GRIT_PATTERN_CONTAINS))
 }
 
 #[inline]
-fn parse_pattern_contains_until_clause(p: &mut GritParser) -> ParsedSyntax {
+fn parse_pattern_until_clause(p: &mut GritParser) -> ParsedSyntax {
     if !p.at(UNTIL_KW) {
         return Absent;
     }
@@ -678,7 +678,7 @@ fn parse_pattern_contains_until_clause(p: &mut GritParser) -> ParsedSyntax {
 
     parse_expected_pattern_with_precedence(p, PRECEDENCE_PATTERN);
 
-    Present(m.complete(p, GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE))
+    Present(m.complete(p, GRIT_PATTERN_UNTIL_CLAUSE))
 }
 
 #[inline]
@@ -901,6 +901,7 @@ fn parse_pattern_within(p: &mut GritParser) -> ParsedSyntax {
             expected_pattern,
         )
         .ok();
+    parse_pattern_until_clause(p).ok();
 
     Present(m.complete(p, GRIT_WITHIN))
 }

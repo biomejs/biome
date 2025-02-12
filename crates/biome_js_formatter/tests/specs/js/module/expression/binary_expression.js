@@ -30,5 +30,5 @@ a + b * c > 65 + 5;
 
 
 a + b + 4 +
-// rome-ignore format: Test formatting ignored binary expressions
+// biome-ignore format: Test formatting ignored binary expressions
   -   4_444_444;

@@ -1,0 +1,88 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<div><</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@1..4 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@4..5 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@5..6 "<" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@6..7 "<" [] [],
+                slash_token: SLASH@7..8 "/" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@8..11 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@11..12 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@12..13 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..13
+  0: (empty)
+  1: (empty)
+  2: HTML_ELEMENT_LIST@0..12
+    0: HTML_ELEMENT@0..12
+      0: HTML_OPENING_ELEMENT@0..5
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_NAME@1..4
+          0: HTML_LITERAL@1..4 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@4..4
+        3: R_ANGLE@4..5 ">" [] []
+      1: HTML_ELEMENT_LIST@5..6
+        0: HTML_CONTENT@5..6
+          0: HTML_LITERAL@5..6 "<" [] []
+      2: HTML_CLOSING_ELEMENT@6..12
+        0: L_ANGLE@6..7 "<" [] []
+        1: SLASH@7..8 "/" [] []
+        2: HTML_NAME@8..11
+          0: HTML_LITERAL@8..11 "div" [] []
+        3: R_ANGLE@11..12 ">" [] []
+  3: EOF@12..13 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+child-no-tag-name.html:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unescaped `<` bracket character. Expected a tag or escaped character.
+  
+  > 1 │ <div><</div>
+      │      ^
+    2 │ 
+  
+  i Replace this character with `&lt;` to escape it.
+  
+```

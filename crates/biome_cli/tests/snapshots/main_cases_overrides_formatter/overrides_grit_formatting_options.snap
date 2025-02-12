@@ -1,0 +1,78 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "indentStyle": "tab"
+  },
+  "overrides": [
+    {
+      "includes": ["file.grit"],
+      "grit": { "formatter": { "indentStyle": "space", "indentWidth": 8 } }
+    }
+  ]
+}
+```
+
+## `file.grit`
+
+```grit
+`console.$_($content)` where { $content <: contains `secret` until `sanitized($_)` }
+```
+
+## `file.js`
+
+```js
+function name() { return "hello"; }
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.grit format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - `console.$_($content)`·where·{·$content·<:·contains·`secret`·until·`sanitized($_)`·}
+      1 │ + `console.$_($content)`·where·{
+      2 │ + ········$content·<:·contains·`secret`·until·`sanitized($_)`
+      3 │ + }
+      4 │ + 
+  
+
+```
+
+```block
+file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1   │ - function·name()·{·return·"hello";·}
+      1 │ + function·name()·{
+      2 │ + → return·"hello";
+      3 │ + }
+      4 │ + 
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 2 errors.
+```

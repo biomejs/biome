@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: simpleBranches2.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function simpleBranches2() {
     if (firstCondition) {                 // +1
         return 1;
@@ -29,5 +30,3 @@ simpleBranches2.js:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━━
   
 
 ```
-
-

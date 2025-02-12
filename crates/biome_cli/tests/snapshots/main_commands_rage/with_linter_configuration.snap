@@ -54,46 +54,44 @@ Environment:
 
 Biome Configuration:
   Status:                       Loaded successfully
-  Formatter disabled:           false
-  Linter disabled:              false
-  Organize imports disabled:    false
-  VCS disabled:                 true
+  Formatter enabled:            true
+  Linter enabled:               true
+  Assist enabled:               true
+  VCS enabled:                  false
 
 Linter:
-  JavaScript enabled:           true
-  JSON enabled:                 true
-  CSS enabled:                  true
-  GraphQL enabled:              false
+  JavaScript enabled:           unset
+  JSON enabled:                 unset
+  CSS enabled:                  unset
+  GraphQL enabled:              unset
   Recommended:                  false
-  All:                          false
   Enabled rules:
-  complexity/noBannedTypes
-  complexity/noEmptyTypeParameters
-  complexity/noExcessiveNestedTestSuites
-  complexity/noExtraBooleanCast
-  complexity/noForEach
-  complexity/noMultipleSpacesInRegularExpressionLiterals
-  complexity/noStaticOnlyClass
-  complexity/noThisInStatic
-  complexity/noUselessCatch
-  complexity/noUselessConstructor
-  complexity/noUselessEmptyExport
-  complexity/noUselessFragments
-  complexity/noUselessLabel
-  complexity/noUselessLoneBlockStatements
-  complexity/noUselessRename
-  complexity/noUselessSwitchCase
-  complexity/noUselessTernary
-  complexity/noUselessThisAlias
-  complexity/noUselessTypeConstraint
-  complexity/noWith
-  complexity/useArrowFunction
-  complexity/useFlatMap
-  complexity/useLiteralKeys
-  complexity/useOptionalChain
-  complexity/useRegexLiterals
-  complexity/useSimpleNumberKeys
-  suspicious/noCommentText
+    complexity/noBannedTypes
+    complexity/noEmptyTypeParameters
+    complexity/noExtraBooleanCast
+    complexity/noForEach
+    complexity/noMultipleSpacesInRegularExpressionLiterals
+    complexity/noStaticOnlyClass
+    complexity/noThisInStatic
+    complexity/noUselessCatch
+    complexity/noUselessConstructor
+    complexity/noUselessEmptyExport
+    complexity/noUselessFragments
+    complexity/noUselessLabel
+    complexity/noUselessLoneBlockStatements
+    complexity/noUselessRename
+    complexity/noUselessSwitchCase
+    complexity/noUselessTernary
+    complexity/noUselessThisAlias
+    complexity/noUselessTypeConstraint
+    complexity/noWith
+    complexity/useArrowFunction
+    complexity/useFlatMap
+    complexity/useLiteralKeys
+    complexity/useOptionalChain
+    complexity/useRegexLiterals
+    complexity/useSimpleNumberKeys
+    suspicious/noCommentText
 
 Server:
   Version:                      0.0.0

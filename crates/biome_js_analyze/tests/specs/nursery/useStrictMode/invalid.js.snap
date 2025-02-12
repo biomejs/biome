@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
 ---
 # Input
-```jsx
+```cjs
 
 
 function f() {
@@ -27,16 +27,11 @@ invalid.js:3:1 lint/nursery/useStrictMode  FIXABLE  ━━━━━━━━━�
   
   i Strict mode allows to opt-in some optimisations of the runtime engines, and it eliminates some JavaScript silent errors by changing them to throw errors.
   
-  i Check the for more information regarding strict mode.
+  i Check the MDN web docs for more information regarding strict mode.
   
-  i Safe fix: Insert a top level"use strict" .
+  i Safe fix: Insert a top level "use strict".
   
-    1 1 │   
-    2 2 │   
-      3 │ + "use·strict";
-      4 │ + 
-    3 5 │   function f() {
-    4 6 │   	return "lorem ipsum"
-  
+    1 │ "use·strict";
+      │ +++++++++++++
 
 ```

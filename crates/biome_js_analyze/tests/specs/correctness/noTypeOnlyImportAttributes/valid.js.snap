@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import A from "" with { type: "json" };
 import * as B from "" with { type: "json" };
 import { C } from "" with { type: "json" };
@@ -14,5 +15,3 @@ export { A } from "" with { type: "json" };
 export * as B from "" with { type: "json" };
 export { E, F } from "" with { type: "json" };
 ```
-
-

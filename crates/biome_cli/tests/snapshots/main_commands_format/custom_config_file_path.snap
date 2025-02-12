@@ -2,7 +2,7 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
 ---
-## `/test/rome.json`
+## `/test/biome.json`
 
 ```json
 {
@@ -10,7 +10,7 @@ expression: content
     "enabled": true,
     "lineWidth": 160,
     "indentStyle": "space",
-    "indentSize": 6
+    "indentWidth": 6
   }
 }
 
@@ -26,29 +26,6 @@ function f() {
 ```
 
 # Emitted Messages
-
-```block
-rome.json internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The configuration file rome.json is deprecated. Use biome.json instead.
-  
-
-```
-
-```block
-/test/rome.json:6:5 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The property indentSize is deprecated. Use formatter.indentWidth instead.
-  
-    4 │     "lineWidth": 160,
-    5 │     "indentStyle": "space",
-  > 6 │     "indentSize": 6
-      │     ^^^^^^^^^^^^
-    7 │   }
-    8 │ }
-  
-
-```
 
 ```block
 Formatted 1 file in <TIME>. Fixed 1 file.

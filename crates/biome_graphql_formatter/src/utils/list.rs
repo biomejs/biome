@@ -19,7 +19,7 @@ where
         let node = element.node();
 
         if index != 0 {
-            if node.map_or(false, |node| node.syntax().has_leading_comments()) {
+            if node.is_ok_and(|node| node.syntax().has_leading_comments()) {
                 write!(f, [soft_line_break_or_space()])?;
             } else {
                 write!(f, [space()])?;

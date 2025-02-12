@@ -1,21 +1,23 @@
 use biome_analyze::{AnalysisFilter, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
+use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::JsFileSource;
 use biome_test_utils::{
-    code_fix_to_string, create_analyzer_options, diagnostic_to_string, load_manifest,
-    parse_test_path, scripts_from_json,
+    code_fix_to_string, create_analyzer_options, dependency_graph_for_test_file,
+    diagnostic_to_string, parse_test_path, project_layout_with_node_manifest, scripts_from_json,
 };
+use camino::Utf8Path;
 use std::ops::Deref;
-use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
+use std::{fs::read_to_string, slice};
 
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
 #[ignore]
 #[test]
 fn quick_test() {
-    let input_file = Path::new("tests/specs/complexity/noUselessFragments/issue_4553.jsx");
-    let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
+    let input_file = Utf8Path::new("tests/specs/a11y/useAltText/img.jsx");
+    let file_name = input_file.file_name().unwrap();
 
     let (group, rule) = parse_test_path(input_file);
     if rule == "specs" || rule == "suppression" {
@@ -62,7 +64,7 @@ fn analyze(
     source_type: JsFileSource,
     filter: AnalysisFilter,
     file_name: &str,
-    input_file: &Path,
+    input_file: &Utf8Path,
 ) {
     let parsed = parse(input_code, source_type, JsParserOptions::default());
     let root = parsed.tree();
@@ -70,10 +72,14 @@ fn analyze(
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
     let options = create_analyzer_options(input_file, &mut diagnostics);
-    let manifest = load_manifest(input_file, &mut diagnostics);
+    let project_layout = project_layout_with_node_manifest(input_file, &mut diagnostics);
+
+    let dependency_graph = dependency_graph_for_test_file(input_file, &project_layout);
+
+    let services = JsAnalyzerServices::from((dependency_graph, project_layout, source_type));
 
     let (_, errors) =
-        biome_js_analyze::analyze(&root, filter, &options, source_type, manifest, |event| {
+        biome_js_analyze::analyze(&root, filter, &options, Vec::new(), services, |event| {
             if let Some(mut diag) = event.diagnostic() {
                 for action in event.actions() {
                     diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));

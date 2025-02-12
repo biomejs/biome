@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::CssFunction;
+use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
 
 use crate::utils::{is_custom_function, is_function_keyword};
@@ -36,6 +37,7 @@ declare_lint_rule! {
         name: "noUnknownFunction",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("function-no-unknown")],
     }
 }
@@ -53,7 +55,7 @@ impl Rule for NoUnknownFunction {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let function_name = node.name().ok()?.text();
+        let function_name = node.name().ok()?.to_trimmed_string();
 
         // We don't have a semantic model yet, so we can't determine if functions are defined elsewhere.
         // Therefore, we ignore these custom functions to prevent false detections.

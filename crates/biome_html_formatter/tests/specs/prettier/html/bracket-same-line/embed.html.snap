@@ -1,0 +1,69 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/bracket-same-line/embed.html
+---
+# Input
+
+```html
+<script long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+alert(1)</script>
+<style long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+.a{color: #f00}</style>
+<script>
+alert(1)</script>
+<style>
+.a{color: #f00}</style>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,16 +1,12 @@
+ <script
+   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+ >
+-  alert(1)
+-</script>
++alert(1)</script>
+ <style
+   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+ >
+-  .a{color: #f00}
+-</style>
++.a{color: #f00}</style>
+ <script>
+-  alert(1)
+-</script>
++alert(1)</script>
+ <style>
+-  .a{color: #f00}
+-</style>
++.a{color: #f00}</style>
+```
+
+# Output
+
+```html
+<script
+  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+>
+alert(1)</script>
+<style
+  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+>
+.a{color: #f00}</style>
+<script>
+alert(1)</script>
+<style>
+.a{color: #f00}</style>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+    6:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+```

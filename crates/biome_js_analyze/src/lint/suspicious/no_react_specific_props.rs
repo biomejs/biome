@@ -1,6 +1,8 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource,
+};
 use biome_console::markup;
 use biome_js_factory::make::{jsx_ident, jsx_name};
 use biome_js_syntax::{AnyJsxAttributeName, JsxAttribute};
@@ -32,6 +34,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintSolid("no-react-specific-props")],
         recommended: false,
         fix_kind: FixKind::Safe,
+        domains: &[RuleDomain::Solid],
     }
 }
 
@@ -55,7 +58,7 @@ impl Rule for NoReactSpecificProps {
         let attribute = ctx.query();
         let name = attribute.name().ok()?;
         let range = name.range();
-        let name = name.text();
+        let name = name.to_trimmed_string();
 
         if REACT_SPECIFIC_JSX_PROPS.contains(&name.as_str()) {
             let replacement = get_replacement_for_react_prop(&name)?;

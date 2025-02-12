@@ -255,6 +255,36 @@ pub fn grit_int_literal(value_token: SyntaxToken) -> GritIntLiteral {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn grit_javascript_body_wrapper(value_token: SyntaxToken) -> GritJavascriptBodyWrapper {
+    GritJavascriptBodyWrapper::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_JAVASCRIPT_BODY_WRAPPER,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn grit_javascript_function_definition(
+    function_token: SyntaxToken,
+    name: GritName,
+    l_paren_token: SyntaxToken,
+    args: GritVariableList,
+    r_paren_token: SyntaxToken,
+    js_token: SyntaxToken,
+    grit_javascript_body_wrapper: GritJavascriptBodyWrapper,
+) -> GritJavascriptFunctionDefinition {
+    GritJavascriptFunctionDefinition::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_JAVASCRIPT_FUNCTION_DEFINITION,
+        [
+            Some(SyntaxElement::Token(function_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(args.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+            Some(SyntaxElement::Token(js_token)),
+            Some(SyntaxElement::Node(
+                grit_javascript_body_wrapper.into_syntax(),
+            )),
+        ],
+    ))
+}
 pub fn grit_language_declaration(
     language_token: SyntaxToken,
     name: AnyGritLanguageName,
@@ -651,10 +681,10 @@ pub fn grit_pattern_contains(
 pub struct GritPatternContainsBuilder {
     contains_token: SyntaxToken,
     contains: AnyGritMaybeCurlyPattern,
-    until_clause: Option<GritPatternContainsUntilClause>,
+    until_clause: Option<GritPatternUntilClause>,
 }
 impl GritPatternContainsBuilder {
-    pub fn with_until_clause(mut self, until_clause: GritPatternContainsUntilClause) -> Self {
+    pub fn with_until_clause(mut self, until_clause: GritPatternUntilClause) -> Self {
         self.until_clause = Some(until_clause);
         self
     }
@@ -669,18 +699,6 @@ impl GritPatternContainsBuilder {
             ],
         ))
     }
-}
-pub fn grit_pattern_contains_until_clause(
-    until_token: SyntaxToken,
-    until: AnyGritPattern,
-) -> GritPatternContainsUntilClause {
-    GritPatternContainsUntilClause::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE,
-        [
-            Some(SyntaxElement::Token(until_token)),
-            Some(SyntaxElement::Node(until.into_syntax())),
-        ],
-    ))
 }
 pub fn grit_pattern_definition(
     pattern_token: SyntaxToken,
@@ -884,6 +902,18 @@ pub fn grit_pattern_or_else(
             Some(SyntaxElement::Token(l_curly_token)),
             Some(SyntaxElement::Node(patterns.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn grit_pattern_until_clause(
+    until_token: SyntaxToken,
+    until: AnyGritPattern,
+) -> GritPatternUntilClause {
+    GritPatternUntilClause::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_PATTERN_UNTIL_CLAUSE,
+        [
+            Some(SyntaxElement::Token(until_token)),
+            Some(SyntaxElement::Node(until.into_syntax())),
         ],
     ))
 }
@@ -1490,14 +1520,37 @@ pub fn grit_version(
         ],
     ))
 }
-pub fn grit_within(within_token: SyntaxToken, pattern: AnyGritMaybeCurlyPattern) -> GritWithin {
-    GritWithin::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_WITHIN,
-        [
-            Some(SyntaxElement::Token(within_token)),
-            Some(SyntaxElement::Node(pattern.into_syntax())),
-        ],
-    ))
+pub fn grit_within(
+    within_token: SyntaxToken,
+    pattern: AnyGritMaybeCurlyPattern,
+) -> GritWithinBuilder {
+    GritWithinBuilder {
+        within_token,
+        pattern,
+        until_clause: None,
+    }
+}
+pub struct GritWithinBuilder {
+    within_token: SyntaxToken,
+    pattern: AnyGritMaybeCurlyPattern,
+    until_clause: Option<GritPatternUntilClause>,
+}
+impl GritWithinBuilder {
+    pub fn with_until_clause(mut self, until_clause: GritPatternUntilClause) -> Self {
+        self.until_clause = Some(until_clause);
+        self
+    }
+    pub fn build(self) -> GritWithin {
+        GritWithin::unwrap_cast(SyntaxNode::new_detached(
+            GritSyntaxKind::GRIT_WITHIN,
+            [
+                Some(SyntaxElement::Token(self.within_token)),
+                Some(SyntaxElement::Node(self.pattern.into_syntax())),
+                self.until_clause
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn grit_definition_list<I, S>(items: I, separators: S) -> GritDefinitionList
 where

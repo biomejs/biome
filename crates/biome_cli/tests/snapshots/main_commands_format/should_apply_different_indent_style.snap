@@ -12,14 +12,14 @@ expression: content
   "javascript": {
     "formatter": {
       "lineWidth": 320,
-      "indentSize": 8,
+      "indentWidth": 8,
       "indentStyle": "tab"
     }
   },
   "json": {
     "formatter": {
       "lineWidth": 80,
-      "indentSize": 2,
+      "indentWidth": 2,
       "indentStyle": "tab"
     }
   }
@@ -53,36 +53,6 @@ const a = {
 ```
 
 # Emitted Messages
-
-```block
-biome.json:8:17 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The property indentSize is deprecated. Use javascript.formatter.indentWidth instead.
-  
-     6 │             "formatter": {
-     7 │                 "lineWidth": 320,
-   > 8 │                 "indentSize": 8,
-       │                 ^^^^^^^^^^^^
-     9 │                 "indentStyle": "tab"
-    10 │             }
-  
-
-```
-
-```block
-biome.json:15:17 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The property indentSize is deprecated. Use json.formatter.indentWidth instead.
-  
-    13 │             "formatter": {
-    14 │                 "lineWidth": 80,
-  > 15 │                 "indentSize": 2,
-       │                 ^^^^^^^^^^^^
-    16 │                 "indentStyle": "tab"
-    17 │             }
-  
-
-```
 
 ```block
 Formatted 2 files in <TIME>. Fixed 2 files.

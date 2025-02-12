@@ -5,8 +5,8 @@ use crate::matcher::pattern::MatchResult::{
 use crate::matcher::pattern::PatternToken::{
     AnyChar, AnyExcept, AnyPattern, AnyRecursiveSequence, AnySequence, AnyWithin, Char,
 };
+use camino::Utf8Path;
 use std::error::Error;
-use std::path::Path;
 use std::str::FromStr;
 use std::{fmt, path};
 
@@ -149,7 +149,7 @@ impl Pattern {
             tokens.push(AnyRecursiveSequence);
         } else {
             // A pattern is absolute if it starts with a path separator, eg. "/home" or "\\?\C:\Users"
-            let mut is_absolute = chars.first().map_or(false, |c| path::is_separator(*c));
+            let mut is_absolute = chars.first().is_some_and(|c| path::is_separator(*c));
 
             // On windows a pattern may also be absolute if it starts with a
             // drive letter, a colon and a separator, eg. "c:/Users" or "G:\Users"
@@ -366,9 +366,8 @@ impl Pattern {
 
     /// Return if the given `Path`, when converted to a `str`, matches this
     /// `Pattern` using the default match options (i.e. `MatchOptions::new()`).
-    pub fn matches_path(&self, path: &Path) -> bool {
-        // FIXME (#9639): This needs to handle non-utf8 paths
-        path.to_str().map_or(false, |s| self.matches(s))
+    pub fn matches_path(&self, path: &Utf8Path) -> bool {
+        self.matches(path.as_str())
     }
 
     /// Return if the given `str` matches this `Pattern` using the specified
@@ -379,10 +378,8 @@ impl Pattern {
 
     /// Return if the given `Path`, when converted to a `str`, matches this
     /// `Pattern` using the specified match options.
-    pub fn matches_path_with(&self, path: &Path, options: MatchOptions) -> bool {
-        // FIXME (#9639): This needs to handle non-utf8 paths
-        path.to_str()
-            .map_or(false, |s| self.matches_with(s, options))
+    pub fn matches_path_with(&self, path: &Utf8Path, options: MatchOptions) -> bool {
+        self.matches_with(path.as_str(), options)
     }
 
     /// Access the original glob pattern.
@@ -551,7 +548,7 @@ fn chars_eq(a: char, b: char, case_sensitive: bool) -> bool {
         true
     } else if !case_sensitive && a.is_ascii() && b.is_ascii() {
         // FIXME: work with non-ascii chars properly (issue #9084)
-        a.to_ascii_lowercase() == b.to_ascii_lowercase()
+        a.eq_ignore_ascii_case(&b)
     } else {
         a == b
     }
@@ -605,7 +602,7 @@ impl MatchOptions {
 #[cfg(test)]
 mod test {
     use super::{MatchOptions, Pattern};
-    use std::path::Path;
+    use camino::Utf8Path;
 
     #[test]
     fn test_pattern_from_str() {
@@ -932,27 +929,35 @@ mod test {
 
     #[test]
     fn test_matches_path() {
-        // on windows, (Path::new("a/b").as_str().unwrap() == "a\\b"), so this
+        // on windows, (Utf8Path::new("a/b").as_str().unwrap() == "a\\b"), so this
         // tests that / and \ are considered equivalent on windows
-        assert!(Pattern::new("a/b").unwrap().matches_path(Path::new("a/b")));
+        assert!(Pattern::new("a/b")
+            .unwrap()
+            .matches_path(Utf8Path::new("a/b")));
     }
 
     #[test]
     fn test_path_join() {
-        let pattern = Path::new("one").join(Path::new("**/*.rs"));
-        assert!(Pattern::new(pattern.to_str().unwrap()).is_ok());
+        let pattern = Utf8Path::new("one").join(Utf8Path::new("**/*.rs"));
+        assert!(Pattern::new(pattern.as_str()).is_ok());
     }
 
     #[test]
     fn test_pattern_relative() {
-        assert!(Pattern::new("./b").unwrap().matches_path(Path::new("a/b")));
-        assert!(Pattern::new("b").unwrap().matches_path(Path::new("a/b")));
+        assert!(Pattern::new("./b")
+            .unwrap()
+            .matches_path(Utf8Path::new("a/b")));
+        assert!(Pattern::new("b")
+            .unwrap()
+            .matches_path(Utf8Path::new("a/b")));
 
         if cfg!(windows) {
             assert!(Pattern::new(".\\b")
                 .unwrap()
-                .matches_path(Path::new("a\\b")));
-            assert!(Pattern::new("b").unwrap().matches_path(Path::new("a\\b")));
+                .matches_path(Utf8Path::new("a\\b")));
+            assert!(Pattern::new("b")
+                .unwrap()
+                .matches_path(Utf8Path::new("a\\b")));
         }
     }
 
@@ -960,22 +965,22 @@ mod test {
     fn test_pattern_absolute() {
         assert!(Pattern::new("/a/b")
             .unwrap()
-            .matches_path(Path::new("/a/b")));
+            .matches_path(Utf8Path::new("/a/b")));
 
         if cfg!(windows) {
             assert!(Pattern::new("c:/a/b")
                 .unwrap()
-                .matches_path(Path::new("c:/a/b")));
+                .matches_path(Utf8Path::new("c:/a/b")));
             assert!(Pattern::new("C:\\a\\b")
                 .unwrap()
-                .matches_path(Path::new("C:\\a\\b")));
+                .matches_path(Utf8Path::new("C:\\a\\b")));
 
             assert!(Pattern::new("\\\\?\\c:\\a\\b")
                 .unwrap()
-                .matches_path(Path::new("\\\\?\\c:\\a\\b")));
+                .matches_path(Utf8Path::new("\\\\?\\c:\\a\\b")));
             assert!(Pattern::new("\\\\?\\C:/a/b")
                 .unwrap()
-                .matches_path(Path::new("\\\\?\\C:/a/b")));
+                .matches_path(Utf8Path::new("\\\\?\\C:/a/b")));
         }
     }
 
@@ -983,59 +988,59 @@ mod test {
     fn test_pattern_glob() {
         assert!(Pattern::new("*.js")
             .unwrap()
-            .matches_path(Path::new("b/c.js")));
+            .matches_path(Utf8Path::new("b/c.js")));
 
         assert!(Pattern::new("**/*.js")
             .unwrap()
-            .matches_path(Path::new("b/c.js")));
+            .matches_path(Utf8Path::new("b/c.js")));
 
         assert!(Pattern::new("*.js")
             .unwrap()
-            .matches_path(Path::new("/a/b/c.js")));
+            .matches_path(Utf8Path::new("/a/b/c.js")));
 
         assert!(Pattern::new("**/*.js")
             .unwrap()
-            .matches_path(Path::new("/a/b/c.js")));
+            .matches_path(Utf8Path::new("/a/b/c.js")));
 
         if cfg!(windows) {
             assert!(Pattern::new("*.js")
                 .unwrap()
-                .matches_path(Path::new("C:\\a\\b\\c.js")));
+                .matches_path(Utf8Path::new("C:\\a\\b\\c.js")));
 
             assert!(Pattern::new("**/*.js")
                 .unwrap()
-                .matches_path(Path::new("\\\\?\\C:\\a\\b\\c.js")));
+                .matches_path(Utf8Path::new("\\\\?\\C:\\a\\b\\c.js")));
         }
     }
 
     #[test]
     fn test_pattern_glob_brackets() {
         let pattern = Pattern::parse("{foo.js,bar.js}", true).unwrap();
-        assert!(pattern.matches_path(Path::new("foo.js")));
-        assert!(pattern.matches_path(Path::new("bar.js")));
-        assert!(!pattern.matches_path(Path::new("baz.js")));
+        assert!(pattern.matches_path(Utf8Path::new("foo.js")));
+        assert!(pattern.matches_path(Utf8Path::new("bar.js")));
+        assert!(!pattern.matches_path(Utf8Path::new("baz.js")));
 
         let pattern = Pattern::parse("{foo,bar}.js", true).unwrap();
-        assert!(pattern.matches_path(Path::new("foo.js")));
-        assert!(pattern.matches_path(Path::new("bar.js")));
-        assert!(!pattern.matches_path(Path::new("baz.js")));
+        assert!(pattern.matches_path(Utf8Path::new("foo.js")));
+        assert!(pattern.matches_path(Utf8Path::new("bar.js")));
+        assert!(!pattern.matches_path(Utf8Path::new("baz.js")));
 
         assert!(Pattern::parse("**/{foo,bar}.js", true)
             .unwrap()
-            .matches_path(Path::new("a/b/foo.js")));
+            .matches_path(Utf8Path::new("a/b/foo.js")));
 
         let pattern = Pattern::parse("src/{a/foo,bar}.js", true).unwrap();
-        assert!(pattern.matches_path(Path::new("src/a/foo.js")));
-        assert!(pattern.matches_path(Path::new("src/bar.js")));
-        assert!(!pattern.matches_path(Path::new("src/a/b/foo.js")));
-        assert!(!pattern.matches_path(Path::new("src/a/bar.js")));
+        assert!(pattern.matches_path(Utf8Path::new("src/a/foo.js")));
+        assert!(pattern.matches_path(Utf8Path::new("src/bar.js")));
+        assert!(!pattern.matches_path(Utf8Path::new("src/a/b/foo.js")));
+        assert!(!pattern.matches_path(Utf8Path::new("src/a/bar.js")));
 
         let pattern = Pattern::parse("src/{a,b}/{c,d}/foo.js", true).unwrap();
-        assert!(pattern.matches_path(Path::new("src/a/c/foo.js")));
-        assert!(pattern.matches_path(Path::new("src/a/d/foo.js")));
-        assert!(pattern.matches_path(Path::new("src/b/c/foo.js")));
-        assert!(pattern.matches_path(Path::new("src/b/d/foo.js")));
-        assert!(!pattern.matches_path(Path::new("src/bar/foo.js")));
+        assert!(pattern.matches_path(Utf8Path::new("src/a/c/foo.js")));
+        assert!(pattern.matches_path(Utf8Path::new("src/a/d/foo.js")));
+        assert!(pattern.matches_path(Utf8Path::new("src/b/c/foo.js")));
+        assert!(pattern.matches_path(Utf8Path::new("src/b/d/foo.js")));
+        assert!(!pattern.matches_path(Utf8Path::new("src/bar/foo.js")));
 
         let _ = Pattern::parse("{{foo,bar},baz}", true)
             .expect_err("should not allow curly brackets more than 1 level deep");
@@ -1045,8 +1050,8 @@ mod test {
     fn test_pattern_glob_brackets_not_available_by_default() {
         // RODO: Remove this test when we make brackets available by default in Biome 2.0
         let pattern = Pattern::parse("{foo.js,bar.js}", false).unwrap();
-        assert!(!pattern.matches_path(Path::new("foo.js")));
-        assert!(!pattern.matches_path(Path::new("bar.js")));
-        assert!(!pattern.matches_path(Path::new("baz.js")));
+        assert!(!pattern.matches_path(Utf8Path::new("foo.js")));
+        assert!(!pattern.matches_path(Utf8Path::new("bar.js")));
+        assert!(!pattern.matches_path(Utf8Path::new("baz.js")));
     }
 }

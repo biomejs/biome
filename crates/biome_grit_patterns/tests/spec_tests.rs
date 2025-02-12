@@ -1,12 +1,11 @@
 use biome_diagnostics::Diagnostic;
 use biome_grit_parser::parse_grit;
 use biome_grit_patterns::{
-    GritQuery, GritQueryResult, GritTargetFile, GritTargetLanguage, JsTargetLanguage, Message,
+    GritQuery, GritQueryEffect, GritTargetFile, GritTargetLanguage, JsTargetLanguage, Message,
     OutputFile,
 };
-use biome_js_parser::{parse, JsParserOptions};
-use biome_js_syntax::JsFileSource;
 use biome_test_utils::register_leak_checker;
+use camino::Utf8Path;
 use grit_util::Range;
 use std::{fs::read_to_string, path::Path};
 
@@ -45,37 +44,34 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             );
         }
 
-        GritQuery::from_node(parse_grit_result.tree(), None, target_lang)
-            .unwrap_or_else(|err| panic!("cannot compile query from {query_path:?}: {err:?}"))
+        GritQuery::from_node(
+            parse_grit_result.tree(),
+            None,
+            target_lang.clone(),
+            Vec::new(),
+        )
+        .unwrap_or_else(|err| panic!("cannot compile query from {query_path:?}: {err:?}"))
     };
 
     let target_file = {
         let target_path = format!("tests/specs/{target_lang_ext}/{test_name}.{target_lang_ext}");
-        let target_path = Path::new(&target_path);
+        let target_path = Utf8Path::new(&target_path);
         let target_code = read_to_string(target_path)
             .unwrap_or_else(|err| panic!("failed to read code from {target_path:?}: {err:?}"));
-        // TODO: We should generalize this when we have more target languages.
-        let target_parse = parse(
-            &target_code,
-            JsFileSource::tsx(),
-            JsParserOptions::default(),
-        );
 
-        GritTargetFile {
-            path: target_path.into(),
-            parse: target_parse.into(),
-        }
+        GritTargetFile::parse(&target_code, target_path.into(), target_lang)
     };
 
-    let (results, logs) = query
+    let result = query
         .execute(target_file)
         .unwrap_or_else(|err| panic!("cannot execute query from {query_path:?}: {err:?}"));
-    let snapshot_result = SnapshotResult::from_query_results(results);
+    let snapshot_result = SnapshotResult::from_query_effects(result.effects);
 
-    let snapshot = if logs.is_empty() {
+    let snapshot = if result.logs.is_empty() {
         format!("{snapshot_result:#?}")
     } else {
-        let logs = logs
+        let logs = result
+            .logs
             .iter()
             .map(|log| {
                 format!(
@@ -108,6 +104,7 @@ fn run_error_test(query_path: &Path, test_name: &str) {
                 parse_grit_result.tree(),
                 None,
                 GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
+                Vec::new(),
             ) {
                 Ok(_) => panic!("an error was expected when compiling query from {query_path:?}"),
                 Err(error) => ErrorSnapshotResult {
@@ -164,24 +161,24 @@ struct SnapshotResult {
 }
 
 impl SnapshotResult {
-    fn from_query_results(results: Vec<GritQueryResult>) -> Self {
+    fn from_query_effects(results: Vec<GritQueryEffect>) -> Self {
         let mut snapshot_result = Self::default();
         for result in results {
             match result {
-                GritQueryResult::Match(m) => {
+                GritQueryEffect::Match(m) => {
                     snapshot_result.messages.extend(m.messages);
                     snapshot_result
                         .matched_ranges
                         .extend(m.ranges.into_iter().map(format_range));
                 }
-                GritQueryResult::Rewrite(rewrite) => {
+                GritQueryEffect::Rewrite(rewrite) => {
                     snapshot_result.messages.extend(rewrite.original.messages);
                     snapshot_result
                         .matched_ranges
                         .extend(rewrite.original.ranges.into_iter().map(format_range));
                     snapshot_result.rewritten_files.push(rewrite.rewritten);
                 }
-                GritQueryResult::CreateFile(create_file) => {
+                GritQueryEffect::CreateFile(create_file) => {
                     if let Some(ranges) = create_file.ranges {
                         snapshot_result
                             .matched_ranges

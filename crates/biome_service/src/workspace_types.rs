@@ -259,7 +259,7 @@ fn schema_object_type<'a>(
     let has_defaults = schema
         .metadata
         .as_ref()
-        .map_or(false, |metadata| metadata.default.is_some());
+        .is_some_and(|metadata| metadata.default.is_some());
 
     (ts_type, is_nullable || has_defaults, description)
 }
@@ -336,10 +336,10 @@ pub fn generate_type<'a>(
             // Create a property signature member in the interface for each
             // property of the corresponding schema object
             let object = schema.object.as_deref().unwrap();
-            for (property, schema) in &object.properties {
+            for (property_str, schema) in &object.properties {
                 let (ts_type, optional, description) = schema_type(queue, root_schema, schema);
 
-                let mut property = make::ident(property);
+                let mut property = make::ident(property_str);
                 if let Some(description) = description {
                     let comment = format!("/**\n\t* {description} \n\t */");
                     let trivia = vec![
@@ -350,10 +350,47 @@ pub fn generate_type<'a>(
                     property = property.with_leading_trivia(trivia);
                 }
 
+                let type_annotation = if property_str == "featuresSupported" {
+                    // HACK: force the `featuresSupported` property to be a Map<FeatureKind, SupportKind>
+                    // This is a temporary workaround to fix the type annotation for this property. The
+                    // better fix would be to use the `transform` feature that is available in `schemars` 1.0 to
+                    // add a metadata field that we can pick up here to generate the correct type annotation.
+                    // Alternatively, we could generate these types based on the actual rust types instead of the
+                    // json schema.
+                    let full_type = make::ts_reference_type(
+                        make::js_reference_identifier(make::ident("Map")).into(),
+                    )
+                    .with_type_arguments(make::ts_type_arguments(
+                        make::token(T![<]),
+                        make::ts_type_argument_list(
+                            [
+                                make::ts_reference_type(
+                                    make::js_reference_identifier(make::ident("FeatureKind"))
+                                        .into(),
+                                )
+                                .build()
+                                .into(),
+                                make::ts_reference_type(
+                                    make::js_reference_identifier(make::ident("SupportKind"))
+                                        .into(),
+                                )
+                                .build()
+                                .into(),
+                            ],
+                            [make::token(T![,])],
+                        ),
+                        make::token(T![>]),
+                    ))
+                    .build();
+                    make::ts_type_annotation(make::token(T![:]), full_type.into())
+                } else {
+                    make::ts_type_annotation(make::token(T![:]), ts_type)
+                };
+
                 let mut builder = make::ts_property_signature_type_member(
                     AnyJsObjectMemberName::from(make::js_literal_member_name(property)),
                 )
-                .with_type_annotation(make::ts_type_annotation(make::token(T![:]), ts_type));
+                .with_type_annotation(type_annotation);
 
                 if optional {
                     builder = builder.with_optional_token(make::token(T![?]));
@@ -451,17 +488,16 @@ macro_rules! workspace_method {
 }
 
 /// Returns a list of signature for all the methods in the [Workspace] trait
-pub fn methods() -> [WorkspaceMethod; 19] {
+pub fn methods() -> [WorkspaceMethod; 21] {
     [
         workspace_method!(file_features),
         workspace_method!(update_settings),
-        workspace_method!(register_project_folder),
-        workspace_method!(set_manifest_for_project),
+        workspace_method!(open_project),
         workspace_method!(open_file),
         workspace_method!(change_file),
         workspace_method!(close_file),
         workspace_method!(get_syntax_tree),
-        workspace_method!(organize_imports),
+        workspace_method!(check_file_size),
         workspace_method!(get_file_content),
         workspace_method!(get_control_flow_graph),
         workspace_method!(get_formatter_ir),
@@ -472,5 +508,8 @@ pub fn methods() -> [WorkspaceMethod; 19] {
         workspace_method!(format_on_type),
         workspace_method!(fix_file),
         workspace_method!(rename),
+        workspace_method!(parse_pattern),
+        workspace_method!(search_pattern),
+        workspace_method!(drop_pattern),
     ]
 }

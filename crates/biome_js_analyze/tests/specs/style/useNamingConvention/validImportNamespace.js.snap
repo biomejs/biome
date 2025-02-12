@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validImportNamespace.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import * as x from ""
 
 import * as camelCase from ""
@@ -12,5 +13,3 @@ import * as $ from ""
 
 import * as _ from ""
 ```
-
-

@@ -5,6 +5,7 @@ use biome_console::{
 use biome_text_edit::TextEdit;
 use std::path::Path;
 use std::{env, io, iter};
+use terminal_size::terminal_size;
 use unicode_width::UnicodeWidthStr;
 
 mod backtrace;
@@ -108,7 +109,22 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
             _ => None,
         };
 
-        let is_vscode = env::var("TERM_PROGRAM").unwrap_or_default() == "vscode";
+        let is_vscode = {
+            if cfg!(debug_assertions) {
+                false
+            } else {
+                env::var("TERM_PROGRAM").unwrap_or_default() == "vscode"
+            }
+        };
+        // https://github.com/JetBrains/jediterm/issues/253#issuecomment-1280492436
+        // https://github.com/JetBrains/intellij-community/blob/5ca79d879617e9cc82f61590b8d157d6a4ad8746/plugins/terminal/src/org/jetbrains/plugins/terminal/runner/LocalOptionsConfigurer.java#L94
+        let is_jetbrains = {
+            if cfg!(debug_assertions) {
+                false
+            } else {
+                env::var("TERM_PROGRAM").unwrap_or_default() == "JetBrains-JediTerm"
+            }
+        };
 
         if let Some(name) = file_name {
             if is_vscode {
@@ -120,6 +136,10 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
                     fmt.write_markup(markup! {
                         <Hyperlink href={link}>{name}</Hyperlink>
                     })?;
+                } else if is_jetbrains {
+                    fmt.write_str(&format!(" at {name}"))?;
+                } else if cfg!(debug_assertions) && cfg!(windows) {
+                    fmt.write_str(name.replace('\\', "/").as_str())?;
                 } else {
                     fmt.write_str(name)?;
                 }
@@ -187,11 +207,17 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintHeader<'_, D> {
 
         // Load the printed width for the header, and fill the rest of the line
         // with the '━' line character up to 100 columns with at least 10 characters
-        const HEADER_WIDTH: usize = 100;
+        let header_width = {
+            if cfg!(debug_assertions) {
+                100
+            } else {
+                terminal_size().map_or(100, |(width, _)| width.0 as usize)
+            }
+        };
         const MIN_WIDTH: usize = 10;
 
         let text_width = slot.map_or(0, |writer| writer.width);
-        let line_width = HEADER_WIDTH.saturating_sub(text_width).max(MIN_WIDTH);
+        let line_width = header_width.saturating_sub(text_width).max(MIN_WIDTH);
         HorizontalLine::new(line_width).fmt(f)
     }
 }
@@ -501,7 +527,7 @@ impl Visit for PrintAdvices<'_, '_> {
                             self.0.write_markup(markup!({ header_cell }))?;
                             if index < headers.len() - 1 {
                                 self.0.write_markup(
-                                    markup! {{Padding::new(padding + longest_cell - header_cell.text_len())}},
+                                    markup! {{Padding::new(padding + longest_cell.saturating_sub(header_cell.text_len()))}},
                                 )?;
                             }
                         }

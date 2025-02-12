@@ -402,20 +402,17 @@ impl<L: Language + Default> RegistryRule<L> {
             let preferred_jsx_quote = params.options.preferred_jsx_quote();
             let jsx_runtime = params.options.jsx_runtime();
             let options = params.options.rule_options::<R>().unwrap_or_default();
-            let ctx = match RuleContext::new(
+            let ctx = RuleContext::new(
                 &query_result,
                 params.root,
                 params.services,
                 &globals,
-                &params.options.file_path,
+                params.options.file_path.as_path(),
                 &options,
                 preferred_quote,
                 preferred_jsx_quote,
                 jsx_runtime,
-            ) {
-                Ok(ctx) => ctx,
-                Err(error) => return Err(error),
-            };
+            )?;
 
             for result in R::run(&ctx) {
                 let text_range =

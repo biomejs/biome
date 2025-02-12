@@ -1,0 +1,71 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/css/simple.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sample styled page</title>
+    <style>a { color: red; }</style>
+    <style>
+      body { background: navy; color: yellow; }
+    </style>
+  </head>
+  <body>
+    <h1>Sample styled page</h1>
+    <p>This page is just a demo.</p>
+  </body>
+</html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,17 +1,10 @@
+-<!doctype html>
++<!DOCTYPE html>
+ <html>
+   <head>
+     <title>Sample styled page</title>
+-    <style>
+-      a {
+-        color: red;
+-      }
+-    </style>
++    <style>a { color: red; }</style>
+     <style>
+-      body {
+-        background: navy;
+-        color: yellow;
+-      }
++      body { background: navy; color: yellow; }
+     </style>
+   </head>
+   <body>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sample styled page</title>
+    <style>a { color: red; }</style>
+    <style>
+      body { background: navy; color: yellow; }
+    </style>
+  </head>
+  <body>
+    <h1>Sample styled page</h1>
+    <p>This page is just a demo.</p>
+  </body>
+</html>
+```

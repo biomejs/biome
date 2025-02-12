@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::{fmt::Display, fmt::Formatter, markup};
+use biome_diagnostics::Severity;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, static_value::StaticValue, TextRange};
 use biome_rowan::AstNode;
 
@@ -51,6 +52,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("alt-text")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -97,24 +99,33 @@ impl Rule for UseAltText {
                             if !opening_element.has_accessible_child() {
                                 return Some((
                                     ValidatedElement::Object,
-                                    element.syntax().text_range(),
+                                    element.syntax().text_range_with_trivia(),
                                 ));
                             }
                         }
                         AnyJsxElement::JsxSelfClosingElement(_) => {
-                            return Some((ValidatedElement::Object, element.syntax().text_range()));
+                            return Some((
+                                ValidatedElement::Object,
+                                element.syntax().text_range_with_trivia(),
+                            ));
                         }
                     }
                 }
             }
             "img" => {
                 if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
-                    return Some((ValidatedElement::Img, element.syntax().text_range()));
+                    return Some((
+                        ValidatedElement::Img,
+                        element.syntax().text_range_with_trivia(),
+                    ));
                 }
             }
             "area" => {
                 if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
-                    return Some((ValidatedElement::Area, element.syntax().text_range()));
+                    return Some((
+                        ValidatedElement::Area,
+                        element.syntax().text_range_with_trivia(),
+                    ));
                 }
             }
             "input" => {
@@ -124,7 +135,10 @@ impl Rule for UseAltText {
                     && !has_aria_labelledby
                     && !aria_hidden
                 {
-                    return Some((ValidatedElement::Input, element.syntax().text_range()));
+                    return Some((
+                        ValidatedElement::Input,
+                        element.syntax().text_range_with_trivia(),
+                    ));
                 }
             }
             _ => {}
@@ -149,17 +163,17 @@ impl Rule for UseAltText {
 fn has_type_image_attribute(element: &AnyJsxElement) -> bool {
     element
         .find_attribute_by_name("type")
-        .map_or(false, |attribute| {
+        .is_some_and(|attribute| {
             attribute
                 .as_static_value()
-                .map_or(false, |value| value.text() == "image")
+                .is_some_and(|value| value.text() == "image")
         })
 }
 
 fn has_valid_alt_text(element: &AnyJsxElement) -> bool {
     element
         .find_attribute_by_name("alt")
-        .map_or(false, |attribute| {
+        .is_some_and(|attribute| {
             if attribute.initializer().is_none() {
                 return false;
             }
@@ -167,27 +181,26 @@ fn has_valid_alt_text(element: &AnyJsxElement) -> bool {
             attribute
                 .as_static_value()
                 .map_or(true, |value| !value.is_null_or_undefined())
-                && !element.has_trailing_spread_prop(&attribute)
         })
 }
 
 fn has_valid_label(element: &AnyJsxElement, name_to_lookup: &str) -> bool {
     element
         .find_attribute_by_name(name_to_lookup)
-        .map_or(false, |attribute| {
+        .is_some_and(|attribute| {
             if attribute.initializer().is_none() {
                 return false;
             }
             attribute.as_static_value().map_or(true, |value| {
                 !value.is_null_or_undefined() && value.is_not_string_constant("")
-            }) && !element.has_trailing_spread_prop(&attribute)
+            })
         })
 }
 
 fn is_aria_hidden(element: &AnyJsxElement) -> bool {
     element
         .find_attribute_by_name("aria-hidden")
-        .map_or(false, |attribute| {
+        .is_some_and(|attribute| {
             attribute
                 .as_static_value()
                 .map_or(true, |value| match value {

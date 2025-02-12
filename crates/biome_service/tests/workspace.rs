@@ -2,23 +2,30 @@
 mod test {
     use biome_analyze::RuleCategories;
     use biome_configuration::analyzer::{RuleGroup, RuleSelector};
-    use biome_fs::BiomePath;
+    use biome_configuration::{Configuration, FilesConfiguration};
+    use biome_fs::{BiomePath, MemoryFileSystem};
     use biome_js_syntax::{JsFileSource, TextSize};
     use biome_service::file_handlers::DocumentFileSource;
+    use biome_service::projects::ProjectKey;
     use biome_service::workspace::{
-        server, FileGuard, OpenFileParams, RegisterProjectFolderParams,
+        server, CloseFileParams, CloseProjectParams, FileContent, FileGuard, GetFileContentParams,
+        GetSyntaxTreeParams, OpenFileParams, OpenProjectParams, ScanProjectFolderParams,
+        UpdateSettingsParams,
     };
-    use biome_service::Workspace;
-    fn create_server() -> Box<dyn Workspace> {
-        let workspace = server();
-        workspace
-            .register_project_folder(RegisterProjectFolderParams {
-                set_as_current_workspace: true,
-                path: None,
+    use biome_service::{Workspace, WorkspaceError};
+    use camino::Utf8PathBuf;
+    use std::num::NonZeroU64;
+
+    fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
+        let workspace = server(Box::new(MemoryFileSystem::default()));
+        let project_key = workspace
+            .open_project(OpenProjectParams {
+                path: Default::default(),
+                open_uninitialized: true,
             })
             .unwrap();
 
-        workspace
+        (workspace, project_key)
     }
 
     #[test]
@@ -27,14 +34,16 @@ mod test {
         const GRAPH: &str = "flowchart TB
     block_0[\"<b>block_0</b><br/>Return(JS_RETURN_STATEMENT 19..26)<br/>Return\"]\n\n";
 
-        let workspace = create_server();
+        let (workspace, project_key) = create_server();
         let file = FileGuard::open(
             workspace.as_ref(),
             OpenFileParams {
+                project_key,
                 path: BiomePath::new("file.js"),
-                content: SOURCE.into(),
+                content: FileContent::FromClient(SOURCE.into()),
                 version: 0,
                 document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -46,16 +55,18 @@ mod test {
 
     #[test]
     fn recognize_typescript_definition_file() {
-        let workspace = create_server();
+        let (workspace, project_key) = create_server();
 
         let file = FileGuard::open(
             workspace.as_ref(),
             OpenFileParams {
+                project_key,
                 path: BiomePath::new("file.d.ts"),
                 // the following code snippet can be correctly parsed in .d.ts file but not in .ts file
-                content: "export const foo: number".into(),
+                content: FileContent::FromClient("export const foo: number".into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -65,16 +76,18 @@ mod test {
 
     #[test]
     fn correctly_handle_json_files() {
-        let workspace = create_server();
+        let (workspace, project_key) = create_server();
 
         // ".json" file
         let json_file = FileGuard::open(
             workspace.as_ref(),
             OpenFileParams {
+                project_key,
                 path: BiomePath::new("a.json"),
-                content: r#"{"a": 42}"#.into(),
+                content: FileContent::FromClient(r#"{"a": 42}"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -84,10 +97,12 @@ mod test {
         let json_file_with_comments = FileGuard::open(
             workspace.as_ref(),
             OpenFileParams {
+                project_key,
                 path: BiomePath::new("b.json"),
-                content: r#"{"a": 42}//comment"#.into(),
+                content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -97,10 +112,12 @@ mod test {
         let json_file_with_trailing_commas = FileGuard::open(
             workspace.as_ref(),
             OpenFileParams {
+                project_key,
                 path: BiomePath::new("c.json"),
-                content: r#"{"a": 42,}"#.into(),
+                content: FileContent::FromClient(r#"{"a": 42,}"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -110,10 +127,12 @@ mod test {
         let jsonc_file = FileGuard::open(
             workspace.as_ref(),
             OpenFileParams {
+                project_key,
                 path: BiomePath::new("d.jsonc"),
-                content: r#"{"a": 42}//comment"#.into(),
+                content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -123,10 +142,12 @@ mod test {
         let jsonc_file = FileGuard::open(
             workspace.as_ref(),
             OpenFileParams {
+                project_key,
                 path: BiomePath::new("e.jsonc"),
-                content: r#"{"a": 42,}"#.into(),
+                content: FileContent::FromClient(r#"{"a": 42,}"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -136,10 +157,12 @@ mod test {
         let well_known_json_with_comments_file = FileGuard::open(
             workspace.as_ref(),
             OpenFileParams {
+                project_key,
                 path: BiomePath::new(".eslintrc.json"),
-                content: r#"{"a": 42}//comment"#.into(),
+                content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -149,10 +172,12 @@ mod test {
         let well_known_json_with_comments_file = FileGuard::open(
             workspace.as_ref(),
             OpenFileParams {
+                project_key,
                 path: BiomePath::new("project/.vscode/settings.json"),
-                content: r#"{"a": 42}//comment"#.into(),
+                content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -162,10 +187,12 @@ mod test {
         let well_known_json_with_comments_file_with_trailing_commas = FileGuard::open(
             workspace.as_ref(),
             OpenFileParams {
+                project_key,
                 path: BiomePath::new("dir/.eslintrc.json"),
-                content: r#"{"a": 42,}"#.into(),
+                content: FileContent::FromClient(r#"{"a": 42,}"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -177,10 +204,12 @@ mod test {
         let well_known_json_with_comments_and_trailing_commas_file = FileGuard::open(
             workspace.as_ref(),
             OpenFileParams {
+                project_key,
                 path: BiomePath::new("tsconfig.json"),
-                content: r#"{"a": 42,}//comment"#.into(),
+                content: FileContent::FromClient(r#"{"a": 42,}//comment"#.into()),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -191,13 +220,15 @@ mod test {
 
     #[test]
     fn correctly_parses_graphql_files() {
-        let workspace = create_server();
+        let (workspace, project_key) = create_server();
 
         let graphql_file = FileGuard::open(
             workspace.as_ref(),
             OpenFileParams {
+                project_key,
                 path: BiomePath::new("file.graphql"),
-                content: r#"type Query {
+                content: FileContent::FromClient(
+                    r#"type Query {
   me: User
 }
 
@@ -205,9 +236,11 @@ type User {
   id: ID
   name: String
 }"#
-                .into(),
+                    .into(),
+                ),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -220,18 +253,22 @@ type User {
 
     #[test]
     fn correctly_pulls_lint_diagnostics() {
-        let workspace = create_server();
+        let (workspace, project_key) = create_server();
 
         let graphql_file = FileGuard::open(
             workspace.as_ref(),
             OpenFileParams {
+                project_key,
                 path: BiomePath::new("file.graphql"),
-                content: r#"query {
+                content: FileContent::FromClient(
+                    r#"query {
   member @deprecated(abc: 123)
 }"#
-                .into(),
+                    .into(),
+                ),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -239,7 +276,7 @@ type User {
             RuleCategories::all(),
             10,
             vec![RuleSelector::Rule(
-                RuleGroup::Nursery,
+                RuleGroup::Nursery.as_str(),
                 "useDeprecatedReason",
             )],
             vec![],
@@ -251,18 +288,22 @@ type User {
 
     #[test]
     fn pull_grit_debug_info() {
-        let workspace = create_server();
+        let (workspace, project_key) = create_server();
 
         let grit_file = FileGuard::open(
             workspace.as_ref(),
             OpenFileParams {
+                project_key,
                 path: BiomePath::new("file.grit"),
-                content: r#"`function ($args) { $body }` where {
+                content: FileContent::FromClient(
+                    r#"`function ($args) { $body }` where {
   $args <: contains `x`
 }"#
-                .into(),
+                    .into(),
+                ),
                 version: 0,
                 document_file_source: None,
+                persist_node_cache: false,
             },
         )
         .unwrap();
@@ -271,5 +312,125 @@ type User {
         let syntax = result.unwrap().ast;
 
         assert!(syntax.starts_with("GritRoot"))
+    }
+
+    #[test]
+    fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistered() {
+        const FILE_A_CONTENT: &[u8] = b"import { bar } from './b.ts';\nfunction foo() {}";
+        const FILE_B_CONTENT: &[u8] = b"import { foo } from './a.ts';\nfunction bar() {}";
+
+        let mut fs = MemoryFileSystem::default();
+        fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_A_CONTENT);
+        fs.insert(Utf8PathBuf::from("/project/b.ts"), FILE_B_CONTENT);
+
+        let workspace = server(Box::new(fs));
+        let project_key = workspace
+            .open_project(OpenProjectParams {
+                path: Utf8PathBuf::from("/project").into(),
+                open_uninitialized: true,
+            })
+            .unwrap();
+
+        workspace
+            .scan_project_folder(ScanProjectFolderParams {
+                project_key,
+                path: None,
+            })
+            .unwrap();
+
+        macro_rules! assert_file_a_content {
+            () => {
+                assert_eq!(
+                    workspace
+                        .get_file_content(GetFileContentParams {
+                            project_key,
+                            path: BiomePath::new("/project/a.ts"),
+                        })
+                        .unwrap(),
+                    String::from_utf8(FILE_A_CONTENT.to_vec()).unwrap(),
+                );
+            };
+        }
+
+        assert_file_a_content!();
+
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: BiomePath::new("/project/a.ts"),
+                content: FileContent::FromServer,
+                version: 0,
+                document_file_source: None,
+                persist_node_cache: false,
+            })
+            .unwrap();
+
+        assert_file_a_content!();
+
+        workspace
+            .close_file(CloseFileParams {
+                project_key,
+                path: BiomePath::new("/project/a.ts"),
+            })
+            .unwrap();
+
+        assert_file_a_content!();
+
+        workspace
+            .close_project(CloseProjectParams { project_key })
+            .unwrap();
+
+        assert!(workspace
+            .get_file_content(GetFileContentParams {
+                project_key,
+                path: BiomePath::new("/project/a.ts"),
+            })
+            .is_err_and(|error| matches!(error, WorkspaceError::NotFound(_))));
+    }
+
+    #[test]
+    fn too_large_files_are_tracked_but_not_parsed() {
+        const FILE_CONTENT: &[u8] = b"console.log(`I'm YUUUGE!`);";
+
+        let mut fs = MemoryFileSystem::default();
+        fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
+
+        let workspace = server(Box::new(fs));
+        let project_key = workspace
+            .open_project(OpenProjectParams {
+                path: Utf8PathBuf::from("/project").into(),
+                open_uninitialized: true,
+            })
+            .unwrap();
+
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                configuration: Configuration {
+                    files: Some(FilesConfiguration {
+                        max_size: Some(NonZeroU64::new(10).unwrap().into()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                vcs_base_path: None,
+                gitignore_matches: Vec::new(),
+                workspace_directory: None,
+            })
+            .unwrap();
+
+        workspace
+            .scan_project_folder(ScanProjectFolderParams {
+                project_key,
+                path: None,
+            })
+            .unwrap();
+
+        assert!(workspace
+            .get_syntax_tree(GetSyntaxTreeParams {
+                project_key,
+                path: BiomePath::new("/project/a.ts"),
+            })
+            .is_err_and(|error| matches!(error, WorkspaceError::FileIgnored(_))));
     }
 }
