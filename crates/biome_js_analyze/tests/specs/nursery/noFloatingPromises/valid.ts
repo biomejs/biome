@@ -27,11 +27,16 @@ async function bindingPromiseInsideFunction() {
   Promise.resolve()
 }
 
-
-class ValidTestClass {
+class ValidTestClassParent {
+  async returnsPromiseFromParent(): Promise<string> {
+    return 'value';
+  }
+}
+class ValidTestClass extends ValidTestClassParent {
   returnsPromiseFunctionProperty: () => Promise<void>
   returnsPromiseProperty: Promise<void>
   constructor() {
+    super()
     this.returnsPromiseFunctionProperty = () => Promise.resolve();
     this.returnsPromiseProperty = new Promise((resolve, reject) => { })
   }
@@ -52,6 +57,10 @@ class ValidTestClass {
 
   async someMethod3() {
     this.returnsPromiseProperty.then(() => { }, () => { });
+  }
+
+  async someMethod4() {
+    this.returnsPromiseFromParent().then(() => { }).catch(() => {}).finally(() => { });
   }
 
   returnsPromiseFunction = async function (): Promise<string> {
@@ -76,10 +85,11 @@ async function testClassMethodCalls(): Promise<string> {
   return validTestClass.returnsPromiseArrowFunction();
 }
 
-const validTestClassInitializedExpression = class ValidTestClass {
+const validTestClassInitializedExpression = class ValidTestClass extends ValidTestClassParent {
   returnsPromiseFunctionProperty: () => Promise<void>
   returnsPromiseProperty: Promise<void>
   constructor() {
+    super();
     this.returnsPromiseFunctionProperty = () => Promise.resolve();
     this.returnsPromiseProperty = new Promise((resolve, reject) => { })
   }
@@ -102,6 +112,10 @@ const validTestClassInitializedExpression = class ValidTestClass {
     this.returnsPromiseProperty.then(() => { }, () => { });
   }
 
+  async someMethod4() {
+    this.returnsPromiseFromParent().then(() => { }).catch(() => {}).finally(() => { });
+  }
+
   returnsPromiseFunction = async function (): Promise<string> {
     return 'value';
   }
@@ -122,4 +136,57 @@ async function testClassExpressionMethodCalls(): Promise<string> {
   validTestClassExpression.returnsPromiseFunctionProperty().then(() => { }, () => { }).finally(() => { });
   validTestClassExpression.returnsPromiseProperty.catch(() => { });
   return validTestClassExpression.returnsPromiseArrowFunction();
+}
+
+const UnnamedValidClassExpression = class extends ValidTestClassParent {
+  returnsPromiseFunctionProperty: () => Promise<void>
+  returnsPromiseProperty: Promise<void>
+  constructor() {
+    super();
+    this.returnsPromiseFunctionProperty = () => Promise.resolve();
+    this.returnsPromiseProperty = new Promise((resolve, reject) => { })
+  }
+
+  async returnsPromiseMethod(): Promise<string> {
+    return 'value';
+  }
+  async someMethod() {
+    this.returnsPromiseMethod().catch(() => { });
+  }
+
+  returnsString(): string {
+    return 'value';
+  }
+  async someMethod2() {
+    this.returnsString();
+  }
+
+  async someMethod3() {
+    this.returnsPromiseProperty.then(() => { }, () => { });
+  }
+
+  async someMethod4() {
+    this.returnsPromiseFromParent().then(() => { }).catch(() => {}).finally(() => { });
+  }
+
+  returnsPromiseFunction = async function (): Promise<string> {
+    return 'value';
+  }
+  returnsPromiseArrowFunction = async (): Promise<string> => {
+    return 'value';
+  }
+
+  async someMetho3() {
+    await this.returnsPromiseFunction().then(() => { });
+    this.returnsPromiseArrowFunction().catch(() => { });
+  }
+}
+
+const unnamedValidClassExpression = new UnnamedValidClassExpression();
+async function testUnnamedClassExpressionMethodCalls(): Promise<string> {
+  await unnamedValidClassExpression.returnsPromiseMethod();
+  unnamedValidClassExpression.returnsPromiseMethod().catch(() => { });
+  unnamedValidClassExpression.returnsPromiseFunctionProperty().then(() => { }, () => { }).finally(() => { });
+  unnamedValidClassExpression.returnsPromiseProperty.catch(() => { });
+  return unnamedValidClassExpression.returnsPromiseArrowFunction();
 }
