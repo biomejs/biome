@@ -1,5 +1,5 @@
 use proc_macro2::{Delimiter, Group, Ident, TokenStream, TokenTree};
-use proc_macro_error::*;
+use proc_macro_error2::*;
 use quote::{quote, ToTokens};
 
 struct StackEntry {
