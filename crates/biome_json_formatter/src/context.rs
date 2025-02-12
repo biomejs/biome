@@ -2,7 +2,7 @@ use crate::comments::{FormatJsonLeadingComment, JsonComments};
 use crate::JsonCommentStyle;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::separated::TrailingSeparator;
-use biome_formatter::{prelude::*, AttributePosition, BracketSpacing, IndentWidth};
+use biome_formatter::{prelude::*, BracketSpacing, IndentWidth};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TransformSourceMap,
@@ -64,7 +64,6 @@ pub struct JsonFormatOptions {
     indent_width: IndentWidth,
     line_ending: LineEnding,
     line_width: LineWidth,
-    attribute_position: AttributePosition,
     /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
     trailing_commas: TrailingCommas,
     expand: Expand,
@@ -214,6 +213,10 @@ impl JsonFormatOptions {
         self.expand = expand;
     }
 
+    pub fn bracket_spacing(&self) -> BracketSpacing {
+        self.bracket_spacing
+    }
+
     pub(crate) fn to_trailing_separator(&self) -> TrailingSeparator {
         match self.trailing_commas {
             TrailingCommas::None => TrailingSeparator::Omit,
@@ -245,18 +248,6 @@ impl FormatOptions for JsonFormatOptions {
 
     fn line_ending(&self) -> LineEnding {
         self.line_ending
-    }
-
-    fn attribute_position(&self) -> AttributePosition {
-        self.attribute_position
-    }
-
-    fn bracket_same_line(&self) -> biome_formatter::BracketSameLine {
-        biome_formatter::BracketSameLine::default()
-    }
-
-    fn bracket_spacing(&self) -> BracketSpacing {
-        self.bracket_spacing
     }
 
     fn as_print_options(&self) -> PrinterOptions {

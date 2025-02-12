@@ -705,6 +705,11 @@ pub trait FormatContext {
 }
 
 /// Options customizing how the source code should be formatted.
+///
+/// **Note**: This trait should **only** contain the essential abstractions required for the printing phase.  
+/// For example, do not add a `fn bracket_spacing(&self) -> BracketSpacing` method here,  
+/// as the [BracketSpacing] option is not needed during the printing phase
+/// and enforcing its implementation for all structs using this trait is unnecessary.
 pub trait FormatOptions {
     /// The indent style.
     fn indent_style(&self) -> IndentStyle;
@@ -717,15 +722,6 @@ pub trait FormatOptions {
 
     /// The type of line ending.
     fn line_ending(&self) -> LineEnding;
-
-    /// The attribute position.
-    fn attribute_position(&self) -> AttributePosition;
-
-    /// Whether to put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
-    fn bracket_same_line(&self) -> BracketSameLine;
-
-    /// Whether to insert spaces around brackets in object literals. Defaults to true.
-    fn bracket_spacing(&self) -> BracketSpacing;
 
     /// Derives the print options from the these format options
     fn as_print_options(&self) -> PrinterOptions;
@@ -775,9 +771,6 @@ pub struct SimpleFormatOptions {
     pub indent_width: IndentWidth,
     pub line_width: LineWidth,
     pub line_ending: LineEnding,
-    pub attribute_position: AttributePosition,
-    pub bracket_same_line: BracketSameLine,
-    pub bracket_spacing: BracketSpacing,
 }
 
 impl FormatOptions for SimpleFormatOptions {
@@ -797,26 +790,12 @@ impl FormatOptions for SimpleFormatOptions {
         self.line_ending
     }
 
-    fn attribute_position(&self) -> AttributePosition {
-        self.attribute_position
-    }
-
-    fn bracket_same_line(&self) -> BracketSameLine {
-        self.bracket_same_line
-    }
-
-    fn bracket_spacing(&self) -> BracketSpacing {
-        self.bracket_spacing
-    }
-
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::default()
             .with_indent_style(self.indent_style)
             .with_indent_width(self.indent_width)
             .with_print_width(self.line_width.into())
             .with_line_ending(self.line_ending)
-            .with_attribute_position(self.attribute_position)
-            .with_bracket_spacing(self.bracket_spacing)
     }
 }
 
