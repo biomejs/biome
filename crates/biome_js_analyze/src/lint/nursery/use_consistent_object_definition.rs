@@ -102,56 +102,67 @@ impl Rule for UseConsistentObjectDefinition {
         let options = ctx.options();
         match binding {
             AnyJsObjectMember::JsShorthandPropertyObjectMember(_) => match options.syntax {
+                // Shorthand properties should error when explicit is expected
+                ObjectPropertySyntax::Shorthand => None,
+                ObjectPropertySyntax::Explicit => Some(()),
+            },
+            AnyJsObjectMember::JsMethodObjectMember(_) => match options.syntax {
+                // Shorthand methods should error when explicit is expected
                 ObjectPropertySyntax::Shorthand => None,
                 ObjectPropertySyntax::Explicit => Some(()),
             },
             AnyJsObjectMember::JsPropertyObjectMember(source) => {
-                let member_token = source.name().ok()?;
-                let member_id = match member_token {
-                    AnyJsObjectMemberName::JsLiteralMemberName(literal) => {
-                        let literal_token = literal.value().ok()?;
-                        inner_string_text(&literal_token)
+                let value_token = source.value().ok()?;
+                let value_id = match value_token {
+                    AnyJsExpression::JsIdentifierExpression(identifier_token) => {
+                        // If expression is an identifier, get ID to compare it against the property name later
+                        let variable_token = identifier_token.name().ok()?.value_token().ok()?;
+                        inner_string_text(&variable_token)
                     }
-                    AnyJsObjectMemberName::JsComputedMemberName(_computed) => {
+                    AnyJsExpression::JsFunctionExpression(_function_token) => {
+                        // Functions are always shorthandable
+                        match options.syntax {
+                            ObjectPropertySyntax::Shorthand => return Some(()),
+                            ObjectPropertySyntax::Explicit => return None,
+                        }
+                    }
+                    _ => return None,
+                };
+                let name_token = source.name().ok()?;
+                let _name_id = match name_token {
+                    AnyJsObjectMemberName::JsLiteralMemberName(literal_token) => {
+                        match options.syntax {
+                            ObjectPropertySyntax::Shorthand => {
+                                // Throw shorthand error if the value is the same as the property name
+                                // We use `text_trimmed` to preserve quotes when comparing, we need this
+                                // because {foo: foo} can be shorthanded, but {"foo": foo} cannot
+                                if literal_token.value().ok()?.text_trimmed() == value_id.trim() {
+                                    return Some(());
+                                } else {
+                                    return None;
+                                }
+                            }
+                            ObjectPropertySyntax::Explicit => {
+                                return None;
+                            }
+                        }
+                    }
+                    AnyJsObjectMemberName::JsComputedMemberName(_computed_token) => {
                         let reference_token = source.value().ok()?;
+                        // Computed is always shorthandable if the value is a function, else never
                         match reference_token {
-                            AnyJsExpression::JsFunctionExpression(function) => {
-                                let function_token = function.function_token().ok()?;
-                                inner_string_text(&function_token)
+                            AnyJsExpression::JsFunctionExpression(_function_token) => {
+                                match options.syntax {
+                                    ObjectPropertySyntax::Shorthand => return Some(()),
+                                    ObjectPropertySyntax::Explicit => return None,
+                                }
                             }
                             _ => return None,
                         }
                     }
                     _ => return None,
                 };
-                let reference_token = source.value().ok()?;
-                let reference_id = match reference_token {
-                    AnyJsExpression::JsIdentifierExpression(identifier) => {
-                        let variable_token = identifier.name().ok()?.value_token().ok()?;
-                        inner_string_text(&variable_token)
-                    }
-                    AnyJsExpression::JsFunctionExpression(function) => {
-                        let function_token = function.function_token().ok()?;
-                        inner_string_text(&function_token)
-                    }
-                    _ => return None,
-                };
-
-                match options.syntax {
-                    ObjectPropertySyntax::Shorthand => {
-                        if member_id == reference_id || "function" == reference_id {
-                            Some(())
-                        } else {
-                            None
-                        }
-                    }
-                    ObjectPropertySyntax::Explicit => None,
-                }
             }
-            AnyJsObjectMember::JsMethodObjectMember(_) => match options.syntax {
-                ObjectPropertySyntax::Shorthand => None,
-                ObjectPropertySyntax::Explicit => Some(()),
-            },
             _ => None,
         }
     }
