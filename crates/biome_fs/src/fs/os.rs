@@ -236,6 +236,12 @@ impl<'scope> OsTraversalScope<'scope> {
 
 impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
     fn evaluate(&self, ctx: &'scope dyn TraversalContext, path: Utf8PathBuf) {
+        // Path must be absolute in order to properly normalize them before matching against globs.
+        //
+        // FIXME: This code should be moved to the `traverse_inputs` function in `biome_cli/src/traverse.rs`.
+        // Unfortunately moving this code to the `traverse_inputs` function makes many tests fail.
+        // The issue is coming from some bugs in our test infra.
+        // See https://github.com/biomejs/biome/pull/5017
         let path = match std::path::Path::new(&path).absolutize() {
             Ok(std::borrow::Cow::Owned(absolutized)) => Utf8PathBuf::from_path_buf(absolutized)
                 .expect("Absolute path must be correctly parsed"),
