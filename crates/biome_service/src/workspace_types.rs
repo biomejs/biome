@@ -350,29 +350,34 @@ pub fn generate_type<'a>(
                     property = property.with_leading_trivia(trivia);
                 }
 
-                let type_annotation = if property_str == "featuresSupported" {
+                let type_annotation = if let Some((container_type, key_type, value_type)) =
+                    match property_str.as_str() {
+                        "featuresSupported" => Some(("Map", "FeatureKind", "SupportKind")),
+                        "domains" => Some(("Record", "RuleDomain", "RuleDomainValue")),
+                        _ => None,
+                    } {
                     // HACK: force the `featuresSupported` property to be a Map<FeatureKind, SupportKind>
                     // This is a temporary workaround to fix the type annotation for this property. The
                     // better fix would be to use the `transform` feature that is available in `schemars` 1.0 to
                     // add a metadata field that we can pick up here to generate the correct type annotation.
                     // Alternatively, we could generate these types based on the actual rust types instead of the
                     // json schema.
+                    //
+                    // We also manually fix the types for some other properties as well.
                     let full_type = make::ts_reference_type(
-                        make::js_reference_identifier(make::ident("Map")).into(),
+                        make::js_reference_identifier(make::ident(container_type)).into(),
                     )
                     .with_type_arguments(make::ts_type_arguments(
                         make::token(T![<]),
                         make::ts_type_argument_list(
                             [
                                 make::ts_reference_type(
-                                    make::js_reference_identifier(make::ident("FeatureKind"))
-                                        .into(),
+                                    make::js_reference_identifier(make::ident(key_type)).into(),
                                 )
                                 .build()
                                 .into(),
                                 make::ts_reference_type(
-                                    make::js_reference_identifier(make::ident("SupportKind"))
-                                        .into(),
+                                    make::js_reference_identifier(make::ident(value_type)).into(),
                                 )
                                 .build()
                                 .into(),

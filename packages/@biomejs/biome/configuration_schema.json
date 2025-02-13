@@ -2271,7 +2271,7 @@
 			"type": "object",
 			"properties": {
 				"domains": {
-					"description": "An object where the keys are the names of the domains, and the values are boolean. `true` to turn-on the rules that belong to that domain, `false` to turn them off",
+					"description": "An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.",
 					"type": ["object", "null"],
 					"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" }
 				},
