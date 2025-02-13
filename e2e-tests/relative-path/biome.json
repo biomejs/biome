@@ -1,0 +1,4 @@
+{
+    "files": { "includes": ["**"] },
+    "linter": { "rules": { "recommended": true, "suspicious": { "noDebugger": "error" } } }
+}
