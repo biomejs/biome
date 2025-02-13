@@ -5,8 +5,8 @@ use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, CstFormatContext, FormatContext,
-    FormatElement, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
-    TransformSourceMap,
+    FormatElement, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, ObjectWrap,
+    QuoteStyle, TransformSourceMap,
 };
 use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
 use std::fmt;
@@ -397,7 +397,7 @@ impl FormatOptions for JsFormatOptions {
 }
 
 impl fmt::Display for JsFormatOptions {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Indent style: {}", self.indent_style)?;
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
@@ -442,7 +442,7 @@ impl FromStr for QuoteProperties {
 }
 
 impl fmt::Display for QuoteProperties {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             QuoteProperties::AsNeeded => write!(f, "As needed"),
             QuoteProperties::Preserve => write!(f, "Preserve"),
@@ -486,7 +486,7 @@ impl FromStr for Semicolons {
 }
 
 impl fmt::Display for Semicolons {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Semicolons::AsNeeded => write!(f, "As needed"),
             Semicolons::Always => write!(f, "Always"),
@@ -531,54 +531,10 @@ impl FromStr for ArrowParentheses {
 }
 
 impl fmt::Display for ArrowParentheses {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ArrowParentheses::AsNeeded => write!(f, "As needed"),
             ArrowParentheses::Always => write!(f, "Always"),
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub enum ObjectWrap {
-    #[default]
-    Preserve,
-    Collapse,
-}
-
-impl ObjectWrap {
-    pub const fn is_preserve(&self) -> bool {
-        matches!(self, Self::Preserve)
-    }
-
-    pub const fn is_collapse(&self) -> bool {
-        matches!(self, Self::Collapse)
-    }
-}
-
-impl FromStr for ObjectWrap {
-    type Err = &'static str;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "preserve"  => Ok(Self::Preserve),
-            "contains"  => Ok(Self::Collapse),
-            _ => Err("Value not supported for objectWrap. Supported values are 'preserve' and 'collapse'."),
-        }
-    }
-}
-
-impl fmt::Display for ObjectWrap {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Preserve => write!(f, "Preserve"),
-            Self::Collapse => write!(f, "Collapse"),
         }
     }
 }

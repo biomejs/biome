@@ -37,20 +37,20 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        9 │ + → → "attributePosition":·"auto",
       10 │ + → → "bracketSameLine":·false,
       11 │ + → → "bracketSpacing":·true,
-      12 │ + → → "useEditorconfig":·true
-      13 │ + → },
-      14 │ + → "javascript":·{
-      15 │ + → → "formatter":·{
-      16 │ + → → → "jsxQuoteStyle":·"double",
-      17 │ + → → → "quoteProperties":·"asNeeded",
-      18 │ + → → → "trailingCommas":·"all",
-      19 │ + → → → "semicolons":·"asNeeded",
-      20 │ + → → → "arrowParentheses":·"always",
-      21 │ + → → → "bracketSameLine":·false,
-      22 │ + → → → "quoteStyle":·"single",
-      23 │ + → → → "attributePosition":·"auto",
-      24 │ + → → → "bracketSpacing":·true,
-      25 │ + → → → "objectWrap":·"preserve"
+      12 │ + → → "objectWrap":·"preserve",
+      13 │ + → → "useEditorconfig":·true
+      14 │ + → },
+      15 │ + → "javascript":·{
+      16 │ + → → "formatter":·{
+      17 │ + → → → "jsxQuoteStyle":·"double",
+      18 │ + → → → "quoteProperties":·"asNeeded",
+      19 │ + → → → "trailingCommas":·"all",
+      20 │ + → → → "semicolons":·"asNeeded",
+      21 │ + → → → "arrowParentheses":·"always",
+      22 │ + → → → "bracketSameLine":·false,
+      23 │ + → → → "quoteStyle":·"single",
+      24 │ + → → → "attributePosition":·"auto",
+      25 │ + → → → "bracketSpacing":·true
       26 │ + → → }
       27 │ + → }
       28 │ + }

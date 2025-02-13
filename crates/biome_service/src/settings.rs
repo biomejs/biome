@@ -22,7 +22,7 @@ use biome_css_syntax::CssLanguage;
 use biome_deserialize::Merge;
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
-    LineWidth,
+    LineWidth, ObjectWrap,
 };
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
@@ -237,6 +237,7 @@ pub struct FormatSettings {
     pub attribute_position: Option<AttributePosition>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub bracket_spacing: Option<BracketSpacing>,
+    pub object_wrap: Option<ObjectWrap>,
     /// List of ignore paths/files
     pub ignored_files: Matcher,
     /// List of included paths/files
@@ -266,6 +267,7 @@ pub struct OverrideFormatSettings {
     pub bracket_spacing: Option<BracketSpacing>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub attribute_position: Option<AttributePosition>,
+    pub object_wrap: Option<ObjectWrap>,
 }
 
 impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
@@ -280,6 +282,7 @@ impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
             bracket_spacing: conf.bracket_spacing,
             bracket_same_line: conf.bracket_same_line,
             attribute_position: conf.attribute_position,
+            object_wrap: conf.object_wrap,
         }
     }
 }
@@ -1338,6 +1341,7 @@ pub fn to_override_settings(
                 bracket_spacing: formatter.bracket_spacing,
                 bracket_same_line: formatter.bracket_same_line,
                 attribute_position: formatter.attribute_position,
+                object_wrap: formatter.object_wrap,
             })
             .unwrap_or_default();
         let linter = pattern
@@ -1504,6 +1508,7 @@ pub fn to_format_settings(
         attribute_position: conf.attribute_position,
         bracket_same_line: conf.bracket_same_line,
         bracket_spacing: conf.bracket_spacing,
+        object_wrap: conf.object_wrap,
         ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
         included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
         includes: Includes::new(working_directory, conf.includes),
@@ -1530,6 +1535,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             attribute_position: Some(AttributePosition::default()),
             bracket_same_line: conf.bracket_same_line,
             bracket_spacing: Some(BracketSpacing::default()),
+            object_wrap: conf.object_wrap,
             format_with_errors: conf.format_with_errors,
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
