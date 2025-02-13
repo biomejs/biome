@@ -15,9 +15,9 @@ serde          = { workspace = true, optional = true }
 ureq           = "3.0.3"
 xtask          = { path = '../', version = "0.0" }
 
-biome_analyze         = { workspace = true, optional = true }
+biome_analyze         = { workspace = true, features = ["schema"], optional = true }
 biome_cli             = { workspace = true, optional = true }
-biome_configuration   = { workspace = true, optional = true }
+biome_configuration   = { workspace = true, features = ["schema"], optional = true }
 biome_css_analyze     = { workspace = true, optional = true }
 biome_css_syntax      = { workspace = true, optional = true }
 biome_diagnostics     = { workspace = true, optional = true }
@@ -59,6 +59,7 @@ license = ["ureq/default", "ureq/json", "serde", "serde_json"]
 schema = [
   "schemars",
   "serde_json",
+  "biome_analyze",
   "biome_rowan",
   "biome_service",
   "biome_js_syntax",
