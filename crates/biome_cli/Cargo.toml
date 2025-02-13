@@ -44,7 +44,7 @@ bpaf                     = { workspace = true, features = ["bright-color"] }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }
 dashmap                  = { workspace = true }
-path-absolutize          = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
+path-absolutize          = { workspace = true }
 quick-junit              = "0.5.1"
 rayon                    = { workspace = true }
 regex                    = { workspace = true }
