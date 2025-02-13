@@ -25,13 +25,14 @@ jobs:
         with:
           node-version: 20.x
 
-      - name: Pin Corepack 0.20
+      - name: Install pnpm
         run: |
-          echo "Before: corepack => $(corepack --version || echo 'not installed')"
-          npm install -g corepack@0.20
-          echo "After : corepack => $(corepack --version)"
+          npm install -g corepack
           corepack enable
           pnpm --version
+
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Create Release Pull Request
         uses: changesets/action@v1
