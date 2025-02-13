@@ -147,6 +147,27 @@ jobs:
         run: |
           pnpm --filter @biomejs/backend-jsonrpc run test:ci
           pnpm --filter @biomejs/js-api run test:ci
+  
+  e2e-tests:
+    name: end-to-end tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Free Disk Space
+        uses: ./.github/actions/free-disk-space
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@e013866c4215f77c925f42f60257dec7dd18836e # v1.2.1
+        with:
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Biome debug binary
+        run: cargo build --bin biome
+      - name: Run tests
+        run: |
+          cd e2e-tests
+          sh test-all.sh
 
   documentation:
     name: Documentation
