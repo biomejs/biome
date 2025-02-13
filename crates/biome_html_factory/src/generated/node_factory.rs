@@ -159,16 +159,34 @@ impl HtmlDirectiveBuilder {
 pub fn html_element(
     opening_element: HtmlOpeningElement,
     children: HtmlElementList,
-    closing_element: HtmlClosingElement,
-) -> HtmlElement {
-    HtmlElement::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_ELEMENT,
-        [
-            Some(SyntaxElement::Node(opening_element.into_syntax())),
-            Some(SyntaxElement::Node(children.into_syntax())),
-            Some(SyntaxElement::Node(closing_element.into_syntax())),
-        ],
-    ))
+) -> HtmlElementBuilder {
+    HtmlElementBuilder {
+        opening_element,
+        children,
+        closing_element: None,
+    }
+}
+pub struct HtmlElementBuilder {
+    opening_element: HtmlOpeningElement,
+    children: HtmlElementList,
+    closing_element: Option<HtmlClosingElement>,
+}
+impl HtmlElementBuilder {
+    pub fn with_closing_element(mut self, closing_element: HtmlClosingElement) -> Self {
+        self.closing_element = Some(closing_element);
+        self
+    }
+    pub fn build(self) -> HtmlElement {
+        HtmlElement::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::HTML_ELEMENT,
+            [
+                Some(SyntaxElement::Node(self.opening_element.into_syntax())),
+                Some(SyntaxElement::Node(self.children.into_syntax())),
+                self.closing_element
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn html_name(value_token: SyntaxToken) -> HtmlName {
     HtmlName::unwrap_cast(SyntaxNode::new_detached(
