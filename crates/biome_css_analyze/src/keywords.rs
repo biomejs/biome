@@ -773,8 +773,8 @@ pub const FUNCTION_KEYWORDS: [&str; 685] = [
 ];
 
 // These are the ones that can have single-colon notation
-pub const LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS: [&str; 4] =
-    ["after", "before", "first-letter", "first-line"];
+pub const LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS: [&str; 5] =
+    ["after", "before", "first-letter", "first-line", "slotted"];
 
 pub const VENDOR_SPECIFIC_PSEUDO_ELEMENTS: [&str; 66] = [
     "-moz-focus-inner",
