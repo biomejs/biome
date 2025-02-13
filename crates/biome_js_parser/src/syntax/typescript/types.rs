@@ -42,6 +42,7 @@ use biome_js_syntax::JsSyntaxKind::TS_TYPE_ANNOTATION;
 use biome_js_syntax::T;
 use biome_js_syntax::{JsSyntaxKind::*, *};
 
+use super::ts_parse_error::expected_ts_import_type_with_arguments;
 use super::{expect_ts_index_signature_member, is_at_ts_index_signature_member, MemberParent};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -1165,7 +1166,8 @@ fn parse_ts_import_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax 
     p.eat(T![typeof]);
     p.expect(T![import]);
 
-    parse_ts_import_type_arguments(p, context).ok();
+    parse_ts_import_type_arguments(p, context)
+        .or_add_diagnostic(p, expected_ts_import_type_with_arguments);
 
     if p.at(T![.]) {
         let qualifier = p.start();
@@ -1731,10 +1733,6 @@ fn parse_ts_import_type_assertion_block(p: &mut JsParser) -> ParsedSyntax {
 
 fn parse_ts_import_type_arguments(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
     if !p.at(T!['(']) {
-        p.error(p.err_builder(
-            format!("Expected '(', but got '{}' here", p.cur_text()),
-            p.cur_range(),
-        ));
         return Absent;
     }
     let m = p.start();

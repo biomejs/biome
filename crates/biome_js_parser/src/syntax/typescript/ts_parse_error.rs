@@ -135,3 +135,13 @@ pub(crate) fn infer_not_allowed(p: &JsParser, range: TextRange) -> ParseDiagnost
         range,
     )
 }
+
+pub(crate) fn expected_ts_import_type_with_arguments(
+    p: &JsParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        format!("Expected '(', but got '{}' here", p.cur_text()),
+        range,
+    )
+}
