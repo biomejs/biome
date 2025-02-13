@@ -1,3 +1,0 @@
----
-"@biomejs/biome": minor
----
