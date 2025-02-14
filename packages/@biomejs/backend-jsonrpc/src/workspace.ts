@@ -314,9 +314,9 @@ export interface JsonConfiguration {
 }
 export interface LinterConfiguration {
 	/**
-	 * An object where the keys are the names of the domains, and the values are boolean. `true` to turn-on the rules that belong to that domain, `false` to turn them off
+	 * An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.
 	 */
-	domains?: {};
+	domains?: Record<RuleDomain, RuleDomainValue>;
 	/**
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
@@ -944,7 +944,7 @@ export interface OverrideLinterConfiguration {
 	/**
 	 * List of rules
 	 */
-	domains?: {};
+	domains?: Record<RuleDomain, RuleDomainValue>;
 	/**
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
@@ -3834,6 +3834,11 @@ export type SupportKind =
 	| "protected"
 	| "featureNotEnabled"
 	| "fileNotSupported";
+/**
+ * Rule domains
+ */
+export type RuleDomain = "react" | "test" | "solid" | "next";
+export type RuleDomainValue = "all" | "none" | "recommended";
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;

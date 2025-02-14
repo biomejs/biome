@@ -25,7 +25,6 @@ use std::{
     env::current_dir,
     ffi::OsString,
     panic::catch_unwind,
-    path::PathBuf,
     sync::atomic::{AtomicUsize, Ordering},
     thread,
     time::{Duration, Instant},
@@ -101,7 +100,7 @@ pub(crate) fn traverse(
         // contains are properly closed once the traversal finishes
         let (elapsed, evaluated_paths) = traverse_inputs(
             fs,
-            inputs,
+            &inputs,
             &TraversalOptions {
                 fs,
                 workspace,
@@ -159,7 +158,7 @@ pub(crate) fn traverse(
 /// run it to completion, returning the duration of the process and the evaluated paths
 fn traverse_inputs(
     fs: &dyn FileSystem,
-    inputs: Vec<OsString>,
+    inputs: &[OsString],
     ctx: &TraversalOptions,
 ) -> (Duration, BTreeSet<BiomePath>) {
     let start = Instant::now();
@@ -167,7 +166,7 @@ fn traverse_inputs(
         for input in inputs {
             scope.evaluate(
                 ctx,
-                Utf8PathBuf::from_path_buf(PathBuf::from(input)).expect("Valid UTF-8 path"),
+                Utf8PathBuf::from_path_buf(input.into()).expect("Valid UTF-8 path"),
             );
         }
     }));
