@@ -574,7 +574,7 @@ export interface HtmlFormatterConfiguration {
 	 */
 	lineWidth?: LineWidth;
 	/**
-	 * Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "strict".
+	 * Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "css".
 	 */
 	whitespaceSensitivity?: WhitespaceSensitivity;
 }
