@@ -58,6 +58,10 @@ Alternatively, you can use our official [CodeSandbox template](https://codesandb
 
 ## Getting Started
 
+You can [work on the project locally](#local-development) by cloning the repository and installing the required tools or [use the pre-configured GitHub Codespaces](#github-codespaces) and jump right into the code.
+
+### Local development
+
 Building this project requires a `stable` Rust toolchain, which can be installed using [rustup](https://www.rust-lang.org/tools/install).
 
 Clone the repository and navigate to the `tools` directory:
@@ -74,7 +78,7 @@ You can use cargo to run Biome CLI in development mode:
 cargo biome-cli-dev --help
 ```
 
-## Install the required tools
+#### Install the required tools
 
 We use [Just](https://just.systems/man/en/) to run scripts and tasks, to make our life easier.
 
@@ -101,6 +105,16 @@ This command will install:
 You'll also need to have `pnpm` installed on your machine, and run `pnpm install` from the root of the repository. `pnpm` is needed to [create changesets](#create-a-changeset)
 
 And you're good to go hack with Biome and Rust! 🚀
+
+### GitHub Codespaces
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&machine=premiumLinux&repo=932201881&ref=main&skip_quickstart=true)
+
+This Codespace comes pre-configured with the required tools and dependencies to work on the Biome project.
+
+> [!NOTE]
+> A basic Codespace (32gb of disk space) might run out of disk space when building biome or running the full test suite.
+> The pre-configured Codespace is therefor based on the premium image with 64gb of disk space.
 
 ## Testing
 
