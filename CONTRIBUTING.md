@@ -108,7 +108,7 @@ And you're good to go hack with Biome and Rust! 🚀
 
 ### GitHub Codespaces
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&machine=premiumLinux&repo=932201881&ref=main&skip_quickstart=true)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?machine=premiumLinux&repo=671654508&ref=main&skip_quickstart=true)
 
 This Codespace comes pre-configured with the required tools and dependencies to work on the Biome project.
 
