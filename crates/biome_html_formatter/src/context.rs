@@ -31,7 +31,7 @@ pub struct HtmlFormatOptions {
     /// See: <https://prettier.io/docs/en/options.html#bracket-line>
     bracket_same_line: BracketSameLine,
 
-    /// Whether to consider whitespace as significant. Default is `strict`.
+    /// Whether to consider whitespace as significant. Default is `css`.
     ///
     /// Whitespace inside HTML elements can sometimes affect the rendering of the page.
     /// See:

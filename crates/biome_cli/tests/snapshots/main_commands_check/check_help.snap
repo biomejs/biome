@@ -149,9 +149,9 @@ The configuration that is contained inside the file `biome.json`
         --html-formatter-bracket-same-line=<true|false>  Whether to hug the closing bracket of
                               multiline HTML tags to the end of the last line, rather than being
                               alone on the following line. Defaults to false.
-        --html-formatter-whitespace-sensitivity=<strict|ignore>  Whether to account for whitespace
-                              sensitivity when formatting HTML (and its super languages). Defaults
-                              to "strict".
+        --html-formatter-whitespace-sensitivity=<css|strict|ignore>  Whether to account for
+                              whitespace sensitivity when formatting HTML (and its super languages).
+                              Defaults to "css".
         --html-formatter-indent-script-and-style=<true|false>  Whether to indent the `<script>` and
                               `<style>` tags for HTML (and its super languages). Defaults to false.
         --assist-enabled=<true|false>  Whether Biome should enable assist via LSP.

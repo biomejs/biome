@@ -87,10 +87,10 @@ pub struct HtmlFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_same_line: Option<BracketSameLine>,
 
-    /// Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "strict".
+    /// Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "css".
     #[bpaf(
         long("html-formatter-whitespace-sensitivity"),
-        argument("strict|ignore"),
+        argument("css|strict|ignore"),
         optional
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
