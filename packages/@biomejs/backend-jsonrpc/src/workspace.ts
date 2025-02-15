@@ -191,7 +191,7 @@ export interface FormatterConfiguration {
 	/**
 	* Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.
 
-Default: `false`. 
+	Default: `true`. 
 	 */
 	useEditorconfig?: Bool;
 }
