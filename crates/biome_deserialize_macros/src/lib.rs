@@ -4,7 +4,7 @@ mod partial_derive;
 mod util;
 
 use proc_macro::TokenStream;
-use proc_macro_error::*;
+use proc_macro_error2::*;
 use syn::{parse_macro_input, DeriveInput};
 
 /// Derives the [biome_deserialize::Deserializable] trait for a custom enum or

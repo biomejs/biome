@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/yaml/invalid.html
+---
+# Input
+
+```html
+---
+    invalid:
+invalid:
+---
+
+
+
+<html><head></head><body></body></html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,4 @@
+----
+-    invalid:
+-invalid:
+----
++--- invalid: invalid: ---
+ 
+ <html>
+   <head></head>
+```
+
+# Output
+
+```html
+--- invalid: invalid: ---
+
+<html>
+  <head></head>
+  <body></body>
+</html>
+```

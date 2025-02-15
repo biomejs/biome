@@ -30,7 +30,9 @@ use biome_configuration::json::{
 use biome_configuration::Configuration;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::Applicability;
-use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
+use biome_formatter::{
+    BracketSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+};
 use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::analyze;
 use biome_json_formatter::context::{Expand, JsonFormatOptions, TrailingCommas};
@@ -53,6 +55,7 @@ pub struct JsonFormatterSettings {
     pub indent_style: Option<IndentStyle>,
     pub trailing_commas: Option<TrailingCommas>,
     pub expand: Option<Expand>,
+    pub bracket_spacing: Option<BracketSpacing>,
     pub enabled: Option<JsonFormatterEnabled>,
 }
 
@@ -65,6 +68,7 @@ impl From<JsonFormatterConfiguration> for JsonFormatterSettings {
             indent_style: configuration.indent_style,
             trailing_commas: configuration.trailing_commas,
             expand: configuration.expand,
+            bracket_spacing: configuration.bracket_spacing,
             enabled: configuration.enabled,
         }
     }
@@ -166,6 +170,11 @@ impl ServiceLanguage for JsonLanguage {
             }
         });
 
+        let bracket_spacing = language
+            .and_then(|l| l.bracket_spacing)
+            .or(global.and_then(|g| g.bracket_spacing))
+            .unwrap_or_default();
+
         let file_source = document_file_source
             .to_json_file_source()
             .unwrap_or_default();
@@ -176,7 +185,8 @@ impl ServiceLanguage for JsonLanguage {
             .with_indent_width(indent_width)
             .with_line_width(line_width)
             .with_trailing_commas(trailing_commas)
-            .with_expand(expand_lists);
+            .with_expand(expand_lists)
+            .with_bracket_spacing(bracket_spacing);
 
         if let Some(overrides) = overrides {
             overrides.to_override_json_format_options(path, options)

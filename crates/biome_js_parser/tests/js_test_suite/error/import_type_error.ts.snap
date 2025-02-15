@@ -10,6 +10,8 @@ type A = typeof import("a.json",{});
 type B = typeof import("a.json",{with:{[a]:"1"}});
 type C = typeof import("a.json",{with:{}}, 1);
 type D = import("a",);
+type E = import;
+type F = typeof import;
 
 ```
 
@@ -162,19 +164,51 @@ JsModule {
             },
             semicolon_token: SEMICOLON@156..157 ";" [] [],
         },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@157..163 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@163..165 "E" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@165..167 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: missing (optional),
+                import_token: IMPORT_KW@167..173 "import" [] [],
+                arguments: missing (required),
+                qualifier_clause: missing (optional),
+                type_arguments: missing (optional),
+            },
+            semicolon_token: SEMICOLON@173..174 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@174..180 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@180..182 "F" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@182..184 "=" [] [Whitespace(" ")],
+            ty: TsImportType {
+                typeof_token: TYPEOF_KW@184..191 "typeof" [] [Whitespace(" ")],
+                import_token: IMPORT_KW@191..197 "import" [] [],
+                arguments: missing (required),
+                qualifier_clause: missing (optional),
+                type_arguments: missing (optional),
+            },
+            semicolon_token: SEMICOLON@197..198 ";" [] [],
+        },
     ],
-    eof_token: EOF@157..158 "" [Newline("\n")] [],
+    eof_token: EOF@198..199 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: JS_MODULE@0..158
+0: JS_MODULE@0..199
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..157
+  3: JS_MODULE_ITEM_LIST@0..198
     0: TS_TYPE_ALIAS_DECLARATION@0..36
       0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@5..7
@@ -282,7 +316,33 @@ JsModule {
         3: (empty)
         4: (empty)
       5: SEMICOLON@156..157 ";" [] []
-  4: EOF@157..158 "" [Newline("\n")] []
+    6: TS_TYPE_ALIAS_DECLARATION@157..174
+      0: TYPE_KW@157..163 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@163..165
+        0: IDENT@163..165 "E" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@165..167 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@167..173
+        0: (empty)
+        1: IMPORT_KW@167..173 "import" [] []
+        2: (empty)
+        3: (empty)
+        4: (empty)
+      5: SEMICOLON@173..174 ";" [] []
+    7: TS_TYPE_ALIAS_DECLARATION@174..198
+      0: TYPE_KW@174..180 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@180..182
+        0: IDENT@180..182 "F" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@182..184 "=" [] [Whitespace(" ")]
+      4: TS_IMPORT_TYPE@184..197
+        0: TYPEOF_KW@184..191 "typeof" [] [Whitespace(" ")]
+        1: IMPORT_KW@191..197 "import" [] []
+        2: (empty)
+        3: (empty)
+        4: (empty)
+      5: SEMICOLON@197..198 ";" [] []
+  4: EOF@198..199 "" [Newline("\n")] []
 
 ```
 
@@ -332,7 +392,7 @@ import_type_error.ts:3:42 parse ━━━━━━━━━━━━━━━━
   > 3 │ type C = typeof import("a.json",{with:{}}, 1);
       │                                          ^
     4 │ type D = import("a",);
-    5 │ 
+    5 │ type E = import;
   
   i Remove ,
   
@@ -344,7 +404,8 @@ import_type_error.ts:4:20 parse ━━━━━━━━━━━━━━━━
     3 │ type C = typeof import("a.json",{with:{}}, 1);
   > 4 │ type D = import("a",);
       │                    ^
-    5 │ 
+    5 │ type E = import;
+    6 │ type F = typeof import;
   
   i Remove the trailing comma here
   
@@ -352,6 +413,28 @@ import_type_error.ts:4:20 parse ━━━━━━━━━━━━━━━━
     3 │ type C = typeof import("a.json",{with:{}}, 1);
   > 4 │ type D = import("a",);
       │                    ^
-    5 │ 
+    5 │ type E = import;
+    6 │ type F = typeof import;
+  
+import_type_error.ts:5:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected '(', but got ';' here
+  
+    3 │ type C = typeof import("a.json",{with:{}}, 1);
+    4 │ type D = import("a",);
+  > 5 │ type E = import;
+      │                ^
+    6 │ type F = typeof import;
+    7 │ 
+  
+import_type_error.ts:6:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected '(', but got ';' here
+  
+    4 │ type D = import("a",);
+    5 │ type E = import;
+  > 6 │ type F = typeof import;
+      │                       ^
+    7 │ 
   
 ```

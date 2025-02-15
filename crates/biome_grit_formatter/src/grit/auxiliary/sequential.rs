@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{write, FormatOptions};
+use biome_formatter::write;
 use biome_grit_syntax::{GritSequential, GritSequentialFields};
 
 #[derive(Debug, Clone, Default)]

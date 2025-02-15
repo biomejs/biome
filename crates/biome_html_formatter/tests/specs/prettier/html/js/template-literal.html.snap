@@ -1,0 +1,75 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/js/template-literal.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    </head>
+    <body>
+        <script>
+            function foo() {
+                return `
+                    <div>
+                        <p>Text</p>
+                    </div>
+                `;
+            }
+        </script>
+    </body>
+</html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,15 +1,15 @@
+-<!doctype html>
++<!DOCTYPE html>
+ <html lang="en">
+-  <head> </head>
++  <head></head>
+   <body>
+     <script>
+-      function foo() {
+-        return `
++            function foo() {
++                return `
+                     <div>
+                         <p>Text</p>
+                     </div>
+                 `;
+-      }
+-    </script>
++            }
++        </script>
+   </body>
+ </html>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head></head>
+  <body>
+    <script>
+            function foo() {
+                return `
+                    <div>
+                        <p>Text</p>
+                    </div>
+                `;
+            }
+        </script>
+  </body>
+</html>
+```

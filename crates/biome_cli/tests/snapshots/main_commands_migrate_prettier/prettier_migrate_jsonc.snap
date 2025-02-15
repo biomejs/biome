@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 ## `biome.jsonc`
 
@@ -47,11 +46,12 @@ biome.jsonc migrate ━━━━━━━━━━━━━━━━━━━━
       22 │ + → → → "bracketSameLine":·false,
       23 │ + → → → "quoteStyle":·"single",
       24 │ + → → → "attributePosition":·"auto",
-      25 │ + → → → "bracketSpacing":·true
-      26 │ + → → }
-      27 │ + → }
-      28 │ + }
-      29 │ + 
+      25 │ + → → → "bracketSpacing":·true,
+      26 │ + → → → "objectWrap":·"preserve"
+      27 │ + → → }
+      28 │ + → }
+      29 │ + }
+      30 │ + 
   
 
 ```

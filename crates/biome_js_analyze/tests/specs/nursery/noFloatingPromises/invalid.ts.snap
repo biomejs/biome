@@ -5,70 +5,272 @@ expression: invalid.ts
 # Input
 ```ts
 async function returnsPromise(): Promise<string> {
-  return 'value';
+	return "value";
 }
 returnsPromise();
-returnsPromise().then(() => { }).finally(() => { });
+returnsPromise()
+	.then(() => {})
+	.finally(() => {});
 
 async function returnsPromiseInAsyncFunction(): Promise<void> {
-  returnsPromise();
+	returnsPromise();
 }
 
 const returnsPromiseInAsyncArrowFunction = async (): Promise<void> => {
-  returnsPromise().then(() => { }).finally(() => { });
-}
+	returnsPromise()
+		.then(() => {})
+		.finally(() => {});
+};
 
 class Test {
-  async returnsPromiseInAsyncClassMethod(): Promise<void> {
-    returnsPromise();
-  }
+	async returnsPromiseInAsyncClassMethod(): Promise<void> {
+		returnsPromise();
+	}
 }
-
 
 function returnsPromiseWithoutAsync(): Promise<string> {
-  return Promise.resolve("value")
+	return Promise.resolve("value");
 }
 
-
-returnsPromiseWithoutAsync()
-
+returnsPromiseWithoutAsync();
 
 const returnsPromiseAssignedArrowFunction = async (): Promise<string> => {
-  return 'value';
+	return "value";
 };
 
 returnsPromiseAssignedArrowFunction();
 
 const returnsPromiseAssignedFunction = async function (): Promise<string> {
-  return 'value'
-}
+	return "value";
+};
 
 async function returnsPromiseAssignedFunctionInAsyncFunction(): Promise<void> {
-  returnsPromiseAssignedFunction().then(() => { })
+	returnsPromiseAssignedFunction().then(() => {});
 }
 
-const returnsPromiseAssignedArrowFunctionAnnotatedType: () => Promise<string> = () => {
-  return Promise.resolve('value');
-};
+const returnsPromiseAssignedArrowFunctionAnnotatedType: () => Promise<string> =
+	() => {
+		return Promise.resolve("value");
+	};
 
 returnsPromiseAssignedArrowFunctionAnnotatedType();
 
+const promise = new Promise((resolve) => resolve("value"));
+promise.then(() => {}).finally(() => {});
 
-const promise = new Promise((resolve) => resolve('value'));
-promise.then(() => { }).finally(() => { });
+Promise.resolve("value").then(() => {});
+Promise.all([p1, p2, p3]);
 
-Promise.resolve('value').then(() => { })
-Promise.all([p1, p2, p3])
-
-
-const promiseWithParentheses = (new Promise((resolve, reject) => resolve('value')));
+const promiseWithParentheses = new Promise((resolve, reject) =>
+	resolve("value")
+);
 promiseWithParentheses;
-(returnsPromise());
+returnsPromise();
 
+const promiseWithGlobalIdentifier = new window.Promise((resolve, reject) =>
+	resolve("value")
+);
+promiseWithGlobalIdentifier.then(() => {}).finally(() => {});
+globalThis.Promise.reject("value").finally();
 
-const promiseWithGlobalIdentifier = new window.Promise((resolve, reject) => resolve('value'));
-promiseWithGlobalIdentifier.then(() => { }).finally(() => { });
-globalThis.Promise.reject('value').finally();
+class InvalidTestClassParent {
+	async returnsPromiseFromParent(): Promise<string> {
+		return "value";
+	}
+}
+class InvalidTestClass extends InvalidTestClassParent {
+	returnsPromiseFunctionProperty: () => Promise<void>;
+	returnsPromiseProperty: Promise<void>;
+	constructor() {
+		super();
+		this.returnsPromiseFunctionProperty = () => Promise.resolve();
+		this.returnsPromiseProperty = new Promise((resolve, reject) => {});
+	}
+
+	async returnsPromiseMethod(): Promise<string> {
+		return "value";
+	}
+	async someMethod() {
+		this.returnsPromiseMethod();
+	}
+
+	async someMethod2() {
+		this.returnsPromiseFromParent()
+			.then(() => {})
+			.finally(() => {});
+	}
+
+	async someMethod3() {
+		this.returnsPromiseFunctionProperty();
+	}
+
+	async someMethod4() {
+		this.returnsPromiseProperty.then(() => {}).finally(() => {});
+	}
+
+	async #returnsPromisePrivateMethod(): Promise<string> {
+		return "value";
+	}
+	async someMethod5() {
+		this.#returnsPromisePrivateMethod()
+			.then(() => {})
+			.finally(() => {});
+	}
+
+	returnsPromiseFunction = async function (): Promise<string> {
+		return "value";
+	};
+	returnsPromiseArrowFunction = async (): Promise<string> => {
+		return "value";
+	};
+
+	async someMetho3() {
+		this.returnsPromiseFunction()
+			.then(() => {})
+			.finally(() => {});
+		this.returnsPromiseArrowFunction();
+	}
+}
+
+const invalidTestClass = new InvalidTestClass();
+invalidTestClass
+	.returnsPromiseMethod()
+	.then(() => {})
+	.finally(() => {});
+invalidTestClass.returnsPromiseFunctionProperty();
+invalidTestClass.returnsPromiseProperty;
+invalidTestClass.returnsPromiseProperty.then(() => {}).finally(() => {});
+
+const InvalidTestClassInitializedExpression = class InvalidTestClass extends InvalidTestClassParent {
+	returnsPromiseFunctionProperty: () => Promise<void>;
+	returnsPromiseProperty: Promise<void>;
+	constructor() {
+		super();
+		this.returnsPromiseFunctionProperty = () => Promise.resolve();
+		this.returnsPromiseProperty = new Promise((resolve, reject) => {});
+	}
+
+	async returnsPromiseMethod(): Promise<string> {
+		return "value";
+	}
+	async someMethod() {
+		this.returnsPromiseMethod();
+	}
+
+	async someMethod2() {
+		this.returnsPromiseFromParent()
+			.then(() => {})
+			.finally(() => {});
+	}
+
+	async someMethod3() {
+		this.returnsPromiseFunctionProperty();
+	}
+
+	async someMethod4() {
+		this.returnsPromiseProperty.then(() => {}).finally(() => {});
+	}
+
+	async #returnsPromisePrivateMethod(): Promise<string> {
+		return "value";
+	}
+	async someMethod5() {
+		this.#returnsPromisePrivateMethod()
+			.then(() => {})
+			.finally(() => {});
+	}
+
+	returnsPromiseFunction = async function (): Promise<string> {
+		return "value";
+	};
+	returnsPromiseArrowFunction = async (): Promise<string> => {
+		return "value";
+	};
+
+	async someMetho3() {
+		this.returnsPromiseFunction()
+			.then(() => {})
+			.finally(() => {});
+		this.returnsPromiseArrowFunction();
+	}
+};
+
+const invalidTestClassExpression = new InvalidTestClassInitializedExpression();
+invalidTestClassExpression
+	.returnsPromiseMethod()
+	.then(() => {})
+	.finally(() => {});
+invalidTestClassExpression.returnsPromiseFunctionProperty();
+invalidTestClassExpression.returnsPromiseProperty;
+invalidTestClassExpression.returnsPromiseProperty
+	.then(() => {})
+	.finally(() => {});
+
+const InvalidTestUnnamedClassInitializedExpression = class extends InvalidTestClassParent {
+	returnsPromiseFunctionProperty: () => Promise<void>;
+	returnsPromiseProperty: Promise<void>;
+	constructor() {
+		super();
+		this.returnsPromiseFunctionProperty = () => Promise.resolve();
+		this.returnsPromiseProperty = new Promise((resolve, reject) => {});
+	}
+
+	async returnsPromiseMethod(): Promise<string> {
+		return "value";
+	}
+	async someMethod() {
+		this.returnsPromiseMethod();
+	}
+
+	async someMethod2() {
+		this.returnsPromiseFromParent()
+			.then(() => {})
+			.finally(() => {});
+	}
+
+	async someMethod3() {
+		this.returnsPromiseFunctionProperty();
+	}
+
+	async someMethod4() {
+		this.returnsPromiseProperty.then(() => {}).finally(() => {});
+	}
+
+	async #returnsPromisePrivateMethod(): Promise<string> {
+		return "value";
+	}
+	async someMethod5() {
+		this.#returnsPromisePrivateMethod()
+			.then(() => {})
+			.finally(() => {});
+	}
+
+	returnsPromiseFunction = async function (): Promise<string> {
+		return "value";
+	};
+	returnsPromiseArrowFunction = async (): Promise<string> => {
+		return "value";
+	};
+
+	async someMetho3() {
+		this.returnsPromiseFunction()
+			.then(() => {})
+			.finally(() => {});
+		this.returnsPromiseArrowFunction();
+	}
+};
+
+const invalidTestUnnamedClassInitializedExpression =
+	new InvalidTestUnnamedClassInitializedExpression();
+invalidTestUnnamedClassInitializedExpression
+	.returnsPromiseMethod()
+	.then(() => {})
+	.finally(() => {});
+invalidTestUnnamedClassInitializedExpression.returnsPromiseFunctionProperty();
+invalidTestUnnamedClassInitializedExpression.returnsPromiseProperty;
+invalidTestUnnamedClassInitializedExpression.returnsPromiseProperty
+	.then(() => {})
+	.finally(() => {});
 
 ```
 
@@ -78,12 +280,12 @@ invalid.ts:4:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    2 │   return 'value';
+    2 │ 	return "value";
     3 │ }
   > 4 │ returnsPromise();
       │ ^^^^^^^^^^^^^^^^^
-    5 │ returnsPromise().then(() => { }).finally(() => { });
-    6 │ 
+    5 │ returnsPromise()
+    6 │ 	.then(() => {})
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -97,10 +299,13 @@ invalid.ts:5:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━
   
     3 │ }
     4 │ returnsPromise();
-  > 5 │ returnsPromise().then(() => { }).finally(() => { });
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ 
-    7 │ async function returnsPromiseInAsyncFunction(): Promise<void> {
+  > 5 │ returnsPromise()
+      │ ^^^^^^^^^^^^^^^^
+  > 6 │ 	.then(() => {})
+  > 7 │ 	.finally(() => {});
+      │ 	^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ async function returnsPromiseInAsyncFunction(): Promise<void> {
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -108,74 +313,80 @@ invalid.ts:5:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:8:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:10:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-     7 │ async function returnsPromiseInAsyncFunction(): Promise<void> {
-   > 8 │   returnsPromise();
-       │   ^^^^^^^^^^^^^^^^^
-     9 │ }
-    10 │ 
+     9 │ async function returnsPromiseInAsyncFunction(): Promise<void> {
+  > 10 │ 	returnsPromise();
+       │ 	^^^^^^^^^^^^^^^^^
+    11 │ }
+    12 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
   i Unsafe fix: Add await operator.
   
-    8 │ ··await·returnsPromise();
-      │   ++++++                 
+    10 │ → await·returnsPromise();
+       │   ++++++                 
 
 ```
 
 ```
-invalid.ts:12:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:14:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    11 │ const returnsPromiseInAsyncArrowFunction = async (): Promise<void> => {
-  > 12 │   returnsPromise().then(() => { }).finally(() => { });
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │ }
-    14 │ 
+    13 │ const returnsPromiseInAsyncArrowFunction = async (): Promise<void> => {
+  > 14 │ 	returnsPromise()
+       │ 	^^^^^^^^^^^^^^^^
+  > 15 │ 		.then(() => {})
+  > 16 │ 		.finally(() => {});
+       │ 		^^^^^^^^^^^^^^^^^^^
+    17 │ };
+    18 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
   i Unsafe fix: Add await operator.
   
-    12 │ ··await·returnsPromise().then(()·=>·{·}).finally(()·=>·{·});
-       │   ++++++                                                    
+    14 │ → await·returnsPromise()
+       │   ++++++                
 
 ```
 
 ```
-invalid.ts:17:5 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:21:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    15 │ class Test {
-    16 │   async returnsPromiseInAsyncClassMethod(): Promise<void> {
-  > 17 │     returnsPromise();
-       │     ^^^^^^^^^^^^^^^^^
-    18 │   }
-    19 │ }
+    19 │ class Test {
+    20 │ 	async returnsPromiseInAsyncClassMethod(): Promise<void> {
+  > 21 │ 		returnsPromise();
+       │ 		^^^^^^^^^^^^^^^^^
+    22 │ 	}
+    23 │ }
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
   i Unsafe fix: Add await operator.
   
-    17 │ ····await·returnsPromise();
+    21 │ → → await·returnsPromise();
        │     ++++++                 
 
 ```
 
 ```
-invalid.ts:27:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:29:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-  > 27 │ returnsPromiseWithoutAsync()
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ }
     28 │ 
+  > 29 │ returnsPromiseWithoutAsync();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │ const returnsPromiseAssignedArrowFunction = async (): Promise<string> => {
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -183,16 +394,16 @@ invalid.ts:27:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:34:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:35:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    32 │ };
-    33 │ 
-  > 34 │ returnsPromiseAssignedArrowFunction();
+    33 │ };
+    34 │ 
+  > 35 │ returnsPromiseAssignedArrowFunction();
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    35 │ 
-    36 │ const returnsPromiseAssignedFunction = async function (): Promise<string> {
+    36 │ 
+    37 │ const returnsPromiseAssignedFunction = async function (): Promise<string> {
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -200,35 +411,36 @@ invalid.ts:34:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:41:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:42:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    40 │ async function returnsPromiseAssignedFunctionInAsyncFunction(): Promise<void> {
-  > 41 │   returnsPromiseAssignedFunction().then(() => { })
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    42 │ }
-    43 │ 
+    41 │ async function returnsPromiseAssignedFunctionInAsyncFunction(): Promise<void> {
+  > 42 │ 	returnsPromiseAssignedFunction().then(() => {});
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ }
+    44 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
   i Unsafe fix: Add await operator.
   
-    41 │ ··await·returnsPromiseAssignedFunction().then(()·=>·{·})
+    42 │ → await·returnsPromiseAssignedFunction().then(()·=>·{});
        │   ++++++                                                
 
 ```
 
 ```
-invalid.ts:48:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:50:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    46 │ };
-    47 │ 
-  > 48 │ returnsPromiseAssignedArrowFunctionAnnotatedType();
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ 	};
     49 │ 
+  > 50 │ returnsPromiseAssignedArrowFunctionAnnotatedType();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ 
+    52 │ const promise = new Promise((resolve) => resolve("value"));
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -236,32 +448,15 @@ invalid.ts:48:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:52:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:53:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    51 │ const promise = new Promise((resolve) => resolve('value'));
-  > 52 │ promise.then(() => { }).finally(() => { });
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    53 │ 
-    54 │ Promise.resolve('value').then(() => { })
-  
-  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
-  
-
-```
-
-```
-invalid.ts:54:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
-  
-    52 │ promise.then(() => { }).finally(() => { });
-    53 │ 
-  > 54 │ Promise.resolve('value').then(() => { })
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    55 │ Promise.all([p1, p2, p3])
-    56 │ 
+    52 │ const promise = new Promise((resolve) => resolve("value"));
+  > 53 │ promise.then(() => {}).finally(() => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ 
+    55 │ Promise.resolve("value").then(() => {});
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -273,10 +468,12 @@ invalid.ts:55:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    54 │ Promise.resolve('value').then(() => { })
-  > 55 │ Promise.all([p1, p2, p3])
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    56 │ 
+    53 │ promise.then(() => {}).finally(() => {});
+    54 │ 
+  > 55 │ Promise.resolve("value").then(() => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ Promise.all([p1, p2, p3]);
+    57 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -284,15 +481,32 @@ invalid.ts:55:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:59:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:56:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    58 │ const promiseWithParentheses = (new Promise((resolve, reject) => resolve('value')));
-  > 59 │ promiseWithParentheses;
+    55 │ Promise.resolve("value").then(() => {});
+  > 56 │ Promise.all([p1, p2, p3]);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ 
+    58 │ const promiseWithParentheses = new Promise((resolve, reject) =>
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:61:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    59 │ 	resolve("value")
+    60 │ );
+  > 61 │ promiseWithParentheses;
        │ ^^^^^^^^^^^^^^^^^^^^^^^
-    60 │ (returnsPromise());
-    61 │ 
+    62 │ returnsPromise();
+    63 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -300,15 +514,16 @@ invalid.ts:59:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:60:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:62:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    58 │ const promiseWithParentheses = (new Promise((resolve, reject) => resolve('value')));
-    59 │ promiseWithParentheses;
-  > 60 │ (returnsPromise());
-       │ ^^^^^^^^^^^^^^^^^^^
-    61 │ 
+    60 │ );
+    61 │ promiseWithParentheses;
+  > 62 │ returnsPromise();
+       │ ^^^^^^^^^^^^^^^^^
+    63 │ 
+    64 │ const promiseWithGlobalIdentifier = new window.Promise((resolve, reject) =>
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -316,15 +531,16 @@ invalid.ts:60:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:64:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:67:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    63 │ const promiseWithGlobalIdentifier = new window.Promise((resolve, reject) => resolve('value'));
-  > 64 │ promiseWithGlobalIdentifier.then(() => { }).finally(() => { });
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    65 │ globalThis.Promise.reject('value').finally();
-    66 │ 
+    65 │ 	resolve("value")
+    66 │ );
+  > 67 │ promiseWithGlobalIdentifier.then(() => {}).finally(() => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    68 │ globalThis.Promise.reject("value").finally();
+    69 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -332,15 +548,691 @@ invalid.ts:64:1 lint/nursery/noFloatingPromises ━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:65:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:68:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    63 │ const promiseWithGlobalIdentifier = new window.Promise((resolve, reject) => resolve('value'));
-    64 │ promiseWithGlobalIdentifier.then(() => { }).finally(() => { });
-  > 65 │ globalThis.Promise.reject('value').finally();
+    66 │ );
+    67 │ promiseWithGlobalIdentifier.then(() => {}).finally(() => {});
+  > 68 │ globalThis.Promise.reject("value").finally();
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    66 │ 
+    69 │ 
+    70 │ class InvalidTestClassParent {
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:88:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    86 │ 	}
+    87 │ 	async someMethod() {
+  > 88 │ 		this.returnsPromiseMethod();
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    89 │ 	}
+    90 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    88 │ → → await·this.returnsPromiseMethod();
+       │     ++++++                            
+
+```
+
+```
+invalid.ts:92:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    91 │ 	async someMethod2() {
+  > 92 │ 		this.returnsPromiseFromParent()
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 93 │ 			.then(() => {})
+  > 94 │ 			.finally(() => {});
+       │ 			^^^^^^^^^^^^^^^^^^^
+    95 │ 	}
+    96 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    92 │ → → await·this.returnsPromiseFromParent()
+       │     ++++++                               
+
+```
+
+```
+invalid.ts:98:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     97 │ 	async someMethod3() {
+   > 98 │ 		this.returnsPromiseFunctionProperty();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     99 │ 	}
+    100 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    98 │ → → await·this.returnsPromiseFunctionProperty();
+       │     ++++++                                      
+
+```
+
+```
+invalid.ts:102:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    101 │ 	async someMethod4() {
+  > 102 │ 		this.returnsPromiseProperty.then(() => {}).finally(() => {});
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    103 │ 	}
+    104 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    102 │ → → await·this.returnsPromiseProperty.then(()·=>·{}).finally(()·=>·{});
+        │     ++++++                                                             
+
+```
+
+```
+invalid.ts:109:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    107 │ 	}
+    108 │ 	async someMethod5() {
+  > 109 │ 		this.#returnsPromisePrivateMethod()
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 110 │ 			.then(() => {})
+  > 111 │ 			.finally(() => {});
+        │ 			^^^^^^^^^^^^^^^^^^^
+    112 │ 	}
+    113 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    109 │ → → await·this.#returnsPromisePrivateMethod()
+        │     ++++++                                   
+
+```
+
+```
+invalid.ts:122:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    121 │ 	async someMetho3() {
+  > 122 │ 		this.returnsPromiseFunction()
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 123 │ 			.then(() => {})
+  > 124 │ 			.finally(() => {});
+        │ 			^^^^^^^^^^^^^^^^^^^
+    125 │ 		this.returnsPromiseArrowFunction();
+    126 │ 	}
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    122 │ → → await·this.returnsPromiseFunction()
+        │     ++++++                             
+
+```
+
+```
+invalid.ts:125:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    123 │ 			.then(() => {})
+    124 │ 			.finally(() => {});
+  > 125 │ 		this.returnsPromiseArrowFunction();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    126 │ 	}
+    127 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    125 │ → → await·this.returnsPromiseArrowFunction();
+        │     ++++++                                   
+
+```
+
+```
+invalid.ts:130:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    129 │ const invalidTestClass = new InvalidTestClass();
+  > 130 │ invalidTestClass
+        │ ^^^^^^^^^^^^^^^^
+  > 131 │ 	.returnsPromiseMethod()
+  > 132 │ 	.then(() => {})
+  > 133 │ 	.finally(() => {});
+        │ 	^^^^^^^^^^^^^^^^^^^
+    134 │ invalidTestClass.returnsPromiseFunctionProperty();
+    135 │ invalidTestClass.returnsPromiseProperty;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:134:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    132 │ 	.then(() => {})
+    133 │ 	.finally(() => {});
+  > 134 │ invalidTestClass.returnsPromiseFunctionProperty();
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    135 │ invalidTestClass.returnsPromiseProperty;
+    136 │ invalidTestClass.returnsPromiseProperty.then(() => {}).finally(() => {});
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:135:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    133 │ 	.finally(() => {});
+    134 │ invalidTestClass.returnsPromiseFunctionProperty();
+  > 135 │ invalidTestClass.returnsPromiseProperty;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    136 │ invalidTestClass.returnsPromiseProperty.then(() => {}).finally(() => {});
+    137 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:136:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    134 │ invalidTestClass.returnsPromiseFunctionProperty();
+    135 │ invalidTestClass.returnsPromiseProperty;
+  > 136 │ invalidTestClass.returnsPromiseProperty.then(() => {}).finally(() => {});
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    137 │ 
+    138 │ const InvalidTestClassInitializedExpression = class InvalidTestClass extends InvalidTestClassParent {
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:151:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    149 │ 	}
+    150 │ 	async someMethod() {
+  > 151 │ 		this.returnsPromiseMethod();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    152 │ 	}
+    153 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    151 │ → → await·this.returnsPromiseMethod();
+        │     ++++++                            
+
+```
+
+```
+invalid.ts:155:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    154 │ 	async someMethod2() {
+  > 155 │ 		this.returnsPromiseFromParent()
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 156 │ 			.then(() => {})
+  > 157 │ 			.finally(() => {});
+        │ 			^^^^^^^^^^^^^^^^^^^
+    158 │ 	}
+    159 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    155 │ → → await·this.returnsPromiseFromParent()
+        │     ++++++                               
+
+```
+
+```
+invalid.ts:161:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    160 │ 	async someMethod3() {
+  > 161 │ 		this.returnsPromiseFunctionProperty();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    162 │ 	}
+    163 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    161 │ → → await·this.returnsPromiseFunctionProperty();
+        │     ++++++                                      
+
+```
+
+```
+invalid.ts:165:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    164 │ 	async someMethod4() {
+  > 165 │ 		this.returnsPromiseProperty.then(() => {}).finally(() => {});
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    166 │ 	}
+    167 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    165 │ → → await·this.returnsPromiseProperty.then(()·=>·{}).finally(()·=>·{});
+        │     ++++++                                                             
+
+```
+
+```
+invalid.ts:172:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    170 │ 	}
+    171 │ 	async someMethod5() {
+  > 172 │ 		this.#returnsPromisePrivateMethod()
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 173 │ 			.then(() => {})
+  > 174 │ 			.finally(() => {});
+        │ 			^^^^^^^^^^^^^^^^^^^
+    175 │ 	}
+    176 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    172 │ → → await·this.#returnsPromisePrivateMethod()
+        │     ++++++                                   
+
+```
+
+```
+invalid.ts:185:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    184 │ 	async someMetho3() {
+  > 185 │ 		this.returnsPromiseFunction()
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 186 │ 			.then(() => {})
+  > 187 │ 			.finally(() => {});
+        │ 			^^^^^^^^^^^^^^^^^^^
+    188 │ 		this.returnsPromiseArrowFunction();
+    189 │ 	}
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    185 │ → → await·this.returnsPromiseFunction()
+        │     ++++++                             
+
+```
+
+```
+invalid.ts:188:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    186 │ 			.then(() => {})
+    187 │ 			.finally(() => {});
+  > 188 │ 		this.returnsPromiseArrowFunction();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    189 │ 	}
+    190 │ };
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    188 │ → → await·this.returnsPromiseArrowFunction();
+        │     ++++++                                   
+
+```
+
+```
+invalid.ts:193:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    192 │ const invalidTestClassExpression = new InvalidTestClassInitializedExpression();
+  > 193 │ invalidTestClassExpression
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 194 │ 	.returnsPromiseMethod()
+  > 195 │ 	.then(() => {})
+  > 196 │ 	.finally(() => {});
+        │ 	^^^^^^^^^^^^^^^^^^^
+    197 │ invalidTestClassExpression.returnsPromiseFunctionProperty();
+    198 │ invalidTestClassExpression.returnsPromiseProperty;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:197:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    195 │ 	.then(() => {})
+    196 │ 	.finally(() => {});
+  > 197 │ invalidTestClassExpression.returnsPromiseFunctionProperty();
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    198 │ invalidTestClassExpression.returnsPromiseProperty;
+    199 │ invalidTestClassExpression.returnsPromiseProperty
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:198:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    196 │ 	.finally(() => {});
+    197 │ invalidTestClassExpression.returnsPromiseFunctionProperty();
+  > 198 │ invalidTestClassExpression.returnsPromiseProperty;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    199 │ invalidTestClassExpression.returnsPromiseProperty
+    200 │ 	.then(() => {})
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:199:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    197 │ invalidTestClassExpression.returnsPromiseFunctionProperty();
+    198 │ invalidTestClassExpression.returnsPromiseProperty;
+  > 199 │ invalidTestClassExpression.returnsPromiseProperty
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 200 │ 	.then(() => {})
+  > 201 │ 	.finally(() => {});
+        │ 	^^^^^^^^^^^^^^^^^^^
+    202 │ 
+    203 │ const InvalidTestUnnamedClassInitializedExpression = class extends InvalidTestClassParent {
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:216:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    214 │ 	}
+    215 │ 	async someMethod() {
+  > 216 │ 		this.returnsPromiseMethod();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    217 │ 	}
+    218 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    216 │ → → await·this.returnsPromiseMethod();
+        │     ++++++                            
+
+```
+
+```
+invalid.ts:220:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    219 │ 	async someMethod2() {
+  > 220 │ 		this.returnsPromiseFromParent()
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 221 │ 			.then(() => {})
+  > 222 │ 			.finally(() => {});
+        │ 			^^^^^^^^^^^^^^^^^^^
+    223 │ 	}
+    224 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    220 │ → → await·this.returnsPromiseFromParent()
+        │     ++++++                               
+
+```
+
+```
+invalid.ts:226:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    225 │ 	async someMethod3() {
+  > 226 │ 		this.returnsPromiseFunctionProperty();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    227 │ 	}
+    228 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    226 │ → → await·this.returnsPromiseFunctionProperty();
+        │     ++++++                                      
+
+```
+
+```
+invalid.ts:230:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    229 │ 	async someMethod4() {
+  > 230 │ 		this.returnsPromiseProperty.then(() => {}).finally(() => {});
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    231 │ 	}
+    232 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    230 │ → → await·this.returnsPromiseProperty.then(()·=>·{}).finally(()·=>·{});
+        │     ++++++                                                             
+
+```
+
+```
+invalid.ts:237:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    235 │ 	}
+    236 │ 	async someMethod5() {
+  > 237 │ 		this.#returnsPromisePrivateMethod()
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 238 │ 			.then(() => {})
+  > 239 │ 			.finally(() => {});
+        │ 			^^^^^^^^^^^^^^^^^^^
+    240 │ 	}
+    241 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    237 │ → → await·this.#returnsPromisePrivateMethod()
+        │     ++++++                                   
+
+```
+
+```
+invalid.ts:250:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    249 │ 	async someMetho3() {
+  > 250 │ 		this.returnsPromiseFunction()
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 251 │ 			.then(() => {})
+  > 252 │ 			.finally(() => {});
+        │ 			^^^^^^^^^^^^^^^^^^^
+    253 │ 		this.returnsPromiseArrowFunction();
+    254 │ 	}
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    250 │ → → await·this.returnsPromiseFunction()
+        │     ++++++                             
+
+```
+
+```
+invalid.ts:253:3 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    251 │ 			.then(() => {})
+    252 │ 			.finally(() => {});
+  > 253 │ 		this.returnsPromiseArrowFunction();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    254 │ 	}
+    255 │ };
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    253 │ → → await·this.returnsPromiseArrowFunction();
+        │     ++++++                                   
+
+```
+
+```
+invalid.ts:259:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    257 │ const invalidTestUnnamedClassInitializedExpression =
+    258 │ 	new InvalidTestUnnamedClassInitializedExpression();
+  > 259 │ invalidTestUnnamedClassInitializedExpression
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 260 │ 	.returnsPromiseMethod()
+  > 261 │ 	.then(() => {})
+  > 262 │ 	.finally(() => {});
+        │ 	^^^^^^^^^^^^^^^^^^^
+    263 │ invalidTestUnnamedClassInitializedExpression.returnsPromiseFunctionProperty();
+    264 │ invalidTestUnnamedClassInitializedExpression.returnsPromiseProperty;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:263:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    261 │ 	.then(() => {})
+    262 │ 	.finally(() => {});
+  > 263 │ invalidTestUnnamedClassInitializedExpression.returnsPromiseFunctionProperty();
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    264 │ invalidTestUnnamedClassInitializedExpression.returnsPromiseProperty;
+    265 │ invalidTestUnnamedClassInitializedExpression.returnsPromiseProperty
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:264:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    262 │ 	.finally(() => {});
+    263 │ invalidTestUnnamedClassInitializedExpression.returnsPromiseFunctionProperty();
+  > 264 │ invalidTestUnnamedClassInitializedExpression.returnsPromiseProperty;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    265 │ invalidTestUnnamedClassInitializedExpression.returnsPromiseProperty
+    266 │ 	.then(() => {})
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.ts:265:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    263 │ invalidTestUnnamedClassInitializedExpression.returnsPromiseFunctionProperty();
+    264 │ invalidTestUnnamedClassInitializedExpression.returnsPromiseProperty;
+  > 265 │ invalidTestUnnamedClassInitializedExpression.returnsPromiseProperty
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 266 │ 	.then(() => {})
+  > 267 │ 	.finally(() => {});
+        │ 	^^^^^^^^^^^^^^^^^^^
+    268 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   

@@ -1,0 +1,63 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/script/legacy.html
+---
+# Input
+
+```html
+
+<script>
+<!--
+alert(1)
+-->
+</script>
+
+<script>
+<!--
+alert(2)
+//-->
+</script>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,11 +1,11 @@
+ <script>
+-  <!--
+-  alert(1);
+-  -->
++<!--
++alert(1)
++-->
+ </script>
+ 
+ <script>
+-  <!--
+-  alert(2);
+-  //-->
++<!--
++alert(2)
++//-->
+ </script>
+```
+
+# Output
+
+```html
+<script>
+<!--
+alert(1)
+-->
+</script>
+
+<script>
+<!--
+alert(2)
+//-->
+</script>
+```

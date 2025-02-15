@@ -45,6 +45,7 @@ pub type NoConstAssign =
     <lint::correctness::no_const_assign::NoConstAssign as biome_analyze::Rule>::Options;
 pub type NoConstEnum =
     <lint::suspicious::no_const_enum::NoConstEnum as biome_analyze::Rule>::Options;
+pub type NoConstantBinaryExpression = < lint :: nursery :: no_constant_binary_expression :: NoConstantBinaryExpression as biome_analyze :: Rule > :: Options ;
 pub type NoConstantCondition =
     <lint::correctness::no_constant_condition::NoConstantCondition as biome_analyze::Rule>::Options;
 pub type NoConstantMathMinMaxClamp = < lint :: correctness :: no_constant_math_min_max_clamp :: NoConstantMathMinMaxClamp as biome_analyze :: Rule > :: Options ;

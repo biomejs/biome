@@ -1,0 +1,87 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/bracket-same-line/inline.html
+---
+# Input
+
+```html
+
+<span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+text
+</span>
+<span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"></span>
+<span  class="a">text</span>
+<span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+text
+</span>
+<span  class="a">text</span><span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+text
+</span>
+<span  class="a">text</span><span  class="a">text</span><span  class="a">text</span><span  class="a">text</span><span  class="a">text</span>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -12,11 +12,14 @@
+ >
+   text
+ </span>
+-<span class="a">text</span
+-><span
++<span class="a">text</span>
++<span
+   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+ >
+   text
+ </span>
+-<span class="a">text</span><span class="a">text</span><span class="a">text</span
+-><span class="a">text</span><span class="a">text</span>
++<span class="a">text</span>
++<span class="a">text</span>
++<span class="a">text</span>
++<span class="a">text</span>
++<span class="a">text</span>
+```
+
+# Output
+
+```html
+<span
+  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+>
+  text
+</span>
+<span
+  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+></span>
+<span class="a">text</span>
+<span
+  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+>
+  text
+</span>
+<span class="a">text</span>
+<span
+  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+>
+  text
+</span>
+<span class="a">text</span>
+<span class="a">text</span>
+<span class="a">text</span>
+<span class="a">text</span>
+<span class="a">text</span>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+    7:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   11:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   17:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+```

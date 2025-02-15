@@ -1807,7 +1807,7 @@
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
 				"whitespaceSensitivity": {
-					"description": "Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to \"strict\".",
+					"description": "Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to \"css\".",
 					"anyOf": [
 						{ "$ref": "#/definitions/WhitespaceSensitivity" },
 						{ "type": "null" }
@@ -1949,6 +1949,10 @@
 					"description": "What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
+				"objectWrap": {
+					"description": "Whether to enforce collapsing object literals when possible. Defaults to preserve.",
+					"anyOf": [{ "$ref": "#/definitions/ObjectWrap" }, { "type": "null" }]
+				},
 				"quoteProperties": {
 					"description": "When properties in objects are quoted. Defaults to asNeeded.",
 					"anyOf": [
@@ -2053,6 +2057,13 @@
 		"JsonFormatterConfiguration": {
 			"type": "object",
 			"properties": {
+				"bracketSpacing": {
+					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSpacing" },
+						{ "type": "null" }
+					]
+				},
 				"enabled": {
 					"description": "Control the formatter for JSON (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
@@ -2260,7 +2271,7 @@
 			"type": "object",
 			"properties": {
 				"domains": {
-					"description": "An object where the keys are the names of the domains, and the values are boolean. `true` to turn-on the rules that belong to that domain, `false` to turn them off",
+					"description": "An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.",
 					"type": ["object", "null"],
 					"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" }
 				},
@@ -2486,6 +2497,13 @@
 				},
 				"noCommonJs": {
 					"description": "Disallow use of CommonJs module system in favor of ESM style imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noConstantBinaryExpression": {
+					"description": "Disallow expressions where the operation doesn't affect the value",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2922,6 +2940,7 @@
 			},
 			"additionalProperties": false
 		},
+		"ObjectWrap": { "type": "string", "enum": ["preserve", "collapse"] },
 		"Options": {
 			"type": "object",
 			"properties": {

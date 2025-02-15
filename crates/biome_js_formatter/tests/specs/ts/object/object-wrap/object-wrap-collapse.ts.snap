@@ -1,0 +1,149 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/object/object-wrap/object-wrap-collapse.ts
+---
+# Input
+
+```ts
+type A = {
+	name1: "value1",
+	name2: "value2",
+};
+
+const a: A = {
+	name1: "value1",
+	name2: "value2",
+};
+
+type B = { name1: "value1",
+	name2: "value2",
+};
+
+const b: B = { name1: "value1",
+	name2: "value2",
+};
+
+type C = {
+	name1: "value1", name2: "value2",
+};
+
+const c: C = {
+	name1: "value1", name2: "value2",
+};
+
+type D = {
+	name1: "value1", name2: "value2", };
+
+const d: D = {
+	name1: "value1", name2: "value2", };
+
+type E = { name1: "value1", name2: "value2", };
+
+const e: E = { name1: "value1", name2: "value2", };
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Object wrap: Preserve
+-----
+
+```ts
+type A = {
+	name1: "value1";
+	name2: "value2";
+};
+
+const a: A = {
+	name1: "value1",
+	name2: "value2",
+};
+
+type B = { name1: "value1"; name2: "value2" };
+
+const b: B = { name1: "value1", name2: "value2" };
+
+type C = {
+	name1: "value1";
+	name2: "value2";
+};
+
+const c: C = {
+	name1: "value1",
+	name2: "value2",
+};
+
+type D = {
+	name1: "value1";
+	name2: "value2";
+};
+
+const d: D = {
+	name1: "value1",
+	name2: "value2",
+};
+
+type E = { name1: "value1"; name2: "value2" };
+
+const e: E = { name1: "value1", name2: "value2" };
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Object wrap: Collapse
+-----
+
+```ts
+type A = { name1: "value1"; name2: "value2" };
+
+const a: A = { name1: "value1", name2: "value2" };
+
+type B = { name1: "value1"; name2: "value2" };
+
+const b: B = { name1: "value1", name2: "value2" };
+
+type C = { name1: "value1"; name2: "value2" };
+
+const c: C = { name1: "value1", name2: "value2" };
+
+type D = { name1: "value1"; name2: "value2" };
+
+const d: D = { name1: "value1", name2: "value2" };
+
+type E = { name1: "value1"; name2: "value2" };
+
+const e: E = { name1: "value1", name2: "value2" };
+```

@@ -8,6 +8,7 @@ use crate::{
 use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
 use camino::{Utf8DirEntry, Utf8Path, Utf8PathBuf};
 use oxc_resolver::{FsResolution, ResolveError, ResolveOptions, Resolver};
+use path_absolutize::Absolutize;
 use rayon::{scope, Scope};
 use std::env::temp_dir;
 use std::fs::FileType;
@@ -235,6 +236,17 @@ impl<'scope> OsTraversalScope<'scope> {
 
 impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
     fn evaluate(&self, ctx: &'scope dyn TraversalContext, path: Utf8PathBuf) {
+        // Path must be absolute in order to properly normalize them before matching against globs.
+        //
+        // FIXME: This code should be moved to the `traverse_inputs` function in `biome_cli/src/traverse.rs`.
+        // Unfortunately moving this code to the `traverse_inputs` function makes many tests fail.
+        // The issue is coming from some bugs in our test infra.
+        // See https://github.com/biomejs/biome/pull/5017
+        let path = match std::path::Path::new(&path).absolutize() {
+            Ok(std::borrow::Cow::Owned(absolutized)) => Utf8PathBuf::from_path_buf(absolutized)
+                .expect("Absolute path must be correctly parsed"),
+            _ => path,
+        };
         let file_type = match path.metadata() {
             Ok(meta) => meta.file_type(),
             Err(err) => {
@@ -511,6 +523,8 @@ impl TemporaryFs {
     /// Creates a file under the working directory
     pub fn create_file(&mut self, name: &str, content: &str) {
         let path = self.working_directory.join(name);
+        std::fs::create_dir_all(path.parent().expect("parent dir exists."))
+            .expect("Temporary directory to exist and being writable");
         std::fs::write(path.as_std_path(), content)
             .expect("Temporary directory to exist and being writable");
         self.files.push((path, content.to_string()));

@@ -5,7 +5,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::{
     JsAwaitExpression, JsDoWhileStatement, JsForInStatement, JsForOfStatement, JsForStatement,
-    JsInitializerClause, JsSyntaxKind, JsSyntaxNode, JsWhileStatement, JsWithStatement,
+    JsForVariableDeclaration, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, JsWhileStatement,
+    JsWithStatement,
 };
 use biome_rowan::{declare_node_union, AstNode, WalkEvent};
 
@@ -64,14 +65,16 @@ impl Rule for NoAwaitInLoop {
             }
         }
 
-        for event in loop_node.syntax().preorder() {
+        let mut preorder = loop_node.syntax().preorder();
+        while let Some(event) = preorder.next() {
             match event {
                 WalkEvent::Enter(node) => {
                     if is_boundary(&node) {
-                        break;
+                        preorder.skip_subtree();
                     }
 
-                    // e.g. while (baz) { for await (x of xs)}
+                    // skip valid case: for await
+                    // e.g. `while (baz) { for await (x of xs)}`
                     if JsForOfStatement::can_cast(node.kind()) {
                         if let Some(for_of) = JsForOfStatement::cast(node.clone()) {
                             if for_of.await_token().is_some() {
@@ -80,15 +83,29 @@ impl Rule for NoAwaitInLoop {
                         }
                     }
 
+                    // skip valid case: binding in for
+                    // e.g. `async function foo() { for (var i = await bar; i < n; i++) {  } }`
+                    if JsVariableDeclaration::can_cast(node.kind()) {
+                        if let Some(parent) = node.parent() {
+                            if JsForStatement::can_cast(parent.kind()) {
+                                preorder.skip_subtree();
+                            }
+                        }
+                    }
+
+                    // skip valid case: biding in `for in`
+                    // `async function foo() { for (var bar = await baz in qux) {} }`
+                    if JsForVariableDeclaration::can_cast(node.kind()) {
+                        preorder.skip_subtree();
+                    }
+
                     if JsAwaitExpression::can_cast(node.kind()) {
-                        // skip valid cases for example:
-                        // - async function foo() { for (var bar in await baz) { } }
-                        // - async function foo() { for (var bar of await baz) { } }
-                        // - async function foo() { for (var bar = await baz in qux) {} }
+                        // skip valid cases: expression in `for in` and `for of`
+                        // - `async function foo() { for (var bar in await baz) { } }`
+                        // - `async function foo() { for (var bar of await baz) { } }`
                         if let Some(parent) = node.parent() {
                             if JsForOfStatement::can_cast(parent.kind())
                                 || JsForInStatement::can_cast(parent.kind())
-                                || JsInitializerClause::can_cast(parent.kind())
                             {
                                 continue;
                             }

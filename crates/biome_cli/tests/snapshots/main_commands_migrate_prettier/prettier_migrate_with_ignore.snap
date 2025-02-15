@@ -60,11 +60,12 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
       23 │ + → → → "bracketSameLine":·false,
       24 │ + → → → "quoteStyle":·"single",
       25 │ + → → → "attributePosition":·"auto",
-      26 │ + → → → "bracketSpacing":·true
-      27 │ + → → }
-      28 │ + → }
-      29 │ + }
-      30 │ + 
+      26 │ + → → → "bracketSpacing":·true,
+      27 │ + → → → "objectWrap":·"preserve"
+      28 │ + → → }
+      29 │ + → }
+      30 │ + }
+      31 │ + 
   
 
 ```

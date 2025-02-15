@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/tags/menu.html
+---
+# Input
+
+```html
+<menu>
+  <li><button onclick="copy()">Copy</button></li>
+  <li><button onclick="cut()">Cut</button></li>
+  <li><button onclick="paste()">Paste</button></li>
+</menu>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,11 @@
+ <menu>
+-  <li><button onclick="copy()">Copy</button></li>
+-  <li><button onclick="cut()">Cut</button></li>
+-  <li><button onclick="paste()">Paste</button></li>
++  <li>
++    <button onclick="copy()">Copy</button>
++  </li>
++  <li>
++    <button onclick="cut()">Cut</button>
++  </li>
++  <li>
++    <button onclick="paste()">Paste</button>
++  </li>
+ </menu>
+```
+
+# Output
+
+```html
+<menu>
+  <li>
+    <button onclick="copy()">Copy</button>
+  </li>
+  <li>
+    <button onclick="cut()">Cut</button>
+  </li>
+  <li>
+    <button onclick="paste()">Paste</button>
+  </li>
+</menu>
+```

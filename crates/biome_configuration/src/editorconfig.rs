@@ -94,8 +94,8 @@ pub struct EditorConfigOptions {
     #[serde(deserialize_with = "deserialize_optional_value_from_string")]
     end_of_line: EditorconfigValue<LineEnding>,
     // Not a biome option, but we need it to emit a diagnostic when this is set to false.
-    #[serde(deserialize_with = "deserialize_optional_bool_from_string")]
-    insert_final_newline: Option<bool>,
+    #[serde(deserialize_with = "deserialize_optional_value_from_string")]
+    insert_final_newline: EditorconfigValue<bool>,
 }
 
 impl EditorConfigOptions {
@@ -120,7 +120,7 @@ impl EditorConfigOptions {
     fn validate(&self) -> Vec<EditorConfigDiagnostic> {
         let mut errors = vec![];
         // `insert_final_newline = false` results in formatting behavior that is incompatible with biome
-        if let Some(false) = self.insert_final_newline {
+        if let EditorconfigValue::Explicit(false) = self.insert_final_newline {
             errors.push(EditorConfigDiagnostic::incompatible(
                 "insert_final_newline",
                 "Biome always inserts a final newline. Set this option to true.",
@@ -165,13 +165,6 @@ where
         "true" => Ok(true),
         _ => Err(serde::de::Error::custom("expected 'true' or 'false'")),
     }
-}
-
-fn deserialize_optional_bool_from_string<'de, D>(deserializer: D) -> Result<Option<bool>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    deserialize_bool_from_string(deserializer).map(Some)
 }
 
 fn deserialize_optional_value_from_string<'de, D, T>(
@@ -438,6 +431,7 @@ indent_style = unset
 indent_size = unset
 end_of_line = unset
 max_line_length = unset
+insert_final_newline = unset
 "#;
 
         let conf = parse_str(input).expect("Failed to parse editorconfig");

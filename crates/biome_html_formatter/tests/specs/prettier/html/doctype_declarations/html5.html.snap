@@ -1,0 +1,48 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/doctype_declarations/html5.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>An HTML standard template</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <p>… Your HTML content here …</p>
+  </body>
+</html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-<!doctype html>
++<!DOCTYPE html>
+ <html>
+   <head>
+     <title>An HTML standard template</title>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>An HTML standard template</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <p>… Your HTML content here …</p>
+  </body>
+</html>
+```

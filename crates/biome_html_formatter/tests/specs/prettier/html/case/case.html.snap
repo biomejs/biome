@@ -1,0 +1,116 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/case/case.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<HTML CLASS="no-js mY-ClAsS">
+  <HEAD>
+    <META CHARSET="utf-8">
+    <TITLE>My tITlE</TITLE>
+    <META NAME="description" content="My CoNtEnT">
+  </HEAD>
+  <body>
+    <P>Hello world!<BR> This is HTML5 Boilerplate.</P>
+    <SCRIPT>
+      window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
+      ga('create', 'UA-XXXXX-Y', 'auto'); ga('send', 'pageview')
+    </SCRIPT>
+    <SCRIPT src="https://www.google-analytics.com/analytics.js" ASYNC DEFER></SCRIPT>
+  </body>
+</HTML>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,28 +1,24 @@
+-<!doctype html>
+-<html class="no-js mY-ClAsS">
+-  <head>
+-    <meta charset="utf-8" />
+-    <title>My tITlE</title>
+-    <meta name="description" content="My CoNtEnT" />
+-  </head>
++<!DOCTYPE html>
++<HTML CLASS="no-js mY-ClAsS">
++  <HEAD>
++    <META CHARSET="utf-8" />
++    <TITLE>My tITlE</TITLE>
++    <META NAME="description" content="My CoNtEnT" />
++  </HEAD>
+   <body>
+-    <p>
+-      Hello world!<br />
++    <P>
++      Hello world!
++      <BR />
+       This is HTML5 Boilerplate.
+-    </p>
+-    <script>
+-      window.ga = function () {
+-        ga.q.push(arguments);
+-      };
+-      ga.q = [];
+-      ga.l = +new Date();
+-      ga("create", "UA-XXXXX-Y", "auto");
+-      ga("send", "pageview");
+-    </script>
+-    <script
++    </P>
++    <SCRIPT>
++      window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
++      ga('create', 'UA-XXXXX-Y', 'auto'); ga('send', 'pageview')
++    </SCRIPT>
++    <SCRIPT
+       src="https://www.google-analytics.com/analytics.js"
+-      async
+-      defer
+-    ></script>
++      ASYNC
++      DEFER
++    ></SCRIPT>
+   </body>
+-</html>
++</HTML>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<HTML CLASS="no-js mY-ClAsS">
+  <HEAD>
+    <META CHARSET="utf-8" />
+    <TITLE>My tITlE</TITLE>
+    <META NAME="description" content="My CoNtEnT" />
+  </HEAD>
+  <body>
+    <P>
+      Hello world!
+      <BR />
+      This is HTML5 Boilerplate.
+    </P>
+    <SCRIPT>
+      window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
+      ga('create', 'UA-XXXXX-Y', 'auto'); ga('send', 'pageview')
+    </SCRIPT>
+    <SCRIPT
+      src="https://www.google-analytics.com/analytics.js"
+      ASYNC
+      DEFER
+    ></SCRIPT>
+  </body>
+</HTML>
+```
+
+# Lines exceeding max width of 80 characters
+```
+   15:       window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
+```
