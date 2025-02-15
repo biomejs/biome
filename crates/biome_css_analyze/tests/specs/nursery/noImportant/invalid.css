@@ -1,0 +1,10 @@
+.foo {
+    color: red !important;
+    background: blue !important;
+    padding: 10px;
+}
+
+a { color: pink!important; }
+
+a { color: pink ! important; }
+

@@ -1,0 +1,86 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+snapshot_kind: text
+---
+# Input
+```css
+.foo {
+    color: red !important;
+    background: blue !important;
+    padding: 10px;
+}
+
+a { color: pink!important; }
+
+a { color: pink ! important; }
+
+
+```
+
+# Diagnostics
+```
+invalid.css:2:16 lint/nursery/noImportant ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected !important declaration.
+  
+    1 │ .foo {
+  > 2 │     color: red !important;
+      │                ^^^^^^^^^^
+    3 │     background: blue !important;
+    4 │     padding: 10px;
+  
+  i Using !important breaks the natural cascading of CSS rules and makes styles harder to maintain.
+  
+
+```
+
+```
+invalid.css:3:22 lint/nursery/noImportant ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected !important declaration.
+  
+    1 │ .foo {
+    2 │     color: red !important;
+  > 3 │     background: blue !important;
+      │                      ^^^^^^^^^^
+    4 │     padding: 10px;
+    5 │ }
+  
+  i Using !important breaks the natural cascading of CSS rules and makes styles harder to maintain.
+  
+
+```
+
+```
+invalid.css:7:16 lint/nursery/noImportant ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected !important declaration.
+  
+    5 │ }
+    6 │ 
+  > 7 │ a { color: pink!important; }
+      │                ^^^^^^^^^^
+    8 │ 
+    9 │ a { color: pink ! important; }
+  
+  i Using !important breaks the natural cascading of CSS rules and makes styles harder to maintain.
+  
+
+```
+
+```
+invalid.css:9:17 lint/nursery/noImportant ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected !important declaration.
+  
+     7 │ a { color: pink!important; }
+     8 │ 
+   > 9 │ a { color: pink ! important; }
+       │                 ^^^^^^^^^^^
+    10 │ 
+  
+  i Using !important breaks the natural cascading of CSS rules and makes styles harder to maintain.
+  
+
+```

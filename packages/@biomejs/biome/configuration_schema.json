@@ -2614,6 +2614,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noImportant": {
+					"description": "Disallow using !important in declarations",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noIrregularWhitespace": {
 					"description": "Disallows the use of irregular whitespace characters.",
 					"anyOf": [
