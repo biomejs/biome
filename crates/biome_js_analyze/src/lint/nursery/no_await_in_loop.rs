@@ -75,15 +75,13 @@ impl Rule for NoAwaitInLoop {
 
                     // skip valid case: for await
                     // e.g. `while (baz) { for await (x of xs)}`
-                    if JsForOfStatement::can_cast(node.kind()) {
-                        if let Some(for_of) = JsForOfStatement::cast(node.clone()) {
-                            if for_of.await_token().is_some() {
-                                return Some(node.clone());
-                            }
+                    if let Some(for_of) = JsForOfStatement::cast(node.clone()) {
+                        if for_of.await_token().is_some() {
+                            return Some(node);
                         }
                     }
 
-                    // skip valid case: binding in for
+                    // skip valid case: binding in `for`
                     // e.g. `async function foo() { for (var i = await bar; i < n; i++) {  } }`
                     if JsVariableDeclaration::can_cast(node.kind()) {
                         if let Some(parent) = node.parent() {
@@ -93,7 +91,7 @@ impl Rule for NoAwaitInLoop {
                         }
                     }
 
-                    // skip valid case: biding in `for in`
+                    // skip valid case: bidning in `for in`
                     // `async function foo() { for (var bar = await baz in qux) {} }`
                     if JsForVariableDeclaration::can_cast(node.kind()) {
                         preorder.skip_subtree();
@@ -110,7 +108,7 @@ impl Rule for NoAwaitInLoop {
                                 continue;
                             }
                         }
-                        return Some(node.clone());
+                        return Some(node);
                     }
                 }
                 WalkEvent::Leave(_) => {}
