@@ -98,6 +98,7 @@ Attribute Position: Auto
 
 ```grit
 language go;
+
 pattern before_each_file_prep_imports() {
 	$_ where {
 		// Array of global imports. Each import is a tuple of (source, as)
@@ -164,6 +165,6 @@ pattern ensure_import($source) {
 
 # Lines exceeding max width of 80 characters
 ```
-   43: 		$program <: contains bubble($source, $name_to_use) import_spec($name, path = $path) where {
-   47: 		// $GLOBAL_NEW_IMPORTS <: some bubble($source) `$import` where $import <: $source,
+   44: 		$program <: contains bubble($source, $name_to_use) import_spec($name, path = $path) where {
+   48: 		// $GLOBAL_NEW_IMPORTS <: some bubble($source) `$import` where $import <: $source,
 ```

@@ -43,6 +43,7 @@ Attribute Position: Auto
 
 ```grit
 language go;
+
 // All core stdlib functions can be done here
 private pattern before_each_file_stdlib() { before_each_file_prep_imports()}
 

@@ -681,6 +681,7 @@ Attribute Position: Auto
 ```grit
 engine marzano(0.1)
 language js;
+
 private pattern handle_ref($statements, $statement, $name, $type) {
 	$value where {
 		or {
@@ -1256,34 +1257,34 @@ private pattern fix_react_default_export() {
 
 # Lines exceeding max width of 80 characters
 ```
-   39: private pattern handle_one_statement($class_name, $statements, $states_statements, $static_statements, $render_statements, $constructor_statements, $handler_callback_suffix, $use_ref_from, $use_previous_value_hook) {
-   41: 		method_definition($static, $async, $name, $body, $parameters) as $statement where {
-   66: 					$parameters <: maybe contains required_parameter(pattern=$prevProps) where {
-  102: 						$statements += `const $[name]$[handler_callback_suffix] = useCallback(async ($parameters) => $body, []);`
-  120: 						$statements += `const $[name]$[handler_callback_suffix] = useCallback(($parameters) => $body, []);`
-  128: 		public_field_definition($static, $name, $value, $type) as $statement where or {
-  176: 						$states_statements += `const [$name, set$capitalized] = useState<$inner_type>($after_value);`
-  179: 						$states_statements += `const [$name, set$capitalized] = useState($after_value);`
-  188: 					$statements += `const $[name]$[handler_callback_suffix] = useCallback($value, []);`
-  194: 					$properties <: contains bubble($states_statements) pair($key, value = $val) where {
-  233: 		assignment_expression(left = `this.state`, right = object(properties = some bubble($states_statements, $is_constructor) pair($key, $value) where {
-  243: 		variable_declarator(name = object_pattern(properties = some bubble($states_statements, $is_constructor) $prop where {
-  301: 		contains `import React, { $x } from "react"` => `import React, { $x, $hooks } from "react"`,
-  312: 		export_statement(declaration = class_declaration(name = $class_name, $body, $heritage) as $class),
-  329: 			$static_statements += raw`/*\n* TODO: Class component's static variables are reassigned, needs manual handling\n*/`
-  331: 		if ($class <: contains extends_clause(type_arguments = contains type_arguments($types))) {
-  343: 		$body <: contains handle_one_statement($class_name, $statements, $states_statements, $static_statements, $render_statements, $constructor_statements, $handler_callback_suffix, $use_ref_from, $use_previous_value_hook) until `defaultProps = { $_ }`,
-  344: 		$program <: maybe contains interface_declaration(body = $interface, name = $interface_name) where {
-  363: 					$states_statements += `const [$name, set$capitalized] = useState<$inner_type | undefined>(undefined);`
-  385: 			$previous_value_hook = `\nfunction usePreviousValue(){\n    const ref = useRef();\n    useEffect(() => {\n        ref.current = props;\n    });\n    return ref.current;\n}\n`
-  392: 		$the_function = `($args) => {\n    $states_statements\n\n    $statements\n\n    $constructor_statements\n\n    $render_statements \n}`,
-  415: private pattern rewrite_accesses($hoisted_states, $hoisted_refs, $use_memos, $handler_callback_suffix) {
-  425: 						$property <: within member_expression() as $already_ref where $already_ref <: js"$p.current" ,
-  500: 		// clean-up props arg -- not needed if only used in constructor, and first step introduced it
-  514: 	contains bubble($hoisted_states, $hoisted_refs, $use_memos) variable_declarator($name, $value) where {
-  556: 			$statements <: maybe gather_accesses($hoisted_states, $hoisted_refs, $use_memos),
-  558: 				export_statement(decorator = contains `@observer` => ., declaration = lexical_declaration(declarations = contains rewrite_accesses($hoisted_states, $hoisted_refs, $use_memos, $handler_callback_suffix) until Bottom)),
-  559: 				export_statement(declaration = lexical_declaration(declarations = contains rewrite_accesses($hoisted_states, $hoisted_refs, $use_memos, $handler_callback_suffix) until Bottom)),
-  560: 				lexical_declaration(declarations = contains rewrite_accesses($hoisted_states, $hoisted_refs, $use_memos, $handler_callback_suffix) until Bottom)
-  568: 		$default_export <: r"(?s)(export default const)(.+?)=.+"($target, $name) where {
+   40: private pattern handle_one_statement($class_name, $statements, $states_statements, $static_statements, $render_statements, $constructor_statements, $handler_callback_suffix, $use_ref_from, $use_previous_value_hook) {
+   42: 		method_definition($static, $async, $name, $body, $parameters) as $statement where {
+   67: 					$parameters <: maybe contains required_parameter(pattern=$prevProps) where {
+  103: 						$statements += `const $[name]$[handler_callback_suffix] = useCallback(async ($parameters) => $body, []);`
+  121: 						$statements += `const $[name]$[handler_callback_suffix] = useCallback(($parameters) => $body, []);`
+  129: 		public_field_definition($static, $name, $value, $type) as $statement where or {
+  177: 						$states_statements += `const [$name, set$capitalized] = useState<$inner_type>($after_value);`
+  180: 						$states_statements += `const [$name, set$capitalized] = useState($after_value);`
+  189: 					$statements += `const $[name]$[handler_callback_suffix] = useCallback($value, []);`
+  195: 					$properties <: contains bubble($states_statements) pair($key, value = $val) where {
+  234: 		assignment_expression(left = `this.state`, right = object(properties = some bubble($states_statements, $is_constructor) pair($key, $value) where {
+  244: 		variable_declarator(name = object_pattern(properties = some bubble($states_statements, $is_constructor) $prop where {
+  302: 		contains `import React, { $x } from "react"` => `import React, { $x, $hooks } from "react"`,
+  313: 		export_statement(declaration = class_declaration(name = $class_name, $body, $heritage) as $class),
+  330: 			$static_statements += raw`/*\n* TODO: Class component's static variables are reassigned, needs manual handling\n*/`
+  332: 		if ($class <: contains extends_clause(type_arguments = contains type_arguments($types))) {
+  344: 		$body <: contains handle_one_statement($class_name, $statements, $states_statements, $static_statements, $render_statements, $constructor_statements, $handler_callback_suffix, $use_ref_from, $use_previous_value_hook) until `defaultProps = { $_ }`,
+  345: 		$program <: maybe contains interface_declaration(body = $interface, name = $interface_name) where {
+  364: 					$states_statements += `const [$name, set$capitalized] = useState<$inner_type | undefined>(undefined);`
+  386: 			$previous_value_hook = `\nfunction usePreviousValue(){\n    const ref = useRef();\n    useEffect(() => {\n        ref.current = props;\n    });\n    return ref.current;\n}\n`
+  393: 		$the_function = `($args) => {\n    $states_statements\n\n    $statements\n\n    $constructor_statements\n\n    $render_statements \n}`,
+  416: private pattern rewrite_accesses($hoisted_states, $hoisted_refs, $use_memos, $handler_callback_suffix) {
+  426: 						$property <: within member_expression() as $already_ref where $already_ref <: js"$p.current" ,
+  501: 		// clean-up props arg -- not needed if only used in constructor, and first step introduced it
+  515: 	contains bubble($hoisted_states, $hoisted_refs, $use_memos) variable_declarator($name, $value) where {
+  557: 			$statements <: maybe gather_accesses($hoisted_states, $hoisted_refs, $use_memos),
+  559: 				export_statement(decorator = contains `@observer` => ., declaration = lexical_declaration(declarations = contains rewrite_accesses($hoisted_states, $hoisted_refs, $use_memos, $handler_callback_suffix) until Bottom)),
+  560: 				export_statement(declaration = lexical_declaration(declarations = contains rewrite_accesses($hoisted_states, $hoisted_refs, $use_memos, $handler_callback_suffix) until Bottom)),
+  561: 				lexical_declaration(declarations = contains rewrite_accesses($hoisted_states, $hoisted_refs, $use_memos, $handler_callback_suffix) until Bottom)
+  569: 		$default_export <: r"(?s)(export default const)(.+?)=.+"($target, $name) where {
 ```
