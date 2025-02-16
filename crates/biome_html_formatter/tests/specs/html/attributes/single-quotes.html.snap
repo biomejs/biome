@@ -28,5 +28,5 @@ Indent script and style: false
 -----
 
 ```html
-<img src="foo.png'" alt='should keep "these" quotes' />
+<img src="foo.png" alt='should keep "these" quotes' />
 ```
