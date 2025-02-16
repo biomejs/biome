@@ -53,6 +53,7 @@ Attribute Position: Auto
 
 ```grit
 language universal;
+
 // Concat two lists together
 function concat($list_a, $list_b) {
 	$new_list = [],
