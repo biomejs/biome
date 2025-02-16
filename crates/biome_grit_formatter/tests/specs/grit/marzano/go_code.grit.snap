@@ -138,7 +138,7 @@ pattern after_each_file_handle_imports() {
 function require_import($source, $as) {
 	// Default condition
 	$split_source = split($source, "/"),
-	if ($as <: undefined) { $name_to_use = [ -1 $split_source ] } else {
+	if ($as <: undefined) { $name_to_use = $split_source[-1] } else {
 		$name_to_use = $as
 	},
 	or {
