@@ -90,29 +90,6 @@ and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,6 @@
--<input name="address" maxlength="200" />
-+<input name="address " maxlength="200" />
-+<input name="address'" maxlength="200" />
- <input name="address" maxlength="200" />
--<input name="address" maxlength="200" />
- <div class="foo"></div>
- <div class="foo"></div>
- <div class="foo bar"></div>
-@@ -18,11 +18,11 @@
- <div attribute="">String</div>
- <div attribute="">String</div>
- <div attribute>String</div>
--<div attribute="">String</div>
- <div attribute="">String</div>
-+<div attribute="'">String</div>
- <div attribute>String</div>
- <div attribute="">String</div>
--<div attribute="">String</div>
-+<div attribute="' ">String</div>
- <div attribute="attribute = attribute"></div>
- <div ATTRIBUTE>String</div>
- <div ATTRIBUTE="">String</div>
 @@ -61,8 +61,14 @@
    data-index-number="12314"
    data-parent="cars"
@@ -138,8 +115,8 @@ and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
 # Output
 
 ```html
-<input name="address " maxlength="200" />
-<input name="address'" maxlength="200" />
+<input name="address" maxlength="200" />
+<input name="address" maxlength="200" />
 <input name="address" maxlength="200" />
 <div class="foo"></div>
 <div class="foo"></div>
@@ -159,10 +136,10 @@ and HTML5 Apps. It also documents Mozilla products, like Firefox OS."
 <div attribute="">String</div>
 <div attribute>String</div>
 <div attribute="">String</div>
-<div attribute="'">String</div>
+<div attribute="">String</div>
 <div attribute>String</div>
 <div attribute="">String</div>
-<div attribute="' ">String</div>
+<div attribute="">String</div>
 <div attribute="attribute = attribute"></div>
 <div ATTRIBUTE>String</div>
 <div ATTRIBUTE="">String</div>
