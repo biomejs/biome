@@ -600,7 +600,7 @@ export interface JsFormatterConfiguration {
 	 */
 	arrowParentheses?: ArrowParentheses;
 	/**
-	 * The attribute position style in jsx elements. Defaults to auto.
+	 * The attribute position style in JSX elements. Defaults to auto.
 	 */
 	attributePosition?: AttributePosition;
 	/**
