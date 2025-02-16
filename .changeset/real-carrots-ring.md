@@ -1,5 +1,5 @@
 ---
-"@biomejs/biome": patch
+"@biomejs/biome": minor
 ---
 
-Added --suppress flag to suppress existing diagnostics
+Add `--suppress` flag to suppress existing diagnostics.
