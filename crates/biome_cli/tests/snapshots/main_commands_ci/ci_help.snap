@@ -71,6 +71,8 @@ The configuration that is contained inside the file `biome.json`
                               code. Defaults to double.
         --javascript-formatter-attribute-position=<multiline|auto>  The attribute position style in
                               JSX elements. Defaults to auto.
+        --javascript-formatter-bracket-spacing=<true|false>  Whether to insert spaces around
+                              brackets in object literals. Defaults to true.
         --javascript-object-wrap=<preserve|collapse>  Whether to enforce collapsing object literals
                               when possible. Defaults to preserve.
         --javascript-linter-enabled=<true|false>  Control the linter for JavaScript (and its super
