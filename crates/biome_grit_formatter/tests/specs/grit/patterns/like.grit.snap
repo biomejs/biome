@@ -26,7 +26,7 @@ Attribute Position: Auto
 -----
 
 ```grit
-language js;
+language js
 
 like (0.9) { `const foo = 1;` } => `console.log('hello')`
 ```

@@ -54,7 +54,7 @@ Attribute Position: Auto
 -----
 
 ```grit
-language js;
+language js
 
 multifile {
 	// bubble comment

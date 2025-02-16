@@ -41,7 +41,7 @@ Attribute Position: Auto
 -----
 
 ```grit
-language js;
+language js
 
 multifile {
 	bubble($prop, $source_file, $new_prop) file($body) where $body <: contains `type $prop = $_` where {

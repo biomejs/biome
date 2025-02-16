@@ -97,7 +97,7 @@ Attribute Position: Auto
 -----
 
 ```grit
-language go;
+language go
 
 pattern before_each_file_prep_imports() {
 	$_ where {

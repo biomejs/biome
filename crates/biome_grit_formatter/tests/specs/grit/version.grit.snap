@@ -31,7 +31,7 @@ Attribute Position: Auto
 
 ```grit
 engine biome(1.0)
-language js(typescript, jsx);
+language js(typescript, jsx)
 
 `$test($_)` where { $test <: js"test.only" => js"test" }
 ```

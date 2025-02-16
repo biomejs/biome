@@ -680,7 +680,7 @@ Attribute Position: Auto
 
 ```grit
 engine marzano(0.1)
-language js;
+language js
 
 private pattern handle_ref($statements, $statement, $name, $type) {
 	$value where {

@@ -29,7 +29,7 @@ Attribute Position: Auto
 
 ```grit
 engine biome(0.1)
-language python;
+language python
 
 `$var in $dict.keys()` => `$var in $dict`
 ```
