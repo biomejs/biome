@@ -85,7 +85,7 @@ globalThis.globalThis["eval"]("foo");
 ```
 invalid.js:2:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
     1 │ var foo = "foo";
   > 2 │ eval(foo);
@@ -103,7 +103,7 @@ invalid.js:2:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:4:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
     2 │ eval(foo);
     3 │ 
@@ -122,7 +122,7 @@ invalid.js:4:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:6:5 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
     4 │ eval("foo");
     5 │ 
@@ -141,7 +141,7 @@ invalid.js:6:5 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:8:5 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
      6 │ (0, eval)("foo");
      7 │ 
@@ -160,7 +160,7 @@ invalid.js:8:5 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:10:5 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
      8 │ (0, window.eval)("foo");
      9 │ 
@@ -179,7 +179,7 @@ invalid.js:10:5 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:12:12 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
     10 │ (0, window["eval"])("foo");
     11 │ 
@@ -198,7 +198,7 @@ invalid.js:12:12 lint/security/noGlobalEval ━━━━━━━━━━━━
 ```
 invalid.js:45:4 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
     43 │ (function (exe) {
     44 │ 	exe("foo");
@@ -217,7 +217,7 @@ invalid.js:45:4 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:47:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
     45 │ })(eval);
     46 │ 
@@ -236,7 +236,7 @@ invalid.js:47:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:49:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
     47 │ window.eval("foo");
     48 │ 
@@ -255,7 +255,7 @@ invalid.js:49:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:51:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
     49 │ window.window.eval("foo");
     50 │ 
@@ -274,7 +274,7 @@ invalid.js:51:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:62:12 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
     60 │ }
     61 │ 
@@ -293,7 +293,7 @@ invalid.js:62:12 lint/security/noGlobalEval ━━━━━━━━━━━━
 ```
 invalid.js:65:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
     63 │ EVAL("foo");
     64 │ 
@@ -312,7 +312,7 @@ invalid.js:65:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:67:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
     65 │ globalThis.eval("foo");
     66 │ 
@@ -331,7 +331,7 @@ invalid.js:67:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:69:1 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
     67 │ globalThis.globalThis.eval("foo");
     68 │ 
@@ -350,7 +350,7 @@ invalid.js:69:1 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:71:5 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
     69 │ globalThis.globalThis["eval"]("foo");
     70 │ 
@@ -369,7 +369,7 @@ invalid.js:71:5 lint/security/noGlobalEval ━━━━━━━━━━━━�
 ```
 invalid.js:73:5 lint/security/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! eval() exposes to security risks and performance issues.
+  × eval() exposes to security risks and performance issues.
   
     71 │ (0, globalThis.eval)("foo");
     72 │ 

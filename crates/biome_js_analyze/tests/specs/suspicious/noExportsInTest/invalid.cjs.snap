@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.cjs
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -14,7 +15,7 @@ module.exports.invalid = function () { }
 ```
 invalid.cjs:2:1 lint/suspicious/noExportsInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not export from a test file.
+  × Do not export from a test file.
   
     1 │ describe("a test", () => { expect(1).toBe(1); })
   > 2 │ module.exports["invalid"] = function () { }
@@ -28,7 +29,7 @@ invalid.cjs:2:1 lint/suspicious/noExportsInTest ━━━━━━━━━━�
 ```
 invalid.cjs:3:1 lint/suspicious/noExportsInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not export from a test file.
+  × Do not export from a test file.
   
     1 │ describe("a test", () => { expect(1).toBe(1); })
     2 │ module.exports["invalid"] = function () { }
@@ -42,7 +43,7 @@ invalid.cjs:3:1 lint/suspicious/noExportsInTest ━━━━━━━━━━�
 ```
 invalid.cjs:4:1 lint/suspicious/noExportsInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not export from a test file.
+  × Do not export from a test file.
   
     2 │ module.exports["invalid"] = function () { }
     3 │ module.exports = function () { }

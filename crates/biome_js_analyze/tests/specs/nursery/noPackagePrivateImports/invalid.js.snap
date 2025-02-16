@@ -23,7 +23,7 @@ import { fooPackageVariable } from "./sub/foo/index.js";
 ```
 invalid.js:2:36 lint/nursery/noPackagePrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Importing package private symbols is disallowed from outside the module directory.
+  i Importing package private symbols is disallowed from outside the module directory.
   
     1 │ // Attempt to import from `foo.js` from outside its `sub` module.
   > 2 │ import { fooPackageVariable } from "./sub/foo.js";
@@ -39,7 +39,7 @@ invalid.js:2:36 lint/nursery/noPackagePrivateImports ━━━━━━━━━
 ```
 invalid.js:5:36 lint/nursery/noPackagePrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Importing package private symbols is disallowed from outside the module directory.
+  i Importing package private symbols is disallowed from outside the module directory.
   
     4 │ // Attempt to import from `bar.ts` from outside its `aunt` module.
   > 5 │ import { barPackageVariable } from "../aunt/bar.ts";
@@ -55,7 +55,7 @@ invalid.js:5:36 lint/nursery/noPackagePrivateImports ━━━━━━━━━
 ```
 invalid.js:8:36 lint/nursery/noPackagePrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Importing package private symbols is disallowed from outside the module directory.
+  i Importing package private symbols is disallowed from outside the module directory.
   
      7 │ // Assumed to resolve to a JS/TS file.
    > 8 │ import { fooPackageVariable } from "./sub/foo";
@@ -71,7 +71,7 @@ invalid.js:8:36 lint/nursery/noPackagePrivateImports ━━━━━━━━━
 ```
 invalid.js:11:36 lint/nursery/noPackagePrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Importing package private symbols is disallowed from outside the module directory.
+  i Importing package private symbols is disallowed from outside the module directory.
   
     10 │ // If the `sub/foo` module is inaccessible, so is its index file.
   > 11 │ import { fooPackageVariable } from "./sub/foo/index.js";

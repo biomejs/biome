@@ -134,7 +134,7 @@ if (a) {
 ```
 invalid.js:6:2 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
      5 │ if (condition) {
    > 6 │ 	if (anotherCondition) {
@@ -166,7 +166,7 @@ invalid.js:6:2 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━
 ```
 invalid.js:20:2 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     19 │ if (condition) // Comment
   > 20 │ 	if (anotherCondition)
@@ -194,7 +194,7 @@ invalid.js:20:2 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:24:16 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     23 │ // Inner one is `JsBlockStatement`
   > 24 │ if (condition) if (anotherCondition) {
@@ -220,7 +220,7 @@ invalid.js:24:16 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:30:2 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     28 │ // Outer one is `JsBlockStatement`
     29 │ if (condition) {
@@ -246,7 +246,7 @@ invalid.js:30:2 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:34:16 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     33 │ // No `JsBlockStatement`
   > 34 │ if (condition) if (anotherCondition) doSomething();
@@ -269,7 +269,7 @@ invalid.js:34:16 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:37:16 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     36 │ // `JsEmptyStatement`
   > 37 │ if (condition) if (anotherCondition);
@@ -292,7 +292,7 @@ invalid.js:37:16 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:45:2 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     43 │ 	}
     44 │ } else if (c) {
@@ -325,7 +325,7 @@ invalid.js:45:2 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:53:3 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     51 │ function* foo() {
     52 │ 	if (a || b)
@@ -357,7 +357,7 @@ invalid.js:53:3 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:54:4 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     52 │ 	if (a || b)
     53 │ 		if (a ?? b)
@@ -389,7 +389,7 @@ invalid.js:54:4 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:55:5 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     53 │ 		if (a ?? b)
     54 │ 			if (a ? b : c)
@@ -422,7 +422,7 @@ invalid.js:55:5 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:56:6 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     54 │ 			if (a ? b : c)
     55 │ 				if (a = b)
@@ -454,7 +454,7 @@ invalid.js:56:6 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:57:7 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     55 │ 				if (a = b)
     56 │ 					if (a += b)
@@ -485,7 +485,7 @@ invalid.js:57:7 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:58:8 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     56 │ 					if (a += b)
     57 │ 						if (a -= b)
@@ -515,7 +515,7 @@ invalid.js:58:8 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:59:9 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     57 │ 						if (a -= b)
     58 │ 							if (a &&= b)
@@ -544,7 +544,7 @@ invalid.js:59:9 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:60:10 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     58 │ 							if (a &&= b)
     59 │ 								if (yield a)
@@ -570,7 +570,7 @@ invalid.js:60:10 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:66:3 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     64 │ async function foo() {
     65 │ 	if (a)
@@ -600,7 +600,7 @@ invalid.js:66:3 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:67:4 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     65 │ 	if (a)
     66 │ 		if (await a)
@@ -629,7 +629,7 @@ invalid.js:67:4 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:68:5 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     66 │ 		if (await a)
     67 │ 			if (a.b)
@@ -655,7 +655,7 @@ invalid.js:68:5 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:72:17 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     71 │ // Don't case parenthesis in outer test
   > 72 │ if (((a || b))) if (((c || d)));
@@ -678,7 +678,7 @@ invalid.js:72:17 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:76:2 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     74 │ // Semicolon
     75 │ if (a)
@@ -706,7 +706,7 @@ invalid.js:76:2 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:80:2 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     79 │ if (a) {
   > 80 │ 	if (b) foo()
@@ -720,7 +720,7 @@ invalid.js:80:2 lint/nursery/useCollapsedIf ━━━━━━━━━━━━
 ```
 invalid.js:89:2 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     88 │ if (condition) { // Comment
   > 89 │ 	if (anotherCondition) {
@@ -737,7 +737,7 @@ invalid.js:89:2 lint/nursery/useCollapsedIf ━━━━━━━━━━━━
 ```
 invalid.js:96:2 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
      94 │ if (condition) {
      95 │ 	// Comment
@@ -755,7 +755,7 @@ invalid.js:96:2 lint/nursery/useCollapsedIf ━━━━━━━━━━━━
 ```
 invalid.js:102:2 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     101 │ if (condition) {
   > 102 │ 	if (anotherCondition) {
@@ -772,7 +772,7 @@ invalid.js:102:2 lint/nursery/useCollapsedIf ━━━━━━━━━━━�
 ```
 invalid.js:108:2 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     107 │ if (condition) {
   > 108 │ 	if (anotherCondition) {
@@ -789,7 +789,7 @@ invalid.js:108:2 lint/nursery/useCollapsedIf ━━━━━━━━━━━�
 ```
 invalid.js:115:2 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     114 │ if (condition)
   > 115 │ 	if (anotherCondition) // Comment
@@ -805,7 +805,7 @@ invalid.js:115:2 lint/nursery/useCollapsedIf ━━━━━━━━━━━�
 ```
 invalid.js:120:2 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into another if statement.
+  i This if statement can be collapsed into another if statement.
   
     118 │ // Semicolon
     119 │ if (a) {

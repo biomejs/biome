@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidGlobal.d.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -11,7 +12,7 @@ interface camelCase {}
 ```
 invalidGlobal.d.ts:1:11 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name should be in PascalCase.
+  i This interface name should be in PascalCase.
   
   > 1 │ interface camelCase {}
       │           ^^^^^^^^^

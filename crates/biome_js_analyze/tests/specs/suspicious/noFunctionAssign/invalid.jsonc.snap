@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -11,7 +12,7 @@ function foo() { }; foo = bar;
 ```
 invalid.jsonc:1:10 lint/suspicious/noFunctionAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not reassign a function declaration.
+  × Do not reassign a function declaration.
   
   > 1 │ function foo() { }; foo = bar;
       │          ^^^
@@ -35,7 +36,7 @@ function foo2() { foo2 = bar; }
 ```
 invalid.jsonc:1:10 lint/suspicious/noFunctionAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not reassign a function declaration.
+  × Do not reassign a function declaration.
   
   > 1 │ function foo2() { foo2 = bar; }
       │          ^^^^
@@ -59,7 +60,7 @@ foo3 = bar; function foo3() { };
 ```
 invalid.jsonc:1:22 lint/suspicious/noFunctionAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not reassign a function declaration.
+  × Do not reassign a function declaration.
   
   > 1 │ foo3 = bar; function foo3() { };
       │                      ^^^^
@@ -85,7 +86,7 @@ invalid.jsonc:1:22 lint/suspicious/noFunctionAssign ━━━━━━━━━�
 ```
 invalid.jsonc:1:24 lint/suspicious/noFunctionAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not reassign a function declaration.
+  × Do not reassign a function declaration.
   
   > 1 │ [foo4] = bar; function foo4() { };
       │                        ^^^^
@@ -111,7 +112,7 @@ invalid.jsonc:1:24 lint/suspicious/noFunctionAssign ━━━━━━━━━�
 ```
 invalid.jsonc:1:35 lint/suspicious/noFunctionAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not reassign a function declaration.
+  × Do not reassign a function declaration.
   
   > 1 │ ({ x: foo5 = 0 } = bar); function foo5() { };
       │                                   ^^^^
@@ -137,7 +138,7 @@ function foo6() { [foo6] = bar; }
 ```
 invalid.jsonc:1:10 lint/suspicious/noFunctionAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not reassign a function declaration.
+  × Do not reassign a function declaration.
   
   > 1 │ function foo6() { [foo6] = bar; }
       │          ^^^^
@@ -161,7 +162,7 @@ invalid.jsonc:1:10 lint/suspicious/noFunctionAssign ━━━━━━━━━�
 ```
 invalid.jsonc:1:50 lint/suspicious/noFunctionAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not reassign a function declaration.
+  × Do not reassign a function declaration.
   
   > 1 │ (function () { ({ x: foo7 = 0 } = bar); function foo7() { }; })();
       │                                                  ^^^^
@@ -177,5 +178,3 @@ invalid.jsonc:1:50 lint/suspicious/noFunctionAssign ━━━━━━━━━�
   
 
 ```
-
-

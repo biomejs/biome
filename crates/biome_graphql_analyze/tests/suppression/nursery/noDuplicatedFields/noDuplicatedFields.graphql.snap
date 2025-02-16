@@ -40,7 +40,7 @@ query test {
 ```
 noDuplicatedFields.graphql:1:36 lint/nursery/noDuplicatedFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable `v` defined multiple times.
+  i Variable `v` defined multiple times.
   
   > 1 │ query test($v: String, $t: String, $v: String) {
       │                                    ^^^^^^^^^^
@@ -70,7 +70,7 @@ noDuplicatedFields.graphql:1:36 lint/nursery/noDuplicatedFields  FIXABLE  ━━
 ```
 noDuplicatedFields.graphql:6:48 lint/nursery/noDuplicatedFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Argument `first` defined multiple times.
+  i Argument `first` defined multiple times.
   
     5 │ query test {
   > 6 │   users(first: 100, after: 10, filter: "test", first: 50) {
@@ -103,7 +103,7 @@ noDuplicatedFields.graphql:6:48 lint/nursery/noDuplicatedFields  FIXABLE  ━━
 ```
 noDuplicatedFields.graphql:16:5 lint/nursery/noDuplicatedFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Field `name` defined multiple times.
+  i Field `name` defined multiple times.
   
     14 │     name
     15 │     email

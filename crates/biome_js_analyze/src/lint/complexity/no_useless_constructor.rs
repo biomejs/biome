@@ -123,7 +123,7 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("no-useless-constructor"),
         ],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }

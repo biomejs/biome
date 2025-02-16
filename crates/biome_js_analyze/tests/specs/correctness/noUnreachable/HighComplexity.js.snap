@@ -253,7 +253,7 @@ function HighComplexity2() {
 ```
 HighComplexity.js:29:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code is unreachable
+  × This code is unreachable
   
     28 │     return;
   > 29 │     afterReturn();
@@ -267,7 +267,7 @@ HighComplexity.js:29:5 lint/correctness/noUnreachable ━━━━━━━━�
 ```
 HighComplexity.js:240:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code is unreachable
+  × This code is unreachable
   
     239 │     return;
   > 240 │     afterReturn();

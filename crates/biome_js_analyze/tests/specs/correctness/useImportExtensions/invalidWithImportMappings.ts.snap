@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidWithImportMappings.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -12,7 +13,7 @@ import "./sub/Foo";
 ```
 invalidWithImportMappings.ts:1:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
   > 1 │ import "./sub/foo";
       │        ^^^^^^^^^^^
@@ -32,7 +33,7 @@ invalidWithImportMappings.ts:1:8 lint/correctness/useImportExtensions  FIXABLE  
 ```
 invalidWithImportMappings.ts:2:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     1 │ import "./sub/foo";
   > 2 │ import "./sub/Foo";

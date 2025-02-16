@@ -14,7 +14,7 @@ snapshot_kind: text
 ```
 issue_4855.jsx:1:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
   > 1 │ <div class="content-[''] absolute">Hello</div>;
       │            ^^^^^^^^^^^^^^^^^^^^^^^
@@ -34,7 +34,7 @@ issue_4855.jsx:1:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
 ```
 issue_4855.jsx:2:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     1 │ <div class="content-[''] absolute">Hello</div>;
   > 2 │ <div class='top-0 absolute'>Hello</div>;

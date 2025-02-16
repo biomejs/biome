@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidClass.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -44,7 +45,7 @@ Foo<any>()
 ```
 invalidClass.ts:2:27 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     1 │ class Greeter {
   > 2 │ 	constructor(param: Array<any>) {}
@@ -60,7 +61,7 @@ invalidClass.ts:2:27 lint/suspicious/noExplicitAny ━━━━━━━━━�
 ```
 invalidClass.ts:6:11 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     5 │ class Greeter {
   > 6 │ 	message: any;
@@ -76,7 +77,7 @@ invalidClass.ts:6:11 lint/suspicious/noExplicitAny ━━━━━━━━━�
 ```
 invalidClass.ts:10:17 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
      9 │ class Greeter {
   > 10 │ 	message: Array<any>;
@@ -92,7 +93,7 @@ invalidClass.ts:10:17 lint/suspicious/noExplicitAny ━━━━━━━━━�
 ```
 invalidClass.ts:14:11 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     13 │ class Greeter {
   > 14 │ 	message: any[];
@@ -108,7 +109,7 @@ invalidClass.ts:14:11 lint/suspicious/noExplicitAny ━━━━━━━━━�
 ```
 invalidClass.ts:18:23 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     17 │ class Greeter {
   > 18 │ 	message: Array<Array<any>>;
@@ -124,7 +125,7 @@ invalidClass.ts:18:23 lint/suspicious/noExplicitAny ━━━━━━━━━�
 ```
 invalidClass.ts:22:17 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     21 │ class Greeter {
   > 22 │ 	message: Array<any[]>;
@@ -140,7 +141,7 @@ invalidClass.ts:22:17 lint/suspicious/noExplicitAny ━━━━━━━━━�
 ```
 invalidClass.ts:25:15 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     23 │ }
     24 │ 
@@ -157,7 +158,7 @@ invalidClass.ts:25:15 lint/suspicious/noExplicitAny ━━━━━━━━━�
 ```
 invalidClass.ts:25:32 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     23 │ }
     24 │ 
@@ -174,7 +175,7 @@ invalidClass.ts:25:32 lint/suspicious/noExplicitAny ━━━━━━━━━�
 ```
 invalidClass.ts:27:24 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     25 │ class Foo<t = any> extends Bar<any> {}
     26 │ 
@@ -191,7 +192,7 @@ invalidClass.ts:27:24 lint/suspicious/noExplicitAny ━━━━━━━━━�
 ```
 invalidClass.ts:27:41 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     25 │ class Foo<t = any> extends Bar<any> {}
     26 │ 
@@ -208,7 +209,7 @@ invalidClass.ts:27:41 lint/suspicious/noExplicitAny ━━━━━━━━━�
 ```
 invalidClass.ts:29:24 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     27 │ abstract class Foo<t = any> extends Bar<any> {}
     28 │ 
@@ -225,7 +226,7 @@ invalidClass.ts:29:24 lint/suspicious/noExplicitAny ━━━━━━━━━�
 ```
 invalidClass.ts:29:44 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     27 │ abstract class Foo<t = any> extends Bar<any> {}
     28 │ 
@@ -242,7 +243,7 @@ invalidClass.ts:29:44 lint/suspicious/noExplicitAny ━━━━━━━━━�
 ```
 invalidClass.ts:29:54 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     27 │ abstract class Foo<t = any> extends Bar<any> {}
     28 │ 
@@ -259,7 +260,7 @@ invalidClass.ts:29:54 lint/suspicious/noExplicitAny ━━━━━━━━━�
 ```
 invalidClass.ts:31:9 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     29 │ abstract class Foo<t = any> implements Bar<any>, Baz<any> {}
     30 │ 
@@ -276,7 +277,7 @@ invalidClass.ts:31:9 lint/suspicious/noExplicitAny ━━━━━━━━━�
 ```
 invalidClass.ts:33:5 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     31 │ new Foo<any>()
     32 │ 
@@ -288,5 +289,3 @@ invalidClass.ts:33:5 lint/suspicious/noExplicitAny ━━━━━━━━━�
   
 
 ```
-
-
