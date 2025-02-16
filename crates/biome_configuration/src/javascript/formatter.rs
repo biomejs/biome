@@ -93,7 +93,7 @@ pub struct JsFormatterConfiguration {
     pub quote_style: Option<QuoteStyle>,
 
     // it's also a top-level configurable property.
-    /// The attribute position style in jsx elements. Defaults to auto.
+    /// The attribute position style in JSX elements. Defaults to auto.
     #[bpaf(
         long("javascript-formatter-attribute-position"),
         argument("multiline|auto")
