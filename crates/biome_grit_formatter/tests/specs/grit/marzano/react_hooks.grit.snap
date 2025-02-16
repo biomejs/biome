@@ -691,7 +691,7 @@ private pattern handle_ref($statements, $statement, $name, $type) {
 					and {
 						$statement <: contains js"?",
 						$type <: type_annotation(type = $annotated),
-						$annotated <: notcontains js"undefined",
+						$annotated <: not contains js"undefined",
 						$inner_type = js"$annotated | undefined"
 					},
 					// We have a type annotation, use this
@@ -804,7 +804,7 @@ private pattern handle_one_statement($class_name, $statements, $states_statement
 					}
 				}
 			},
-			if (!$name <: js"constructor") {
+			if (! $name <: js"constructor") {
 				$body <: find_miscellaneous_state($states_statements)
 			}
 		},
@@ -892,7 +892,7 @@ private pattern handle_one_statement($class_name, $statements, $states_statement
 			},
 			and {
 				// If we have a use_ref_from, we can use it to wrap values
-				!$use_ref_from <: .,
+				! $use_ref_from <: .,
 				$statement <: prepend_comment($statements),
 				or {
 					and { $value <: ., $after_value = `undefined` },
@@ -919,7 +919,7 @@ private pattern change_this($states_statements, $is_constructor) {
 			$capitalized = capitalize(string = $key),
 			or {
 				$is_constructor <: true,
-				$program <: notcontains `constructor ($_) { $body }` where {
+				$program <: not contains `constructor ($_) { $body }` where {
 					$body <: contains $key
 				}
 			},
@@ -929,7 +929,7 @@ private pattern change_this($states_statements, $is_constructor) {
 			$capitalized = capitalize(string = $prop),
 			or {
 				$is_constructor <: true,
-				$program <: notcontains `constructor ($_) { $body }` where {
+				$program <: not contains `constructor ($_) { $body }` where {
 					$body <: contains $prop
 				}
 			},
@@ -941,7 +941,7 @@ private pattern change_this($states_statements, $is_constructor) {
 private pattern find_miscellaneous_state($states_statements) {
 	maybe contains `this.state.$name` where {
 		$capitalized = capitalize(string = $name),
-		$program <: notcontains `constructor ($_) { $body }` where {
+		$program <: not contains `constructor ($_) { $body }` where {
 			$body <: contains $name
 		},
 		$states_statements += `const [$name, set$capitalized] = useState();`
@@ -950,13 +950,13 @@ private pattern find_miscellaneous_state($states_statements) {
 
 private pattern gather_hooks($hooks) {
 	contains or {
-		`useEffect` where { $hooks <: notsome `useEffect`, $hooks += `useEffect` },
+		`useEffect` where { $hooks <: not some `useEffect`, $hooks += `useEffect` },
 		`useCallback` where {
-			$hooks <: notsome `useCallback`,
+			$hooks <: not some `useCallback`,
 			$hooks += `useCallback`
 		},
-		`useState` where { $hooks <: notsome `useState`, $hooks += `useState` },
-		`useRef` where { $hooks <: notsome `useRef`, $hooks += `useRef` }
+		`useState` where { $hooks <: not some `useState`, $hooks += `useState` },
+		`useRef` where { $hooks <: not some `useRef`, $hooks += `useRef` }
 	}
 }
 
@@ -966,10 +966,10 @@ pattern add_more_imports($use_ref_from) {
 		// If we use MobX, insert it
 		if (and {
 			$program <: contains `observer($_)`,
-			$program <: notcontains js"mobx-react"
+			$program <: not contains js"mobx-react"
 		}) { $more_imports += `import { observer } from "mobx-react";` },
 		// If we have useRefFrom, use it
-		if (and { $program <: contains js"useRefFrom", !$use_ref_from <: . }) {
+		if (and { $program <: contains js"useRefFrom", ! $use_ref_from <: . }) {
 			$more_imports += `import { useRefFrom } from $use_ref_from;`
 		}
 	} => `$more_imports\n$statements`
@@ -989,7 +989,7 @@ pattern adjust_imports() {
 		},
 		contains `import React, { $x } from "react"` => `import React, { $x, $hooks } from "react"`,
 		contains `import React from "react"` as $i where {
-			if ($i <: notcontains namespace_import()) {
+			if ($i <: not contains namespace_import()) {
 				$i => `import React, { $hooks } from 'react';`
 			} else { $i => `$i\nimport { $hooks } from 'react';` }
 		},
@@ -1038,7 +1038,7 @@ pattern first_step($use_ref_from, $handler_callback_suffix) {
 				property_signature($name, $type) where {
 					$type <: type_annotation(type = $inner_type),
 					$capitalized = capitalize(string = $name),
-					$body <: notcontains or {
+					$body <: not contains or {
 						public_field_definition(name = $public_name, $value) where or {
 							$public_name <: $name,
 							and { $public_name <: js"state", $value <: contains $name }
@@ -1055,8 +1055,8 @@ pattern first_step($use_ref_from, $handler_callback_suffix) {
 				}
 			}
 		},
-		$body <: notcontains `componentDidCatch`,
-		$class <: notwithin class_declaration(name = not$class_name) ,
+		$body <: not contains `componentDidCatch`,
+		$class <: not within class_declaration(name = not $class_name) ,
 		if ($body <: contains `static defaultProps = $default_props`) {
 			$the_props = "inputProps"
 		} else { $the_props = "props" },
@@ -1064,7 +1064,7 @@ pattern first_step($use_ref_from, $handler_callback_suffix) {
 		if (or {
 			$program <: contains `FunctionComponent`,
 			// If we have useRefFrom, then we force useFunctionComponent
-			$use_ref_from <: not.
+			$use_ref_from <: not .
 		}) {
 			$const_type_annotation = `: React.FunctionComponent<$props_type>`,
 			$type_annotation = .
@@ -1098,9 +1098,9 @@ export const $original_name = observer($base_name);`
 
 private pattern find_dependencies($hoisted_states, $dependencies) {
 	contains bubble($hoisted_states, $dependencies) identifier() as $i where {
-		$i <: not`props`,
+		$i <: not `props`,
 		$hoisted_states <: some $i,
-		$dependencies <: notsome $i,
+		$dependencies <: not some $i,
 		$dependencies += `$i`
 	}
 }
@@ -1197,7 +1197,7 @@ private pattern rewrite_accesses($hoisted_states, $hoisted_refs, $use_memos, $ha
 				`props`,
 				`inputProps`
 			},
-			$body <: notcontains `props`,
+			$body <: not contains `props`,
 			if ($parenthesis <: .) { $props => `()` } else { $props => . }
 		}
 	}
@@ -1229,13 +1229,13 @@ private pattern gather_accesses($hoisted_states, $hoisted_refs, $use_memos) {
 		variable_declarator(name = array_pattern(elements = [
 			$name, $_
 		]), value = `useState($_)`) as $var where {
-			$var <: notwithin object()
+			$var <: not within object()
 		} where $hoisted_states += $name,
 		variable_declarator(name = $name, value = `useRef($_)`) as $var where {
-			$var <: notwithin object()
+			$var <: not within object()
 		} where $hoisted_refs += $name,
 		variable_declarator(name = $name, value = `useMemo($_)`) as $var where {
-			$var <: notwithin object()
+			$var <: not within object()
 		} where $use_memos += $name
 	}
 }
