@@ -76,7 +76,7 @@ multifile {
 			// bubble comment
 			// second bubble comment
 
-			$prop <: imported_from(from = includes $source_file)
+			$prop <: imported_from(from=includes $source_file)
 		},
 		// bubble comment
 		// second bubble comment
