@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fix a CLI flag `--bracket-spacing` is duplicated between the global configuration and the lang-specific override for JavaScript.
+Fixed the flag `--bracket-spacing` that was duplicated between the global configuration and the language-specific override for JavaScript.
