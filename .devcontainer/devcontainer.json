@@ -1,0 +1,16 @@
+{
+	"image": "mcr.microsoft.com/devcontainers/universal:2",
+	"features": {
+		"ghcr.io/devcontainers/features/rust:1": {
+			"version": "latest",
+			"profile": "complete",
+			"targets": "aarch64-unknown-linux-gnu"
+		},
+		"ghcr.io/guiyomh/features/just:0": {
+			"version": "latest"
+		}
+	},
+	"hostRequirements": {
+		"storage": "64gb"
+	}
+}
