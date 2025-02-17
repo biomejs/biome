@@ -125,8 +125,8 @@ impl Rule for NoAwaitInLoop {
                 markup! { "Avoid using "<Emphasis>"await"</Emphasis>" inside loops." },
             )
             .note(markup! {
-                "Using "<Emphasis>"await"</Emphasis>" inside loops might cause performance issues or unintended sequential execution."
-            }),
+                "Using "<Emphasis>"await"</Emphasis>" inside loops might cause performance issues or unintended sequential execution, consider use "<Emphasis>"Promise.all()"</Emphasis>" instead."
+            })
         )
     }
 }
