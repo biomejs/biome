@@ -127,6 +127,8 @@
 //! ```
 //!
 
+pub mod editorconfig;
+
 /// A Biome glob pattern.
 #[derive(Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
