@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 snapshot_kind: text
 ---
 ## `file.vue`
@@ -58,7 +58,7 @@ file.vue:2:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━�
 ```block
 file.vue:3:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid the delete operator which can impact performance.
+  ! Avoid the delete operator which can impact performance.
   
     1 │ <script setup lang="js">
     2 │ a == b;
@@ -80,5 +80,6 @@ file.vue:3:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 2 errors.
+Found 1 error.
+Found 1 warning.
 ```

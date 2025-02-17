@@ -4704,7 +4704,7 @@
 					]
 				},
 				"noSparseArray": {
-					"description": "Disallow sparse arrays",
+					"description": "Prevents the use of sparse arrays (arrays with holes).",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -4799,7 +4799,7 @@
 					]
 				},
 				"useValidTypeof": {
-					"description": "This rule checks that the result of a `typeof' expression is compared to a valid value.",
+					"description": "This rule checks that the result of a typeof expression is compared to a valid value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

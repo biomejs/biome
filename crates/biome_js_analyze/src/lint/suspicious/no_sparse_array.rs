@@ -13,7 +13,8 @@ declare_lint_rule! {
     /// Prevents the use of sparse arrays (arrays with holes).
     ///
     /// Sparse arrays may contain empty slots due to the use of multiple commas between two items, like the following:
-    /// ```js
+    ///
+    /// ```js,ignore
     /// const items = [a,,,b];
     /// ```
     /// Arrays with holes might yield incorrect information. For example, the previous snippet, `items` has a length of `4`, but did the user

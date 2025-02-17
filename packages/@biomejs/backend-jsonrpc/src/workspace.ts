@@ -2193,7 +2193,7 @@ export interface Suspicious {
 	 */
 	noSkippedTests?: RuleFixConfiguration_for_Null;
 	/**
-	 * Disallow sparse arrays
+	 * Prevents the use of sparse arrays (arrays with holes).
 	 */
 	noSparseArray?: RuleFixConfiguration_for_Null;
 	/**
@@ -2249,7 +2249,7 @@ export interface Suspicious {
 	 */
 	useNumberToFixedDigitsArgument?: RuleFixConfiguration_for_Null;
 	/**
-	 * This rule checks that the result of a `typeof' expression is compared to a valid value.
+	 * This rule checks that the result of a typeof expression is compared to a valid value.
 	 */
 	useValidTypeof?: RuleFixConfiguration_for_Null;
 }

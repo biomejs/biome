@@ -39,7 +39,8 @@ declare_lint_rule! {
         version: "1.7.0",
         name: "noFlatMapIdentity",
         language: "js",
-        severity: Severity::Warning,
+        severity: Severity::Information,
+        recommended: true,
         sources: &[RuleSource::Clippy("flat_map_identity")],
         fix_kind: FixKind::Safe,
     }
