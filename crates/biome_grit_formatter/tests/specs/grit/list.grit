@@ -1,0 +1,5 @@
+`const names = [$names]` where {
+	if ($names[0] <: $names[-1]) {
+		$names => $names[-1]
+	}
+}
