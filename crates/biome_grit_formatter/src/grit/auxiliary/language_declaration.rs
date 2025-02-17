@@ -13,8 +13,7 @@ impl FormatNodeRule<GritLanguageDeclaration> for FormatGritLanguageDeclaration {
             language_token,
             name,
             flavor,
-            // Exclude the semicolon token
-            semicolon_token: _,
+            semicolon_token,
         } = node.as_fields();
         write!(
             f,
@@ -22,8 +21,14 @@ impl FormatNodeRule<GritLanguageDeclaration> for FormatGritLanguageDeclaration {
                 language_token.format(),
                 space(),
                 name.format(),
-                flavor.format()
+                flavor.format(),
             ]
-        )
+        )?;
+
+        if let Some(semicolon_token) = semicolon_token {
+            write!(f, [format_removed(&semicolon_token)])?;
+        }
+
+        Ok(())
     }
 }
