@@ -332,8 +332,11 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
         Err(err) => panic!("Cannot load plugin: {err:?}"),
     };
 
+    // Enable at least 1 rule so that PhaseRunner will be called
+    // which is necessary to parse and store supression comments
+    let rule_filter = RuleFilter::Rule("nursery", "noCommonJs");
     let filter = AnalysisFilter {
-        enabled_rules: Some(&[]),
+        enabled_rules: Some(slice::from_ref(&rule_filter)),
         ..AnalysisFilter::default()
     };
 

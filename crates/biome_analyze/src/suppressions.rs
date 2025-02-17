@@ -13,6 +13,8 @@ pub struct TopLevelSuppression {
     pub(crate) suppress_all: bool,
     /// Filters for the current suppression
     pub(crate) filters: FxHashSet<RuleFilter<'static>>,
+    /// Current suppressed plugins
+    pub(crate) plugins: FxHashSet<String>,
     /// The range of the comment
     pub(crate) comment_range: TextRange,
 
@@ -48,6 +50,7 @@ impl TopLevelSuppression {
         // The absence of a filter means that it's a suppression all
         match filter {
             None => self.suppress_all = true,
+            Some(RuleFilter::Group("plugin")) => self.insert_plugin(&suppression.kind),
             Some(filter) => self.insert(filter),
         }
         self.comment_range = comment_range;
@@ -59,8 +62,18 @@ impl TopLevelSuppression {
         self.filters.insert(filter);
     }
 
+    pub(crate) fn insert_plugin(&mut self, kind: &AnalyzerSuppressionKind) {
+        if let AnalyzerSuppressionKind::Plugin(plugin_name) = kind {
+            self.plugins.insert(plugin_name.to_string());
+        }
+    }
+
     pub(crate) fn suppressed_rule(&self, filter: &RuleKey) -> bool {
         self.filters.iter().any(|f| f == filter)
+    }
+
+    pub(crate) fn suppressed_plugin(&self, plugin_name: &str) -> bool {
+        self.plugins.contains(plugin_name)
     }
 
     pub(crate) fn expand_range(&mut self, range: TextRange) {
@@ -89,6 +102,8 @@ pub(crate) struct LineSuppression {
     pub(crate) suppressed_rules: FxHashSet<RuleFilter<'static>>,
     /// List of all the rule instances this comment has started suppressing.
     pub(crate) suppressed_instances: FxHashMap<String, RuleFilter<'static>>,
+    /// List of plugins this comment has started suppressing
+    pub(crate) suppressed_plugins: FxHashSet<String>,
     /// Set to `true` when a signal matching this suppression was emitted and
     /// suppressed
     pub(crate) did_suppress_signal: bool,
@@ -139,6 +154,15 @@ impl RangeSuppressions {
         text_range: TextRange,
         already_suppressed: Option<TextRange>,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
+        if let Some(RuleFilter::Group("plugin")) = filter {
+            return Err(AnalyzerSuppressionDiagnostic::new(
+                category!("suppressions/incorrect"),
+                text_range,
+                markup!{"Found a "<Emphasis>"biome-range-"</Emphasis>" suppression on a plugin. This is not supported"}
+            ).hint(markup!{
+                "Remove this suppression."
+            }.to_owned()));
+        }
         if suppression.is_range_start() {
             if let Some(range_suppression) = self.suppressions.last_mut() {
                 match filter {
@@ -270,6 +294,7 @@ impl<'analyzer> Suppressions<'analyzer> {
     fn push_line_suppression(
         &mut self,
         filter: Option<RuleFilter<'static>>,
+        plugin: Option<String>,
         instance: Option<String>,
         current_range: TextRange,
         already_suppressed: Option<TextRange>,
@@ -283,6 +308,12 @@ impl<'analyzer> Suppressions<'analyzer> {
                         suppression.suppress_all = true;
                         suppression.suppressed_rules.clear();
                         suppression.suppressed_instances.clear();
+                    }
+                    Some(RuleFilter::Group("plugin")) => { // TODO use predefined rule filter here
+                        if let Some(plugin) = plugin {
+                            suppression.suppressed_plugins.insert(plugin);
+                        }
+                        suppression.suppress_all = false;
                     }
                     Some(filter) => {
                         suppression.suppressed_rules.insert(filter);
@@ -312,6 +343,9 @@ impl<'analyzer> Suppressions<'analyzer> {
                 if let Some(instance) = instance {
                     suppression.suppressed_instances.insert(instance, filter);
                 }
+                if let Some(plugin) = plugin {
+                    suppression.suppressed_plugins.insert(plugin);
+                }
             }
         }
         self.line_suppressions.push(suppression);
@@ -329,6 +363,7 @@ impl<'analyzer> Suppressions<'analyzer> {
             AnalyzerSuppressionKind::Everything => return Ok(None),
             AnalyzerSuppressionKind::Rule(rule) => rule,
             AnalyzerSuppressionKind::RuleInstance(rule, _) => rule,
+            AnalyzerSuppressionKind::Plugin(_) => return Ok(Some(RuleFilter::Group("plugin"))),
         };
 
         let group_rule = rule.split_once('/');
@@ -357,8 +392,15 @@ impl<'analyzer> Suppressions<'analyzer> {
 
     fn map_to_rule_instances(&self, suppression_kind: &AnalyzerSuppressionKind) -> Option<String> {
         match suppression_kind {
-            AnalyzerSuppressionKind::Everything | AnalyzerSuppressionKind::Rule(_) => None,
+            AnalyzerSuppressionKind::Everything | AnalyzerSuppressionKind::Rule(_) | AnalyzerSuppressionKind::Plugin(_) => None,
             AnalyzerSuppressionKind::RuleInstance(_, instances) => Some((*instances).to_string()),
+        }
+    }
+
+    fn map_to_plugin_name(&self, suppression_kind: &AnalyzerSuppressionKind) -> Option<String> {
+        match suppression_kind {
+            AnalyzerSuppressionKind::Plugin(plugin_name) => Some((*plugin_name).to_string()),
+            _ => None,
         }
     }
 
@@ -370,11 +412,12 @@ impl<'analyzer> Suppressions<'analyzer> {
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
         let filter = self.map_to_rule_filter(&suppression.kind, comment_range)?;
         let instances = self.map_to_rule_instances(&suppression.kind);
+        let plugin = self.map_to_plugin_name(&suppression.kind);
         self.last_suppression = Some(suppression.variant.clone());
         let already_suppressed = self.already_suppressed(filter.as_ref(), &comment_range);
         match suppression.variant {
             AnalyzerSuppressionVariant::Line => {
-                self.push_line_suppression(filter, instances, comment_range, already_suppressed)
+                self.push_line_suppression(filter, plugin, instances, comment_range, already_suppressed)
             }
             AnalyzerSuppressionVariant::TopLevel => self.top_level_suppression.push_suppression(
                 suppression,
