@@ -28,25 +28,29 @@ snapshot_kind: text
         "noParameterAssign": "off",
         "useNodeAssertStrict": "error",
         "useLiteralEnumMembers": "error",
-        "noArguments": "error",
-        "useShorthandFunctionType": "error",
-        "useExportType": "error",
-        "useDefaultParameterLast": "error",
         "noCommaOperator": "error",
-        "useSingleVarDeclarator": "error",
         "useNodejsImportProtocol": "error",
+        "useAsConstAssertion": "error",
+        "useNumericLiterals": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
         "useConst": "error",
-        "noNonNullAssertion": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
         "noInferrableTypes": "error",
         "useExponentiationOperator": "error",
-        "noUselessElse": "error",
-        "useSelfClosingElements": "error",
-        "useNumberNamespace": "error",
-        "useAsConstAssertion": "error",
-        "noUnusedTemplateLiteral": "error",
-        "useNumericLiterals": "error",
         "useTemplate": "error",
-        "useEnumInitializers": "error"
+        "noNonNullAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "noArguments": "error",
+        "useExportType": "error",
+        "noUselessElse": "error",
+        "useShorthandFunctionType": "error"
+      },
+      "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error"
       },
       "nursery": {
         "noRestrictedImports": {
@@ -70,10 +74,6 @@ snapshot_kind: text
           }
         },
         "noExplicitAny": "off"
-      },
-      "correctness": {
-        "noUnusedVariables": "error",
-        "noUnusedImports": "error"
       }
     }
   },
