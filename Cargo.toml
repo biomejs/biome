@@ -189,7 +189,7 @@ enumflags2           = "0.7.11"
 getrandom            = "0.2.15"
 globset              = "0.4.15"
 grit-pattern-matcher = "0.5"
-grit-util            = "0.5"
+grit-util            = "0.5.1"
 ignore               = "0.4.23"
 indexmap             = { version = "2.7.1" }
 insta                = "1.42.1"
