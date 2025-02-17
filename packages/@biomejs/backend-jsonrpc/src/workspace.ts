@@ -1545,6 +1545,10 @@ export interface Nursery {
 	 */
 	noImportCycles?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow using !important in declarations
+	 */
+	noImportant?: RuleConfiguration_for_Null;
+	/**
 	 * Disallows the use of irregular whitespace characters.
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
@@ -3324,6 +3328,7 @@ export type Category =
 	| "lint/nursery/noHeadElement"
 	| "lint/nursery/noHeadImportInDocument"
 	| "lint/nursery/noImgElement"
+	| "lint/nursery/noImportant"
 	| "lint/nursery/noImportCycles"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
