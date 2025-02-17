@@ -23,22 +23,6 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-check.js:1:11 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the delete operator which can impact performance.
-  
-  > 1 │ debugger; delete obj.prop; a === -0;
-      │           ^^^^^^^^^^^^^^^
-  
-  i Unsafe fix: Use an undefined assignment instead.
-  
-  - debugger;·delete·obj.prop;·a·===·-0;
-  + debugger;·obj.prop·=·undefined;·a·===·-0;
-  
-
-```
-
-```block
 check.js:1:28 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Do not use the === operator to compare against -0.
@@ -56,5 +40,4 @@ check.js:1:28 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━�
 ```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
-Found 1 warning.
 ```

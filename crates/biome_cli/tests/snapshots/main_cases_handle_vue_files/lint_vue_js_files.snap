@@ -56,30 +56,6 @@ file.vue:2:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━�
 ```
 
 ```block
-file.vue:3:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Avoid the delete operator which can impact performance.
-  
-    1 │ <script setup lang="js">
-    2 │ a == b;
-  > 3 │ delete a.c;
-      │ ^^^^^^^^^^
-    4 │ 
-    5 │ var foo = "";
-  
-  i Unsafe fix: Use an undefined assignment instead.
-  
-    1 1 │   a == b;
-    2   │ - delete·a.c;
-      2 │ + a.c·=·undefined;
-    3 3 │   
-    4 4 │   var foo = "";
-  
-
-```
-
-```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
-Found 1 warning.
 ```
