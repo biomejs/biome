@@ -42,18 +42,15 @@ pub struct HtmlFormatterSettings {
 impl From<HtmlFormatterConfiguration> for HtmlFormatterSettings {
     fn from(config: HtmlFormatterConfiguration) -> Self {
         HtmlFormatterSettings {
-            // TODO
-            // uncomment once ready
-            // bracket_same_line: config.bracket_same_line,
-            // whitespace_sensitivity: config.whitespace_sensitivity,
-            // indent_script_and_style: config.indent_script_and_style,
             enabled: config.enabled,
             line_ending: config.line_ending,
             line_width: config.line_width,
             indent_width: config.indent_width,
             indent_style: config.indent_style,
             attribute_position: config.attribute_position,
-            ..Default::default()
+            bracket_same_line: config.bracket_same_line,
+            whitespace_sensitivity: config.whitespace_sensitivity,
+            indent_script_and_style: config.indent_script_and_style,
         }
     }
 }
