@@ -29,7 +29,7 @@ biome_json_syntax     = { workspace = true }
 biome_rowan           = { workspace = true }
 biome_service         = { workspace = true }
 camino                = { workspace = true }
-pulldown-cmark        = "0.12.2"
+pulldown-cmark        = "0.13.0"
 
 
 [lints]

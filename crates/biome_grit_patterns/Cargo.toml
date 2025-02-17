@@ -28,7 +28,7 @@ camino               = { workspace = true }
 grit-pattern-matcher = { workspace = true }
 grit-util            = { workspace = true }
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
-rand                 = { version = "0.8.5" }
+rand                 = { version = "0.9.0" }
 regex                = { workspace = true }
 rustc-hash           = { workspace = true }
 schemars             = { workspace = true, optional = true }

@@ -19,8 +19,8 @@ schema = ["dep:schemars", "serde"]
 serde  = ["dep:serde"]
 
 [dev-dependencies]
-serde_test        = "1.0.177"
-static_assertions = "1.1"
+serde_test        = "=1.0.177"
+static_assertions = "=1.1.0"
 
 [[test]]
 name              = "serde"
