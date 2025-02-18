@@ -72,12 +72,6 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_editorconfig: Option<UseEditorconfigEnabled>,
 
-    /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
-    /// match these patterns.
-    #[bpaf(hide, pure(Default::default()))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ignore: Option<Vec<Box<str>>>,
-
     /// A list of Unix shell style patterns. The formatter will include files/folders that will
     /// match these patterns.
     #[bpaf(hide, pure(Default::default()))]

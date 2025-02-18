@@ -12,11 +12,6 @@ pub struct OrganizeImports {
     #[partial(bpaf(hide))]
     pub enabled: bool,
 
-    /// A list of Unix shell style patterns. The import organizer will ignore files/folders that will
-    /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub ignore: StringSet,
-
     /// A list of Unix shell style patterns. The import organizer will include files/folders that will
     /// match these patterns.
     #[partial(bpaf(hide))]

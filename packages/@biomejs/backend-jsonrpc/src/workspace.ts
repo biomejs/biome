@@ -98,10 +98,6 @@ export interface AssistConfiguration {
 	 */
 	enabled?: Bool;
 	/**
-	 * A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.
-	 */
-	ignore?: string[];
-	/**
 	 * A list of Unix shell style patterns. Biome will include files/folders that will match these patterns.
 	 */
 	include?: string[];
@@ -140,10 +136,6 @@ export interface CssConfiguration {
  */
 export interface FilesConfiguration {
 	/**
-	 * A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.
-	 */
-	ignore?: string[];
-	/**
 	 * Tells Biome to not emit diagnostics when handling files that doesn't know
 	 */
 	ignoreUnknown?: Bool;
@@ -181,10 +173,6 @@ export interface FormatterConfiguration {
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
 	 */
 	formatWithErrors?: Bool;
-	/**
-	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
-	 */
-	ignore?: string[];
 	/**
 	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
 	 */
@@ -321,10 +309,6 @@ export interface LinterConfiguration {
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
 	enabled?: Bool;
-	/**
-	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
-	 */
-	ignore?: string[];
 	/**
 	 * A list of Unix shell style patterns. The analyzer will include files/folders that will match these patterns.
 	 */
@@ -792,10 +776,6 @@ export interface OverridePattern {
 	 * Specific configuration for the GritQL language
 	 */
 	html?: HtmlConfiguration;
-	/**
-	 * A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.
-	 */
-	ignore?: string[];
 	/**
 	 * A list of Unix shell style patterns. Biome will include files/folders that will match these patterns.
 	 */

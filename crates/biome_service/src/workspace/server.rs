@@ -503,7 +503,6 @@ impl WorkspaceServer {
         };
 
         !is_included
-            || files_settings.ignored_files.matches_path(path)
             || files_settings.git_ignore.as_ref().is_some_and(|ignore| {
                 // `matched_path_or_any_parents` panics if `source` is not under the gitignore root.
                 // This checks excludes absolute paths that are not a prefix of the base root.

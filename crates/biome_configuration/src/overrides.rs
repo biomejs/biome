@@ -34,11 +34,6 @@ impl FromStr for Overrides {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverridePattern {
-    /// A list of Unix shell style patterns. Biome will ignore files/folders that will
-    /// match these patterns.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ignore: Option<Vec<Box<str>>>,
-
     /// A list of Unix shell style patterns. Biome will include files/folders that will
     /// match these patterns.
     #[serde(skip_serializing_if = "Option::is_none")]

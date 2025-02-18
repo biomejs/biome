@@ -1,7 +1,7 @@
 ---
 source: crates/biome_configuration/tests/spec_tests.rs
+assertion_line: 58
 expression: formatter_quote_style.json
-snapshot_kind: text
 ---
 formatter_quote_style.json:3:9 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -26,6 +26,5 @@ formatter_quote_style.json:3:9 deserialize ━━━━━━━━━━━━�
   - bracketSameLine
   - bracketSpacing
   - useEditorconfig
-  - ignore
   - include
   - includes

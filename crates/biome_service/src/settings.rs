@@ -241,8 +241,6 @@ pub struct FormatSettings {
     pub attribute_position: Option<AttributePosition>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub bracket_spacing: Option<BracketSpacing>,
-    /// List of ignore paths/files
-    pub ignored_files: Matcher,
     /// List of included paths/files
     pub included_files: Matcher,
     /// List of included paths/files
@@ -297,9 +295,6 @@ pub struct LinterSettings {
     /// List of rules
     pub rules: Option<Rules>,
 
-    /// List of ignored paths/files to match
-    pub ignored_files: Matcher,
-
     /// List of included paths/files to match
     pub included_files: Matcher,
 
@@ -337,9 +332,6 @@ pub struct AssistSettings {
 
     /// List of rules
     pub actions: Option<Actions>,
-
-    /// List of ignored paths/files to match
-    pub ignored_files: Matcher,
 
     /// List of included paths/files to match
     pub included_files: Matcher,
@@ -598,9 +590,6 @@ pub struct FilesSettings {
     pub git_ignore: Option<Gitignore>,
 
     /// List of paths/files to matcher
-    pub ignored_files: Matcher,
-
-    /// List of paths/files to matcher
     pub included_files: Matcher,
 
     /// List of included paths/files
@@ -687,10 +676,6 @@ fn to_file_settings(
         Some(FilesSettings {
             max_size: config.max_size,
             git_ignore,
-            ignored_files: Matcher::from_globs(
-                working_directory.clone(),
-                config.ignore.as_deref(),
-            )?,
             included_files: Matcher::from_globs(
                 working_directory.clone(),
                 config.include.as_deref(),
@@ -1076,7 +1061,6 @@ impl OverrideSettings {
 
 #[derive(Clone, Debug, Default)]
 pub struct OverrideSettingPattern {
-    exclude: Matcher,
     include: Matcher,
     includes: Includes,
     /// Formatter settings applied to all files in the workspaces
@@ -1095,9 +1079,6 @@ impl OverrideSettingPattern {
     /// Note that only path to regular files should be passed.
     /// This function doesn't take directories into account.
     pub fn is_file_included(&self, file_path: &Utf8Path) -> bool {
-        if self.exclude.matches_path(file_path) {
-            return false;
-        }
         self.include.matches_path(file_path)
             || if !self.includes.is_unset() {
                 self.includes.matches_with_exceptions(file_path)
@@ -1381,7 +1362,6 @@ pub fn to_override_settings(
         let pattern_setting = OverrideSettingPattern {
             includes: Includes::new(working_directory.clone(), pattern.includes),
             include: Matcher::from_globs(working_directory.clone(), pattern.include.as_deref())?,
-            exclude: Matcher::from_globs(working_directory.clone(), pattern.ignore.as_deref())?,
             formatter,
             linter,
             assist,
@@ -1508,7 +1488,6 @@ pub fn to_format_settings(
         attribute_position: conf.attribute_position,
         bracket_same_line: conf.bracket_same_line,
         bracket_spacing: conf.bracket_spacing,
-        ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
         included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
         includes: Includes::new(working_directory, conf.includes),
     })
@@ -1535,7 +1514,6 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             bracket_same_line: conf.bracket_same_line,
             bracket_spacing: Some(BracketSpacing::default()),
             format_with_errors: conf.format_with_errors,
-            ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
             includes: Default::default(),
         })
@@ -1549,7 +1527,6 @@ pub fn to_linter_settings(
     Ok(LinterSettings {
         enabled: conf.enabled,
         rules: conf.rules,
-        ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
         included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
         includes: Includes::new(working_directory, conf.includes),
         domains: conf.domains,
@@ -1563,7 +1540,6 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
         Ok(Self {
             enabled: conf.enabled,
             rules: conf.rules,
-            ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
             includes: Default::default(),
             domains: conf.domains,
@@ -1578,7 +1554,6 @@ pub fn to_assist_settings(
     Ok(AssistSettings {
         enabled: conf.enabled,
         actions: conf.actions,
-        ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
         included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
         includes: Includes::new(working_directory, conf.includes),
     })
@@ -1591,7 +1566,6 @@ impl TryFrom<OverrideAssistConfiguration> for AssistSettings {
         Ok(Self {
             enabled: conf.enabled,
             actions: conf.actions,
-            ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
             includes: Default::default(),
         })
