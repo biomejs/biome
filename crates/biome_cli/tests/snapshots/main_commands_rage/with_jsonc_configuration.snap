@@ -36,7 +36,7 @@ Environment:
 
 Biome Configuration:
   Status:                       Loaded successfully
-  Configuration path:           biome.jsonc
+  Path:                         biome.jsonc
   Formatter enabled:            false
   Linter enabled:               true
   Assist enabled:               true

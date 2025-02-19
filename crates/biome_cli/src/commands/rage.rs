@@ -204,7 +204,11 @@ impl Display for RageConfiguration<'_> {
         match load_configuration(self.fs, ConfigurationPathHint::default()) {
             Ok(loaded_configuration) => {
                 if loaded_configuration.directory_path.is_none() {
-                    KeyValuePair("Status", markup!(<Dim>"Not set"</Dim>)).fmt(fmt)?;
+                    markup! {
+                        {KeyValuePair("Status", markup!(<Dim>"Not set"</Dim>))}
+                        {ConfigPath("unset")}
+                    }
+                    .fmt(fmt)?;
                 } else {
                     let LoadedConfiguration {
                         configuration,
@@ -240,7 +244,7 @@ impl Display for RageConfiguration<'_> {
 
                     markup! (
                         {KeyValuePair("Status", status)}
-                        {KeyValuePair("Configuration path", markup!({DebugDisplay(config_path)}))}
+                        {ConfigPath(config_path)}
                         {KeyValuePair("Formatter enabled", markup!({DebugDisplay(settings.is_formatter_enabled())}))}
                         {KeyValuePair("Linter enabled", markup!({DebugDisplay(settings.is_linter_enabled())}))}
                         {KeyValuePair("Assist enabled", markup!({DebugDisplay(settings.is_assist_enabled())}))}
@@ -448,6 +452,20 @@ impl Display for ConnectedClientServerLog<'_> {
             BiomeServerLog.fmt(fmt)
         } else {
             Ok(())
+        }
+    }
+}
+
+/// Prints the config path, but only if it is set.
+struct ConfigPath<'a>(&'a str);
+
+impl Display for ConfigPath<'_> {
+    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        let path = self.0;
+        if path.is_empty() {
+            KeyValuePair("Path", markup! { <Dim>"unset"</Dim> }).fmt(fmt)
+        } else {
+            KeyValuePair("Path", markup!({ DebugDisplay(path) })).fmt(fmt)
         }
     }
 }

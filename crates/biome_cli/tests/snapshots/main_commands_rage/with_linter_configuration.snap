@@ -53,7 +53,7 @@ Environment:
 
 Biome Configuration:
   Status:                       Loaded successfully
-  Configuration path:           biome.json
+  Path:                         biome.json
   Formatter enabled:            true
   Linter enabled:               true
   Assist enabled:               true
