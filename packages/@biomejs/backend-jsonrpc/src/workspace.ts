@@ -98,10 +98,6 @@ export interface AssistConfiguration {
 	 */
 	enabled?: Bool;
 	/**
-	 * A list of Unix shell style patterns. Biome will include files/folders that will match these patterns.
-	 */
-	include?: string[];
-	/**
 	 * A list of glob patterns. Biome will include files/folders that will match these patterns.
 	 */
 	includes?: Glob[];
@@ -140,10 +136,6 @@ export interface FilesConfiguration {
 	 */
 	ignoreUnknown?: Bool;
 	/**
-	 * A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.
-	 */
-	include?: string[];
-	/**
 	 * A list of glob patterns. Biome will handle only those files/folders that will match these patterns.
 	 */
 	includes?: Glob[];
@@ -173,10 +165,6 @@ export interface FormatterConfiguration {
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
 	 */
 	formatWithErrors?: Bool;
-	/**
-	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
-	 */
-	include?: string[];
 	/**
 	 * A list of glob patterns. The formatter will include files/folders that will match these patterns.
 	 */
@@ -309,10 +297,6 @@ export interface LinterConfiguration {
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
 	enabled?: Bool;
-	/**
-	 * A list of Unix shell style patterns. The analyzer will include files/folders that will match these patterns.
-	 */
-	include?: string[];
 	/**
 	 * A list of glob patterns. The analyzer will handle only those files/folders that will match these patterns.
 	 */

@@ -344,12 +344,6 @@ pub struct FilesConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
 
-    /// A list of Unix shell style patterns. Biome will handle only those files/folders that will
-    /// match these patterns.
-    #[bpaf(hide, pure(Default::default()))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub include: Option<Vec<Box<str>>>,
-
     /// A list of glob patterns. Biome will handle only those files/folders that will
     /// match these patterns.
     #[bpaf(hide, pure(Default::default()))]

@@ -85,7 +85,6 @@ Formatter:
   Line width:                   120
   Attribute position:           Multiline
   Bracket spacing:              unset
-  Include:                      unset
   Includes:                     **/*.html, **/*.css, **/*.js, **/*.ts, **/*.tsx, **/*.jsx, **/*.json, **/*.md, !configuration-schema.json
 
 JavaScript Formatter:

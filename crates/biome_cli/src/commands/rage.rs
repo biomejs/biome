@@ -242,12 +242,6 @@ impl Display for RageConfiguration<'_> {
                     // Print formatter configuration if --formatter option is true
                     if self.formatter {
                         let formatter_configuration = configuration.get_formatter_configuration();
-                        let include = formatter_configuration.include.map(|list| {
-                            list.iter()
-                                .map(|s| s.to_string())
-                                .collect::<Vec<_>>()
-                                .join(", ")
-                        });
                         let includes = formatter_configuration.includes.map(|list| {
                             list.iter()
                                 .map(|s| s.to_string())
@@ -263,7 +257,6 @@ impl Display for RageConfiguration<'_> {
                             {KeyValuePair("Line width", markup!({DisplayOption(formatter_configuration.line_width)}))}
                             {KeyValuePair("Attribute position", markup!({DisplayOption(formatter_configuration.attribute_position)}))}
                             {KeyValuePair("Bracket spacing", markup!({DisplayOption(formatter_configuration.bracket_spacing)}))}
-                            {KeyValuePair("Include", markup!({DisplayOption(include)}))}
                             {KeyValuePair("Includes", markup!({DisplayOption(includes)}))}
                         ).fmt(fmt)?;
 

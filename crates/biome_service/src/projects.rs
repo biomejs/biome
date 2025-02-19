@@ -174,19 +174,19 @@ impl Projects {
         };
 
         let settings = &project_data.settings;
-        let (feature_includes_files, feature_included_files) = match feature {
+        let feature_includes_files = match feature {
             FeatureKind::Format => {
                 let formatter = &settings.formatter;
-                (&formatter.includes, &formatter.included_files)
+                &formatter.includes
             }
             FeatureKind::Lint => {
                 let linter = &settings.linter;
-                (&linter.includes, &linter.included_files)
+                &linter.includes
             }
 
             FeatureKind::Assist => {
                 let assists = &settings.assist;
-                (&assists.includes, &assists.included_files)
+                &assists.includes
             }
             // TODO: enable once the configuration is available
             FeatureKind::Search => return false, // There is no search-specific config.
@@ -201,11 +201,6 @@ impl Projects {
                 feature_includes_files.matches_with_exceptions(path)
             };
         }
-        if !feature_included_files.is_empty() {
-            is_feature_included =
-                is_feature_included && (is_dir(path) || feature_included_files.matches_path(path));
-        };
-
         !is_feature_included
     }
 }

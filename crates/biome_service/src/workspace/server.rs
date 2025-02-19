@@ -497,10 +497,6 @@ impl WorkspaceServer {
                 files_settings.includes.matches_with_exceptions(path)
             };
         }
-        if !files_settings.included_files.is_empty() {
-            is_included =
-                is_included && (is_dir(path) || files_settings.included_files.matches_path(path))
-        };
 
         !is_included
             || files_settings.git_ignore.as_ref().is_some_and(|ignore| {

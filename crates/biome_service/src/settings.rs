@@ -242,8 +242,6 @@ pub struct FormatSettings {
     pub bracket_same_line: Option<BracketSameLine>,
     pub bracket_spacing: Option<BracketSpacing>,
     /// List of included paths/files
-    pub included_files: Matcher,
-    /// List of included paths/files
     pub includes: Includes,
 }
 
@@ -295,9 +293,6 @@ pub struct LinterSettings {
     /// List of rules
     pub rules: Option<Rules>,
 
-    /// List of included paths/files to match
-    pub included_files: Matcher,
-
     /// List of included paths/files
     pub includes: Includes,
 
@@ -332,9 +327,6 @@ pub struct AssistSettings {
 
     /// List of rules
     pub actions: Option<Actions>,
-
-    /// List of included paths/files to match
-    pub included_files: Matcher,
 
     /// List of included paths/files
     pub includes: Includes,
@@ -589,9 +581,6 @@ pub struct FilesSettings {
     /// gitignore file patterns
     pub git_ignore: Option<Gitignore>,
 
-    /// List of paths/files to matcher
-    pub included_files: Matcher,
-
     /// List of included paths/files
     pub includes: Includes,
 
@@ -676,10 +665,6 @@ fn to_file_settings(
         Some(FilesSettings {
             max_size: config.max_size,
             git_ignore,
-            included_files: Matcher::from_globs(
-                working_directory.clone(),
-                config.include.as_deref(),
-            )?,
             includes: Includes::new(working_directory, config.includes),
             ignore_unknown: config.ignore_unknown,
         })
@@ -1488,7 +1473,6 @@ pub fn to_format_settings(
         attribute_position: conf.attribute_position,
         bracket_same_line: conf.bracket_same_line,
         bracket_spacing: conf.bracket_spacing,
-        included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
         includes: Includes::new(working_directory, conf.includes),
     })
 }
@@ -1514,7 +1498,6 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             bracket_same_line: conf.bracket_same_line,
             bracket_spacing: Some(BracketSpacing::default()),
             format_with_errors: conf.format_with_errors,
-            included_files: Matcher::empty(),
             includes: Default::default(),
         })
     }
@@ -1527,7 +1510,6 @@ pub fn to_linter_settings(
     Ok(LinterSettings {
         enabled: conf.enabled,
         rules: conf.rules,
-        included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
         includes: Includes::new(working_directory, conf.includes),
         domains: conf.domains,
     })
@@ -1540,7 +1522,6 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
         Ok(Self {
             enabled: conf.enabled,
             rules: conf.rules,
-            included_files: Matcher::empty(),
             includes: Default::default(),
             domains: conf.domains,
         })
@@ -1554,7 +1535,6 @@ pub fn to_assist_settings(
     Ok(AssistSettings {
         enabled: conf.enabled,
         actions: conf.actions,
-        included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
         includes: Includes::new(working_directory, conf.includes),
     })
 }
@@ -1566,7 +1546,6 @@ impl TryFrom<OverrideAssistConfiguration> for AssistSettings {
         Ok(Self {
             enabled: conf.enabled,
             actions: conf.actions,
-            included_files: Matcher::empty(),
             includes: Default::default(),
         })
     }

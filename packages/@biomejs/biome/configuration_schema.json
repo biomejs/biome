@@ -397,11 +397,6 @@
 					"description": "Whether Biome should enable assist via LSP.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
-				"include": {
-					"description": "A list of Unix shell style patterns. Biome will include files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
 				"includes": {
 					"description": "A list of glob patterns. Biome will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
@@ -1380,11 +1375,6 @@
 					"description": "Tells Biome to not emit diagnostics when handling files that doesn't know",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
-				"include": {
-					"description": "A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
 				"includes": {
 					"description": "A list of glob patterns. Biome will handle only those files/folders that will match these patterns.",
 					"type": ["array", "null"],
@@ -1458,11 +1448,6 @@
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
 				},
 				"includes": {
 					"description": "A list of glob patterns. The formatter will include files/folders that will match these patterns.",
@@ -2263,11 +2248,6 @@
 				"enabled": {
 					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. The analyzer will include files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
 				},
 				"includes": {
 					"description": "A list of glob patterns. The analyzer will handle only those files/folders that will match these patterns.",

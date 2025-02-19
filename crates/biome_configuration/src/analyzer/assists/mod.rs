@@ -19,11 +19,6 @@ pub struct AssistsConfiguration {
     #[partial(bpaf(pure(Default::default()), optional, hide))]
     pub actions: Actions,
 
-    /// A list of Unix shell style patterns. Biome will include files/folders that will
-    /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub include: StringSet,
-
     /// A list of glob patterns. Biome will include files/folders that will
     /// match these patterns.
     #[partial(bpaf(pure(Default::default()), hide))]
@@ -35,7 +30,6 @@ impl Default for AssistsConfiguration {
         Self {
             enabled: true,
             actions: Actions::default(),
-            include: StringSet::default(),
             includes: Default::default(),
         }
     }

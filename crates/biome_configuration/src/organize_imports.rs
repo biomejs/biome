@@ -12,11 +12,6 @@ pub struct OrganizeImports {
     #[partial(bpaf(hide))]
     pub enabled: bool,
 
-    /// A list of Unix shell style patterns. The import organizer will include files/folders that will
-    /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub include: StringSet,
-
     /// A list of glob patterns. The import organizer will include files/folders that will
     /// match these patterns.
     #[partial(bpaf(pure(Default::default()), hide))]
@@ -28,7 +23,6 @@ impl Default for OrganizeImports {
         Self {
             enabled: true,
             ignore: Default::default(),
-            include: Default::default(),
             includes: Default::default(),
         }
     }
