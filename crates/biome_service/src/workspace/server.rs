@@ -7,7 +7,7 @@ use super::{
     ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
     PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
     ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
-    SupportsFeatureParams, UpdateSettingsParams,
+    SupportsFeatureParams, UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::diagnostics::FileTooLarge;
 use crate::file_handlers::{
@@ -22,6 +22,8 @@ use crate::workspace::{
 };
 use crate::{file_handlers::Features, Workspace, WorkspaceError};
 use append_only_vec::AppendOnlyVec;
+use biome_analyze::AnalyzerPluginVec;
+use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_dependency_graph::DependencyGraph;
 use biome_deserialize::json::deserialize_from_json_str;
@@ -38,6 +40,7 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_package::PackageType;
 use biome_parser::AnyParse;
+use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::NodeCache;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -61,6 +64,9 @@ pub(super) struct WorkspaceServer {
 
     /// Dependency graph tracking imports across source files.
     dependency_graph: Arc<DependencyGraph>,
+
+    /// Keeps all loaded plugins in memory, per project.
+    plugin_caches: Arc<HashMap<ProjectKey, PluginCache>>,
 
     /// Stores the document (text content + version number) associated with a URL
     documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
@@ -136,6 +142,7 @@ impl WorkspaceServer {
             projects: Default::default(),
             project_layout: Default::default(),
             dependency_graph: Default::default(),
+            plugin_caches: Default::default(),
             documents: Default::default(),
             file_sources: AppendOnlyVec::default(),
             patterns: Default::default(),
@@ -519,6 +526,41 @@ impl WorkspaceServer {
             })
     }
 
+    fn load_plugins(
+        &self,
+        project_key: ProjectKey,
+        base_path: &Utf8Path,
+        plugins: &Plugins,
+    ) -> Vec<PluginDiagnostic> {
+        let mut diagnostics = Vec::new();
+        let plugin_cache = PluginCache::default();
+
+        for plugin_config in plugins.iter() {
+            match plugin_config {
+                PluginConfiguration::Path(plugin_path) => {
+                    match BiomePlugin::load(self.fs.as_ref(), plugin_path, base_path) {
+                        Ok(plugin) => {
+                            plugin_cache.insert_plugin(plugin_path.clone().into(), plugin);
+                        }
+                        Err(diagnostic) => diagnostics.push(diagnostic),
+                    }
+                }
+            }
+        }
+
+        self.plugin_caches.pin().insert(project_key, plugin_cache);
+
+        diagnostics
+    }
+
+    fn get_analyzer_plugins_for_project(&self, project_key: ProjectKey) -> AnalyzerPluginVec {
+        self.plugin_caches
+            .pin()
+            .get(&project_key)
+            .map(|cache| cache.get_analyzer_plugins())
+            .unwrap_or_default()
+    }
+
     pub(super) fn update_project_layout_for_paths(&self, paths: &[BiomePath]) {
         for path in paths {
             if let Err(error) = self.update_project_layout_for_path(path) {
@@ -645,22 +687,35 @@ impl Workspace for WorkspaceServer {
     /// This function may panic if the internal settings mutex has been poisoned
     /// by another thread having previously panicked while holding the lock
     #[tracing::instrument(level = "debug", skip(self))]
-    fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
+    fn update_settings(
+        &self,
+        params: UpdateSettingsParams,
+    ) -> Result<UpdateSettingsResult, WorkspaceError> {
         let mut settings = self
             .projects
             .get_settings(params.project_key)
             .ok_or_else(WorkspaceError::no_project)?;
 
+        let workspace_directory = params.workspace_directory.map(|p| p.to_path_buf());
+
         settings.merge_with_configuration(
             params.configuration,
-            params.workspace_directory.map(|p| p.to_path_buf()),
+            workspace_directory.clone(),
             params.vcs_base_path.map(|p| p.to_path_buf()),
             params.gitignore_matches.as_slice(),
         )?;
 
+        let diagnostics = self.load_plugins(
+            params.project_key,
+            &workspace_directory.unwrap_or_default(),
+            &settings.plugins,
+        );
+
         self.projects.set_settings(params.project_key, settings);
 
-        Ok(())
+        Ok(UpdateSettingsResult {
+            diagnostics: diagnostics.into_iter().map(Into::into).collect(),
+        })
     }
 
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
@@ -918,6 +973,7 @@ impl Workspace for WorkspaceServer {
                     project_layout: self.project_layout.clone(),
                     suppression_reason: None,
                     enabled_rules,
+                    plugins: self.get_analyzer_plugins_for_project(project_key),
                 });
 
                 (
@@ -998,6 +1054,7 @@ impl Workspace for WorkspaceServer {
             skip,
             suppression_reason: None,
             enabled_rules,
+            plugins: self.get_analyzer_plugins_for_project(project_key),
         }))
     }
 
@@ -1137,6 +1194,7 @@ impl Workspace for WorkspaceServer {
             rule_categories,
             suppression_reason,
             enabled_rules,
+            plugins: self.get_analyzer_plugins_for_project(project_key),
         })
     }
 

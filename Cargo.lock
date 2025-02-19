@@ -1218,6 +1218,8 @@ dependencies = [
  "grit-pattern-matcher",
  "grit-util",
  "insta",
+ "papaya",
+ "rustc-hash 2.1.1",
  "serde",
 ]
 
@@ -1290,6 +1292,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_package",
  "biome_parser",
+ "biome_plugin_loader",
  "biome_project_layout",
  "biome_rowan",
  "biome_string_case",

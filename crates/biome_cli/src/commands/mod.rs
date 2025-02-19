@@ -801,13 +801,16 @@ pub(crate) trait CommandRunner: Sized {
             open_uninitialized: true,
         })?;
 
-        workspace.update_settings(UpdateSettingsParams {
+        let result = workspace.update_settings(UpdateSettingsParams {
             project_key,
             workspace_directory: configuration_path.map(BiomePath::from),
             configuration,
             vcs_base_path: vcs_base_path.map(BiomePath::from),
             gitignore_matches,
         })?;
+        for diagnostic in result.diagnostics {
+            console.log(markup! {{PrintDiagnostic::simple(&diagnostic)}});
+        }
 
         let execution = self.get_execution(cli_options, console, workspace, project_key)?;
 

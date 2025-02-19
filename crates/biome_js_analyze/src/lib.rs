@@ -3,8 +3,8 @@
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
     to_analyzer_suppressions, AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions,
-    AnalyzerPlugin, AnalyzerSignal, AnalyzerSuppression, ControlFlow, InspectMatcher, LanguageRoot,
-    MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
+    AnalyzerPluginSlice, AnalyzerSignal, AnalyzerSuppression, ControlFlow, InspectMatcher,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
 };
 use biome_aria::AriaRoles;
 use biome_dependency_graph::DependencyGraph;
@@ -74,7 +74,7 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     filter: AnalysisFilter,
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
-    plugins: Vec<Box<dyn AnalyzerPlugin>>,
+    plugins: AnalyzerPluginSlice<'a>,
     services: JsAnalyzerServices,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
@@ -135,7 +135,7 @@ where
 
     for plugin in plugins {
         if plugin.supports_js() {
-            analyzer.add_plugin(plugin);
+            analyzer.add_plugin(plugin.clone());
         }
     }
 
@@ -167,7 +167,7 @@ pub fn analyze<'a, F, B>(
     root: &LanguageRoot<JsLanguage>,
     filter: AnalysisFilter,
     options: &'a AnalyzerOptions,
-    plugins: Vec<Box<dyn AnalyzerPlugin>>,
+    plugins: AnalyzerPluginSlice<'a>,
     services: JsAnalyzerServices,
     emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
@@ -234,7 +234,7 @@ let bar = 33;
                 ..AnalysisFilter::default()
             },
             &options,
-            Vec::new(),
+            &[],
             services,
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -282,7 +282,7 @@ let bar = 33;
             &parsed.tree(),
             AnalysisFilter::default(),
             &options,
-            Vec::new(),
+            &[],
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -367,7 +367,7 @@ let bar = 33;
             &parsed.tree(),
             AnalysisFilter::default(),
             &options,
-            Vec::new(),
+            &[],
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -438,7 +438,7 @@ let bar = 33;
             &parsed.tree(),
             filter,
             &options,
-            Vec::new(),
+            &[],
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -482,7 +482,7 @@ let bar = 33;
             &parsed.tree(),
             filter,
             &options,
-            Vec::new(),
+            &[],
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -533,7 +533,7 @@ debugger;
             &parsed.tree(),
             filter,
             &options,
-            Vec::new(),
+            &[],
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -579,7 +579,7 @@ debugger;
             &parsed.tree(),
             filter,
             &options,
-            Vec::new(),
+            &[],
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -627,7 +627,7 @@ debugger;
             &parsed.tree(),
             filter,
             &options,
-            Vec::new(),
+            &[],
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -676,7 +676,7 @@ let bar = 33;
             &parsed.tree(),
             filter,
             &options,
-            Vec::new(),
+            &[],
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -723,7 +723,7 @@ let bar = 33;
             &parsed.tree(),
             filter,
             &options,
-            Vec::new(),
+            &[],
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -773,7 +773,7 @@ let c;
             &parsed.tree(),
             filter,
             &options,
-            Vec::new(),
+            &[],
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -824,7 +824,7 @@ debugger;
             &parsed.tree(),
             filter,
             &options,
-            Vec::new(),
+            &[],
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -876,7 +876,7 @@ let d;
             &parsed.tree(),
             filter,
             &options,
-            Vec::new(),
+            &[],
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
@@ -919,7 +919,7 @@ const foo0 = function (bar: string) {
         let services =
             JsAnalyzerServices::from((Default::default(), Default::default(), JsFileSource::ts()));
 
-        analyze(&root, filter, &options, Vec::new(), services, |signal| {
+        analyze(&root, filter, &options, &[], services, |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
                     .with_file_path("dummyFile")
@@ -963,7 +963,7 @@ a == b;
             &parsed.tree(),
             filter,
             &options,
-            Vec::new(),
+            &[],
             Default::default(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
