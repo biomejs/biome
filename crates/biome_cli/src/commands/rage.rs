@@ -237,10 +237,10 @@ impl Display for RageConfiguration<'_> {
                         markup!(<Dim>"Loaded successfully"</Dim>)
                     };
 
-                    let config_path = file_path
-                        .as_ref()
-                        .map(|path| path.as_str())
-                        .unwrap_or_else(|| directory_path.as_ref().unwrap().as_str());
+                    let config_path = file_path.as_ref().map_or_else(
+                        || directory_path.as_ref().unwrap().as_str(),
+                        |path| path.as_str(),
+                    );
 
                     markup! (
                         {KeyValuePair("Status", status)}
