@@ -24,18 +24,14 @@ use serde::{Deserialize, Serialize};
 pub struct NoUnusedVariablesOptions {
     /// Whether to ignore unused variables from an object desctructuring with a spread
     /// (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).
-    #[serde(default = "enabled")]
+    #[serde(default)]
     ignore_rest_siblings: bool,
-}
-
-const fn enabled() -> bool {
-    true
 }
 
 impl Default for NoUnusedVariablesOptions {
     fn default() -> Self {
         Self {
-            ignore_rest_siblings: enabled(),
+            ignore_rest_siblings: true,
         }
     }
 }
@@ -60,6 +56,10 @@ declare_lint_rule! {
     /// :::
     ///
     /// ## Options
+    ///
+    /// **Since v2.0.0**
+    ///
+    /// The rule supports the following options:
     ///
     /// ```json,options
     /// {
@@ -106,7 +106,7 @@ declare_lint_rule! {
     /// export function f<T>() {}
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diagnostic,use_options
     /// // With `ignoreRestSiblings: false`
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand, year, ...other } = car;
@@ -135,14 +135,14 @@ declare_lint_rule! {
     /// used_overloaded();
     /// ```
     ///
-    /// ```js,expect_diagnostic,use_options
+    /// ```js,use_options
     /// // With `ignoreRestSiblings: false`
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand: _brand, year: _year, ...other } = car;
     /// console.log(other);
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```js
     /// // With `ignoreRestSiblings: true`
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand, year, ...other } = car;
