@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.cjs
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -15,7 +16,7 @@ function f() {
 ```
 invalid.cjs:2:3 lint/complexity/noWith ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected use of with statement.
+  × Unexpected use of with statement.
   
     1 │ function f() {
   > 2 │   with (point) {
@@ -30,5 +31,3 @@ invalid.cjs:2:3 lint/complexity/noWith ━━━━━━━━━━━━━�
   
 
 ```
-
-

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `check.js`
 
@@ -39,7 +40,7 @@ check.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━
 ```block
 check.js:1:11 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid the delete operator which can impact performance.
+  ! Avoid the delete operator which can impact performance.
   
   > 1 │ debugger; delete obj.prop; a === -0;
       │           ^^^^^^^^^^^^^^^
@@ -54,5 +55,6 @@ check.js:1:11 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 2 errors.
+Found 1 error.
+Found 1 warning.
 ```

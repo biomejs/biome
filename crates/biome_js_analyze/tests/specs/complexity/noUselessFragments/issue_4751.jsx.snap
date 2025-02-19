@@ -19,7 +19,7 @@ showFullName ? <>{fullName}</> : <>{firstName}</>;
 ```
 issue_4751.jsx:2:3 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     1 │ <section>
   > 2 │   <>
@@ -51,7 +51,7 @@ issue_4751.jsx:2:3 lint/complexity/noUselessFragments  FIXABLE  ━━━━━�
 ```
 issue_4751.jsx:8:16 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     6 │ </section>;
     7 │ 
@@ -70,7 +70,7 @@ issue_4751.jsx:8:16 lint/complexity/noUselessFragments  FIXABLE  ━━━━━
 ```
 issue_4751.jsx:8:34 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     6 │ </section>;
     7 │ 

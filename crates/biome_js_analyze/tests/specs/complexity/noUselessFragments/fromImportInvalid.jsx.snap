@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: fromImportInvalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -17,7 +18,7 @@ import React, { Fragment } from "react";
 ```
 fromImportInvalid.jsx:4:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     3 │ <>
   > 4 │     <Fragment></Fragment>
@@ -37,7 +38,7 @@ fromImportInvalid.jsx:4:5 lint/complexity/noUselessFragments  FIXABLE  ━━━
 ```
 fromImportInvalid.jsx:5:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     3 │ <>
     4 │     <Fragment></Fragment>
@@ -54,5 +55,3 @@ fromImportInvalid.jsx:5:5 lint/complexity/noUselessFragments  FIXABLE  ━━━
       │     ---------------------------------
 
 ```
-
-

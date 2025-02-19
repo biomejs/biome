@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -11,7 +12,7 @@ foo.reduce((acc, bar) => [...acc, bar], [])
 ```
 invalid.jsonc:1:27 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduce((acc, bar) => [...acc, bar], [])
       │                           ^^^^^^
@@ -32,7 +33,7 @@ foo.reduceRight((acc, bar) => [...acc, bar], [])
 ```
 invalid.jsonc:1:32 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduceRight((acc, bar) => [...acc, bar], [])
       │                                ^^^^^^
@@ -53,7 +54,7 @@ foo.reduce((acc, bar) => {return [...acc, bar];}, [])
 ```
 invalid.jsonc:1:35 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduce((acc, bar) => {return [...acc, bar];}, [])
       │                                   ^^^^^^
@@ -74,7 +75,7 @@ foo.reduceRight((acc, bar) => {return [...acc, bar];}, [])
 ```
 invalid.jsonc:1:40 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduceRight((acc, bar) => {return [...acc, bar];}, [])
       │                                        ^^^^^^
@@ -95,7 +96,7 @@ foo.reduce((acc, bar) => [...acc, ...bar], [])
 ```
 invalid.jsonc:1:27 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduce((acc, bar) => [...acc, ...bar], [])
       │                           ^^^^^^
@@ -116,7 +117,7 @@ foo.reduceRight((acc, bar) => [...acc, ...bar], [])
 ```
 invalid.jsonc:1:32 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduceRight((acc, bar) => [...acc, ...bar], [])
       │                                ^^^^^^
@@ -137,7 +138,7 @@ foo.reduce((acc, bar) => {return [...acc, ...bar];}, [])
 ```
 invalid.jsonc:1:35 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduce((acc, bar) => {return [...acc, ...bar];}, [])
       │                                   ^^^^^^
@@ -158,7 +159,7 @@ foo.reduceRight((acc, bar) => {return [...acc, ...bar];}, [])
 ```
 invalid.jsonc:1:40 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduceRight((acc, bar) => {return [...acc, ...bar];}, [])
       │                                        ^^^^^^
@@ -179,7 +180,7 @@ foo.reduce((acc, bar) => ({...acc, [bar.key]: bar.value}), {})
 ```
 invalid.jsonc:1:28 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduce((acc, bar) => ({...acc, [bar.key]: bar.value}), {})
       │                            ^^^^^^
@@ -200,7 +201,7 @@ foo.reduceRight((acc, bar) => ({...acc, [bar.key]: bar.value}), {})
 ```
 invalid.jsonc:1:33 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduceRight((acc, bar) => ({...acc, [bar.key]: bar.value}), {})
       │                                 ^^^^^^
@@ -221,7 +222,7 @@ foo.reduce((acc, bar) => {return {...acc, [bar.key]: bar.value};}, {})
 ```
 invalid.jsonc:1:35 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduce((acc, bar) => {return {...acc, [bar.key]: bar.value};}, {})
       │                                   ^^^^^^
@@ -242,7 +243,7 @@ foo.reduceRight((acc, bar) => {return {...acc, [bar.key]: bar.value};}, {})
 ```
 invalid.jsonc:1:40 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduceRight((acc, bar) => {return {...acc, [bar.key]: bar.value};}, {})
       │                                        ^^^^^^
@@ -263,7 +264,7 @@ foo.reduce((acc, bar) => ({...acc, ...bar}), {})
 ```
 invalid.jsonc:1:28 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduce((acc, bar) => ({...acc, ...bar}), {})
       │                            ^^^^^^
@@ -284,7 +285,7 @@ foo.reduceRight((acc, bar) => ({...acc, ...bar}), {})
 ```
 invalid.jsonc:1:33 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduceRight((acc, bar) => ({...acc, ...bar}), {})
       │                                 ^^^^^^
@@ -305,7 +306,7 @@ foo.reduce((acc, bar) => {return {...acc, ...bar};}, {})
 ```
 invalid.jsonc:1:35 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduce((acc, bar) => {return {...acc, ...bar};}, {})
       │                                   ^^^^^^
@@ -326,7 +327,7 @@ foo.reduceRight((acc, bar) => {return {...acc, ...bar};}, {})
 ```
 invalid.jsonc:1:40 lint/performance/noAccumulatingSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the use of spread (`...`) syntax on accumulators.
+  × Avoid the use of spread (`...`) syntax on accumulators.
   
   > 1 │ foo.reduceRight((acc, bar) => {return {...acc, ...bar};}, {})
       │                                        ^^^^^^
@@ -337,5 +338,3 @@ invalid.jsonc:1:40 lint/performance/noAccumulatingSpread ━━━━━━━�
   
 
 ```
-
-

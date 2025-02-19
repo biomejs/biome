@@ -69,7 +69,6 @@ Linter:
     complexity/noBannedTypes
     complexity/noEmptyTypeParameters
     complexity/noExtraBooleanCast
-    complexity/noForEach
     complexity/noMultipleSpacesInRegularExpressionLiterals
     complexity/noStaticOnlyClass
     complexity/noThisInStatic

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: withCommentsInvalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -16,7 +17,7 @@ expression: withCommentsInvalid.jsx
 ```
 withCommentsInvalid.jsx:2:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     1 │ <>
   > 2 │     </* test */>empty</>
@@ -36,7 +37,7 @@ withCommentsInvalid.jsx:2:5 lint/complexity/noUselessFragments  FIXABLE  ━━�
 ```
 withCommentsInvalid.jsx:3:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     1 │ <>
     2 │     </* test */>empty</>
@@ -57,7 +58,7 @@ withCommentsInvalid.jsx:3:5 lint/complexity/noUselessFragments  FIXABLE  ━━�
 ```
 withCommentsInvalid.jsx:4:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     2 │     </* test */>empty</>
     3 │     <>empty</* comment */ />
@@ -74,5 +75,3 @@ withCommentsInvalid.jsx:4:5 lint/complexity/noUselessFragments  FIXABLE  ━━�
       │     --     -----------------
 
 ```
-
-

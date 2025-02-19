@@ -22,7 +22,7 @@ function useCounter() {
 ```
 preactHooks.js:6:23 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook does not specify all of its dependencies: value
+  × This hook does not specify all of its dependencies: value
   
     4 │ function useCounter() {
     5 │     const [value, setValue] = useState(0);

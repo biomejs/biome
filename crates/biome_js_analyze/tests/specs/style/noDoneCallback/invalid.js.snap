@@ -74,7 +74,7 @@ test.each``("something", ({ a, b }, done) => {});
 ```
 invalid.js:1:20 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
   > 1 │ test("something", (done) => {
       │                    ^^^^
@@ -89,7 +89,7 @@ invalid.js:1:20 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:4:20 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     2 │     done();
     3 │ });
@@ -106,7 +106,7 @@ invalid.js:4:20 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:7:20 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     5 │     done();
     6 │ });
@@ -123,7 +123,7 @@ invalid.js:7:20 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:10:20 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
      8 │     finished();
      9 │ });
@@ -140,7 +140,7 @@ invalid.js:10:20 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:13:20 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     11 │     done();
     12 │ });
@@ -157,7 +157,7 @@ invalid.js:13:20 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:14:20 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     12 │ });
     13 │ test("something", (done) => done());
@@ -174,7 +174,7 @@ invalid.js:14:20 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:15:29 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     13 │ test("something", (done) => done());
     14 │ test("something", (done) => done());
@@ -191,7 +191,7 @@ invalid.js:15:29 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:18:29 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     16 │     done();
     17 │ });
@@ -208,7 +208,7 @@ invalid.js:18:29 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:21:26 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     19 │     done();
     20 │ });
@@ -225,7 +225,7 @@ invalid.js:21:26 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:24:26 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     22 │     done();
     23 │ });
@@ -242,7 +242,7 @@ invalid.js:24:26 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:25:35 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     23 │ });
     24 │ test("something", async (done) => done());
@@ -259,7 +259,7 @@ invalid.js:25:35 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:28:20 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     26 │     done();
     27 │ });
@@ -276,7 +276,7 @@ invalid.js:28:20 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:31:12 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     29 │     done();
     30 │ });
@@ -293,7 +293,7 @@ invalid.js:31:12 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:34:12 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     32 │     done();
     33 │ });
@@ -310,7 +310,7 @@ invalid.js:34:12 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:37:13 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     35 │     finished();
     36 │ });
@@ -327,7 +327,7 @@ invalid.js:37:13 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:40:11 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     38 │     done();
     39 │ });
@@ -344,7 +344,7 @@ invalid.js:40:11 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:41:12 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     39 │ });
     40 │ afterAll((done) => done());
@@ -361,7 +361,7 @@ invalid.js:41:12 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:42:21 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     40 │ afterAll((done) => done());
     41 │ afterEach((done) => done());
@@ -378,7 +378,7 @@ invalid.js:42:21 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:45:21 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     43 │     done();
     44 │ });
@@ -395,7 +395,7 @@ invalid.js:45:21 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:48:18 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     46 │     done();
     47 │ });
@@ -412,7 +412,7 @@ invalid.js:48:18 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:51:18 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     49 │     done();
     50 │ });
@@ -429,7 +429,7 @@ invalid.js:51:18 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:52:27 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     50 │ });
     51 │ beforeAll(async (done) => done());
@@ -446,7 +446,7 @@ invalid.js:52:27 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:55:13 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     53 │     done();
     54 │ });
@@ -463,7 +463,7 @@ invalid.js:55:13 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:58:13 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     56 │     done();
     57 │ });
@@ -480,7 +480,7 @@ invalid.js:58:13 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:61:35 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     59 │     done();
     60 │ });
@@ -497,7 +497,7 @@ invalid.js:61:35 lint/style/noDoneCallback ━━━━━━━━━━━━�
 ```
 invalid.js:62:37 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow using a callback in asynchronous tests and hooks.
+  i Disallow using a callback in asynchronous tests and hooks.
   
     60 │ });
     61 │ it.each``("something", ({ a, b }, done) => {});

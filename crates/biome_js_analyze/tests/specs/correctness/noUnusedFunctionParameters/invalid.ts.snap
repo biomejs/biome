@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -14,7 +15,7 @@ class D {
 ```
 invalid.ts:2:4 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  i This parameter is unused.
   
     1 │ class D {
   > 2 │ 	f(a: D): D | undefined { return; }

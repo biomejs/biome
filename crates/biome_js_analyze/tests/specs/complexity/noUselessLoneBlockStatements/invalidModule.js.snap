@@ -58,7 +58,7 @@ class C {
 ```
 invalidModule.js:3:1 lint/complexity/noUselessLoneBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This block statement doesn't serve any purpose and can be safely removed.
+  i This block statement doesn't serve any purpose and can be safely removed.
   
     1 │ export {}
     2 │ 
@@ -75,7 +75,7 @@ invalidModule.js:3:1 lint/complexity/noUselessLoneBlockStatements ━━━━�
 ```
 invalidModule.js:7:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This block statement doesn't serve any purpose and can be safely removed.
+  i This block statement doesn't serve any purpose and can be safely removed.
   
      5 │ if (foo) {
      6 │  bar();
@@ -105,7 +105,7 @@ invalidModule.js:7:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━�
 ```
 invalidModule.js:15:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This block statement doesn't serve any purpose and can be safely removed.
+  i This block statement doesn't serve any purpose and can be safely removed.
   
     13 │  // this is bar
     14 │  bar();
@@ -137,7 +137,7 @@ invalidModule.js:15:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━
 ```
 invalidModule.js:22:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This block statement doesn't serve any purpose and can be safely removed.
+  i This block statement doesn't serve any purpose and can be safely removed.
   
     21 │ function bar() {
   > 22 │  {
@@ -166,7 +166,7 @@ invalidModule.js:22:2 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━
 ```
 invalidModule.js:36:1 lint/complexity/noUselessLoneBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This block statement doesn't serve any purpose and can be safely removed.
+  i This block statement doesn't serve any purpose and can be safely removed.
   
     34 │ }
     35 │ 
@@ -187,7 +187,7 @@ invalidModule.js:36:1 lint/complexity/noUselessLoneBlockStatements ━━━━�
 ```
 invalidModule.js:43:3 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This block statement doesn't serve any purpose and can be safely removed.
+  i This block statement doesn't serve any purpose and can be safely removed.
   
     41 │ class C {
     42 │  static {

@@ -72,7 +72,7 @@ function JsTryFinallyStatement4() {
 ```
 JsTryFinallyStatement.js:11:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
      9 │     }
     10 │ 
@@ -96,7 +96,7 @@ JsTryFinallyStatement.js:11:5 lint/correctness/noUnreachable ━━━━━━�
 ```
 JsTryFinallyStatement.js:17:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     15 │     return;
     16 │ 
@@ -124,7 +124,7 @@ JsTryFinallyStatement.js:17:5 lint/correctness/noUnreachable ━━━━━━�
 ```
 JsTryFinallyStatement.js:35:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     33 │         }
     34 │ 
@@ -148,7 +148,7 @@ JsTryFinallyStatement.js:35:9 lint/correctness/noUnreachable ━━━━━━�
 ```
 JsTryFinallyStatement.js:36:19 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     35 │         afterTryStatement1();
   > 36 │     } catch (err) {
@@ -176,7 +176,7 @@ JsTryFinallyStatement.js:36:19 lint/correctness/noUnreachable ━━━━━━
 ```
 JsTryFinallyStatement.js:59:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     57 │     }
     58 │ 

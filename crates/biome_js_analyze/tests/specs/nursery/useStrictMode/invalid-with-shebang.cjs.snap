@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-with-shebang.cjs
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -13,7 +14,7 @@ let some_variable = "some value";
 ```
 invalid-with-shebang.cjs:1:1 lint/nursery/useStrictMode  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected absence of the directive "use strict".
+  × Unexpected absence of the directive "use strict".
   
   > 1 │ #!/usr/bin/env node
       │ ^^^^^^^^^^^^^^^^^^^

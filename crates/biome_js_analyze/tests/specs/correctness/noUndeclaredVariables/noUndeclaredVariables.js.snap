@@ -25,7 +25,7 @@ new AggregateError();
 ```
 noUndeclaredVariables.js:2:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The foobar variable is undeclared.
+  i The foobar variable is undeclared.
   
     1 │ // invalid
   > 2 │ foobar;
@@ -42,7 +42,7 @@ noUndeclaredVariables.js:2:1 lint/correctness/noUndeclaredVariables ━━━━
 ```
 noUndeclaredVariables.js:4:5 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The lorem variable is undeclared.
+  i The lorem variable is undeclared.
   
     2 │ foobar;
     3 │ function f() {
@@ -60,7 +60,7 @@ noUndeclaredVariables.js:4:5 lint/correctness/noUndeclaredVariables ━━━━
 ```
 noUndeclaredVariables.js:6:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment variable is undeclared.
+  i The assignment variable is undeclared.
   
     4 │     lorem;
     5 │ }
@@ -78,7 +78,7 @@ noUndeclaredVariables.js:6:1 lint/correctness/noUndeclaredVariables ━━━━
 ```
 noUndeclaredVariables.js:7:2 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The Missing variable is undeclared.
+  i The Missing variable is undeclared.
   
     5 │ }
     6 │ assignment = "value";

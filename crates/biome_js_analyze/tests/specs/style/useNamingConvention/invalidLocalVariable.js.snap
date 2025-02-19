@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidLocalVariable.js
+snapshot_kind: text
 ---
 # Input
 ```js
@@ -28,7 +29,7 @@ export function f() {
 ```
 invalidLocalVariable.js:2:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This const name should be in camelCase or PascalCase.
+  i This const name should be in camelCase or PascalCase.
   
     1 │ export default function () {
   > 2 │     const CONSTANT_CASE_CONST = 0
@@ -50,7 +51,7 @@ invalidLocalVariable.js:2:11 lint/style/useNamingConvention  FIXABLE  ━━━�
 ```
 invalidLocalVariable.js:4:9 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This let name should be in camelCase or PascalCase.
+  i This let name should be in camelCase or PascalCase.
   
     2 │     const CONSTANT_CASE_CONST = 0
     3 │ 
@@ -74,7 +75,7 @@ invalidLocalVariable.js:4:9 lint/style/useNamingConvention  FIXABLE  ━━━�
 ```
 invalidLocalVariable.js:6:9 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This var name should be in camelCase or PascalCase.
+  i This var name should be in camelCase or PascalCase.
   
     4 │     let CONSTANT_CASE_LET
     5 │ 
@@ -98,7 +99,7 @@ invalidLocalVariable.js:6:9 lint/style/useNamingConvention  FIXABLE  ━━━�
 ```
 invalidLocalVariable.js:8:19 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This const name should be in camelCase or PascalCase.
+  i This const name should be in camelCase or PascalCase.
   
      6 │     var CONSTANT_CASE_VAR
      7 │ 
@@ -122,7 +123,7 @@ invalidLocalVariable.js:8:19 lint/style/useNamingConvention  FIXABLE  ━━━�
 ```
 invalidLocalVariable.js:12:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This const name should be in camelCase or PascalCase.
+  i This const name should be in camelCase or PascalCase.
   
     11 │ export function f() {
   > 12 │     const a_var = 0;

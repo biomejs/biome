@@ -60,8 +60,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDelete",
         language: "js",
-        recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }

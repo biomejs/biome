@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-with-directive.cjs
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -12,7 +13,7 @@ expression: invalid-with-directive.cjs
 ```
 invalid-with-directive.cjs:1:1 lint/nursery/useStrictMode  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected absence of the directive "use strict".
+  × Unexpected absence of the directive "use strict".
   
   > 1 │ "use server";
       │ ^^^^^^^^^^^^^

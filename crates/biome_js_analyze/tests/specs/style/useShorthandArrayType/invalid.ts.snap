@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -23,7 +24,7 @@ let readonlyInvalid6: ReadonlyArray<ReadonlyArray<ReadonlyArray<number>>>;
 ```
 invalid.ts:1:12 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand T[] syntax instead of Array<T> syntax.
+  i Use shorthand T[] syntax instead of Array<T> syntax.
   
   > 1 │ let valid: Array<foo>;
       │            ^^^^^^^^^^
@@ -43,7 +44,7 @@ invalid.ts:1:12 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 invalid.ts:2:15 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand T[] syntax instead of Array<T> syntax.
+  i Use shorthand T[] syntax instead of Array<T> syntax.
   
     1 │ let valid: Array<foo>;
   > 2 │ let invalid1: Array<foo, Array<string>>;
@@ -65,7 +66,7 @@ invalid.ts:2:15 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 invalid.ts:2:26 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand T[] syntax instead of Array<T> syntax.
+  i Use shorthand T[] syntax instead of Array<T> syntax.
   
     1 │ let valid: Array<foo>;
   > 2 │ let invalid1: Array<foo, Array<string>>;
@@ -87,7 +88,7 @@ invalid.ts:2:26 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 invalid.ts:3:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand T[] syntax instead of Array<T> syntax.
+  i Use shorthand T[] syntax instead of Array<T> syntax.
   
     1 │ let valid: Array<foo>;
     2 │ let invalid1: Array<foo, Array<string>>;
@@ -111,7 +112,7 @@ invalid.ts:3:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 invalid.ts:4:15 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand T[] syntax instead of Array<T> syntax.
+  i Use shorthand T[] syntax instead of Array<T> syntax.
   
     2 │ let invalid1: Array<foo, Array<string>>;
     3 │ let invalid2: Promise<Array<string>>;
@@ -135,7 +136,7 @@ invalid.ts:4:15 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 invalid.ts:5:15 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand T[] syntax instead of Array<T> syntax.
+  i Use shorthand T[] syntax instead of Array<T> syntax.
   
     3 │ let invalid2: Promise<Array<string>>;
     4 │ let invalid3: Array<Foo<Bar>>;
@@ -159,7 +160,7 @@ invalid.ts:5:15 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 invalid.ts:7:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
+  i Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
     5 │ let invalid4: Array<[number, number]>;
     6 │ 
@@ -183,7 +184,7 @@ invalid.ts:7:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 invalid.ts:8:31 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
+  i Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
      7 │ let readonlyInvalid1: ReadonlyArray<foo>;
    > 8 │ let readonlyInvalid2: Promise<ReadonlyArray<string>>;
@@ -206,7 +207,7 @@ invalid.ts:8:31 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 invalid.ts:9:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
+  i Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
      7 │ let readonlyInvalid1: ReadonlyArray<foo>;
      8 │ let readonlyInvalid2: Promise<ReadonlyArray<string>>;
@@ -230,7 +231,7 @@ invalid.ts:9:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 invalid.ts:10:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
+  i Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
      8 │ let readonlyInvalid2: Promise<ReadonlyArray<string>>;
      9 │ let readonlyInvalid3: ReadonlyArray<Foo<Bar>>;
@@ -254,7 +255,7 @@ invalid.ts:10:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━�
 ```
 invalid.ts:11:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
+  i Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
      9 │ let readonlyInvalid3: ReadonlyArray<Foo<Bar>>;
     10 │ let readonlyInvalid4: ReadonlyArray<[number, number]>;
@@ -278,7 +279,7 @@ invalid.ts:11:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━�
 ```
 invalid.ts:11:37 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
+  i Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
      9 │ let readonlyInvalid3: ReadonlyArray<Foo<Bar>>;
     10 │ let readonlyInvalid4: ReadonlyArray<[number, number]>;
@@ -302,7 +303,7 @@ invalid.ts:11:37 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━�
 ```
 invalid.ts:12:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
+  i Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
     10 │ let readonlyInvalid4: ReadonlyArray<[number, number]>;
     11 │ let readonlyInvalid5: ReadonlyArray<ReadonlyArray<number>>;
@@ -324,7 +325,7 @@ invalid.ts:12:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━�
 ```
 invalid.ts:12:37 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
+  i Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
     10 │ let readonlyInvalid4: ReadonlyArray<[number, number]>;
     11 │ let readonlyInvalid5: ReadonlyArray<ReadonlyArray<number>>;
@@ -346,7 +347,7 @@ invalid.ts:12:37 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━�
 ```
 invalid.ts:12:51 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
+  i Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
     10 │ let readonlyInvalid4: ReadonlyArray<[number, number]>;
     11 │ let readonlyInvalid5: ReadonlyArray<ReadonlyArray<number>>;
@@ -364,5 +365,3 @@ invalid.ts:12:51 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━�
   
 
 ```
-
-

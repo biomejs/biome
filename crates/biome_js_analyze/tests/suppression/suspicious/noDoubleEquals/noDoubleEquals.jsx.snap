@@ -18,7 +18,7 @@ let a = <button
 ```
 noDoubleEquals.jsx:3:51 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     1 │ let a = <button
     2 │     className="SomeManyClasses"

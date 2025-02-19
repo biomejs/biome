@@ -15,7 +15,7 @@ React.createElement('div', {
 ```
 reactCreateElement.js:2:5 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  × Avoid passing content using the dangerouslySetInnerHTML prop.
   
     1 │ React.createElement('div', {
   > 2 │     dangerouslySetInnerHTML: { __html: 'child' }

@@ -32,7 +32,7 @@ query {
 ```
 useDeprecatedReason.graphql:2:10 lint/nursery/useDeprecatedReason  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The directive `@deprecated` should have a `reason` argument.
+  i The directive `@deprecated` should have a `reason` argument.
   
     1 │ query {
   > 2 │   member @deprecated {
@@ -64,7 +64,7 @@ useDeprecatedReason.graphql:2:10 lint/nursery/useDeprecatedReason  FIXABLE  ━�
 ```
 useDeprecatedReason.graphql:8:10 lint/nursery/useDeprecatedReason  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The directive `@deprecated` should have a `reason` argument.
+  i The directive `@deprecated` should have a `reason` argument.
   
      7 │ query {
    > 8 │   member @deprecated()
@@ -97,7 +97,7 @@ useDeprecatedReason.graphql:8:10 lint/nursery/useDeprecatedReason  FIXABLE  ━�
 ```
 useDeprecatedReason.graphql:13:3 lint/nursery/useDeprecatedReason  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The directive `@deprecated` should have a `reason` argument.
+  i The directive `@deprecated` should have a `reason` argument.
   
     11 │ query {
     12 │   member

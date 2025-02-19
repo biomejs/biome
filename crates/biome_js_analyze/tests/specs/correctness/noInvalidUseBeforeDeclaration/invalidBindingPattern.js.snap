@@ -26,7 +26,7 @@ function f({ a = a }) {}
 ```
 invalidBindingPattern.js:1:18 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is used before its declaration.
+  × This variable is used before its declaration.
   
   > 1 │ function f({ b = a, a = 0 }) {}
       │                  ^
@@ -46,7 +46,7 @@ invalidBindingPattern.js:1:18 lint/correctness/noInvalidUseBeforeDeclaration ━
 ```
 invalidBindingPattern.js:2:17 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is used before its declaration.
+  × This variable is used before its declaration.
   
     1 │ function f({ b = a, a = 0 }) {}
   > 2 │ function f([b = a, a = 0]) {}
@@ -68,7 +68,7 @@ invalidBindingPattern.js:2:17 lint/correctness/noInvalidUseBeforeDeclaration ━
 ```
 invalidBindingPattern.js:3:22 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is used before its declaration.
+  × This variable is used before its declaration.
   
     1 │ function f({ b = a, a = 0 }) {}
     2 │ function f([b = a, a = 0]) {}
@@ -92,7 +92,7 @@ invalidBindingPattern.js:3:22 lint/correctness/noInvalidUseBeforeDeclaration ━
 ```
 invalidBindingPattern.js:4:18 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is used before its declaration.
+  × This variable is used before its declaration.
   
     2 │ function f([b = a, a = 0]) {}
     3 │ function f({ x: [b = a, { a = 0 }] }) {}
@@ -116,7 +116,7 @@ invalidBindingPattern.js:4:18 lint/correctness/noInvalidUseBeforeDeclaration ━
 ```
 invalidBindingPattern.js:6:14 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is used before its declaration.
+  × This variable is used before its declaration.
   
     4 │ function f({ a = a }) {}
     5 │ {
@@ -140,7 +140,7 @@ invalidBindingPattern.js:6:14 lint/correctness/noInvalidUseBeforeDeclaration ━
 ```
 invalidBindingPattern.js:9:13 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is used before its declaration.
+  × This variable is used before its declaration.
   
      7 │ }
      8 │ {
@@ -164,7 +164,7 @@ invalidBindingPattern.js:9:13 lint/correctness/noInvalidUseBeforeDeclaration ━
 ```
 invalidBindingPattern.js:13:11 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is used before its declaration.
+  × This variable is used before its declaration.
   
     11 │ {
     12 │ 	const {

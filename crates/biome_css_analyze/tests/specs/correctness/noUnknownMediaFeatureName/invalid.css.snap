@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -28,7 +29,7 @@ expression: invalid.css
 ```
 invalid.css:1:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unknown media feature names.
+  × Don't use unknown media feature names.
   
   > 1 │ @media screen and (unknown) {
       │        ^^^^^^^^^^^^^^^^^^^^
@@ -45,7 +46,7 @@ invalid.css:1:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━
 ```
 invalid.css:4:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unknown media feature names.
+  × Don't use unknown media feature names.
   
     2 │ }
     3 │ 
@@ -64,7 +65,7 @@ invalid.css:4:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━
 ```
 invalid.css:7:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unknown media feature names.
+  × Don't use unknown media feature names.
   
     5 │ }
     6 │ 
@@ -83,7 +84,7 @@ invalid.css:7:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━
 ```
 invalid.css:10:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unknown media feature names.
+  × Don't use unknown media feature names.
   
      8 │ }
      9 │ 
@@ -102,7 +103,7 @@ invalid.css:10:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━�
 ```
 invalid.css:13:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unknown media feature names.
+  × Don't use unknown media feature names.
   
     11 │ }
     12 │ 
@@ -121,7 +122,7 @@ invalid.css:13:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━�
 ```
 invalid.css:16:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unknown media feature names.
+  × Don't use unknown media feature names.
   
     14 │ }
     15 │ 

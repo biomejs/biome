@@ -1,7 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 86
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -12,7 +12,7 @@ import Document from "next/document";
 ```
 invalid.jsx:1:1 lint/nursery/noDocumentImportInPage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use next/document outside of pages/_document.jsx to avoid unexpected behaviors.
+  i Don't use next/document outside of pages/_document.jsx to avoid unexpected behaviors.
   
   > 1 │ import Document from "next/document";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

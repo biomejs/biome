@@ -33,7 +33,7 @@ function JsLabeledStatement2() {
 ```
 JsLabeledStatement.js:9:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
      7 │         }
      8 │ 
@@ -66,7 +66,7 @@ JsLabeledStatement.js:9:9 lint/correctness/noUnreachable ━━━━━━━�
 ```
 JsLabeledStatement.js:17:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     15 │         beforeBreak();
     16 │         break label;

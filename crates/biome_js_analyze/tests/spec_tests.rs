@@ -2,7 +2,6 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerAction, AnalyzerPlugin, ControlFlow, Never, RuleFilter,
 };
 use biome_diagnostics::advice::CodeSuggestionAdvice;
-use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{parse, JsParserOptions};
@@ -171,8 +170,7 @@ pub(crate) fn analyze_and_snap(
                     }
                 }
 
-                let error = diag.with_severity(Severity::Warning);
-                diagnostics.push(diagnostic_to_string(file_name, input_code, error));
+                diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
                 return ControlFlow::Continue(());
             }
 

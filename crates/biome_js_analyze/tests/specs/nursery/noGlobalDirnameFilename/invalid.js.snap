@@ -21,7 +21,7 @@ if (__filename.endsWith(".js")) {}
 ```
 invalid.js:1:17 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use __dirname.
+  i Don't use __dirname.
   
   > 1 │ const dirname = __dirname;
       │                 ^^^^^^^^^
@@ -43,7 +43,7 @@ invalid.js:1:17 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━�
 ```
 invalid.js:2:18 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use __filename.
+  i Don't use __filename.
   
     1 │ const dirname = __dirname;
   > 2 │ const filename = __filename;
@@ -67,7 +67,7 @@ invalid.js:2:18 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━�
 ```
 invalid.js:3:20 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use __dirname.
+  i Don't use __dirname.
   
     1 │ const dirname = __dirname;
     2 │ const filename = __filename;
@@ -88,7 +88,7 @@ invalid.js:3:20 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━�
 ```
 invalid.js:4:21 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use __filename.
+  i Don't use __filename.
   
     2 │ const filename = __filename;
     3 │ const dirname_ = { __dirname };
@@ -109,7 +109,7 @@ invalid.js:4:21 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━�
 ```
 invalid.js:5:30 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use __dirname.
+  i Don't use __dirname.
   
     3 │ const dirname_ = { __dirname };
     4 │ const filename_ = { __filename };
@@ -135,7 +135,7 @@ invalid.js:5:30 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━�
 ```
 invalid.js:6:32 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use __filename.
+  i Don't use __filename.
   
     4 │ const filename_ = { __filename };
     5 │ const dirname__ = { dirname: __dirname, foo: "foo" };
@@ -161,7 +161,7 @@ invalid.js:6:32 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━�
 ```
 invalid.js:8:5 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use __dirname.
+  i Don't use __dirname.
   
      6 │ const filename__ = { filename: __filename, foo: "foo" };
      7 │ 
@@ -187,7 +187,7 @@ invalid.js:8:5 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━
 ```
 invalid.js:9:5 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use __filename.
+  i Don't use __filename.
   
      8 │ if (__dirname.startsWith("/project/src/")) {}
    > 9 │ if (__filename.endsWith(".js")) {}

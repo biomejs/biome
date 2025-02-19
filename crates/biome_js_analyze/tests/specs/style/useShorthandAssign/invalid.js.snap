@@ -35,7 +35,7 @@ window.a = window.a + 1;
 ```
 invalid.js:1:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment +=.
+  i Assignment (=) can be replaced with operator assignment +=.
   
   > 1 │ a = a + 1;
       │ ^^^^^^^^^
@@ -55,7 +55,7 @@ invalid.js:1:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:2:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment -=.
+  i Assignment (=) can be replaced with operator assignment -=.
   
     1 │ a = a + 1;
   > 2 │ a = a - 1;
@@ -77,7 +77,7 @@ invalid.js:2:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:3:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment *=.
+  i Assignment (=) can be replaced with operator assignment *=.
   
     1 │ a = a + 1;
     2 │ a = a - 1;
@@ -101,7 +101,7 @@ invalid.js:3:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:4:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment *=.
+  i Assignment (=) can be replaced with operator assignment *=.
   
     2 │ a = a - 1;
     3 │ a = a * 1;
@@ -125,7 +125,7 @@ invalid.js:4:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:5:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment /=.
+  i Assignment (=) can be replaced with operator assignment /=.
   
     3 │ a = a * 1;
     4 │ a = 1 * a;
@@ -149,7 +149,7 @@ invalid.js:5:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:6:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment %=.
+  i Assignment (=) can be replaced with operator assignment %=.
   
     4 │ a = 1 * a;
     5 │ a = a / 1;
@@ -173,7 +173,7 @@ invalid.js:6:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:7:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment <<=.
+  i Assignment (=) can be replaced with operator assignment <<=.
   
     5 │ a = a / 1;
     6 │ a = a % 1;
@@ -197,7 +197,7 @@ invalid.js:7:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:8:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment >>=.
+  i Assignment (=) can be replaced with operator assignment >>=.
   
      6 │ a = a % 1;
      7 │ a = a << 1;
@@ -221,7 +221,7 @@ invalid.js:8:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:9:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment >>>=.
+  i Assignment (=) can be replaced with operator assignment >>>=.
   
      7 │ a = a << 1;
      8 │ a = a >> 1;
@@ -245,7 +245,7 @@ invalid.js:9:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:10:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment &=.
+  i Assignment (=) can be replaced with operator assignment &=.
   
      8 │ a = a >> 1;
      9 │ a = a >>> 1;
@@ -269,7 +269,7 @@ invalid.js:10:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:11:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment &=.
+  i Assignment (=) can be replaced with operator assignment &=.
   
      9 │ a = a >>> 1;
     10 │ a = a & 1;
@@ -293,7 +293,7 @@ invalid.js:11:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:12:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment ^=.
+  i Assignment (=) can be replaced with operator assignment ^=.
   
     10 │ a = a & 1;
     11 │ a = 1 & a;
@@ -317,7 +317,7 @@ invalid.js:12:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:13:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment ^=.
+  i Assignment (=) can be replaced with operator assignment ^=.
   
     11 │ a = 1 & a;
     12 │ a = a ^ 1;
@@ -341,7 +341,7 @@ invalid.js:13:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:14:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment |=.
+  i Assignment (=) can be replaced with operator assignment |=.
   
     12 │ a = a ^ 1;
     13 │ a = 1 ^ a;
@@ -365,7 +365,7 @@ invalid.js:14:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:15:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment |=.
+  i Assignment (=) can be replaced with operator assignment |=.
   
     13 │ a = 1 ^ a;
     14 │ a = a | 1;
@@ -389,7 +389,7 @@ invalid.js:15:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:16:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment **=.
+  i Assignment (=) can be replaced with operator assignment **=.
   
     14 │ a = a | 1;
     15 │ a = 1 | a;
@@ -413,7 +413,7 @@ invalid.js:16:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:17:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment +=.
+  i Assignment (=) can be replaced with operator assignment +=.
   
     15 │ a = 1 | a;
     16 │ a = a ** 1;
@@ -437,7 +437,7 @@ invalid.js:17:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:18:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment +=.
+  i Assignment (=) can be replaced with operator assignment +=.
   
     16 │ a = a ** 1;
     17 │ this.a = this.a + 1;
@@ -461,7 +461,7 @@ invalid.js:18:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:19:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment +=.
+  i Assignment (=) can be replaced with operator assignment +=.
   
     17 │ this.a = this.a + 1;
     18 │ this.a = this.a + b
@@ -485,7 +485,7 @@ invalid.js:19:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:20:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment +=.
+  i Assignment (=) can be replaced with operator assignment +=.
   
     18 │ this.a = this.a + b
     19 │ this.a = this.a + this.b
@@ -509,7 +509,7 @@ invalid.js:20:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:21:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment +=.
+  i Assignment (=) can be replaced with operator assignment +=.
   
     19 │ this.a = this.a + this.b
     20 │ a = (a) + 1;
@@ -533,7 +533,7 @@ invalid.js:21:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:22:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment -=.
+  i Assignment (=) can be replaced with operator assignment -=.
   
     20 │ a = (a) + 1;
     21 │ x = (x + y);
@@ -557,7 +557,7 @@ invalid.js:22:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━
 ```
 invalid.js:23:1 lint/style/useShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Assignment (=) can be replaced with operator assignment +=.
+  i Assignment (=) can be replaced with operator assignment +=.
   
     21 │ x = (x + y);
     22 │ x[0] = x[0] - y

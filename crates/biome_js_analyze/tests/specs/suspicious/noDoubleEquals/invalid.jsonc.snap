@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -11,7 +12,7 @@ const isZero = a == 0;
 ```
 invalid.jsonc:1:18 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
   > 1 │ const isZero = a == 0;
       │                  ^^
@@ -39,7 +40,7 @@ const isNonZero = a != 0;
 ```
 invalid.jsonc:1:21 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use !== instead of !=
+  × Use !== instead of !=
   
   > 1 │ const isNonZero = a != 0;
       │                     ^^

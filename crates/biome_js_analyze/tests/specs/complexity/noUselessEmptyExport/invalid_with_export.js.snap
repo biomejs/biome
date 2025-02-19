@@ -14,7 +14,7 @@ export {}
 ```
 invalid_with_export.js:3:1 lint/complexity/noUselessEmptyExport  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This empty export is useless because there's another export or import.
+  i This empty export is useless because there's another export or import.
   
     1 │ function f() { return 0 }
     2 │ export const A = f();

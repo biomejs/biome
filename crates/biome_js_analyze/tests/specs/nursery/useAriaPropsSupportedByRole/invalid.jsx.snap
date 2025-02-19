@@ -33,7 +33,7 @@ snapshot_kind: text
 ```
 invalid.jsx:2:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-checked' is not supported by this element.
+  × The ARIA attribute 'aria-checked' is not supported by this element.
   
     1 │ <>
   > 2 │ <a href="#" aria-checked />
@@ -49,7 +49,7 @@ invalid.jsx:2:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:3:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-checked' is not supported by this element.
+  × The ARIA attribute 'aria-checked' is not supported by this element.
   
     1 │ <>
     2 │ <a href="#" aria-checked />
@@ -66,7 +66,7 @@ invalid.jsx:3:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:4:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-checked' is not supported by this element.
+  × The ARIA attribute 'aria-checked' is not supported by this element.
   
     2 │ <a href="#" aria-checked />
     3 │ <area href="#" aria-checked />
@@ -83,7 +83,7 @@ invalid.jsx:4:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:5:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-checked' is not supported by this element.
+  × The ARIA attribute 'aria-checked' is not supported by this element.
   
     3 │ <area href="#" aria-checked />
     4 │ <img alt="foobar" aria-checked />
@@ -100,7 +100,7 @@ invalid.jsx:5:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:6:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-checked' is not supported by this element.
+  × The ARIA attribute 'aria-checked' is not supported by this element.
   
     4 │ <img alt="foobar" aria-checked />
     5 │ <menu type="toolbar" aria-checked />
@@ -117,7 +117,7 @@ invalid.jsx:6:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:7:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-expanded' is not supported by this element.
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
   
     5 │ <menu type="toolbar" aria-checked />
     6 │ <aside aria-checked />
@@ -134,7 +134,7 @@ invalid.jsx:7:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:8:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-expanded' is not supported by this element.
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
   
      6 │ <aside aria-checked />
      7 │ <ul aria-expanded />
@@ -151,7 +151,7 @@ invalid.jsx:8:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:9:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-expanded' is not supported by this element.
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
   
      7 │ <ul aria-expanded />
      8 │ <details aria-expanded />
@@ -168,7 +168,7 @@ invalid.jsx:9:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:10:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-expanded' is not supported by this element.
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
   
      8 │ <details aria-expanded />
      9 │ <dialog aria-expanded />
@@ -185,7 +185,7 @@ invalid.jsx:10:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:11:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-expanded' is not supported by this element.
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
   
      9 │ <dialog aria-expanded />
     10 │ <aside aria-expanded />
@@ -202,7 +202,7 @@ invalid.jsx:11:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:12:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-expanded' is not supported by this element.
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
   
     10 │ <aside aria-expanded />
     11 │ <article aria-expanded />
@@ -219,7 +219,7 @@ invalid.jsx:12:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:13:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-expanded' is not supported by this element.
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
   
     11 │ <article aria-expanded />
     12 │ <li aria-expanded />
@@ -236,7 +236,7 @@ invalid.jsx:13:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:14:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-expanded' is not supported by this element.
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
   
     12 │ <li aria-expanded />
     13 │ <nav aria-expanded />
@@ -253,7 +253,7 @@ invalid.jsx:14:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:15:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-expanded' is not supported by this element.
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
   
     13 │ <nav aria-expanded />
     14 │ <ol aria-expanded />
@@ -270,7 +270,7 @@ invalid.jsx:15:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:16:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-expanded' is not supported by this element.
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
   
     14 │ <ol aria-expanded />
     15 │ <output aria-expanded />
@@ -287,7 +287,7 @@ invalid.jsx:16:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:17:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-expanded' is not supported by this element.
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
   
     15 │ <output aria-expanded />
     16 │ <tbody aria-expanded />
@@ -304,7 +304,7 @@ invalid.jsx:17:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:18:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-expanded' is not supported by this element.
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
   
     16 │ <tbody aria-expanded />
     17 │ <tfoot aria-expanded />
@@ -321,7 +321,7 @@ invalid.jsx:18:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:19:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-selected' is not supported by this element.
+  × The ARIA attribute 'aria-selected' is not supported by this element.
   
     17 │ <tfoot aria-expanded />
     18 │ <thead aria-expanded />
@@ -338,7 +338,7 @@ invalid.jsx:19:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:20:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-expanded' is not supported by this element.
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
   
     18 │ <thead aria-expanded />
     19 │ <input type="radio" aria-selected />

@@ -18,7 +18,7 @@ export function foo() {
 ```
 noAssignInExpressions.ts:3:10 lint/suspicious/noAssignInExpressions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assignment should not be in an expression.
+  × The assignment should not be in an expression.
   
     1 │ export function foo() {
     2 │ 	let x: number;

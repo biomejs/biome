@@ -65,7 +65,7 @@ class FetchServersMetrics extends React.Component {
 ```
 invalid.js:1:7 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This aliasing of this is unnecessary.
+  i This aliasing of this is unnecessary.
   
   > 1 │ const self = this, v = 0, /*u*/ u = 2, self2 = this;
       │       ^^^^^^^^^^^
@@ -84,7 +84,7 @@ invalid.js:1:7 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━�
 ```
 invalid.js:1:40 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This aliasing of this is unnecessary.
+  i This aliasing of this is unnecessary.
   
   > 1 │ const self = this, v = 0, /*u*/ u = 2, self2 = this;
       │                                        ^^^^^^^^^^^^
@@ -103,7 +103,7 @@ invalid.js:1:40 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━�
 ```
 invalid.js:5:11 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This aliasing of this is unnecessary.
+  i This aliasing of this is unnecessary.
   
     3 │ function f() {
     4 │     // assignment comment
@@ -132,7 +132,7 @@ invalid.js:5:11 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━�
 ```
 invalid.js:12:9 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This aliasing of this is unnecessary.
+  i This aliasing of this is unnecessary.
   
     11 │ function f() {
   > 12 │     let self = this;
@@ -159,7 +159,7 @@ invalid.js:12:9 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━�
 ```
 invalid.js:19:9 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This aliasing of this is unnecessary.
+  i This aliasing of this is unnecessary.
   
     18 │ function f() {
   > 19 │     var self;
@@ -188,7 +188,7 @@ invalid.js:19:9 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━�
 ```
 invalid.js:32:13 lint/complexity/noUselessThisAlias  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This aliasing of this is unnecessary.
+  i This aliasing of this is unnecessary.
   
     30 │     _fetchServersMetrics() {
     31 │       const { onStatusChange, appIds, filters, time } = this.props;
