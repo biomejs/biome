@@ -209,6 +209,8 @@ impl Display for RageConfiguration<'_> {
                     let LoadedConfiguration {
                         configuration,
                         diagnostics,
+                        directory_path,
+                        file_path,
                         ..
                     } = loaded_configuration;
                     let vcs_enabled = configuration.is_vcs_enabled();
@@ -231,8 +233,14 @@ impl Display for RageConfiguration<'_> {
                         markup!(<Dim>"Loaded successfully"</Dim>)
                     };
 
+                    let config_path = file_path
+                        .as_ref()
+                        .map(|path| path.as_str())
+                        .unwrap_or_else(|| directory_path.as_ref().unwrap().as_str());
+
                     markup! (
                         {KeyValuePair("Status", status)}
+                        {KeyValuePair("Configuration path", markup!({DebugDisplay(config_path)}))}
                         {KeyValuePair("Formatter enabled", markup!({DebugDisplay(settings.is_formatter_enabled())}))}
                         {KeyValuePair("Linter enabled", markup!({DebugDisplay(settings.is_linter_enabled())}))}
                         {KeyValuePair("Assist enabled", markup!({DebugDisplay(settings.is_assist_enabled())}))}

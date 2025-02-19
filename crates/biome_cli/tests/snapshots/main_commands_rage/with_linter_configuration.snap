@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/commands/rage.rs
 expression: content
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -54,6 +53,7 @@ Environment:
 
 Biome Configuration:
   Status:                       Loaded successfully
+  Configuration path:           biome.json
   Formatter enabled:            true
   Linter enabled:               true
   Assist enabled:               true
