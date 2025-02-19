@@ -1049,7 +1049,7 @@
 				"noUnusedVariables": {
 					"description": "Disallow unused variables.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/NoUnusedVariablesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2484,6 +2484,23 @@
 			},
 			"additionalProperties": false
 		},
+		"NoUnusedVariablesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUnusedVariablesOptions" }
+			]
+		},
+		"NoUnusedVariablesOptions": {
+			"type": "object",
+			"properties": {
+				"ignoreRestSiblings": {
+					"description": "Whether to ignore unused variables from an object desctructuring with a spread (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).",
+					"default": false,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -3582,6 +3599,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoUndeclaredDependenciesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoUnusedVariablesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUnusedVariablesOptions" }]
 				}
 			},
 			"additionalProperties": false
