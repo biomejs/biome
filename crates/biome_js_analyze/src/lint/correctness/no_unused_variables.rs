@@ -109,7 +109,7 @@ declare_lint_rule! {
     /// ```js,expect_diagnostic,use_options
     /// // With `ignoreRestSiblings: false`
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
-    /// const { brand, year, ...other } = car;
+    /// const { brand, ...other } = car;
     /// console.log(other);
     /// ```
     ///
@@ -138,14 +138,14 @@ declare_lint_rule! {
     /// ```js,use_options
     /// // With `ignoreRestSiblings: false`
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
-    /// const { brand: _brand, year: _year, ...other } = car;
+    /// const { brand: _brand, ...other } = car;
     /// console.log(other);
     /// ```
     ///
     /// ```js
     /// // With `ignoreRestSiblings: true`
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
-    /// const { brand, year, ...other } = car;
+    /// const { brand, ...other } = car;
     /// console.log(other);
     /// ```
     pub NoUnusedVariables {
