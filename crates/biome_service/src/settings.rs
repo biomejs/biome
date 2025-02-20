@@ -9,6 +9,7 @@ use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::html::HtmlConfiguration;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::max_size::MaxSize;
+use biome_configuration::plugins::Plugins;
 use biome_configuration::{
     push_to_analyzer_assist, push_to_analyzer_rules, BiomeDiagnostic, Configuration,
     CssConfiguration, FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration,
@@ -57,6 +58,8 @@ pub struct Settings {
     pub files: FilesSettings,
     /// Assist settings
     pub assist: AssistSettings,
+    /// Plugin settings.
+    pub plugins: Plugins,
     /// overrides
     pub override_settings: OverrideSettings,
 }
@@ -115,6 +118,11 @@ impl Settings {
         // html settings
         if let Some(html) = configuration.html {
             self.languages.html = html.into()
+        }
+
+        // plugin settings
+        if let Some(plugins) = configuration.plugins {
+            self.plugins = plugins;
         }
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.

@@ -605,7 +605,7 @@ fn debug_control_flow(parse: AnyParse, cursor: TextSize) -> String {
             }
         },
         &options,
-        Vec::new(),
+        &[],
         Default::default(),
         |_| ControlFlow::<Never>::Continue(()),
     );
@@ -672,7 +672,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         &tree,
         filter,
         &analyzer_options,
-        Vec::new(),
+        &params.plugins,
         services,
         |signal| process_lint.process_signal(signal),
     );
@@ -694,6 +694,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         skip,
         suppression_reason,
         enabled_rules: rules,
+        plugins,
     } = params;
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -735,7 +736,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         &tree,
         filter,
         &analyzer_options,
-        Vec::new(),
+        &plugins,
         services,
         |signal| {
             actions.extend(signal.actions().into_code_action_iter().map(|item| {
@@ -814,7 +815,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             &tree,
             filter,
             &analyzer_options,
-            Vec::new(),
+            &params.plugins,
             services,
             |signal| {
                 let current_diagnostic = signal.diagnostic();

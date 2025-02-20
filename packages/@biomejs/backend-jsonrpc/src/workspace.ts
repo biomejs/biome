@@ -3013,157 +3013,8 @@ export type RestrictedModifier =
 	| "protected"
 	| "readonly"
 	| "static";
-export interface OpenProjectParams {
-	/**
-	 * Whether the folder should be opened as a project, even if no `biome.json` can be found.
-	 */
-	openUninitialized: boolean;
-	/**
-	 * The path to open
-	 */
-	path: BiomePath;
-}
-export interface OpenFileParams {
-	content: FileContent;
-	documentFileSource?: DocumentFileSource;
-	path: BiomePath;
-	/**
-	* Set to `true` to persist the node cache used during parsing, in order to speed up subsequent reparsing if the document has been edited.
-
-This should only be enabled if reparsing is to be expected, such as when the file is opened through the LSP Proxy. 
-	 */
-	persistNodeCache?: boolean;
-	projectKey: ProjectKey;
-	version: number;
-}
-export type FileContent =
-	| { content: string; type: "fromClient" }
-	| { type: "fromServer" };
-export type DocumentFileSource =
-	| "Unknown"
-	| { Js: JsFileSource }
-	| { Json: JsonFileSource }
-	| { Css: CssFileSource }
-	| { Graphql: GraphqlFileSource }
-	| { Html: HtmlFileSource }
-	| { Grit: GritFileSource };
-export interface JsFileSource {
-	/**
-	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
-	 */
-	embedding_kind: EmbeddingKind;
-	language: Language;
-	module_kind: ModuleKind;
-	variant: LanguageVariant;
-	version: LanguageVersion;
-}
-export interface JsonFileSource {
-	allowComments: boolean;
-	allowTrailingCommas: boolean;
-	variant: JsonFileVariant;
-}
-export interface CssFileSource {
-	variant: CssVariant;
-}
-export interface GraphqlFileSource {
-	variant: GraphqlVariant;
-}
-export interface HtmlFileSource {
-	variant: HtmlVariant;
-}
-export interface GritFileSource {
-	variant: GritVariant;
-}
-export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
-export type Language =
-	| "javaScript"
-	| { typeScript: { definition_file: boolean } };
-/**
- * Is the source file an ECMAScript Module or Script. Changes the parsing semantic.
- */
-export type ModuleKind = "script" | "module";
-export type LanguageVariant = "standard" | "standardRestricted" | "jsx";
-/**
-	* Enum of the different ECMAScript standard versions. The versions are ordered in increasing order; The newest version comes last.
-
-Defaults to the latest stable ECMAScript standard. 
-	 */
-export type LanguageVersion = "eS2022" | "eSNext";
-/**
- * It represents the extension of the file
- */
-export type JsonFileVariant = "standard" | "jsonc";
-/**
-	* The style of CSS contained in the file.
-
-Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards. 
-	 */
-export type CssVariant = "standard";
-/**
- * The style of GraphQL contained in the file.
- */
-export type GraphqlVariant = "standard";
-export type HtmlVariant = "Standard" | "Astro";
-export type GritVariant = "Standard";
-export interface ChangeFileParams {
-	content: string;
-	path: BiomePath;
-	projectKey: ProjectKey;
-	version: number;
-}
-export interface CloseFileParams {
-	path: BiomePath;
-	projectKey: ProjectKey;
-}
-export interface GetSyntaxTreeParams {
-	path: BiomePath;
-	projectKey: ProjectKey;
-}
-export interface GetSyntaxTreeResult {
-	ast: string;
-	cst: string;
-}
-export interface CheckFileSizeParams {
-	path: BiomePath;
-	projectKey: ProjectKey;
-}
-export interface CheckFileSizeResult {
-	fileSize: number;
-	limit: number;
-}
-export interface GetFileContentParams {
-	path: BiomePath;
-	projectKey: ProjectKey;
-}
-export interface GetControlFlowGraphParams {
-	cursor: TextSize;
-	path: BiomePath;
-	projectKey: ProjectKey;
-}
-export type TextSize = number;
-export interface GetFormatterIRParams {
-	path: BiomePath;
-	projectKey: ProjectKey;
-}
-export interface PullDiagnosticsParams {
-	categories: RuleCategories;
-	/**
-	 * Rules to apply on top of the configuration
-	 */
-	enabledRules?: RuleCode[];
-	maxDiagnostics: number;
-	only?: RuleCode[];
-	path: BiomePath;
-	projectKey: ProjectKey;
-	skip?: RuleCode[];
-}
-export type RuleCategories = RuleCategory[];
-export type RuleCode = string;
-export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
-export interface PullDiagnosticsResult {
+export interface UpdateSettingsResult {
 	diagnostics: Diagnostic[];
-	errors: number;
-	skippedDiagnostics: number;
 }
 /**
  * Serializable representation for a [Diagnostic](super::Diagnostic).
@@ -3611,6 +3462,7 @@ export interface TextEdit {
 	ops: CompressedOp[];
 }
 export type Backtrace = BacktraceFrame[];
+export type TextSize = number;
 /**
  * Enumeration of all the supported markup elements
  */
@@ -3649,6 +3501,157 @@ export interface BacktraceSymbol {
 	filename?: string;
 	lineno?: number;
 	name?: string;
+}
+export interface OpenProjectParams {
+	/**
+	 * Whether the folder should be opened as a project, even if no `biome.json` can be found.
+	 */
+	openUninitialized: boolean;
+	/**
+	 * The path to open
+	 */
+	path: BiomePath;
+}
+export interface OpenFileParams {
+	content: FileContent;
+	documentFileSource?: DocumentFileSource;
+	path: BiomePath;
+	/**
+	* Set to `true` to persist the node cache used during parsing, in order to speed up subsequent reparsing if the document has been edited.
+
+This should only be enabled if reparsing is to be expected, such as when the file is opened through the LSP Proxy. 
+	 */
+	persistNodeCache?: boolean;
+	projectKey: ProjectKey;
+	version: number;
+}
+export type FileContent =
+	| { content: string; type: "fromClient" }
+	| { type: "fromServer" };
+export type DocumentFileSource =
+	| "Unknown"
+	| { Js: JsFileSource }
+	| { Json: JsonFileSource }
+	| { Css: CssFileSource }
+	| { Graphql: GraphqlFileSource }
+	| { Html: HtmlFileSource }
+	| { Grit: GritFileSource };
+export interface JsFileSource {
+	/**
+	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
+	 */
+	embedding_kind: EmbeddingKind;
+	language: Language;
+	module_kind: ModuleKind;
+	variant: LanguageVariant;
+	version: LanguageVersion;
+}
+export interface JsonFileSource {
+	allowComments: boolean;
+	allowTrailingCommas: boolean;
+	variant: JsonFileVariant;
+}
+export interface CssFileSource {
+	variant: CssVariant;
+}
+export interface GraphqlFileSource {
+	variant: GraphqlVariant;
+}
+export interface HtmlFileSource {
+	variant: HtmlVariant;
+}
+export interface GritFileSource {
+	variant: GritVariant;
+}
+export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
+export type Language =
+	| "javaScript"
+	| { typeScript: { definition_file: boolean } };
+/**
+ * Is the source file an ECMAScript Module or Script. Changes the parsing semantic.
+ */
+export type ModuleKind = "script" | "module";
+export type LanguageVariant = "standard" | "standardRestricted" | "jsx";
+/**
+	* Enum of the different ECMAScript standard versions. The versions are ordered in increasing order; The newest version comes last.
+
+Defaults to the latest stable ECMAScript standard. 
+	 */
+export type LanguageVersion = "eS2022" | "eSNext";
+/**
+ * It represents the extension of the file
+ */
+export type JsonFileVariant = "standard" | "jsonc";
+/**
+	* The style of CSS contained in the file.
+
+Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards. 
+	 */
+export type CssVariant = "standard";
+/**
+ * The style of GraphQL contained in the file.
+ */
+export type GraphqlVariant = "standard";
+export type HtmlVariant = "Standard" | "Astro";
+export type GritVariant = "Standard";
+export interface ChangeFileParams {
+	content: string;
+	path: BiomePath;
+	projectKey: ProjectKey;
+	version: number;
+}
+export interface CloseFileParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
+export interface GetSyntaxTreeParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
+export interface GetSyntaxTreeResult {
+	ast: string;
+	cst: string;
+}
+export interface CheckFileSizeParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
+export interface CheckFileSizeResult {
+	fileSize: number;
+	limit: number;
+}
+export interface GetFileContentParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
+export interface GetControlFlowGraphParams {
+	cursor: TextSize;
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
+export interface GetFormatterIRParams {
+	path: BiomePath;
+	projectKey: ProjectKey;
+}
+export interface PullDiagnosticsParams {
+	categories: RuleCategories;
+	/**
+	 * Rules to apply on top of the configuration
+	 */
+	enabledRules?: RuleCode[];
+	maxDiagnostics: number;
+	only?: RuleCode[];
+	path: BiomePath;
+	projectKey: ProjectKey;
+	skip?: RuleCode[];
+}
+export type RuleCategories = RuleCategory[];
+export type RuleCode = string;
+export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
+export interface PullDiagnosticsResult {
+	diagnostics: Diagnostic[];
+	errors: number;
+	skippedDiagnostics: number;
 }
 export interface PullActionsParams {
 	enabledRules?: RuleCode[];
@@ -3846,7 +3849,7 @@ export type RuleDomain = "react" | "test" | "solid" | "next";
 export type RuleDomainValue = "all" | "none" | "recommended";
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
-	updateSettings(params: UpdateSettingsParams): Promise<void>;
+	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;
 	openProject(params: OpenProjectParams): Promise<ProjectKey>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;

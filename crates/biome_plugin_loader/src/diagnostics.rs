@@ -100,6 +100,12 @@ impl std::fmt::Display for PluginDiagnostic {
     }
 }
 
+impl From<PluginDiagnostic> for biome_diagnostics::serde::Diagnostic {
+    fn from(error: PluginDiagnostic) -> Self {
+        biome_diagnostics::serde::Diagnostic::new(error)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "plugin",

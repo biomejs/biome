@@ -13,8 +13,9 @@ use crate::workspace::{
 };
 use crate::WorkspaceError;
 use biome_analyze::{
-    AnalyzerDiagnostic, AnalyzerOptions, AnalyzerSignal, ControlFlow, GroupCategory, Never,
-    Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
+    AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec, AnalyzerSignal, ControlFlow,
+    GroupCategory, Never, Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory,
+    RuleFilter, RuleGroup,
 };
 use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
 use biome_configuration::Rules;
@@ -397,6 +398,7 @@ pub struct FixAllParams<'a> {
     pub(crate) rule_categories: RuleCategories,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) plugins: AnalyzerPluginVec,
 }
 
 #[derive(Default)]
@@ -463,6 +465,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) project_layout: Arc<ProjectLayout>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) plugins: AnalyzerPluginVec,
 }
 
 pub(crate) struct LintResults {
@@ -590,6 +593,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) skip: Vec<RuleSelector>,
     pub(crate) suppression_reason: Option<String>,
     pub(crate) enabled_rules: Vec<RuleSelector>,
+    pub(crate) plugins: AnalyzerPluginVec,
 }
 
 type Lint = fn(LintParams) -> LintResults;

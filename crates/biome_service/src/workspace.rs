@@ -533,6 +533,13 @@ pub struct UpdateSettingsParams {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
+pub struct UpdateSettingsResult {
+    pub diagnostics: Vec<Diagnostic>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct ProjectFeaturesParams {
     pub manifest_path: BiomePath,
 }
@@ -1035,10 +1042,13 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Updates the global settings for the given project.
     ///
-    /// This method should not be used in combination with
-    /// `scan_project_folder()`. When scanning is enabled, the server will
+    /// TODO: This method should not be used in combination with
+    /// `scan_project_folder()`. When scanning is enabled, the server should
     /// manage project settings on its own.
-    fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError>;
+    fn update_settings(
+        &self,
+        params: UpdateSettingsParams,
+    ) -> Result<UpdateSettingsResult, WorkspaceError>;
 
     /// Closes the project with the given key.
     ///
