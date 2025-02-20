@@ -568,6 +568,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         only,
         enabled_rules: rules,
         suppression_reason,
+        plugins: _,
     } = params;
 
     let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();

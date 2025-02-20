@@ -1,5 +1,5 @@
 use biome_analyze::{
-    AnalysisFilter, AnalyzerAction, AnalyzerPlugin, ControlFlow, Never, RuleFilter,
+    AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, RuleFilter,
 };
 use biome_css_parser::{parse_css, CssParserOptions};
 use biome_css_syntax::{CssFileSource, CssLanguage};
@@ -14,6 +14,7 @@ use biome_test_utils::{
 };
 use camino::Utf8Path;
 use std::ops::Deref;
+use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{css,json,jsonc}", crate::run_test, "module"}
@@ -72,7 +73,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 input_file,
                 CheckActionType::Lint,
                 parser_options,
-                Vec::new(),
+                &[],
             );
         }
 
@@ -90,7 +91,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             input_file,
             CheckActionType::Lint,
             parser_options,
-            Vec::new(),
+            &[],
         )
     };
 
@@ -116,7 +117,7 @@ pub(crate) fn analyze_and_snap(
     input_file: &Utf8Path,
     check_action_type: CheckActionType,
     parser_options: CssParserOptions,
-    plugins: Vec<Box<dyn AnalyzerPlugin>>,
+    plugins: AnalyzerPluginSlice,
 ) -> usize {
     let parsed = parse_css(input_code, parser_options);
     let root = parsed.tree();
@@ -241,7 +242,7 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
         input_file,
         CheckActionType::Suppression,
         CssParserOptions::default(),
-        Vec::new(),
+        &[],
     );
 
     insta::with_settings!({
@@ -288,7 +289,7 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
         &input_path,
         CheckActionType::Lint,
         CssParserOptions::default(),
-        vec![Box::new(plugin)],
+        &[Arc::new(Box::new(plugin))],
     );
 
     insta::with_settings!({
