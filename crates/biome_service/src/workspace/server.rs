@@ -710,6 +710,15 @@ impl Workspace for WorkspaceServer {
             &workspace_directory.unwrap_or_default(),
             &settings.plugins,
         );
+        let has_errors = diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.severity() >= Severity::Error);
+        if has_errors {
+            // Note we also pass non-error diagnostics here. Filtering them
+            // might be cleaner, but on the other hand, including them may
+            // sometimes give a hint as to why an error occurred?
+            return Err(WorkspaceError::plugin_errors(diagnostics));
+        }
 
         self.projects.set_settings(params.project_key, settings);
 

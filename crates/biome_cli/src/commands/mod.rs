@@ -808,8 +808,8 @@ pub(crate) trait CommandRunner: Sized {
             vcs_base_path: vcs_base_path.map(BiomePath::from),
             gitignore_matches,
         })?;
-        for diagnostic in result.diagnostics {
-            console.log(markup! {{PrintDiagnostic::simple(&diagnostic)}});
+        for diagnostic in &result.diagnostics {
+            console.log(markup! {{PrintDiagnostic::simple(diagnostic)}});
         }
 
         let execution = self.get_execution(cli_options, console, workspace, project_key)?;

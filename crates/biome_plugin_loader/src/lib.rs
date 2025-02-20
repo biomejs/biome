@@ -92,6 +92,8 @@ impl BiomePlugin {
 }
 
 /// Normalizes the given `path` without requiring filesystem access.
+///
+/// This only normalizes `.` and `..` entries, but does not resolve symlinks.
 fn normalize_path(path: &Utf8Path) -> Utf8PathBuf {
     let mut stack = Vec::new();
 
