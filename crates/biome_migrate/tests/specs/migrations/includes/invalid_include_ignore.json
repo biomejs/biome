@@ -7,7 +7,7 @@
     "include": ["src/**/*.js"],
     "ignore": ["*.gen.js"]
   },
-  "assists": {
+  "assist": {
     "include": ["src/**/*.js"],
     "ignore": ["*.gen.js"]
   },

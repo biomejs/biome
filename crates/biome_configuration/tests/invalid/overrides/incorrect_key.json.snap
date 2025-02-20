@@ -1,7 +1,7 @@
 ---
 source: crates/biome_configuration/tests/spec_tests.rs
+assertion_line: 58
 expression: incorrect_key.json
-snapshot_kind: text
 ---
 incorrect_key.json:4:4 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -16,7 +16,6 @@ incorrect_key.json:4:4 deserialize ━━━━━━━━━━━━━━━
   
   i Known keys:
   
-  - ignore
   - include
   - includes
   - javascript

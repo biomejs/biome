@@ -33,7 +33,7 @@ impl Rule for Includes {
                 continue;
             };
             match name.text() {
-                "files" | "formatter" | "linter" | "assists" => {
+                "files" | "formatter" | "linter" | "assist" => {
                     let Ok(AnyJsonValue::JsonObjectValue(object)) = root_member.value() else {
                         continue;
                     };
