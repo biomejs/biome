@@ -414,7 +414,7 @@ impl RuleSource {
 
     pub fn to_rule_url(&self) -> String {
         match self {
-            Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"),
+            Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#{rule_name}"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
             Self::EslintGraphql(rule_name) => format!("https://the-guild.dev/graphql/eslint/rules/{rule_name}"),
             Self::EslintGraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),

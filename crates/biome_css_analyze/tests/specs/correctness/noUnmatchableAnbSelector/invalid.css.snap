@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -25,7 +26,7 @@ a:nth-last-child(0),a:nth-last-child(n+5) ~ li {}
 ```
 invalid.css:1:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This selector will never match any elements.
+  × This selector will never match any elements.
   
   > 1 │ a:nth-child(0) {}
       │             ^
@@ -42,7 +43,7 @@ invalid.css:1:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━
 ```
 invalid.css:2:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This selector will never match any elements.
+  × This selector will never match any elements.
   
     1 │ a:nth-child(0) {}
   > 2 │ a:nth-child(0n) {}
@@ -60,7 +61,7 @@ invalid.css:2:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━
 ```
 invalid.css:3:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This selector will never match any elements.
+  × This selector will never match any elements.
   
     1 │ a:nth-child(0) {}
     2 │ a:nth-child(0n) {}
@@ -79,7 +80,7 @@ invalid.css:3:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━
 ```
 invalid.css:4:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This selector will never match any elements.
+  × This selector will never match any elements.
   
     2 │ a:nth-child(0n) {}
     3 │ a:nth-child(+0n) {}
@@ -98,7 +99,7 @@ invalid.css:4:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━
 ```
 invalid.css:5:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This selector will never match any elements.
+  × This selector will never match any elements.
   
     3 │ a:nth-child(+0n) {}
     4 │ a:nth-child(-0n) {}
@@ -117,7 +118,7 @@ invalid.css:5:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━
 ```
 invalid.css:6:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This selector will never match any elements.
+  × This selector will never match any elements.
   
     4 │ a:nth-child(-0n) {}
     5 │ a:nth-child(0n+0) {}
@@ -136,7 +137,7 @@ invalid.css:6:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━
 ```
 invalid.css:7:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This selector will never match any elements.
+  × This selector will never match any elements.
   
     5 │ a:nth-child(0n+0) {}
     6 │ a:nth-child(0n-0) {}
@@ -155,7 +156,7 @@ invalid.css:7:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━
 ```
 invalid.css:8:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This selector will never match any elements.
+  × This selector will never match any elements.
   
      6 │ a:nth-child(0n-0) {}
      7 │ a:nth-child(-0n-0) {}
@@ -174,7 +175,7 @@ invalid.css:8:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━
 ```
 invalid.css:9:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This selector will never match any elements.
+  × This selector will never match any elements.
   
      7 │ a:nth-child(-0n-0) {}
      8 │ a:nth-child(0 of a) {}
@@ -193,7 +194,7 @@ invalid.css:9:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━
 ```
 invalid.css:10:18 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This selector will never match any elements.
+  × This selector will never match any elements.
   
      8 │ a:nth-child(0 of a) {}
      9 │ a:nth-child(0), a:nth-child(1) {}
@@ -212,7 +213,7 @@ invalid.css:10:18 lint/correctness/noUnmatchableAnbSelector ━━━━━━�
 ```
 invalid.css:11:15 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This selector will never match any elements.
+  × This selector will never match any elements.
   
      9 │ a:nth-child(0), a:nth-child(1) {}
     10 │ a:nth-last-child(0) {}
@@ -231,7 +232,7 @@ invalid.css:11:15 lint/correctness/noUnmatchableAnbSelector ━━━━━━�
 ```
 invalid.css:12:20 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This selector will never match any elements.
+  × This selector will never match any elements.
   
     10 │ a:nth-last-child(0) {}
     11 │ a:nth-of-type(0) {}
@@ -250,7 +251,7 @@ invalid.css:12:20 lint/correctness/noUnmatchableAnbSelector ━━━━━━�
 ```
 invalid.css:13:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This selector will never match any elements.
+  × This selector will never match any elements.
   
     11 │ a:nth-of-type(0) {}
     12 │ a:nth-last-of-type(0) {}
@@ -269,7 +270,7 @@ invalid.css:13:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━�
 ```
 invalid.css:14:18 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This selector will never match any elements.
+  × This selector will never match any elements.
   
     12 │ a:nth-last-of-type(0) {}
     13 │ a:nth-child(0n):nth-child(-n+5) {}

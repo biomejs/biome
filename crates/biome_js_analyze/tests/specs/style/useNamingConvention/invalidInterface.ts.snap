@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidInterface.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -29,7 +30,7 @@ interface _Unknown_Style {}
 ```
 invalidInterface.ts:1:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name should be in PascalCase.
+  i This interface name should be in PascalCase.
   
   > 1 │ export interface XXX {}
       │                  ^^^
@@ -42,7 +43,7 @@ invalidInterface.ts:1:18 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidInterface.ts:3:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name should be in PascalCase.
+  i This interface name should be in PascalCase.
   
     1 │ export interface XXX {}
     2 │ 
@@ -57,7 +58,7 @@ invalidInterface.ts:3:18 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidInterface.ts:5:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name should be in PascalCase.
+  i This interface name should be in PascalCase.
   
     3 │ export interface CONSTANT_CASE {}
     4 │ 
@@ -72,7 +73,7 @@ invalidInterface.ts:5:18 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidInterface.ts:7:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name should be in PascalCase.
+  i This interface name should be in PascalCase.
   
     5 │ export interface camelCase {}
     6 │ 
@@ -87,7 +88,7 @@ invalidInterface.ts:7:18 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidInterface.ts:9:18 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name should be in PascalCase.
+  i This interface name should be in PascalCase.
   
      7 │ export interface snake_case {}
      8 │ 
@@ -102,7 +103,7 @@ invalidInterface.ts:9:18 lint/style/useNamingConvention ━━━━━━━━
 ```
 invalidInterface.ts:11:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name part should be in PascalCase.
+  i This interface name part should be in PascalCase.
   
      9 │ export interface Unknown_Style {}
     10 │ 
@@ -126,7 +127,7 @@ invalidInterface.ts:11:12 lint/style/useNamingConvention  FIXABLE  ━━━━�
 ```
 invalidInterface.ts:13:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name part should be in PascalCase.
+  i This interface name part should be in PascalCase.
   
     11 │ interface _XXX {}
     12 │ 
@@ -150,7 +151,7 @@ invalidInterface.ts:13:12 lint/style/useNamingConvention  FIXABLE  ━━━━�
 ```
 invalidInterface.ts:15:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name part should be in PascalCase.
+  i This interface name part should be in PascalCase.
   
     13 │ interface _CONSTANT_CASE {}
     14 │ 
@@ -174,7 +175,7 @@ invalidInterface.ts:15:12 lint/style/useNamingConvention  FIXABLE  ━━━━�
 ```
 invalidInterface.ts:17:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name part should be in PascalCase.
+  i This interface name part should be in PascalCase.
   
     15 │ interface _camelCase {}
     16 │ 
@@ -198,7 +199,7 @@ invalidInterface.ts:17:12 lint/style/useNamingConvention  FIXABLE  ━━━━�
 ```
 invalidInterface.ts:19:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name part should be in PascalCase.
+  i This interface name part should be in PascalCase.
   
     17 │ interface _snake_case {}
     18 │ 

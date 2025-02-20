@@ -86,7 +86,7 @@ var r = globalThis.RegExp("[👍]", "");
 ```
 invalid.js:1:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
   > 1 │ var r = /[👍]/;
       │           ^^
@@ -105,7 +105,7 @@ invalid.js:1:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:2:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     1 │ var r = /[👍]/;
   > 2 │ var r = /[\uD83D\uDC4D]/;
@@ -125,7 +125,7 @@ invalid.js:2:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:3:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     1 │ var r = /[👍]/;
     2 │ var r = /[\uD83D\uDC4D]/;
@@ -146,7 +146,7 @@ invalid.js:3:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:4:15 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     2 │ var r = /[\uD83D\uDC4D]/;
     3 │ var r = /[👍]\\a/;
@@ -167,7 +167,7 @@ invalid.js:4:15 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:5:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     3 │ var r = /[👍]\\a/;
     4 │ var r = /(?<=[👍])/;
@@ -184,7 +184,7 @@ invalid.js:5:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━
 ```
 invalid.js:6:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     4 │ var r = /(?<=[👍])/;
     5 │ var r = /[A�]/;
@@ -201,7 +201,7 @@ invalid.js:6:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━
 ```
 invalid.js:7:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     5 │ var r = /[A�]/;
     6 │ var r = /[A�]/u;
@@ -218,7 +218,7 @@ invalid.js:7:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━
 ```
 invalid.js:8:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
      6 │ var r = /[A�]/u;
      7 │ var r = /[\u0041\u0301]/;
@@ -235,7 +235,7 @@ invalid.js:8:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━
 ```
 invalid.js:9:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
      7 │ var r = /[\u0041\u0301]/;
      8 │ var r = /[\u0041\u0301]/u;
@@ -252,7 +252,7 @@ invalid.js:9:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━
 ```
 invalid.js:10:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
      8 │ var r = /[\u0041\u0301]/u;
      9 │ var r = /[\u{41}\u{301}]/u;
@@ -269,7 +269,7 @@ invalid.js:10:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:11:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
      9 │ var r = /[\u{41}\u{301}]/u;
     10 │ var r = /[❇�]/;
@@ -286,7 +286,7 @@ invalid.js:11:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:12:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     10 │ var r = /[❇�]/;
     11 │ var r = /[❇�]/u;
@@ -303,7 +303,7 @@ invalid.js:12:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:13:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     11 │ var r = /[❇�]/u;
     12 │ var r = /[\u2747\uFE0F]/;
@@ -320,7 +320,7 @@ invalid.js:13:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:14:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     12 │ var r = /[\u2747\uFE0F]/;
     13 │ var r = /[\u2747\uFE0F]/u;
@@ -337,7 +337,7 @@ invalid.js:14:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:15:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     13 │ var r = /[\u2747\uFE0F]/u;
     14 │ var r = /[\u{2747}\u{FE0F}]/u;
@@ -358,7 +358,7 @@ invalid.js:15:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:16:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match an emoji with a skin tone modifier.
+  × A character class cannot match an emoji with a skin tone modifier.
   
     14 │ var r = /[\u{2747}\u{FE0F}]/u;
     15 │ var r = /[👶🏻]/;
@@ -375,7 +375,7 @@ invalid.js:16:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:17:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match an emoji with a skin tone modifier.
+  × A character class cannot match an emoji with a skin tone modifier.
   
     15 │ var r = /[👶🏻]/;
     16 │ var r = /[👶🏻]/u;
@@ -392,7 +392,7 @@ invalid.js:17:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:18:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match an emoji with a skin tone modifier.
+  × A character class cannot match an emoji with a skin tone modifier.
   
     16 │ var r = /[👶🏻]/u;
     17 │ var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
@@ -409,7 +409,7 @@ invalid.js:18:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:19:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     17 │ var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
     18 │ var r = /[\u{1F476}\u{1F3FB}]/u;
@@ -430,7 +430,7 @@ invalid.js:19:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:20:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     18 │ var r = /[\u{1F476}\u{1F3FB}]/u;
     19 │ var r = /[🇯🇵]/;
@@ -456,7 +456,7 @@ invalid.js:20:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:21:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a pair of regional indicator symbols.
+  × A character class cannot match a pair of regional indicator symbols.
   
     19 │ var r = /[🇯🇵]/;
     20 │ var r = /[🇯🇵]/i;
@@ -473,7 +473,7 @@ invalid.js:21:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:22:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a pair of regional indicator symbols.
+  × A character class cannot match a pair of regional indicator symbols.
   
     20 │ var r = /[🇯🇵]/i;
     21 │ var r = /[🇯🇵]/u;
@@ -490,7 +490,7 @@ invalid.js:22:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:23:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a pair of regional indicator symbols.
+  × A character class cannot match a pair of regional indicator symbols.
   
     21 │ var r = /[🇯🇵]/u;
     22 │ var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
@@ -507,7 +507,7 @@ invalid.js:23:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:24:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     22 │ var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
     23 │ var r = /[\u{1F1EF}\u{1F1F5}]/u;
@@ -528,7 +528,7 @@ invalid.js:24:11 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:25:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a joined character sequence.
+  × A character class cannot match a joined character sequence.
   
     23 │ var r = /[\u{1F1EF}\u{1F1F5}]/u;
     24 │ var r = /[👨�👩�👦]/;
@@ -545,7 +545,7 @@ invalid.js:25:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:26:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a joined character sequence.
+  × A character class cannot match a joined character sequence.
   
     24 │ var r = /[👨�👩�👦]/;
     25 │ var r = /[👨�👩�👦]/u;
@@ -562,7 +562,7 @@ invalid.js:26:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:27:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a joined character sequence.
+  × A character class cannot match a joined character sequence.
   
     25 │ var r = /[👨�👩�👦]/u;
     26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
@@ -579,7 +579,7 @@ invalid.js:27:11 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:28:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
     27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
@@ -600,7 +600,7 @@ invalid.js:28:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:29:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
     28 │ var r = new RegExp("[👍]", "");
@@ -621,7 +621,7 @@ invalid.js:29:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:30:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     28 │ var r = new RegExp("[👍]", "");
     29 │ var r = new RegExp('[👍]', ``);
@@ -638,7 +638,7 @@ invalid.js:30:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:31:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     29 │ var r = new RegExp('[👍]', ``);
     30 │ var r = new RegExp("[👍]", flags);
@@ -659,7 +659,7 @@ invalid.js:31:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:32:27 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     30 │ var r = new RegExp("[👍]", flags);
     31 │ var r = new RegExp("[\uD83D\uDC4D]", "");
@@ -680,7 +680,7 @@ invalid.js:32:27 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:33:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     31 │ var r = new RegExp("[\uD83D\uDC4D]", "");
     32 │ var r = new RegExp("/(?<=[👍])", "");
@@ -697,7 +697,7 @@ invalid.js:33:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:34:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     32 │ var r = new RegExp("/(?<=[👍])", "");
     33 │ var r = new RegExp("[A�]", "");
@@ -714,7 +714,7 @@ invalid.js:34:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:35:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     33 │ var r = new RegExp("[A�]", "");
     34 │ var r = new RegExp("[A�]", "u");
@@ -731,7 +731,7 @@ invalid.js:35:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:36:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     34 │ var r = new RegExp("[A�]", "u");
     35 │ var r = new RegExp("[\u0041\u0301]", "");
@@ -748,7 +748,7 @@ invalid.js:36:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:37:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     35 │ var r = new RegExp("[\u0041\u0301]", "");
     36 │ var r = new RegExp("[\u0041\u0301]", "u");
@@ -765,7 +765,7 @@ invalid.js:37:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:38:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     36 │ var r = new RegExp("[\u0041\u0301]", "u");
     37 │ var r = new RegExp("[\u{41}\u{301}]", "u");
@@ -782,7 +782,7 @@ invalid.js:38:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:39:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     37 │ var r = new RegExp("[\u{41}\u{301}]", "u");
     38 │ var r = new RegExp("[❇�]", "");
@@ -799,7 +799,7 @@ invalid.js:39:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:40:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     38 │ var r = new RegExp("[❇�]", "");
     39 │ var r = new RegExp("[❇�]", "u");
@@ -816,7 +816,7 @@ invalid.js:40:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:41:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     39 │ var r = new RegExp("[❇�]", "u");
     40 │ var r = new RegExp("[\u2747\uFE0F]", "");
@@ -833,7 +833,7 @@ invalid.js:41:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:42:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     40 │ var r = new RegExp("[\u2747\uFE0F]", "");
     41 │ var r = new RegExp("[\u2747\uFE0F]", "u");
@@ -850,7 +850,7 @@ invalid.js:42:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:43:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     41 │ var r = new RegExp("[\u2747\uFE0F]", "u");
     42 │ var r = new RegExp("[\u{2747}\u{FE0F}]", "u");
@@ -871,7 +871,7 @@ invalid.js:43:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:44:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match an emoji with a skin tone modifier.
+  × A character class cannot match an emoji with a skin tone modifier.
   
     42 │ var r = new RegExp("[\u{2747}\u{FE0F}]", "u");
     43 │ var r = new RegExp("[👶🏻]", "");
@@ -888,7 +888,7 @@ invalid.js:44:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:45:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match an emoji with a skin tone modifier.
+  × A character class cannot match an emoji with a skin tone modifier.
   
     43 │ var r = new RegExp("[👶🏻]", "");
     44 │ var r = new RegExp("[👶🏻]", "u");
@@ -905,7 +905,7 @@ invalid.js:45:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:46:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match an emoji with a skin tone modifier.
+  × A character class cannot match an emoji with a skin tone modifier.
   
     44 │ var r = new RegExp("[👶🏻]", "u");
     45 │ var r = new RegExp("[\uD83D\uDC76\uD83C\uDFFB]", "u");
@@ -922,7 +922,7 @@ invalid.js:46:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:47:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     45 │ var r = new RegExp("[\uD83D\uDC76\uD83C\uDFFB]", "u");
     46 │ var r = new RegExp("[\u{1F476}\u{1F3FB}]", "u");
@@ -943,7 +943,7 @@ invalid.js:47:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:48:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     46 │ var r = new RegExp("[\u{1F476}\u{1F3FB}]", "u");
     47 │ var r = new RegExp("[🇯🇵]", "");
@@ -969,7 +969,7 @@ invalid.js:48:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:49:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     47 │ var r = new RegExp("[🇯🇵]", "");
     48 │ var r = new RegExp("[🇯🇵]", "i");
@@ -995,7 +995,7 @@ invalid.js:49:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:50:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     48 │ var r = new RegExp("[🇯🇵]", "i");
     49 │ var r = new RegExp('[🇯🇵]', `i`);
@@ -1016,7 +1016,7 @@ invalid.js:50:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:51:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     49 │ var r = new RegExp('[🇯🇵]', `i`);
     50 │ var r = new RegExp('[🇯🇵]', `${foo}`);
@@ -1037,7 +1037,7 @@ invalid.js:51:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:52:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     50 │ var r = new RegExp('[🇯🇵]', `${foo}`);
     51 │ var r = new RegExp("[🇯🇵]");
@@ -1058,7 +1058,7 @@ invalid.js:52:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:53:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a pair of regional indicator symbols.
+  × A character class cannot match a pair of regional indicator symbols.
   
     51 │ var r = new RegExp("[🇯🇵]");
     52 │ var r = new RegExp("[🇯🇵]",);
@@ -1075,7 +1075,7 @@ invalid.js:53:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:54:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a pair of regional indicator symbols.
+  × A character class cannot match a pair of regional indicator symbols.
   
     52 │ var r = new RegExp("[🇯🇵]",);
     53 │ var r = new RegExp("[🇯🇵]", "u");
@@ -1092,7 +1092,7 @@ invalid.js:54:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:55:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a pair of regional indicator symbols.
+  × A character class cannot match a pair of regional indicator symbols.
   
     53 │ var r = new RegExp("[🇯🇵]", "u");
     54 │ var r = new RegExp("[\uD83C\uDDEF\uD83C\uDDF5]", "u");
@@ -1109,7 +1109,7 @@ invalid.js:55:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:56:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     54 │ var r = new RegExp("[\uD83C\uDDEF\uD83C\uDDF5]", "u");
     55 │ var r = new RegExp("[\u{1F1EF}\u{1F1F5}]", "u");
@@ -1130,7 +1130,7 @@ invalid.js:56:22 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:57:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a joined character sequence.
+  × A character class cannot match a joined character sequence.
   
     55 │ var r = new RegExp("[\u{1F1EF}\u{1F1F5}]", "u");
     56 │ var r = new RegExp("[👨�👩�👦]", "");
@@ -1147,7 +1147,7 @@ invalid.js:57:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:58:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a joined character sequence.
+  × A character class cannot match a joined character sequence.
   
     56 │ var r = new RegExp("[👨�👩�👦]", "");
     57 │ var r = new RegExp("[👨�👩�👦]", "u");
@@ -1164,7 +1164,7 @@ invalid.js:58:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:59:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a joined character sequence.
+  × A character class cannot match a joined character sequence.
   
     57 │ var r = new RegExp("[👨�👩�👦]", "u");
     58 │ var r = new RegExp("[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]", "u");
@@ -1181,7 +1181,7 @@ invalid.js:59:22 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:60:33 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     58 │ var r = new RegExp("[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]", "u");
     59 │ var r = new RegExp("[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]", "u");
@@ -1198,7 +1198,7 @@ invalid.js:60:33 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:61:33 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match an emoji with a skin tone modifier.
+  × A character class cannot match an emoji with a skin tone modifier.
   
     59 │ var r = new RegExp("[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]", "u");
     60 │ var r = new globalThis.RegExp("[❇�]", "");
@@ -1215,7 +1215,7 @@ invalid.js:61:33 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:62:33 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     60 │ var r = new globalThis.RegExp("[❇�]", "");
     61 │ var r = new globalThis.RegExp("[👶🏻]", "u");
@@ -1236,7 +1236,7 @@ invalid.js:62:33 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:63:33 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a joined character sequence.
+  × A character class cannot match a joined character sequence.
   
     61 │ var r = new globalThis.RegExp("[👶🏻]", "u");
     62 │ var r = new globalThis.RegExp("[🇯🇵]", "");
@@ -1253,7 +1253,7 @@ invalid.js:63:33 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:64:29 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     62 │ var r = new globalThis.RegExp("[🇯🇵]", "");
     63 │ var r = new globalThis.RegExp("[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]", "u");
@@ -1270,7 +1270,7 @@ invalid.js:64:29 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:65:29 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     63 │ var r = new globalThis.RegExp("[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]", "u");
     64 │ var r = new window.RegExp("[❇�]", "");
@@ -1291,7 +1291,7 @@ invalid.js:65:29 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:66:29 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     64 │ var r = new window.RegExp("[❇�]", "");
     65 │ var r = new window.RegExp("[👍]", "");
@@ -1308,7 +1308,7 @@ invalid.js:66:29 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:67:29 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     65 │ var r = new window.RegExp("[👍]", "");
     66 │ var r = new global.RegExp("[❇�]", "");
@@ -1329,7 +1329,7 @@ invalid.js:67:29 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:68:55 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a character and a combining character.
+  × A character class cannot match a character and a combining character.
   
     66 │ var r = new global.RegExp("[❇�]", "");
     67 │ var r = new global.RegExp("[👍]", "");
@@ -1346,7 +1346,7 @@ invalid.js:68:55 lint/suspicious/noMisleadingCharacterClass ━━━━━━�
 ```
 invalid.js:69:55 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     67 │ var r = new global.RegExp("[👍]", "");
     68 │ var r = new globalThis.globalThis.globalThis.RegExp("[❇�]", "");
@@ -1367,7 +1367,7 @@ invalid.js:69:55 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:70:18 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     68 │ var r = new globalThis.globalThis.globalThis.RegExp("[❇�]", "");
     69 │ var r = new globalThis.globalThis.globalThis.RegExp("[👍]", "");
@@ -1388,7 +1388,7 @@ invalid.js:70:18 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:71:25 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     69 │ var r = new globalThis.globalThis.globalThis.RegExp("[👍]", "");
     70 │ var r = RegExp("[👍]", "");
@@ -1409,7 +1409,7 @@ invalid.js:71:25 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:72:25 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     70 │ var r = RegExp("[👍]", "");
     71 │ var r = window.RegExp("[👍]", "");
@@ -1430,7 +1430,7 @@ invalid.js:72:25 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:73:29 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     71 │ var r = window.RegExp("[👍]", "");
     72 │ var r = global.RegExp("[👍]", "");
@@ -1451,7 +1451,7 @@ invalid.js:73:29 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
 ```
 invalid.js:75:5 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
+  × A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them.
   
     73 │ var r = globalThis.RegExp("[👍]", "");
     74 │ 

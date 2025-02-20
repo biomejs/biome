@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidMethodParameters.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -17,7 +18,7 @@ export {}
 ```
 invalidMethodParameters.ts:2:14 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  i This parameter is unused.
   
     1 │ class D {
   > 2 │ 	constructor(a: number) {}
@@ -41,7 +42,7 @@ invalidMethodParameters.ts:2:14 lint/correctness/noUnusedVariables  FIXABLE  ━
 ```
 invalidMethodParameters.ts:3:4 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  i This parameter is unused.
   
     1 │ class D {
     2 │ 	constructor(a: number) {}
@@ -67,7 +68,7 @@ invalidMethodParameters.ts:3:4 lint/correctness/noUnusedVariables  FIXABLE  ━�
 ```
 invalidMethodParameters.ts:4:8 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  i This parameter is unused.
   
     2 │ 	constructor(a: number) {}
     3 │ 	f(a: number) {}
@@ -89,5 +90,3 @@ invalidMethodParameters.ts:4:8 lint/correctness/noUnusedVariables  FIXABLE  ━�
   
 
 ```
-
-

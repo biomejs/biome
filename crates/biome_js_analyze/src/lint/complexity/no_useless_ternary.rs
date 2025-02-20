@@ -58,7 +58,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-unneeded-ternary")],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }

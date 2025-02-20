@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -14,7 +15,7 @@ a {}
 ```
 invalid.css:2:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This @import is in the wrong position.
+  × This @import is in the wrong position.
   
     1 │ a {}
   > 2 │ @import 'foo.css';
@@ -32,7 +33,7 @@ invalid.css:2:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━�
 ```
 invalid.css:3:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This @import is in the wrong position.
+  × This @import is in the wrong position.
   
     1 │ a {}
     2 │ @import 'foo.css';

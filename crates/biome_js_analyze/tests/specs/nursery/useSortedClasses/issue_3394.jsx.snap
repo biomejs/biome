@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 86
 expression: issue_3394.jsx
 snapshot_kind: text
 ---
@@ -16,7 +15,7 @@ snapshot_kind: text
 ```
 issue_3394.jsx:3:31 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     1 │ <>
     2 │   <div class={`${variable}-bar ${variable}`}></div>

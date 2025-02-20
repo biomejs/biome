@@ -84,7 +84,7 @@ snapshot_kind: text
 ```
 invalid.jsx:2:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     1 │ <>
   > 2 │ 	<div onClick={() => void 0} />
@@ -100,7 +100,7 @@ invalid.jsx:2:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:3:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     1 │ <>
     2 │ 	<div onClick={() => void 0} />
@@ -117,7 +117,7 @@ invalid.jsx:3:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:4:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     2 │ 	<div onClick={() => void 0} />
     3 │ 	<div onClick={() => void 0} role={undefined} />
@@ -134,7 +134,7 @@ invalid.jsx:4:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:5:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     3 │ 	<div onClick={() => void 0} role={undefined} />
     4 │ 	<div onClick={() => void 0} {...props} />
@@ -151,7 +151,7 @@ invalid.jsx:5:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:7:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     5 │ 	<div onKeyUp={() => void 0} aria-hidden={false} />
     6 │ 	{/*Static elements; no inherent role */}
@@ -168,7 +168,7 @@ invalid.jsx:7:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:8:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
      6 │ 	{/*Static elements; no inherent role */}
      7 │ 	<a onClick={() => void 0} />
@@ -185,7 +185,7 @@ invalid.jsx:8:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:9:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
      7 │ 	<a onClick={() => void 0} />
      8 │ 	<a onClick={() => {}} />
@@ -202,7 +202,7 @@ invalid.jsx:9:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:10:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
      8 │ 	<a onClick={() => {}} />
      9 │ 	<a tabIndex="0" onClick={() => void 0} />
@@ -219,7 +219,7 @@ invalid.jsx:10:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:11:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
      9 │ 	<a tabIndex="0" onClick={() => void 0} />
     10 │ 	<area onClick={() => { }} />
@@ -236,7 +236,7 @@ invalid.jsx:11:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:12:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     10 │ 	<area onClick={() => { }} />
     11 │ 	<b onClick={() => {}} />
@@ -253,7 +253,7 @@ invalid.jsx:12:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:13:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     11 │ 	<b onClick={() => {}} />
     12 │ 	<base onClick={() => {}} />
@@ -270,7 +270,7 @@ invalid.jsx:13:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:14:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     12 │ 	<base onClick={() => {}} />
     13 │ 	<bdi onClick={() => {}} />
@@ -287,7 +287,7 @@ invalid.jsx:14:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:15:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     13 │ 	<bdi onClick={() => {}} />
     14 │ 	<bdo onClick={() => { }} />
@@ -304,7 +304,7 @@ invalid.jsx:15:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:16:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     14 │ 	<bdo onClick={() => { }} />
     15 │ 	<body onClick={() => { }} />
@@ -321,7 +321,7 @@ invalid.jsx:16:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:17:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     15 │ 	<body onClick={() => { }} />
     16 │ 	<cite onClick={() => { }} />
@@ -338,7 +338,7 @@ invalid.jsx:17:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:18:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     16 │ 	<cite onClick={() => { }} />
     17 │ 	<col onClick={() => {}} />
@@ -355,7 +355,7 @@ invalid.jsx:18:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:19:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     17 │ 	<col onClick={() => {}} />
     18 │ 	<colgroup onClick={() => { }} />
@@ -372,7 +372,7 @@ invalid.jsx:19:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:20:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     18 │ 	<colgroup onClick={() => { }} />
     19 │ 	<data onClick={() => {}} />
@@ -389,7 +389,7 @@ invalid.jsx:20:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:21:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     19 │ 	<data onClick={() => {}} />
     20 │ 	<div onClick={() => { }} />
@@ -406,7 +406,7 @@ invalid.jsx:21:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:22:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     20 │ 	<div onClick={() => { }} />
     21 │ 	<head onClick={() => {}} />
@@ -423,7 +423,7 @@ invalid.jsx:22:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:23:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     21 │ 	<head onClick={() => {}} />
     22 │ 	<header onClick={() => {}} />
@@ -440,7 +440,7 @@ invalid.jsx:23:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:24:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     22 │ 	<header onClick={() => {}} />
     23 │ 	<hgroup onClick={() => {}} />
@@ -457,7 +457,7 @@ invalid.jsx:24:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:25:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     23 │ 	<hgroup onClick={() => {}} />
     24 │ 	<i onClick={() => {}} />
@@ -474,7 +474,7 @@ invalid.jsx:25:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:27:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     25 │ 	<kbd onClick={() => {}} />
     26 │ 
@@ -491,7 +491,7 @@ invalid.jsx:27:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:28:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     27 │ 	<map onClick={() => {}} />
   > 28 │ 	<meta onClick={() => {}} />
@@ -507,7 +507,7 @@ invalid.jsx:28:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:29:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     27 │ 	<map onClick={() => {}} />
     28 │ 	<meta onClick={() => {}} />
@@ -524,7 +524,7 @@ invalid.jsx:29:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:30:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     28 │ 	<meta onClick={() => {}} />
     29 │ 	<noscript onClick={() => {}} />
@@ -541,7 +541,7 @@ invalid.jsx:30:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:31:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     29 │ 	<noscript onClick={() => {}} />
     30 │ 	<object onClick={() => {}} />
@@ -558,7 +558,7 @@ invalid.jsx:31:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:32:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     30 │ 	<object onClick={() => {}} />
     31 │ 	<picture onClick={() => {}} />
@@ -575,7 +575,7 @@ invalid.jsx:32:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:33:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     31 │ 	<picture onClick={() => {}} />
     32 │ 	<q onClick={() => {}} />
@@ -592,7 +592,7 @@ invalid.jsx:33:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:34:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     32 │ 	<q onClick={() => {}} />
     33 │ 	<rp onClick={() => {}} />
@@ -609,7 +609,7 @@ invalid.jsx:34:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:35:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     33 │ 	<rp onClick={() => {}} />
     34 │ 	<rt onClick={() => {}} />
@@ -626,7 +626,7 @@ invalid.jsx:35:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:36:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     34 │ 	<rt onClick={() => {}} />
     35 │ 	<s onClick={() => {}} />
@@ -643,7 +643,7 @@ invalid.jsx:36:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:37:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     35 │ 	<s onClick={() => {}} />
     36 │ 	<samp onClick={() => {}} />
@@ -660,7 +660,7 @@ invalid.jsx:37:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:38:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     36 │ 	<samp onClick={() => {}} />
     37 │ 	<script onClick={() => {}} />
@@ -677,7 +677,7 @@ invalid.jsx:38:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:39:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     37 │ 	<script onClick={() => {}} />
     38 │ 	<section onClick={() => {}} />
@@ -694,7 +694,7 @@ invalid.jsx:39:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:40:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     38 │ 	<section onClick={() => {}} />
     39 │ 	<small onClick={() => {}} />
@@ -711,7 +711,7 @@ invalid.jsx:40:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:41:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     39 │ 	<small onClick={() => {}} />
     40 │ 	<source onClick={() => {}} />
@@ -728,7 +728,7 @@ invalid.jsx:41:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:42:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     40 │ 	<source onClick={() => {}} />
     41 │ 	<span onClick={() => {}} />
@@ -745,7 +745,7 @@ invalid.jsx:42:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:43:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     41 │ 	<span onClick={() => {}} />
     42 │ 	<style onClick={() => {}} />
@@ -762,7 +762,7 @@ invalid.jsx:43:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:44:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     42 │ 	<style onClick={() => {}} />
     43 │ 	<title onClick={() => {}} />
@@ -779,7 +779,7 @@ invalid.jsx:44:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:45:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     43 │ 	<title onClick={() => {}} />
     44 │ 	<track onClick={() => {}} />
@@ -796,7 +796,7 @@ invalid.jsx:45:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:46:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     44 │ 	<track onClick={() => {}} />
     45 │ 	<u onClick={() => {}} />
@@ -813,7 +813,7 @@ invalid.jsx:46:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:47:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     45 │ 	<u onClick={() => {}} />
     46 │ 	<var onClick={() => {}} />
@@ -830,7 +830,7 @@ invalid.jsx:47:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:50:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     49 │ 	{/* // Handlers */}
   > 50 │ 	<div onKeyDown={() => {}} />
@@ -846,7 +846,7 @@ invalid.jsx:50:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:51:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     49 │ 	{/* // Handlers */}
     50 │ 	<div onKeyDown={() => {}} />
@@ -863,7 +863,7 @@ invalid.jsx:51:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:52:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     50 │ 	<div onKeyDown={() => {}} />
     51 │ 	<div onKeyPress={() => {}} />
@@ -880,7 +880,7 @@ invalid.jsx:52:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:53:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     51 │ 	<div onKeyPress={() => {}} />
     52 │ 	<div onKeyUp={() => {}} />
@@ -897,7 +897,7 @@ invalid.jsx:53:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:54:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     52 │ 	<div onKeyUp={() => {}} />
     53 │ 	<div onClick={() => {}} />
@@ -914,7 +914,7 @@ invalid.jsx:54:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:55:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     53 │ 	<div onClick={() => {}} />
     54 │ 	<div onMouseDown={() => {}} />
@@ -931,7 +931,7 @@ invalid.jsx:55:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:58:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     57 │ 	{/* Presentation is a special case role that indicates intentional static semantics */}
   > 58 │ 	<div role="presentation" onClick={() => {}} />
@@ -947,7 +947,7 @@ invalid.jsx:58:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:59:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     57 │ 	{/* Presentation is a special case role that indicates intentional static semantics */}
     58 │ 	<div role="presentation" onClick={() => {}} />
@@ -964,7 +964,7 @@ invalid.jsx:59:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:61:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     59 │ 	<div role="presentation" onKeyDown={() => {}} />
     60 │ 	{/* HTML elements attributed with an abstract role */}
@@ -981,7 +981,7 @@ invalid.jsx:61:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:62:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     60 │ 	{/* HTML elements attributed with an abstract role */}
     61 │ 	<div role="command" onClick={() => {}} />
@@ -998,7 +998,7 @@ invalid.jsx:62:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:63:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     61 │ 	<div role="command" onClick={() => {}} />
     62 │ 	<div role="composite" onClick={() => {}} />
@@ -1015,7 +1015,7 @@ invalid.jsx:63:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:64:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     62 │ 	<div role="composite" onClick={() => {}} />
     63 │ 	<div role="input" onClick={() => {}} />
@@ -1032,7 +1032,7 @@ invalid.jsx:64:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:65:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     63 │ 	<div role="input" onClick={() => {}} />
     64 │ 	<div role="landmark" onClick={() => {}} />
@@ -1049,7 +1049,7 @@ invalid.jsx:65:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:66:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     64 │ 	<div role="landmark" onClick={() => {}} />
     65 │ 	<div role="range" onClick={() => {}} />
@@ -1066,7 +1066,7 @@ invalid.jsx:66:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:67:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     65 │ 	<div role="range" onClick={() => {}} />
     66 │ 	<div role="roletype" onClick={() => {}} />
@@ -1083,7 +1083,7 @@ invalid.jsx:67:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:68:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     66 │ 	<div role="roletype" onClick={() => {}} />
     67 │ 	<div role="sectionhead" onClick={() => {}} />
@@ -1100,7 +1100,7 @@ invalid.jsx:68:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:69:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     67 │ 	<div role="sectionhead" onClick={() => {}} />
     68 │ 	<div role="select" onClick={() => {}} />
@@ -1117,7 +1117,7 @@ invalid.jsx:69:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:70:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     68 │ 	<div role="select" onClick={() => {}} />
     69 │ 	<div role="structure" onClick={() => {}} />
@@ -1134,7 +1134,7 @@ invalid.jsx:70:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 ```
 invalid.jsx:71:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Static Elements should not be interactive.
+  i Static Elements should not be interactive.
   
     69 │ 	<div role="structure" onClick={() => {}} />
     70 │ 	<div role="widget" onClick={() => {}} />

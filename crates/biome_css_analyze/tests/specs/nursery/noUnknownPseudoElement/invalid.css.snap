@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -19,7 +20,7 @@ b > .foo::error { }
 ```
 invalid.css:1:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown pseudo-elements: pseudo
+  × Unexpected unknown pseudo-elements: pseudo
   
   > 1 │ a::pseudo { }
       │    ^^^^^^
@@ -41,7 +42,7 @@ invalid.css:1:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━�
 ```
 invalid.css:2:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown pseudo-elements: Pseudo
+  × Unexpected unknown pseudo-elements: Pseudo
   
     1 │ a::pseudo { }
   > 2 │ a::Pseudo { }
@@ -64,7 +65,7 @@ invalid.css:2:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━�
 ```
 invalid.css:3:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown pseudo-elements: pSeUdO
+  × Unexpected unknown pseudo-elements: pSeUdO
   
     1 │ a::pseudo { }
     2 │ a::Pseudo { }
@@ -88,7 +89,7 @@ invalid.css:3:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━�
 ```
 invalid.css:4:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown pseudo-elements: PSEUDO
+  × Unexpected unknown pseudo-elements: PSEUDO
   
     2 │ a::Pseudo { }
     3 │ a::pSeUdO { }
@@ -112,7 +113,7 @@ invalid.css:4:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━�
 ```
 invalid.css:5:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown pseudo-elements: element
+  × Unexpected unknown pseudo-elements: element
   
     3 │ a::pSeUdO { }
     4 │ a::PSEUDO { }
@@ -136,7 +137,7 @@ invalid.css:5:4 lint/nursery/noUnknownPseudoElement ━━━━━━━━━�
 ```
 invalid.css:6:10 lint/nursery/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown pseudo-elements: element
+  × Unexpected unknown pseudo-elements: element
   
     4 │ a::PSEUDO { }
     5 │ a::element { }
@@ -160,7 +161,7 @@ invalid.css:6:10 lint/nursery/noUnknownPseudoElement ━━━━━━━━━
 ```
 invalid.css:8:11 lint/nursery/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected unknown pseudo-elements: error
+  × Unexpected unknown pseudo-elements: error
   
     6 │ a:hover::element { }
     7 │ a,

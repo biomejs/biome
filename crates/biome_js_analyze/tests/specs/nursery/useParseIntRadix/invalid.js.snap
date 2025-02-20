@@ -33,7 +33,7 @@ var num = parseInt("071", "abc", 3);
 ```
 invalid.js:1:11 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing radix parameter
+  i Missing radix parameter
   
   > 1 │ var num = parseInt("071");
       │           ^^^^^^^^^^^^^^^
@@ -52,7 +52,7 @@ invalid.js:1:11 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━━
 ```
 invalid.js:3:11 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing radix parameter
+  i Missing radix parameter
   
     1 │ var num = parseInt("071");
     2 │ 
@@ -73,7 +73,7 @@ invalid.js:3:11 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━━
 ```
 invalid.js:5:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid radix parameter
+  i Invalid radix parameter
   
     3 │ var num = parseInt(someValue);
     4 │ 
@@ -90,7 +90,7 @@ invalid.js:5:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━�
 ```
 invalid.js:7:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid radix parameter
+  i Invalid radix parameter
   
     5 │ var num = parseInt("071", "abc");
     6 │ 
@@ -107,7 +107,7 @@ invalid.js:7:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━�
 ```
 invalid.js:9:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid radix parameter
+  i Invalid radix parameter
   
      7 │ var num = parseInt("071", "8");
      8 │ 
@@ -124,7 +124,7 @@ invalid.js:9:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━�
 ```
 invalid.js:11:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid radix parameter
+  i Invalid radix parameter
   
      9 │ var num = parseInt("071", 37);
     10 │ 
@@ -141,7 +141,7 @@ invalid.js:11:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━
 ```
 invalid.js:13:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid radix parameter
+  i Invalid radix parameter
   
     11 │ var num = parseInt("071", 1);
     12 │ 
@@ -158,7 +158,7 @@ invalid.js:13:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━
 ```
 invalid.js:15:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This call to parseInt has no arguments, it will always return NaN
+  i This call to parseInt has no arguments, it will always return NaN
   
     13 │ var num = parseInt("071", undefined);
     14 │ 
@@ -175,7 +175,7 @@ invalid.js:15:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━
 ```
 invalid.js:17:11 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing radix parameter
+  i Missing radix parameter
   
     15 │ var num = parseInt();
     16 │ 
@@ -196,7 +196,7 @@ invalid.js:17:11 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━�
 ```
 invalid.js:19:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid radix parameter
+  i Invalid radix parameter
   
     17 │ var num = Number.parseInt("10");
     18 │ 
@@ -213,7 +213,7 @@ invalid.js:19:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━
 ```
 invalid.js:21:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid radix parameter
+  i Invalid radix parameter
   
     19 │ var num = parseInt("0xF", 16n);
     20 │ 

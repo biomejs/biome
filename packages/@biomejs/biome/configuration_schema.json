@@ -1807,7 +1807,7 @@
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
 				"whitespaceSensitivity": {
-					"description": "Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to \"strict\".",
+					"description": "Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to \"css\".",
 					"anyOf": [
 						{ "$ref": "#/definitions/WhitespaceSensitivity" },
 						{ "type": "null" }
@@ -1905,7 +1905,7 @@
 					]
 				},
 				"attributePosition": {
-					"description": "The attribute position style in jsx elements. Defaults to auto.",
+					"description": "The attribute position style in JSX elements. Defaults to auto.",
 					"anyOf": [
 						{ "$ref": "#/definitions/AttributePosition" },
 						{ "type": "null" }
@@ -2271,7 +2271,7 @@
 			"type": "object",
 			"properties": {
 				"domains": {
-					"description": "An object where the keys are the names of the domains, and the values are boolean. `true` to turn-on the rules that belong to that domain, `false` to turn them off",
+					"description": "An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.",
 					"type": ["object", "null"],
 					"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" }
 				},
@@ -2488,6 +2488,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAwaitInLoop": {
+					"description": "Disallow await inside loops.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noCommonJs": {
 					"description": "Disallow use of CommonJs module system in favor of ESM style imports.",
 					"anyOf": [
@@ -4704,7 +4711,7 @@
 					]
 				},
 				"noSparseArray": {
-					"description": "Disallow sparse arrays",
+					"description": "Prevents the use of sparse arrays (arrays with holes).",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -4799,7 +4806,7 @@
 					]
 				},
 				"useValidTypeof": {
-					"description": "This rule checks that the result of a `typeof' expression is compared to a valid value.",
+					"description": "This rule checks that the result of a typeof expression is compared to a valid value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
 ```js
@@ -16,7 +17,7 @@ returnsPromise().then(() => { }).finally(() => { });
 ```
 invalid.js:4:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
     2 │   return 'value';
     3 │ }
@@ -33,7 +34,7 @@ invalid.js:4:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━
 ```
 invalid.js:5:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
     3 │ }
     4 │ returnsPromise();

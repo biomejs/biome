@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -144,7 +145,7 @@ function Component10() {
 ```
 invalid.jsx:4:21 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     3 │ something.forEach((Element, index) => {
   > 4 │     <Component key={index}>foo</Component>;
@@ -171,7 +172,7 @@ invalid.jsx:4:21 lint/suspicious/noArrayIndexKey ━━━━━━━━━━�
 ```
 invalid.jsx:7:21 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     5 │ });
     6 │ something.forEach((element, index, array) => {
@@ -199,7 +200,7 @@ invalid.jsx:7:21 lint/suspicious/noArrayIndexKey ━━━━━━━━━━�
 ```
 invalid.jsx:10:34 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
      8 │ });
      9 │ things.filter((thing, index) => {
@@ -227,7 +228,7 @@ invalid.jsx:10:34 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:14:21 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     13 │ something.forEach((Element, index) => {
   > 14 │     <Component key={index} />;
@@ -254,7 +255,7 @@ invalid.jsx:14:21 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:17:21 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     15 │ });
     16 │ something.forEach((element, index, array) => {
@@ -282,7 +283,7 @@ invalid.jsx:17:21 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:20:34 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     18 │ });
     19 │ things.filter((thing, index) => {
@@ -310,7 +311,7 @@ invalid.jsx:20:34 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:23:65 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     21 │ });
     22 │ things.reduce(
@@ -338,7 +339,7 @@ invalid.jsx:23:65 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:28:38 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     27 │ React.Children.map(this.props.children, (child, index) =>
   > 28 │     React.cloneElement(child, { key: index })
@@ -365,7 +366,7 @@ invalid.jsx:28:38 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:32:45 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     31 │ React.Children.forEach(this.props.children, function (child, index) {
   > 32 │     return React.cloneElement(child, { key: index });
@@ -392,7 +393,7 @@ invalid.jsx:32:45 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:36:32 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     35 │ Children.map(this.props.children, (child, index) =>
   > 36 │     cloneElement(child, { key: index })
@@ -419,7 +420,7 @@ invalid.jsx:36:32 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:40:39 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     39 │ Children.forEach(this.props.children, function (child, index) {
   > 40 │     return cloneElement(child, { key: index });
@@ -446,7 +447,7 @@ invalid.jsx:40:39 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:44:44 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     43 │ Children.forEach(this.props.children, function (child, index) {
   > 44 │     const foo = cloneElement(child, { key: index });
@@ -473,7 +474,7 @@ invalid.jsx:44:44 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:50:43 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     48 │ function Test(props) {
     49 │     return Children.map(props.children, function (child, index) {
@@ -500,7 +501,7 @@ invalid.jsx:50:43 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:54:63 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     52 │ }
     53 │ 
@@ -528,7 +529,7 @@ invalid.jsx:54:63 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:57:28 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     56 │ things.flatMap((thing, index) => {
   > 57 │     return <Component key={index} />;
@@ -555,7 +556,7 @@ invalid.jsx:57:28 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:61:28 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     60 │ Array.from(things, (thing, index) => {
   > 61 │     return <Component key={index} />;
@@ -582,7 +583,7 @@ invalid.jsx:61:28 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:65:57 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     64 │ const mapping = {
   > 65 │     foo: () => things.map((_, index) => <Component key={index} />),
@@ -608,7 +609,7 @@ invalid.jsx:65:57 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:69:67 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     68 │ class A extends React.Component {
   > 69 │     renderThings = () => things.map((_, index) => <Component key={index} />);
@@ -634,7 +635,7 @@ invalid.jsx:69:67 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:72:67 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     70 │ }
     71 │ 
@@ -662,7 +663,7 @@ invalid.jsx:72:67 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:74:67 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     72 │ const Component1 = () => things.map((_, index) => <Component key={index} />);
     73 │ 
@@ -690,7 +691,7 @@ invalid.jsx:74:67 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:77:53 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     76 │ function Component3() {
   > 77 │     return things.map((_, index) => <Component key={index} />);
@@ -716,7 +717,7 @@ invalid.jsx:77:53 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:81:61 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     80 │ function Component4() {
   > 81 │     let elements = things.map((_, index) => <Component key={index} />);
@@ -742,7 +743,7 @@ invalid.jsx:81:61 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:83:61 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     81 │     let elements = things.map((_, index) => <Component key={index} />);
     82 │     if (condition) {
@@ -770,7 +771,7 @@ invalid.jsx:83:61 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:90:56 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     88 │ function Component5({ things }) {
     89 │     const elements = useMemo(
@@ -798,7 +799,7 @@ invalid.jsx:90:56 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:98:56 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
      96 │ function Component6({ things }) {
      97 │     const elements = useMemo(
@@ -826,7 +827,7 @@ invalid.jsx:98:56 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
 ```
 invalid.jsx:107:71 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     105 │     return (
     106 │         <HoC>
@@ -854,7 +855,7 @@ invalid.jsx:107:71 lint/suspicious/noArrayIndexKey ━━━━━━━━━�
 ```
 invalid.jsx:115:83 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     113 │     return (
     114 │         <HoC>
@@ -882,7 +883,7 @@ invalid.jsx:115:83 lint/suspicious/noArrayIndexKey ━━━━━━━━━�
 ```
 invalid.jsx:123:80 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     121 │     return (
     122 │         <HoC>
@@ -910,7 +911,7 @@ invalid.jsx:123:80 lint/suspicious/noArrayIndexKey ━━━━━━━━━�
 ```
 invalid.jsx:131:80 lint/suspicious/noArrayIndexKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the index of an array as key property in an element.
+  × Avoid using the index of an array as key property in an element.
   
     129 │     return (
     130 │         <HoC>
@@ -934,5 +935,3 @@ invalid.jsx:131:80 lint/suspicious/noArrayIndexKey ━━━━━━━━━�
   
 
 ```
-
-

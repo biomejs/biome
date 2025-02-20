@@ -1,4 +1,15 @@
 {
-    "files": { "includes": ["**"] },
-    "linter": { "rules": { "recommended": true, "suspicious": { "noDebugger": "error" } } }
+  "files": {
+    "includes": [
+      "**"
+    ]
+  },
+  "linter": {
+    "rules": {
+      "recommended": true,
+      "suspicious": {
+        "noDebugger": "error"
+      }
+    }
+  }
 }

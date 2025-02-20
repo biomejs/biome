@@ -314,9 +314,9 @@ export interface JsonConfiguration {
 }
 export interface LinterConfiguration {
 	/**
-	 * An object where the keys are the names of the domains, and the values are boolean. `true` to turn-on the rules that belong to that domain, `false` to turn them off
+	 * An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.
 	 */
-	domains?: {};
+	domains?: Record<RuleDomain, RuleDomainValue>;
 	/**
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
@@ -574,7 +574,7 @@ export interface HtmlFormatterConfiguration {
 	 */
 	lineWidth?: LineWidth;
 	/**
-	 * Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "strict".
+	 * Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "css".
 	 */
 	whitespaceSensitivity?: WhitespaceSensitivity;
 }
@@ -600,7 +600,7 @@ export interface JsFormatterConfiguration {
 	 */
 	arrowParentheses?: ArrowParentheses;
 	/**
-	 * The attribute position style in jsx elements. Defaults to auto.
+	 * The attribute position style in JSX elements. Defaults to auto.
 	 */
 	attributePosition?: AttributePosition;
 	/**
@@ -944,7 +944,7 @@ export interface OverrideLinterConfiguration {
 	/**
 	 * List of rules
 	 */
-	domains?: {};
+	domains?: Record<RuleDomain, RuleDomainValue>;
 	/**
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
@@ -1472,6 +1472,10 @@ export interface Correctness {
  * A list of rules that belong to this group
  */
 export interface Nursery {
+	/**
+	 * Disallow await inside loops.
+	 */
+	noAwaitInLoop?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
@@ -2193,7 +2197,7 @@ export interface Suspicious {
 	 */
 	noSkippedTests?: RuleFixConfiguration_for_Null;
 	/**
-	 * Disallow sparse arrays
+	 * Prevents the use of sparse arrays (arrays with holes).
 	 */
 	noSparseArray?: RuleFixConfiguration_for_Null;
 	/**
@@ -2249,7 +2253,7 @@ export interface Suspicious {
 	 */
 	useNumberToFixedDigitsArgument?: RuleFixConfiguration_for_Null;
 	/**
-	 * This rule checks that the result of a `typeof' expression is compared to a valid value.
+	 * This rule checks that the result of a typeof expression is compared to a valid value.
 	 */
 	useValidTypeof?: RuleFixConfiguration_for_Null;
 }
@@ -3303,6 +3307,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
+	| "lint/nursery/noAwaitInLoop"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"
@@ -3834,6 +3839,11 @@ export type SupportKind =
 	| "protected"
 	| "featureNotEnabled"
 	| "fileNotSupported";
+/**
+ * Rule domains
+ */
+export type RuleDomain = "react" | "test" | "solid" | "next";
+export type RuleDomainValue = "all" | "none" | "recommended";
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;

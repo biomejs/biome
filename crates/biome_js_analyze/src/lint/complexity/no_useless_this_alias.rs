@@ -58,7 +58,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintTypeScript("no-this-alias")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -16,7 +17,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:3:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use the 'marquee' element.
+  × Don't use the 'marquee' element.
   
     1 │ <div>
     2 │     <div />
@@ -37,7 +38,7 @@ invalid.jsx:3:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━�
 ```
 invalid.jsx:4:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use the 'blink' element.
+  × Don't use the 'blink' element.
   
     2 │     <div />
     3 │     <marquee />
@@ -54,5 +55,3 @@ invalid.jsx:4:5 lint/a11y/noDistractingElements  FIXABLE  ━━━━━━━�
       │     ---------
 
 ```
-
-

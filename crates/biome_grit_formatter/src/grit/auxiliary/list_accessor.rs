@@ -16,12 +16,9 @@ impl FormatNodeRule<GritListAccessor> for FormatGritListAccessor {
         write!(
             f,
             [
-                l_brack_token.format(),
-                space(),
-                index.format(),
-                space(),
                 list.format(),
-                space(),
+                l_brack_token.format(),
+                index.format(),
                 r_brack_token.format()
             ]
         )

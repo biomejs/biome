@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -16,7 +17,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:7 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element div is non-interactive. Do not use tabIndex.
+  × The HTML element div is non-interactive. Do not use tabIndex.
   
     1 │ <>
   > 2 │ 	<div tabIndex="0"></div>
@@ -36,7 +37,7 @@ invalid.jsx:2:7 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━�
 ```
 invalid.jsx:3:22 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element div is non-interactive. Do not use tabIndex.
+  × The HTML element div is non-interactive. Do not use tabIndex.
   
     1 │ <>
     2 │ 	<div tabIndex="0"></div>
@@ -57,7 +58,7 @@ invalid.jsx:3:22 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━
 ```
 invalid.jsx:4:11 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The HTML element article is non-interactive. Do not use tabIndex.
+  × The HTML element article is non-interactive. Do not use tabIndex.
   
     2 │ 	<div tabIndex="0"></div>
     3 │ 	<div role="article" tabIndex="0"></div>
@@ -74,5 +75,3 @@ invalid.jsx:4:11 lint/a11y/noNoninteractiveTabindex  FIXABLE  ━━━━━━
       │            -------------  
 
 ```
-
-

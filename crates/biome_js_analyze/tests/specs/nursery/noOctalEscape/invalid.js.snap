@@ -76,7 +76,7 @@ var foo = "\\\751";
 ```
 invalid.js:1:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
   > 1 │ var foo = "foo \01 bar";
       │           ^^^^^^^^^^^^^
@@ -93,7 +93,7 @@ invalid.js:1:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:2:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     1 │ var foo = "foo \01 bar";
   > 2 │ var foo = "foo \000 bar";
@@ -111,7 +111,7 @@ invalid.js:2:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:3:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     1 │ var foo = "foo \01 bar";
     2 │ var foo = "foo \000 bar";
@@ -130,7 +130,7 @@ invalid.js:3:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:4:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     2 │ var foo = "foo \000 bar";
     3 │ var foo = "foo \377 bar";
@@ -149,7 +149,7 @@ invalid.js:4:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:5:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     3 │ var foo = "foo \377 bar";
     4 │ var foo = "foo \378 bar";
@@ -168,7 +168,7 @@ invalid.js:5:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:6:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     4 │ var foo = "foo \378 bar";
     5 │ var foo = "foo \37a bar";
@@ -187,7 +187,7 @@ invalid.js:6:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:7:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     5 │ var foo = "foo \37a bar";
     6 │ var foo = "foo \381 bar";
@@ -206,7 +206,7 @@ invalid.js:7:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:8:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
      6 │ var foo = "foo \381 bar";
      7 │ var foo = "foo \3a1 bar";
@@ -225,7 +225,7 @@ invalid.js:8:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:9:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
      7 │ var foo = "foo \3a1 bar";
      8 │ var foo = "foo \251 bar";
@@ -244,7 +244,7 @@ invalid.js:9:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:10:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
      8 │ var foo = "foo \251 bar";
      9 │ var foo = "foo \258 bar";
@@ -263,7 +263,7 @@ invalid.js:10:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
 ```
 invalid.js:11:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
      9 │ var foo = "foo \258 bar";
     10 │ var foo = "foo \25a bar";
@@ -282,7 +282,7 @@ invalid.js:11:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
 ```
 invalid.js:12:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     10 │ var foo = "foo \25a bar";
     11 │ var foo = "\3s51";
@@ -301,7 +301,7 @@ invalid.js:12:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
 ```
 invalid.js:13:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     11 │ var foo = "\3s51";
     12 │ var foo = "\77";
@@ -320,7 +320,7 @@ invalid.js:13:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
 ```
 invalid.js:14:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     12 │ var foo = "\77";
     13 │ var foo = "\78";
@@ -339,7 +339,7 @@ invalid.js:14:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
 ```
 invalid.js:15:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     13 │ var foo = "\78";
     14 │ var foo = "\5a";
@@ -358,7 +358,7 @@ invalid.js:15:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
 ```
 invalid.js:16:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     14 │ var foo = "\5a";
     15 │ var foo = "\751";
@@ -377,7 +377,7 @@ invalid.js:16:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
 ```
 invalid.js:17:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     15 │ var foo = "\751";
     16 │ var foo = "foo \400 bar";
@@ -396,7 +396,7 @@ invalid.js:17:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
 ```
 invalid.js:18:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     16 │ var foo = "foo \400 bar";
     17 │ var foo = "foo \400 bar";
@@ -415,7 +415,7 @@ invalid.js:18:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
 ```
 invalid.js:19:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     17 │ var foo = "foo \400 bar";
     18 │ var foo = "\t\1";
@@ -434,7 +434,7 @@ invalid.js:19:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
 ```
 invalid.js:20:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     18 │ var foo = "\t\1";
     19 │ var foo = "\\\751";
@@ -454,7 +454,7 @@ invalid.js:20:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:21:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     19 │ var foo = "\\\751";
     20 │ '\0\1'
@@ -474,7 +474,7 @@ invalid.js:21:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:22:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     20 │ '\0\1'
     21 │ '\0 \1'
@@ -494,7 +494,7 @@ invalid.js:22:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:23:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     21 │ '\0 \1'
     22 │ '\0\01'
@@ -514,7 +514,7 @@ invalid.js:23:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:24:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     22 │ '\0\01'
     23 │ '\0 \01'
@@ -534,7 +534,7 @@ invalid.js:24:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:25:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     23 │ '\0 \01'
     24 │ '\0a\1'
@@ -554,7 +554,7 @@ invalid.js:25:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:26:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     24 │ '\0a\1'
     25 │ '\0a\01'
@@ -574,7 +574,7 @@ invalid.js:26:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:27:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     25 │ '\0a\01'
     26 │ '\0\08'
@@ -594,7 +594,7 @@ invalid.js:27:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:28:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     26 │ '\0\08'
     27 │ '\1'
@@ -614,7 +614,7 @@ invalid.js:28:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:29:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     27 │ '\1'
     28 │ '\2'
@@ -634,7 +634,7 @@ invalid.js:29:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:30:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     28 │ '\2'
     29 │ '\7'
@@ -654,7 +654,7 @@ invalid.js:30:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:31:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     29 │ '\7'
     30 │ '\00'
@@ -674,7 +674,7 @@ invalid.js:31:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:32:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     30 │ '\00'
     31 │ '\01'
@@ -694,7 +694,7 @@ invalid.js:32:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:33:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     31 │ '\01'
     32 │ '\02'
@@ -714,7 +714,7 @@ invalid.js:33:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:34:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     32 │ '\02'
     33 │ '\07'
@@ -734,7 +734,7 @@ invalid.js:34:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:35:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     33 │ '\07'
     34 │ '\08'
@@ -754,7 +754,7 @@ invalid.js:35:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:36:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     34 │ '\08'
     35 │ '\09'
@@ -774,7 +774,7 @@ invalid.js:36:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:37:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     35 │ '\09'
     36 │ '\10'
@@ -794,7 +794,7 @@ invalid.js:37:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:38:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     36 │ '\10'
     37 │ '\12'
@@ -814,7 +814,7 @@ invalid.js:38:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:39:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     37 │ '\12'
     38 │ ' \1'
@@ -834,7 +834,7 @@ invalid.js:39:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:40:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     38 │ ' \1'
     39 │ '\1 '
@@ -854,7 +854,7 @@ invalid.js:40:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:41:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     39 │ '\1 '
     40 │ 'a\1'
@@ -874,7 +874,7 @@ invalid.js:41:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:42:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     40 │ 'a\1'
     41 │ '\1a'
@@ -894,7 +894,7 @@ invalid.js:42:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:43:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     41 │ '\1a'
     42 │ 'a\1a'
@@ -914,7 +914,7 @@ invalid.js:43:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:44:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     42 │ 'a\1a'
     43 │ ' \01'
@@ -934,7 +934,7 @@ invalid.js:44:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:45:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     43 │ ' \01'
     44 │ '\01 '
@@ -954,7 +954,7 @@ invalid.js:45:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:46:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     44 │ '\01 '
     45 │ 'a\01'
@@ -974,7 +974,7 @@ invalid.js:46:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:47:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     45 │ 'a\01'
     46 │ '\01a'
@@ -994,7 +994,7 @@ invalid.js:47:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:48:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     46 │ '\01a'
     47 │ 'a\01a'
@@ -1014,7 +1014,7 @@ invalid.js:48:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:49:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     47 │ 'a\01a'
     48 │ 'a\08a'
@@ -1034,7 +1034,7 @@ invalid.js:49:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:50:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     48 │ 'a\08a'
     49 │ '\n\1'
@@ -1054,7 +1054,7 @@ invalid.js:50:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:51:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     49 │ '\n\1'
     50 │ '\n\01'
@@ -1074,7 +1074,7 @@ invalid.js:51:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:52:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     50 │ '\n\01'
     51 │ '\n\08'
@@ -1094,7 +1094,7 @@ invalid.js:52:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:53:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     51 │ '\n\08'
     52 │ '\\\1'
@@ -1114,7 +1114,7 @@ invalid.js:53:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:54:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     52 │ '\\\1'
     53 │ '\\\01'
@@ -1134,7 +1134,7 @@ invalid.js:54:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:55:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     53 │ '\\\01'
     54 │ '\\\08'
@@ -1154,7 +1154,7 @@ invalid.js:55:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:56:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     54 │ '\\\08'
     55 │ '\\n\1'
@@ -1174,7 +1174,7 @@ invalid.js:56:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:57:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     55 │ '\\n\1'
     56 │ '\01\02'
@@ -1194,7 +1194,7 @@ invalid.js:57:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:58:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     56 │ '\01\02'
     57 │ '\02\01'
@@ -1214,7 +1214,7 @@ invalid.js:58:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:59:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     57 │ '\02\01'
     58 │ '\01\2'
@@ -1234,7 +1234,7 @@ invalid.js:59:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:60:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     58 │ '\01\2'
     59 │ '\2\01'
@@ -1254,7 +1254,7 @@ invalid.js:60:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
 ```
 invalid.js:61:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use octal
+  i Don't use octal
   
     59 │ '\2\01'
     60 │ '\08\1'

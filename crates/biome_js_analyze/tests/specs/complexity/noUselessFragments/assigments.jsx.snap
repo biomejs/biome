@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: assigments.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -12,7 +13,7 @@ arr = <>Error</>
 ```
 assigments.jsx:1:7 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
   > 1 │ arr = <>Error</>
       │       ^^^^^^^^^^
@@ -28,5 +29,3 @@ assigments.jsx:1:7 lint/complexity/noUselessFragments  FIXABLE  ━━━━━�
   
 
 ```
-
-

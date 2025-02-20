@@ -18,7 +18,7 @@ export default {
 ```
 invalidObjectGetter.js:2:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object getter name should be in camelCase.
+  i This object getter name should be in camelCase.
   
     1 │ export default {
   > 2 │     get SpecialProperty() {},
@@ -32,7 +32,7 @@ invalidObjectGetter.js:2:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidObjectGetter.js:4:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object getter name should be in camelCase.
+  i This object getter name should be in camelCase.
   
     2 │     get SpecialProperty() {},
     3 │ 
@@ -47,7 +47,7 @@ invalidObjectGetter.js:4:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidObjectGetter.js:6:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object getter name should be in camelCase.
+  i This object getter name should be in camelCase.
   
     4 │     get special_property() {},
     5 │ 

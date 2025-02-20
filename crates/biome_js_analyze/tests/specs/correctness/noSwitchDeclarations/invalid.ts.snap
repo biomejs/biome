@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -48,7 +49,7 @@ switch (1) {
 ```
 invalid.ts:3:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Other switch clauses can erroneously access this declaration.
+  × Other switch clauses can erroneously access this declaration.
     Wrap the declaration in a block to restrict its access to the switch clause.
   
     1 │ switch (1) {
@@ -87,7 +88,7 @@ invalid.ts:3:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
 ```
 invalid.ts:9:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Other switch clauses can erroneously access this declaration.
+  × Other switch clauses can erroneously access this declaration.
     Wrap the declaration in a block to restrict its access to the switch clause.
   
      7 │ switch (1) {
@@ -127,7 +128,7 @@ invalid.ts:9:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
 ```
 invalid.ts:15:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Other switch clauses can erroneously access this declaration.
+  × Other switch clauses can erroneously access this declaration.
     Wrap the declaration in a block to restrict its access to the switch clause.
   
     13 │ switch (1) {
@@ -167,7 +168,7 @@ invalid.ts:15:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
 ```
 invalid.ts:21:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Other switch clauses can erroneously access this declaration.
+  × Other switch clauses can erroneously access this declaration.
     Wrap the declaration in a block to restrict its access to the switch clause.
   
     19 │ switch (1) {
@@ -211,7 +212,7 @@ invalid.ts:21:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
 ```
 invalid.ts:29:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Other switch clauses can erroneously access this declaration.
+  × Other switch clauses can erroneously access this declaration.
     Wrap the declaration in a block to restrict its access to the switch clause.
   
     27 │ switch (1) {
@@ -251,7 +252,7 @@ invalid.ts:29:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━�
 ```
 invalid.ts:35:3 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Other switch clauses can erroneously access this declaration.
+  × Other switch clauses can erroneously access this declaration.
     Wrap the declaration in a block to restrict its access to the switch clause.
   
     33 │ switch (1) {

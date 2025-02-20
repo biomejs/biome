@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -27,7 +28,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:2 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Alternative text title element cannot be empty
+  × Alternative text title element cannot be empty
   
     1 │ <>
   > 2 │ 	<svg>foo</svg>
@@ -43,7 +44,7 @@ invalid.jsx:2:2 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━
 ```
 invalid.jsx:3:2 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Alternative text title element cannot be empty
+  × Alternative text title element cannot be empty
   
     1 │ <>
     2 │ 	<svg>foo</svg>
@@ -60,7 +61,7 @@ invalid.jsx:3:2 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━
 ```
 invalid.jsx:7:2 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Alternative text title element cannot be empty
+  × Alternative text title element cannot be empty
   
     5 │ 		<circle />
     6 │ 	</svg>
@@ -77,7 +78,7 @@ invalid.jsx:7:2 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━
 ```
 invalid.jsx:10:2 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Alternative text title element cannot be empty
+  × Alternative text title element cannot be empty
   
      8 │ 		<span id="">foo</span>
      9 │ 	</svg>
@@ -94,7 +95,7 @@ invalid.jsx:10:2 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━�
 ```
 invalid.jsx:13:2 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Alternative text title element cannot be empty
+  × Alternative text title element cannot be empty
   
     11 │ 		<span id="">foo</span>
     12 │ 	</svg>
@@ -107,5 +108,3 @@ invalid.jsx:13:2 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━�
   
 
 ```
-
-

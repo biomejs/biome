@@ -4,7 +4,6 @@ use biome_analyze::{
 use biome_css_parser::{parse_css, CssParserOptions};
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
-use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_fs::OsFileSystem;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
@@ -146,8 +145,7 @@ pub(crate) fn analyze_and_snap(
                 }
             }
 
-            let error = diag.with_severity(Severity::Warning);
-            diagnostics.push(diagnostic_to_string(file_name, input_code, error));
+            diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
             return ControlFlow::Continue(());
         }
 

@@ -66,7 +66,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-no-useless-fragment")],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -444,7 +444,7 @@ impl Rule for NoUselessFragments {
             rule_category!(),
             node.syntax().text_trimmed_range(),
             markup! {
-                "Avoid using unnecessary "<Emphasis>"Fragment"</Emphasis>"."
+                "This fragment is unnecessary."
             },
         ).note(markup! {
             "A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed "<Hyperlink href="https://legacy.reactjs.org/docs/fragments.html#keyed-fragments">"fragment"</Hyperlink>"."

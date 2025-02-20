@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTypeProperty.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -23,7 +24,7 @@ export interface X {
 ```
 invalidTypeProperty.ts:2:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This property name should be in camelCase.
+  i This property name should be in camelCase.
   
     1 │ export interface X {
   > 2 │     Initialized: unknown
@@ -37,7 +38,7 @@ invalidTypeProperty.ts:2:5 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidTypeProperty.ts:4:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This property name should be in camelCase.
+  i This property name should be in camelCase.
   
     2 │     Initialized: unknown
     3 │ 
@@ -52,7 +53,7 @@ invalidTypeProperty.ts:4:5 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidTypeProperty.ts:6:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This property name should be in camelCase.
+  i This property name should be in camelCase.
   
     4 │     SpecialProperty: unknown
     5 │ 
@@ -67,7 +68,7 @@ invalidTypeProperty.ts:6:5 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidTypeProperty.ts:8:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This property name should be in camelCase.
+  i This property name should be in camelCase.
   
      6 │     special_property: unknown
      7 │ 
@@ -82,7 +83,7 @@ invalidTypeProperty.ts:8:5 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidTypeProperty.ts:10:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This property name should be in camelCase.
+  i This property name should be in camelCase.
   
      8 │     Unknown_Style: unknown
      9 │ 
@@ -97,7 +98,7 @@ invalidTypeProperty.ts:10:5 lint/style/useNamingConvention ━━━━━━━
 ```
 invalidTypeProperty.ts:12:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This property name should be in camelCase.
+  i This property name should be in camelCase.
   
     10 │     Unknown_Init_Style: unknown
     11 │ 

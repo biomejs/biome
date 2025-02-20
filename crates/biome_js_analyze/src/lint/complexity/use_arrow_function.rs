@@ -73,7 +73,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("prefer-arrow-callback")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }

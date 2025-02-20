@@ -15,7 +15,7 @@ let a = f(process.env);
 ```
 invalid.js:1:9 lint/nursery/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use process.env.
+  i Don't use process.env.
   
   > 1 │ let a = process.env;
       │         ^^^^^^^^^^^
@@ -30,7 +30,7 @@ invalid.js:1:9 lint/nursery/noProcessEnv ━━━━━━━━━━━━━
 ```
 invalid.js:2:9 lint/nursery/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use process.env.
+  i Don't use process.env.
   
     1 │ let a = process.env;
   > 2 │ let a = process.env.ENV;
@@ -46,7 +46,7 @@ invalid.js:2:9 lint/nursery/noProcessEnv ━━━━━━━━━━━━━
 ```
 invalid.js:3:11 lint/nursery/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use process.env.
+  i Don't use process.env.
   
     1 │ let a = process.env;
     2 │ let a = process.env.ENV;

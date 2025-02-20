@@ -77,7 +77,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintTypeScript("prefer-optional-chain")],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }

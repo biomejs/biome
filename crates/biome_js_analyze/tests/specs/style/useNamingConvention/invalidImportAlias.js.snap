@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidImportAlias.js
+snapshot_kind: text
 ---
 # Input
 ```js
@@ -25,7 +26,7 @@ import snake_case from ""
 ```
 invalidImportAlias.js:1:15 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
+  i Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
   > 1 │ import { X as XxXX } from ""
       │               ^^^^
@@ -48,7 +49,7 @@ invalidImportAlias.js:1:15 lint/style/useNamingConvention  FIXABLE  ━━━━
 ```
 invalidImportAlias.js:3:15 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  i This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
   
     1 │ import { X as XxXX } from ""
     2 │ 
@@ -72,7 +73,7 @@ invalidImportAlias.js:3:15 lint/style/useNamingConvention  FIXABLE  ━━━━
 ```
 invalidImportAlias.js:5:15 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
+  i Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
     3 │ import { Y as snake_case  } from ""
     4 │ 
@@ -99,7 +100,7 @@ invalidImportAlias.js:5:15 lint/style/useNamingConvention  FIXABLE  ━━━━
 ```
 invalidImportAlias.js:7:15 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  i This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
   
     5 │ import { X as XxXX } from ""
     6 │ 
@@ -123,7 +124,7 @@ invalidImportAlias.js:7:15 lint/style/useNamingConvention  FIXABLE  ━━━━
 ```
 invalidImportAlias.js:9:8 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
+  i Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
      7 │ import { Y as snake_case  } from ""
      8 │ 
@@ -150,7 +151,7 @@ invalidImportAlias.js:9:8 lint/style/useNamingConvention  FIXABLE  ━━━━�
 ```
 invalidImportAlias.js:11:8 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  i This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
   
      9 │ import XxXX from ""
     10 │ 
@@ -174,7 +175,7 @@ invalidImportAlias.js:11:8 lint/style/useNamingConvention  FIXABLE  ━━━━
 ```
 invalidImportAlias.js:13:8 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
+  i Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
     11 │ import snake_case from ""
     12 │ 
@@ -201,7 +202,7 @@ invalidImportAlias.js:13:8 lint/style/useNamingConvention  FIXABLE  ━━━━
 ```
 invalidImportAlias.js:15:8 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  i This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
   
     13 │ import XxXX from ""
     14 │ 

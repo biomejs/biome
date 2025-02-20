@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: componentFragment.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -24,7 +25,7 @@ export function Component() {
 ```
 componentFragment.jsx:7:27 lint/complexity/noUselessFragments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     5 │   return (
     6 │     <div>
@@ -41,7 +42,7 @@ componentFragment.jsx:7:27 lint/complexity/noUselessFragments ━━━━━━
 ```
 componentFragment.jsx:11:19 lint/complexity/noUselessFragments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
      9 │       </Suspense>
     10 │ 
@@ -54,5 +55,3 @@ componentFragment.jsx:11:19 lint/complexity/noUselessFragments ━━━━━�
   
 
 ```
-
-
