@@ -229,8 +229,6 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             bracket_same_line: Some(value.bracket_line.into()),
             attribute_position: Some(AttributePosition::default()),
             format_with_errors: Some(false.into()),
-            ignore: None,
-            include: None,
             includes: None,
             enabled: Some(true.into()),
             // editorconfig support is intentionally set to true, because prettier always reads the editorconfig file

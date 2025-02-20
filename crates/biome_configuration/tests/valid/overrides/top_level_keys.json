@@ -1,7 +1,6 @@
 {
 	"overrides": [
 		{
-			"ignore": [],
 			"include": [],
 			"includes": [],
 			"javascript": {},
