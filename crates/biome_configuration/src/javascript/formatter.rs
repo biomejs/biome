@@ -108,7 +108,10 @@ pub struct JsFormatterConfiguration {
     pub bracket_spacing: Option<BracketSpacing>,
 
     /// Whether to enforce collapsing object literals when possible. Defaults to preserve.
-    #[bpaf(long("javascript-object-wrap"), argument("preserve|collapse"))]
+    #[bpaf(
+        long("javascript-formatter-object-wrap"),
+        argument("preserve|collapse")
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub object_wrap: Option<ObjectWrap>,
 }

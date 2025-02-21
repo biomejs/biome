@@ -476,6 +476,7 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Dani Guardiola @DaniGuardiola](https://github.com/DaniGuardiola)
 - [Justinas Delinda @minht11](https://github.com/minht11)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
+- [Naoki Ikeguchi @siketyan](https://github.com/siketyan)
 - [Vasu Singh @vasucp1207](https://github.com/vasucp1207)
 - [Vo Hoang Long @vohoanglong0107](https://github.com/vohoanglong0107)
 - [Yagiz Nizipli @anonrig](https://github.com/anonrig)

@@ -18,3 +18,5 @@ However, when `objectWrap` is `collapse`, it will be formatted to the following 
 ```js
 const obj = { foo: "bar" };
 ```
+
+This option is also available in a CLI flag `--javascript-formatter-object-wrap=<preserve|collapse>`.

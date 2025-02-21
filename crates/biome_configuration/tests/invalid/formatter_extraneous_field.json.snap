@@ -1,5 +1,6 @@
 ---
 source: crates/biome_configuration/tests/spec_tests.rs
+assertion_line: 58
 expression: formatter_extraneous_field.json
 ---
 formatter_extraneous_field.json:3:3 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -26,6 +27,4 @@ formatter_extraneous_field.json:3:3 deserialize ━━━━━━━━━━�
   - bracketSpacing
   - objectWrap
   - useEditorconfig
-  - ignore
-  - include
   - includes

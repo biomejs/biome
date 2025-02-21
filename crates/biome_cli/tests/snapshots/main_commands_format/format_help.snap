@@ -57,8 +57,8 @@ Formatting options specific to the JavaScript files
                               JSX elements. Defaults to auto.
         --javascript-formatter-bracket-spacing=<true|false>  Whether to insert spaces around
                               brackets in object literals. Defaults to true.
-        --javascript-object-wrap=<preserve|collapse>  Whether to enforce collapsing object literals
-                              when possible. Defaults to preserve.
+        --javascript-formatter-object-wrap=<preserve|collapse>  Whether to enforce collapsing object
+                              literals when possible. Defaults to preserve.
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
