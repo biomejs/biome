@@ -6,6 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, JsConstructorClassMember, JsFileSource,
     JsFunctionBody, JsFunctionDeclaration, JsFunctionExportDefaultDeclaration,
@@ -355,14 +356,10 @@ fn to_arrow_body(body: JsFunctionBody) -> AnyJsFunctionBody {
         // To keep comments, we keep the regular function body
         return early_result;
     }
-    if matches!(
-        return_arg,
-        AnyJsExpression::JsSequenceExpression(_) | AnyJsExpression::JsObjectExpression(_)
-    ) {
-        // () => (first, second)
-        // () => ({ ... })
-        return AnyJsFunctionBody::AnyJsExpression(make::parenthesized(return_arg).into());
+    let function_body = AnyJsFunctionBody::AnyJsExpression(return_arg.clone());
+    if function_body.needs_parentheses() {
+        AnyJsFunctionBody::AnyJsExpression(make::parenthesized(return_arg).into())
+    } else {
+        function_body
     }
-    // () => expression
-    AnyJsFunctionBody::AnyJsExpression(return_arg)
 }
