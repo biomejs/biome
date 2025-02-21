@@ -10,7 +10,7 @@ use crate::{
             html_split_children, is_meaningful_html_text, HtmlChild, HtmlChildrenIterator,
             HtmlSpace,
         },
-        metadata::is_element_whitespace_sensitive,
+        metadata::is_element_whitespace_sensitive_from_element,
     },
 };
 use biome_formatter::{best_fitting, prelude::*, CstFormatContext, FormatRuleWithOptions};
@@ -23,12 +23,18 @@ use tag::GroupMode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElementList {
     layout: HtmlChildListLayout,
+    /// Whether or not the parent element that encapsulates this element list is whitespace sensitive.
+    is_element_whitespace_sensitive: bool,
 
     borrowed_tokens: BorrowedTokens,
 }
 
 pub(crate) struct FormatHtmlElementListOptions {
     pub layout: HtmlChildListLayout,
+    /// Whether or not the parent element that encapsulates this element list is whitespace sensitive.
+    ///
+    /// This should always be false for the root element.
+    pub is_element_whitespace_sensitive: bool,
     pub borrowed_r_angle: Option<HtmlSyntaxToken>,
     pub borrowed_closing_tag: Option<HtmlClosingElement>,
 }
@@ -38,6 +44,7 @@ impl FormatRuleWithOptions<HtmlElementList> for FormatHtmlElementList {
 
     fn with_options(mut self, options: Self::Options) -> Self {
         self.layout = options.layout;
+        self.is_element_whitespace_sensitive = options.is_element_whitespace_sensitive;
         self.borrowed_tokens = BorrowedTokens {
             borrowed_opening_r_angle: options.borrowed_r_angle,
             borrowed_closing_tag: options.borrowed_closing_tag,
@@ -153,6 +160,11 @@ impl FormatHtmlElementList {
         // Trim leading new lines
         if let Some(HtmlChild::Newline | HtmlChild::EmptyLine) = children_iter.peek() {
             children_iter.next();
+            // since there is a leading newline, we need to preserve the fact that there is whitespace there if this element is whitespace sensitive.
+            if self.is_element_whitespace_sensitive {
+                flat.write(&space(), f);
+                // don't need to add anything for multiline here because there will already be a newline.
+            }
         }
 
         flat.write(&borrowed_opening_r_angle, f);
@@ -175,9 +187,8 @@ impl FormatHtmlElementList {
                                 next_child,
                                 AnyHtmlElement::HtmlSelfClosingElement(_)
                             ) || word.is_single_character(),
-                            is_next_element_whitespace_sensitive: is_element_whitespace_sensitive(
-                                f, next_child,
-                            ),
+                            is_next_element_whitespace_sensitive:
+                                is_element_whitespace_sensitive_from_element(f, next_child),
                         }),
 
                         Some(HtmlChild::Newline | HtmlChild::Whitespace | HtmlChild::EmptyLine) => {
@@ -291,7 +302,7 @@ impl FormatHtmlElementList {
                             // adefg
                             // ```
                             let is_current_whitespace_sensitive =
-                                is_element_whitespace_sensitive(f, non_text);
+                                is_element_whitespace_sensitive_from_element(f, non_text);
                             if is_current_whitespace_sensitive {
                                 // we can't add any whitespace if the element is whitespace sensitive
                                 None

@@ -176,10 +176,10 @@ e-wrap </html:textarea>
 -    <span> inline </span><span> inline </span> <span> inline </span
 -    ><span> inline </span>
 -    <html:div>
-+    <span>inline </span>
-+    <span>inline </span>
-+    <span>inline </span>
-+    <span>inline </span>
++    <span> inline </span>
++    <span> inline </span>
++    <span> inline </span>
++    <span> inline </span>
 +    <html :div>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
      </html:div>
@@ -243,10 +243,10 @@ e-wrap </html:textarea>
 -    <span> inline </span><span> inline </span> <span> inline </span
 -    ><span> inline </span>
 -    <html:div>
-+    <span>inline </span>
-+    <span>inline </span>
-+    <span>inline </span>
-+    <span>inline </span>
++    <span> inline </span>
++    <span> inline </span>
++    <span> inline </span>
++    <span> inline </span>
 +    <html :div>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
      </html:div>
@@ -310,10 +310,10 @@ e-wrap </html:textarea>
 -    <span> inline </span><span> inline </span> <span> inline </span
 -    ><span> inline </span>
 -    <html:div>
-+    <span>inline </span>
-+    <span>inline </span>
-+    <span>inline </span>
-+    <span>inline </span>
++    <span> inline </span>
++    <span> inline </span>
++    <span> inline </span>
++    <span> inline </span>
 +    <html :div>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
      </html:div>
@@ -377,10 +377,10 @@ e-wrap </html:textarea>
 -    <span> inline </span><span> inline </span> <span> inline </span
 -    ><span> inline </span>
 -    <html:div>
-+    <span>inline </span>
-+    <span>inline </span>
-+    <span>inline </span>
-+    <span>inline </span>
++    <span> inline </span>
++    <span> inline </span>
++    <span> inline </span>
++    <span> inline </span>
 +    <html :div>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
      </html:div>
@@ -442,10 +442,10 @@ e-wrap </html:textarea>
 -    <span> inline </span><span> inline </span> <span> inline </span
 -    ><span> inline </span>
 -    <html:div>
-+    <span>inline </span>
-+    <span>inline </span>
-+    <span>inline </span>
-+    <span>inline </span>
++    <span> inline </span>
++    <span> inline </span>
++    <span> inline </span>
++    <span> inline </span>
 +    <html :div>
        looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
      </html:div>
@@ -572,10 +572,10 @@ e</pre>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
-    <span>inline </span>
-    <span>inline </span>
-    <span>inline </span>
-    <span>inline </span>
+    <span> inline </span>
+    <span> inline </span>
+    <span> inline </span>
+    <span> inline </span>
     <html :div>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
     </html:div>
@@ -613,10 +613,10 @@ e</pre>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
-    <span>inline </span>
-    <span>inline </span>
-    <span>inline </span>
-    <span>inline </span>
+    <span> inline </span>
+    <span> inline </span>
+    <span> inline </span>
+    <span> inline </span>
     <html :div>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
     </html:div>
@@ -654,10 +654,10 @@ e</pre>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
-    <span>inline </span>
-    <span>inline </span>
-    <span>inline </span>
-    <span>inline </span>
+    <span> inline </span>
+    <span> inline </span>
+    <span> inline </span>
+    <span> inline </span>
     <html :div>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
     </html:div>
@@ -695,10 +695,10 @@ e</pre>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
-    <span>inline </span>
-    <span>inline </span>
-    <span>inline </span>
-    <span>inline </span>
+    <span> inline </span>
+    <span> inline </span>
+    <span> inline </span>
+    <span> inline </span>
     <html :div>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
     </html:div>
@@ -736,10 +736,10 @@ e</pre>
     <span>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog inline
     </span>
-    <span>inline </span>
-    <span>inline </span>
-    <span>inline </span>
-    <span>inline </span>
+    <span> inline </span>
+    <span> inline </span>
+    <span> inline </span>
+    <span> inline </span>
     <html :div>
       looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog block
     </html:div>
