@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidGlobal.tsx
+snapshot_kind: text
 ---
 # Input
 ```tsx
@@ -23,7 +24,7 @@ function render() {
 ```
 invalidGlobal.tsx:1:11 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
   > 1 │ const a = ReactDOM.render(<div />, document.body);
       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -39,7 +40,7 @@ invalidGlobal.tsx:1:11 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidGlobal.tsx:2:20 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     1 │ const a = ReactDOM.render(<div />, document.body);
   > 2 │ const foo = bar && ReactDOM.render(<div />, document.body);
@@ -56,7 +57,7 @@ invalidGlobal.tsx:2:20 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidGlobal.tsx:3:19 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     1 │ const a = ReactDOM.render(<div />, document.body);
     2 │ const foo = bar && ReactDOM.render(<div />, document.body);
@@ -74,7 +75,7 @@ invalidGlobal.tsx:3:19 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidGlobal.tsx:4:19 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     2 │ const foo = bar && ReactDOM.render(<div />, document.body);
     3 │ const foo = bar ? ReactDOM.render(<div />, document.body) : null
@@ -92,7 +93,7 @@ invalidGlobal.tsx:4:19 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidGlobal.tsx:6:12 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     4 │ const foo = () => ReactDOM.render(<div />, document.body);
     5 │ const foo = {
@@ -110,7 +111,7 @@ invalidGlobal.tsx:6:12 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidGlobal.tsx:9:9 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
      7 │ };
      8 │ let lorem;
@@ -128,7 +129,7 @@ invalidGlobal.tsx:9:9 lint/correctness/noRenderReturnValue ━━━━━━━
 ```
 invalidGlobal.tsx:11:12 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
      9 │ lorem = ReactDOM.render(<div />, document.body);
     10 │ function render() {

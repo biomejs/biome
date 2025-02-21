@@ -1,6 +1,5 @@
 use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
-use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_graphql_parser::parse_graphql;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_rowan::AstNode;
@@ -119,8 +118,7 @@ pub(crate) fn analyze_and_snap(
                 }
             }
 
-            let error = diag.with_severity(Severity::Warning);
-            diagnostics.push(diagnostic_to_string(file_name, input_code, error));
+            diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
             return ControlFlow::Continue(());
         }
 

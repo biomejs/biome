@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: unstableDependency.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -50,7 +51,7 @@ const Component = () => {
 ```
 unstableDependency.jsx:30:9 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! fetchThings changes on every re-render and should not be used as a hook dependency.
+  × fetchThings changes on every re-render and should not be used as a hook dependency.
   
     28 │             return mapping[res.body] || res;
     29 │         });
@@ -67,7 +68,7 @@ unstableDependency.jsx:30:9 lint/correctness/useExhaustiveDependencies ━━━
 ```
 unstableDependency.jsx:30:22 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! fetchMoreThings changes on every re-render and should not be used as a hook dependency.
+  × fetchMoreThings changes on every re-render and should not be used as a hook dependency.
   
     28 │             return mapping[res.body] || res;
     29 │         });
@@ -84,7 +85,7 @@ unstableDependency.jsx:30:22 lint/correctness/useExhaustiveDependencies ━━�
 ```
 unstableDependency.jsx:30:39 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! mapping changes on every re-render and should not be used as a hook dependency.
+  × mapping changes on every re-render and should not be used as a hook dependency.
   
     28 │             return mapping[res.body] || res;
     29 │         });

@@ -1,61 +1,47 @@
 mod analyzer_grit_plugin;
 mod diagnostics;
+mod plugin_cache;
 mod plugin_manifest;
 
 pub use analyzer_grit_plugin::AnalyzerGritPlugin;
-use biome_analyze::AnalyzerPlugin;
+pub use diagnostics::PluginDiagnostic;
+pub use plugin_cache::*;
+
+use std::sync::Arc;
+
+use biome_analyze::{AnalyzerPlugin, AnalyzerPluginVec};
 use biome_console::markup;
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_diagnostics::ResolveError;
 use biome_fs::FileSystem;
 use biome_json_parser::JsonParserOptions;
-use camino::{Utf8Path, Utf8PathBuf};
-use diagnostics::PluginDiagnostic;
+use camino::{Utf8Component, Utf8Path, Utf8PathBuf};
 use plugin_manifest::PluginManifest;
 
 #[derive(Debug)]
 pub struct BiomePlugin {
-    pub analyzer_plugins: Vec<Box<dyn AnalyzerPlugin>>,
+    pub analyzer_plugins: AnalyzerPluginVec,
 }
 
 impl BiomePlugin {
     /// Loads a plugin from the given `plugin_path`.
     ///
-    /// Base paths are used to resolve relative paths and package specifiers.
+    /// The base path is used to resolve relative paths.
     pub fn load(
         fs: &dyn FileSystem,
         plugin_path: &str,
-        relative_resolution_base_path: &Utf8Path,
-        external_resolution_base_path: &Utf8Path,
+        base_path: &Utf8Path,
     ) -> Result<Self, PluginDiagnostic> {
-        let plugin_path = if let Some(plugin_path) = plugin_path.strip_prefix("./") {
-            relative_resolution_base_path.join(plugin_path)
-        } else if plugin_path.starts_with('.') {
-            relative_resolution_base_path.join(plugin_path)
-        } else {
-            Utf8PathBuf::from_path_buf(
-                fs.resolve_configuration(plugin_path, external_resolution_base_path)
-                    .map_err(|error| {
-                        PluginDiagnostic::cant_resolve(
-                            external_resolution_base_path.to_string(),
-                            Some(ResolveError::from(error)),
-                        )
-                    })?
-                    .into_path_buf(),
-            )
-            .expect("Valid UTF-8 path")
-        };
+        let plugin_path = normalize_path(&base_path.join(plugin_path));
 
         // If the plugin path references a `.grit` file directly, treat it as
         // a single-rule plugin instead of going through the manifest process:
         if plugin_path
-            .as_os_str()
-            .as_encoded_bytes()
-            .ends_with(b".grit")
+            .extension()
+            .is_some_and(|extension| extension == "grit")
         {
             let plugin = AnalyzerGritPlugin::load(fs, &plugin_path)?;
             return Ok(Self {
-                analyzer_plugins: vec![Box::new(plugin) as Box<dyn AnalyzerPlugin>],
+                analyzer_plugins: vec![Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>)],
             });
         }
 
@@ -90,7 +76,7 @@ impl BiomePlugin {
                 .map(|rule| {
                     if rule.as_os_str().as_encoded_bytes().ends_with(b".grit") {
                         let plugin = AnalyzerGritPlugin::load(fs, &plugin_path.join(rule))?;
-                        Ok(Box::new(plugin) as Box<dyn AnalyzerPlugin>)
+                        Ok(Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>))
                     } else {
                         Err(PluginDiagnostic::unsupported_rule_format(markup!(
                             "Unsupported rule format for plugin rule "
@@ -103,6 +89,39 @@ impl BiomePlugin {
 
         Ok(plugin)
     }
+}
+
+/// Normalizes the given `path` without requiring filesystem access.
+///
+/// This only normalizes `.` and `..` entries, but does not resolve symlinks.
+fn normalize_path(path: &Utf8Path) -> Utf8PathBuf {
+    let mut stack = Vec::new();
+
+    for component in path.components() {
+        match component {
+            Utf8Component::ParentDir => {
+                if stack.last().is_some_and(|last| *last == "..") {
+                    stack.push("..");
+                } else {
+                    stack.pop();
+                }
+            }
+            Utf8Component::CurDir => {}
+            Utf8Component::RootDir => {
+                stack.clear();
+                stack.push("/");
+            }
+            Utf8Component::Normal(c) => stack.push(c),
+            _ => {}
+        }
+    }
+
+    let mut result = Utf8PathBuf::new();
+    for part in stack {
+        result.push(part);
+    }
+
+    result
 }
 
 #[cfg(test)]
@@ -138,7 +157,7 @@ mod test {
 
         fs.insert("/my-plugin/rules/1.grit".into(), r#"`hello`"#);
 
-        let plugin = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"), Utf8Path::new("/"))
+        let plugin = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"))
             .expect("Couldn't load plugin");
         assert_eq!(plugin.analyzer_plugins.len(), 1);
     }
@@ -148,7 +167,7 @@ mod test {
         let mut fs = MemoryFileSystem::default();
         fs.insert("/my-plugin/rules/1.grit".into(), r#"`hello`"#);
 
-        let error = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"), Utf8Path::new("/"))
+        let error = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"))
             .expect_err("Plugin loading should've failed");
         snap_diagnostic("load_plugin_without_manifest", error.into());
     }
@@ -164,7 +183,7 @@ mod test {
 }"#,
         );
 
-        let error = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"), Utf8Path::new("/"))
+        let error = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"))
             .expect_err("Plugin loading should've failed");
         snap_diagnostic("load_plugin_with_wrong_version", error.into());
     }
@@ -180,7 +199,7 @@ mod test {
 }"#,
         );
 
-        let error = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"), Utf8Path::new("/"))
+        let error = BiomePlugin::load(&fs, "./my-plugin", Utf8Path::new("/"))
             .expect_err("Plugin loading should've failed");
         snap_diagnostic("load_plugin_with_wrong_rule_extension", error.into());
     }
@@ -190,13 +209,8 @@ mod test {
         let mut fs = MemoryFileSystem::default();
         fs.insert("/my-plugin.grit".into(), r#"`hello`"#);
 
-        let plugin = BiomePlugin::load(
-            &fs,
-            "./my-plugin.grit",
-            Utf8Path::new("/"),
-            Utf8Path::new("/"),
-        )
-        .expect("Couldn't load plugin");
+        let plugin = BiomePlugin::load(&fs, "./my-plugin.grit", Utf8Path::new("/"))
+            .expect("Couldn't load plugin");
         assert_eq!(plugin.analyzer_plugins.len(), 1);
     }
 }

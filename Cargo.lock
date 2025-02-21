@@ -1218,6 +1218,8 @@ dependencies = [
  "grit-pattern-matcher",
  "grit-util",
  "insta",
+ "papaya",
+ "rustc-hash 2.1.1",
  "serde",
 ]
 
@@ -1290,6 +1292,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_package",
  "biome_parser",
+ "biome_plugin_loader",
  "biome_project_layout",
  "biome_rowan",
  "biome_string_case",
@@ -3733,9 +3736,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.137"
+version = "1.0.139"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "930cfb6e6abf99298aaad7d29abbef7a9999a9a8806a40088f55f0dcec03146b"
+checksum = "44f86c3acccc9c65b153fe1b85a3be07fe5515274ec9f0653b4a0875731c72a6"
 dependencies = [
  "indexmap",
  "itoa",

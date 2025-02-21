@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -22,7 +23,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a lang attribute when using the html element.
+  × Provide a lang attribute when using the html element.
   
     1 │ <>
   > 2 │     <html />
@@ -38,7 +39,7 @@ invalid.jsx:2:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
 ```
 invalid.jsx:3:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a lang attribute when using the html element.
+  × Provide a lang attribute when using the html element.
   
     1 │ <>
     2 │     <html />
@@ -55,7 +56,7 @@ invalid.jsx:3:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
 ```
 invalid.jsx:4:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a lang attribute when using the html element.
+  × Provide a lang attribute when using the html element.
   
     2 │     <html />
     3 │     <html></html>
@@ -72,7 +73,7 @@ invalid.jsx:4:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
 ```
 invalid.jsx:5:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a lang attribute when using the html element.
+  × Provide a lang attribute when using the html element.
   
     3 │     <html></html>
     4 │     <html lang=""></html>
@@ -89,7 +90,7 @@ invalid.jsx:5:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
 ```
 invalid.jsx:6:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a lang attribute when using the html element.
+  × Provide a lang attribute when using the html element.
   
     4 │     <html lang=""></html>
     5 │     <html lang={""}></html>
@@ -106,7 +107,7 @@ invalid.jsx:6:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
 ```
 invalid.jsx:7:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a lang attribute when using the html element.
+  × Provide a lang attribute when using the html element.
   
     5 │     <html lang={""}></html>
     6 │     <html lang={``}></html>
@@ -123,7 +124,7 @@ invalid.jsx:7:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
 ```
 invalid.jsx:8:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a lang attribute when using the html element.
+  × Provide a lang attribute when using the html element.
   
      6 │     <html lang={``}></html>
      7 │     <html lang={true}></html>
@@ -140,7 +141,7 @@ invalid.jsx:8:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
 ```
 invalid.jsx:9:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a lang attribute when using the html element.
+  × Provide a lang attribute when using the html element.
   
      7 │     <html lang={true}></html>
      8 │     <html lang={false}></html>
@@ -157,7 +158,7 @@ invalid.jsx:9:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
 ```
 invalid.jsx:10:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a lang attribute when using the html element.
+  × Provide a lang attribute when using the html element.
   
      8 │     <html lang={false}></html>
      9 │     <html lang={undefined}></html>
@@ -174,7 +175,7 @@ invalid.jsx:10:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━�
 ```
 invalid.jsx:11:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a lang attribute when using the html element.
+  × Provide a lang attribute when using the html element.
   
      9 │     <html lang={undefined}></html>
     10 │     <html lang={null}></html>
@@ -186,5 +187,3 @@ invalid.jsx:11:5 lint/a11y/useHtmlLang ━━━━━━━━━━━━━�
   
 
 ```
-
-

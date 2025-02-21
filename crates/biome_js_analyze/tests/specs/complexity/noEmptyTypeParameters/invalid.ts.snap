@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -12,7 +13,7 @@ interface B<> {};
 ```
 invalid.ts:1:7 lint/complexity/noEmptyTypeParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using an empty type parameter list is confusing.
+  × Using an empty type parameter list is confusing.
   
   > 1 │ type A<> = {};
       │       ^^
@@ -26,7 +27,7 @@ invalid.ts:1:7 lint/complexity/noEmptyTypeParameters ━━━━━━━━━
 ```
 invalid.ts:2:12 lint/complexity/noEmptyTypeParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using an empty type parameter list is confusing.
+  × Using an empty type parameter list is confusing.
   
     1 │ type A<> = {};
   > 2 │ interface B<> {};
@@ -36,5 +37,3 @@ invalid.ts:2:12 lint/complexity/noEmptyTypeParameters ━━━━━━━━�
   
 
 ```
-
-

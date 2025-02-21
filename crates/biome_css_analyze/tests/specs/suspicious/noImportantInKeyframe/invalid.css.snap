@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -18,7 +19,7 @@ expression: invalid.css
 ```
 invalid.css:6:16 lint/suspicious/noImportantInKeyframe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using !important within keyframes declaration is completely ignored in some browsers.
+  × Using !important within keyframes declaration is completely ignored in some browsers.
   
     4 │   }
     5 │   to {

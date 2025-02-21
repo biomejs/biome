@@ -38,6 +38,8 @@ The configuration that is contained inside the file `biome.json`
                               apply to self closing elements).
         --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
                               Defaults to true.
+        --object-wrap=<preserve|collapse>  Whether to enforce collapsing object literals when
+                              possible. Defaults to preserve.
         --use-editorconfig=<true|false>  Use any `.editorconfig` files to configure the formatter.
                               Configuration in `biome.json` will override `.editorconfig`
                               configuration.
@@ -72,8 +74,8 @@ The configuration that is contained inside the file `biome.json`
                               JSX elements. Defaults to auto.
         --javascript-formatter-bracket-spacing=<true|false>  Whether to insert spaces around
                               brackets in object literals. Defaults to true.
-        --javascript-object-wrap=<preserve|collapse>  Whether to enforce collapsing object literals
-                              when possible. Defaults to preserve.
+        --javascript-formatter-object-wrap=<preserve|collapse>  Whether to enforce collapsing object
+                              literals when possible. Defaults to preserve.
         --javascript-linter-enabled=<true|false>  Control the linter for JavaScript (and its super
                               languages) files.
         --javascript-assist-enabled=<true|false>  Control the assist for JavaScript (and its super
@@ -97,6 +99,8 @@ The configuration that is contained inside the file `biome.json`
                               Defaults to "followSource".
         --json-formatter-bracket-spacing=<true|false>  Whether to insert spaces around brackets in
                               object literals. Defaults to true.
+        --json-formatter-object-wrap=<preserve|collapse>  Whether to enforce collapsing object
+                              literals when possible. Defaults to preserve.
         --json-linter-enabled=<true|false>  Control the linter for JSON (and its super languages)
                               files.
         --json-assist-enabled=<true|false>  Control the assist for JSON (and its super languages)

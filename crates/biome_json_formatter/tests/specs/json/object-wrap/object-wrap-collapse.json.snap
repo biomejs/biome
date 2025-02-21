@@ -1,0 +1,65 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: json/object-wrap/object-wrap-collapse.json
+---
+# Input
+
+```json
+{
+  "foo": {
+    "bar": {
+      "baz": {
+        "qux": true
+      }
+    }
+  }
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Trailing commas: None
+Expand: Follow Source
+Bracket spacing: true
+Object wrap: Preserve
+-----
+
+```json
+{
+	"foo": {
+		"bar": {
+			"baz": {
+				"qux": true
+			}
+		}
+	}
+}
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Trailing commas: None
+Expand: Follow Source
+Bracket spacing: true
+Object wrap: Collapse
+-----
+
+```json
+{ "foo": { "bar": { "baz": { "qux": true } } } }
+```

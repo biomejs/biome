@@ -15,7 +15,7 @@ export function f({ a, b }) {
 ```
 invalidUsedBindingPattern.js:1:21 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  i This variable is unused.
   
   > 1 │ export function f({ a, b }) {
       │                     ^

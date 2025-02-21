@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidClass.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -15,7 +16,7 @@ export {}
 ```
 invalidClass.ts:1:7 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class is unused.
+  i This class is unused.
   
   > 1 │ class D {
       │       ^
@@ -30,7 +31,7 @@ invalidClass.ts:1:7 lint/correctness/noUnusedVariables ━━━━━━━━�
 ```
 invalidClass.ts:2:4 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  i This parameter is unused.
   
     1 │ class D {
   > 2 │ 	f(a: D): D | undefined { return; }
@@ -50,5 +51,3 @@ invalidClass.ts:2:4 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━
   
 
 ```
-
-

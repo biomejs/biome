@@ -22,7 +22,7 @@ array.flatMap(arr => {return arr})
 ```
 invalid.js:1:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid unnecessary callback in flatMap call.
+  i Avoid unnecessary callback in flatMap call.
   
   > 1 │ array.flatMap(function f(arr) { return arr });
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -44,7 +44,7 @@ invalid.js:1:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━�
 ```
 invalid.js:3:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid unnecessary callback in flatMap call.
+  i Avoid unnecessary callback in flatMap call.
   
     1 │ array.flatMap(function f(arr) { return arr });
     2 │ 
@@ -70,7 +70,7 @@ invalid.js:3:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━�
 ```
 invalid.js:5:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid unnecessary callback in flatMap call.
+  i Avoid unnecessary callback in flatMap call.
   
     3 │ array.flatMap(function (arr) { return arr });
     4 │ 
@@ -96,7 +96,7 @@ invalid.js:5:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━�
 ```
 invalid.js:7:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid unnecessary callback in flatMap call.
+  i Avoid unnecessary callback in flatMap call.
   
     5 │ array.flatMap((arr) => arr)
     6 │ 
@@ -122,7 +122,7 @@ invalid.js:7:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━�
 ```
 invalid.js:9:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid unnecessary callback in flatMap call.
+  i Avoid unnecessary callback in flatMap call.
   
      7 │ array.flatMap((arr) => {return arr})
      8 │ 
@@ -148,7 +148,7 @@ invalid.js:9:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━�
 ```
 invalid.js:11:1 lint/correctness/noFlatMapIdentity  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid unnecessary callback in flatMap call.
+  i Avoid unnecessary callback in flatMap call.
   
      9 │ array.flatMap(arr => arr)
     10 │ 

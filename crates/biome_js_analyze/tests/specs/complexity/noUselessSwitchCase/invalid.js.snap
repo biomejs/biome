@@ -29,7 +29,7 @@ switch (foo) {
 ```
 invalid.js:2:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless case clause.
+  i Useless case clause.
   
     1 │ switch (foo) {
   > 2 │ 	case 0:
@@ -61,7 +61,7 @@ invalid.js:2:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━�
 ```
 invalid.js:10:14 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless case clause.
+  i Useless case clause.
   
      9 │ switch (foo) {
   > 10 │ 	/* before */case 0:/* after */
@@ -92,7 +92,7 @@ invalid.js:10:14 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━�
 ```
 invalid.js:13:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless case clause.
+  i Useless case clause.
   
     11 │ 	// comment for default
     12 │ 	default:
@@ -124,7 +124,7 @@ invalid.js:13:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━
 ```
 invalid.js:14:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless case clause.
+  i Useless case clause.
   
     12 │ 	default:
     13 │ 	case 1:

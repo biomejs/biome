@@ -17,7 +17,7 @@ Object.assign({ foo: 'bar'}, baz);
 ```
 preferObjectSpread.grit:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer object spread instead of `Object.assign()`
+  i Prefer object spread instead of `Object.assign()`
   
   > 1 │ Object.assign({}, foo);
       │               ^^^^^^^
@@ -30,7 +30,7 @@ preferObjectSpread.grit:1:15 plugin ━━━━━━━━━━━━━━�
 ```
 preferObjectSpread.grit:3:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer object spread instead of `Object.assign()`
+  i Prefer object spread instead of `Object.assign()`
   
     1 │ Object.assign({}, foo);
     2 │ 
@@ -45,7 +45,7 @@ preferObjectSpread.grit:3:15 plugin ━━━━━━━━━━━━━━�
 ```
 preferObjectSpread.grit:5:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer object spread instead of `Object.assign()`
+  i Prefer object spread instead of `Object.assign()`
   
     3 │ Object.assign({}, {foo: 'bar'});
     4 │ 

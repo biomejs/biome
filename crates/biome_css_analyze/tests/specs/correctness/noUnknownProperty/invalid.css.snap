@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -18,7 +19,7 @@ a {
 ```
 invalid.css:2:3 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unknown property is not allowed.
+  × Unknown property is not allowed.
   
     1 │ a {
   > 2 │   colr: blue;
@@ -36,7 +37,7 @@ invalid.css:2:3 lint/correctness/noUnknownProperty ━━━━━━━━━�
 ```
 invalid.css:6:3 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unknown property is not allowed.
+  × Unknown property is not allowed.
   
     5 │ a {
   > 6 │   my-property: 1;

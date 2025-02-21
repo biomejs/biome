@@ -27,7 +27,7 @@ React.createElement("button", { type: "button" }, "foo")
 ```
 inObject.js:2:21 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an explicit type prop for the button element.
+  × Provide an explicit type prop for the button element.
   
     1 │ // invalid
   > 2 │ React.createElement('button');
@@ -45,7 +45,7 @@ inObject.js:2:21 lint/a11y/useButtonType ━━━━━━━━━━━━━
 ```
 inObject.js:4:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
     2 │ React.createElement('button');
     3 │ React.createElement('button', {
@@ -64,7 +64,7 @@ inObject.js:4:13 lint/a11y/useButtonType ━━━━━━━━━━━━━
 ```
 inObject.js:7:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
     5 │ });
     6 │ React.createElement('button', {
@@ -83,7 +83,7 @@ inObject.js:7:13 lint/a11y/useButtonType ━━━━━━━━━━━━━
 ```
 inObject.js:9:31 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
      7 │     "type": 1
      8 │ });
@@ -105,7 +105,7 @@ inObject.js:9:31 lint/a11y/useButtonType ━━━━━━━━━━━━━
 ```
 inObject.js:12:31 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
     10 │     "style": "background: red"
     11 │ });

@@ -22,7 +22,7 @@ export default {
 ```
 invalidObjectProperty.js:2:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object property name should be in camelCase.
+  i This object property name should be in camelCase.
   
     1 │ export default {
   > 2 │     Initialized: 0,
@@ -36,7 +36,7 @@ invalidObjectProperty.js:2:5 lint/style/useNamingConvention ━━━━━━�
 ```
 invalidObjectProperty.js:4:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object property name should be in camelCase.
+  i This object property name should be in camelCase.
   
     2 │     Initialized: 0,
     3 │ 
@@ -51,7 +51,7 @@ invalidObjectProperty.js:4:5 lint/style/useNamingConvention ━━━━━━�
 ```
 invalidObjectProperty.js:6:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object property name should be in camelCase.
+  i This object property name should be in camelCase.
   
     4 │     SpecialProperty: 0,
     5 │ 
@@ -66,7 +66,7 @@ invalidObjectProperty.js:6:5 lint/style/useNamingConvention ━━━━━━�
 ```
 invalidObjectProperty.js:8:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object property name should be in camelCase.
+  i This object property name should be in camelCase.
   
      6 │     special_property: 0,
      7 │ 
@@ -81,7 +81,7 @@ invalidObjectProperty.js:8:5 lint/style/useNamingConvention ━━━━━━�
 ```
 invalidObjectProperty.js:10:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object property name should be in camelCase.
+  i This object property name should be in camelCase.
   
      8 │     Unknown_Style: 0,
      9 │ 

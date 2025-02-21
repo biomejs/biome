@@ -39,7 +39,7 @@ function excessiveNesting() {
 ```
 excessiveNesting.js:10:46 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Excessive complexity of 255 detected (max: 15).
+  i Excessive complexity of 255 detected (max: 15).
   
      8 │                             function nested7() {
      9 │                                 function nested8() {

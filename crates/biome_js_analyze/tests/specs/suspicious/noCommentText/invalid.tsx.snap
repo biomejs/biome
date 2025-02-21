@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.tsx
+snapshot_kind: text
 ---
 # Input
 ```tsx
@@ -35,7 +36,7 @@ expression: invalid.tsx
 ```
 invalid.tsx:2:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Wrap comments inside children within braces.
+  × Wrap comments inside children within braces.
   
     1 │ <>
   > 2 │     <div>// comment</div>
@@ -57,7 +58,7 @@ invalid.tsx:2:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
 ```
 invalid.tsx:3:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Wrap comments inside children within braces.
+  × Wrap comments inside children within braces.
   
     1 │ <>
     2 │     <div>// comment</div>
@@ -76,7 +77,7 @@ invalid.tsx:3:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
 ```
 invalid.tsx:4:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Wrap comments inside children within braces.
+  × Wrap comments inside children within braces.
   
     2 │     <div>// comment</div>
     3 │     <div>/* comment */</div>
@@ -95,7 +96,7 @@ invalid.tsx:4:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
 ```
 invalid.tsx:5:15 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Wrap comments inside children within braces.
+  × Wrap comments inside children within braces.
   
     3 │     <div>/* comment */</div>
     4 │     <div>/** comment */</div>
@@ -114,7 +115,7 @@ invalid.tsx:5:15 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
 ```
 invalid.tsx:6:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Wrap comments inside children within braces.
+  × Wrap comments inside children within braces.
   
     4 │     <div>/** comment */</div>
     5 │     <div>text /* comment */</div>
@@ -133,7 +134,7 @@ invalid.tsx:6:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
 ```
 invalid.tsx:9:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Wrap comments inside children within braces.
+  × Wrap comments inside children within braces.
   
      7 │     <div>
      8 │         text
@@ -157,7 +158,7 @@ invalid.tsx:9:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━
 ```
 invalid.tsx:12:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Wrap comments inside children within braces.
+  × Wrap comments inside children within braces.
   
     10 │     </div>
     11 │     <div>
@@ -176,7 +177,7 @@ invalid.tsx:12:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
 ```
 invalid.tsx:16:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Wrap comments inside children within braces.
+  × Wrap comments inside children within braces.
   
     14 │     </div>
     15 │     <div>
@@ -200,7 +201,7 @@ invalid.tsx:16:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
 ```
 invalid.tsx:20:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Wrap comments inside children within braces.
+  × Wrap comments inside children within braces.
   
     18 │     </div>
     19 │     <div>
@@ -228,7 +229,7 @@ invalid.tsx:20:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
 ```
 invalid.tsx:23:11 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Wrap comments inside children within braces.
+  × Wrap comments inside children within braces.
   
     21 │         comment */
     22 │     </div>

@@ -15,7 +15,7 @@ describe(() => {
 ```
 invalidImportedChai.js:3:2 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assertion isn't inside a it(), test() or Deno.test() function call.
+  i The assertion isn't inside a it(), test() or Deno.test() function call.
   
     1 │ import { expect } from "chai";
     2 │ describe(() => {

@@ -14,7 +14,7 @@ String.raw`a ${x}`;
 ```
 invalid.js:1:1 lint/nursery/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! String.raw is useless when the raw string doesn't contain any escape sequence.
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
   
   > 1 │ String.raw`a`;
       │ ^^^^^^^^^^^^^
@@ -29,7 +29,7 @@ invalid.js:1:1 lint/nursery/noUselessStringRaw ━━━━━━━━━━━
 ```
 invalid.js:2:1 lint/nursery/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! String.raw is useless when the raw string doesn't contain any escape sequence.
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
   
     1 │ String.raw`a`;
   > 2 │ String.raw`abc`;
@@ -44,7 +44,7 @@ invalid.js:2:1 lint/nursery/noUselessStringRaw ━━━━━━━━━━━
 ```
 invalid.js:3:1 lint/nursery/noUselessStringRaw ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! String.raw is useless when the raw string doesn't contain any escape sequence.
+  i String.raw is useless when the raw string doesn't contain any escape sequence.
   
     1 │ String.raw`a`;
     2 │ String.raw`abc`;

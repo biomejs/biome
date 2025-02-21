@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: noUndeclaredVariables.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -37,7 +38,7 @@ export type Invalid<S extends number> = `Hello ${T}`
 ```
 noUndeclaredVariables.ts:26:50 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The T variable is undeclared.
+  i The T variable is undeclared.
   
     25 │ // Invalid
   > 26 │ export type Invalid<S extends number> = `Hello ${T}`

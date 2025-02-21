@@ -10,7 +10,7 @@ use biome_analyze::RuleDomain;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
-    LineWidth,
+    LineWidth, ObjectWrap,
 };
 use bpaf::Bpaf;
 use rustc_hash::FxHashMap;
@@ -34,11 +34,6 @@ impl FromStr for Overrides {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverridePattern {
-    /// A list of Unix shell style patterns. Biome will ignore files/folders that will
-    /// match these patterns.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ignore: Option<Vec<Box<str>>>,
-
     /// A list of Unix shell style patterns. Biome will include files/folders that will
     /// match these patterns.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -151,6 +146,11 @@ pub struct OverrideFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("bracket-spacing"), argument("true|false"))]
     pub bracket_spacing: Option<BracketSpacing>,
+
+    /// Whether to enforce collapsing object literals when possible. Defaults to preserve.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("object-wrap"), argument("preserve|collapse"))]
+    pub object_wrap: Option<ObjectWrap>,
 }
 
 #[derive(

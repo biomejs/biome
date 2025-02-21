@@ -12,7 +12,7 @@ snapshot_kind: text
 ```
 invalid_snake_case.js lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The filename should be in camelCase.
+  i The filename should be in camelCase.
   
   i The filename could be renamed to one of the following names:
     invalidSnakeCase.js

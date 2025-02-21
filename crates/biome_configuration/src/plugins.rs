@@ -10,6 +10,12 @@ use std::str::FromStr;
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Plugins(pub Vec<PluginConfiguration>);
 
+impl Plugins {
+    pub fn iter(&self) -> impl Iterator<Item = &PluginConfiguration> {
+        self.0.iter()
+    }
+}
+
 impl FromStr for Plugins {
     type Err = String;
 
@@ -36,8 +42,9 @@ impl Deserializable for PluginConfiguration {
             Deserializable::deserialize(ctx, value, rule_name).map(Self::Path)
         } else {
             // TODO: Fix this to allow plugins to receive options.
-            //       Difficulty is that we need a `Deserializable` implementation
-            //       for `serde_json::Value`, since plugin options are untyped.
+            //       We probably need to pass them as `AnyJsonValue` or
+            //       `biome_json_value::JsonValue`, since plugin options are
+            //       untyped.
             //       Also, we don't have a way to configure Grit plugins yet.
             /*Deserializable::deserialize(value, rule_name, diagnostics)
             .map(|plugin| Self::PathWithOptions(plugin))*/

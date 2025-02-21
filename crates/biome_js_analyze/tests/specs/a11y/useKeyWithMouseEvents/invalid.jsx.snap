@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -20,7 +21,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:1:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! onMouseOver must be accompanied by onFocus for accessibility.
+  × onMouseOver must be accompanied by onFocus for accessibility.
   
   > 1 │ <div onMouseOver={() => {}} />;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -35,7 +36,7 @@ invalid.jsx:1:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:2:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! onMouseOut must be accompanied by onBlur for accessibility.
+  × onMouseOut must be accompanied by onBlur for accessibility.
   
     1 │ <div onMouseOver={() => {}} />;
   > 2 │ <div onMouseOut={() => {}} />;
@@ -51,7 +52,7 @@ invalid.jsx:2:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:3:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! onMouseOver must be accompanied by onFocus for accessibility.
+  × onMouseOver must be accompanied by onFocus for accessibility.
   
     1 │ <div onMouseOver={() => {}} />;
     2 │ <div onMouseOut={() => {}} />;
@@ -68,7 +69,7 @@ invalid.jsx:3:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:4:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! onMouseOut must be accompanied by onBlur for accessibility.
+  × onMouseOut must be accompanied by onBlur for accessibility.
   
     2 │ <div onMouseOut={() => {}} />;
     3 │ <div onMouseOver={() => {}} onFocus={undefined} />;
@@ -85,7 +86,7 @@ invalid.jsx:4:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:5:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! onMouseOver must be accompanied by onFocus for accessibility.
+  × onMouseOver must be accompanied by onFocus for accessibility.
   
     3 │ <div onMouseOver={() => {}} onFocus={undefined} />;
     4 │ <div onMouseOut={() => {}} onBlur={undefined} />;
@@ -102,7 +103,7 @@ invalid.jsx:5:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:6:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! onMouseOut must be accompanied by onBlur for accessibility.
+  × onMouseOut must be accompanied by onBlur for accessibility.
   
     4 │ <div onMouseOut={() => {}} onBlur={undefined} />;
     5 │ <div onMouseOver={() => {}} onFocus={null} />;
@@ -119,7 +120,7 @@ invalid.jsx:6:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:7:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! onMouseOver must be accompanied by onFocus for accessibility.
+  × onMouseOver must be accompanied by onFocus for accessibility.
   
     5 │ <div onMouseOver={() => {}} onFocus={null} />;
     6 │ <div onMouseOut={() => {}} onBlur={null} />;
@@ -136,7 +137,7 @@ invalid.jsx:7:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:8:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! onMouseOut must be accompanied by onBlur for accessibility.
+  × onMouseOut must be accompanied by onBlur for accessibility.
   
      6 │ <div onMouseOut={() => {}} onBlur={null} />;
      7 │ <div onMouseOver={() => {}}></div>;
@@ -153,7 +154,7 @@ invalid.jsx:8:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:9:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! onMouseOut must be accompanied by onBlur for accessibility.
+  × onMouseOut must be accompanied by onBlur for accessibility.
   
      7 │ <div onMouseOver={() => {}}></div>;
      8 │ <div onMouseOut={() => {}}></div>;
@@ -169,7 +170,7 @@ invalid.jsx:9:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
 ```
 invalid.jsx:10:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! onMouseOver must be accompanied by onFocus for accessibility.
+  × onMouseOver must be accompanied by onFocus for accessibility.
   
      8 │ <div onMouseOut={() => {}}></div>;
      9 │ <div {...spread} onMouseOut={() => {}}></div>;
@@ -180,5 +181,3 @@ invalid.jsx:10:1 lint/a11y/useKeyWithMouseEvents ━━━━━━━━━━�
   
 
 ```
-
-

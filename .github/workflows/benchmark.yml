@@ -50,6 +50,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compile
+        timeout-minutes: 15
         run: cargo codspeed build --features codspeed -p xtask_bench
 
       - name: Run the benchmarks
