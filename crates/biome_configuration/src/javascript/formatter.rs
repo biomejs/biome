@@ -2,10 +2,10 @@ use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
-    LineWidth, QuoteStyle,
+    LineWidth, ObjectWrap, QuoteStyle,
 };
 use biome_js_formatter::context::{
-    trailing_commas::TrailingCommas, ArrowParentheses, ObjectWrap, QuoteProperties, Semicolons,
+    trailing_commas::TrailingCommas, ArrowParentheses, QuoteProperties, Semicolons,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
