@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -185,23 +184,6 @@ invalid.css:11:2 lint/nursery/noUnknownPseudoClass ━━━━━━━━━�
        │  ^^^^^
     12 │ :slotted {}
     13 │ :placeholder {}
-  
-  i See MDN web docs for more details.
-  
-
-```
-
-```
-invalid.css:12:2 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected unknown pseudo-class slotted 
-  
-    10 │ ::-webkit-scrollbar-button:horizontal:unknown {}
-    11 │ :first { }
-  > 12 │ :slotted {}
-       │  ^^^^^^^
-    13 │ :placeholder {}
-    14 │ @page :blank:unknown { }
   
   i See MDN web docs for more details.
   
