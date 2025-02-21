@@ -265,3 +265,35 @@ invalidTestUnnamedClassInitializedExpression.returnsPromiseProperty;
 invalidTestUnnamedClassInitializedExpression.returnsPromiseProperty
 	.then(() => {})
 	.finally(() => {});
+invalidTestClassExpression.returnsPromiseProperty
+	.then(() => {})
+	.finally(() => {});
+
+const invalidTestObject = {
+	returnsPromiseArrowFunction: async (): Promise<string> => {
+		return "value";
+	},
+
+	returnsPromiseFunction: async function (): Promise<string> {
+		return "value";
+	},
+
+	async returnsPromiseMethod(): Promise<string> {
+		return "value";
+	},
+
+	someMethod() {
+		this.returnsPromiseArrowFunction();
+		this.returnsPromiseFunction().then(() => {});
+		this["returnsPromiseMethod"]();
+	},
+};
+async function testInvalidObejctMethodCalls(): Promise<void> {
+	invalidTestObject.returnsPromiseArrowFunction();
+	invalidTestObject.returnsPromiseFunction().then(() => {});
+	invalidTestObject
+		.returnsPromiseMethod()
+		.then(() => {})
+		.finally(() => {});
+	invalidTestObject["returnsPromiseMethod"]();
+}
