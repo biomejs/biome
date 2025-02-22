@@ -88,7 +88,7 @@ impl CommentStyle for HtmlCommentStyle {
         parse_suppression_comment(text)
             .filter_map(Result::ok)
             .flat_map(|suppression| suppression.categories)
-            .any(|(key, _, _)| key == category!("format"))
+            .any(|(key, ..)| key == category!("format"))
     }
 
     fn get_comment_kind(_comment: &SyntaxTriviaPieceComments<HtmlLanguage>) -> CommentKind {

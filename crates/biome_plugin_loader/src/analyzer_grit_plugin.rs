@@ -20,7 +20,7 @@ use crate::{AnalyzerPlugin, PluginDiagnostic};
 #[derive(Clone, Debug)]
 pub struct AnalyzerGritPlugin {
     grit_query: Rc<GritQuery>,
- }
+}
 
 impl AnalyzerGritPlugin {
     pub fn load(fs: &dyn FileSystem, path: &Utf8Path) -> Result<Self, PluginDiagnostic> {

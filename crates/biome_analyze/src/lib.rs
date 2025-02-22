@@ -2,7 +2,6 @@
 
 use biome_console::markup;
 use biome_parser::AnyParse;
-use suppressions::LineSuppression;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
@@ -193,7 +192,7 @@ where
             let root: AnyParse = ctx.root.syntax().as_send().expect("not a root node").into();
             for diagnostic in plugin.evaluate(root, ctx.options.file_path.clone()) {
                 let name = diagnostic.subcategory.clone().expect("");
-                let text_range = diagnostic.span.clone().expect("");
+                let text_range = diagnostic.span.expect("");
 
                 // 1. check for top level suppression
                 if suppressions.top_level_suppression.suppressed_plugin(&name)
@@ -208,20 +207,17 @@ where
 
                 // 3. check for line suppression
                 let suppression = {
-                    let index =
-                        suppressions
-                            .line_suppressions
-                            .binary_search_by(|suppression| {
-                                if suppression.text_range.end() < text_range.start() {
-                                    Ordering::Less
-                                } else if text_range.end()
-                                    < suppression.text_range.start()
-                                {
-                                    Ordering::Greater
-                                } else {
-                                    Ordering::Equal
-                                }
-                            });
+                    let index = suppressions
+                        .line_suppressions
+                        .binary_search_by(|suppression| {
+                            if suppression.text_range.end() < text_range.start() {
+                                Ordering::Less
+                            } else if text_range.end() < suppression.text_range.start() {
+                                Ordering::Greater
+                            } else {
+                                Ordering::Equal
+                            }
+                        });
 
                     index
                         .ok()
@@ -229,10 +225,7 @@ where
                 };
 
                 let suppression = suppression.filter(|suppression| {
-                    if suppression.suppress_all {
-                        return true;
-                    }
-                    suppression.suppressed_plugins.contains(&name)
+                    suppression.suppress_all || suppression.suppressed_plugins.contains(&name)
                 });
 
                 if let Some(suppression) = suppression {

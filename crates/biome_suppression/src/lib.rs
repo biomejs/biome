@@ -253,10 +253,7 @@ fn parse_suppression_line(
 
         let (category, rest) = line.split_at(separator);
         let category = category.trim_end();
-        let (category, subcategory) = parse_category(category).map_err(|()| SuppressionDiagnostic {
-            message: SuppressionDiagnosticKind::ParseCategory(category.into()),
-            span: TextRange::at(offset_from(base, category), TextSize::of(category)),
-        })?;
+        let (category, subcategory) = parse_category(base, category)?;
 
         // Skip over and match the separator
         let (separator, rest) = rest.split_at(1);
@@ -312,15 +309,30 @@ fn parse_suppression_line(
     })
 }
 
-fn parse_category(category: &str) -> Result<(Option<&Category>, Option<&str>), ()> {
+/// Parse the comment's category part into (category, subcategory)
+///
+/// category is static, predefined in crates/biome_diagnostics_categories/src/categories.rs
+/// subcategory is dynamic (e.g user defined plugin name)
+///
+/// # Example
+/// - No category:      `// biome-ignore`                  -> `(None, None)`
+/// - Plugin category:  `// biome-ignore plugin/my-plugin` -> `("plugin", "my-plugin")`
+/// - Valid category:   `// biome-ignore lint/complexity`  -> `("lint/complexity", None)`
+/// - Invalid category: `// biome-ignore linx`             -> `Err(SuppressionDiagnostic)`
+fn parse_category<'a>(
+    base: &'a str,
+    category: &'a str,
+) -> Result<(Option<&'static Category>, Option<&'a str>), SuppressionDiagnostic> {
     if category.is_empty() {
         return Ok((None, None));
     }
     if let Some(rest) = category.strip_prefix("plugin/") {
         return Ok(("plugin".parse().ok(), Some(rest)));
     }
-    let category = category.parse()?;
-    // can create dynamic category here
+    let category: &'static Category = category.parse().map_err(|()| SuppressionDiagnostic {
+        message: SuppressionDiagnosticKind::ParseCategory(category.into()),
+        span: TextRange::at(offset_from(base, category), TextSize::of(category)),
+    })?;
     Ok((Some(category), None))
 }
 
@@ -361,7 +373,10 @@ mod tests_suppression_kinds {
             parse_suppression_comment("// biome-ignore format lint: explanation")
                 .collect::<Vec<_>>(),
             vec![Ok(Suppression {
-                categories: vec![(category!("format"), None, None), (category!("lint"), None, None)],
+                categories: vec![
+                    (category!("format"), None, None),
+                    (category!("lint"), None, None)
+                ],
                 reason: "explanation",
                 kind: SuppressionKind::Classic,
                 range: TextRange::new(TextSize::from(3), TextSize::from(15))
@@ -375,7 +390,10 @@ mod tests_suppression_kinds {
             parse_suppression_comment("// biome-ignore-all format lint: explanation")
                 .collect::<Vec<_>>(),
             vec![Ok(Suppression {
-                categories: vec![(category!("format"), None, None), (category!("lint"), None, None)],
+                categories: vec![
+                    (category!("format"), None, None),
+                    (category!("lint"), None, None)
+                ],
                 reason: "explanation",
                 kind: SuppressionKind::All,
                 range: TextRange::new(TextSize::from(3), TextSize::from(19))
@@ -389,7 +407,10 @@ mod tests_suppression_kinds {
             parse_suppression_comment("// biome-ignore-start format lint: explanation")
                 .collect::<Vec<_>>(),
             vec![Ok(Suppression {
-                categories: vec![(category!("format"), None, None), (category!("lint"), None, None)],
+                categories: vec![
+                    (category!("format"), None, None),
+                    (category!("lint"), None, None)
+                ],
                 reason: "explanation",
                 kind: SuppressionKind::RangeStart,
                 range: TextRange::new(TextSize::from(3), TextSize::from(21))
@@ -403,7 +424,10 @@ mod tests_suppression_kinds {
             parse_suppression_comment("// biome-ignore-end format lint: explanation")
                 .collect::<Vec<_>>(),
             vec![Ok(Suppression {
-                categories: vec![(category!("format"), None, None), (category!("lint"), None, None)],
+                categories: vec![
+                    (category!("format"), None, None),
+                    (category!("lint"), None, None)
+                ],
                 reason: "explanation",
                 kind: SuppressionKind::RangeEnd,
                 range: TextRange::new(TextSize::from(3), TextSize::from(19))
@@ -582,7 +606,10 @@ mod tests_biome_ignore_inline {
             parse_suppression_comment("// biome-ignore format lint: explanation")
                 .collect::<Vec<_>>(),
             vec![Ok(Suppression {
-                categories: vec![(category!("format"), None, None), (category!("lint"), None, None)],
+                categories: vec![
+                    (category!("format"), None, None),
+                    (category!("lint"), None, None)
+                ],
                 reason: "explanation",
                 kind: SuppressionKind::Classic,
                 range: TextRange::new(TextSize::from(3), TextSize::from(15))
@@ -822,7 +849,10 @@ mod tests_biome_ignore_toplevel {
             parse_suppression_comment("// biome-ignore-all format lint: explanation")
                 .collect::<Vec<_>>(),
             vec![Ok(Suppression {
-                categories: vec![(category!("format"), None, None), (category!("lint"), None, None)],
+                categories: vec![
+                    (category!("format"), None, None),
+                    (category!("lint"), None, None)
+                ],
                 reason: "explanation",
                 kind: SuppressionKind::All,
                 range: TextRange::new(TextSize::from(3), TextSize::from(19))
