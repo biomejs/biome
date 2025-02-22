@@ -667,7 +667,9 @@ declare_lint_rule! {
     /// - Non-capturing groups `(?:)`
     /// - Case-insensitive groups `(?i:)` and case-sensitive groups `(?-i:)`
     /// - A limited set of escaped characters including all special characters
-    ///   and regular string escape characters `\f`, `\n`, `\r`, `\t`, `\v`
+    ///   and regular string escape characters `\f`, `\n`, `\r`, `\t`, `\v`.
+    ///   Note that you can also escape special characters using character classes.
+    ///   For example, `\$` and `[$]` are two valid patterns that escape `$`.
     ///
     /// [case]: https://en.wikipedia.org/wiki/Naming_convention_(programming)#Examples_of_multiple-word_identifier_formats
     /// [`camelCase`]: https://en.wikipedia.org/wiki/Camel_case
