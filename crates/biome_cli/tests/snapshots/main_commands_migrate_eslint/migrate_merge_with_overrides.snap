@@ -8,7 +8,7 @@ expression: redactor(content)
 {
   "overrides": [
     {
-      "include": ["*.js"],
+      "includes": ["*.js"],
       "linter": { "enabled": false }
     }
   ]
@@ -53,13 +53,13 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
   
     1  1 │   {
     2    │ - ········"overrides":·[{
-    3    │ - ············"include":·["*.js"],
+    3    │ - ············"includes":·["*.js"],
     4    │ - ············"linter":·{·"enabled":·false·}
     5    │ - ········}]
     6    │ - ····}
        2 │ + → "linter":·{·"rules":·{·"recommended":·false·},·"includes":·["**"]·},
        3 │ + → "overrides":·[
-       4 │ + → → {·"include":·["*.js"],·"linter":·{·"enabled":·false·}·},
+       4 │ + → → {·"includes":·["*.js"],·"linter":·{·"enabled":·false·}·},
        5 │ + → → {
        6 │ + → → → "includes":·["bin/*.js",·"lib/*.js",·"!*.test.js"],
        7 │ + → → → "linter":·{·"rules":·{·"suspicious":·{·"noDoubleEquals":·"off"·}·}·}

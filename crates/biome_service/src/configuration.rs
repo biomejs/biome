@@ -1,4 +1,3 @@
-use crate::matcher::Pattern;
 use crate::settings::Settings;
 use crate::WorkspaceError;
 use biome_analyze::AnalyzerRules;
@@ -299,39 +298,9 @@ pub fn load_editorconfig(
     // How .editorconfig is supposed to be resolved: https://editorconfig.org/#file-location
     // We currently don't support the `root` property, so we just search for the file like we do for biome.json
     if let Some(auto_search_result) = fs.auto_search_file(&workspace_root, ".editorconfig") {
-        let AutoSearchResult {
-            content,
-            file_path: path,
-            ..
-        } = auto_search_result;
+        let AutoSearchResult { content, .. } = auto_search_result;
         let editorconfig = biome_configuration::editorconfig::parse_str(&content)?;
-        let config = editorconfig.to_biome();
-
-        let patterns = config
-            .0
-            .as_ref()
-            .and_then(|c| c.overrides.as_ref())
-            .map(|overrides| {
-                overrides
-                    .0
-                    .iter()
-                    .flat_map(|override_pattern| override_pattern.include.iter().flatten())
-            });
-
-        if let Some(patterns) = patterns {
-            for pattern in patterns {
-                if let Err(err) = Pattern::new(pattern) {
-                    return Err(BiomeDiagnostic::new_invalid_ignore_pattern_with_path(
-                        pattern,
-                        err.to_string(),
-                        path.as_str(),
-                    )
-                    .into());
-                }
-            }
-        }
-
-        Ok(config)
+        Ok(editorconfig.to_biome())
     } else {
         Ok((None, vec![]))
     }

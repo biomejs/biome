@@ -2993,6 +2993,10 @@
 			},
 			"additionalProperties": false
 		},
+		"OverrideGlobs": {
+			"type": "array",
+			"items": { "$ref": "#/definitions/Glob" }
+		},
 		"OverrideLinterConfiguration": {
 			"type": "object",
 			"properties": {
@@ -3057,15 +3061,12 @@
 						{ "type": "null" }
 					]
 				},
-				"include": {
-					"description": "A list of Unix shell style patterns. Biome will include files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
 				"includes": {
 					"description": "A list of glob patterns. Biome will include files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "$ref": "#/definitions/Glob" }
+					"anyOf": [
+						{ "$ref": "#/definitions/OverrideGlobs" },
+						{ "type": "null" }
+					]
 				},
 				"javascript": {
 					"description": "Specific configuration for the JavaScript language",
