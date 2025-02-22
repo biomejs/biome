@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/commands/rage.rs
 expression: content
-snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -37,6 +36,7 @@ Environment:
 Biome Configuration:
   Error:                        Expected an array, an object, or a literal but instead found '}'.
   Status:                       Loaded with errors
+  Path:                         biome.json
   Formatter enabled:            true
   Linter enabled:               true
   Assist enabled:               true

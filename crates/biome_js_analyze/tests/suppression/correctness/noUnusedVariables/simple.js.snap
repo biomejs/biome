@@ -12,7 +12,7 @@ let c = !a || !b;
 ```
 simple.js:1:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  i This variable is unused.
   
   > 1 │ let c = !a || !b;
       │     ^

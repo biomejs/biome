@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidComponent.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -16,7 +17,7 @@ function component() {
 ```
 invalidComponent.jsx:1:8 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
+  i Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
   > 1 │ import HTMLWrapper from "HTMLWrapper.tsx";
       │        ^^^^^^^^^^^

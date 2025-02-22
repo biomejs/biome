@@ -15,7 +15,7 @@ enum Status {
 ```
 invalid.graphql:2:2 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Enum values should be in all caps.
+  i Enum values should be in all caps.
   
     1 │ enum Status {
   > 2 │ 	Active

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid_unexported_component.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -12,7 +13,7 @@ createRoot(document.getElementById("root")).render(<App />);
 ```
 invalid_unexported_component.jsx:1:7 lint/nursery/useComponentExportOnlyModules ━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexported components are not allowed.
+  i Unexported components are not allowed.
   
   > 1 │ const App = () => {}
       │       ^^^

@@ -122,7 +122,10 @@ impl Rule for NoSelfAssign {
                 markup! {
                     "This is where is assigned."
                 },
-            ),
+            )
+            .note(markup! {
+             "Self assignments have no effect and can be removed."
+            }),
         )
     }
 }

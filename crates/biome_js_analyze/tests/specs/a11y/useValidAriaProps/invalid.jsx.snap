@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -16,7 +17,7 @@ var a = <div aria-skldjfaria-foo1="foobar" aria-skldjfaria-foo222="foobar" />;
 ```
 invalid.jsx:1:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element contains invalid ARIA attribute(s)
+  × The element contains invalid ARIA attribute(s)
   
   > 1 │ var a = <input className="" aria-labell="" />;
       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -41,7 +42,7 @@ invalid.jsx:1:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:2:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element contains invalid ARIA attribute(s)
+  × The element contains invalid ARIA attribute(s)
   
     1 │ var a = <input className="" aria-labell="" />;
   > 2 │ var a = <div aria-="foobar" />;
@@ -68,7 +69,7 @@ invalid.jsx:2:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:3:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element contains invalid ARIA attribute(s)
+  × The element contains invalid ARIA attribute(s)
   
     1 │ var a = <input className="" aria-labell="" />;
     2 │ var a = <div aria-="foobar" />;
@@ -97,7 +98,7 @@ invalid.jsx:3:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:4:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element contains invalid ARIA attribute(s)
+  × The element contains invalid ARIA attribute(s)
   
     2 │ var a = <div aria-="foobar" />;
     3 │ var a = <div aria-labeledby="foobar" />;
@@ -126,7 +127,7 @@ invalid.jsx:4:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:5:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element contains invalid ARIA attribute(s)
+  × The element contains invalid ARIA attribute(s)
   
     3 │ var a = <div aria-labeledby="foobar" />;
     4 │ var a = <div aria-skldjfaria-foo1="foobar" />;
@@ -153,7 +154,7 @@ invalid.jsx:5:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:5:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The element contains invalid ARIA attribute(s)
+  × The element contains invalid ARIA attribute(s)
   
     3 │ var a = <div aria-labeledby="foobar" />;
     4 │ var a = <div aria-skldjfaria-foo1="foobar" />;

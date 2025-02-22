@@ -21,7 +21,7 @@ const baz = 3;
 ```
 invalid_multiple_separate_exports.js:7:1 lint/nursery/useExportsLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All exports should be declared after all non-export statements.
+  i All exports should be declared after all non-export statements.
   
     6 │ export { foo, bar };
   > 7 │ export default (x) = x ** 2;

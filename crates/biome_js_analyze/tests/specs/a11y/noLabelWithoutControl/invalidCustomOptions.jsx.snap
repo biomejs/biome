@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidCustomOptions.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -13,7 +14,7 @@ expression: invalidCustomOptions.jsx
 ```
 invalidCustomOptions.jsx:1:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with an input.
+  × A form label must be associated with an input.
   
   > 1 │ <CustomLabel><span><CustomInput /></span></CustomLabel>;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -28,7 +29,7 @@ invalidCustomOptions.jsx:1:1 lint/a11y/noLabelWithoutControl ━━━━━━�
 ```
 invalidCustomOptions.jsx:2:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with an input.
+  × A form label must be associated with an input.
   
     1 │ <CustomLabel><span><CustomInput /></span></CustomLabel>;
   > 2 │ <CustomLabel aria-label="A label" />;

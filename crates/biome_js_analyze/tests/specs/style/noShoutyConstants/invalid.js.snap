@@ -40,7 +40,7 @@ export const e = {
 ```
 invalid.js:4:7 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Redundant constant declaration.
+  i Redundant constant declaration.
   
     2 │ console.log(FOO, FOO2);
     3 │ 
@@ -78,7 +78,7 @@ invalid.js:4:7 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:4:34 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Redundant constant declaration.
+  i Redundant constant declaration.
   
     2 │ console.log(FOO, FOO2);
     3 │ 
@@ -118,7 +118,7 @@ invalid.js:4:34 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:20:7 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Redundant constant declaration.
+  i Redundant constant declaration.
   
     18 │ };
     19 │ 
@@ -158,7 +158,7 @@ invalid.js:20:7 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:26:7 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Redundant constant declaration.
+  i Redundant constant declaration.
   
     24 │ };
     25 │ 

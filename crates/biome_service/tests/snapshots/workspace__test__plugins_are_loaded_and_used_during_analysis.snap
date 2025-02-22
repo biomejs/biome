@@ -1,0 +1,40 @@
+---
+source: crates/biome_service/tests/workspace.rs
+expression: result.diagnostics
+---
+[
+    Diagnostic {
+        category: Some(
+            Category {
+                name: "plugin",
+                link: None,
+            },
+        ),
+        severity: Information,
+        description: "Prefer object spread instead of `Object.assign()`",
+        message: "Prefer object spread instead of `Object.assign()`",
+        advices: Advices {
+            advices: [],
+        },
+        verbose_advices: Advices {
+            advices: [],
+        },
+        location: Location {
+            path: Some(
+                File(
+                    "/project/a.ts",
+                ),
+            ),
+            span: Some(
+                24..38,
+            ),
+            source_code: None,
+        },
+        tags: DiagnosticTags(
+            BitFlags<DiagnosticTag> {
+                bits: 0b0,
+            },
+        ),
+        source: None,
+    },
+]

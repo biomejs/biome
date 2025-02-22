@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -21,7 +22,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
     1 │ <>
   > 2 │ 	<meta charset="UTF-8" aria-hidden="false" />
@@ -41,7 +42,7 @@ invalid.jsx:2:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
 ```
 invalid.jsx:3:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
     1 │ <>
     2 │ 	<meta charset="UTF-8" aria-hidden="false" />
@@ -62,7 +63,7 @@ invalid.jsx:3:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
 ```
 invalid.jsx:4:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
     2 │ 	<meta charset="UTF-8" aria-hidden="false" />
     3 │ 	<meta charset="UTF-8" role="meta" />
@@ -83,7 +84,7 @@ invalid.jsx:4:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
 ```
 invalid.jsx:5:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
     3 │ 	<meta charset="UTF-8" role="meta" />
     4 │ 	<html aria-required="true" />
@@ -104,7 +105,7 @@ invalid.jsx:5:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
 ```
 invalid.jsx:6:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
     4 │ 	<html aria-required="true" />
     5 │ 	<html role="html"></html>
@@ -125,7 +126,7 @@ invalid.jsx:6:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
 ```
 invalid.jsx:7:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
     5 │ 	<html role="html"></html>
     6 │ 	<script aria-label="script"></script>
@@ -146,7 +147,7 @@ invalid.jsx:7:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
 ```
 invalid.jsx:8:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
      6 │ 	<script aria-label="script"></script>
      7 │ 	<script role="script"></script>
@@ -167,7 +168,7 @@ invalid.jsx:8:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
 ```
 invalid.jsx:9:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
      7 │ 	<script role="script"></script>
      8 │ 	<style aria-labelledby></style>
@@ -184,5 +185,3 @@ invalid.jsx:9:2 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
       │          ------------         
 
 ```
-
-

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-non-strict-mode.cjs
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -33,7 +34,7 @@ function f() {
 ```
 invalid-non-strict-mode.cjs:7:12 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Shouldn't redeclare 'foo'. Consider to delete it or rename it.
+  × Shouldn't redeclare 'foo'. Consider to delete it or rename it.
   
     5 │ 	}
     6 │ 	default: {
@@ -57,7 +58,7 @@ invalid-non-strict-mode.cjs:7:12 lint/suspicious/noRedeclare ━━━━━━�
 ```
 invalid-non-strict-mode.cjs:19:13 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Shouldn't redeclare 'foo'. Consider to delete it or rename it.
+  × Shouldn't redeclare 'foo'. Consider to delete it or rename it.
   
     17 │ 		}
     18 │ 		default: {

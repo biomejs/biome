@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -14,7 +15,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:1:8 lint/style/noImplicitBoolean  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use explicit boolean values for boolean JSX props.
+  i Use explicit boolean values for boolean JSX props.
   
   > 1 │ <input disabled />;
       │        ^^^^^^^^
@@ -31,7 +32,7 @@ invalid.jsx:1:8 lint/style/noImplicitBoolean  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:2:8 lint/style/noImplicitBoolean  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use explicit boolean values for boolean JSX props.
+  i Use explicit boolean values for boolean JSX props.
   
     1 │ <input disabled />;
   > 2 │ <input accept /** some comment */ />;
@@ -49,7 +50,7 @@ invalid.jsx:2:8 lint/style/noImplicitBoolean  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:3:28 lint/style/noImplicitBoolean  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use explicit boolean values for boolean JSX props.
+  i Use explicit boolean values for boolean JSX props.
   
     1 │ <input disabled />;
     2 │ <input accept /** some comment */ />;
@@ -63,5 +64,3 @@ invalid.jsx:3:28 lint/style/noImplicitBoolean  FIXABLE  ━━━━━━━━
       │                                  +++++++    
 
 ```
-
-

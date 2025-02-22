@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue4567.js
+snapshot_kind: text
 ---
 # Input
 ```js
@@ -14,7 +15,7 @@ function{
 ```
 issue4567.js:3:24 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook specifies more dependencies than necessary: w
+  × This hook specifies more dependencies than necessary: w
   
     1 │ import {useCallback,utte } from"react";
     2 │ function{

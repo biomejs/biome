@@ -16,7 +16,7 @@ use biome_string_case::StrLikeExtension;
 use crate::JsRuleAction;
 
 declare_lint_rule! {
-    /// This rule checks that the result of a `typeof' expression is compared to a valid value.
+    /// This rule checks that the result of a `typeof` expression is compared to a valid value.
     ///
     /// ## Examples
     ///

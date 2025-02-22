@@ -12,7 +12,7 @@ snapshot_kind: text
 ```
 invalid-non-ascii-café.js lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The filename should be in ASCII because requireAscii is set to `true`.
+  i The filename should be in ASCII because requireAscii is set to `true`.
   
   i If you want to use non-ASCII filenames, then set the requireAscii option to `false`.
     See the rule options for more details.

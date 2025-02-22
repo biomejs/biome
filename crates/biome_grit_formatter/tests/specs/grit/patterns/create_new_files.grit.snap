@@ -1,7 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: grit/patterns/create_new_files.grit
-snapshot_kind: text
 ---
 # Input
 
@@ -29,6 +28,6 @@ Attribute Position: Auto
 	$functionName <: r"test.*",
 	$f => .,
 	$new_file_name = `$functionName.test.js`,
-	$new_files += file(name = $new_file_name, body = $f)
+	$new_files += file(name=$new_file_name, body=$f)
 }
 ```

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidExplicit.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -60,7 +61,7 @@ abstract class InvalidExplicit8 {
 ```
 invalidExplicit.ts:2:22 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing accessibility modifier on this member.
+  × Missing accessibility modifier on this member.
   
     1 │ class InvalidExplicit {
   > 2 │   public constructor(readonly value: string) {}
@@ -76,7 +77,7 @@ invalidExplicit.ts:2:22 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidExplicit.ts:6:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing accessibility modifier on this member.
+  × Missing accessibility modifier on this member.
   
     5 │ class InvalidExplicit2 {
   > 6 │   x: number;
@@ -92,7 +93,7 @@ invalidExplicit.ts:6:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidExplicit.ts:14:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing accessibility modifier on this member.
+  × Missing accessibility modifier on this member.
   
     12 │ class InvalidExplicit3 {
     13 │   private x: number;
@@ -112,7 +113,7 @@ invalidExplicit.ts:14:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidExplicit.ts:20:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing accessibility modifier on this member.
+  × Missing accessibility modifier on this member.
   
     19 │ class InvalidExplicit4 {
   > 20 │   x?: number;
@@ -128,7 +129,7 @@ invalidExplicit.ts:20:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidExplicit.ts:21:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing accessibility modifier on this member.
+  × Missing accessibility modifier on this member.
   
     19 │ class InvalidExplicit4 {
     20 │   x?: number;
@@ -148,7 +149,7 @@ invalidExplicit.ts:21:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidExplicit.ts:28:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing accessibility modifier on this member.
+  × Missing accessibility modifier on this member.
   
     26 │ class InvalidExplicit5 {
     27 │   private x: number;
@@ -168,7 +169,7 @@ invalidExplicit.ts:28:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidExplicit.ts:31:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing accessibility modifier on this member.
+  × Missing accessibility modifier on this member.
   
     29 │     this.x = x;
     30 │   }
@@ -188,7 +189,7 @@ invalidExplicit.ts:31:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidExplicit.ts:34:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing accessibility modifier on this member.
+  × Missing accessibility modifier on this member.
   
     32 │     return this.x;
     33 │   }
@@ -208,7 +209,7 @@ invalidExplicit.ts:34:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidExplicit.ts:40:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing accessibility modifier on this member.
+  × Missing accessibility modifier on this member.
   
     39 │ class InvalidExplicit6 {
   > 40 │   x = 2;
@@ -224,7 +225,7 @@ invalidExplicit.ts:40:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidExplicit.ts:44:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing accessibility modifier on this member.
+  × Missing accessibility modifier on this member.
   
     43 │ class InvalidExplicit7 {
   > 44 │   constructor(public x: any[]) {}
@@ -240,7 +241,7 @@ invalidExplicit.ts:44:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidExplicit.ts:48:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing accessibility modifier on this member.
+  × Missing accessibility modifier on this member.
   
     47 │ abstract class InvalidExplicit8 {
   > 48 │   abstract x: string;

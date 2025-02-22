@@ -129,7 +129,7 @@ dependencies = [
  "camino",
  "enumflags2",
  "indexmap",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "tracing",
@@ -195,7 +195,7 @@ dependencies = [
  "quick-junit",
  "rayon",
  "regex",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "serde",
  "serde_json",
  "smallvec",
@@ -237,7 +237,7 @@ dependencies = [
  "camino",
  "insta",
  "oxc_resolver",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "serde_ini",
@@ -263,7 +263,7 @@ name = "biome_control_flow"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
 ]
 
 [[package]]
@@ -287,7 +287,7 @@ dependencies = [
  "camino",
  "insta",
  "regex",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "tests_macros",
@@ -355,7 +355,7 @@ dependencies = [
  "biome_css_parser",
  "biome_css_syntax",
  "biome_rowan",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
 ]
 
 [[package]]
@@ -387,7 +387,7 @@ dependencies = [
  "once_cell",
  "oxc_resolver",
  "papaya",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "seize",
  "serde_json",
 ]
@@ -491,7 +491,7 @@ dependencies = [
  "drop_bomb",
  "indexmap",
  "insta",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "tracing",
@@ -533,7 +533,7 @@ dependencies = [
  "parking_lot",
  "path-absolutize",
  "rayon",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "serde_json",
@@ -631,7 +631,7 @@ dependencies = [
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_rowan",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
 ]
 
 [[package]]
@@ -720,7 +720,7 @@ dependencies = [
  "path-absolutize",
  "rand 0.8.5",
  "regex",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "serde_json",
@@ -834,7 +834,7 @@ dependencies = [
  "natord",
  "regex",
  "roaring",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "smallvec",
@@ -903,7 +903,7 @@ dependencies = [
  "insta",
  "quickcheck",
  "quickcheck_macros",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "serde_json",
@@ -922,7 +922,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_rowan",
  "rust-lapper",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "smallvec",
 ]
 
@@ -975,7 +975,7 @@ dependencies = [
  "camino",
  "insta",
  "natord",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "tests_macros",
 ]
 
@@ -1053,7 +1053,7 @@ dependencies = [
  "biome_rowan",
  "indexmap",
  "oxc_resolver",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "static_assertions",
 ]
 
@@ -1075,7 +1075,7 @@ dependencies = [
  "camino",
  "futures",
  "papaya",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "serde",
  "serde_json",
  "tokio",
@@ -1090,7 +1090,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "biome_rowan",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "tower",
  "tower-lsp",
 ]
@@ -1158,7 +1158,7 @@ dependencies = [
  "biome_test_utils",
  "camino",
  "insta",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "tests_macros",
 ]
 
@@ -1181,7 +1181,7 @@ dependencies = [
  "insta",
  "node-semver",
  "oxc_resolver",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "serde",
  "static_assertions",
  "tests_macros",
@@ -1218,6 +1218,8 @@ dependencies = [
  "grit-pattern-matcher",
  "grit-util",
  "insta",
+ "papaya",
+ "rustc-hash 2.1.1",
  "serde",
 ]
 
@@ -1229,7 +1231,7 @@ dependencies = [
  "biome_parser",
  "camino",
  "papaya",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
 ]
 
 [[package]]
@@ -1243,7 +1245,7 @@ dependencies = [
  "iai",
  "quickcheck",
  "quickcheck_macros",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "serde_json",
@@ -1290,6 +1292,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_package",
  "biome_parser",
+ "biome_plugin_loader",
  "biome_project_layout",
  "biome_rowan",
  "biome_string_case",
@@ -1303,7 +1306,7 @@ dependencies = [
  "papaya",
  "rayon",
  "regex",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "serde_json",
@@ -2985,7 +2988,7 @@ dependencies = [
  "json-strip-comments",
  "once_cell",
  "papaya",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "seize",
  "serde",
  "serde_json",
@@ -2996,9 +2999,9 @@ dependencies = [
 
 [[package]]
 name = "papaya"
-version = "0.1.8"
+version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc7c76487f7eaa00a0fc1d7f88dc6b295aec478d11b0fc79f857b62c2874124c"
+checksum = "aeb8b9616002a83f9779ea70a2a44364fe804f8b532b96989d0790a34ad76479"
 dependencies = [
  "equivalent",
  "seize",
@@ -3543,9 +3546,9 @@ checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
 name = "rustc-hash"
-version = "2.1.0"
+version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7fb8039b3032c191086b10f11f319a6e99e1e82889c5cc6046f515c9db1d497"
+checksum = "357703d41365b4b27c590e3ed91eabb1b663f07c4c084095e60cbed4362dff0d"
 
 [[package]]
 name = "rustix"
@@ -3733,9 +3736,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.137"
+version = "1.0.139"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "930cfb6e6abf99298aaad7d29abbef7a9999a9a8806a40088f55f0dcec03146b"
+checksum = "44f86c3acccc9c65b153fe1b85a3be07fe5515274ec9f0653b4a0875731c72a6"
 dependencies = [
  "indexmap",
  "itoa",
@@ -4976,6 +4979,9 @@ dependencies = [
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_grit_patterns",
+ "biome_html_formatter",
+ "biome_html_parser",
+ "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_formatter",
  "biome_js_parser",

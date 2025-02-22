@@ -1,7 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: grit/file_node.grit
-snapshot_kind: text
 ---
 # Input
 
@@ -25,5 +24,5 @@ Attribute Position: Auto
 -----
 
 ```grit
-file(body = contains `console.$method` => `println`)
+file(body=contains `console.$method` => `println`)
 ```

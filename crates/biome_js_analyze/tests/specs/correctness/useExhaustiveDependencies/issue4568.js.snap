@@ -18,7 +18,7 @@ xpor function ueCanvasn(
 ```
 issue4568.js:6:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook specifies more dependencies than necessary: c
+  × This hook specifies more dependencies than necessary: c
   
     4 │ xpor function ueCanvasn(
     5 │ ) {

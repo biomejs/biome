@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidVariable.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -28,7 +29,7 @@ const test = <T extends Partial<any>>() => {};
 ```
 invalidVariable.ts:1:15 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
   > 1 │ const number: any = 1
       │               ^^^
@@ -43,7 +44,7 @@ invalidVariable.ts:1:15 lint/suspicious/noExplicitAny ━━━━━━━━�
 ```
 invalidVariable.ts:3:17 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     1 │ const number: any = 1
     2 │ 
@@ -60,7 +61,7 @@ invalidVariable.ts:3:17 lint/suspicious/noExplicitAny ━━━━━━━━�
 ```
 invalidVariable.ts:5:18 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     3 │ const anyArray: any[] = []
     4 │ 
@@ -77,7 +78,7 @@ invalidVariable.ts:5:18 lint/suspicious/noExplicitAny ━━━━━━━━�
 ```
 invalidVariable.ts:7:24 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     5 │ const anyMatrix: any[][] = []
     6 │ 
@@ -94,7 +95,7 @@ invalidVariable.ts:7:24 lint/suspicious/noExplicitAny ━━━━━━━━�
 ```
 invalidVariable.ts:9:31 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
      7 │ const anyArray2: Array<any> = []
      8 │ 
@@ -111,7 +112,7 @@ invalidVariable.ts:9:31 lint/suspicious/noExplicitAny ━━━━━━━━�
 ```
 invalidVariable.ts:11:22 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
      9 │ const anyMatrix2: Array<Array<any>> = []
     10 │ 
@@ -128,7 +129,7 @@ invalidVariable.ts:11:22 lint/suspicious/noExplicitAny ━━━━━━━━�
 ```
 invalidVariable.ts:11:33 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
      9 │ const anyMatrix2: Array<Array<any>> = []
     10 │ 
@@ -145,7 +146,7 @@ invalidVariable.ts:11:33 lint/suspicious/noExplicitAny ━━━━━━━━�
 ```
 invalidVariable.ts:13:33 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     11 │ const anyGenerics: T<any, Array<any>> = []
     12 │ 
@@ -162,7 +163,7 @@ invalidVariable.ts:13:33 lint/suspicious/noExplicitAny ━━━━━━━━�
 ```
 invalidVariable.ts:15:24 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     13 │ const bar5 = function (...args: any) {}
     14 │ 
@@ -179,7 +180,7 @@ invalidVariable.ts:15:24 lint/suspicious/noExplicitAny ━━━━━━━━�
 ```
 invalidVariable.ts:17:33 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected any. Specify a different type.
+  × Unexpected any. Specify a different type.
   
     15 │ const baz5 = (...args: any) => {}
     16 │ 
@@ -191,5 +192,3 @@ invalidVariable.ts:17:33 lint/suspicious/noExplicitAny ━━━━━━━━�
   
 
 ```
-
-

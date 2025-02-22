@@ -21,7 +21,7 @@ impl FormatNodeRule<GritVersion> for FormatGritVersion {
                 engine_name.format(),
                 l_paren_token.format(),
                 version.format(),
-                r_paren_token.format()
+                r_paren_token.format(),
             ]
         )
     }

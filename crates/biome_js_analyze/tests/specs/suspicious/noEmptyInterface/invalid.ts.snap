@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -12,7 +13,7 @@ interface Foo {}
 ```
 invalid.ts:1:1 lint/suspicious/noEmptyInterface  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! An empty interface is equivalent to {}.
+  × An empty interface is equivalent to {}.
   
   > 1 │ interface Foo {}
       │ ^^^^^^^^^^^^^^^^
@@ -26,5 +27,3 @@ invalid.ts:1:1 lint/suspicious/noEmptyInterface  FIXABLE  ━━━━━━━�
   
 
 ```
-
-

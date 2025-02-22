@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -14,7 +15,7 @@ enum MyEnum {
 ```
 invalid.ts:1:1 lint/nursery/noEnum ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use enum
+  i Don't use enum
   
   > 1 │ enum MyEnum {
       │ ^^^^^^^^^^^^^

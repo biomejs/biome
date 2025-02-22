@@ -38,33 +38,23 @@ snapshot_kind: text
         "noNonNullAssertion": "off",
         "noUselessElse": "off",
         "useLiteralEnumMembers": "error",
-        "noArguments": "error",
-        "useShorthandFunctionType": "error",
-        "useExportType": "error",
-        "useDefaultParameterLast": "error",
         "noCommaOperator": "error",
-        "useSingleVarDeclarator": "error",
         "useNodejsImportProtocol": "error",
-        "useConst": "error",
-        "noInferrableTypes": "error",
-        "useExponentiationOperator": "error",
-        "useSelfClosingElements": "error",
-        "useImportType": "error",
-        "useNumberNamespace": "error",
         "useAsConstAssertion": "error",
         "useNumericLiterals": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useConst": "error",
+        "useSingleVarDeclarator": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error",
+        "useExponentiationOperator": "error",
         "useTemplate": "error",
-        "useEnumInitializers": "error"
-      },
-      "security": {
-        "noDangerouslySetInnerHtml": "off"
-      },
-      "suspicious": {
-        "noExplicitAny": "off",
-        "noShadowRestrictedNames": "off",
-        "noConfusingVoidType": "off",
-        "noArrayIndexKey": "off",
-        "noAssignInExpressions": "off"
+        "useDefaultParameterLast": "error",
+        "noArguments": "error",
+        "useImportType": "error",
+        "useExportType": "error",
+        "useShorthandFunctionType": "error"
       },
       "a11y": {
         "noSvgWithoutTitle": "off",
@@ -80,6 +70,16 @@ snapshot_kind: text
       "correctness": {
         "useExhaustiveDependencies": "off",
         "useJsxKeyInIterable": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off",
+        "noShadowRestrictedNames": "off",
+        "noConfusingVoidType": "off",
+        "noArrayIndexKey": "off",
+        "noAssignInExpressions": "off"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
       }
     }
   }

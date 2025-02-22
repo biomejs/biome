@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalidQuotes.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -13,7 +14,7 @@ expression: invalidQuotes.css
 ```
 invalidQuotes.css:2:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Each @import should be unique unless differing by media queries.
+  × Each @import should be unique unless differing by media queries.
   
     1 │ @import "a.css";
   > 2 │ @import 'a.css';
