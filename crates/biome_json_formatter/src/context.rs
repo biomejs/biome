@@ -2,7 +2,7 @@ use crate::comments::{FormatJsonLeadingComment, JsonComments};
 use crate::JsonCommentStyle;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::separated::TrailingSeparator;
-use biome_formatter::{prelude::*, BracketSpacing, IndentWidth};
+use biome_formatter::{prelude::*, BracketSpacing, IndentWidth, ObjectWrap};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TransformSourceMap,
@@ -68,6 +68,7 @@ pub struct JsonFormatOptions {
     trailing_commas: TrailingCommas,
     expand: Expand,
     bracket_spacing: BracketSpacing,
+    object_wrap: ObjectWrap,
     /// The kind of file
     file_source: JsonFileSource,
 }
@@ -184,6 +185,11 @@ impl JsonFormatOptions {
         self
     }
 
+    pub fn with_object_wrap(mut self, object_wrap: ObjectWrap) -> Self {
+        self.object_wrap = object_wrap;
+        self
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -213,8 +219,16 @@ impl JsonFormatOptions {
         self.expand = expand;
     }
 
+    pub fn set_object_wrap(&mut self, object_wrap: ObjectWrap) {
+        self.object_wrap = object_wrap;
+    }
+
     pub fn bracket_spacing(&self) -> BracketSpacing {
         self.bracket_spacing
+    }
+
+    pub fn object_wrap(&self) -> ObjectWrap {
+        self.object_wrap
     }
 
     pub(crate) fn to_trailing_separator(&self) -> TrailingSeparator {
@@ -264,6 +278,7 @@ impl fmt::Display for JsonFormatOptions {
         writeln!(f, "Trailing commas: {}", self.trailing_commas)?;
         writeln!(f, "Expand: {}", self.expand)?;
         writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
+        writeln!(f, "Object wrap: {}", self.object_wrap)?;
 
         Ok(())
     }

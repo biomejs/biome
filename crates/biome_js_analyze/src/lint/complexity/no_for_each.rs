@@ -99,8 +99,7 @@ declare_lint_rule! {
             RuleSource::EslintUnicorn("no-array-for-each"),
             RuleSource::Clippy("needless_for_each"),
         ],
-        recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
     }
 }
 

@@ -20,7 +20,7 @@ createElement('div', {
 ```
 createElementBindingInvalid.js:4:5 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  × Avoid passing content using the dangerouslySetInnerHTML prop.
   
     3 │ React.createElement('div', {
   > 4 │     dangerouslySetInnerHTML: { __html: 'child' }
@@ -36,7 +36,7 @@ createElementBindingInvalid.js:4:5 lint/security/noDangerouslySetInnerHtml ━�
 ```
 createElementBindingInvalid.js:8:5 lint/security/noDangerouslySetInnerHtml ━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid passing content using the dangerouslySetInnerHTML prop.
+  × Avoid passing content using the dangerouslySetInnerHTML prop.
   
     7 │ createElement('div', {
   > 8 │     dangerouslySetInnerHTML: { __html: 'child' }

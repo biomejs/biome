@@ -466,6 +466,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         skip,
         suppression_reason,
         enabled_rules: rules,
+        plugins: _,
     } = params;
     let _ = debug_span!("Code actions GraphQL", range =? range, path =? path).entered();
     let tree = parse.tree();

@@ -33,21 +33,21 @@ biome.jsonc migrate ━━━━━━━━━━━━━━━━━━━━
        9 │ + → → "attributePosition":·"auto",
       10 │ + → → "bracketSameLine":·false,
       11 │ + → → "bracketSpacing":·true,
-      12 │ + → → "useEditorconfig":·true
-      13 │ + → },
-      14 │ + → "linter":·{·"enabled":·true·},
-      15 │ + → "javascript":·{
-      16 │ + → → "formatter":·{
-      17 │ + → → → "jsxQuoteStyle":·"double",
-      18 │ + → → → "quoteProperties":·"asNeeded",
-      19 │ + → → → "trailingCommas":·"all",
-      20 │ + → → → "semicolons":·"always",
-      21 │ + → → → "arrowParentheses":·"always",
-      22 │ + → → → "bracketSameLine":·false,
-      23 │ + → → → "quoteStyle":·"single",
-      24 │ + → → → "attributePosition":·"auto",
-      25 │ + → → → "bracketSpacing":·true,
-      26 │ + → → → "objectWrap":·"preserve"
+      12 │ + → → "objectWrap":·"preserve",
+      13 │ + → → "useEditorconfig":·true
+      14 │ + → },
+      15 │ + → "linter":·{·"enabled":·true·},
+      16 │ + → "javascript":·{
+      17 │ + → → "formatter":·{
+      18 │ + → → → "jsxQuoteStyle":·"double",
+      19 │ + → → → "quoteProperties":·"asNeeded",
+      20 │ + → → → "trailingCommas":·"all",
+      21 │ + → → → "semicolons":·"always",
+      22 │ + → → → "arrowParentheses":·"always",
+      23 │ + → → → "bracketSameLine":·false,
+      24 │ + → → → "quoteStyle":·"single",
+      25 │ + → → → "attributePosition":·"auto",
+      26 │ + → → → "bracketSpacing":·true
       27 │ + → → }
       28 │ + → }
       29 │ + }

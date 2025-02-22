@@ -51,6 +51,7 @@ biome_json_parser       = { workspace = true }
 biome_json_syntax       = { workspace = true }
 biome_package           = { workspace = true }
 biome_parser            = { workspace = true }
+biome_plugin_loader     = { workspace = true }
 biome_project_layout    = { workspace = true }
 biome_rowan             = { workspace = true, features = ["serde"] }
 biome_string_case       = { workspace = true }

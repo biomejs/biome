@@ -16,7 +16,7 @@ function JsThrowStatement1() {
 ```
 JsThrowStatement.js:3:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     1 │ function JsThrowStatement1() {
     2 │     throw new Error();

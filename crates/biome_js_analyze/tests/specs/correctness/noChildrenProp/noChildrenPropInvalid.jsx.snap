@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: noChildrenPropInvalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -36,7 +37,7 @@ aliased('div', {
 ```
 noChildrenPropInvalid.jsx:4:16 lint/correctness/noChildrenProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid passing children using a prop
+  × Avoid passing children using a prop
   
     3 │ <>
   > 4 │     <Component children={'foo'}></Component>
@@ -52,7 +53,7 @@ noChildrenPropInvalid.jsx:4:16 lint/correctness/noChildrenProp ━━━━━�
 ```
 noChildrenPropInvalid.jsx:6:7 lint/correctness/noChildrenProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid passing children using a prop
+  × Avoid passing children using a prop
   
     4 │     <Component children={'foo'}></Component>
     5 │     <Component
@@ -69,7 +70,7 @@ noChildrenPropInvalid.jsx:6:7 lint/correctness/noChildrenProp ━━━━━━
 ```
 noChildrenPropInvalid.jsx:10:7 lint/correctness/noChildrenProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid passing children using a prop
+  × Avoid passing children using a prop
   
      8 │     <Child·
      9 │       className='testing'
@@ -86,7 +87,7 @@ noChildrenPropInvalid.jsx:10:7 lint/correctness/noChildrenProp ━━━━━�
 ```
 noChildrenPropInvalid.jsx:19:5 lint/correctness/noChildrenProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid passing children using a prop
+  × Avoid passing children using a prop
   
     18 │ React.createElement('div', {
   > 19 │     children: 'foo'
@@ -102,7 +103,7 @@ noChildrenPropInvalid.jsx:19:5 lint/correctness/noChildrenProp ━━━━━�
 ```
 noChildrenPropInvalid.jsx:24:2 lint/correctness/noChildrenProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid passing children using a prop
+  × Avoid passing children using a prop
   
     23 │ aliased('div', {
   > 24 │ 	children: 'foo'

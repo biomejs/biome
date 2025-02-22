@@ -1,0 +1,15 @@
+{
+  "files": {
+    "includes": [
+      "**",
+      "!file.js"
+    ]
+  },
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noDebugger": "error"
+      }
+    }
+  }
+}

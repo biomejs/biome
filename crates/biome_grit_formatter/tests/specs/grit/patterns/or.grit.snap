@@ -1,14 +1,15 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: grit/patterns/or.grit
-snapshot_kind: text
 ---
 # Input
 
 ```grit
 `var $x = [$names]` => `var coolPeople = [$names]` where {
-  $names <: every or {`"andrew"`, `"alex"`}
+  $names <: every or {`"andrew"`, `"alex"`},
+	$names <: not contains `"sam"`
 }
+
 ```
 
 
@@ -31,6 +32,7 @@ Attribute Position: Auto
 	$names <: every or {
 		`"andrew"`,
 		`"alex"`
-	}
+	},
+	$names <: not contains `"sam"`
 }
 ```

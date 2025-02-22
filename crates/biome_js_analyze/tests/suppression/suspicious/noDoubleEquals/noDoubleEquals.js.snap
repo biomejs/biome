@@ -32,7 +32,7 @@ let a = `Output of "biome rage":
 ```
 noDoubleEquals.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     1 │ const foo = `
     2 │ text
@@ -75,7 +75,7 @@ noDoubleEquals.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 noDoubleEquals.js:7:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     6 │ // existing comment
   > 7 │ a == b;
@@ -114,7 +114,7 @@ noDoubleEquals.js:7:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 noDoubleEquals.js:9:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
      7 │ a == b;
      8 │ 
@@ -155,7 +155,7 @@ noDoubleEquals.js:9:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 noDoubleEquals.js:14:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     13 │ if (/** some weird comment
   > 14 │     **/ a == b) {
@@ -196,7 +196,7 @@ noDoubleEquals.js:14:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
 ```
 noDoubleEquals.js:19:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     18 │ let a = `Output of "biome rage":
   > 19 │   formatter enabled: ${formatter == true}

@@ -2,7 +2,7 @@ use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
-    LineWidth,
+    LineWidth, ObjectWrap,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -64,6 +64,11 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
 
+    /// Whether to enforce collapsing object literals when possible. Defaults to preserve.
+    #[bpaf(long("object-wrap"), argument("preserve|collapse"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub object_wrap: Option<ObjectWrap>,
+
     /// Use any `.editorconfig` files to configure the formatter. Configuration
     /// in `biome.json` will override `.editorconfig` configuration.
     ///
@@ -71,18 +76,6 @@ pub struct FormatterConfiguration {
     #[bpaf(long("use-editorconfig"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_editorconfig: Option<UseEditorconfigEnabled>,
-
-    /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
-    /// match these patterns.
-    #[bpaf(hide, pure(Default::default()))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ignore: Option<Vec<Box<str>>>,
-
-    /// A list of Unix shell style patterns. The formatter will include files/folders that will
-    /// match these patterns.
-    #[bpaf(hide, pure(Default::default()))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub include: Option<Vec<Box<str>>>,
 
     /// A list of glob patterns. The formatter will include files/folders that will
     /// match these patterns.
@@ -122,6 +115,10 @@ impl FormatterConfiguration {
 
     pub fn bracket_spacing_resolved(&self) -> BracketSpacing {
         self.bracket_spacing.unwrap_or_default()
+    }
+
+    pub fn object_wrap_resolved(&self) -> ObjectWrap {
+        self.object_wrap.unwrap_or_default()
     }
 
     pub fn use_editorconfig_resolved(&self) -> bool {

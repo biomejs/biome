@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.json
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -11,7 +12,7 @@ let a = undefined;
 ```
 invalid.json:1:9 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ let a = undefined;
       │         ^^^^^^^^^
@@ -34,7 +35,7 @@ let a = undefined, b = 2;
 ```
 invalid.json:1:9 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ let a = undefined, b = 2;
       │         ^^^^^^^^^
@@ -57,7 +58,7 @@ var a = undefined;
 ```
 invalid.json:1:9 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ var a = undefined;
       │         ^^^^^^^^^
@@ -80,7 +81,7 @@ var a = undefined, b = 2;
 ```
 invalid.json:1:9 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ var a = undefined, b = 2;
       │         ^^^^^^^^^
@@ -103,7 +104,7 @@ function foo() {return undefined;}
 ```
 invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ function foo() {return undefined;}
       │                        ^^^^^^^^^
@@ -126,7 +127,7 @@ const foo = () => undefined;
 ```
 invalid.json:1:19 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ const foo = () => undefined;
       │                   ^^^^^^^^^
@@ -150,7 +151,7 @@ const foo = () => {return undefined;};
 ```
 invalid.json:1:27 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ const foo = () => {return undefined;};
       │                           ^^^^^^^^^
@@ -173,7 +174,7 @@ function foo() {return undefined;}
 ```
 invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ function foo() {return undefined;}
       │                        ^^^^^^^^^
@@ -196,7 +197,7 @@ function foo() {return /* comment */ undefined;}
 ```
 invalid.json:1:38 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ function foo() {return /* comment */ undefined;}
       │                                      ^^^^^^^^^
@@ -219,7 +220,7 @@ function* foo() {yield undefined;}
 ```
 invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ function* foo() {yield undefined;}
       │                        ^^^^^^^^^
@@ -242,7 +243,7 @@ function* foo() {yield undefined;}
 ```
 invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ function* foo() {yield undefined;}
       │                        ^^^^^^^^^
@@ -265,7 +266,7 @@ const {foo = undefined} = {};
 ```
 invalid.json:1:14 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ const {foo = undefined} = {};
       │              ^^^^^^^^^
@@ -288,7 +289,7 @@ const [foo = undefined] = [];
 ```
 invalid.json:1:14 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ const [foo = undefined] = [];
       │              ^^^^^^^^^
@@ -311,7 +312,7 @@ function foo(bar = undefined) {}
 ```
 invalid.json:1:20 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ function foo(bar = undefined) {}
       │                    ^^^^^^^^^
@@ -334,7 +335,7 @@ function foo({bar = undefined}) {}
 ```
 invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ function foo({bar = undefined}) {}
       │                     ^^^^^^^^^
@@ -357,7 +358,7 @@ function foo({bar = undefined} = {}) {}
 ```
 invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ function foo({bar = undefined} = {}) {}
       │                     ^^^^^^^^^
@@ -380,7 +381,7 @@ function foo([bar = undefined]) {}
 ```
 invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ function foo([bar = undefined]) {}
       │                     ^^^^^^^^^
@@ -403,7 +404,7 @@ function foo([bar = undefined] = []) {}
 ```
 invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use unnecessary undefined.
+  i Don't use unnecessary undefined.
   
   > 1 │ function foo([bar = undefined] = []) {}
       │                     ^^^^^^^^^

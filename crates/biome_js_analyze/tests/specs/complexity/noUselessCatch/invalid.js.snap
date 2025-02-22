@@ -41,7 +41,7 @@ try {
 ```
 invalid.js:7:3 lint/complexity/noUselessCatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The catch clause that only rethrows the original error is useless.
+  i The catch clause that only rethrows the original error is useless.
   
     5 │ 		doSomethingThatMightThrowB();
     6 │ 	} catch (e) {
@@ -73,7 +73,7 @@ invalid.js:7:3 lint/complexity/noUselessCatch  FIXABLE  ━━━━━━━━
 ```
 invalid.js:19:3 lint/complexity/noUselessCatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The catch clause that only rethrows the original error is useless.
+  i The catch clause that only rethrows the original error is useless.
   
     17 │ 		}
     18 │ 	} catch (e) {
@@ -107,7 +107,7 @@ invalid.js:19:3 lint/complexity/noUselessCatch  FIXABLE  ━━━━━━━�
 ```
 invalid.js:26:2 lint/complexity/noUselessCatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The catch clause that only rethrows the original error is useless.
+  i The catch clause that only rethrows the original error is useless.
   
     24 │ 	doSomethingThatMightThrow();
     25 │ } catch (e) {

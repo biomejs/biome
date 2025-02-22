@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.cjs
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -28,7 +29,7 @@ expression: invalid.cjs
 ```
 invalid.cjs:1:1 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This block statement doesn't serve any purpose and can be safely removed.
+  i This block statement doesn't serve any purpose and can be safely removed.
   
   > 1 │ {}
       │ ^^
@@ -47,7 +48,7 @@ invalid.cjs:1:1 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━
 ```
 invalid.cjs:3:1 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This block statement doesn't serve any purpose and can be safely removed.
+  i This block statement doesn't serve any purpose and can be safely removed.
   
     1 │ {}
     2 │ 
@@ -80,7 +81,7 @@ invalid.cjs:3:1 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━
 ```
 invalid.cjs:8:1 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This block statement doesn't serve any purpose and can be safely removed.
+  i This block statement doesn't serve any purpose and can be safely removed.
   
      6 │ }
      7 │ 
@@ -112,7 +113,7 @@ invalid.cjs:8:1 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━
 ```
 invalid.cjs:12:1 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This block statement doesn't serve any purpose and can be safely removed.
+  i This block statement doesn't serve any purpose and can be safely removed.
   
     10 │ }
     11 │ 
@@ -141,5 +142,3 @@ invalid.cjs:12:1 lint/complexity/noUselessLoneBlockStatements  FIXABLE  ━━�
   
 
 ```
-
-

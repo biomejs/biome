@@ -33,5 +33,6 @@ Attribute Position: Auto
 
 ```grit
 pattern identifier_scope($name) {
-	or { function($parameters) where { $parameters <: contains $name } }}
+	or { function($parameters) where { $parameters <: contains $name } }
+}
 ```

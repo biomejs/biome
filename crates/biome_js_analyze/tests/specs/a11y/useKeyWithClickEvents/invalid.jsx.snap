@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -15,7 +16,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
   
     1 │ <>
   > 2 │     <div onClick={() => {}} />
@@ -27,5 +28,3 @@ invalid.jsx:2:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━�
   
 
 ```
-
-

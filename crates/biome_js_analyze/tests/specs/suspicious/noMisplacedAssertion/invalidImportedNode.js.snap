@@ -17,7 +17,7 @@ describe(() => {
 ```
 invalidImportedNode.js:5:2 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The assertion isn't inside a it(), test() or Deno.test() function call.
+  i The assertion isn't inside a it(), test() or Deno.test() function call.
   
     4 │ describe(() => {
   > 5 │ 	assert.equal("something", "something")

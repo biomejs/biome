@@ -2,6 +2,7 @@
 mod test {
     use biome_analyze::RuleCategories;
     use biome_configuration::analyzer::{RuleGroup, RuleSelector};
+    use biome_configuration::plugins::{PluginConfiguration, Plugins};
     use biome_configuration::{Configuration, FilesConfiguration};
     use biome_fs::{BiomePath, MemoryFileSystem};
     use biome_js_syntax::{JsFileSource, TextSize};
@@ -9,11 +10,12 @@ mod test {
     use biome_service::projects::ProjectKey;
     use biome_service::workspace::{
         server, CloseFileParams, CloseProjectParams, FileContent, FileGuard, GetFileContentParams,
-        GetSyntaxTreeParams, OpenFileParams, OpenProjectParams, ScanProjectFolderParams,
-        UpdateSettingsParams,
+        GetSyntaxTreeParams, OpenFileParams, OpenProjectParams, PullDiagnosticsParams,
+        ScanProjectFolderParams, UpdateSettingsParams,
     };
     use biome_service::{Workspace, WorkspaceError};
     use camino::Utf8PathBuf;
+    use insta::assert_debug_snapshot;
     use std::num::NonZeroU64;
 
     fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
@@ -432,5 +434,67 @@ type User {
                 path: BiomePath::new("/project/a.ts"),
             })
             .is_err_and(|error| matches!(error, WorkspaceError::FileIgnored(_))));
+    }
+
+    #[test]
+    fn plugins_are_loaded_and_used_during_analysis() {
+        const PLUGIN_CONTENT: &[u8] = br#"
+`Object.assign($args)` where {
+    register_diagnostic(
+        span = $args,
+        message = "Prefer object spread instead of `Object.assign()`"
+    )
+}
+"#;
+
+        const FILE_CONTENT: &[u8] = b"const a = Object.assign({ foo: 'bar' });";
+
+        let mut fs = MemoryFileSystem::default();
+        fs.insert(Utf8PathBuf::from("/project/plugin.grit"), PLUGIN_CONTENT);
+        fs.insert(Utf8PathBuf::from("/project/a.ts"), FILE_CONTENT);
+
+        let workspace = server(Box::new(fs));
+        let project_key = workspace
+            .open_project(OpenProjectParams {
+                path: Utf8PathBuf::from("/project").into(),
+                open_uninitialized: true,
+            })
+            .unwrap();
+
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                configuration: Configuration {
+                    plugins: Some(Plugins(vec![PluginConfiguration::Path(
+                        "./plugin.grit".to_string(),
+                    )])),
+                    ..Default::default()
+                },
+                vcs_base_path: None,
+                gitignore_matches: Vec::new(),
+                workspace_directory: Some(BiomePath::new("/project")),
+            })
+            .unwrap();
+
+        workspace
+            .scan_project_folder(ScanProjectFolderParams {
+                project_key,
+                path: None,
+            })
+            .unwrap();
+
+        let result = workspace
+            .pull_diagnostics(PullDiagnosticsParams {
+                project_key,
+                path: BiomePath::new("/project/a.ts"),
+                categories: RuleCategories::default(),
+                max_diagnostics: 10,
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: Vec::new(),
+            })
+            .unwrap();
+        assert_debug_snapshot!(result.diagnostics);
+        assert_eq!(result.errors, 0);
     }
 }

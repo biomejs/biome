@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -11,7 +12,7 @@ expression: invalid.jsonc
 ```
 invalid.jsonc:1:2 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /   /;
       │  ^^^
@@ -35,7 +36,7 @@ invalid.jsonc:1:2 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:2 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /  foo/;
       │  ^^
@@ -59,7 +60,7 @@ invalid.jsonc:1:2 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo   /;
       │     ^^^
@@ -83,7 +84,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  bar/;
       │     ^^
@@ -107,7 +108,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo   bar    baz/;
       │     ^^^^^^^^^^
@@ -131,7 +132,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:11 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo [ba]r  b(a|z)/;
       │           ^^
@@ -155,7 +156,7 @@ invalid.jsonc:1:11 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  +/;
       │     ^^
@@ -179,7 +180,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  +?/;
       │     ^^
@@ -203,7 +204,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  */;
       │     ^^
@@ -227,7 +228,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  *?/;
       │     ^^
@@ -251,7 +252,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo   */;
       │     ^^^
@@ -275,7 +276,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  ?/;
       │     ^^
@@ -299,7 +300,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  {2}/;
       │     ^^
@@ -323,7 +324,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  {2}a{1,2}/;
       │     ^^
@@ -347,7 +348,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  {2,}/;
       │     ^^
@@ -371,7 +372,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  {,2}/;
       │     ^^
@@ -395,7 +396,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  {2,3}/;
       │     ^^
@@ -419,7 +420,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  +  *   *   {2,}/;
       │     ^^^^^^^^^^^^^
@@ -443,7 +444,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  {}/;
       │     ^^
@@ -467,7 +468,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  {,}/;
       │     ^^
@@ -491,7 +492,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  {,2}/;
       │     ^^
@@ -515,7 +516,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  {1 2}/;
       │     ^^
@@ -539,7 +540,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  {1/;
       │     ^^
@@ -563,7 +564,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  {1,2/;
       │     ^^
@@ -587,7 +588,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /���   /gu;
       │  ^^^
@@ -611,7 +612,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:6 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo😀  ?/;
       │       ^^
@@ -635,7 +636,7 @@ invalid.jsonc:1:6 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
 
-  ! This regular expression contains unclear uses of consecutive spaces.
+  × This regular expression contains unclear uses of consecutive spaces.
   
   > 1 │ /foo  😀/;
       │     ^^

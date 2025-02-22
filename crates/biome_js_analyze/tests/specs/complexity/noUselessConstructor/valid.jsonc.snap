@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -16,7 +17,7 @@ class A { constructor(a, b = 0){ } }
 ```
 valid.jsonc:1:11 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor is unnecessary.
+  i This constructor is unnecessary.
   
   > 1 │ class A { constructor(a, b = 0){ } }
       │           ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -92,5 +93,3 @@ class A extends B { constructor() { foo; } }
 ```cjs
 class A extends B { constructor(foo, bar) { super(bar); } }
 ```
-
-

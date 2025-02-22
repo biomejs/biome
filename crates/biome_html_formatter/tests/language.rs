@@ -38,7 +38,7 @@ impl TestFormatLanguage for HtmlTestFormatLanguage {
         let options = Self::ServiceLanguage::resolve_format_options(
             Some(&settings.formatter),
             Some(&settings.override_settings),
-            None,
+            Some(&settings.languages.html.formatter),
             &BiomePath::new(""),
             file_source,
         );

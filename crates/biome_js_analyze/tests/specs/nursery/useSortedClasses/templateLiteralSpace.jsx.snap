@@ -1,7 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 84
 expression: templateLiteralSpace.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -19,7 +19,7 @@ expression: templateLiteralSpace.jsx
 ```
 templateLiteralSpace.jsx:2:26 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     1 │ <>
   > 2 │ 	<div class={`${variable} px-2 foo p-4 bar`}/>
@@ -41,7 +41,7 @@ templateLiteralSpace.jsx:2:26 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 templateLiteralSpace.jsx:3:15 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     1 │ <>
     2 │ 	<div class={`${variable} px-2 foo p-4 bar`}/>
@@ -65,7 +65,7 @@ templateLiteralSpace.jsx:3:15 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 templateLiteralSpace.jsx:4:30 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     2 │ 	<div class={`${variable} px-2 foo p-4 bar`}/>
     3 │ 	<div class={`px-2 foo p-4 bar ${variable}`}/>
@@ -89,7 +89,7 @@ templateLiteralSpace.jsx:4:30 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 templateLiteralSpace.jsx:5:15 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     3 │ 	<div class={`px-2 foo p-4 bar ${variable}`}/>
     4 │ 	<div class={`${variable}px-2 foo p-4 bar`}/>
@@ -113,7 +113,7 @@ templateLiteralSpace.jsx:5:15 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 templateLiteralSpace.jsx:6:30 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     4 │ 	<div class={`${variable}px-2 foo p-4 bar`}/>
     5 │ 	<div class={`px-2 foo p-4 bar${variable}`}/>
@@ -137,7 +137,7 @@ templateLiteralSpace.jsx:6:30 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 templateLiteralSpace.jsx:6:55 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     4 │ 	<div class={`${variable}px-2 foo p-4 bar`}/>
     5 │ 	<div class={`px-2 foo p-4 bar${variable}`}/>

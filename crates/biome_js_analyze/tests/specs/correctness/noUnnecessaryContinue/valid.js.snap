@@ -84,7 +84,7 @@ function f(xs) {
 ```
 valid.js:53:3 lint/correctness/noUnnecessaryContinue  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary continue statement
+  × Unnecessary continue statement
   
     51 │ 	if (x) {
     52 │ 		// before

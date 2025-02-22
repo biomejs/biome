@@ -154,10 +154,17 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
             .build(),
         ));
     }
-    // HACK: SupportKind doesn't get picked up in the loop above, so we add it manually
+    // HACK: these types doesn't get picked up in the loop above, so we add it manually
     let support_kind_schema = SchemaGenerator::from(SchemaSettings::openapi3())
         .root_schema_for::<biome_service::workspace::SupportKind>();
     generate_type(&mut declarations, &mut queue, &support_kind_schema);
+    let rule_domain_schema = SchemaGenerator::from(SchemaSettings::openapi3())
+        .root_schema_for::<biome_analyze::RuleDomain>();
+    generate_type(&mut declarations, &mut queue, &rule_domain_schema);
+    let rule_domain_value_schema = SchemaGenerator::from(SchemaSettings::openapi3())
+        .root_schema_for::<biome_configuration::analyzer::RuleDomainValue>(
+    );
+    generate_type(&mut declarations, &mut queue, &rule_domain_value_schema);
 
     let leading_comment = [
         (

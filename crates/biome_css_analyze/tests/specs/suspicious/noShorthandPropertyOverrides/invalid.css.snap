@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -48,7 +49,7 @@ a { padding-left: 10px; padding-right: 10px; padding: 20px; }
 ```
 invalid.css:1:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property padding after padding-left
+  × Unexpected shorthand property padding after padding-left
   
   > 1 │ a { padding-left: 10px; padding: 20px; }
       │                         ^^^^^^^
@@ -61,7 +62,7 @@ invalid.css:1:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━
 ```
 invalid.css:3:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property border after border-width
+  × Unexpected shorthand property border after border-width
   
     1 │ a { padding-left: 10px; padding: 20px; }
     2 │ 
@@ -76,7 +77,7 @@ invalid.css:3:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━
 ```
 invalid.css:5:24 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property border after border-color
+  × Unexpected shorthand property border after border-color
   
     3 │ a { border-width: 20px; border: 1px solid black; }
     4 │ 
@@ -91,7 +92,7 @@ invalid.css:5:24 lint/suspicious/noShorthandPropertyOverrides ━━━━━━
 ```
 invalid.css:7:27 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property border after border-style
+  × Unexpected shorthand property border after border-style
   
     5 │ a { border-color: red; border: 1px solid black; }
     6 │ 
@@ -106,7 +107,7 @@ invalid.css:7:27 lint/suspicious/noShorthandPropertyOverrides ━━━━━━
 ```
 invalid.css:9:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property border after border-image
+  × Unexpected shorthand property border after border-image
   
      7 │ a { border-style: dotted; border: 1px solid black; }
      8 │ 
@@ -121,7 +122,7 @@ invalid.css:9:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━━
 ```
 invalid.css:11:42 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property border after border-image-source
+  × Unexpected shorthand property border after border-image-source
   
      9 │ a { border-image: url("foo.png"); border: 1px solid black; }
     10 │ 
@@ -136,7 +137,7 @@ invalid.css:11:42 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:13:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property pAdDiNg after pAdDiNg-lEfT
+  × Unexpected shorthand property pAdDiNg after pAdDiNg-lEfT
   
     11 │ a { border-image-source: url("foo.png"); border: 1px solid black; }
     12 │ 
@@ -151,7 +152,7 @@ invalid.css:13:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:15:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property PADDING after PADDING-LEFT
+  × Unexpected shorthand property PADDING after PADDING-LEFT
   
     13 │ a { pAdDiNg-lEfT: 10Px; pAdDiNg: 20Px; }
     14 │ 
@@ -166,7 +167,7 @@ invalid.css:15:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:17:49 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property border after border-top-width
+  × Unexpected shorthand property border after border-top-width
   
     15 │ a { PADDING-LEFT: 10PX; PADDING: 20PX; }
     16 │ 
@@ -181,7 +182,7 @@ invalid.css:17:49 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:19:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property transition after transition-property
+  × Unexpected shorthand property transition after transition-property
   
     17 │ a { border-top-width: 1px; top: 0; bottom: 3px; border: 2px solid blue; }
     18 │ 
@@ -196,7 +197,7 @@ invalid.css:19:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:21:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property background after background-repeat
+  × Unexpected shorthand property background after background-repeat
   
     19 │ a { transition-property: opacity; transition: opacity 1s linear; }
     20 │ 
@@ -211,7 +212,7 @@ invalid.css:21:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:23:52 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property background after background-repeat
+  × Unexpected shorthand property background after background-repeat
   
     21 │ a { background-repeat: no-repeat; background: url(lion.png); }
     22 │ 
@@ -226,7 +227,7 @@ invalid.css:23:52 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:25:43 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property -webkit-transition after -webkit-transition-property
+  × Unexpected shorthand property -webkit-transition after -webkit-transition-property
   
     23 │ @media (color) { a { background-repeat: no-repeat; background: url(lion.png); }}
     24 │ 
@@ -241,7 +242,7 @@ invalid.css:25:43 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:27:43 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property -webKIT-transition after -WEBKIT-transition-property
+  × Unexpected shorthand property -webKIT-transition after -WEBKIT-transition-property
   
     25 │ a { -webkit-transition-property: opacity; -webkit-transition: opacity 1s linear; }
     26 │ 
@@ -256,7 +257,7 @@ invalid.css:27:43 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:29:31 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property font after font-variant
+  × Unexpected shorthand property font after font-variant
   
     27 │ a { -WEBKIT-transition-property: opacity; -webKIT-transition: opacity 1s linear; }
     28 │ 
@@ -271,7 +272,7 @@ invalid.css:29:31 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:31:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property font after font-variant
+  × Unexpected shorthand property font after font-variant
   
     29 │ a { font-variant: small-caps; font: sans-serif; }
     30 │ 
@@ -286,7 +287,7 @@ invalid.css:31:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:33:30 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property font after font-size-adjust
+  × Unexpected shorthand property font after font-size-adjust
   
     31 │ a { font-variant: all-small-caps; font: sans-serif; }
     32 │ 
@@ -301,7 +302,7 @@ invalid.css:33:30 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:35:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property padding after padding-left
+  × Unexpected shorthand property padding after padding-left
   
     33 │ a { font-size-adjust: 0.545; font: Verdana; }
     34 │ 
@@ -316,7 +317,7 @@ invalid.css:35:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:35:60 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property border after border-width
+  × Unexpected shorthand property border after border-width
   
     33 │ a { font-size-adjust: 0.545; font: Verdana; }
     34 │ 
@@ -331,7 +332,7 @@ invalid.css:35:60 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:37:46 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property padding after padding-left
+  × Unexpected shorthand property padding after padding-left
   
     35 │ a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
     36 │ 
@@ -345,7 +346,7 @@ invalid.css:37:46 lint/suspicious/noShorthandPropertyOverrides ━━━━━�
 ```
 invalid.css:37:46 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected shorthand property padding after padding-right
+  × Unexpected shorthand property padding after padding-right
   
     35 │ a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
     36 │ 

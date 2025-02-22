@@ -27,26 +27,13 @@ pub struct LinterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rules: Option<Rules>,
 
-    /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
-    /// match these patterns.
-    #[bpaf(hide, pure(Default::default()))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ignore: Option<Vec<Box<str>>>,
-
-    /// A list of Unix shell style patterns. The analyzer will include files/folders that will
-    /// match these patterns.
-    #[bpaf(hide, pure(Default::default()))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub include: Option<Vec<Box<str>>>,
-
     /// A list of glob patterns. The analyzer will handle only those files/folders that will
     /// match these patterns.
     #[bpaf(pure(Default::default()), hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<biome_glob::Glob>>,
 
-    /// An object where the keys are the names of the domains, and the values are boolean. `true` to turn-on the rules that
-    /// belong to that domain, `false` to turn them off
+    /// An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,

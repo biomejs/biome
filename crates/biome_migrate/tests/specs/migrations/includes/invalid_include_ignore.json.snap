@@ -13,7 +13,7 @@ expression: invalid_include_ignore.json
     "include": ["src/**/*.js"],
     "ignore": ["*.gen.js"]
   },
-  "assists": {
+  "assist": {
     "include": ["src/**/*.js"],
     "ignore": ["*.gen.js"]
   },
@@ -80,7 +80,7 @@ invalid_include_ignore.json:7:5 migrate  FIXABLE  ━━━━━━━━━━
      8    │ - ····"ignore":·["*.gen.js"]
         7 │ + ····"includes":·["**/src/**/*.js",·"!**/*.gen.js"]
      9  8 │     },
-    10  9 │     "assists": {
+    10  9 │     "assist": {
   
 
 ```
@@ -91,7 +91,7 @@ invalid_include_ignore.json:11:5 migrate  FIXABLE  ━━━━━━━━━�
   ! include and ignore configurations have been replaced by the includes configuration.
   
      9 │   },
-    10 │   "assists": {
+    10 │   "assist": {
   > 11 │     "include": ["src/**/*.js"],
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │     "ignore": ["*.gen.js"]
@@ -100,7 +100,7 @@ invalid_include_ignore.json:11:5 migrate  FIXABLE  ━━━━━━━━━�
   i Safe fix: Use includes instead.
   
      9  9 │     },
-    10 10 │     "assists": {
+    10 10 │     "assist": {
     11    │ - ····"include":·["src/**/*.js"],
     12    │ - ····"ignore":·["*.gen.js"]
        11 │ + ····"includes":·["**/src/**/*.js",·"!**/*.gen.js"]

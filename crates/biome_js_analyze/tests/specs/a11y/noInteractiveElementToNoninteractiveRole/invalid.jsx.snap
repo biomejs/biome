@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -77,7 +78,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     1 │ /* Interactive elements */
   > 2 │ <a href="http://x.y.z" role="img" />;
@@ -99,7 +100,7 @@ invalid.jsx:2:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━
 ```
 invalid.jsx:3:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     1 │ /* Interactive elements */
     2 │ <a href="http://x.y.z" role="img" />;
@@ -122,7 +123,7 @@ invalid.jsx:3:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━
 ```
 invalid.jsx:5:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     3 │ <a href="http://x.y.z" tabIndex="0" role="img" />;
     4 │ /* All flavors of input */
@@ -145,7 +146,7 @@ invalid.jsx:5:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━
 ```
 invalid.jsx:6:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     4 │ /* All flavors of input */
     5 │ <input role="img" />;
@@ -168,7 +169,7 @@ invalid.jsx:6:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━
 ```
 invalid.jsx:7:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     5 │ <input role="img" />;
     6 │ <input type="img" role="img" />;
@@ -191,7 +192,7 @@ invalid.jsx:7:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━
 ```
 invalid.jsx:8:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
      6 │ <input type="img" role="img" />;
      7 │ <input type="checkbox" role="img" />;
@@ -214,7 +215,7 @@ invalid.jsx:8:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━
 ```
 invalid.jsx:9:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
      7 │ <input type="checkbox" role="img" />;
      8 │ <input type="color" role="img" />;
@@ -237,7 +238,7 @@ invalid.jsx:9:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━
 ```
 invalid.jsx:10:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
      8 │ <input type="color" role="img" />;
      9 │ <input type="date" role="img" />;
@@ -260,7 +261,7 @@ invalid.jsx:10:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:11:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
      9 │ <input type="date" role="img" />;
     10 │ <input type="datetime" role="img" />;
@@ -283,7 +284,7 @@ invalid.jsx:11:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:12:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     10 │ <input type="datetime" role="img" />;
     11 │ <input type="datetime-local" role="img" />;
@@ -306,7 +307,7 @@ invalid.jsx:12:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:13:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     11 │ <input type="datetime-local" role="img" />;
     12 │ <input type="email" role="img" />;
@@ -329,7 +330,7 @@ invalid.jsx:13:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:14:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     12 │ <input type="email" role="img" />;
     13 │ <input type="file" role="img" />;
@@ -352,7 +353,7 @@ invalid.jsx:14:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:15:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     13 │ <input type="file" role="img" />;
     14 │ <input type="image" role="img" />;
@@ -375,7 +376,7 @@ invalid.jsx:15:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:16:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     14 │ <input type="image" role="img" />;
     15 │ <input type="month" role="img" />;
@@ -398,7 +399,7 @@ invalid.jsx:16:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:17:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     15 │ <input type="month" role="img" />;
     16 │ <input type="number" role="img" />;
@@ -421,7 +422,7 @@ invalid.jsx:17:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:18:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     16 │ <input type="number" role="img" />;
     17 │ <input type="password" role="img" />;
@@ -444,7 +445,7 @@ invalid.jsx:18:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:19:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     17 │ <input type="password" role="img" />;
     18 │ <input type="radio" role="img" />;
@@ -467,7 +468,7 @@ invalid.jsx:19:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:20:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     18 │ <input type="radio" role="img" />;
     19 │ <input type="range" role="img" />;
@@ -490,7 +491,7 @@ invalid.jsx:20:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:21:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     19 │ <input type="range" role="img" />;
     20 │ <input type="reset" role="img" />;
@@ -513,7 +514,7 @@ invalid.jsx:21:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:22:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     20 │ <input type="reset" role="img" />;
     21 │ <input type="search" role="img" />;
@@ -536,7 +537,7 @@ invalid.jsx:22:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:23:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     21 │ <input type="search" role="img" />;
     22 │ <input type="submit" role="img" />;
@@ -559,7 +560,7 @@ invalid.jsx:23:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:24:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     22 │ <input type="submit" role="img" />;
     23 │ <input type="tel" role="img" />;
@@ -582,7 +583,7 @@ invalid.jsx:24:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:25:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     23 │ <input type="tel" role="img" />;
     24 │ <input type="text" role="img" />;
@@ -605,7 +606,7 @@ invalid.jsx:25:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:26:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     24 │ <input type="text" role="img" />;
     25 │ <input type="time" role="img" />;
@@ -628,7 +629,7 @@ invalid.jsx:26:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:27:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     25 │ <input type="time" role="img" />;
     26 │ <input type="url" role="img" />;
@@ -651,7 +652,7 @@ invalid.jsx:27:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:29:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     27 │ <input type="week" role="img" />;
     28 │ /* End all flavors of input */
@@ -674,7 +675,7 @@ invalid.jsx:29:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:30:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     28 │ /* End all flavors of input */
     29 │ <menuitem role="img" />;
@@ -697,7 +698,7 @@ invalid.jsx:30:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:31:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     29 │ <menuitem role="img" />;
     30 │ <option className="foo" role="img" />;
@@ -720,7 +721,7 @@ invalid.jsx:31:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:32:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     30 │ <option className="foo" role="img" />;
     31 │ <select className="foo" role="img" />;
@@ -743,7 +744,7 @@ invalid.jsx:32:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:33:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     31 │ <select className="foo" role="img" />;
     32 │ <textarea className="foo" role="img" />;
@@ -766,7 +767,7 @@ invalid.jsx:33:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:35:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     33 │ <tr role="img" />;
     34 │ /* Interactive elements */
@@ -789,7 +790,7 @@ invalid.jsx:35:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:36:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     34 │ /* Interactive elements */
     35 │ <a href="http://x.y.z" role="listitem" />;
@@ -812,7 +813,7 @@ invalid.jsx:36:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:38:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     36 │ <a href="http://x.y.z" tabIndex="0" role="listitem" />;
     37 │ /* All flavors of input */
@@ -835,7 +836,7 @@ invalid.jsx:38:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:39:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     37 │ /* All flavors of input */
     38 │ <input role="listitem" />;
@@ -858,7 +859,7 @@ invalid.jsx:39:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:40:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     38 │ <input role="listitem" />;
     39 │ <input type="listitem" role="listitem" />;
@@ -881,7 +882,7 @@ invalid.jsx:40:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:41:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     39 │ <input type="listitem" role="listitem" />;
     40 │ <input type="checkbox" role="listitem" />;
@@ -904,7 +905,7 @@ invalid.jsx:41:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:42:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     40 │ <input type="checkbox" role="listitem" />;
     41 │ <input type="color" role="listitem" />;
@@ -927,7 +928,7 @@ invalid.jsx:42:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:43:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     41 │ <input type="color" role="listitem" />;
     42 │ <input type="date" role="listitem" />;
@@ -950,7 +951,7 @@ invalid.jsx:43:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:44:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     42 │ <input type="date" role="listitem" />;
     43 │ <input type="datetime" role="listitem" />;
@@ -973,7 +974,7 @@ invalid.jsx:44:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:45:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     43 │ <input type="datetime" role="listitem" />;
     44 │ <input type="datetime-local" role="listitem" />;
@@ -996,7 +997,7 @@ invalid.jsx:45:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:46:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     44 │ <input type="datetime-local" role="listitem" />;
     45 │ <input type="email" role="listitem" />;
@@ -1019,7 +1020,7 @@ invalid.jsx:46:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:47:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     45 │ <input type="email" role="listitem" />;
     46 │ <input type="file" role="listitem" />;
@@ -1042,7 +1043,7 @@ invalid.jsx:47:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:48:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     46 │ <input type="file" role="listitem" />;
     47 │ <input type="image" role="listitem" />;
@@ -1065,7 +1066,7 @@ invalid.jsx:48:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:49:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     47 │ <input type="image" role="listitem" />;
     48 │ <input type="month" role="listitem" />;
@@ -1088,7 +1089,7 @@ invalid.jsx:49:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:50:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     48 │ <input type="month" role="listitem" />;
     49 │ <input type="number" role="listitem" />;
@@ -1111,7 +1112,7 @@ invalid.jsx:50:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:51:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     49 │ <input type="number" role="listitem" />;
     50 │ <input type="password" role="listitem" />;
@@ -1134,7 +1135,7 @@ invalid.jsx:51:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:52:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     50 │ <input type="password" role="listitem" />;
     51 │ <input type="radio" role="listitem" />;
@@ -1157,7 +1158,7 @@ invalid.jsx:52:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:53:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     51 │ <input type="radio" role="listitem" />;
     52 │ <input type="range" role="listitem" />;
@@ -1180,7 +1181,7 @@ invalid.jsx:53:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:54:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     52 │ <input type="range" role="listitem" />;
     53 │ <input type="reset" role="listitem" />;
@@ -1203,7 +1204,7 @@ invalid.jsx:54:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:55:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     53 │ <input type="reset" role="listitem" />;
     54 │ <input type="search" role="listitem" />;
@@ -1226,7 +1227,7 @@ invalid.jsx:55:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:56:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     54 │ <input type="search" role="listitem" />;
     55 │ <input type="submit" role="listitem" />;
@@ -1249,7 +1250,7 @@ invalid.jsx:56:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:57:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     55 │ <input type="submit" role="listitem" />;
     56 │ <input type="tel" role="listitem" />;
@@ -1272,7 +1273,7 @@ invalid.jsx:57:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:58:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     56 │ <input type="tel" role="listitem" />;
     57 │ <input type="text" role="listitem" />;
@@ -1295,7 +1296,7 @@ invalid.jsx:58:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:59:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     57 │ <input type="text" role="listitem" />;
     58 │ <input type="time" role="listitem" />;
@@ -1318,7 +1319,7 @@ invalid.jsx:59:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:60:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     58 │ <input type="time" role="listitem" />;
     59 │ <input type="url" role="listitem" />;
@@ -1341,7 +1342,7 @@ invalid.jsx:60:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:62:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     60 │ <input type="week" role="listitem" />;
     61 │ /* End all flavors of input */
@@ -1364,7 +1365,7 @@ invalid.jsx:62:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:63:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     61 │ /* End all flavors of input */
     62 │ <menuitem role="listitem" />;
@@ -1387,7 +1388,7 @@ invalid.jsx:63:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:64:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     62 │ <menuitem role="listitem" />;
     63 │ <option className="foo" role="listitem" />;
@@ -1410,7 +1411,7 @@ invalid.jsx:64:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:65:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     63 │ <option className="foo" role="listitem" />;
     64 │ <select className="foo" role="listitem" />;
@@ -1433,7 +1434,7 @@ invalid.jsx:65:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
 ```
 invalid.jsx:66:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Interactive elements should not be assigned non-interactive roles.
+  × Interactive elements should not be assigned non-interactive roles.
   
     64 │ <select className="foo" role="listitem" />;
     65 │ <textarea className="foo" role="listitem" />;
@@ -1451,5 +1452,3 @@ invalid.jsx:66:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  �
        │     ----------------   
 
 ```
-
-

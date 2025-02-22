@@ -397,16 +397,6 @@
 					"description": "Whether Biome should enable assist via LSP.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. Biome will include files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
 				"includes": {
 					"description": "A list of glob patterns. Biome will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
@@ -1381,19 +1371,9 @@
 			"description": "The configuration of the filesystem",
 			"type": "object",
 			"properties": {
-				"ignore": {
-					"description": "A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
 				"ignoreUnknown": {
 					"description": "Tells Biome to not emit diagnostics when handling files that doesn't know",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
 				},
 				"includes": {
 					"description": "A list of glob patterns. Biome will handle only those files/folders that will match these patterns.",
@@ -1469,16 +1449,6 @@
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
 				"includes": {
 					"description": "A list of glob patterns. The formatter will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
@@ -1499,6 +1469,10 @@
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"objectWrap": {
+					"description": "Whether to enforce collapsing object literals when possible. Defaults to preserve.",
+					"anyOf": [{ "$ref": "#/definitions/ObjectWrap" }, { "type": "null" }]
 				},
 				"useEditorconfig": {
 					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.\n\nDefault: `false`.",
@@ -1807,7 +1781,7 @@
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
 				"whitespaceSensitivity": {
-					"description": "Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to \"strict\".",
+					"description": "Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to \"css\".",
 					"anyOf": [
 						{ "$ref": "#/definitions/WhitespaceSensitivity" },
 						{ "type": "null" }
@@ -1905,7 +1879,7 @@
 					]
 				},
 				"attributePosition": {
-					"description": "The attribute position style in jsx elements. Defaults to auto.",
+					"description": "The attribute position style in JSX elements. Defaults to auto.",
 					"anyOf": [
 						{ "$ref": "#/definitions/AttributePosition" },
 						{ "type": "null" }
@@ -2087,6 +2061,10 @@
 				"lineWidth": {
 					"description": "What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"objectWrap": {
+					"description": "Whether to enforce collapsing object literals when possible. Defaults to preserve.",
+					"anyOf": [{ "$ref": "#/definitions/ObjectWrap" }, { "type": "null" }]
 				},
 				"trailingCommas": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"none\".",
@@ -2271,23 +2249,13 @@
 			"type": "object",
 			"properties": {
 				"domains": {
-					"description": "An object where the keys are the names of the domains, and the values are boolean. `true` to turn-on the rules that belong to that domain, `false` to turn them off",
+					"description": "An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.",
 					"type": ["object", "null"],
 					"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" }
 				},
 				"enabled": {
 					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
-				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. The analyzer will include files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
 				},
 				"includes": {
 					"description": "A list of glob patterns. The analyzer will handle only those files/folders that will match these patterns.",
@@ -2488,6 +2456,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAwaitInLoop": {
+					"description": "Disallow await inside loops.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noCommonJs": {
 					"description": "Disallow use of CommonJs module system in favor of ESM style imports.",
 					"anyOf": [
@@ -3010,6 +2985,10 @@
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"objectWrap": {
+					"description": "Whether to enforce collapsing object literals when possible. Defaults to preserve.",
+					"anyOf": [{ "$ref": "#/definitions/ObjectWrap" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -3077,11 +3056,6 @@
 						{ "$ref": "#/definitions/HtmlConfiguration" },
 						{ "type": "null" }
 					]
-				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. Biome will include files/folders that will match these patterns.",
@@ -4704,7 +4678,7 @@
 					]
 				},
 				"noSparseArray": {
-					"description": "Disallow sparse arrays",
+					"description": "Prevents the use of sparse arrays (arrays with holes).",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -4799,7 +4773,7 @@
 					]
 				},
 				"useValidTypeof": {
-					"description": "This rule checks that the result of a `typeof' expression is compared to a valid value.",
+					"description": "This rule checks that the result of a typeof expression is compared to a valid value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

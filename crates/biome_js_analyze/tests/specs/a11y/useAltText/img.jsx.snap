@@ -72,7 +72,7 @@ snapshot_kind: text
 ```
 img.jsx:3:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     1 │ // invalid
     2 │ <>
@@ -91,7 +91,7 @@ img.jsx:3:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 img.jsx:4:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     2 │ <>
     3 │   <img />
@@ -110,7 +110,7 @@ img.jsx:4:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 img.jsx:5:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     3 │   <img />
     4 │   <img alt />
@@ -129,7 +129,7 @@ img.jsx:5:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 img.jsx:6:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     4 │   <img alt />
     5 │   <img alt={undefined} />
@@ -148,7 +148,7 @@ img.jsx:6:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 img.jsx:7:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     5 │   <img alt={undefined} />
     6 │   <img src="xyz" />
@@ -167,7 +167,7 @@ img.jsx:7:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 img.jsx:8:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
      6 │   <img src="xyz" />
      7 │   <img role />
@@ -186,7 +186,7 @@ img.jsx:8:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 img.jsx:9:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
      7 │   <img role />
      8 │   <img {...this.props} />
@@ -205,7 +205,7 @@ img.jsx:9:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 img.jsx:10:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
      8 │   <img {...this.props} />
      9 │   <img alt={undefined} role="presentation" />
@@ -224,7 +224,7 @@ img.jsx:10:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 img.jsx:11:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
      9 │   <img alt={undefined} role="presentation" />
     10 │   <img alt role="presentation" />
@@ -243,7 +243,7 @@ img.jsx:11:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 img.jsx:12:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     10 │   <img alt role="presentation" />
     11 │   <img role="presentation" />
@@ -262,7 +262,7 @@ img.jsx:12:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 img.jsx:13:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     11 │   <img role="presentation" />
     12 │   <img role="none" />
@@ -281,7 +281,7 @@ img.jsx:13:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 img.jsx:14:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     12 │   <img role="none" />
     13 │   <img aria-label={undefined} />
@@ -300,7 +300,7 @@ img.jsx:14:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 img.jsx:15:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     13 │   <img aria-label={undefined} />
     14 │   <img aria-labelledby={undefined} />
@@ -319,7 +319,7 @@ img.jsx:15:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 img.jsx:16:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     14 │   <img aria-labelledby={undefined} />
     15 │   <img aria-hidden={undefined} />
@@ -338,7 +338,7 @@ img.jsx:16:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 img.jsx:17:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     15 │   <img aria-hidden={undefined} />
     16 │   <img aria-label="" />
@@ -357,7 +357,7 @@ img.jsx:17:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━�
 ```
 img.jsx:18:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  × Provide a text alternative through the alt, aria-label or aria-labelledby attribute
   
     16 │   <img aria-label="" />
     17 │   <img aria-labelledby="" />

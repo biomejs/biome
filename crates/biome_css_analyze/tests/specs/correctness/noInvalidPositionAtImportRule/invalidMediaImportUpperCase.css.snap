@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalidMediaImportUpperCase.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -13,7 +14,7 @@ expression: invalidMediaImportUpperCase.css
 ```
 invalidMediaImportUpperCase.css:2:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━
 
-  ! This @import is in the wrong position.
+  × This @import is in the wrong position.
   
     1 │ @media print {}
   > 2 │ @imPort URl('foo.css');

@@ -2,10 +2,10 @@ use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
-    LineWidth, QuoteStyle,
+    LineWidth, ObjectWrap, QuoteStyle,
 };
 use biome_js_formatter::context::{
-    trailing_commas::TrailingCommas, ArrowParentheses, ObjectWrap, QuoteProperties, Semicolons,
+    trailing_commas::TrailingCommas, ArrowParentheses, QuoteProperties, Semicolons,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -93,19 +93,25 @@ pub struct JsFormatterConfiguration {
     pub quote_style: Option<QuoteStyle>,
 
     // it's also a top-level configurable property.
-    /// The attribute position style in jsx elements. Defaults to auto.
-    #[bpaf(long("javascript-attribute-position"), argument("multiline|auto"))]
+    /// The attribute position style in JSX elements. Defaults to auto.
+    #[bpaf(
+        long("javascript-formatter-attribute-position"),
+        argument("multiline|auto")
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub attribute_position: Option<AttributePosition>,
 
     // it's also a top-level configurable property.
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
-    #[bpaf(long("bracket-spacing"), argument("true|false"))]
+    #[bpaf(long("javascript-formatter-bracket-spacing"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
 
     /// Whether to enforce collapsing object literals when possible. Defaults to preserve.
-    #[bpaf(long("javascript-object-wrap"), argument("preserve|collapse"))]
+    #[bpaf(
+        long("javascript-formatter-object-wrap"),
+        argument("preserve|collapse")
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub object_wrap: Option<ObjectWrap>,
 }

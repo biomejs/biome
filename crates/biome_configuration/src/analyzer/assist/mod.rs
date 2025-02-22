@@ -22,18 +22,6 @@ pub struct AssistConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub actions: Option<Actions>,
 
-    /// A list of Unix shell style patterns. Biome will ignore files/folders that will
-    /// match these patterns.
-    #[bpaf(hide, pure(Default::default()))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ignore: Option<Vec<Box<str>>>,
-
-    /// A list of Unix shell style patterns. Biome will include files/folders that will
-    /// match these patterns.
-    #[bpaf(hide, pure(Default::default()))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub include: Option<Vec<Box<str>>>,
-
     /// A list of glob patterns. Biome will include files/folders that will
     /// match these patterns.
     #[bpaf(hide, pure(Default::default()))]

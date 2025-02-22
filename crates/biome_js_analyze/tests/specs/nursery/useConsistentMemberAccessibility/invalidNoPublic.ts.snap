@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidNoPublic.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -98,7 +99,7 @@ abstract class InvalidNoPublic17 {
 ```
 invalidNoPublic.ts:2:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     1 │ class InvalidNoPublic {
   > 2 │   public name: string;
@@ -114,7 +115,7 @@ invalidNoPublic.ts:2:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:3:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     1 │ class InvalidNoPublic {
     2 │   public name: string;
@@ -131,7 +132,7 @@ invalidNoPublic.ts:3:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:4:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     2 │   public name: string;
     3 │   public x?: string;
@@ -148,7 +149,7 @@ invalidNoPublic.ts:4:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:11:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
      9 │ class InvalidNoPublic2 {
     10 │   protected name: string;
@@ -165,7 +166,7 @@ invalidNoPublic.ts:11:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:18:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     17 │ class InvalidNoPublic3 {
   > 18 │   public x: number;
@@ -181,7 +182,7 @@ invalidNoPublic.ts:18:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:19:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     17 │ class InvalidNoPublic3 {
     18 │   public x: number;
@@ -198,7 +199,7 @@ invalidNoPublic.ts:19:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:25:25 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     24 │ class InvalidNoPublic4 {
   > 25 │   protected constructor(public x: number) {}
@@ -214,7 +215,7 @@ invalidNoPublic.ts:25:25 lint/nursery/useConsistentMemberAccessibility ━━━
 ```
 invalidNoPublic.ts:26:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     24 │ class InvalidNoPublic4 {
     25 │   protected constructor(public x: number) {}
@@ -231,7 +232,7 @@ invalidNoPublic.ts:26:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:32:15 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     31 │ class InvalidNoPublic5 {
   > 32 │   constructor(public readonly x: number) {}
@@ -247,7 +248,7 @@ invalidNoPublic.ts:32:15 lint/nursery/useConsistentMemberAccessibility ━━━
 ```
 invalidNoPublic.ts:36:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     35 │ class InvalidNoPublic6 {
   > 36 │   public x = 2;
@@ -263,7 +264,7 @@ invalidNoPublic.ts:36:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:41:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     40 │ class InvalidNoPublic7 {
   > 41 │   public /*public*/ constructor(private foo: string) {}
@@ -279,7 +280,7 @@ invalidNoPublic.ts:41:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:46:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     44 │ class InvalidNoPublic8 {
     45 │   @public
@@ -296,7 +297,7 @@ invalidNoPublic.ts:46:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:51:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     49 │ class InvalidNoPublic9 {
     50 │   @public
@@ -313,7 +314,7 @@ invalidNoPublic.ts:51:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:55:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     54 │ class InvalidNoPublic10 {
   > 55 │   public foo = '';
@@ -329,7 +330,7 @@ invalidNoPublic.ts:55:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:59:15 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     58 │ class InvalidNoPublic11 {
   > 59 │   constructor(public /* Hi there */ readonly foo) {}
@@ -345,7 +346,7 @@ invalidNoPublic.ts:59:15 lint/nursery/useConsistentMemberAccessibility ━━━
 ```
 invalidNoPublic.ts:63:15 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     62 │ class InvalidNoPublic12 {
   > 63 │   constructor(public readonly foo: string) {}
@@ -361,7 +362,7 @@ invalidNoPublic.ts:63:15 lint/nursery/useConsistentMemberAccessibility ━━━
 ```
 invalidNoPublic.ts:67:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     66 │ class InvalidNoPublic13 {
   > 67 │   public constructor() {}
@@ -377,7 +378,7 @@ invalidNoPublic.ts:67:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:71:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     70 │ class InvalidNoPublic14 {
   > 71 │   public /* */ constructor() {}
@@ -393,7 +394,7 @@ invalidNoPublic.ts:71:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:75:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     74 │ class InvalidNoPublic15 {
   > 75 │   public 'foo' = 1;
@@ -409,7 +410,7 @@ invalidNoPublic.ts:75:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:76:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     74 │ class InvalidNoPublic15 {
     75 │   public 'foo' = 1;
@@ -426,7 +427,7 @@ invalidNoPublic.ts:76:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:77:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     75 │   public 'foo' = 1;
     76 │   public 'foo foo' = 2;
@@ -443,7 +444,7 @@ invalidNoPublic.ts:77:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:78:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     76 │   public 'foo foo' = 2;
     77 │   public 'bar'() {}
@@ -460,7 +461,7 @@ invalidNoPublic.ts:78:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:82:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     81 │ abstract class InvalidNoPublic16 {
   > 82 │   public abstract method(): string;
@@ -476,7 +477,7 @@ invalidNoPublic.ts:82:3 lint/nursery/useConsistentMemberAccessibility ━━━�
 ```
 invalidNoPublic.ts:86:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The public modifier is disallowed.
+  × The public modifier is disallowed.
   
     85 │ abstract class InvalidNoPublic17 {
   > 86 │   public abstract x: string;

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -18,7 +19,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the scope attribute on elements other than th elements.
+  × Avoid using the scope attribute on elements other than th elements.
   
     1 │ <>
   > 2 │ 	<div scope={scope} />
@@ -43,7 +44,7 @@ invalid.jsx:2:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━
 ```
 invalid.jsx:3:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the scope attribute on elements other than th elements.
+  × Avoid using the scope attribute on elements other than th elements.
   
     1 │ <>
     2 │ 	<div scope={scope} />
@@ -69,7 +70,7 @@ invalid.jsx:3:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━
 ```
 invalid.jsx:4:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the scope attribute on elements other than th elements.
+  × Avoid using the scope attribute on elements other than th elements.
   
     2 │ 	<div scope={scope} />
     3 │ 	<div scope={scope}></div>
@@ -95,7 +96,7 @@ invalid.jsx:4:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━
 ```
 invalid.jsx:5:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the scope attribute on elements other than th elements.
+  × Avoid using the scope attribute on elements other than th elements.
   
     3 │ 	<div scope={scope}></div>
     4 │ 	<div scope="col" />
@@ -121,7 +122,7 @@ invalid.jsx:5:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━
 ```
 invalid.jsx:6:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using the scope attribute on elements other than th elements.
+  × Avoid using the scope attribute on elements other than th elements.
   
     4 │ 	<div scope="col" />
     5 │ 	<div scope="col"></div>
@@ -143,5 +144,3 @@ invalid.jsx:6:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━
       │        ------  
 
 ```
-
-

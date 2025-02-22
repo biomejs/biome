@@ -5,6 +5,7 @@ use biome_parser::AnyParse;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
+use std::sync::Arc;
 
 mod analyzer_plugin;
 mod categories;
@@ -25,7 +26,7 @@ mod visitor;
 // Re-exported for use in the `declare_group` macro
 pub use biome_diagnostics::category_concat;
 
-pub use crate::analyzer_plugin::AnalyzerPlugin;
+pub use crate::analyzer_plugin::{AnalyzerPlugin, AnalyzerPluginSlice, AnalyzerPluginVec};
 pub use crate::categories::{
     ActionCategory, OtherActionCategory, RefactorKind, RuleCategories, RuleCategoriesBuilder,
     RuleCategory, SourceActionKind, SUPPRESSION_INLINE_ACTION_CATEGORY,
@@ -72,7 +73,7 @@ pub struct Analyzer<'analyzer, L: Language, Matcher, Break, Diag> {
     /// List of visitors being run by this instance of the analyzer for each phase
     phases: BTreeMap<Phases, Vec<Box<dyn Visitor<Language = L> + 'analyzer>>>,
     /// Plugins to be run after the phases for built-in rules.
-    plugins: Vec<Box<dyn AnalyzerPlugin>>,
+    plugins: AnalyzerPluginVec,
     /// Holds the metadata for all the rules statically known to the analyzer
     metadata: &'analyzer MetadataRegistry,
     /// Executor for the query matches emitted by the visitors
@@ -128,7 +129,7 @@ where
     }
 
     /// Registers an [AnalyzerPlugin] to be executed after the regular phases.
-    pub fn add_plugin(&mut self, plugin: Box<dyn AnalyzerPlugin>) {
+    pub fn add_plugin(&mut self, plugin: Arc<Box<dyn AnalyzerPlugin>>) {
         self.plugins.push(plugin);
     }
 

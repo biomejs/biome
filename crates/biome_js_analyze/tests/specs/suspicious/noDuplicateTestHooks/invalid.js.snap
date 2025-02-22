@@ -180,7 +180,7 @@ describe("foo", () => {
 ```
 invalid.js:4:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow duplicate setup and teardown hooks.
+  × Disallow duplicate setup and teardown hooks.
   
     2 │ 	beforeEach(() => {
     3 │ 	});
@@ -199,7 +199,7 @@ invalid.js:4:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━�
 ```
 invalid.js:16:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow duplicate setup and teardown hooks.
+  × Disallow duplicate setup and teardown hooks.
   
     14 │ 	beforeAll(() => {
     15 │ 	});
@@ -218,7 +218,7 @@ invalid.js:16:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:26:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow duplicate setup and teardown hooks.
+  × Disallow duplicate setup and teardown hooks.
   
     24 │ 	afterEach(() => {
     25 │ 	});
@@ -237,7 +237,7 @@ invalid.js:26:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:36:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow duplicate setup and teardown hooks.
+  × Disallow duplicate setup and teardown hooks.
   
     34 │ 	afterAll(() => {
     35 │ 	});
@@ -256,7 +256,7 @@ invalid.js:36:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:46:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow duplicate setup and teardown hooks.
+  × Disallow duplicate setup and teardown hooks.
   
     44 │ 	beforeEach(() => {
     45 │ 	});
@@ -275,7 +275,7 @@ invalid.js:46:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:48:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow duplicate setup and teardown hooks.
+  × Disallow duplicate setup and teardown hooks.
   
     46 │ 	beforeEach(() => {
     47 │ 	});
@@ -294,7 +294,7 @@ invalid.js:48:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:58:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow duplicate setup and teardown hooks.
+  × Disallow duplicate setup and teardown hooks.
   
     56 │ 	afterAll(() => {
     57 │ 	});
@@ -313,7 +313,7 @@ invalid.js:58:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:62:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow duplicate setup and teardown hooks.
+  × Disallow duplicate setup and teardown hooks.
   
     60 │ 	beforeAll(() => {
     61 │ 	});
@@ -332,7 +332,7 @@ invalid.js:62:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:72:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow duplicate setup and teardown hooks.
+  × Disallow duplicate setup and teardown hooks.
   
     70 │ 	beforeEach(() => {
     71 │ 	});
@@ -351,7 +351,7 @@ invalid.js:72:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:90:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow duplicate setup and teardown hooks.
+  × Disallow duplicate setup and teardown hooks.
   
     88 │ 		beforeEach(() => {
     89 │ 		});
@@ -370,7 +370,7 @@ invalid.js:90:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 invalid.js:101:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow duplicate setup and teardown hooks.
+  × Disallow duplicate setup and teardown hooks.
   
      99 │ 	beforeEach(() => {
     100 │ 	});
@@ -389,7 +389,7 @@ invalid.js:101:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━�
 ```
 invalid.js:120:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow duplicate setup and teardown hooks.
+  × Disallow duplicate setup and teardown hooks.
   
     118 │ 		beforeEach(() => {
     119 │ 		});
@@ -408,7 +408,7 @@ invalid.js:120:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━�
 ```
 invalid.js:141:4 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow duplicate setup and teardown hooks.
+  × Disallow duplicate setup and teardown hooks.
   
     139 │ 			beforeEach(() => {
     140 │ 			});
@@ -427,7 +427,7 @@ invalid.js:141:4 lint/suspicious/noDuplicateTestHooks ━━━━━━━━�
 ```
 invalid.js:153:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow duplicate setup and teardown hooks.
+  × Disallow duplicate setup and teardown hooks.
   
     151 │ 	before(() => {
     152 │ 	});
@@ -446,7 +446,7 @@ invalid.js:153:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━�
 ```
 invalid.js:163:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow duplicate setup and teardown hooks.
+  × Disallow duplicate setup and teardown hooks.
   
     161 │ 	after(() => {
     162 │ 	});

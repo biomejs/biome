@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -92,7 +93,7 @@ function h (): {
 ```
 invalid.ts:4:19 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All foo_declare signatures must be adjacent.
+  i All foo_declare signatures must be adjacent.
   
     2 │   export function foo_declare(s: string): void;
     3 │   export function bar_declare(): void;
@@ -107,7 +108,7 @@ invalid.ts:4:19 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
 ```
 invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All foo_type signatures must be adjacent.
+  i All foo_type signatures must be adjacent.
   
     10 │   foo_type(n: number): void;
     11 │   bar_type(): void;
@@ -122,7 +123,7 @@ invalid.ts:12:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
 ```
 invalid.ts:19:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All foo_interface signatures must be adjacent.
+  i All foo_interface signatures must be adjacent.
   
     17 │   foo_interface(n: number): void;
     18 │   bar_interface(): void;
@@ -137,7 +138,7 @@ invalid.ts:19:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
 ```
 invalid.ts:26:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All fooA signatures must be adjacent.
+  i All fooA signatures must be adjacent.
   
     24 │   fooA(n: number): void;
     25 │   barA(): void {};
@@ -152,7 +153,7 @@ invalid.ts:26:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
 ```
 invalid.ts:32:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All fooB signatures must be adjacent.
+  i All fooB signatures must be adjacent.
   
     30 │   fooB(s: string): void;
     31 │   barB(): void {};
@@ -167,7 +168,7 @@ invalid.ts:32:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
 ```
 invalid.ts:40:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All barC signatures must be adjacent.
+  i All barC signatures must be adjacent.
   
     38 │   fooC(s: string): void;
     39 │   fooC(s: string): void;
@@ -200,7 +201,7 @@ invalid.ts:40:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
 ```
 invalid.ts:50:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All fooD signatures must be adjacent.
+  i All fooD signatures must be adjacent.
   
     48 │   fooD(s: string): void;
     49 │   barD(): void {};
@@ -215,7 +216,7 @@ invalid.ts:50:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
 ```
 invalid.ts:58:17 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All foo signatures must be adjacent.
+  i All foo signatures must be adjacent.
   
     56 │ export function foo(n: number): void;
     57 │ export function bar(): void;
@@ -230,7 +231,7 @@ invalid.ts:58:17 lint/nursery/useAdjacentOverloadSignatures ━━━━━━�
 ```
 invalid.ts:64:5 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All interfaceA signatures must be adjacent.
+  i All interfaceA signatures must be adjacent.
   
     62 │     interfaceA(x: boolean): boolean
     63 │     interfaceB()
@@ -245,7 +246,7 @@ invalid.ts:64:5 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
 ```
 invalid.ts:72:5 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All typeMethodA signatures must be adjacent.
+  i All typeMethodA signatures must be adjacent.
   
     70 │     typeMethodA(x: boolean): boolean;
     71 │     typeMethodB(): void;
@@ -260,7 +261,7 @@ invalid.ts:72:5 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━
 ```
 invalid.ts:79:3 lint/nursery/useAdjacentOverloadSignatures ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All functionA signatures must be adjacent.
+  i All functionA signatures must be adjacent.
   
     77 │   functionA(x: boolean): boolean,
     78 │   functionB(),
