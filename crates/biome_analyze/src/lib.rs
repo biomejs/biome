@@ -225,7 +225,9 @@ where
                 };
 
                 let suppression = suppression.filter(|suppression| {
-                    suppression.suppress_all || suppression.suppressed_plugins.contains(&name)
+                    suppression.suppress_all
+                        || suppression.suppress_all_plugins
+                        || suppression.suppressed_plugins.contains(&name)
                 });
 
                 if let Some(suppression) = suppression {
@@ -691,7 +693,7 @@ impl<'a> AnalyzerSuppression<'a> {
         }
     }
 
-    pub fn plugin(plugin_name: &'a str) -> Self {
+    pub fn plugin(plugin_name: Option<&'a str>) -> Self {
         Self {
             kind: AnalyzerSuppressionKind::Plugin(plugin_name),
             ignore_range: None,
@@ -720,7 +722,7 @@ pub enum AnalyzerSuppressionKind<'a> {
     /// A suppression to be evaluated by a specific rule eg. `// biome-ignore lint/correctness/useExhaustiveDependencies(foo)`
     RuleInstance(&'a str, &'a str),
     /// A suppression disabling a plugin eg. `// biome-ignore plugin/my-plugin`
-    Plugin(&'a str),
+    Plugin(Option<&'a str>),
 }
 
 /// Takes a [Suppression] and returns a [AnalyzerSuppression]
@@ -737,12 +739,10 @@ pub fn to_analyzer_suppressions(
         if key == category!("lint") {
             result.push(AnalyzerSuppression::everything().with_variant(&suppression.kind));
         } else if key == category!("plugin") {
-            if let Some(subcategory) = subcategory {
-                let suppression = AnalyzerSuppression::plugin(subcategory)
-                    .with_ignore_range(ignore_range)
-                    .with_variant(&suppression.kind);
-                result.push(suppression);
-            }
+            let suppression = AnalyzerSuppression::plugin(subcategory)
+                .with_ignore_range(ignore_range)
+                .with_variant(&suppression.kind);
+            result.push(suppression);
         } else {
             let category = key.name();
             if let Some(rule) = category.strip_prefix("lint/") {

@@ -316,7 +316,7 @@ fn parse_suppression_line(
 ///
 /// # Example
 /// - No category:      `// biome-ignore`                  -> `(None, None)`
-/// - Plugin category:  `// biome-ignore plugin/my-plugin` -> `("plugin", "my-plugin")`
+/// - Custom Plugin:    `// biome-ignore plugin/my-plugin` -> `("plugin", "my-plugin")`
 /// - Valid category:   `// biome-ignore lint/complexity`  -> `("lint/complexity", None)`
 /// - Invalid category: `// biome-ignore linx`             -> `Err(SuppressionDiagnostic)`
 fn parse_category<'a>(
@@ -327,7 +327,10 @@ fn parse_category<'a>(
         return Ok((None, None));
     }
     if let Some(rest) = category.strip_prefix("plugin/") {
+        // only handle specified plugin here:   e.g. `// biome-ignore plugin/myPlugin: reason`
         return Ok(("plugin".parse().ok(), Some(rest)));
+        // if user doesn't specify plugin name: e.g. `// biome-ignore plugin: reason`
+        // will return ("plugin", None) and treat as `suppress all plugins`
     }
     let category: &'static Category = category.parse().map_err(|()| SuppressionDiagnostic {
         message: SuppressionDiagnosticKind::ParseCategory(category.into()),
@@ -441,7 +444,10 @@ mod tests_biome_ignore_inline {
     use biome_diagnostics::category;
     use biome_rowan::{TextRange, TextSize};
 
-    use crate::{offset_from, SuppressionDiagnostic, SuppressionDiagnosticKind, SuppressionKind};
+    use crate::{
+        offset_from, parse_category, SuppressionDiagnostic, SuppressionDiagnosticKind,
+        SuppressionKind,
+    };
 
     use super::{parse_suppression_comment, Suppression};
 
@@ -496,6 +502,27 @@ mod tests_biome_ignore_inline {
                 reason: "explanation4",
                 kind: SuppressionKind::Classic,
                 range: TextRange::new(TextSize::from(50), TextSize::from(62))
+            })],
+        );
+
+        assert_eq!(
+            parse_suppression_comment("// biome-ignore plugin: explanation5").collect::<Vec<_>>(),
+            vec![Ok(Suppression {
+                categories: vec![(category!("plugin"), None, None)],
+                reason: "explanation5",
+                kind: SuppressionKind::Classic,
+                range: TextRange::new(TextSize::from(3), TextSize::from(15))
+            })],
+        );
+
+        assert_eq!(
+            parse_suppression_comment("// biome-ignore plugin/myPlugin: explanation6")
+                .collect::<Vec<_>>(),
+            vec![Ok(Suppression {
+                categories: vec![(category!("plugin"), Some("myPlugin"), None)],
+                reason: "explanation6",
+                kind: SuppressionKind::Classic,
+                range: TextRange::new(TextSize::from(3), TextSize::from(15))
             })],
         );
     }
@@ -603,18 +630,44 @@ mod tests_biome_ignore_inline {
     #[test]
     fn parse_multiple_suppression_categories() {
         assert_eq!(
-            parse_suppression_comment("// biome-ignore format lint: explanation")
+            parse_suppression_comment("// biome-ignore format lint plugin: explanation")
                 .collect::<Vec<_>>(),
             vec![Ok(Suppression {
                 categories: vec![
                     (category!("format"), None, None),
-                    (category!("lint"), None, None)
+                    (category!("lint"), None, None),
+                    (category!("plugin"), None, None),
                 ],
                 reason: "explanation",
                 kind: SuppressionKind::Classic,
                 range: TextRange::new(TextSize::from(3), TextSize::from(15))
             })],
         );
+    }
+
+    #[test]
+    fn check_parse_category() {
+        assert_eq!(
+            parse_category("// biome-ignore: reason", ""),
+            Ok((None, None))
+        );
+
+        assert_eq!(
+            parse_category("// biome-ignore plugin/myPlugin: reason", "plugin/myPlugin"),
+            Ok((Some(category!("plugin")), Some("myPlugin")))
+        );
+
+        assert_eq!(
+            parse_category("// biome-ignore lint/complexity: reason", "lint/complexity"),
+            Ok((Some(category!("lint/complexity")), None))
+        );
+
+        let base = "// biome-ignore linx: reason";
+        let category = &base[16..20];
+        assert!(matches!(
+            parse_category(base, category),
+            Err(SuppressionDiagnostic { .. })
+        ));
     }
 
     #[test]
