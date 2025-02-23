@@ -55,15 +55,6 @@ info: html/svg/svg.html
  <html>
    <head>
      <title>SVG</title>
-@@ -34,7 +34,7 @@
-     -->
-     <div xmlns="http://www.w3.org/1999/xhtml">
-       <p>123</p>
--      <span> 123 </span>
-+      <span>123</span>
-     </div>
-   </foreignObject>
- </svg>
 ```
 
 # Output
@@ -105,7 +96,7 @@ info: html/svg/svg.html
     -->
     <div xmlns="http://www.w3.org/1999/xhtml">
       <p>123</p>
-      <span>123</span>
+      <span> 123 </span>
     </div>
   </foreignObject>
 </svg>

@@ -1,10 +1,10 @@
 use crate::html::lists::element_list::{FormatHtmlElementListOptions, HtmlChildListLayout};
-use crate::utils::metadata::HTML_INLINE_TAGS;
+use crate::utils::metadata::is_element_whitespace_sensitive;
 use crate::{
     html::lists::element_list::{FormatChildrenResult, FormatHtmlElementList},
     prelude::*,
 };
-use biome_formatter::{format_args, write, FormatContext, FormatRuleWithOptions};
+use biome_formatter::{format_args, write, FormatRuleWithOptions};
 use biome_html_syntax::{HtmlElement, HtmlElementFields};
 
 use super::{
@@ -21,7 +21,6 @@ pub(crate) struct FormatHtmlElement;
 
 impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
     fn fmt_fields(&self, node: &HtmlElement, f: &mut HtmlFormatter) -> FormatResult<()> {
-        let whitespace_sensitivity = f.context().options().whitespace_sensitivity();
         let HtmlElementFields {
             opening_element,
             children,
@@ -31,6 +30,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
         let closing_element = closing_element?;
         let opening_element = opening_element?;
         let tag_name = opening_element.name()?;
+        let is_whitespace_sensitive = is_element_whitespace_sensitive(f, &tag_name);
         let tag_name = tag_name
             .trim_trivia()
             .map(|t| t.value_token())
@@ -41,13 +41,6 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
                 .as_ref()
                 .is_some_and(|tag_name| tag_name.text().eq_ignore_ascii_case(tag))
         });
-        let is_inline_tag = HTML_INLINE_TAGS.iter().any(|tag| {
-            tag_name
-                .as_ref()
-                .is_some_and(|tag_name| tag_name.text().eq_ignore_ascii_case(tag))
-        });
-        let is_whitespace_sensitive = whitespace_sensitivity.is_strict()
-            || (whitespace_sensitivity.is_css() && is_inline_tag);
 
         let content_has_leading_whitespace = children
             .syntax()
@@ -118,6 +111,7 @@ impl FormatNodeRule<HtmlElement> for FormatHtmlElement {
             let format_children = FormatHtmlElementList::default()
                 .with_options(FormatHtmlElementListOptions {
                     layout: HtmlChildListLayout::BestFitting,
+                    is_element_whitespace_sensitive: is_whitespace_sensitive,
                     borrowed_r_angle,
                     borrowed_closing_tag,
                 })
