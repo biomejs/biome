@@ -161,7 +161,6 @@ impl From<NamingConventionOptions> for use_naming_convention::NamingConventionOp
             strict_case: false,
             require_ascii: false,
             conventions: conventions.into_boxed_slice(),
-            enum_member_case: use_naming_convention::Format::default(),
         }
     }
 }

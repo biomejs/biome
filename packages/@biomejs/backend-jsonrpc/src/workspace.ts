@@ -2821,10 +2821,6 @@ export interface NamingConventionOptions {
 	 */
 	conventions: Convention[];
 	/**
-	 * Allowed cases for _TypeScript_ `enum` member names.
-	 */
-	enumMemberCase: Format;
-	/**
 	 * If `false`, then non-ASCII characters are allowed.
 	 */
 	requireAscii: boolean;
@@ -2906,14 +2902,6 @@ export interface Convention {
 	 */
 	selector: Selector;
 }
-/**
- * Supported cases.
- */
-export type Format =
-	| "camelCase"
-	| "CONSTANT_CASE"
-	| "PascalCase"
-	| "snake_case";
 export type StableHookResult = boolean | number[];
 /**
  * Supported cases for file names.
@@ -2939,6 +2927,14 @@ export interface Selector {
 	 */
 	scope: Scope;
 }
+/**
+ * Supported cases.
+ */
+export type Format =
+	| "camelCase"
+	| "CONSTANT_CASE"
+	| "PascalCase"
+	| "snake_case";
 export type Kind =
 	| "class"
 	| "enum"

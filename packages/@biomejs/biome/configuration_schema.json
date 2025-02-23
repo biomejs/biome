@@ -2290,10 +2290,6 @@
 					"type": "array",
 					"items": { "$ref": "#/definitions/Convention" }
 				},
-				"enumMemberCase": {
-					"description": "Allowed cases for _TypeScript_ `enum` member names.",
-					"allOf": [{ "$ref": "#/definitions/Format" }]
-				},
 				"requireAscii": {
 					"description": "If `false`, then non-ASCII characters are allowed.",
 					"type": "boolean"
