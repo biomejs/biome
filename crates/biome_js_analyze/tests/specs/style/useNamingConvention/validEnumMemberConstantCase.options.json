@@ -6,7 +6,10 @@
 				"useNamingConvention": {
 					"level": "error",
 					"options": {
-						"enumMemberCase": "CONSTANT_CASE"
+						"conventions": [{
+							"selector": { "kind": "enumMember" },
+							"formats": ["CONSTANT_CASE"]
+						}]
 					}
 				}
 			}

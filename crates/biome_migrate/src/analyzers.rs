@@ -10,6 +10,7 @@ use crate::analyzers::trailing_comma::TrailingComma;
 use crate::analyzers::use_while::UseWhile;
 use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
 use biome_json_syntax::JsonLanguage;
+use use_naming_convention_enum_member_case::UseNamingConventionEnumMemberCase;
 
 mod all;
 mod deleted_rules;
@@ -20,6 +21,7 @@ mod organize_imports;
 mod schema;
 mod style_rules;
 mod trailing_comma;
+mod use_naming_convention_enum_member_case;
 mod use_while;
 
 pub(crate) struct MigrationGroup;
@@ -45,6 +47,7 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<OrganizeImports>();
         registry.record_rule::<Includes>();
         registry.record_rule::<TrailingComma>();
+        registry.record_rule::<UseNamingConventionEnumMemberCase>();
     }
 }
 
