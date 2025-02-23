@@ -678,7 +678,7 @@ fn migrate_eslintrcjson_extended_rules() {
 fn migrate_merge_with_overrides() {
     let biomejson = r#"{
         "overrides": [{
-            "include": ["*.js"],
+            "includes": ["*.js"],
             "linter": { "enabled": false }
         }]
     }"#;

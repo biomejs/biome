@@ -49,8 +49,8 @@ pub use html::{html_configuration, HtmlConfiguration};
 pub use javascript::{js_configuration, JsConfiguration};
 pub use json::{json_configuration, JsonConfiguration};
 pub use overrides::{
-    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideLinterConfiguration,
-    OverridePattern, Overrides,
+    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
+    OverrideLinterConfiguration, OverridePattern, Overrides,
 };
 use plugins::Plugins;
 use serde::{Deserialize, Serialize};

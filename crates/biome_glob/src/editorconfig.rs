@@ -28,7 +28,7 @@
 //!
 //! let glob: EditorconfigGlob = "*.rs".parse().expect("correct glob");
 //! assert!(glob.is_match("lib.rs"));
-//! assert!(!glob.is_match("src/lib.rs"));
+//! assert!(glob.is_match("src/lib.rs"));
 //! ```
 //!
 //! ## Matching against multiple globs
@@ -233,6 +233,7 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
     }
     let mut it = pattern.bytes().enumerate();
     let mut changes = Vec::new();
+    let mut has_no_slashes = true;
     let mut prev_is_slash = true;
     let mut alternation_start = None;
     let mut alternation_has_coma = false;
@@ -248,6 +249,7 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
                 }
             }
             b'/' => {
+                has_no_slashes = false;
                 prev_is_slash = true;
                 continue;
             }
@@ -381,6 +383,9 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
             }
         }
     }
+    if has_no_slashes && !pattern.is_empty() && !pattern.starts_with("**") {
+        pattern.insert_str(0, "**/");
+    }
     Ok(pattern)
 }
 
@@ -402,34 +407,34 @@ mod tests {
         assert_eq!(convert_valid_glob("**"), "**");
         assert_eq!(convert_valid_glob("a/**"), "a/**");
         assert_eq!(convert_valid_glob("**/a"), "**/a");
-        assert_eq!(convert_valid_glob("a**b"), "a*/**/*b");
+        assert_eq!(convert_valid_glob("a**b"), "**/a*/**/*b");
 
-        assert_eq!(convert_valid_glob("a**"), "a*/**");
+        assert_eq!(convert_valid_glob("a**"), "**/a*/**");
         assert_eq!(convert_valid_glob("**a"), "**/*a");
         assert_eq!(convert_valid_glob("***"), "**/*");
 
-        assert_eq!(convert_valid_glob(r"[\]a]"), r"[\]a]");
+        assert_eq!(convert_valid_glob(r"[\]a]"), r"**/[\]a]");
         assert_eq!(convert_valid_glob("[a/b]"), r"\[a/b]");
 
-        assert_eq!(convert_valid_glob("{}"), r"\{\}");
+        assert_eq!(convert_valid_glob("{}"), r"**/\{\}");
         assert_eq!(convert_valid_glob("[a/b]{}"), r"\[a/b]\{\}");
-        assert_eq!(convert_valid_glob("{a}"), r"\{a\}");
-        assert_eq!(convert_valid_glob("{a,b"), r"\{a,b");
+        assert_eq!(convert_valid_glob("{a}"), r"**/\{a\}");
+        assert_eq!(convert_valid_glob("{a,b"), r"**/\{a,b");
 
-        assert_eq!(convert_valid_glob("{a,b}"), "{a,b}");
-        assert_eq!(convert_valid_glob("{0,1}"), "{0,1}");
-        assert_eq!(convert_valid_glob("{a,0..1}"), "{a,0..1}");
+        assert_eq!(convert_valid_glob("{a,b}"), "**/{a,b}");
+        assert_eq!(convert_valid_glob("{0,1}"), "**/{0,1}");
+        assert_eq!(convert_valid_glob("{a,0..1}"), "**/{a,0..1}");
 
-        assert_eq!(convert_valid_glob("{0..1}"), "{0,1}");
-        assert_eq!(convert_valid_glob("{0..9}"), "{0,1,2,3,4,5,6,7,8,9}");
-        assert_eq!(convert_valid_glob("{+1..+8}"), "{1,2,3,4,5,6,7,8}");
-        assert_eq!(convert_valid_glob("{0..0}"), "{0}");
+        assert_eq!(convert_valid_glob("{0..1}"), "**/{0,1}");
+        assert_eq!(convert_valid_glob("{0..9}"), "**/{0,1,2,3,4,5,6,7,8,9}");
+        assert_eq!(convert_valid_glob("{+1..+8}"), "**/{1,2,3,4,5,6,7,8}");
+        assert_eq!(convert_valid_glob("{0..0}"), "**/{0}");
 
-        assert_eq!(convert_valid_glob("{10..12}"), "{10,11,12}");
-        assert_eq!(convert_valid_glob("{10..10}"), "{10}");
+        assert_eq!(convert_valid_glob("{10..12}"), "**/{10,11,12}");
+        assert_eq!(convert_valid_glob("{10..10}"), "**/{10}");
 
-        assert_eq!(convert_valid_glob(r"\{0..0}"), r"\{0..0\}");
-        assert_eq!(convert_valid_glob("{a..b}"), r"\{a..b\}");
+        assert_eq!(convert_valid_glob(r"\{0..0}"), r"**/\{0..0\}");
+        assert_eq!(convert_valid_glob("{a..b}"), r"**/\{a..b\}");
     }
 
     // Editorconfig glob tests are ported from https://github.com/editorconfig/editorconfig-core-test/tree/master/glob

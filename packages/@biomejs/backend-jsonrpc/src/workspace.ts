@@ -770,13 +770,9 @@ export interface OverridePattern {
 	 */
 	html?: HtmlConfiguration;
 	/**
-	 * A list of Unix shell style patterns. Biome will include files/folders that will match these patterns.
-	 */
-	include?: string[];
-	/**
 	 * A list of glob patterns. Biome will include files/folders that will match these patterns.
 	 */
-	includes?: Glob[];
+	includes?: OverrideGlobs;
 	/**
 	 * Specific configuration for the JavaScript language
 	 */
@@ -916,6 +912,7 @@ export interface OverrideFormatterConfiguration {
 	 */
 	objectWrap?: ObjectWrap;
 }
+export type OverrideGlobs = Glob[];
 export interface OverrideLinterConfiguration {
 	/**
 	 * List of rules
