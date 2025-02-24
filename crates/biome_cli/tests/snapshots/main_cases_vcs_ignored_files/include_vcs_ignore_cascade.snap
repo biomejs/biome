@@ -30,8 +30,7 @@ file4.js
 ## `file1.js`
 
 ```js
-statement();
-
+  statement(  )  
 ```
 
 ## `file2.js`

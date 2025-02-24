@@ -265,7 +265,7 @@ impl Configuration {
     }
 
     pub fn is_vcs_enabled(&self) -> bool {
-        self.assist.as_ref().is_some_and(|f| f.is_enabled())
+        self.vcs.as_ref().is_some_and(|v| v.is_enabled())
     }
 
     /// Whether Biome should check for `.editorconfig` file

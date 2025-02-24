@@ -401,12 +401,6 @@ pub trait ConfigurationExt {
     ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError>;
 
     fn migrate_deprecated_fields(&mut self);
-
-    fn retrieve_gitignore_matches(
-        &self,
-        fs: &dyn FileSystem,
-        vcs_base_path: Option<&Utf8Path>,
-    ) -> Result<(Option<Utf8PathBuf>, Vec<String>), WorkspaceError>;
 }
 
 impl ConfigurationExt for Configuration {
@@ -520,11 +514,10 @@ impl ConfigurationExt for Configuration {
             let mut content = String::new();
             file.read_to_string(&mut content).map_err(|err| {
                 CantLoadExtendFile::new(extend_configuration_file_path.to_string(), err.to_string()).with_verbose_advice(
-                    markup!{
+                    markup! {
                         "It's possible that the file was created with a different user/group. Make sure you have the rights to read the file."
                     }
                 )
-
             })?;
             let deserialized = deserialize_from_json_str::<Configuration>(
                 content.as_str(),
@@ -544,47 +537,6 @@ impl ConfigurationExt for Configuration {
     /// Checks for the presence of deprecated fields and updates the
     /// configuration to apply them to the new schema.
     fn migrate_deprecated_fields(&mut self) {}
-
-    /// This function checks if the VCS integration is enabled, and if so, it will attempts to resolve the
-    /// VCS root directory and the `.gitignore` file.
-    ///
-    /// ## Returns
-    ///
-    /// A tuple with VCS root folder and the contents of the `.gitignore` file
-    fn retrieve_gitignore_matches(
-        &self,
-        fs: &dyn FileSystem,
-        vcs_base_path: Option<&Utf8Path>,
-    ) -> Result<(Option<Utf8PathBuf>, Vec<String>), WorkspaceError> {
-        let Some(vcs) = &self.vcs else {
-            return Ok((None, vec![]));
-        };
-        if vcs.is_enabled() {
-            let vcs_base_path = match (vcs_base_path, &vcs.root) {
-                (Some(vcs_base_path), Some(root)) => vcs_base_path.join(root),
-                (None, Some(root)) => Utf8PathBuf::from(root),
-                (Some(vcs_base_path), None) => Utf8PathBuf::from(vcs_base_path),
-                (None, None) => return Err(WorkspaceError::vcs_disabled()),
-            };
-            if let Some(client_kind) = &vcs.client_kind {
-                if vcs.should_use_ignore_file() {
-                    let result = fs.auto_search_file(&vcs_base_path, client_kind.ignore_file());
-
-                    if let Some(result) = result {
-                        return Ok((
-                            result.file_path.parent().map(Utf8PathBuf::from),
-                            result
-                                .content
-                                .lines()
-                                .map(String::from)
-                                .collect::<Vec<String>>(),
-                        ));
-                    }
-                }
-            }
-        }
-        Ok((None, vec![]))
-    }
 }
 
 #[cfg(test)]

@@ -14,9 +14,7 @@ export interface FileFeaturesResult {
 }
 export interface UpdateSettingsParams {
 	configuration: Configuration;
-	gitignoreMatches: string[];
 	projectKey: ProjectKey;
-	vcsBasePath?: BiomePath;
 	workspaceDirectory?: BiomePath;
 }
 /**
