@@ -67,11 +67,21 @@ declare_lint_rule! {
     }
 }
 
+/// Options for the rule `noConfusingLabels`
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct NoConfusingLabelsOptions {
+    /// A list of (non-confusing) labels that should be allowed
+    #[serde(skip_serializing_if = "<[_]>::is_empty")]
+    pub allowed_labels: Box<[Box<str>]>
+}
+
 impl Rule for NoConfusingLabels {
     type Query = Ast<JsLabeledStatement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = Box<NoConfusingLabelsOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let labeled_stmt = ctx.query();
