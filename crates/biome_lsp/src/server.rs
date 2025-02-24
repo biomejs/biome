@@ -20,7 +20,7 @@ use rustc_hash::FxHashMap;
 use serde_json::json;
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::sync::Notify;
 use tokio::task::spawn_blocking;
@@ -535,11 +535,11 @@ pub struct ServerFactory {
     /// Synchronization primitive used to broadcast a shutdown signal to all
     /// active connections
     cancellation: Arc<Notify>,
-    /// Optional [Workspace] instance shared between all clients. Currently
-    /// this field is always [None] (meaning each connection will get its own
-    /// workspace) until we figure out how to handle concurrent access to the
-    /// same workspace from multiple client
-    workspace: Option<Arc<dyn Workspace>>,
+
+    /// [Workspace] instance shared between all clients.
+    ///
+    /// Initialized when the first connection is created.
+    workspace: OnceLock<Arc<dyn Workspace>>,
 
     /// The sessions of the connected clients indexed by session key.
     sessions: Sessions,
@@ -559,7 +559,7 @@ impl ServerFactory {
     pub fn new(stop_on_disconnect: bool) -> Self {
         Self {
             cancellation: Arc::default(),
-            workspace: None,
+            workspace: OnceLock::default(),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect,
@@ -579,8 +579,8 @@ impl ServerFactory {
     ) -> ServerConnection {
         let workspace = self
             .workspace
-            .clone()
-            .unwrap_or_else(|| workspace::server_sync(fs));
+            .get_or_init(|| workspace::server_sync(fs))
+            .clone();
 
         let session_key = SessionKey(self.next_session_key.fetch_add(1, Ordering::Relaxed));
 
@@ -673,3 +673,7 @@ impl ServerConnection {
             .await;
     }
 }
+
+#[cfg(test)]
+#[path = "server.tests.rs"]
+mod tests;

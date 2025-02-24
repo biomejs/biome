@@ -1,53 +1,37 @@
-use anyhow::bail;
-use anyhow::Context;
-use anyhow::Error;
-use anyhow::Result;
-use biome_fs::{BiomePath, MemoryFileSystem};
-use biome_lsp::LSPServer;
-use biome_lsp::ServerFactory;
-use biome_lsp::WorkspaceSettings;
-use biome_service::workspace::GetSyntaxTreeResult;
-use biome_service::workspace::OpenProjectParams;
-use biome_service::workspace::{GetFileContentParams, GetSyntaxTreeParams};
-use camino::Utf8PathBuf;
-use futures::channel::mpsc::{channel, Sender};
-use futures::Sink;
-use futures::SinkExt;
-use futures::Stream;
-use futures::StreamExt;
-use serde::de::DeserializeOwned;
-use serde::Serialize;
-use serde_json::{from_value, to_value};
 use std::any::type_name;
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::slice;
 use std::time::Duration;
+
+use anyhow::{bail, Context, Error, Result};
+use biome_fs::{BiomePath, MemoryFileSystem};
+use biome_service::workspace::{
+    GetFileContentParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenProjectParams,
+};
+use camino::Utf8PathBuf;
+use futures::channel::mpsc::{channel, Sender};
+use futures::{Sink, SinkExt, Stream, StreamExt};
+use serde::de::DeserializeOwned;
+use serde::Serialize;
+use serde_json::{from_value, to_value};
 use tokio::time::sleep;
 use tower::timeout::Timeout;
 use tower::{Service, ServiceExt};
-use tower_lsp::jsonrpc;
-use tower_lsp::jsonrpc::Response;
-use tower_lsp::lsp_types as lsp;
-use tower_lsp::lsp_types::DidOpenTextDocumentParams;
-use tower_lsp::lsp_types::DocumentFormattingParams;
-use tower_lsp::lsp_types::FormattingOptions;
-use tower_lsp::lsp_types::InitializeResult;
-use tower_lsp::lsp_types::InitializedParams;
-use tower_lsp::lsp_types::Position;
-use tower_lsp::lsp_types::PublishDiagnosticsParams;
-use tower_lsp::lsp_types::Range;
-use tower_lsp::lsp_types::TextDocumentContentChangeEvent;
-use tower_lsp::lsp_types::TextDocumentIdentifier;
-use tower_lsp::lsp_types::TextDocumentItem;
-use tower_lsp::lsp_types::TextEdit;
-use tower_lsp::lsp_types::VersionedTextDocumentIdentifier;
-use tower_lsp::lsp_types::WorkDoneProgressParams;
-use tower_lsp::lsp_types::{ClientCapabilities, CodeDescription, Url};
-use tower_lsp::lsp_types::{DidChangeConfigurationParams, DidChangeTextDocumentParams};
-use tower_lsp::lsp_types::{DidCloseTextDocumentParams, WorkspaceFolder};
+use tower_lsp::jsonrpc::{self, Request, Response};
+use tower_lsp::lsp_types::{
+    self as lsp, ClientCapabilities, CodeDescription, DidChangeConfigurationParams,
+    DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
+    DocumentFormattingParams, FormattingOptions, InitializeParams, InitializeResult,
+    InitializedParams, Position, PublishDiagnosticsParams, Range, TextDocumentContentChangeEvent,
+    TextDocumentIdentifier, TextDocumentItem, TextEdit, Url, VersionedTextDocumentIdentifier,
+    WorkDoneProgressParams, WorkspaceFolder,
+};
 use tower_lsp::LspService;
-use tower_lsp::{jsonrpc::Request, lsp_types::InitializeParams};
+
+use crate::WorkspaceSettings;
+
+use super::*;
 
 /// Statically build an [Url] instance that points to the file at `$path`
 /// within the workspace. The filesystem path contained in the return URI is
@@ -389,9 +373,7 @@ where
 
         let res = match req.method() {
             "workspace/configuration" => {
-                let settings = WorkspaceSettings {
-                    ..WorkspaceSettings::default()
-                };
+                let settings = WorkspaceSettings::default();
                 let result =
                     to_value(slice::from_ref(&settings)).context("failed to serialize settings")?;
 
@@ -425,100 +407,54 @@ async fn basic_lifecycle() -> Result<()> {
     Ok(())
 }
 
-#[tokio::test]
-async fn document_lifecycle() -> Result<()> {
-    let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
-    let (stream, sink) = client.split();
-    let mut server = Server::new(service);
-
-    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
-    let reader = tokio::spawn(client_handler(stream, sink, sender));
-
-    server.initialize().await?;
-    server.initialized().await?;
-
-    server
-        .open_document("first_line();\nsecond_line();\nthird_line();")
-        .await?;
-
-    server
-        .change_document(
-            1,
-            vec![
-                TextDocumentContentChangeEvent {
-                    range: Some(Range {
-                        start: Position {
-                            line: 2,
-                            character: 6,
-                        },
-                        end: Position {
-                            line: 2,
-                            character: 10,
-                        },
-                    }),
-                    range_length: None,
-                    text: String::from("statement"),
+fn create_document_content_change_event() -> Vec<TextDocumentContentChangeEvent> {
+    vec![
+        TextDocumentContentChangeEvent {
+            range: Some(Range {
+                start: Position {
+                    line: 2,
+                    character: 6,
                 },
-                TextDocumentContentChangeEvent {
-                    range: Some(Range {
-                        start: Position {
-                            line: 1,
-                            character: 7,
-                        },
-                        end: Position {
-                            line: 1,
-                            character: 11,
-                        },
-                    }),
-                    range_length: None,
-                    text: String::from("statement"),
+                end: Position {
+                    line: 2,
+                    character: 10,
                 },
-                TextDocumentContentChangeEvent {
-                    range: Some(Range {
-                        start: Position {
-                            line: 0,
-                            character: 6,
-                        },
-                        end: Position {
-                            line: 0,
-                            character: 10,
-                        },
-                    }),
-                    range_length: None,
-                    text: String::from("statement"),
+            }),
+            range_length: None,
+            text: String::from("statement"),
+        },
+        TextDocumentContentChangeEvent {
+            range: Some(Range {
+                start: Position {
+                    line: 1,
+                    character: 7,
                 },
-            ],
-        )
-        .await?;
+                end: Position {
+                    line: 1,
+                    character: 11,
+                },
+            }),
+            range_length: None,
+            text: String::from("statement"),
+        },
+        TextDocumentContentChangeEvent {
+            range: Some(Range {
+                start: Position {
+                    line: 0,
+                    character: 6,
+                },
+                end: Position {
+                    line: 0,
+                    character: 10,
+                },
+            }),
+            range_length: None,
+            text: String::from("statement"),
+        },
+    ]
+}
 
-    // `open_project()` will return an existing key if called with a path
-    // for an existing project.
-    let project_key = server
-        .request(
-            "biome/open_project",
-            "open_project",
-            OpenProjectParams {
-                path: BiomePath::new(""),
-                open_uninitialized: true,
-            },
-        )
-        .await?
-        .expect("open_project returned an error");
-
-    let res: GetSyntaxTreeResult = server
-        .request(
-            "biome/get_syntax_tree",
-            "get_syntax_tree",
-            GetSyntaxTreeParams {
-                project_key,
-                path: BiomePath::try_from(url!("document.js").to_file_path().unwrap()).unwrap(),
-            },
-        )
-        .await?
-        .expect("get_syntax_tree returned None");
-
-    const EXPECTED: &str = "0: JS_MODULE@0..57
+const EXPECTED_CST: &str = "0: JS_MODULE@0..57
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
@@ -562,12 +498,162 @@ async fn document_lifecycle() -> Result<()> {
   4: EOF@57..57 \"\" [] []
 ";
 
-    assert_eq!(res.cst, EXPECTED);
+#[tokio::test]
+async fn document_lifecycle() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create(None).into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_document("first_line();\nsecond_line();\nthird_line();")
+        .await?;
+
+    server
+        .change_document(1, create_document_content_change_event())
+        .await?;
+
+    // `open_project()` will return an existing key if called with a path
+    // for an existing project.
+    let project_key = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: BiomePath::new(""),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+
+    let res: GetSyntaxTreeResult = server
+        .request(
+            "biome/get_syntax_tree",
+            "get_syntax_tree",
+            GetSyntaxTreeParams {
+                project_key,
+                path: BiomePath::try_from(url!("document.js").to_file_path().unwrap()).unwrap(),
+            },
+        )
+        .await?
+        .expect("get_syntax_tree returned None");
+
+    assert_eq!(res.cst, EXPECTED_CST);
 
     server.close_document().await?;
 
     server.shutdown().await?;
     reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn lifecycle_with_multiple_connections() -> Result<()> {
+    let factory = ServerFactory::default();
+
+    // First connection:
+    {
+        let (service, client) = factory.create(None).into_inner();
+        let (stream, sink) = client.split();
+        let mut server = Server::new(service);
+
+        let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+        let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+        server.initialize().await?;
+        server.initialized().await?;
+
+        server
+            .open_document("first_line();\nsecond_line();\nthird_line();")
+            .await?;
+
+        server
+            .change_document(1, create_document_content_change_event())
+            .await?;
+
+        // `open_project()` will return an existing key if called with a path
+        // for an existing project.
+        let project_key = server
+            .request(
+                "biome/open_project",
+                "open_project",
+                OpenProjectParams {
+                    path: BiomePath::new(""),
+                    open_uninitialized: true,
+                },
+            )
+            .await?
+            .expect("open_project returned an error");
+
+        let res: GetSyntaxTreeResult = server
+            .request(
+                "biome/get_syntax_tree",
+                "get_syntax_tree",
+                GetSyntaxTreeParams {
+                    project_key,
+                    path: BiomePath::try_from(url!("document.js").to_file_path().unwrap()).unwrap(),
+                },
+            )
+            .await?
+            .expect("get_syntax_tree returned None");
+
+        assert_eq!(res.cst, EXPECTED_CST);
+
+        server.shutdown().await?;
+        reader.abort();
+    }
+
+    // Second connection, the document will still be there:
+    {
+        let (service, client) = factory.create(None).into_inner();
+        let (stream, sink) = client.split();
+        let mut server = Server::new(service);
+
+        let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+        let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+        server.initialize().await?;
+        server.initialized().await?;
+
+        // `open_project()` will return an existing key if called with a path
+        // for an existing project.
+        let project_key = server
+            .request(
+                "biome/open_project",
+                "open_project",
+                OpenProjectParams {
+                    path: BiomePath::new(""),
+                    open_uninitialized: true,
+                },
+            )
+            .await?
+            .expect("open_project returned an error");
+
+        let res: GetSyntaxTreeResult = server
+            .request(
+                "biome/get_syntax_tree",
+                "get_syntax_tree",
+                GetSyntaxTreeParams {
+                    project_key,
+                    path: BiomePath::try_from(url!("document.js").to_file_path().unwrap()).unwrap(),
+                },
+            )
+            .await?
+            .expect("get_syntax_tree returned None");
+
+        assert_eq!(res.cst, EXPECTED_CST);
+
+        server.shutdown().await?;
+        reader.abort();
+    }
 
     Ok(())
 }
