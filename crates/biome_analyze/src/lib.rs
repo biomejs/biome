@@ -2,6 +2,7 @@
 
 use biome_console::markup;
 use biome_parser::AnyParse;
+use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
@@ -191,10 +192,52 @@ where
         for plugin in plugins {
             let root: AnyParse = ctx.root.syntax().as_send().expect("not a root node").into();
             for diagnostic in plugin.evaluate(root, ctx.options.file_path.clone()) {
-                let signal = DiagnosticSignal::new(|| diagnostic.clone());
+                let name = diagnostic.subcategory.clone().expect("");
+                let text_range = diagnostic.span.expect("");
 
-                if let ControlFlow::Break(br) = (emit_signal)(&signal) {
-                    return Some(br);
+                // 1. check for top level suppression
+                if suppressions.top_level_suppression.suppressed_plugin(&name)
+                    || suppressions.top_level_suppression.suppress_all
+                {
+                    break;
+                }
+
+                // 2. check for range suppression is not supprted because:
+                // plugin is handled separately after basic analyze phases
+                // at this point, we have read to the end of file, all `// biome-ignore-end` is processed, thus all range suppressions is cleared
+
+                // 3. check for line suppression
+                let suppression = {
+                    let index = suppressions
+                        .line_suppressions
+                        .binary_search_by(|suppression| {
+                            if suppression.text_range.end() < text_range.start() {
+                                Ordering::Less
+                            } else if text_range.end() < suppression.text_range.start() {
+                                Ordering::Greater
+                            } else {
+                                Ordering::Equal
+                            }
+                        });
+
+                    index
+                        .ok()
+                        .map(|index| &mut suppressions.line_suppressions[index])
+                };
+
+                let suppression = suppression.filter(|suppression| {
+                    suppression.suppress_all
+                        || suppression.suppress_all_plugins
+                        || suppression.suppressed_plugins.contains(&name)
+                });
+
+                if let Some(suppression) = suppression {
+                    suppression.did_suppress_signal = true;
+                } else {
+                    let signal = DiagnosticSignal::new(|| diagnostic.clone());
+                    if let ControlFlow::Break(br) = (emit_signal)(&signal) {
+                        return Some(br);
+                    }
                 }
             }
         }
@@ -651,6 +694,14 @@ impl<'a> AnalyzerSuppression<'a> {
         }
     }
 
+    pub fn plugin(plugin_name: Option<&'a str>) -> Self {
+        Self {
+            kind: AnalyzerSuppressionKind::Plugin(plugin_name),
+            ignore_range: None,
+            variant: AnalyzerSuppressionVariant::Line,
+        }
+    }
+
     #[must_use]
     pub fn with_ignore_range(mut self, ignore_range: TextRange) -> Self {
         self.ignore_range = Some(ignore_range);
@@ -671,6 +722,8 @@ pub enum AnalyzerSuppressionKind<'a> {
     Rule(&'a str),
     /// A suppression to be evaluated by a specific rule eg. `// biome-ignore lint/correctness/useExhaustiveDependencies(foo)`
     RuleInstance(&'a str, &'a str),
+    /// A suppression disabling a plugin eg. `// lint/biome-ignore plugin/my-plugin`
+    Plugin(Option<&'a str>),
 }
 
 /// Takes a [Suppression] and returns a [AnalyzerSuppression]
@@ -683,9 +736,14 @@ pub fn to_analyzer_suppressions(
         piece_range.add_start(suppression.range().start()).start(),
         piece_range.add_start(suppression.range().end()).start(),
     );
-    for (key, value) in suppression.categories {
+    for (key, subcategory, value) in suppression.categories {
         if key == category!("lint") {
             result.push(AnalyzerSuppression::everything().with_variant(&suppression.kind));
+        } else if key == category!("lint/plugin") {
+            let suppression = AnalyzerSuppression::plugin(subcategory)
+                .with_ignore_range(ignore_range)
+                .with_variant(&suppression.kind);
+            result.push(suppression);
         } else {
             let category = key.name();
             if let Some(rule) = category.strip_prefix("lint/") {

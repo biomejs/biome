@@ -389,6 +389,7 @@ define_categories! {
     "lint/security",
     "lint/style",
     "lint/suspicious",
+    "lint/plugin",
 
     // Suppression comments
     "suppressions/parse",
