@@ -1383,9 +1383,6 @@ impl<W: Workspace + ?Sized> Drop for FileGuard<'_, W> {
     }
 }
 
-#[test]
-fn test_order() {
-    for items in FileFeaturesResult::PROTECTED_FILES.windows(2) {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
-    }
-}
+#[cfg(test)]
+#[path = "workspace.tests.rs"]
+mod tests;

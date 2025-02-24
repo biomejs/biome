@@ -30,7 +30,7 @@ node-semver              = "2.1.0"
 oxc_resolver             = { workspace = true }
 rustc-hash               = { workspace = true }
 serde                    = { workspace = true }
-static_assertions        = "1.1.0"
+static_assertions        = { workspace = true }
 
 [dev-dependencies]
 insta        = { workspace = true }

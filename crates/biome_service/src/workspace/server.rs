@@ -1,4 +1,3 @@
-use super::scanner::scan;
 use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
     CloseProjectParams, FeatureName, FileContent, FixFileParams, FixFileResult, FormatFileParams,
@@ -45,10 +44,11 @@ use biome_project_layout::ProjectLayout;
 use biome_rowan::NodeCache;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
+use rayon::ThreadPoolBuilder;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, Once};
 use tracing::{info, instrument, warn};
 
 pub(super) struct WorkspaceServer {
@@ -137,6 +137,8 @@ impl WorkspaceServer {
     /// [Default] to disallow instances of [Workspace] from being created
     /// outside a [crate::App]
     pub(crate) fn new(fs: Box<dyn FileSystem>) -> Self {
+        init_thread_pool();
+
         Self {
             features: Features::new(),
             projects: Default::default(),
@@ -748,15 +750,7 @@ impl Workspace for WorkspaceServer {
             .or_else(|| self.projects.get_project_path(params.project_key))
             .ok_or_else(WorkspaceError::no_project)?;
 
-        // TODO: Need to register a file watcher. This should happen before we
-        //       start scanning, or we might miss changes that happened during
-        //       the scan.
-
-        // TODO: If a watcher is registered, we can also skip the scanning.
-        //       **But** if we are using a polling backend for the watching, we
-        //       probably want to force a poll at this moment.
-
-        let result = scan(self, params.project_key, &path)?;
+        let result = self.scan(params.project_key, &path)?;
 
         Ok(ScanProjectFolderResult {
             diagnostics: result.diagnostics,
@@ -1275,6 +1269,19 @@ impl Workspace for WorkspaceServer {
     fn server_info(&self) -> Option<&ServerInfo> {
         None
     }
+}
+
+/// Sets up the global Rayon thread pool the first time it's called.
+///
+/// This is used to assign friendly debug names to the threads of the pool.
+fn init_thread_pool() {
+    static INIT_ONCE: Once = Once::new();
+    INIT_ONCE.call_once(|| {
+        ThreadPoolBuilder::new()
+            .thread_name(|index| format!("biome::workspace_worker_{index}"))
+            .build_global()
+            .expect("failed to initialize the global thread pool");
+    });
 }
 
 /// Generates a pattern ID that we can use as "handle" for referencing
