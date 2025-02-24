@@ -3,10 +3,9 @@ use biome_diagnostics::{Diagnostic as _, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, TraversalContext, TraversalScope};
 use camino::Utf8Path;
 use crossbeam::channel::{unbounded, Receiver, Sender};
-use rayon::ThreadPoolBuilder;
 use std::collections::BTreeSet;
 use std::panic::catch_unwind;
-use std::sync::{Once, RwLock};
+use std::sync::RwLock;
 use std::thread;
 use std::time::{Duration, Instant};
 use tracing::instrument;
@@ -26,61 +25,48 @@ pub(crate) struct ScanResult {
     pub duration: Duration,
 }
 
-#[instrument(level = "debug", skip(workspace))]
-pub(crate) fn scan(
-    workspace: &WorkspaceServer,
-    project_key: ProjectKey,
-    folder: &Utf8Path,
-) -> Result<ScanResult, WorkspaceError> {
-    init_thread_pool();
+impl WorkspaceServer {
+    #[instrument(level = "debug", skip(self))]
+    pub(super) fn scan(
+        &self,
+        project_key: ProjectKey,
+        folder: &Utf8Path,
+    ) -> Result<ScanResult, WorkspaceError> {
+        let (interner, _path_receiver) = PathInterner::new();
+        let (diagnostics_sender, diagnostics_receiver) = unbounded();
 
-    let (interner, _path_receiver) = PathInterner::new();
-    let (diagnostics_sender, diagnostics_receiver) = unbounded();
+        let collector = DiagnosticsCollector::new();
 
-    let collector = DiagnosticsCollector::new();
+        let (duration, diagnostics) = thread::scope(|scope| {
+            let handler = thread::Builder::new()
+                .name("biome::scanner".to_string())
+                .spawn_scoped(scope, || collector.run(diagnostics_receiver))
+                .expect("failed to spawn scanner thread");
 
-    let (duration, diagnostics) = thread::scope(|scope| {
-        let handler = thread::Builder::new()
-            .name("biome::scanner".to_string())
-            .spawn_scoped(scope, || collector.run(diagnostics_receiver))
-            .expect("failed to spawn scanner thread");
+            // The traversal context is scoped to ensure all the channels it
+            // contains are properly closed once scanning finishes.
+            let duration = scan_folder(
+                folder,
+                ScanContext {
+                    workspace: self,
+                    project_key,
+                    interner,
+                    diagnostics_sender,
+                    evaluated_paths: Default::default(),
+                },
+            );
 
-        // The traversal context is scoped to ensure all the channels it
-        // contains are properly closed once scanning finishes.
-        let duration = scan_folder(
-            folder,
-            ScanContext {
-                workspace,
-                project_key,
-                interner,
-                diagnostics_sender,
-                evaluated_paths: Default::default(),
-            },
-        );
+            // Wait for the collector thread to finish.
+            let diagnostics = handler.join().unwrap();
 
-        // Wait for the collector thread to finish.
-        let diagnostics = handler.join().unwrap();
+            (duration, diagnostics)
+        });
 
-        (duration, diagnostics)
-    });
-
-    Ok(ScanResult {
-        diagnostics,
-        duration,
-    })
-}
-
-/// Sets up the global Rayon thread pool the first time it's called.
-///
-/// This is used to assign friendly debug names to the threads of the pool.
-fn init_thread_pool() {
-    static INIT_ONCE: Once = Once::new();
-    INIT_ONCE.call_once(|| {
-        ThreadPoolBuilder::new()
-            .thread_name(|index| format!("biome::workspace_worker_{index}"))
-            .build_global()
-            .expect("failed to initialize the global thread pool");
-    });
+        Ok(ScanResult {
+            diagnostics,
+            duration,
+        })
+    }
 }
 
 /// Initiates the filesystem traversal tasks from the provided path and runs it to completion.
