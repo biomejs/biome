@@ -738,7 +738,7 @@ pub fn to_analyzer_suppressions(
     for (key, subcategory, value) in suppression.categories {
         if key == category!("lint") {
             result.push(AnalyzerSuppression::everything().with_variant(&suppression.kind));
-        } else if key == category!("plugin") {
+        } else if key == category!("lint/plugin") {
             let suppression = AnalyzerSuppression::plugin(subcategory)
                 .with_ignore_range(ignore_range)
                 .with_variant(&suppression.kind);

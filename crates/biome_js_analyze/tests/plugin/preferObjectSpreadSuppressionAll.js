@@ -1,4 +1,4 @@
-// biome-ignore-all plugin/preferObjectSpreadSuppressionAll: reason
+// biome-ignore-all lint/plugin/preferObjectSpreadSuppressionAll: reason
 
 console.log("foo");
 

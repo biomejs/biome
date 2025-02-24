@@ -7,7 +7,7 @@ use biome_diagnostics::category;
 use biome_rowan::{TextRange, TextSize};
 use rustc_hash::{FxHashMap, FxHashSet};
 
-const PLUGIN_RULE_FILTER: RuleFilter<'static> = RuleFilter::Group("plugin");
+const PLUGIN_LINT_RULE_FILTER: RuleFilter<'static> = RuleFilter::Group("lint/plugin");
 
 #[derive(Debug, Default)]
 pub struct TopLevelSuppression {
@@ -54,7 +54,7 @@ impl TopLevelSuppression {
         // The absence of a filter means that it's a suppression all
         match filter {
             None => self.suppress_all = true,
-            Some(PLUGIN_RULE_FILTER) => self.insert_plugin(&suppression.kind),
+            Some(PLUGIN_LINT_RULE_FILTER) => self.insert_plugin(&suppression.kind),
             Some(filter) => self.insert(filter),
         }
         self.comment_range = comment_range;
@@ -166,7 +166,7 @@ impl RangeSuppressions {
         text_range: TextRange,
         already_suppressed: Option<TextRange>,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
-        if let Some(PLUGIN_RULE_FILTER) = filter {
+        if let Some(PLUGIN_LINT_RULE_FILTER) = filter {
             return Err(AnalyzerSuppressionDiagnostic::new(
                 category!("suppressions/incorrect"),
                 text_range,
@@ -322,7 +322,7 @@ impl<'analyzer> Suppressions<'analyzer> {
                         suppression.suppressed_instances.clear();
                         suppression.suppressed_plugins.clear();
                     }
-                    Some(PLUGIN_RULE_FILTER) => {
+                    Some(PLUGIN_LINT_RULE_FILTER) => {
                         if let Some(plugin_name) = plugin_name {
                             suppression.suppressed_plugins.insert(plugin_name);
                             suppression.suppress_all_plugins = false;
@@ -354,7 +354,7 @@ impl<'analyzer> Suppressions<'analyzer> {
             None => {
                 suppression.suppress_all = true;
             }
-            Some(PLUGIN_RULE_FILTER) => {
+            Some(PLUGIN_LINT_RULE_FILTER) => {
                 if let Some(plugin_name) = plugin_name {
                     suppression.suppressed_plugins.insert(plugin_name);
                 } else {
@@ -383,7 +383,7 @@ impl<'analyzer> Suppressions<'analyzer> {
             AnalyzerSuppressionKind::Everything => return Ok(None),
             AnalyzerSuppressionKind::Rule(rule) => rule,
             AnalyzerSuppressionKind::RuleInstance(rule, _) => rule,
-            AnalyzerSuppressionKind::Plugin(_) => return Ok(Some(PLUGIN_RULE_FILTER)),
+            AnalyzerSuppressionKind::Plugin(_) => return Ok(Some(PLUGIN_LINT_RULE_FILTER)),
         };
 
         let group_rule = rule.split_once('/');

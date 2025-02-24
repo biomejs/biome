@@ -316,7 +316,7 @@ fn parse_suppression_line(
 ///
 /// # Example
 /// - No category:      `// biome-ignore`                  -> `(None, None)`
-/// - Custom Plugin:    `// biome-ignore plugin/my-plugin` -> `("plugin", "my-plugin")`
+/// - Custom Plugin:    `// biome-ignore lint/plugin/myPlugin` -> `("lint/plugin", "myPlugin")`
 /// - Valid category:   `// biome-ignore lint/complexity`  -> `("lint/complexity", None)`
 /// - Invalid category: `// biome-ignore linx`             -> `Err(SuppressionDiagnostic)`
 fn parse_category<'a>(
@@ -326,11 +326,10 @@ fn parse_category<'a>(
     if category.is_empty() {
         return Ok((None, None));
     }
-    if let Some(rest) = category.strip_prefix("plugin/") {
-        // only handle specified plugin here:   e.g. `// biome-ignore plugin/myPlugin: reason`
-        return Ok(("plugin".parse().ok(), Some(rest)));
-        // if user doesn't specify plugin name: e.g. `// biome-ignore plugin: reason`
-        // will return ("plugin", None) and treat as `suppress all plugins`
+    if let Some(rest) = category.strip_prefix("lint/plugin/") {
+        return Ok(("lint/plugin".parse().ok(), Some(rest)));
+        // if user doesn't specify plugin name: e.g. `// biome-ignore lint/plugin: reason`
+        // will return ("lint/plugin", None) and treat as `suppress all plugins linting`
     }
     let category: &'static Category = category.parse().map_err(|()| SuppressionDiagnostic {
         message: SuppressionDiagnosticKind::ParseCategory(category.into()),
@@ -506,9 +505,10 @@ mod tests_biome_ignore_inline {
         );
 
         assert_eq!(
-            parse_suppression_comment("// biome-ignore plugin: explanation5").collect::<Vec<_>>(),
+            parse_suppression_comment("// biome-ignore lint/plugin: explanation5")
+                .collect::<Vec<_>>(),
             vec![Ok(Suppression {
-                categories: vec![(category!("plugin"), None, None)],
+                categories: vec![(category!("lint/plugin"), None, None)],
                 reason: "explanation5",
                 kind: SuppressionKind::Classic,
                 range: TextRange::new(TextSize::from(3), TextSize::from(15))
@@ -516,10 +516,10 @@ mod tests_biome_ignore_inline {
         );
 
         assert_eq!(
-            parse_suppression_comment("// biome-ignore plugin/myPlugin: explanation6")
+            parse_suppression_comment("// biome-ignore lint/plugin/myPlugin: explanation6")
                 .collect::<Vec<_>>(),
             vec![Ok(Suppression {
-                categories: vec![(category!("plugin"), Some("myPlugin"), None)],
+                categories: vec![(category!("lint/plugin"), Some("myPlugin"), None)],
                 reason: "explanation6",
                 kind: SuppressionKind::Classic,
                 range: TextRange::new(TextSize::from(3), TextSize::from(15))
@@ -630,13 +630,12 @@ mod tests_biome_ignore_inline {
     #[test]
     fn parse_multiple_suppression_categories() {
         assert_eq!(
-            parse_suppression_comment("// biome-ignore format lint plugin: explanation")
+            parse_suppression_comment("// biome-ignore format lint: explanation")
                 .collect::<Vec<_>>(),
             vec![Ok(Suppression {
                 categories: vec![
                     (category!("format"), None, None),
                     (category!("lint"), None, None),
-                    (category!("plugin"), None, None),
                 ],
                 reason: "explanation",
                 kind: SuppressionKind::Classic,
@@ -653,8 +652,11 @@ mod tests_biome_ignore_inline {
         );
 
         assert_eq!(
-            parse_category("// biome-ignore plugin/myPlugin: reason", "plugin/myPlugin"),
-            Ok((Some(category!("plugin")), Some("myPlugin")))
+            parse_category(
+                "// biome-ignore lint/plugin/myPlugin: reason",
+                "lint/plugin/myPlugin"
+            ),
+            Ok((Some(category!("lint/plugin")), Some("myPlugin")))
         );
 
         assert_eq!(
