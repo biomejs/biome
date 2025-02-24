@@ -65,6 +65,7 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                     .verbose()
                 })
                 .chain(result.diagnostics)
+                .map(|diagnos| diagnos.subcategory(name.to_string()))
                 .collect(),
             Err(error) => vec![RuleDiagnostic::new(
                 category!("plugin"),
