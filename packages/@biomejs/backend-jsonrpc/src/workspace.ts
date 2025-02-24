@@ -3527,6 +3527,7 @@ export type FileContent =
 	| { content: string; type: "fromClient" }
 	| { type: "fromServer" };
 export type DocumentFileSource =
+	| "Ignore"
 	| "Unknown"
 	| { Js: JsFileSource }
 	| { Json: JsonFileSource }

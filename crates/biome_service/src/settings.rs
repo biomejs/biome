@@ -815,7 +815,6 @@ impl OverrideIncludes {
     }
 }
 
-
 fn to_file_settings(
     working_directory: Option<Utf8PathBuf>,
     config: FilesConfiguration,
@@ -826,7 +825,6 @@ fn to_file_settings(
         ignore_unknown: config.ignore_unknown,
     })
 }
-
 
 fn to_vcs_settings(config: VcsConfiguration) -> Result<VcsSettings, WorkspaceError> {
     Ok(VcsSettings {
