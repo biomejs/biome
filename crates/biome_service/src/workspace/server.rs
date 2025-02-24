@@ -1275,13 +1275,16 @@ impl Workspace for WorkspaceServer {
 ///
 /// This is used to assign friendly debug names to the threads of the pool.
 fn init_thread_pool() {
-    static INIT_ONCE: Once = Once::new();
-    INIT_ONCE.call_once(|| {
-        ThreadPoolBuilder::new()
-            .thread_name(|index| format!("biome::workspace_worker_{index}"))
-            .build_global()
-            .expect("failed to initialize the global thread pool");
-    });
+    #[cfg(not(target_family = "wasm"))]
+    {
+        static INIT_ONCE: Once = Once::new();
+        INIT_ONCE.call_once(|| {
+            ThreadPoolBuilder::new()
+                .thread_name(|index| format!("biome::workspace_worker_{index}"))
+                .build_global()
+                .expect("failed to initialize the global thread pool");
+        });
+    }
 }
 
 /// Generates a pattern ID that we can use as "handle" for referencing
