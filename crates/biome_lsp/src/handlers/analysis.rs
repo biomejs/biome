@@ -268,7 +268,7 @@ fn fix_all(
         .supports_format();
 
     let features = FeaturesBuilder::new().with_linter().with_assist().build();
-    if !session.workspace.is_path_ignored(IsPathIgnoredParams {
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features,
