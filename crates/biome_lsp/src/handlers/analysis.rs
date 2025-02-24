@@ -57,7 +57,7 @@ pub(crate) fn code_actions(
         info!("Linter, assist and organize imports are disabled");
         return Ok(Some(Vec::new()));
     }
-    if !session.workspace.is_path_ignored(IsPathIgnoredParams {
+    if session.workspace.is_path_ignored(IsPathIgnoredParams {
         path: path.clone(),
         project_key: doc.project_key,
         features,
