@@ -8,6 +8,8 @@ on:
       - 'packages/@biomejs/**'
       - 'packages/aria-data/**'
       - 'packages/tailwindcss-config-analyzer/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
 
 # Cancel jobs when the PR is updated
 concurrency:
