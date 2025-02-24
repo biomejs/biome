@@ -1,8 +1,10 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind};
 use biome_console::markup;
+use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsStatement, JsFileSource, JsLabeledStatement};
+use serde::{Deserialize, Serialize};
 
 declare_lint_rule! {
     /// Disallow labeled statements that are not loops.
