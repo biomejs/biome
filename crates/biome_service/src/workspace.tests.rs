@@ -416,8 +416,6 @@ fn too_large_files_are_tracked_but_not_parsed() {
                 }),
                 ..Default::default()
             },
-            vcs_base_path: None,
-            gitignore_matches: Vec::new(),
             workspace_directory: None,
         })
         .unwrap();
@@ -471,8 +469,6 @@ fn plugins_are_loaded_and_used_during_analysis() {
                 )])),
                 ..Default::default()
             },
-            vcs_base_path: None,
-            gitignore_matches: Vec::new(),
             workspace_directory: Some(BiomePath::new("/project")),
         })
         .unwrap();
