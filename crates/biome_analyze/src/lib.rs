@@ -721,7 +721,7 @@ pub enum AnalyzerSuppressionKind<'a> {
     Rule(&'a str),
     /// A suppression to be evaluated by a specific rule eg. `// biome-ignore lint/correctness/useExhaustiveDependencies(foo)`
     RuleInstance(&'a str, &'a str),
-    /// A suppression disabling a plugin eg. `// biome-ignore plugin/my-plugin`
+    /// A suppression disabling a plugin eg. `// lint/biome-ignore plugin/my-plugin`
     Plugin(Option<&'a str>),
 }
 
