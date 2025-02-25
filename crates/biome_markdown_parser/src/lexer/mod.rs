@@ -181,7 +181,28 @@ impl<'src> MarkdownLexer<'src> {
         match dispatched {
             WHS => self.consume_newline_or_whitespace(),
             MUL | MIN | IDT => self.consume_thematic_break_literal(),
+            HAS => self.consume_header(),
             _ => self.consume_textual(),
+        }
+    }
+
+    fn consume_header(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        let mut level = 0;
+        while matches!(self.current_byte(), Some(b'#')) {
+            self.advance(1);
+            level += 1;
+        }
+
+        match level {
+            1 => MD_HEADER1,
+            2 => MD_HEADER2,
+            3 => MD_HEADER3,
+            4 => MD_HEADER4,
+            5 => MD_HEADER5,
+            6 => MD_HEADER6,
+            _ => ERROR_TOKEN,
         }
     }
 
@@ -356,8 +377,24 @@ impl<'src> MarkdownLexer<'src> {
     fn consume_textual(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
+        // Consume the first character
         let char = self.current_char_unchecked();
         self.advance(char.len_utf8());
+
+        // Continue consuming characters until we hit a newline or another special markdown character
+        // But allow spaces within text content
+        while let Some(byte) = self.current_byte() {
+            match byte {
+                // Stop at newlines or special Markdown syntax characters,
+                // but NOT spaces (removed b' ' from this list)
+                b'\n' | b'\r' | b'\t' | b'#' | b'*' | b'-' | b'_' => break,
+                _ => {
+                    // Consume this character and continue
+                    let next_char = self.current_char_unchecked();
+                    self.advance(next_char.len_utf8());
+                }
+            }
+        }
 
         MD_TEXTUAL_LITERAL
     }

@@ -141,6 +141,66 @@ fn whitespace() {
 }
 
 #[test]
+fn heading_level_1() {
+    assert_lex! {
+        "# Heading 1",
+        MD_HEADER1:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+fn heading_level_2() {
+    assert_lex! {
+        "## Heading 2",
+        MD_HEADER2:2,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+fn heading_level_3() {
+    assert_lex! {
+        "### Heading 3",
+        MD_HEADER3:3,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+fn heading_level_4() {
+    assert_lex! {
+        "#### Heading 4",
+        MD_HEADER4:4,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+fn heading_level_5() {
+    assert_lex! {
+        "##### Heading 5",
+        MD_HEADER5:5,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+fn heading_level_6() {
+    assert_lex! {
+        "###### Heading 6",
+        MD_HEADER6:6,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
 fn thematic_break_literal() {
     assert_lex! {
         r#"---
