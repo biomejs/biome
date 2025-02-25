@@ -49,7 +49,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex, Once};
-use tracing::{debug, error, info, instrument, warn};
+use tracing::{error, info, instrument, warn};
 
 pub(super) struct WorkspaceServer {
     /// features available throughout the application
@@ -491,7 +491,7 @@ impl WorkspaceServer {
 
     /// Checks whether a file is ignored in the top-level config's
     /// `files.ignore`/`files.include` or in the feature's `ignore`/`include`.
-    #[instrument(level = "debug", skip(self))]
+    #[instrument(level = "debug", skip(self), fields(ignored))]
     fn is_ignored(&self, project_key: ProjectKey, path: &Utf8Path, features: FeatureName) -> bool {
         let file_name = path.file_name();
         let ignored_by_features = {
@@ -512,7 +512,8 @@ impl WorkspaceServer {
                 // Apply feature-level `include`/`ignore`
                 ignored_by_features);
 
-        debug!("Ignored: {ignored}");
+        tracing::Span::current().record("ignored", &ignored);
+
         ignored
     }
 
