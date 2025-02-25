@@ -632,10 +632,10 @@ impl VcsSettings {
     }
 
     /// Stores the contents found in the ignore file.
-    pub fn store_ignore_matches(
+    pub fn store_ignore_patterns(
         &mut self,
         path: &Utf8Path,
-        matches: &[&str],
+        patterns: &[&str],
     ) -> Result<(), WorkspaceError> {
         match self.client_kind {
             Some(VcsClientKind::Git) => {
