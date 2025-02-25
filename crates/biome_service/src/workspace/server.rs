@@ -594,8 +594,8 @@ impl WorkspaceServer {
     /// - If the ignore file contains lines that contain incorrect globs
     pub(super) fn update_project_ignore_files(
         &self,
-        paths: &[BiomePath],
         project_key: ProjectKey,
+        paths: &[BiomePath],
     ) -> Result<(), WorkspaceError> {
         let project_path = self.projects.get_project_path(project_key);
         let mut settings = self
