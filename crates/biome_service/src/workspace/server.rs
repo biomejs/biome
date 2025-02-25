@@ -763,8 +763,6 @@ impl Workspace for WorkspaceServer {
         settings.merge_with_configuration(
             params.configuration,
             workspace_directory.clone(),
-            // params.vcs_base_path.map(|p| p.to_path_buf()),
-            // params.gitignore_matches.as_slice(),
         )?;
 
         let diagnostics = self.load_plugins(
