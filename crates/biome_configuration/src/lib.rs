@@ -49,8 +49,8 @@ pub use html::{html_configuration, HtmlConfiguration};
 pub use javascript::{js_configuration, JsConfiguration};
 pub use json::{json_configuration, JsonConfiguration};
 pub use overrides::{
-    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideLinterConfiguration,
-    OverridePattern, Overrides,
+    OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
+    OverrideLinterConfiguration, OverridePattern, Overrides,
 };
 use plugins::Plugins;
 use serde::{Deserialize, Serialize};
@@ -171,7 +171,6 @@ impl Configuration {
             }),
             files: Some(FilesConfiguration {
                 ignore_unknown: Some(false.into()),
-                ignore: Some(Default::default()),
                 ..Default::default()
             }),
             formatter: Some(FormatterConfiguration {
@@ -344,18 +343,6 @@ pub struct FilesConfiguration {
     #[bpaf(long("files-ignore-unknown"), argument("true|false"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
-
-    /// A list of Unix shell style patterns. Biome will ignore files/folders that will
-    /// match these patterns.
-    #[bpaf(hide, pure(Default::default()))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ignore: Option<Vec<Box<str>>>,
-
-    /// A list of Unix shell style patterns. Biome will handle only those files/folders that will
-    /// match these patterns.
-    #[bpaf(hide, pure(Default::default()))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub include: Option<Vec<Box<str>>>,
 
     /// A list of glob patterns. Biome will handle only those files/folders that will
     /// match these patterns.

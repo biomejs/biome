@@ -699,7 +699,7 @@ fn generate_group_struct(
             }
         );
         let rule_name = Ident::new(&to_capitalized(rule), Span::call_site());
-        if metadata.recommended {
+        if metadata.recommended && metadata.domains.is_empty() {
             lines_recommended_rule_as_filter.push(quote! {
                 RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[#rule_position])
             });

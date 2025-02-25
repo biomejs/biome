@@ -20,6 +20,7 @@ impl FormatNodeRule<GritPatternDefinitionBody> for FormatGritPatternDefinitionBo
             [group(&format_args![
                 l_curly_token.format(),
                 soft_line_indent_or_space(&format_with(|f| { write!(f, [patterns.format()]) })),
+                soft_line_break_or_space(),
                 r_curly_token.format()
             ])]
         )

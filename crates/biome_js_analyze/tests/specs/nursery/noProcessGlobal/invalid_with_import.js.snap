@@ -15,7 +15,7 @@ const c = process.env;
 ```
 invalid_with_import.js:4:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Usage of the `process` global is discouraged.
+  i Usage of the `process` global is discouraged.
   
     2 │ import a from 'b';
     3 │ 

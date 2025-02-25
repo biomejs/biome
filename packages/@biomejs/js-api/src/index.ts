@@ -138,7 +138,11 @@ export class Biome {
 		}
 	}
 
-	openProject(): ProjectKey;
+	/**
+	 * Open a possible workspace project folder. Returns the key of said project. Use this key when you want to switch to different projects.
+	 *
+	 * @param {string} [path]
+	 */
 	openProject(path?: string): ProjectKey {
 		return this.workspace.openProject({
 			path: path || "",

@@ -1,5 +1,5 @@
 use crate::workspace::DocumentFileSource;
-use crate::{Matcher, WorkspaceError};
+use crate::WorkspaceError;
 use biome_analyze::{AnalyzerOptions, AnalyzerRules, RuleDomain};
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration, AssistEnabled};
 use biome_configuration::analyzer::{LinterEnabled, RuleDomainValue};
@@ -9,12 +9,13 @@ use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::html::HtmlConfiguration;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::max_size::MaxSize;
+use biome_configuration::plugins::Plugins;
 use biome_configuration::{
     push_to_analyzer_assist, push_to_analyzer_rules, BiomeDiagnostic, Configuration,
     CssConfiguration, FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration,
     GraphqlConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration,
     LinterConfiguration, OverrideAssistConfiguration, OverrideFormatterConfiguration,
-    OverrideLinterConfiguration, Overrides, Rules,
+    OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -22,7 +23,7 @@ use biome_css_syntax::CssLanguage;
 use biome_deserialize::Merge;
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
-    LineWidth,
+    LineWidth, ObjectWrap,
 };
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
@@ -57,6 +58,8 @@ pub struct Settings {
     pub files: FilesSettings,
     /// Assist settings
     pub assist: AssistSettings,
+    /// Plugin settings.
+    pub plugins: Plugins,
     /// overrides
     pub override_settings: OverrideSettings,
 }
@@ -111,6 +114,15 @@ impl Settings {
         // graphql settings
         if let Some(graphql) = configuration.graphql {
             self.languages.graphql = graphql.into()
+        }
+        // html settings
+        if let Some(html) = configuration.html {
+            self.languages.html = html.into()
+        }
+
+        // plugin settings
+        if let Some(plugins) = configuration.plugins {
+            self.plugins = plugins;
         }
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
@@ -237,10 +249,7 @@ pub struct FormatSettings {
     pub attribute_position: Option<AttributePosition>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub bracket_spacing: Option<BracketSpacing>,
-    /// List of ignore paths/files
-    pub ignored_files: Matcher,
-    /// List of included paths/files
-    pub included_files: Matcher,
+    pub object_wrap: Option<ObjectWrap>,
     /// List of included paths/files
     pub includes: Includes,
 }
@@ -266,6 +275,7 @@ pub struct OverrideFormatSettings {
     pub bracket_spacing: Option<BracketSpacing>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub attribute_position: Option<AttributePosition>,
+    pub object_wrap: Option<ObjectWrap>,
 }
 
 impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
@@ -280,6 +290,7 @@ impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
             bracket_spacing: conf.bracket_spacing,
             bracket_same_line: conf.bracket_same_line,
             attribute_position: conf.attribute_position,
+            object_wrap: conf.object_wrap,
         }
     }
 }
@@ -292,12 +303,6 @@ pub struct LinterSettings {
 
     /// List of rules
     pub rules: Option<Rules>,
-
-    /// List of ignored paths/files to match
-    pub ignored_files: Matcher,
-
-    /// List of included paths/files to match
-    pub included_files: Matcher,
 
     /// List of included paths/files
     pub includes: Includes,
@@ -333,12 +338,6 @@ pub struct AssistSettings {
 
     /// List of rules
     pub actions: Option<Actions>,
-
-    /// List of ignored paths/files to match
-    pub ignored_files: Matcher,
-
-    /// List of included paths/files to match
-    pub included_files: Matcher,
 
     /// List of included paths/files
     pub includes: Includes,
@@ -593,12 +592,6 @@ pub struct FilesSettings {
     /// gitignore file patterns
     pub git_ignore: Option<Gitignore>,
 
-    /// List of paths/files to matcher
-    pub ignored_files: Matcher,
-
-    /// List of paths/files to matcher
-    pub included_files: Matcher,
-
     /// List of included paths/files
     pub includes: Includes,
 
@@ -615,7 +608,6 @@ pub struct Includes {
     /// Otherwise this filtered out all files that doesn't match.
     globs: Option<Box<[biome_glob::Glob]>>,
 }
-
 impl Includes {
     fn new(
         working_directory: Option<Utf8PathBuf>,
@@ -661,6 +653,42 @@ impl Includes {
     }
 }
 
+#[derive(Clone, Default, Debug)]
+pub struct OverrideIncludes {
+    /// This path is used to normalize the tested paths against [Self::globs].
+    working_directory: Option<Utf8PathBuf>,
+    /// If `None`, then all files are included
+    /// Otherwise this filtered out all files that doesn't match.
+    globs: Option<OverrideGlobs>,
+}
+impl OverrideIncludes {
+    pub fn new(working_directory: Option<Utf8PathBuf>, globs: Option<OverrideGlobs>) -> Self {
+        Self {
+            working_directory,
+            globs,
+        }
+    }
+
+    /// Returns `true` is no globs are set.
+    pub fn is_unset(&self) -> bool {
+        self.globs.is_none()
+    }
+
+    /// Normalize `path` and match it against the list of globs.
+    pub fn matches(&self, path: &Utf8Path) -> bool {
+        let Some(globs) = self.globs.as_ref() else {
+            return true;
+        };
+        let path = if let Some(working_directory) = &self.working_directory {
+            path.strip_prefix(working_directory).unwrap_or(path)
+        } else {
+            path
+        };
+        let candidate_path = biome_glob::CandidatePath::new(path);
+        globs.is_match_candidate(&candidate_path)
+    }
+}
+
 fn to_file_settings(
     working_directory: Option<Utf8PathBuf>,
     config: Option<FilesConfiguration>,
@@ -683,14 +711,6 @@ fn to_file_settings(
         Some(FilesSettings {
             max_size: config.max_size,
             git_ignore,
-            ignored_files: Matcher::from_globs(
-                working_directory.clone(),
-                config.ignore.as_deref(),
-            )?,
-            included_files: Matcher::from_globs(
-                working_directory.clone(),
-                config.include.as_deref(),
-            )?,
             includes: Includes::new(working_directory, config.includes),
             ignore_unknown: config.ignore_unknown,
         })
@@ -1072,9 +1092,7 @@ impl OverrideSettings {
 
 #[derive(Clone, Debug, Default)]
 pub struct OverrideSettingPattern {
-    exclude: Matcher,
-    include: Matcher,
-    includes: Includes,
+    includes: OverrideIncludes,
     /// Formatter settings applied to all files in the workspaces
     pub formatter: OverrideFormatSettings,
     /// Linter settings applied to all files in the workspace
@@ -1091,15 +1109,7 @@ impl OverrideSettingPattern {
     /// Note that only path to regular files should be passed.
     /// This function doesn't take directories into account.
     pub fn is_file_included(&self, file_path: &Utf8Path) -> bool {
-        if self.exclude.matches_path(file_path) {
-            return false;
-        }
-        self.include.matches_path(file_path)
-            || if !self.includes.is_unset() {
-                self.includes.matches_with_exceptions(file_path)
-            } else {
-                false
-            }
+        !self.includes.is_unset() && self.includes.matches(file_path)
     }
 
     fn apply_overrides_to_js_format_options(&self, options: &mut JsFormatOptions) {
@@ -1338,6 +1348,7 @@ pub fn to_override_settings(
                 bracket_spacing: formatter.bracket_spacing,
                 bracket_same_line: formatter.bracket_same_line,
                 attribute_position: formatter.attribute_position,
+                object_wrap: formatter.object_wrap,
             })
             .unwrap_or_default();
         let linter = pattern
@@ -1375,9 +1386,7 @@ pub fn to_override_settings(
         languages.html = to_html_language_settings(html, &current_settings.languages.html);
 
         let pattern_setting = OverrideSettingPattern {
-            includes: Includes::new(working_directory.clone(), pattern.includes),
-            include: Matcher::from_globs(working_directory.clone(), pattern.include.as_deref())?,
-            exclude: Matcher::from_globs(working_directory.clone(), pattern.ignore.as_deref())?,
+            includes: OverrideIncludes::new(working_directory.clone(), pattern.includes),
             formatter,
             linter,
             assist,
@@ -1504,8 +1513,7 @@ pub fn to_format_settings(
         attribute_position: conf.attribute_position,
         bracket_same_line: conf.bracket_same_line,
         bracket_spacing: conf.bracket_spacing,
-        ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
-        included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
+        object_wrap: conf.object_wrap,
         includes: Includes::new(working_directory, conf.includes),
     })
 }
@@ -1530,9 +1538,8 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             attribute_position: Some(AttributePosition::default()),
             bracket_same_line: conf.bracket_same_line,
             bracket_spacing: Some(BracketSpacing::default()),
+            object_wrap: conf.object_wrap,
             format_with_errors: conf.format_with_errors,
-            ignored_files: Matcher::empty(),
-            included_files: Matcher::empty(),
             includes: Default::default(),
         })
     }
@@ -1545,8 +1552,6 @@ pub fn to_linter_settings(
     Ok(LinterSettings {
         enabled: conf.enabled,
         rules: conf.rules,
-        ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
-        included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
         includes: Includes::new(working_directory, conf.includes),
         domains: conf.domains,
     })
@@ -1559,8 +1564,6 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
         Ok(Self {
             enabled: conf.enabled,
             rules: conf.rules,
-            ignored_files: Matcher::empty(),
-            included_files: Matcher::empty(),
             includes: Default::default(),
             domains: conf.domains,
         })
@@ -1574,8 +1577,6 @@ pub fn to_assist_settings(
     Ok(AssistSettings {
         enabled: conf.enabled,
         actions: conf.actions,
-        ignored_files: Matcher::from_globs(working_directory.clone(), conf.ignore.as_deref())?,
-        included_files: Matcher::from_globs(working_directory.clone(), conf.include.as_deref())?,
         includes: Includes::new(working_directory, conf.includes),
     })
 }
@@ -1587,8 +1588,6 @@ impl TryFrom<OverrideAssistConfiguration> for AssistSettings {
         Ok(Self {
             enabled: conf.enabled,
             actions: conf.actions,
-            ignored_files: Matcher::empty(),
-            included_files: Matcher::empty(),
             includes: Default::default(),
         })
     }

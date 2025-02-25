@@ -16,6 +16,7 @@ expression: redactor(content)
     "attributePosition": "auto",
     "bracketSameLine": false,
     "bracketSpacing": true,
+    "objectWrap": "preserve",
     "useEditorconfig": true,
     "includes": ["**", "!dist/**", "!node_modules/**", "!generated/*.spec.js"]
   },

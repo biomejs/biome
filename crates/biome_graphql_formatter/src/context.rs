@@ -1,7 +1,5 @@
 use crate::GraphqlCommentStyle;
-use biome_formatter::{
-    prelude::*, AttributePosition, BracketSameLine, BracketSpacing, IndentWidth, QuoteStyle,
-};
+use biome_formatter::{prelude::*, AttributePosition, BracketSpacing, IndentWidth, QuoteStyle};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TransformSourceMap,
@@ -137,6 +135,10 @@ impl GraphqlFormatOptions {
         self.bracket_spacing = bracket_spacing;
     }
 
+    pub fn bracket_spacing(&self) -> BracketSpacing {
+        self.bracket_spacing
+    }
+
     pub fn quote_style(&self) -> QuoteStyle {
         self.quote_style
     }
@@ -157,18 +159,6 @@ impl FormatOptions for GraphqlFormatOptions {
 
     fn line_ending(&self) -> LineEnding {
         self.line_ending
-    }
-
-    fn attribute_position(&self) -> AttributePosition {
-        self.attribute_position
-    }
-
-    fn bracket_same_line(&self) -> BracketSameLine {
-        BracketSameLine::default()
-    }
-
-    fn bracket_spacing(&self) -> BracketSpacing {
-        self.bracket_spacing
     }
 
     fn as_print_options(&self) -> PrinterOptions {

@@ -15,6 +15,8 @@ pub type NoArrayIndexKey =
 pub type NoAssignInExpressions = < lint :: suspicious :: no_assign_in_expressions :: NoAssignInExpressions as biome_analyze :: Rule > :: Options ;
 pub type NoAsyncPromiseExecutor = < lint :: suspicious :: no_async_promise_executor :: NoAsyncPromiseExecutor as biome_analyze :: Rule > :: Options ;
 pub type NoAutofocus = <lint::a11y::no_autofocus::NoAutofocus as biome_analyze::Rule>::Options;
+pub type NoAwaitInLoop =
+    <lint::nursery::no_await_in_loop::NoAwaitInLoop as biome_analyze::Rule>::Options;
 pub type NoBannedTypes =
     <lint::complexity::no_banned_types::NoBannedTypes as biome_analyze::Rule>::Options;
 pub type NoBarrelFile =
@@ -43,6 +45,7 @@ pub type NoConstAssign =
     <lint::correctness::no_const_assign::NoConstAssign as biome_analyze::Rule>::Options;
 pub type NoConstEnum =
     <lint::suspicious::no_const_enum::NoConstEnum as biome_analyze::Rule>::Options;
+pub type NoConstantBinaryExpression = < lint :: nursery :: no_constant_binary_expression :: NoConstantBinaryExpression as biome_analyze :: Rule > :: Options ;
 pub type NoConstantCondition =
     <lint::correctness::no_constant_condition::NoConstantCondition as biome_analyze::Rule>::Options;
 pub type NoConstantMathMinMaxClamp = < lint :: correctness :: no_constant_math_min_max_clamp :: NoConstantMathMinMaxClamp as biome_analyze :: Rule > :: Options ;
@@ -55,6 +58,8 @@ pub type NoDebugger = <lint::suspicious::no_debugger::NoDebugger as biome_analyz
 pub type NoDefaultExport =
     <lint::style::no_default_export::NoDefaultExport as biome_analyze::Rule>::Options;
 pub type NoDelete = <lint::performance::no_delete::NoDelete as biome_analyze::Rule>::Options;
+pub type NoDestructuredProps =
+    <lint::nursery::no_destructured_props::NoDestructuredProps as biome_analyze::Rule>::Options;
 pub type NoDistractingElements =
     <lint::a11y::no_distracting_elements::NoDistractingElements as biome_analyze::Rule>::Options;
 pub type NoDocumentCookie =

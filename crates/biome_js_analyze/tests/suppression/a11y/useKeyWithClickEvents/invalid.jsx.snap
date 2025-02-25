@@ -16,7 +16,7 @@ snapshot_kind: text
 ```
 invalid.jsx:2:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
   
     1 │ <>
   > 2 │     <div onClick={() => {}} />

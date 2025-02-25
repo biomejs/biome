@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -80,7 +81,7 @@ a {
 ```
 invalid.css:4:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS variables '--foo' is used without the 'var()' function
+  × CSS variables '--foo' is used without the 'var()' function
   
     2 │ a {
     3 │     --foo: red;
@@ -97,7 +98,7 @@ invalid.css:4:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 invalid.css:10:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS variables '--bar' is used without the 'var()' function
+  × CSS variables '--bar' is used without the 'var()' function
   
      8 │ @property --bar {}
      9 │ a {
@@ -114,7 +115,7 @@ invalid.css:10:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 invalid.css:18:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS variables '--baz' is used without the 'var()' function
+  × CSS variables '--baz' is used without the 'var()' function
   
     16 │ }
     17 │ a {
@@ -131,7 +132,7 @@ invalid.css:18:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 invalid.css:26:30 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS variables '--aaaa' is used without the 'var()' function
+  × CSS variables '--aaaa' is used without the 'var()' function
   
     24 │ }
     25 │ a {
@@ -148,7 +149,7 @@ invalid.css:26:30 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 invalid.css:34:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS variables '--bbbb' is used without the 'var()' function
+  × CSS variables '--bbbb' is used without the 'var()' function
   
     32 │ }
     33 │ a {
@@ -165,7 +166,7 @@ invalid.css:34:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 invalid.css:42:18 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS variables '--cccc' is used without the 'var()' function
+  × CSS variables '--cccc' is used without the 'var()' function
   
     40 │ }
     41 │ a {
@@ -182,7 +183,7 @@ invalid.css:42:18 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 invalid.css:51:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS variables '--dddd' is used without the 'var()' function
+  × CSS variables '--dddd' is used without the 'var()' function
   
     49 │ }
     50 │ a {
@@ -199,7 +200,7 @@ invalid.css:51:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 invalid.css:52:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS variables '--eeee' is used without the 'var()' function
+  × CSS variables '--eeee' is used without the 'var()' function
   
     50 │ a {
     51 │     --foo: --dddd;
@@ -216,7 +217,7 @@ invalid.css:52:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 invalid.css:59:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS variables '--ffff' is used without the 'var()' function
+  × CSS variables '--ffff' is used without the 'var()' function
   
     57 │ @property --gggg {}
     58 │ a {
@@ -233,7 +234,7 @@ invalid.css:59:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 invalid.css:60:12 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS variables '--gggg' is used without the 'var()' function
+  × CSS variables '--gggg' is used without the 'var()' function
   
     58 │ a {
     59 │     --foo: --ffff;
@@ -250,7 +251,7 @@ invalid.css:60:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 invalid.css:67:14 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! CSS variables '--foo' is used without the 'var()' function
+  × CSS variables '--foo' is used without the 'var()' function
   
     65 │     --foo: red;
     66 │     .child {

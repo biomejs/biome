@@ -135,7 +135,7 @@ declare module "foo" {
 ```
 invalid.ts:1:1 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
   > 1 │ function test(a: number, b: number) {
       │ ^^^^^^^^^^^^^
@@ -152,7 +152,7 @@ invalid.ts:1:1 lint/nursery/useExplicitType ━━━━━━━━━━━━
 ```
 invalid.ts:3:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     1 │ function test(a: number, b: number) {
     2 │ 	return;
@@ -174,7 +174,7 @@ invalid.ts:3:2 lint/nursery/useExplicitType ━━━━━━━━━━━━
 ```
 invalid.ts:9:10 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
      7 │ }
      8 │ 
@@ -196,7 +196,7 @@ invalid.ts:9:10 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:13:15 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     11 │ };
     12 │ 
@@ -215,7 +215,7 @@ invalid.ts:13:15 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:17:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     15 │ class Test {
     16 │ 	constructor() {}
@@ -237,7 +237,7 @@ invalid.ts:17:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:21:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     19 │ 	}
     20 │ 	set prop() {}
@@ -259,7 +259,7 @@ invalid.ts:21:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:24:10 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     22 │ 		return;
     23 │ 	}
@@ -278,7 +278,7 @@ invalid.ts:24:10 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:25:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     23 │ 	}
     24 │ 	arrow = () => "arrow";
@@ -300,7 +300,7 @@ invalid.ts:25:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:31:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     30 │ const obj = {
   > 31 │ 	method() {
@@ -321,7 +321,7 @@ invalid.ts:31:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:37:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     36 │ const obj = {
   > 37 │ 	get method() {
@@ -342,7 +342,7 @@ invalid.ts:37:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:42:14 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     40 │ };
     41 │ 
@@ -361,7 +361,7 @@ invalid.ts:42:14 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:43:14 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     42 │ const func = (value: number) => ({ type: "X", value }) as any;
   > 43 │ const func = (value: number) => ({ type: "X", value }) as Action;
@@ -379,7 +379,7 @@ invalid.ts:43:14 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:45:16 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     43 │ const func = (value: number) => ({ type: "X", value }) as Action;
     44 │ 
@@ -398,7 +398,7 @@ invalid.ts:45:16 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:46:16 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     45 │ export default () => {};
   > 46 │ export default function () {}
@@ -416,7 +416,7 @@ invalid.ts:46:16 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:49:23 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     48 │ // check higher order functions
   > 49 │ const arrowFn = () => () => {};
@@ -434,7 +434,7 @@ invalid.ts:49:23 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:50:23 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     48 │ // check higher order functions
     49 │ const arrowFn = () => () => {};
@@ -453,7 +453,7 @@ invalid.ts:50:23 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:52:9 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     50 │ const arrowFn = () => function () {};
     51 │ const arrowFn = () => {
@@ -472,7 +472,7 @@ invalid.ts:52:9 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:57:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     55 │ // does not support detecting a return of a function inside other statements like if, switch, etc.
     56 │ // we check only the first statment
@@ -496,7 +496,7 @@ invalid.ts:57:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:66:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     64 │ 	}
     65 │ };
@@ -520,7 +520,7 @@ invalid.ts:66:17 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:78:3 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     76 │ 		}
     77 │ 	}
@@ -542,7 +542,7 @@ invalid.ts:78:3 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:85:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     83 │ 	}
     84 │ 	return (): void => {};
@@ -564,7 +564,7 @@ invalid.ts:85:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:94:19 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     92 │ }
     93 │ 
@@ -583,7 +583,7 @@ invalid.ts:94:19 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:95:26 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     94 │ const x = { prop: () => {} };
   > 95 │ const x = { bar: { prop: () => {} } };
@@ -601,7 +601,7 @@ invalid.ts:95:26 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:100:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
      98 │ 	pop(): Type | undefined;
      99 │ 	push(...items: Type[]): number;
@@ -620,7 +620,7 @@ invalid.ts:100:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:104:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     103 │ type MyObject = {
   > 104 │ 	(input: string);
@@ -638,7 +638,7 @@ invalid.ts:104:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:109:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     108 │ abstract class MyClass {
   > 109 │ 	public abstract method();
@@ -656,7 +656,7 @@ invalid.ts:109:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:114:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     112 │ abstract class P<T> {
     113 │ 	abstract method(): T;
@@ -675,7 +675,7 @@ invalid.ts:114:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:118:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     117 │ declare namespace myLib {
   > 118 │ 	function makeGreeting(s: string);
@@ -693,7 +693,7 @@ invalid.ts:118:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 invalid.ts:122:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing return type on function.
+  i Missing return type on function.
   
     121 │ declare module "foo" {
   > 122 │ 	export default function bar();

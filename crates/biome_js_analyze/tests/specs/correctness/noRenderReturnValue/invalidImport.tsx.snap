@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidImport.tsx
+snapshot_kind: text
 ---
 # Input
 ```tsx
@@ -38,7 +39,7 @@ function render2() {
 ```
 invalidImport.tsx:3:11 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     1 │ import CustomReactDOM, { render as customRender } from "react-dom";
     2 │ 
@@ -56,7 +57,7 @@ invalidImport.tsx:3:11 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidImport.tsx:4:20 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     3 │ const a = CustomReactDOM.render(<div />, document.body);
   > 4 │ const foo = bar && CustomReactDOM.render(<div />, document.body);
@@ -73,7 +74,7 @@ invalidImport.tsx:4:20 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidImport.tsx:5:19 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     3 │ const a = CustomReactDOM.render(<div />, document.body);
     4 │ const foo = bar && CustomReactDOM.render(<div />, document.body);
@@ -91,7 +92,7 @@ invalidImport.tsx:5:19 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidImport.tsx:6:19 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     4 │ const foo = bar && CustomReactDOM.render(<div />, document.body);
     5 │ const foo = bar ? CustomReactDOM.render(<div />, document.body) : null
@@ -109,7 +110,7 @@ invalidImport.tsx:6:19 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidImport.tsx:8:12 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
      6 │ const foo = () => CustomReactDOM.render(<div />, document.body);
      7 │ const foo = {
@@ -127,7 +128,7 @@ invalidImport.tsx:8:12 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidImport.tsx:11:9 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
      9 │ };
     10 │ let lorem;
@@ -145,7 +146,7 @@ invalidImport.tsx:11:9 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidImport.tsx:13:12 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     11 │ lorem = CustomReactDOM.render(<div />, document.body);
     12 │ function render1() {
@@ -163,7 +164,7 @@ invalidImport.tsx:13:12 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidImport.tsx:16:11 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     14 │ }
     15 │ 
@@ -181,7 +182,7 @@ invalidImport.tsx:16:11 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidImport.tsx:17:20 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     16 │ const a = customRender(<div />, document.body);
   > 17 │ const foo = bar && customRender(<div />, document.body);
@@ -198,7 +199,7 @@ invalidImport.tsx:17:20 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidImport.tsx:18:19 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     16 │ const a = customRender(<div />, document.body);
     17 │ const foo = bar && customRender(<div />, document.body);
@@ -216,7 +217,7 @@ invalidImport.tsx:18:19 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidImport.tsx:19:19 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     17 │ const foo = bar && customRender(<div />, document.body);
     18 │ const foo = bar ? customRender(<div />, document.body) : null
@@ -234,7 +235,7 @@ invalidImport.tsx:19:19 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidImport.tsx:21:12 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     19 │ const foo = () => customRender(<div />, document.body);
     20 │ const foo = {
@@ -252,7 +253,7 @@ invalidImport.tsx:21:12 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidImport.tsx:24:9 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     22 │ };
     23 │ let lorem;
@@ -270,7 +271,7 @@ invalidImport.tsx:24:9 lint/correctness/noRenderReturnValue ━━━━━━�
 ```
 invalidImport.tsx:26:12 lint/correctness/noRenderReturnValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not depend on the value returned by the function ReactDOM.render().
+  × Do not depend on the value returned by the function ReactDOM.render().
   
     24 │ lorem = customRender(<div />, document.body);
     25 │ function render2() {

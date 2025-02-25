@@ -1,7 +1,7 @@
 {
   "$schema": "../packages/@biomejs/biome/configuration_schema.json",
   "formatter": {
-    "include": [
+    "includes": [
       "**/*.js",
       "**/*.jsx",
       "**/*.cjs",
@@ -11,7 +11,7 @@
     "indentStyle": "space"
   },
   "linter": {
-    "include": [
+    "includes": [
       "**/*.js"
     ],
     "rules": {

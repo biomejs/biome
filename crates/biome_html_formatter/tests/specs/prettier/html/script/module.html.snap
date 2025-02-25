@@ -1,0 +1,85 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/script/module.html
+---
+# Input
+
+```html
+<script type="module">
+import prettier from "prettier/standalone";
+import parserGraphql from "prettier/parser-graphql";
+
+prettier.format("query { }", {
+                      parser: "graphql",
+  plugins: [
+parserGraphql],
+});
+</script>
+
+<script type="module">
+async function foo() {
+  let x=10;while(x-->0)console.log(x)
+  await(import('mod'))
+}
+</script>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,17 +1,17 @@
+ <script type="module">
+-  import prettier from "prettier/standalone";
+-  import parserGraphql from "prettier/parser-graphql";
++import prettier from "prettier/standalone";
++import parserGraphql from "prettier/parser-graphql";
+ 
+-  prettier.format("query { }", {
+-    parser: "graphql",
+-    plugins: [parserGraphql],
+-  });
++prettier.format("query { }", {
++                      parser: "graphql",
++  plugins: [
++parserGraphql],
++});
+ </script>
+ 
+ <script type="module">
+-  async function foo() {
+-    let x = 10;
+-    while (x-- > 0) console.log(x);
+-    await import("mod");
+-  }
++async function foo() {
++  let x=10;while(x-->0)console.log(x)
++  await(import('mod'))
++}
+ </script>
+```
+
+# Output
+
+```html
+<script type="module">
+import prettier from "prettier/standalone";
+import parserGraphql from "prettier/parser-graphql";
+
+prettier.format("query { }", {
+                      parser: "graphql",
+  plugins: [
+parserGraphql],
+});
+</script>
+
+<script type="module">
+async function foo() {
+  let x=10;while(x-->0)console.log(x)
+  await(import('mod'))
+}
+</script>
+```

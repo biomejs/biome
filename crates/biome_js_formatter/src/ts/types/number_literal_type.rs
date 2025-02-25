@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-use biome_formatter::token::number::format_number_token;
+use biome_formatter::token::number::{format_number_token, NumberFormatOptions};
 use biome_formatter::write;
 use biome_js_syntax::{TsNumberLiteralType, TsNumberLiteralTypeFields};
 
@@ -15,7 +15,13 @@ impl FormatNodeRule<TsNumberLiteralType> for FormatTsNumberLiteralType {
         } = node.as_fields();
         write![
             f,
-            [minus_token.format(), format_number_token(&literal_token?)]
+            [
+                minus_token.format(),
+                format_number_token(
+                    &literal_token?,
+                    NumberFormatOptions::default().keep_one_trailing_decimal_zero()
+                )
+            ]
         ]
     }
 }

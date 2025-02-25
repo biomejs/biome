@@ -414,7 +414,7 @@ impl RuleSource {
 
     pub fn to_rule_url(&self) -> String {
         match self {
-            Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"),
+            Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#{rule_name}"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
             Self::EslintGraphql(rule_name) => format!("https://the-guild.dev/graphql/eslint/rules/{rule_name}"),
             Self::EslintGraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),
@@ -1231,6 +1231,7 @@ pub trait Rule: RuleMeta + Sized {
 pub struct RuleDiagnostic {
     #[category]
     pub(crate) category: &'static Category,
+    pub(crate) subcategory: Option<String>,
     #[location(span)]
     pub(crate) span: Option<TextRange>,
     #[message]
@@ -1309,6 +1310,7 @@ impl RuleDiagnostic {
         let message = markup!({ title }).to_owned();
         Self {
             category,
+            subcategory: None,
             span: span.as_span(),
             message: MessageAndDescription::from(message),
             tags: DiagnosticTags::empty(),
@@ -1407,6 +1409,11 @@ impl RuleDiagnostic {
 
     pub fn advices(&self) -> &RuleAdvice {
         &self.rule_advice
+    }
+
+    pub fn subcategory(mut self, subcategory: String) -> Self {
+        self.subcategory = Some(subcategory);
+        self
     }
 }
 

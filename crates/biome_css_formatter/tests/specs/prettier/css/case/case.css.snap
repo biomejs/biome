@@ -106,15 +106,6 @@ x-panel {
    background-color: orange;
  }
  
-@@ -53,7 +53,7 @@
-   max-width: 500px;
-   margin: 0 auto;
-   border-radius: 8px;
--  transition: transform 0.2s ease-out;
-+  transition: transform .2s ease-out;
- }
- :host([hidden]) {
-   display: none;
 ```
 
 # Output
@@ -175,7 +166,7 @@ x-panel {
   max-width: 500px;
   margin: 0 auto;
   border-radius: 8px;
-  transition: transform .2s ease-out;
+  transition: transform 0.2s ease-out;
 }
 :host([hidden]) {
   display: none;

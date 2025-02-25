@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidFunction.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -47,7 +48,7 @@ try { } catch (e) { }
 ```
 invalidFunction.ts:1:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  i This function is unused.
   
   > 1 │ function f1() { }
       │          ^^
@@ -62,7 +63,7 @@ invalidFunction.ts:1:10 lint/correctness/noUnusedVariables ━━━━━━━
 ```
 invalidFunction.ts:5:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  i This function is unused.
   
     3 │ // recursive functions are never called,
     4 │ // so they are invalid
@@ -79,7 +80,7 @@ invalidFunction.ts:5:10 lint/correctness/noUnusedVariables ━━━━━━━
 ```
 invalidFunction.ts:9:10 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function is unused.
+  i This function is unused.
   
      7 │ }
      8 │ 
@@ -96,7 +97,7 @@ invalidFunction.ts:9:10 lint/correctness/noUnusedVariables ━━━━━━━
 ```
 invalidFunction.ts:17:13 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  i This parameter is unused.
   
     16 │ // parameter a is not used
   > 17 │ {(function (a) { })}
@@ -121,7 +122,7 @@ invalidFunction.ts:17:13 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidFunction.ts:18:14 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  i This variable is unused.
   
     16 │ // parameter a is not used
     17 │ {(function (a) { })}
@@ -138,7 +139,7 @@ invalidFunction.ts:18:14 lint/correctness/noUnusedVariables ━━━━━━�
 ```
 invalidFunction.ts:19:14 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  i This variable is unused.
   
     17 │ {(function (a) { })}
     18 │ {(function ({a}) { })}
@@ -164,7 +165,7 @@ invalidFunction.ts:19:14 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidFunction.ts:20:12 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  i This parameter is unused.
   
     18 │ {(function ({a}) { })}
     19 │ {(function ([a]) { })}
@@ -190,7 +191,7 @@ invalidFunction.ts:20:12 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidFunction.ts:25:15 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This parameter is unused.
+  i This parameter is unused.
   
     24 │ // parameter b is not used
   > 25 │ (function (a, b) {
@@ -215,7 +216,7 @@ invalidFunction.ts:25:15 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidFunction.ts:30:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  i This variable is unused.
   
     29 │ // f5 is not used
   > 30 │ const f5 = () => { };
@@ -240,7 +241,7 @@ invalidFunction.ts:30:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidFunction.ts:33:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  i This variable is unused.
   
     32 │ // f6 is recursive, but never called
   > 33 │ const f6 = () => { f6() };
@@ -265,7 +266,7 @@ invalidFunction.ts:33:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
 ```
 invalidFunction.ts:36:16 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable is unused.
+  i This variable is unused.
   
     35 │ // e is not used
   > 36 │ try { } catch (e) { }
@@ -284,5 +285,3 @@ invalidFunction.ts:36:16 lint/correctness/noUnusedVariables  FIXABLE  ━━━�
   
 
 ```
-
-

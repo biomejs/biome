@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 # Emitted Messages
 
@@ -40,6 +39,8 @@ The configuration that is contained inside the file `biome.json`
                               apply to self closing elements).
         --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
                               Defaults to true.
+        --object-wrap=<preserve|collapse>  Whether to enforce collapsing object literals when
+                              possible. Defaults to preserve.
         --use-editorconfig=<true|false>  Use any `.editorconfig` files to configure the formatter.
                               Configuration in `biome.json` will override `.editorconfig`
                               configuration.
@@ -70,8 +71,12 @@ The configuration that is contained inside the file `biome.json`
                               JavaScript (and its super languages) files. Defaults to 80.
         --javascript-formatter-quote-style=<double|single>  The type of quotes used in JavaScript
                               code. Defaults to double.
-        --javascript-attribute-position=<multiline|auto>  The attribute position style in jsx
-                              elements. Defaults to auto.
+        --javascript-formatter-attribute-position=<multiline|auto>  The attribute position style in
+                              JSX elements. Defaults to auto.
+        --javascript-formatter-bracket-spacing=<true|false>  Whether to insert spaces around
+                              brackets in object literals. Defaults to true.
+        --javascript-formatter-object-wrap=<preserve|collapse>  Whether to enforce collapsing object
+                              literals when possible. Defaults to preserve.
         --javascript-linter-enabled=<true|false>  Control the linter for JavaScript (and its super
                               languages) files.
         --javascript-assist-enabled=<true|false>  Control the assist for JavaScript (and its super
@@ -93,6 +98,10 @@ The configuration that is contained inside the file `biome.json`
                               multiple lines, regardless of length of the list. When formatting
                               `package.json`, Biome will use `always` unless configured otherwise.
                               Defaults to "followSource".
+        --json-formatter-bracket-spacing=<true|false>  Whether to insert spaces around brackets in
+                              object literals. Defaults to true.
+        --json-formatter-object-wrap=<preserve|collapse>  Whether to enforce collapsing object
+                              literals when possible. Defaults to preserve.
         --json-linter-enabled=<true|false>  Control the linter for JSON (and its super languages)
                               files.
         --json-assist-enabled=<true|false>  Control the assist for JSON (and its super languages)
@@ -147,9 +156,9 @@ The configuration that is contained inside the file `biome.json`
         --html-formatter-bracket-same-line=<true|false>  Whether to hug the closing bracket of
                               multiline HTML tags to the end of the last line, rather than being
                               alone on the following line. Defaults to false.
-        --html-formatter-whitespace-sensitivity=<strict|ignore>  Whether to account for whitespace
-                              sensitivity when formatting HTML (and its super languages). Defaults
-                              to "strict".
+        --html-formatter-whitespace-sensitivity=<css|strict|ignore>  Whether to account for
+                              whitespace sensitivity when formatting HTML (and its super languages).
+                              Defaults to "css".
         --html-formatter-indent-script-and-style=<true|false>  Whether to indent the `<script>` and
                               `<style>` tags for HTML (and its super languages). Defaults to false.
         --assist-enabled=<true|false>  Whether Biome should enable assist via LSP.

@@ -3,7 +3,7 @@ mod attrs;
 use crate::partial_derive::attrs::PartialType;
 use attrs::{Attrs, FieldAttrs};
 use proc_macro2::{Ident, Span, TokenStream};
-use proc_macro_error::*;
+use proc_macro_error2::*;
 use quote::quote;
 use syn::{Data, Field, GenericArgument, PathArguments, Type};
 

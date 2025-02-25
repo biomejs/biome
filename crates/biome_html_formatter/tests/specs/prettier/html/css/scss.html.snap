@@ -1,0 +1,120 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/css/scss.html
+---
+# Input
+
+```html
+<style type="text/x-scss">
+  $font-stack:    Helvetica, sans-serif;
+  $primary-color: #333;
+
+  body {
+    font: 100% $font-stack;
+    color: $primary-color;
+  }
+</style>
+
+<style lang="scss">
+  $font-stack:    Helvetica, sans-serif;
+  $primary-color: #333;
+
+  body {
+    font: 100% $font-stack;
+    color: $primary-color;
+  }
+</style>
+
+<style lang="scss">
+.someElement {
+    @include bp-medium {
+      display: flex;
+    }
+    
+    @include bp-large {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+}
+</style>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+ <style type="text/x-scss">
+-  $font-stack: Helvetica, sans-serif;
++  $font-stack:    Helvetica, sans-serif;
+   $primary-color: #333;
+ 
+   body {
+@@ -9,7 +9,7 @@
+ </style>
+ 
+ <style lang="scss">
+-  $font-stack: Helvetica, sans-serif;
++  $font-stack:    Helvetica, sans-serif;
+   $primary-color: #333;
+ 
+   body {
+@@ -19,14 +19,14 @@
+ </style>
+ 
+ <style lang="scss">
+-  .someElement {
++.someElement {
+     @include bp-medium {
+       display: flex;
+     }
+-
++    
+     @include bp-large {
+       margin-top: 10px;
+       margin-bottom: 10px;
+     }
+-  }
++}
+ </style>
+```
+
+# Output
+
+```html
+<style type="text/x-scss">
+  $font-stack:    Helvetica, sans-serif;
+  $primary-color: #333;
+
+  body {
+    font: 100% $font-stack;
+    color: $primary-color;
+  }
+</style>
+
+<style lang="scss">
+  $font-stack:    Helvetica, sans-serif;
+  $primary-color: #333;
+
+  body {
+    font: 100% $font-stack;
+    color: $primary-color;
+  }
+</style>
+
+<style lang="scss">
+.someElement {
+    @include bp-medium {
+      display: flex;
+    }
+    
+    @include bp-large {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+}
+</style>
+```

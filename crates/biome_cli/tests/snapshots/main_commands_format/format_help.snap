@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
-snapshot_kind: text
+expression: redactor(content)
 ---
 # Emitted Messages
 
@@ -22,6 +21,8 @@ Generic options applied to all files
                               apply to self closing elements).
         --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
                               Defaults to true.
+        --object-wrap=<preserve|collapse>  Whether to enforce collapsing object literals when
+                              possible. Defaults to preserve.
         --use-editorconfig=<true|false>  Use any `.editorconfig` files to configure the formatter.
                               Configuration in `biome.json` will override `.editorconfig`
                               configuration.
@@ -52,10 +53,12 @@ Formatting options specific to the JavaScript files
                               JavaScript (and its super languages) files. Defaults to 80.
         --javascript-formatter-quote-style=<double|single>  The type of quotes used in JavaScript
                               code. Defaults to double.
-        --javascript-attribute-position=<multiline|auto>  The attribute position style in jsx
-                              elements. Defaults to auto.
-        --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
-                              Defaults to true.
+        --javascript-formatter-attribute-position=<multiline|auto>  The attribute position style in
+                              JSX elements. Defaults to auto.
+        --javascript-formatter-bracket-spacing=<true|false>  Whether to insert spaces around
+                              brackets in object literals. Defaults to true.
+        --javascript-formatter-object-wrap=<preserve|collapse>  Whether to enforce collapsing object
+                              literals when possible. Defaults to preserve.
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
@@ -132,6 +135,10 @@ Available options:
                               multiple lines, regardless of length of the list. When formatting
                               `package.json`, Biome will use `always` unless configured otherwise.
                               Defaults to "followSource".
+        --json-formatter-bracket-spacing=<true|false>  Whether to insert spaces around brackets in
+                              object literals. Defaults to true.
+        --json-formatter-object-wrap=<preserve|collapse>  Whether to enforce collapsing object
+                              literals when possible. Defaults to preserve.
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension

@@ -7,7 +7,7 @@ use biome_console::{markup, ConsoleExt};
 use biome_fs::OsFileSystem;
 use biome_lsp::ServerFactory;
 use biome_service::{workspace::WorkspaceClient, TransportError, WorkspaceError};
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use std::{env, fs};
 use tokio::io;
 use tokio::runtime::Runtime;
@@ -78,12 +78,17 @@ pub(crate) fn run_server(
     log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> Result<(), CliDiagnostic> {
-    setup_tracing_subscriber(log_path, log_file_name_prefix);
+    setup_tracing_subscriber(log_path.as_deref(), log_file_name_prefix.as_deref());
 
     let rt = Runtime::new()?;
     let factory = ServerFactory::new(stop_on_disconnect);
     let cancellation = factory.cancellation();
-    let span = debug_span!("Running Server", pid = std::process::id());
+    let span = debug_span!("Running Server",
+        pid = std::process::id(),
+        config_path = ?config_path.as_ref(),
+        log_path = ?log_path.as_ref(),
+        log_file_name_prefix = &log_file_name_prefix.as_deref(),
+    );
 
     rt.block_on(async move {
         tokio::select! {
@@ -207,12 +212,14 @@ pub(crate) fn read_most_recent_log_file(
 /// is written to log files rotated on a hourly basis (in
 /// `biome-logs/server.log.yyyy-MM-dd-HH` files inside the system temporary
 /// directory)
-fn setup_tracing_subscriber(log_path: Option<Utf8PathBuf>, log_file_name_prefix: Option<String>) {
-    let biome_log_path =
-        log_path.unwrap_or_else(|| biome_fs::ensure_cache_dir().join("biome-logs"));
+fn setup_tracing_subscriber(log_path: Option<&Utf8Path>, log_file_name_prefix: Option<&str>) {
+    let biome_log_path = log_path.map_or_else(
+        || biome_fs::ensure_cache_dir().join("biome-logs"),
+        |path| path.to_path_buf(),
+    );
     let appender_builder = tracing_appender::rolling::RollingFileAppender::builder();
     let file_appender = appender_builder
-        .filename_prefix(log_file_name_prefix.unwrap_or(String::from("server.log")))
+        .filename_prefix(log_file_name_prefix.map_or(String::from("server.log"), Into::into))
         .max_log_files(7)
         .rotation(Rotation::HOURLY)
         .build(biome_log_path)

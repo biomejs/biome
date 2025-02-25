@@ -1,4 +1,3 @@
-use super::scanner::scan;
 use super::{
     ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
     CloseProjectParams, FeatureName, FileContent, FixFileParams, FixFileResult, FormatFileParams,
@@ -7,7 +6,7 @@ use super::{
     ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
     PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
     ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
-    SupportsFeatureParams, UpdateSettingsParams,
+    SupportsFeatureParams, UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::diagnostics::FileTooLarge;
 use crate::file_handlers::{
@@ -22,6 +21,8 @@ use crate::workspace::{
 };
 use crate::{file_handlers::Features, Workspace, WorkspaceError};
 use append_only_vec::AppendOnlyVec;
+use biome_analyze::AnalyzerPluginVec;
+use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_dependency_graph::DependencyGraph;
 use biome_deserialize::json::deserialize_from_json_str;
@@ -38,14 +39,16 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;
 use biome_package::PackageType;
 use biome_parser::AnyParse;
+use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::NodeCache;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
+use rayon::ThreadPoolBuilder;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, Once};
 use tracing::{info, instrument, warn};
 
 pub(super) struct WorkspaceServer {
@@ -61,6 +64,9 @@ pub(super) struct WorkspaceServer {
 
     /// Dependency graph tracking imports across source files.
     dependency_graph: Arc<DependencyGraph>,
+
+    /// Keeps all loaded plugins in memory, per project.
+    plugin_caches: Arc<HashMap<ProjectKey, PluginCache>>,
 
     /// Stores the document (text content + version number) associated with a URL
     documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
@@ -131,11 +137,14 @@ impl WorkspaceServer {
     /// [Default] to disallow instances of [Workspace] from being created
     /// outside a [crate::App]
     pub(crate) fn new(fs: Box<dyn FileSystem>) -> Self {
+        init_thread_pool();
+
         Self {
             features: Features::new(),
             projects: Default::default(),
             project_layout: Default::default(),
             dependency_graph: Default::default(),
+            plugin_caches: Default::default(),
             documents: Default::default(),
             file_sources: AppendOnlyVec::default(),
             patterns: Default::default(),
@@ -497,13 +506,8 @@ impl WorkspaceServer {
                 files_settings.includes.matches_with_exceptions(path)
             };
         }
-        if !files_settings.included_files.is_empty() {
-            is_included =
-                is_included && (is_dir(path) || files_settings.included_files.matches_path(path))
-        };
 
         !is_included
-            || files_settings.ignored_files.matches_path(path)
             || files_settings.git_ignore.as_ref().is_some_and(|ignore| {
                 // `matched_path_or_any_parents` panics if `source` is not under the gitignore root.
                 // This checks excludes absolute paths that are not a prefix of the base root.
@@ -517,6 +521,41 @@ impl WorkspaceServer {
                     false
                 }
             })
+    }
+
+    fn load_plugins(
+        &self,
+        project_key: ProjectKey,
+        base_path: &Utf8Path,
+        plugins: &Plugins,
+    ) -> Vec<PluginDiagnostic> {
+        let mut diagnostics = Vec::new();
+        let plugin_cache = PluginCache::default();
+
+        for plugin_config in plugins.iter() {
+            match plugin_config {
+                PluginConfiguration::Path(plugin_path) => {
+                    match BiomePlugin::load(self.fs.as_ref(), plugin_path, base_path) {
+                        Ok(plugin) => {
+                            plugin_cache.insert_plugin(plugin_path.clone().into(), plugin);
+                        }
+                        Err(diagnostic) => diagnostics.push(diagnostic),
+                    }
+                }
+            }
+        }
+
+        self.plugin_caches.pin().insert(project_key, plugin_cache);
+
+        diagnostics
+    }
+
+    fn get_analyzer_plugins_for_project(&self, project_key: ProjectKey) -> AnalyzerPluginVec {
+        self.plugin_caches
+            .pin()
+            .get(&project_key)
+            .map(|cache| cache.get_analyzer_plugins())
+            .unwrap_or_default()
     }
 
     pub(super) fn update_project_layout_for_paths(&self, paths: &[BiomePath]) {
@@ -645,22 +684,44 @@ impl Workspace for WorkspaceServer {
     /// This function may panic if the internal settings mutex has been poisoned
     /// by another thread having previously panicked while holding the lock
     #[tracing::instrument(level = "debug", skip(self))]
-    fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
+    fn update_settings(
+        &self,
+        params: UpdateSettingsParams,
+    ) -> Result<UpdateSettingsResult, WorkspaceError> {
         let mut settings = self
             .projects
             .get_settings(params.project_key)
             .ok_or_else(WorkspaceError::no_project)?;
 
+        let workspace_directory = params.workspace_directory.map(|p| p.to_path_buf());
+
         settings.merge_with_configuration(
             params.configuration,
-            params.workspace_directory.map(|p| p.to_path_buf()),
+            workspace_directory.clone(),
             params.vcs_base_path.map(|p| p.to_path_buf()),
             params.gitignore_matches.as_slice(),
         )?;
 
+        let diagnostics = self.load_plugins(
+            params.project_key,
+            &workspace_directory.unwrap_or_default(),
+            &settings.plugins,
+        );
+        let has_errors = diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.severity() >= Severity::Error);
+        if has_errors {
+            // Note we also pass non-error diagnostics here. Filtering them
+            // might be cleaner, but on the other hand, including them may
+            // sometimes give a hint as to why an error occurred?
+            return Err(WorkspaceError::plugin_errors(diagnostics));
+        }
+
         self.projects.set_settings(params.project_key, settings);
 
-        Ok(())
+        Ok(UpdateSettingsResult {
+            diagnostics: diagnostics.into_iter().map(Into::into).collect(),
+        })
     }
 
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError> {
@@ -689,15 +750,7 @@ impl Workspace for WorkspaceServer {
             .or_else(|| self.projects.get_project_path(params.project_key))
             .ok_or_else(WorkspaceError::no_project)?;
 
-        // TODO: Need to register a file watcher. This should happen before we
-        //       start scanning, or we might miss changes that happened during
-        //       the scan.
-
-        // TODO: If a watcher is registered, we can also skip the scanning.
-        //       **But** if we are using a polling backend for the watching, we
-        //       probably want to force a poll at this moment.
-
-        let result = scan(self, params.project_key, &path)?;
+        let result = self.scan(params.project_key, &path)?;
 
         Ok(ScanProjectFolderResult {
             diagnostics: result.diagnostics,
@@ -918,6 +971,7 @@ impl Workspace for WorkspaceServer {
                     project_layout: self.project_layout.clone(),
                     suppression_reason: None,
                     enabled_rules,
+                    plugins: self.get_analyzer_plugins_for_project(project_key),
                 });
 
                 (
@@ -998,6 +1052,7 @@ impl Workspace for WorkspaceServer {
             skip,
             suppression_reason: None,
             enabled_rules,
+            plugins: self.get_analyzer_plugins_for_project(project_key),
         }))
     }
 
@@ -1137,6 +1192,7 @@ impl Workspace for WorkspaceServer {
             rule_categories,
             suppression_reason,
             enabled_rules,
+            plugins: self.get_analyzer_plugins_for_project(project_key),
         })
     }
 
@@ -1212,6 +1268,22 @@ impl Workspace for WorkspaceServer {
 
     fn server_info(&self) -> Option<&ServerInfo> {
         None
+    }
+}
+
+/// Sets up the global Rayon thread pool the first time it's called.
+///
+/// This is used to assign friendly debug names to the threads of the pool.
+fn init_thread_pool() {
+    #[cfg(not(target_family = "wasm"))]
+    {
+        static INIT_ONCE: Once = Once::new();
+        INIT_ONCE.call_once(|| {
+            ThreadPoolBuilder::new()
+                .thread_name(|index| format!("biome::workspace_worker_{index}"))
+                .build_global()
+                .expect("failed to initialize the global thread pool");
+        });
     }
 }
 

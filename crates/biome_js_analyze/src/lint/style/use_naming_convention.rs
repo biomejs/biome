@@ -339,7 +339,6 @@ declare_lint_rule! {
     ///     "options": {
     ///         "strictCase": false,
     ///         "requireAscii": false,
-    ///         "enumMemberCase": "CONSTANT_CASE",
     ///         "conventions": [
     ///             {
     ///                 "selector": {
@@ -402,17 +401,6 @@ declare_lint_rule! {
     ///
     /// **Default:** `true`
     ///
-    /// ### enumMemberCase
-    ///
-    /// By default, the rule enforces the naming convention followed by the [TypeScript Compiler team](https://www.typescriptlang.org/docs/handbook/enums.html):
-    /// an `enum` member is in [`PascalCase`].
-    ///
-    /// You can enforce another convention by setting `enumMemberCase` option.
-    /// The supported cases are: [`PascalCase`], [`CONSTANT_CASE`], and [`camelCase`].
-    ///
-    /// **This option will be deprecated in the future.**
-    /// **Use the [`conventions`](#conventions-since-v180) option instead.**
-    ///
     /// ### conventions (Since v1.8.0)
     ///
     /// The `conventions` option allows applying custom conventions.
@@ -445,6 +433,7 @@ declare_lint_rule! {
     ///   - `typeLike`: classes, enums, type aliases, and interfaces
     ///   - `class`
     ///   - `enum`
+    ///   - `enumMember`
     ///   - `interface`
     ///   - `typeAlias`
     ///   - `function`: named function declarations and expressions
@@ -504,8 +493,9 @@ declare_lint_rule! {
     ///
     /// In the following example, we check the following conventions:
     ///
-    /// - A private property starts with `_` and consists of at least two characters
+    /// - A private property starts with `_` and consists of at least two characters.
     /// - The captured name (the name without the leading `_`) is in [`camelCase`].
+    /// - An enum member is in [`PascalCase`] or [`CONSTANT_CASE`].
     ///
     /// ```json,options
     /// {
@@ -518,6 +508,12 @@ declare_lint_rule! {
     ///                 },
     ///                 "match": "_(.+)",
     ///                 "formats": ["camelCase"]
+    ///             },
+    ///             {
+    ///                 "selector": {
+    ///                     "kind": "enumMember"
+    ///                 },
+    ///                 "formats": ["PascalCase", "CONSTANT_CASE"]
     ///             }
     ///         ]
     ///     }
@@ -667,7 +663,9 @@ declare_lint_rule! {
     /// - Non-capturing groups `(?:)`
     /// - Case-insensitive groups `(?i:)` and case-sensitive groups `(?-i:)`
     /// - A limited set of escaped characters including all special characters
-    ///   and regular string escape characters `\f`, `\n`, `\r`, `\t`, `\v`
+    ///   and regular string escape characters `\f`, `\n`, `\r`, `\t`, `\v`.
+    ///   Note that you can also escape special characters using character classes.
+    ///   For example, `\$` and `[$]` are two valid patterns that escape `$`.
     ///
     /// [case]: https://en.wikipedia.org/wiki/Naming_convention_(programming)#Examples_of_multiple-word_identifier_formats
     /// [`camelCase`]: https://en.wikipedia.org/wiki/Camel_case
@@ -763,7 +761,7 @@ impl Rule for UseNamingConvention {
                 });
             }
         }
-        let default_convention = node_selector.default_convention(options);
+        let default_convention = node_selector.default_convention();
         // We only tim the name if it was not trimmed yet
         if is_not_trimmed {
             let (prefix_len, trimmed_name) = trim_underscore_dollar(name);
@@ -1033,10 +1031,6 @@ pub struct NamingConventionOptions {
     /// Custom conventions.
     #[serde(default, skip_serializing_if = "<[_]>::is_empty")]
     pub conventions: Box<[Convention]>,
-
-    /// Allowed cases for _TypeScript_ `enum` member names.
-    #[serde(default, skip_serializing_if = "is_default")]
-    pub enum_member_case: Format,
 }
 impl Default for NamingConventionOptions {
     fn default() -> Self {
@@ -1044,7 +1038,6 @@ impl Default for NamingConventionOptions {
             strict_case: true,
             require_ascii: true,
             conventions: Vec::new().into_boxed_slice(),
-            enum_member_case: Format::default(),
         }
     }
 }
@@ -1086,7 +1079,7 @@ impl DeserializableValidator for Convention {
         if self.formats.is_empty() && self.matching.is_none() {
             ctx.report(
                 DeserializationDiagnostic::new(
-                    "At least one field among `format` and `match` must be set.",
+                    "At least one field among `formats` and `match` must be set.",
                 )
                 .with_range(range),
             );
@@ -1497,7 +1490,7 @@ impl Selector {
 
     /// Returns the list of default [Case] for `self`.
     /// The preferred case comes first in the list.
-    fn default_convention(self, options: &NamingConventionOptions) -> Convention {
+    fn default_convention(self) -> Convention {
         let kind = self.kind;
         match kind {
             Kind::TypeProperty if self.modifiers.contains(Modifier::Readonly) => Convention {
@@ -1570,7 +1563,7 @@ impl Selector {
             Kind::EnumMember => Convention {
                 selector: kind.into(),
                 matching: None,
-                formats: Formats(Case::from(options.enum_member_case).into()),
+                formats: Formats(Case::Pascal.into()),
             },
             Kind::Variable | Kind::Const | Kind::Var | Kind::Let => Convention {
                 selector: kind.into(),

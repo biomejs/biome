@@ -689,6 +689,50 @@ impl FromStr for BracketSameLine {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum ObjectWrap {
+    #[default]
+    Preserve,
+    Collapse,
+}
+
+impl ObjectWrap {
+    pub const fn is_preserve(&self) -> bool {
+        matches!(self, Self::Preserve)
+    }
+
+    pub const fn is_collapse(&self) -> bool {
+        matches!(self, Self::Collapse)
+    }
+}
+
+impl FromStr for ObjectWrap {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "preserve"  => Ok(Self::Preserve),
+            "contains"  => Ok(Self::Collapse),
+            _ => Err("Value not supported for objectWrap. Supported values are 'preserve' and 'collapse'."),
+        }
+    }
+}
+
+impl Display for ObjectWrap {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Preserve => std::write!(f, "Preserve"),
+            Self::Collapse => std::write!(f, "Collapse"),
+        }
+    }
+}
+
 /// Context object storing data relevant when formatting an object.
 pub trait FormatContext {
     type Options: FormatOptions;
@@ -705,6 +749,11 @@ pub trait FormatContext {
 }
 
 /// Options customizing how the source code should be formatted.
+///
+/// **Note**: This trait should **only** contain the essential abstractions required for the printing phase.
+/// For example, do not add a `fn bracket_spacing(&self) -> BracketSpacing` method here,
+/// as the [BracketSpacing] option is not needed during the printing phase
+/// and enforcing its implementation for all structs using this trait is unnecessary.
 pub trait FormatOptions {
     /// The indent style.
     fn indent_style(&self) -> IndentStyle;
@@ -717,15 +766,6 @@ pub trait FormatOptions {
 
     /// The type of line ending.
     fn line_ending(&self) -> LineEnding;
-
-    /// The attribute position.
-    fn attribute_position(&self) -> AttributePosition;
-
-    /// Whether to put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
-    fn bracket_same_line(&self) -> BracketSameLine;
-
-    /// Whether to insert spaces around brackets in object literals. Defaults to true.
-    fn bracket_spacing(&self) -> BracketSpacing;
 
     /// Derives the print options from the these format options
     fn as_print_options(&self) -> PrinterOptions;
@@ -775,9 +815,6 @@ pub struct SimpleFormatOptions {
     pub indent_width: IndentWidth,
     pub line_width: LineWidth,
     pub line_ending: LineEnding,
-    pub attribute_position: AttributePosition,
-    pub bracket_same_line: BracketSameLine,
-    pub bracket_spacing: BracketSpacing,
 }
 
 impl FormatOptions for SimpleFormatOptions {
@@ -797,26 +834,12 @@ impl FormatOptions for SimpleFormatOptions {
         self.line_ending
     }
 
-    fn attribute_position(&self) -> AttributePosition {
-        self.attribute_position
-    }
-
-    fn bracket_same_line(&self) -> BracketSameLine {
-        self.bracket_same_line
-    }
-
-    fn bracket_spacing(&self) -> BracketSpacing {
-        self.bracket_spacing
-    }
-
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::default()
             .with_indent_style(self.indent_style)
             .with_indent_width(self.indent_width)
             .with_print_width(self.line_width.into())
             .with_line_ending(self.line_ending)
-            .with_attribute_position(self.attribute_position)
-            .with_bracket_spacing(self.bracket_spacing)
     }
 }
 
@@ -1955,14 +1978,15 @@ impl<Context> FormatState<Context> {
         self.group_id_builder.group_id(debug_name)
     }
 
+    #[cfg(not(debug_assertions))]
+    #[inline]
+    pub fn track_token<L: Language>(&mut self, _token: &SyntaxToken<L>) {}
+
     /// Tracks the given token as formatted
+    #[cfg(debug_assertions)]
     #[inline]
     pub fn track_token<L: Language>(&mut self, token: &SyntaxToken<L>) {
-        cfg_if::cfg_if! {
-            if #[cfg(debug_assertions)] {
-                self.printed_tokens.track_token(token);
-            }
-        }
+        self.printed_tokens.track_token(token);
     }
 
     #[cfg(not(debug_assertions))]
@@ -1989,14 +2013,15 @@ impl<Context> FormatState<Context> {
         self.printed_tokens.is_disabled()
     }
 
+    #[cfg(not(debug_assertions))]
+    #[inline]
+    pub fn assert_formatted_all_tokens<L: Language>(&self, _root: &SyntaxNode<L>) {}
+
     /// Asserts in debug builds that all tokens have been printed.
+    #[cfg(debug_assertions)]
     #[inline]
     pub fn assert_formatted_all_tokens<L: Language>(&self, root: &SyntaxNode<L>) {
-        cfg_if::cfg_if! {
-            if #[cfg(debug_assertions)] {
-                self.printed_tokens.assert_all_tracked(root);
-            }
-        }
+        self.printed_tokens.assert_all_tracked(root);
     }
 }
 

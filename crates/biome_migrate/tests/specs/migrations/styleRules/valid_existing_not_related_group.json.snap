@@ -176,7 +176,25 @@ valid_existing_not_related_group.json:1:1 migrate  FIXABLE  ━━━━━━�
          39 │ + ········"useEnumInitializers":·"error",
          40 │ + ········"noParameterAssign":·"error"
      40  41 │         },
-     41  42 │         "nursery": {
+     41     │ - ······"nursery":·{
+         42 │ + ······"correctness":·{
+         43 │ + ········"noUnusedVariables":·"off",
+         44 │ + ········"noUnusedImports":·"off"
+         45 │ + ······},
+         46 │ + ······"nursery":·{
+     42  47 │           "noRestrictedImports": {
+     43  48 │             "level": "error",
+    ······· │ 
+     54  59 │         },
+     55  60 │         "suspicious": {
+     56     │ - ········"noConsoleLog":·"off"
+     57     │ - ······},
+     58     │ - ······"correctness":·{
+     59     │ - ········"noUnusedVariables":·"off",
+     60     │ - ········"noUnusedImports":·"off"
+         61 │ + ········"noConsoleLog":·"off"
+     61  62 │         }
+     62  63 │       }
   
 
 ```

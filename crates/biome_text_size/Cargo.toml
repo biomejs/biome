@@ -20,7 +20,7 @@ serde  = ["dep:serde"]
 
 [dev-dependencies]
 serde_test        = "1.0.177"
-static_assertions = "1.1"
+static_assertions = { workspace = true }
 
 [[test]]
 name              = "serde"

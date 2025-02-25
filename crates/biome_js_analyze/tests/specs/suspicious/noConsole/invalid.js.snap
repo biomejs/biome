@@ -21,7 +21,7 @@ globalThis.console.warn();
 ```
 invalid.js:1:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console.
+  i Don't use console.
   
   > 1 │ console.log('hello world')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -40,7 +40,7 @@ invalid.js:1:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:2:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console.
+  i Don't use console.
   
     1 │ console.log('hello world')
   > 2 │ console.info('hello world')
@@ -63,7 +63,7 @@ invalid.js:2:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:3:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console.
+  i Don't use console.
   
     1 │ console.log('hello world')
     2 │ console.info('hello world')
@@ -88,7 +88,7 @@ invalid.js:3:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:4:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console.
+  i Don't use console.
   
     2 │ console.info('hello world')
     3 │ console.warn('hello world')
@@ -113,7 +113,7 @@ invalid.js:4:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:5:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console.
+  i Don't use console.
   
     3 │ console.warn('hello world')
     4 │ console.table('hello world')
@@ -138,7 +138,7 @@ invalid.js:5:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:6:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console.
+  i Don't use console.
   
     4 │ console.table('hello world')
     5 │ console.error('hello world')
@@ -163,7 +163,7 @@ invalid.js:6:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:7:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console.
+  i Don't use console.
   
     5 │ console.error('hello world')
     6 │ console.nonExistent('hello world')
@@ -188,7 +188,7 @@ invalid.js:7:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:9:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console.
+  i Don't use console.
   
      7 │ console.log('with semicolon');
      8 │ 

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidCustomStyleExceptions.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -12,7 +13,7 @@ const aSepcial_CASE_2 = 0; // invalid
 ```
 invalidCustomStyleExceptions.ts:2:7 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  i This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
   
     1 │ const aSepcial_CASE = 0; // valid
   > 2 │ const aSepcial_CASE_2 = 0; // invalid

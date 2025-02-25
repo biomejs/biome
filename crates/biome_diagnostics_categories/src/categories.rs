@@ -134,9 +134,11 @@ define_categories! {
     "lint/correctness/useValidForDirection": "https://biomejs.dev/linter/rules/use-valid-for-direction",
     "lint/correctness/useYield": "https://biomejs.dev/linter/rules/use-yield",
     "lint/nursery/colorNoInvalidHex": "https://biomejs.dev/linter/rules/color-no-invalid-hex",
+    "lint/nursery/noAwaitInLoop": "https://biomejs.dev/linter/rules/no-await-in-loop",
     "lint/nursery/noColorInvalidHex": "https://biomejs.dev/linter/rules/no-color-invalid-hex",
     "lint/nursery/noCommonJs": "https://biomejs.dev/linter/rules/no-common-js",
     "lint/nursery/noConsole": "https://biomejs.dev/linter/rules/no-console",
+    "lint/nursery/noConstantBinaryExpression": "https://biomejs.dev/linter/rules/no-constant-binary-expression",
     "lint/nursery/noDescendingSpecificity": "https://biomejs.dev/linter/rules/no-descending-specificity",
     "lint/nursery/noDocumentCookie": "https://biomejs.dev/linter/rules/no-document-cookie",
     "lint/nursery/noDocumentImportInPage": "https://biomejs.dev/linter/rules/no-document-import-in-page",
@@ -168,6 +170,7 @@ define_categories! {
     "lint/nursery/noPackagePrivateImports": "https://biomejs.dev/linter/rules/no-package-private-imports",
     "lint/nursery/noProcessEnv": "https://biomejs.dev/linter/rules/no-process-env",
     "lint/nursery/noProcessGlobal": "https://biomejs.dev/linter/rules/no-process-global",
+    "lint/nursery/noDestructuredProps": "https://biomejs.dev/linter/rules/no-destructured-props",
     "lint/nursery/noReactSpecificProps": "https://biomejs.dev/linter/rules/no-react-specific-props",
     "lint/nursery/noRestrictedImports": "https://biomejs.dev/linter/rules/no-restricted-imports",
     "lint/nursery/noRestrictedTypes": "https://biomejs.dev/linter/rules/no-restricted-types",
@@ -388,6 +391,7 @@ define_categories! {
     "lint/security",
     "lint/style",
     "lint/suspicious",
+    "lint/plugin",
 
     // Suppression comments
     "suppressions/parse",

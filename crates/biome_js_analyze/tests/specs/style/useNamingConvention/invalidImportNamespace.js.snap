@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidImportNamespace.js
+snapshot_kind: text
 ---
 # Input
 ```js
@@ -20,7 +21,7 @@ import * as Unknown_Style from ""
 ```
 invalidImportNamespace.js:5:13 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import namespace name should be in camelCase or PascalCase.
+  i This import namespace name should be in camelCase or PascalCase.
   
     3 │ import * as PascalCase from ""
     4 │ 
@@ -44,7 +45,7 @@ invalidImportNamespace.js:5:13 lint/style/useNamingConvention  FIXABLE  ━━�
 ```
 invalidImportNamespace.js:7:13 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import namespace name should be in camelCase or PascalCase.
+  i This import namespace name should be in camelCase or PascalCase.
   
     5 │ import * as CONSTANT_CASE from ""
     6 │ 
@@ -68,7 +69,7 @@ invalidImportNamespace.js:7:13 lint/style/useNamingConvention  FIXABLE  ━━�
 ```
 invalidImportNamespace.js:9:13 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import namespace name should be in camelCase or PascalCase.
+  i This import namespace name should be in camelCase or PascalCase.
   
      7 │ import * as snake_case from ""
      8 │ 

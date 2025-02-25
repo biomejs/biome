@@ -196,7 +196,7 @@ class WhileSingleStatement {
 ```
 invalid.js:3:3 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     1 │ class Basic {
     2 │ 	set foo(x) {
@@ -224,7 +224,7 @@ invalid.js:3:3 lint/correctness/noSetterReturn ━━━━━━━━━━━
 ```
 invalid.js:9:3 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
      7 │ const BasicObject = {
      8 │ 	set foo(x) {
@@ -252,7 +252,7 @@ invalid.js:9:3 lint/correctness/noSetterReturn ━━━━━━━━━━━
 ```
 invalid.js:16:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     14 │ 	set foo(x) {
     15 │ 		{
@@ -282,7 +282,7 @@ invalid.js:16:4 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:24:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     22 │ 	set foo(x) {
     23 │ 		do {
@@ -312,7 +312,7 @@ invalid.js:24:4 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:33:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     31 │ 		if (x) {
     32 │ 		} else {
@@ -343,7 +343,7 @@ invalid.js:33:4 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:42:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     40 │ 		if (x) {
     41 │ 		} else if (x) {
@@ -374,7 +374,7 @@ invalid.js:42:4 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:50:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     48 │ 	set foo(x) {
     49 │ 		if (x) {
@@ -404,7 +404,7 @@ invalid.js:50:4 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:57:10 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     55 │ class Labelled {
     56 │ 	set foo(x) {
@@ -432,7 +432,7 @@ invalid.js:57:10 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:64:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     62 │ 	set foo(xs) {
     63 │ 		for (x of xs) {
@@ -462,7 +462,7 @@ invalid.js:64:4 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:71:17 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     69 │ class ForOfSingleStatement {
     70 │ 	set foo(xs) {
@@ -490,7 +490,7 @@ invalid.js:71:17 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:78:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     76 │ 	set foo(xs) {
     77 │ 		for (x in xs) {
@@ -520,7 +520,7 @@ invalid.js:78:4 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:85:17 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     83 │ class ForInSingleStatement {
     84 │ 	set foo(xs) {
@@ -548,7 +548,7 @@ invalid.js:85:17 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:92:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     90 │ 	set foo(x) {
     91 │ 		for (;;) {
@@ -578,7 +578,7 @@ invalid.js:92:4 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:99:12 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
      97 │ class ForSingleStatement {
      98 │ 	set foo(x) {
@@ -606,7 +606,7 @@ invalid.js:99:12 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:107:5 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     105 │ 		switch (x) {
     106 │ 			case 1:
@@ -636,7 +636,7 @@ invalid.js:107:5 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:120:5 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     118 │ 				break;
     119 │ 			default:
@@ -666,7 +666,7 @@ invalid.js:120:5 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:128:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     126 │ 	set foo(x) {
     127 │ 		try {
@@ -696,7 +696,7 @@ invalid.js:128:4 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:137:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     135 │ 		try {
     136 │ 		} catch {
@@ -727,7 +727,7 @@ invalid.js:137:4 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:145:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     143 │ 	set foo(x) {
     144 │ 		try {
@@ -757,7 +757,7 @@ invalid.js:145:4 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:156:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     154 │ 		try {
     155 │ 		} catch {
@@ -787,7 +787,7 @@ invalid.js:156:4 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:167:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     165 │ 		} catch {
     166 │ 		} finally {
@@ -817,7 +817,7 @@ invalid.js:167:4 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:175:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     173 │ 	set foo(x) {
     174 │ 		while (true) {
@@ -847,7 +847,7 @@ invalid.js:175:4 lint/correctness/noSetterReturn ━━━━━━━━━━�
 ```
 invalid.js:182:16 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The setter should not return a value.
+  × The setter should not return a value.
   
     180 │ class WhileSingleStatement {
     181 │ 	set foo(x) {

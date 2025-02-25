@@ -57,7 +57,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintNext("no-img-element")],
         source_kind: RuleSourceKind::SameLogic,
-        recommended: false,
+        recommended: true,
         domains: &[RuleDomain::Next],
     }
 }

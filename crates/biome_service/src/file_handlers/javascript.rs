@@ -35,7 +35,7 @@ use biome_configuration::javascript::{
 use biome_diagnostics::Applicability;
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, FormatError, IndentStyle, IndentWidth,
-    LineEnding, LineWidth, Printed, QuoteStyle,
+    LineEnding, LineWidth, ObjectWrap, Printed, QuoteStyle,
 };
 use biome_fs::BiomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
@@ -76,6 +76,7 @@ pub struct JsFormatterSettings {
     pub indent_style: Option<IndentStyle>,
     pub enabled: Option<JsFormatterEnabled>,
     pub attribute_position: Option<AttributePosition>,
+    pub object_wrap: Option<ObjectWrap>,
 }
 
 impl From<JsFormatterConfiguration> for JsFormatterSettings {
@@ -95,6 +96,7 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
             indent_width: value.indent_width,
             indent_style: value.indent_style,
             line_ending: value.line_ending,
+            object_wrap: value.object_wrap,
         }
     }
 }
@@ -242,6 +244,12 @@ impl ServiceLanguage for JsLanguage {
             language
                 .and_then(|l| l.attribute_position)
                 .or(global.and_then(|g| g.attribute_position))
+                .unwrap_or_default(),
+        )
+        .with_object_wrap(
+            language
+                .and_then(|l| l.object_wrap)
+                .or(global.and_then(|g| g.object_wrap))
                 .unwrap_or_default(),
         );
 
@@ -600,7 +608,7 @@ fn debug_control_flow(parse: AnyParse, cursor: TextSize) -> String {
             }
         },
         &options,
-        Vec::new(),
+        &[],
         Default::default(),
         |_| ControlFlow::<Never>::Continue(()),
     );
@@ -667,7 +675,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         &tree,
         filter,
         &analyzer_options,
-        Vec::new(),
+        &params.plugins,
         services,
         |signal| process_lint.process_signal(signal),
     );
@@ -689,6 +697,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         skip,
         suppression_reason,
         enabled_rules: rules,
+        plugins,
     } = params;
     let _ = debug_span!("Code actions JavaScript", range =? range, path =? path).entered();
     let tree = parse.tree();
@@ -730,7 +739,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         &tree,
         filter,
         &analyzer_options,
-        Vec::new(),
+        &plugins,
         services,
         |signal| {
             actions.extend(signal.actions().into_code_action_iter().map(|item| {
@@ -809,7 +818,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             &tree,
             filter,
             &analyzer_options,
-            Vec::new(),
+            &params.plugins,
             services,
             |signal| {
                 let current_diagnostic = signal.diagnostic();

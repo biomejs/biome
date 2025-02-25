@@ -108,13 +108,19 @@ pub(crate) enum ConfigurationStatus {
     Missing = 1,
     /// The configuration file exists but could not be loaded
     Error = 2,
+    /// The `.editorconfig` file has some errors that biome can't solve
+    EditorConfigError = 3,
     /// Currently loading the configuration
-    Loading = 3,
+    Loading = 4,
 }
 
 impl ConfigurationStatus {
     pub(crate) const fn is_error(&self) -> bool {
         matches!(self, ConfigurationStatus::Error)
+    }
+
+    pub(crate) const fn is_editorconfig_error(&self) -> bool {
+        matches!(self, ConfigurationStatus::EditorConfigError)
     }
 
     pub(crate) const fn is_loaded(&self) -> bool {
@@ -130,7 +136,8 @@ impl TryFrom<u8> for ConfigurationStatus {
             0 => Ok(Self::Loaded),
             1 => Ok(Self::Missing),
             2 => Ok(Self::Error),
-            3 => Ok(Self::Loading),
+            3 => Ok(Self::EditorConfigError),
+            4 => Ok(Self::Loading),
             _ => Err(()),
         }
     }
@@ -332,12 +339,20 @@ impl Session {
     ) -> Result<(), LspError> {
         let biome_path = self.file_path(&url)?;
 
-        if self.configuration_status().is_error() && !self.notified_broken_configuration() {
-            self.set_notified_broken_configuration();
-            self.client
-                .show_message(MessageType::WARNING, "The configuration file has errors. Biome will report only parsing errors until the configuration is fixed.")
-                .await;
+        if !self.notified_broken_configuration() {
+            if self.configuration_status().is_editorconfig_error() {
+                self.set_notified_broken_configuration();
+                self.client
+                    .show_message(MessageType::WARNING, "The .editorconfig file has errors. Biome will report only parsing errors until the file is fixed or its usage is disabled.")
+                    .await
+            } else if self.configuration_status().is_error() {
+                self.set_notified_broken_configuration();
+                self.client
+                    .show_message(MessageType::WARNING, "The configuration file has errors. Biome will report only parsing errors until the configuration is fixed.")
+                    .await;
+            }
         }
+
         let file_features = self.workspace.file_features(SupportsFeatureParams {
             project_key: doc.project_key,
             features: FeaturesBuilder::new().with_linter().with_assist().build(),
@@ -584,7 +599,7 @@ impl Session {
                     Err(error) => {
                         error!("Failed load the `.editorconfig` file. Reason: {error}");
                         self.client.log_message(MessageType::ERROR, &error).await;
-                        return ConfigurationStatus::Error;
+                        return ConfigurationStatus::EditorConfigError;
                     }
                 }
             };
@@ -730,7 +745,7 @@ impl Session {
                 .read()
                 .unwrap()
                 .requires_configuration(),
-            ConfigurationStatus::Error => false,
+            ConfigurationStatus::Error | ConfigurationStatus::EditorConfigError => false,
             ConfigurationStatus::Loading => true,
         }
     }

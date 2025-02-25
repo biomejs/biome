@@ -75,7 +75,8 @@ impl eslint_eslint::FlatConfigData {
                     }
                     let includes =
                         to_biome_includes(&flat_config_object.files, &flat_config_object.ignores);
-                    override_pat.includes = (!includes.is_empty()).then_some(includes);
+                    override_pat.includes = (!includes.is_empty())
+                        .then_some(biome_configuration::OverrideGlobs::Globs(includes.into()));
                     if let Some(rules) = flat_config_object.rules {
                         if !rules.is_empty() {
                             override_pat.linter = Some(biome_config::OverrideLinterConfiguration {
@@ -155,7 +156,8 @@ impl eslint_eslint::LegacyConfigData {
                     override_pattern.javascript = Some(js_config)
                 }
                 let includes = to_biome_includes(&override_elt.files, &override_elt.excluded_files);
-                override_pattern.includes = (!includes.is_empty()).then_some(includes);
+                override_pattern.includes = (!includes.is_empty())
+                    .then_some(biome_configuration::OverrideGlobs::Globs(includes.into()));
                 if !override_elt.rules.is_empty() {
                     override_pattern.linter = Some(biome_config::OverrideLinterConfiguration {
                         rules: Some(override_elt.rules.into_biome_rules(options, &mut results)),
@@ -355,6 +357,7 @@ fn to_biome_includes(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use biome_configuration::OverrideGlobs;
     use eslint_eslint::*;
     use std::borrow::Cow;
 
@@ -449,7 +452,10 @@ mod tests {
         let overrides = biome_config.overrides.unwrap();
         assert_eq!(overrides.0.len(), 1);
         let override0 = overrides.0.into_iter().next().unwrap();
-        assert_eq!(override0.includes.unwrap(), ["*.ts".parse().unwrap()],);
+        assert_eq!(
+            override0.includes.unwrap(),
+            OverrideGlobs::Globs(["*.ts".parse().unwrap()].into_iter().collect()),
+        );
         assert_eq!(
             override0
                 .linter

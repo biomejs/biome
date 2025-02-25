@@ -1,8 +1,7 @@
 use biome_analyze::{
-    AnalysisFilter, AnalyzerAction, AnalyzerPlugin, ControlFlow, Never, RuleFilter,
+    AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, RuleFilter,
 };
 use biome_diagnostics::advice::CodeSuggestionAdvice;
-use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{parse, JsParserOptions};
@@ -18,6 +17,7 @@ use biome_test_utils::{
 };
 use camino::{Utf8Component, Utf8Path};
 use std::ops::Deref;
+use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_test, "module"}
@@ -67,7 +67,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 input_file,
                 CheckActionType::Lint,
                 JsParserOptions::default(),
-                Vec::new(),
+                &[],
             );
         }
 
@@ -85,7 +85,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             input_file,
             CheckActionType::Lint,
             JsParserOptions::default(),
-            Vec::new(),
+            &[],
         )
     };
 
@@ -111,7 +111,7 @@ pub(crate) fn analyze_and_snap(
     input_file: &Utf8Path,
     check_action_type: CheckActionType,
     parser_options: JsParserOptions,
-    plugins: Vec<Box<dyn AnalyzerPlugin>>,
+    plugins: AnalyzerPluginSlice,
 ) -> usize {
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
@@ -171,8 +171,7 @@ pub(crate) fn analyze_and_snap(
                     }
                 }
 
-                let error = diag.with_severity(Severity::Warning);
-                diagnostics.push(diagnostic_to_string(file_name, input_code, error));
+                diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
                 return ControlFlow::Continue(());
             }
 
@@ -250,7 +249,11 @@ fn check_code_action(
 
     // Checks that applying the text edits returned by the BatchMutation
     // returns the same code as printing the modified syntax tree
-    assert_eq!(new_tree.to_string(), output);
+    assert_eq!(
+        new_tree.to_string(),
+        output,
+        "Code action and syntax tree differ"
+    );
 
     if has_bogus_nodes_or_empty_slots(&new_tree) {
         panic!("modified tree has bogus nodes or empty slots:\n{new_tree:#?} \n\n {new_tree}")
@@ -302,7 +305,7 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
         input_file,
         CheckActionType::Suppression,
         JsParserOptions::default(),
-        Vec::new(),
+        &[],
     );
 
     insta::with_settings!({
@@ -328,8 +331,11 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
         Err(err) => panic!("Cannot load plugin: {err:?}"),
     };
 
+    // Enable at least 1 rule so that PhaseRunner will be called
+    // which is necessary to parse and store supression comments
+    let rule_filter = RuleFilter::Rule("nursery", "noCommonJs");
     let filter = AnalysisFilter {
-        enabled_rules: Some(&[]),
+        enabled_rules: Some(slice::from_ref(&rule_filter)),
         ..AnalysisFilter::default()
     };
 
@@ -349,7 +355,7 @@ fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
         &input_path,
         CheckActionType::Lint,
         JsParserOptions::default(),
-        vec![Box::new(plugin)],
+        &[Arc::new(Box::new(plugin))],
     );
 
     insta::with_settings!({

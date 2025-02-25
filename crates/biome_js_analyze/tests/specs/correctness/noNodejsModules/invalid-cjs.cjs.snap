@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-cjs.cjs
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -13,7 +14,7 @@ const path = require('node:path');
 ```
 invalid-cjs.cjs:1:20 lint/correctness/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Node.js modules is forbidden.
+  i Using Node.js modules is forbidden.
   
   > 1 │ const fs = require('fs');
       │                    ^^^^
@@ -30,7 +31,7 @@ invalid-cjs.cjs:1:20 lint/correctness/noNodejsModules ━━━━━━━━�
 ```
 invalid-cjs.cjs:2:22 lint/correctness/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using Node.js modules is forbidden.
+  i Using Node.js modules is forbidden.
   
     1 │ const fs = require('fs');
   > 2 │ const path = require('node:path');

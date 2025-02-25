@@ -22,7 +22,7 @@ upgrade-tools:
 gen-all:
   cargo run -p xtask_codegen -- all
   just gen-configuration
-  cargo codegen-migrate
+  just gen-migrate
   just gen-bindings
   just format
 
@@ -35,9 +35,9 @@ gen-bindings:
 gen-analyzer:
   cargo run -p xtask_codegen -- analyzer
   just gen-configuration
-  cargo codegen-migrate
+  just gen-migrate
   just gen-bindings
-  cargo run -p rules_check
+  just lint-rules
   just format
 
 gen-configuration:
@@ -46,7 +46,6 @@ gen-configuration:
 # Generates code for eslint migration
 gen-migrate:
    cargo run -p xtask_codegen --features configuration -- migrate-eslint
-
 
 # Generates the initial files for all formatter crates
 gen-formatter:
@@ -154,6 +153,10 @@ test-quick package:
 # Alias for `cargo lint`, it runs clippy on the whole codebase
 lint:
   cargo lint
+
+# Checks if the docs of the lint rules follow Biome's requirements
+lint-rules:
+  cargo run -p rules_check
 
 # When you finished coding, run this command to run the same commands in the CI.
 ready:

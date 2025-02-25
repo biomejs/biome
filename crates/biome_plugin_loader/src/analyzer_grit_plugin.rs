@@ -12,14 +12,14 @@ use biome_rowan::TextRange;
 use camino::{Utf8Path, Utf8PathBuf};
 use grit_pattern_matcher::{binding::Binding, pattern::ResolvedPattern};
 use grit_util::{error::GritPatternError, AnalysisLogs};
-use std::{borrow::Cow, fmt::Debug, rc::Rc};
+use std::{borrow::Cow, fmt::Debug};
 
 use crate::{AnalyzerPlugin, PluginDiagnostic};
 
 /// Definition of an analyzer plugin.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct AnalyzerGritPlugin {
-    grit_query: Rc<GritQuery>,
+    grit_query: GritQuery,
 }
 
 impl AnalyzerGritPlugin {
@@ -39,11 +39,9 @@ impl AnalyzerGritPlugin {
             )
             .as_predicate()])
             .with_path(path);
-        let query = compile_pattern_with_options(&source, options)?;
+        let grit_query = compile_pattern_with_options(&source, options)?;
 
-        Ok(Self {
-            grit_query: Rc::new(query),
-        })
+        Ok(Self { grit_query })
     }
 }
 
@@ -65,6 +63,7 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                     .verbose()
                 })
                 .chain(result.diagnostics)
+                .map(|diagnos| diagnos.subcategory(name.to_string()))
                 .collect(),
             Err(error) => vec![RuleDiagnostic::new(
                 category!("plugin"),

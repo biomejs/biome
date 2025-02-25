@@ -3,12 +3,14 @@ use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind, PathKind};
 use crate::fs::OpenOptions;
 use crate::{
     fs::{TraversalContext, TraversalScope},
-    BiomePath, FileSystem,
+    BiomePath, FileSystem, MemoryFileSystem,
 };
 use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
 use camino::{Utf8DirEntry, Utf8Path, Utf8PathBuf};
 use oxc_resolver::{FsResolution, ResolveError, ResolveOptions, Resolver};
+use path_absolutize::Absolutize;
 use rayon::{scope, Scope};
+use std::env::temp_dir;
 use std::fs::FileType;
 use std::panic::AssertUnwindSafe;
 use std::process::Command;
@@ -234,6 +236,17 @@ impl<'scope> OsTraversalScope<'scope> {
 
 impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
     fn evaluate(&self, ctx: &'scope dyn TraversalContext, path: Utf8PathBuf) {
+        // Path must be absolute in order to properly normalize them before matching against globs.
+        //
+        // FIXME: This code should be moved to the `traverse_inputs` function in `biome_cli/src/traverse.rs`.
+        // Unfortunately moving this code to the `traverse_inputs` function makes many tests fail.
+        // The issue is coming from some bugs in our test infra.
+        // See https://github.com/biomejs/biome/pull/5017
+        let path = match std::path::Path::new(&path).absolutize() {
+            Ok(std::borrow::Cow::Owned(absolutized)) => Utf8PathBuf::from_path_buf(absolutized)
+                .expect("Absolute path must be correctly parsed"),
+            _ => path,
+        };
         let file_type = match path.metadata() {
             Ok(meta) => meta.file_type(),
             Err(err) => {
@@ -481,5 +494,66 @@ fn follow_symlink(
 impl From<FileType> for FsErrorKind {
     fn from(_: FileType) -> Self {
         Self::UnknownFileType
+    }
+}
+
+/// Testing utility that creates a working directory inside the
+/// temporary OS folder.
+pub struct TemporaryFs {
+    /// The current working directory. It's the OS temporary folder joined with a file
+    /// name passed in the [TemporaryFs::new] function
+    working_directory: Utf8PathBuf,
+    files: Vec<(Utf8PathBuf, String)>,
+}
+
+impl TemporaryFs {
+    /// Creates a temporary directory named using `directory_name`
+    pub fn new(directory_name: &str) -> Self {
+        let path = temp_dir().join(directory_name);
+        if path.exists() {
+            fs::remove_dir_all(path.as_path()).unwrap();
+        }
+        fs::create_dir(&path).unwrap();
+        Self {
+            working_directory: Utf8PathBuf::from_path_buf(path).unwrap(),
+            files: Vec::new(),
+        }
+    }
+
+    /// Creates a file under the working directory
+    pub fn create_file(&mut self, name: &str, content: &str) {
+        let path = self.working_directory.join(name);
+        std::fs::create_dir_all(path.parent().expect("parent dir exists."))
+            .expect("Temporary directory to exist and being writable");
+        std::fs::write(path.as_std_path(), content)
+            .expect("Temporary directory to exist and being writable");
+        self.files.push((path, content.to_string()));
+    }
+
+    /// Returns the path to use when running the CLI
+    pub fn cli_path(&self) -> &str {
+        self.working_directory.as_str()
+    }
+
+    /// Returns an instance of [OsFileSystem] given the current working directory
+    pub fn create_os(&self) -> OsFileSystem {
+        OsFileSystem::new(self.working_directory.clone())
+    }
+
+    /// Returns an instance of [MemoryFileSystem]. The files saved in the file system
+    /// will be stripped of the working directory path, making snapshots predictable.
+    pub fn create_mem(&self) -> MemoryFileSystem {
+        let mut fs = MemoryFileSystem::default();
+        for (path, content) in self.files.iter() {
+            fs.insert(
+                path.clone()
+                    .strip_prefix(self.working_directory.as_str())
+                    .expect("Working directory")
+                    .to_path_buf(),
+                content.as_bytes(),
+            );
+        }
+
+        fs
     }
 }

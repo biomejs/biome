@@ -7,8 +7,8 @@ use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_formatter::{
-    AttributePosition, BracketSpacing, IndentWidth, LineEnding, LineWidth, ParseFormatNumberError,
-    QuoteStyle,
+    AttributePosition, BracketSpacing, IndentWidth, LineEnding, LineWidth,
+    ObjectWrap as BiomeObjectWrap, ParseFormatNumberError, QuoteStyle,
 };
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
@@ -56,6 +56,8 @@ pub(crate) struct PrettierConfiguration {
     arrow_parens: ArrowParens,
     /// https://prettier.io/docs/en/options#end-of-line
     end_of_line: EndOfLine,
+    /// https://prettier.io/docs/options#object-wrap
+    object_wrap: ObjectWrap,
     /// https://prettier.io/docs/en/configuration.html#configuration-overrides
     overrides: Vec<Override>,
 }
@@ -75,6 +77,7 @@ impl Default for PrettierConfiguration {
             jsx_single_quote: false,
             arrow_parens: ArrowParens::default(),
             end_of_line: EndOfLine::default(),
+            object_wrap: ObjectWrap::default(),
             overrides: vec![],
         }
     }
@@ -113,6 +116,8 @@ pub(crate) struct OverrideOptions {
     arrow_parens: Option<ArrowParens>,
     /// https://prettier.io/docs/en/options#end-of-line
     end_of_line: Option<EndOfLine>,
+    /// https://prettier.io/docs/options#object-wrap
+    object_wrap: ObjectWrap,
 }
 
 #[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
@@ -145,6 +150,13 @@ enum QuoteProps {
     #[deserializable(rename = "as-needed")]
     AsNeeded,
     Preserve,
+}
+
+#[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
+enum ObjectWrap {
+    #[default]
+    Preserve,
+    Collapse,
 }
 
 impl From<PrettierTrailingComma> for TrailingCommas {
@@ -186,6 +198,15 @@ impl From<QuoteProps> for QuoteProperties {
     }
 }
 
+impl From<ObjectWrap> for BiomeObjectWrap {
+    fn from(value: ObjectWrap) -> Self {
+        match value {
+            ObjectWrap::Preserve => Self::Preserve,
+            ObjectWrap::Collapse => Self::Collapse,
+        }
+    }
+}
+
 impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
     type Error = ParseFormatNumberError;
     fn try_from(value: PrettierConfiguration) -> Result<Self, Self::Error> {
@@ -205,15 +226,14 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             line_ending: Some(value.end_of_line.into()),
             bracket_same_line: Some(value.bracket_line.into()),
             attribute_position: Some(AttributePosition::default()),
+            bracket_spacing: Some(BracketSpacing::default()),
+            object_wrap: Some(value.object_wrap.into()),
             format_with_errors: Some(false.into()),
-            ignore: None,
-            include: None,
             includes: None,
             enabled: Some(true.into()),
             // editorconfig support is intentionally set to true, because prettier always reads the editorconfig file
             // see: https://github.com/prettier/prettier/issues/15255
             use_editorconfig: Some(true.into()),
-            bracket_spacing: Some(BracketSpacing::default()),
         };
         result.formatter = Some(formatter);
 
@@ -237,6 +257,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             line_width: None,
             indent_style: None,
             line_ending: None,
+            object_wrap: None,
             enabled: None,
             // js ones
             bracket_same_line: Some(value.bracket_line.into()),
@@ -269,12 +290,12 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
     type Error = ParseFormatNumberError;
     fn try_from(Override { files, options }: Override) -> Result<Self, Self::Error> {
         let mut result = biome_configuration::OverridePattern {
-            includes: Some(
+            includes: Some(biome_configuration::OverrideGlobs::Globs(
                 files
                     .into_iter()
                     .filter_map(|glob| glob.parse().ok())
                     .collect(),
-            ),
+            )),
             ..Default::default()
         };
         if options.print_width.is_some()

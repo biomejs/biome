@@ -1,0 +1,1091 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.tsx
+snapshot_kind: text
+---
+# Input
+```tsx
+let Component = ({}) => <div />;
+
+let Component = ({ a }) => <div a={a} />;
+
+let Component = ({ a }) => <div a={a} />;
+
+let Component = ({ a: A }) => <div a={A} />;
+
+let Component = ({ a: A }) => <div a={A} />;
+
+let Component = ({ ["a" + ""]: a }) => <div a={a} />;
+
+let Component = ({ ["a" + ""]: a, b }) => <div a={a} b={b} />;
+
+let Component = ({ a = 5 }) => <div a={a} />;
+
+let Component = ({ a = 5 }) => <div a={a} />;
+
+let Component = ({ a: A = 5 }) => <div a={A} />;
+
+let Component = ({ a: A = 5 }) => <div a={A} />;
+
+let Component = ({ ["a" + ""]: a = 5 }) => <div a={a} />;
+
+let Component = ({ ["a" + ""]: a = 5, b = 10, c }) => <div a={a} b={b} c={c} />;
+
+let Component = ({ a = 5 }) => {
+	return <div a={a} />;
+};
+
+let Component = ({ a = 5 }) => {
+	various();
+	statements();
+	return <div a={a} />;
+};
+
+let Component = ({ ...rest }) => <div a={rest.a} />;
+
+let Component = ({ a, ...rest }) => <div a={a} />;
+
+let Component = ({ a, ...rest }) => <div a={a} />;
+
+let Component = ({ a, ...other }) => <div a={a} />;
+
+let Component = ({ a, ...rest }) => <div a={a} b={rest.b} />;
+
+let Component = ({ a: A, ...rest }) => <div a={A} />;
+
+let Component = ({ a: A, ...rest }) => <div a={A} />;
+
+let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} />;
+
+let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} b={rest.b} />;
+
+let Component = ({ a = 5, ...rest }) => {
+	return <div a={a} b={rest.b} />;
+};
+
+let Component = ({ a = 5, ...rest }) => <div a={a} b={rest.b} />;
+
+let Component = ({ ["a" + ""]: A = 5, ...rest }) => <div a={A} b={rest.b} />;
+
+let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
+
+```
+
+# Diagnostics
+```
+invalid.tsx:1:18 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i You cannot destructure props.
+  
+  > 1 │ let Component = ({}) => <div />;
+      │                  ^^
+    2 │ 
+    3 │ let Component = ({ a }) => <div a={a} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:3:36 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    1 │ let Component = ({}) => <div />;
+    2 │ 
+  > 3 │ let Component = ({ a }) => <div a={a} />;
+      │                                    ^
+    4 │ 
+    5 │ let Component = ({ a }) => <div a={a} />;
+  
+  i This is where the props were destructured.
+  
+    1 │ let Component = ({}) => <div />;
+    2 │ 
+  > 3 │ let Component = ({ a }) => <div a={a} />;
+      │                  ^^^^^
+    4 │ 
+    5 │ let Component = ({ a }) => <div a={a} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:5:36 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    3 │ let Component = ({ a }) => <div a={a} />;
+    4 │ 
+  > 5 │ let Component = ({ a }) => <div a={a} />;
+      │                                    ^
+    6 │ 
+    7 │ let Component = ({ a: A }) => <div a={A} />;
+  
+  i This is where the props were destructured.
+  
+    3 │ let Component = ({ a }) => <div a={a} />;
+    4 │ 
+  > 5 │ let Component = ({ a }) => <div a={a} />;
+      │                  ^^^^^
+    6 │ 
+    7 │ let Component = ({ a: A }) => <div a={A} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:7:39 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    5 │ let Component = ({ a }) => <div a={a} />;
+    6 │ 
+  > 7 │ let Component = ({ a: A }) => <div a={A} />;
+      │                                       ^
+    8 │ 
+    9 │ let Component = ({ a: A }) => <div a={A} />;
+  
+  i This is where the props were destructured.
+  
+    5 │ let Component = ({ a }) => <div a={a} />;
+    6 │ 
+  > 7 │ let Component = ({ a: A }) => <div a={A} />;
+      │                  ^^^^^^^^
+    8 │ 
+    9 │ let Component = ({ a: A }) => <div a={A} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:9:39 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+     7 │ let Component = ({ a: A }) => <div a={A} />;
+     8 │ 
+   > 9 │ let Component = ({ a: A }) => <div a={A} />;
+       │                                       ^
+    10 │ 
+    11 │ let Component = ({ ["a" + ""]: a }) => <div a={a} />;
+  
+  i This is where the props were destructured.
+  
+     7 │ let Component = ({ a: A }) => <div a={A} />;
+     8 │ 
+   > 9 │ let Component = ({ a: A }) => <div a={A} />;
+       │                  ^^^^^^^^
+    10 │ 
+    11 │ let Component = ({ ["a" + ""]: a }) => <div a={a} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:11:48 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+     9 │ let Component = ({ a: A }) => <div a={A} />;
+    10 │ 
+  > 11 │ let Component = ({ ["a" + ""]: a }) => <div a={a} />;
+       │                                                ^
+    12 │ 
+    13 │ let Component = ({ ["a" + ""]: a, b }) => <div a={a} b={b} />;
+  
+  i This is where the props were destructured.
+  
+     9 │ let Component = ({ a: A }) => <div a={A} />;
+    10 │ 
+  > 11 │ let Component = ({ ["a" + ""]: a }) => <div a={a} />;
+       │                  ^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ let Component = ({ ["a" + ""]: a, b }) => <div a={a} b={b} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:13:51 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    11 │ let Component = ({ ["a" + ""]: a }) => <div a={a} />;
+    12 │ 
+  > 13 │ let Component = ({ ["a" + ""]: a, b }) => <div a={a} b={b} />;
+       │                                                   ^
+    14 │ 
+    15 │ let Component = ({ a = 5 }) => <div a={a} />;
+  
+  i This is where the props were destructured.
+  
+    11 │ let Component = ({ ["a" + ""]: a }) => <div a={a} />;
+    12 │ 
+  > 13 │ let Component = ({ ["a" + ""]: a, b }) => <div a={a} b={b} />;
+       │                  ^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ let Component = ({ a = 5 }) => <div a={a} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:13:57 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    11 │ let Component = ({ ["a" + ""]: a }) => <div a={a} />;
+    12 │ 
+  > 13 │ let Component = ({ ["a" + ""]: a, b }) => <div a={a} b={b} />;
+       │                                                         ^
+    14 │ 
+    15 │ let Component = ({ a = 5 }) => <div a={a} />;
+  
+  i This is where the props were destructured.
+  
+    11 │ let Component = ({ ["a" + ""]: a }) => <div a={a} />;
+    12 │ 
+  > 13 │ let Component = ({ ["a" + ""]: a, b }) => <div a={a} b={b} />;
+       │                  ^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ let Component = ({ a = 5 }) => <div a={a} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:15:40 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    13 │ let Component = ({ ["a" + ""]: a, b }) => <div a={a} b={b} />;
+    14 │ 
+  > 15 │ let Component = ({ a = 5 }) => <div a={a} />;
+       │                                        ^
+    16 │ 
+    17 │ let Component = ({ a = 5 }) => <div a={a} />;
+  
+  i This is where the props were destructured.
+  
+    13 │ let Component = ({ ["a" + ""]: a, b }) => <div a={a} b={b} />;
+    14 │ 
+  > 15 │ let Component = ({ a = 5 }) => <div a={a} />;
+       │                  ^^^^^^^^^
+    16 │ 
+    17 │ let Component = ({ a = 5 }) => <div a={a} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:17:40 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    15 │ let Component = ({ a = 5 }) => <div a={a} />;
+    16 │ 
+  > 17 │ let Component = ({ a = 5 }) => <div a={a} />;
+       │                                        ^
+    18 │ 
+    19 │ let Component = ({ a: A = 5 }) => <div a={A} />;
+  
+  i This is where the props were destructured.
+  
+    15 │ let Component = ({ a = 5 }) => <div a={a} />;
+    16 │ 
+  > 17 │ let Component = ({ a = 5 }) => <div a={a} />;
+       │                  ^^^^^^^^^
+    18 │ 
+    19 │ let Component = ({ a: A = 5 }) => <div a={A} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:19:43 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    17 │ let Component = ({ a = 5 }) => <div a={a} />;
+    18 │ 
+  > 19 │ let Component = ({ a: A = 5 }) => <div a={A} />;
+       │                                           ^
+    20 │ 
+    21 │ let Component = ({ a: A = 5 }) => <div a={A} />;
+  
+  i This is where the props were destructured.
+  
+    17 │ let Component = ({ a = 5 }) => <div a={a} />;
+    18 │ 
+  > 19 │ let Component = ({ a: A = 5 }) => <div a={A} />;
+       │                  ^^^^^^^^^^^^
+    20 │ 
+    21 │ let Component = ({ a: A = 5 }) => <div a={A} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:21:43 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    19 │ let Component = ({ a: A = 5 }) => <div a={A} />;
+    20 │ 
+  > 21 │ let Component = ({ a: A = 5 }) => <div a={A} />;
+       │                                           ^
+    22 │ 
+    23 │ let Component = ({ ["a" + ""]: a = 5 }) => <div a={a} />;
+  
+  i This is where the props were destructured.
+  
+    19 │ let Component = ({ a: A = 5 }) => <div a={A} />;
+    20 │ 
+  > 21 │ let Component = ({ a: A = 5 }) => <div a={A} />;
+       │                  ^^^^^^^^^^^^
+    22 │ 
+    23 │ let Component = ({ ["a" + ""]: a = 5 }) => <div a={a} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:23:52 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    21 │ let Component = ({ a: A = 5 }) => <div a={A} />;
+    22 │ 
+  > 23 │ let Component = ({ ["a" + ""]: a = 5 }) => <div a={a} />;
+       │                                                    ^
+    24 │ 
+    25 │ let Component = ({ ["a" + ""]: a = 5, b = 10, c }) => <div a={a} b={b} c={c} />;
+  
+  i This is where the props were destructured.
+  
+    21 │ let Component = ({ a: A = 5 }) => <div a={A} />;
+    22 │ 
+  > 23 │ let Component = ({ ["a" + ""]: a = 5 }) => <div a={a} />;
+       │                  ^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ let Component = ({ ["a" + ""]: a = 5, b = 10, c }) => <div a={a} b={b} c={c} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:25:63 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    23 │ let Component = ({ ["a" + ""]: a = 5 }) => <div a={a} />;
+    24 │ 
+  > 25 │ let Component = ({ ["a" + ""]: a = 5, b = 10, c }) => <div a={a} b={b} c={c} />;
+       │                                                               ^
+    26 │ 
+    27 │ let Component = ({ a = 5 }) => {
+  
+  i This is where the props were destructured.
+  
+    23 │ let Component = ({ ["a" + ""]: a = 5 }) => <div a={a} />;
+    24 │ 
+  > 25 │ let Component = ({ ["a" + ""]: a = 5, b = 10, c }) => <div a={a} b={b} c={c} />;
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ let Component = ({ a = 5 }) => {
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:25:69 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    23 │ let Component = ({ ["a" + ""]: a = 5 }) => <div a={a} />;
+    24 │ 
+  > 25 │ let Component = ({ ["a" + ""]: a = 5, b = 10, c }) => <div a={a} b={b} c={c} />;
+       │                                                                     ^
+    26 │ 
+    27 │ let Component = ({ a = 5 }) => {
+  
+  i This is where the props were destructured.
+  
+    23 │ let Component = ({ ["a" + ""]: a = 5 }) => <div a={a} />;
+    24 │ 
+  > 25 │ let Component = ({ ["a" + ""]: a = 5, b = 10, c }) => <div a={a} b={b} c={c} />;
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ let Component = ({ a = 5 }) => {
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:25:75 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    23 │ let Component = ({ ["a" + ""]: a = 5 }) => <div a={a} />;
+    24 │ 
+  > 25 │ let Component = ({ ["a" + ""]: a = 5, b = 10, c }) => <div a={a} b={b} c={c} />;
+       │                                                                           ^
+    26 │ 
+    27 │ let Component = ({ a = 5 }) => {
+  
+  i This is where the props were destructured.
+  
+    23 │ let Component = ({ ["a" + ""]: a = 5 }) => <div a={a} />;
+    24 │ 
+  > 25 │ let Component = ({ ["a" + ""]: a = 5, b = 10, c }) => <div a={a} b={b} c={c} />;
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ let Component = ({ a = 5 }) => {
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:28:17 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    27 │ let Component = ({ a = 5 }) => {
+  > 28 │ 	return <div a={a} />;
+       │ 	               ^
+    29 │ };
+    30 │ 
+  
+  i This is where the props were destructured.
+  
+    25 │ let Component = ({ ["a" + ""]: a = 5, b = 10, c }) => <div a={a} b={b} c={c} />;
+    26 │ 
+  > 27 │ let Component = ({ a = 5 }) => {
+       │                  ^^^^^^^^^
+    28 │ 	return <div a={a} />;
+    29 │ };
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:34:17 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    32 │ 	various();
+    33 │ 	statements();
+  > 34 │ 	return <div a={a} />;
+       │ 	               ^
+    35 │ };
+    36 │ 
+  
+  i This is where the props were destructured.
+  
+    29 │ };
+    30 │ 
+  > 31 │ let Component = ({ a = 5 }) => {
+       │                  ^^^^^^^^^
+    32 │ 	various();
+    33 │ 	statements();
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:37:42 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    35 │ };
+    36 │ 
+  > 37 │ let Component = ({ ...rest }) => <div a={rest.a} />;
+       │                                          ^^^^
+    38 │ 
+    39 │ let Component = ({ a, ...rest }) => <div a={a} />;
+  
+  i This is where the props were destructured.
+  
+    35 │ };
+    36 │ 
+  > 37 │ let Component = ({ ...rest }) => <div a={rest.a} />;
+       │                  ^^^^^^^^^^^
+    38 │ 
+    39 │ let Component = ({ a, ...rest }) => <div a={a} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:39:45 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    37 │ let Component = ({ ...rest }) => <div a={rest.a} />;
+    38 │ 
+  > 39 │ let Component = ({ a, ...rest }) => <div a={a} />;
+       │                                             ^
+    40 │ 
+    41 │ let Component = ({ a, ...rest }) => <div a={a} />;
+  
+  i This is where the props were destructured.
+  
+    37 │ let Component = ({ ...rest }) => <div a={rest.a} />;
+    38 │ 
+  > 39 │ let Component = ({ a, ...rest }) => <div a={a} />;
+       │                  ^^^^^^^^^^^^^^
+    40 │ 
+    41 │ let Component = ({ a, ...rest }) => <div a={a} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:41:45 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    39 │ let Component = ({ a, ...rest }) => <div a={a} />;
+    40 │ 
+  > 41 │ let Component = ({ a, ...rest }) => <div a={a} />;
+       │                                             ^
+    42 │ 
+    43 │ let Component = ({ a, ...other }) => <div a={a} />;
+  
+  i This is where the props were destructured.
+  
+    39 │ let Component = ({ a, ...rest }) => <div a={a} />;
+    40 │ 
+  > 41 │ let Component = ({ a, ...rest }) => <div a={a} />;
+       │                  ^^^^^^^^^^^^^^
+    42 │ 
+    43 │ let Component = ({ a, ...other }) => <div a={a} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:43:46 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    41 │ let Component = ({ a, ...rest }) => <div a={a} />;
+    42 │ 
+  > 43 │ let Component = ({ a, ...other }) => <div a={a} />;
+       │                                              ^
+    44 │ 
+    45 │ let Component = ({ a, ...rest }) => <div a={a} b={rest.b} />;
+  
+  i This is where the props were destructured.
+  
+    41 │ let Component = ({ a, ...rest }) => <div a={a} />;
+    42 │ 
+  > 43 │ let Component = ({ a, ...other }) => <div a={a} />;
+       │                  ^^^^^^^^^^^^^^^
+    44 │ 
+    45 │ let Component = ({ a, ...rest }) => <div a={a} b={rest.b} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:45:45 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    43 │ let Component = ({ a, ...other }) => <div a={a} />;
+    44 │ 
+  > 45 │ let Component = ({ a, ...rest }) => <div a={a} b={rest.b} />;
+       │                                             ^
+    46 │ 
+    47 │ let Component = ({ a: A, ...rest }) => <div a={A} />;
+  
+  i This is where the props were destructured.
+  
+    43 │ let Component = ({ a, ...other }) => <div a={a} />;
+    44 │ 
+  > 45 │ let Component = ({ a, ...rest }) => <div a={a} b={rest.b} />;
+       │                  ^^^^^^^^^^^^^^
+    46 │ 
+    47 │ let Component = ({ a: A, ...rest }) => <div a={A} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:45:51 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    43 │ let Component = ({ a, ...other }) => <div a={a} />;
+    44 │ 
+  > 45 │ let Component = ({ a, ...rest }) => <div a={a} b={rest.b} />;
+       │                                                   ^^^^
+    46 │ 
+    47 │ let Component = ({ a: A, ...rest }) => <div a={A} />;
+  
+  i This is where the props were destructured.
+  
+    43 │ let Component = ({ a, ...other }) => <div a={a} />;
+    44 │ 
+  > 45 │ let Component = ({ a, ...rest }) => <div a={a} b={rest.b} />;
+       │                  ^^^^^^^^^^^^^^
+    46 │ 
+    47 │ let Component = ({ a: A, ...rest }) => <div a={A} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:47:48 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    45 │ let Component = ({ a, ...rest }) => <div a={a} b={rest.b} />;
+    46 │ 
+  > 47 │ let Component = ({ a: A, ...rest }) => <div a={A} />;
+       │                                                ^
+    48 │ 
+    49 │ let Component = ({ a: A, ...rest }) => <div a={A} />;
+  
+  i This is where the props were destructured.
+  
+    45 │ let Component = ({ a, ...rest }) => <div a={a} b={rest.b} />;
+    46 │ 
+  > 47 │ let Component = ({ a: A, ...rest }) => <div a={A} />;
+       │                  ^^^^^^^^^^^^^^^^^
+    48 │ 
+    49 │ let Component = ({ a: A, ...rest }) => <div a={A} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:49:48 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    47 │ let Component = ({ a: A, ...rest }) => <div a={A} />;
+    48 │ 
+  > 49 │ let Component = ({ a: A, ...rest }) => <div a={A} />;
+       │                                                ^
+    50 │ 
+    51 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} />;
+  
+  i This is where the props were destructured.
+  
+    47 │ let Component = ({ a: A, ...rest }) => <div a={A} />;
+    48 │ 
+  > 49 │ let Component = ({ a: A, ...rest }) => <div a={A} />;
+       │                  ^^^^^^^^^^^^^^^^^
+    50 │ 
+    51 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:51:57 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    49 │ let Component = ({ a: A, ...rest }) => <div a={A} />;
+    50 │ 
+  > 51 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} />;
+       │                                                         ^
+    52 │ 
+    53 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} b={rest.b} />;
+  
+  i This is where the props were destructured.
+  
+    49 │ let Component = ({ a: A, ...rest }) => <div a={A} />;
+    50 │ 
+  > 51 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} />;
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ 
+    53 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} b={rest.b} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:53:57 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    51 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} />;
+    52 │ 
+  > 53 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} b={rest.b} />;
+       │                                                         ^
+    54 │ 
+    55 │ let Component = ({ a = 5, ...rest }) => {
+  
+  i This is where the props were destructured.
+  
+    51 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} />;
+    52 │ 
+  > 53 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} b={rest.b} />;
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ 
+    55 │ let Component = ({ a = 5, ...rest }) => {
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:53:63 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    51 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} />;
+    52 │ 
+  > 53 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} b={rest.b} />;
+       │                                                               ^^^^
+    54 │ 
+    55 │ let Component = ({ a = 5, ...rest }) => {
+  
+  i This is where the props were destructured.
+  
+    51 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} />;
+    52 │ 
+  > 53 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} b={rest.b} />;
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ 
+    55 │ let Component = ({ a = 5, ...rest }) => {
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:56:17 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    55 │ let Component = ({ a = 5, ...rest }) => {
+  > 56 │ 	return <div a={a} b={rest.b} />;
+       │ 	               ^
+    57 │ };
+    58 │ 
+  
+  i This is where the props were destructured.
+  
+    53 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} b={rest.b} />;
+    54 │ 
+  > 55 │ let Component = ({ a = 5, ...rest }) => {
+       │                  ^^^^^^^^^^^^^^^^^^
+    56 │ 	return <div a={a} b={rest.b} />;
+    57 │ };
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:56:23 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    55 │ let Component = ({ a = 5, ...rest }) => {
+  > 56 │ 	return <div a={a} b={rest.b} />;
+       │ 	                     ^^^^
+    57 │ };
+    58 │ 
+  
+  i This is where the props were destructured.
+  
+    53 │ let Component = ({ ["a" + ""]: A, ...rest }) => <div a={A} b={rest.b} />;
+    54 │ 
+  > 55 │ let Component = ({ a = 5, ...rest }) => {
+       │                  ^^^^^^^^^^^^^^^^^^
+    56 │ 	return <div a={a} b={rest.b} />;
+    57 │ };
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:59:49 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    57 │ };
+    58 │ 
+  > 59 │ let Component = ({ a = 5, ...rest }) => <div a={a} b={rest.b} />;
+       │                                                 ^
+    60 │ 
+    61 │ let Component = ({ ["a" + ""]: A = 5, ...rest }) => <div a={A} b={rest.b} />;
+  
+  i This is where the props were destructured.
+  
+    57 │ };
+    58 │ 
+  > 59 │ let Component = ({ a = 5, ...rest }) => <div a={a} b={rest.b} />;
+       │                  ^^^^^^^^^^^^^^^^^^
+    60 │ 
+    61 │ let Component = ({ ["a" + ""]: A = 5, ...rest }) => <div a={A} b={rest.b} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:59:55 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    57 │ };
+    58 │ 
+  > 59 │ let Component = ({ a = 5, ...rest }) => <div a={a} b={rest.b} />;
+       │                                                       ^^^^
+    60 │ 
+    61 │ let Component = ({ ["a" + ""]: A = 5, ...rest }) => <div a={A} b={rest.b} />;
+  
+  i This is where the props were destructured.
+  
+    57 │ };
+    58 │ 
+  > 59 │ let Component = ({ a = 5, ...rest }) => <div a={a} b={rest.b} />;
+       │                  ^^^^^^^^^^^^^^^^^^
+    60 │ 
+    61 │ let Component = ({ ["a" + ""]: A = 5, ...rest }) => <div a={A} b={rest.b} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:61:61 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    59 │ let Component = ({ a = 5, ...rest }) => <div a={a} b={rest.b} />;
+    60 │ 
+  > 61 │ let Component = ({ ["a" + ""]: A = 5, ...rest }) => <div a={A} b={rest.b} />;
+       │                                                             ^
+    62 │ 
+    63 │ let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
+  
+  i This is where the props were destructured.
+  
+    59 │ let Component = ({ a = 5, ...rest }) => <div a={a} b={rest.b} />;
+    60 │ 
+  > 61 │ let Component = ({ ["a" + ""]: A = 5, ...rest }) => <div a={A} b={rest.b} />;
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    62 │ 
+    63 │ let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:61:67 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    59 │ let Component = ({ a = 5, ...rest }) => <div a={a} b={rest.b} />;
+    60 │ 
+  > 61 │ let Component = ({ ["a" + ""]: A = 5, ...rest }) => <div a={A} b={rest.b} />;
+       │                                                                   ^^^^
+    62 │ 
+    63 │ let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
+  
+  i This is where the props were destructured.
+  
+    59 │ let Component = ({ a = 5, ...rest }) => <div a={a} b={rest.b} />;
+    60 │ 
+  > 61 │ let Component = ({ ["a" + ""]: A = 5, ...rest }) => <div a={A} b={rest.b} />;
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    62 │ 
+    63 │ let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:63:55 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    61 │ let Component = ({ ["a" + ""]: A = 5, ...rest }) => <div a={A} b={rest.b} />;
+    62 │ 
+  > 63 │ let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
+       │                                                       ^^^^^
+    64 │ 
+  
+  i This is where the props were destructured.
+  
+    61 │ let Component = ({ ["a" + ""]: A = 5, ...rest }) => <div a={A} b={rest.b} />;
+    62 │ 
+  > 63 │ let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
+       │                  ^^^^^^^^^^^^^^^^
+    64 │ 
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:63:66 lint/nursery/noDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    61 │ let Component = ({ ["a" + ""]: A = 5, ...rest }) => <div a={A} b={rest.b} />;
+    62 │ 
+  > 63 │ let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
+       │                                                                  ^^^^^
+    64 │ 
+  
+  i This is where the props were destructured.
+  
+    61 │ let Component = ({ ["a" + ""]: A = 5, ...rest }) => <div a={A} b={rest.b} />;
+    62 │ 
+  > 63 │ let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
+       │                  ^^^^^^^^^^^^^^^^
+    64 │ 
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```

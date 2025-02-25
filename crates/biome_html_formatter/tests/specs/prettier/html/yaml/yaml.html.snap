@@ -1,0 +1,46 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/yaml/yaml.html
+---
+# Input
+
+```html
+---
+hello:     world
+---
+
+
+
+
+
+
+<html><head></head><body></body></html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,4 @@
+----
+-hello: world
+----
++--- hello: world ---
+ 
+ <html>
+   <head></head>
+```
+
+# Output
+
+```html
+--- hello: world ---
+
+<html>
+  <head></head>
+  <body></body>
+</html>
+```

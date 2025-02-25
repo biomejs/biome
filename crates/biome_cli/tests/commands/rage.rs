@@ -71,6 +71,24 @@ fn with_configuration() {
 }
 
 #[test]
+fn with_no_configuration() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_rage(fs, &mut console, Args::from(["rage"].as_slice()));
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "with_no_configuration",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn with_jsonc_configuration() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

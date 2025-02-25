@@ -10,6 +10,9 @@ use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_formatter::{FormatResult, Formatted, PrintResult, Printed};
 use biome_graphql_formatter::context::{GraphqlFormatContext, GraphqlFormatOptions};
 use biome_graphql_syntax::GraphqlSyntaxNode;
+use biome_html_formatter::context::HtmlFormatContext;
+use biome_html_formatter::HtmlFormatOptions;
+use biome_html_syntax::HtmlSyntaxNode;
 use biome_js_formatter::context::{JsFormatContext, JsFormatOptions};
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
@@ -25,6 +28,7 @@ pub enum Parse<'a> {
     Json(&'a str),
     Css(&'a str),
     Graphql(&'a str),
+    Html(&'a str),
 }
 
 impl Parse<'_> {
@@ -35,6 +39,7 @@ impl Parse<'_> {
                 "json" => Some(Parse::Json(case.code())),
                 "css" => Some(Parse::Css(case.code())),
                 "graphql" => Some(Parse::Graphql(case.code())),
+                "html" => Some(Parse::Html(case.code())),
                 _ => None,
             },
         }
@@ -57,6 +62,7 @@ impl Parse<'_> {
                     .allow_css_modules(),
             )),
             Parse::Graphql(code) => Parsed::Graphql(biome_graphql_parser::parse_graphql(code)),
+            Parse::Html(code) => Parsed::Html(biome_html_parser::parse_html(code)),
         }
     }
 
@@ -86,6 +92,9 @@ impl Parse<'_> {
             Parse::Graphql(code) => {
                 Parsed::Graphql(biome_graphql_parser::parse_graphql_with_cache(code, cache))
             }
+            Parse::Html(code) => {
+                Parsed::Html(biome_html_parser::parse_html_with_cache(code, cache))
+            }
         }
     }
 }
@@ -95,6 +104,7 @@ pub enum Parsed {
     Json(biome_json_parser::JsonParse),
     Css(biome_css_parser::CssParse),
     Graphql(biome_graphql_parser::GraphqlParse),
+    Html(biome_html_parser::HtmlParse),
 }
 
 impl Parsed {
@@ -106,6 +116,7 @@ impl Parsed {
             Parsed::Json(parse) => Some(FormatNode::Json(parse.syntax())),
             Parsed::Css(parse) => Some(FormatNode::Css(parse.syntax())),
             Parsed::Graphql(parse) => Some(FormatNode::Graphql(parse.syntax())),
+            Parsed::Html(parse) => Some(FormatNode::Html(parse.syntax())),
         }
     }
 
@@ -115,6 +126,7 @@ impl Parsed {
             Parsed::Json(_) => None,
             Parsed::Graphql(_) => None,
             Parsed::Css(parse) => Some(Analyze::Css(parse.tree())),
+            Parsed::Html(_) => None,
         }
     }
 
@@ -124,6 +136,7 @@ impl Parsed {
             Parsed::Json(parse) => parse.into_diagnostics(),
             Parsed::Css(parse) => parse.into_diagnostics(),
             Parsed::Graphql(parse) => parse.into_diagnostics(),
+            Parsed::Html(parse) => parse.into_diagnostics(),
         }
     }
 }
@@ -133,6 +146,7 @@ pub enum FormatNode {
     Json(JsonSyntaxNode),
     Css(CssSyntaxNode),
     Graphql(GraphqlSyntaxNode),
+    Html(HtmlSyntaxNode),
 }
 
 impl FormatNode {
@@ -152,6 +166,10 @@ impl FormatNode {
                 biome_graphql_formatter::format_node(GraphqlFormatOptions::default(), root)
                     .map(FormattedNode::Graphql)
             }
+            FormatNode::Html(root) => {
+                biome_html_formatter::format_node(HtmlFormatOptions::default(), root)
+                    .map(FormattedNode::Html)
+            }
         }
     }
 }
@@ -161,6 +179,7 @@ pub enum FormattedNode {
     Json(Formatted<JsonFormatContext>),
     Css(Formatted<CssFormatContext>),
     Graphql(Formatted<GraphqlFormatContext>),
+    Html(Formatted<HtmlFormatContext>),
 }
 
 impl FormattedNode {
@@ -170,6 +189,7 @@ impl FormattedNode {
             FormattedNode::Json(formatted) => formatted.print(),
             FormattedNode::Css(formatted) => formatted.print(),
             FormattedNode::Graphql(formatted) => formatted.print(),
+            FormattedNode::Html(formatted) => formatted.print(),
         }
     }
 }
@@ -198,7 +218,7 @@ impl Analyze {
                     root,
                     filter,
                     &options,
-                    Vec::new(),
+                    &[],
                     Default::default(),
                     |event| {
                         black_box(event.diagnostic());
@@ -216,7 +236,7 @@ impl Analyze {
                     ..AnalysisFilter::default()
                 };
                 let options = AnalyzerOptions::default();
-                biome_css_analyze::analyze(root, filter, &options, Vec::new(), |event| {
+                biome_css_analyze::analyze(root, filter, &options, &[], |event| {
                     black_box(event.diagnostic());
                     black_box(event.actions());
                     ControlFlow::<Never>::Continue(())

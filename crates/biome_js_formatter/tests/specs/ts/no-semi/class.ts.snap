@@ -81,6 +81,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Object wrap: Preserve
 -----
 
 ```ts
@@ -154,6 +155,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Object wrap: Preserve
 -----
 
 ```ts

@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 snapshot_kind: text
 ---
 ## `package.json`
@@ -44,7 +44,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-test.js:5:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+/test.js:5:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Disallow duplicate setup and teardown hooks.
   
@@ -63,6 +63,6 @@ test.js:5:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━�
 ```
 
 ```block
-Checked 1 file in <TIME>. No fixes applied.
+Checked 2 files in <TIME>. No fixes applied.
 Found 1 error.
 ```

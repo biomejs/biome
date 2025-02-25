@@ -430,7 +430,7 @@ fn assert_lint(
                 let services =
                     JsAnalyzerServices::from((Default::default(), Default::default(), file_source));
 
-                biome_js_analyze::analyze(&root, filter, &options, vec![], services, |signal| {
+                biome_js_analyze::analyze(&root, filter, &options, &[], services, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         for action in signal.actions() {
                             if !action.is_suppression() {
@@ -522,7 +522,7 @@ fn assert_lint(
                     test,
                 );
 
-                biome_css_analyze::analyze(&root, filter, &options, Vec::new(), |signal| {
+                biome_css_analyze::analyze(&root, filter, &options, &[], |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         for action in signal.actions() {
                             if !action.is_suppression() {

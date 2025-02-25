@@ -1,7 +1,6 @@
 pub mod documentation;
 pub mod file_handlers;
 
-pub mod matcher;
 pub mod projects;
 pub mod settings;
 pub mod workspace;
@@ -21,7 +20,6 @@ use biome_fs::{FileSystem, OsFileSystem};
 
 pub use diagnostics::{extension_error, TransportError, WorkspaceError};
 pub use file_handlers::JsFormatterSettings;
-pub use matcher::Matcher;
 pub use workspace::Workspace;
 
 /// This is the main entrypoint of the application.

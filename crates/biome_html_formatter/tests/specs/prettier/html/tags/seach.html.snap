@@ -1,0 +1,98 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/tags/seach.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+<header>
+  <h1><a href="/">My fancy blog</a></h1>
+  ...
+  <search>
+    <form action="search.php">
+      <label for="query">Find an article</label>
+      <input id="query" name="q" type="search">
+      <button type="submit">Go!</button>
+    </form>
+  </search>
+
+  <SEARCH></SEARCH>
+</header>
+</body>
+</html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-<!doctype html>
++<!DOCTYPE html>
+ <html lang="en">
+   <head>
+     <meta charset="UTF-8" />
+@@ -8,7 +8,9 @@
+   </head>
+   <body>
+     <header>
+-      <h1><a href="/">My fancy blog</a></h1>
++      <h1>
++        <a href="/">My fancy blog</a>
++      </h1>
+       ...
+       <search>
+         <form action="search.php">
+@@ -18,7 +20,7 @@
+         </form>
+       </search>
+ 
+-      <search></search>
++      <SEARCH></SEARCH>
+     </header>
+   </body>
+ </html>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <header>
+      <h1>
+        <a href="/">My fancy blog</a>
+      </h1>
+      ...
+      <search>
+        <form action="search.php">
+          <label for="query">Find an article</label>
+          <input id="query" name="q" type="search" />
+          <button type="submit">Go!</button>
+        </form>
+      </search>
+
+      <SEARCH></SEARCH>
+    </header>
+  </body>
+</html>
+```

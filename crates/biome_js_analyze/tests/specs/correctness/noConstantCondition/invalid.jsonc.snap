@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -11,7 +12,7 @@ for (; true;);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ for (; true;);
       │        ^^^^
@@ -28,7 +29,7 @@ for (; ``;);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ for (; ``;);
       │        ^^
@@ -45,7 +46,7 @@ for (; `foo`;);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ for (; `foo`;);
       │        ^^^^^
@@ -62,7 +63,7 @@ for (; `foo${bar}`;);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ for (; `foo${bar}`;);
       │        ^^^^^^^^^^^
@@ -79,7 +80,7 @@ do { } while (1)
 ```
 invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ do { } while (1)
       │               ^
@@ -96,7 +97,7 @@ do { } while ('1')
 ```
 invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ do { } while ('1')
       │               ^^^
@@ -113,7 +114,7 @@ do { } while (0)
 ```
 invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ do { } while (0)
       │               ^
@@ -130,7 +131,7 @@ do { } while (t = -2)
 ```
 invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ do { } while (t = -2)
       │               ^^^^^^
@@ -147,7 +148,7 @@ do { } while (``)
 ```
 invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ do { } while (``)
       │               ^^
@@ -164,7 +165,7 @@ do { } while (`foo`)
 ```
 invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ do { } while (`foo`)
       │               ^^^^^
@@ -181,7 +182,7 @@ do { } while (`foo${bar}`)
 ```
 invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ do { } while (`foo${bar}`)
       │               ^^^^^^^^^^^
@@ -198,7 +199,7 @@ true ? 1 : 2;
 ```
 invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ true ? 1 : 2;
       │ ^^^^
@@ -215,7 +216,7 @@ invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ 1 ? 1 : 2;
       │ ^
@@ -232,7 +233,7 @@ q = 0 ? 1 : 2;
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ q = 0 ? 1 : 2;
       │     ^
@@ -249,7 +250,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ (q = 0) ? 1 : 2;
       │ ^^^^^^^
@@ -266,7 +267,7 @@ invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ `` ? 1 : 2;
       │ ^^
@@ -283,7 +284,7 @@ invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ `foo` ? 1 : 2;
       │ ^^^^^
@@ -300,7 +301,7 @@ invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ `foo${bar}` ? 1 : 2;
       │ ^^^^^^^^^^^
@@ -317,7 +318,7 @@ if (-2);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (-2);
       │     ^^
@@ -334,7 +335,7 @@ if (true);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (true);
       │     ^^^^
@@ -351,7 +352,7 @@ if (1);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (1);
       │     ^
@@ -368,7 +369,7 @@ if ({});
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if ({});
       │     ^^
@@ -385,7 +386,7 @@ if (0 < 1);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (0 < 1);
       │     ^^^^^
@@ -402,7 +403,7 @@ if (0 || 1);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (0 || 1);
       │     ^^^^^^
@@ -419,7 +420,7 @@ if (a, 1);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a, 1);
       │     ^^^^
@@ -436,7 +437,7 @@ if (`foo`);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (`foo`);
       │     ^^^^^
@@ -453,7 +454,7 @@ if (``);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (``);
       │     ^^
@@ -471,7 +472,7 @@ if (`\
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (`\
       │     ^^
@@ -490,7 +491,7 @@ if (`${'bar'}`);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (`${'bar'}`);
       │     ^^^^^^^^^^
@@ -507,7 +508,7 @@ if (`${'bar' + `foo`}`);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (`${'bar' + `foo`}`);
       │     ^^^^^^^^^^^^^^^^^^
@@ -524,7 +525,7 @@ if (`foo${false || true}`);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (`foo${false || true}`);
       │     ^^^^^^^^^^^^^^^^^^^^^
@@ -541,7 +542,7 @@ if (`foo${0 || 1}`);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (`foo${0 || 1}`);
       │     ^^^^^^^^^^^^^^
@@ -558,7 +559,7 @@ if (`foo${bar}`);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (`foo${bar}`);
       │     ^^^^^^^^^^^
@@ -575,7 +576,7 @@ if (`${bar}foo`);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (`${bar}foo`);
       │     ^^^^^^^^^^^
@@ -592,7 +593,7 @@ if (!(true || a));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (!(true || a));
       │     ^^^^^^^^^^^^
@@ -609,7 +610,7 @@ if (!(a && void b && c));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (!(a && void b && c));
       │     ^^^^^^^^^^^^^^^^^^^
@@ -626,7 +627,7 @@ if (0 || !(a && null));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (0 || !(a && null));
       │     ^^^^^^^^^^^^^^^^^
@@ -643,7 +644,7 @@ if (1 + !(a || true));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (1 + !(a || true));
       │     ^^^^^^^^^^^^^^^^
@@ -660,7 +661,7 @@ if (!(null && a) > 1);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (!(null && a) > 1);
       │     ^^^^^^^^^^^^^^^^
@@ -677,7 +678,7 @@ if (+(!(a && 0)));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (+(!(a && 0)));
       │     ^^^^^^^^^^^^
@@ -694,7 +695,7 @@ if (!typeof a === 'string');
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (!typeof a === 'string');
       │     ^^^^^^^^^^^^^^^^^^^^^^
@@ -711,7 +712,7 @@ if (-('foo' || a));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (-('foo' || a));
       │     ^^^^^^^^^^^^^
@@ -728,7 +729,7 @@ if (+(void a && b) === ~(1 || c));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (+(void a && b) === ~(1 || c));
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -745,7 +746,7 @@ if (a ||= true);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a ||= true);
       │     ^^^^^^^^^^
@@ -762,7 +763,7 @@ if (a ||= 5);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a ||= 5);
       │     ^^^^^^^
@@ -779,7 +780,7 @@ if (a ||= 'foo' || b);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a ||= 'foo' || b);
       │     ^^^^^^^^^^^^^^^^
@@ -796,7 +797,7 @@ if (a ||= b || /regex/);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a ||= b || /regex/);
       │     ^^^^^^^^^^^^^^^^^^
@@ -813,7 +814,7 @@ if (a ||= b ||= true);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a ||= b ||= true);
       │     ^^^^^^^^^^^^^^^^
@@ -830,7 +831,7 @@ if (a ||= b ||= c || 1);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a ||= b ||= c || 1);
       │     ^^^^^^^^^^^^^^^^^^
@@ -847,7 +848,7 @@ if (!(a ||= true));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (!(a ||= true));
       │     ^^^^^^^^^^^^^
@@ -864,7 +865,7 @@ if (!(a ||= 'foo') === true);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (!(a ||= 'foo') === true);
       │     ^^^^^^^^^^^^^^^^^^^^^^^
@@ -881,7 +882,7 @@ if (!(a ||= 'foo') === false);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (!(a ||= 'foo') === false);
       │     ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -898,7 +899,7 @@ if (a || (b ||= true));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a || (b ||= true));
       │     ^^^^^^^^^^^^^^^^^
@@ -915,7 +916,7 @@ if ((a ||= 1) || b);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if ((a ||= 1) || b);
       │     ^^^^^^^^^^^^^^
@@ -932,7 +933,7 @@ if ((a ||= true) && true);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if ((a ||= true) && true);
       │     ^^^^^^^^^^^^^^^^^^^^
@@ -949,7 +950,7 @@ if (true && (a ||= true));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (true && (a ||= true));
       │     ^^^^^^^^^^^^^^^^^^^^
@@ -966,7 +967,7 @@ if (a &&= false);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a &&= false);
       │     ^^^^^^^^^^^
@@ -983,7 +984,7 @@ if (a &&= null);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a &&= null);
       │     ^^^^^^^^^^
@@ -1000,7 +1001,7 @@ if (a &&= void b);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a &&= void b);
       │     ^^^^^^^^^^^^
@@ -1017,7 +1018,7 @@ if (a &&= 0 && b);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a &&= 0 && b);
       │     ^^^^^^^^^^^^
@@ -1034,7 +1035,7 @@ if (a &&= b && '');
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a &&= b && '');
       │     ^^^^^^^^^^^^^
@@ -1051,7 +1052,7 @@ if (a &&= b &&= false);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a &&= b &&= false);
       │     ^^^^^^^^^^^^^^^^^
@@ -1068,7 +1069,7 @@ if (a &&= b &&= c && false);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a &&= b &&= c && false);
       │     ^^^^^^^^^^^^^^^^^^^^^^
@@ -1085,7 +1086,7 @@ if (!(a &&= false));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (!(a &&= false));
       │     ^^^^^^^^^^^^^^
@@ -1102,7 +1103,7 @@ if (!(a &&= 0) + 1);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (!(a &&= 0) + 1);
       │     ^^^^^^^^^^^^^^
@@ -1119,7 +1120,7 @@ if (a && (b &&= false));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a && (b &&= false));
       │     ^^^^^^^^^^^^^^^^^^
@@ -1136,7 +1137,7 @@ if ((a &&= null) && b);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if ((a &&= null) && b);
       │     ^^^^^^^^^^^^^^^^^
@@ -1153,7 +1154,7 @@ if (false || (a &&= false));
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (false || (a &&= false));
       │     ^^^^^^^^^^^^^^^^^^^^^^
@@ -1170,7 +1171,7 @@ if ((a &&= false) || false);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if ((a &&= false) || false);
       │     ^^^^^^^^^^^^^^^^^^^^^^
@@ -1187,7 +1188,7 @@ while ([]);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ while ([]);
       │        ^^
@@ -1204,7 +1205,7 @@ while (~!0);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ while (~!0);
       │        ^^^
@@ -1221,7 +1222,7 @@ while (x = 1);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ while (x = 1);
       │        ^^^^^
@@ -1238,7 +1239,7 @@ while (function () { });
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ while (function () { });
       │        ^^^^^^^^^^^^^^^
@@ -1255,7 +1256,7 @@ while (1);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ while (1);
       │        ^
@@ -1272,7 +1273,7 @@ while (() => { });
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ while (() => { });
       │        ^^^^^^^^^
@@ -1289,7 +1290,7 @@ while (`foo`);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ while (`foo`);
       │        ^^^^^
@@ -1306,7 +1307,7 @@ while (``);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ while (``);
       │        ^^
@@ -1323,7 +1324,7 @@ while (`${'foo'}`);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ while (`${'foo'}`);
       │        ^^^^^^^^^^
@@ -1340,7 +1341,7 @@ while (`${'foo' + 'bar'}`);
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ while (`${'foo' + 'bar'}`);
       │        ^^^^^^^^^^^^^^^^^^
@@ -1357,7 +1358,7 @@ if (typeof x) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (typeof x) { }
       │     ^^^^^^^^
@@ -1374,7 +1375,7 @@ if (typeof 'abc' === 'string') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (typeof 'abc' === 'string') { }
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1391,7 +1392,7 @@ if (a = typeof b) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a = typeof b) { }
       │     ^^^^^^^^^^^^
@@ -1408,7 +1409,7 @@ if (a, typeof b) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a, typeof b) { }
       │     ^^^^^^^^^^^
@@ -1425,7 +1426,7 @@ if (typeof 'a' == 'string' || typeof 'b' == 'string') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (typeof 'a' == 'string' || typeof 'b' == 'string') { }
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1442,7 +1443,7 @@ while (typeof x) { }
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ while (typeof x) { }
       │        ^^^^^^^^
@@ -1459,7 +1460,7 @@ if (1 || void x);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (1 || void x);
       │     ^^^^^^^^^^^
@@ -1476,7 +1477,7 @@ if (void x);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (void x);
       │     ^^^^^^
@@ -1493,7 +1494,7 @@ if (y = void x);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (y = void x);
       │     ^^^^^^^^^^
@@ -1510,7 +1511,7 @@ if (x, void x);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (x, void x);
       │     ^^^^^^^^^
@@ -1527,7 +1528,7 @@ if (void x === void y);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (void x === void y);
       │     ^^^^^^^^^^^^^^^^^
@@ -1544,7 +1545,7 @@ if (void x && a);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (void x && a);
       │     ^^^^^^^^^^^
@@ -1561,7 +1562,7 @@ if (a && void x);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a && void x);
       │     ^^^^^^^^^^^
@@ -1578,7 +1579,7 @@ if (false && abc === 'str') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (false && abc === 'str') { }
       │     ^^^^^^^^^^^^^^^^^^^^^^
@@ -1595,7 +1596,7 @@ if (true || abc === 'str') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (true || abc === 'str') { }
       │     ^^^^^^^^^^^^^^^^^^^^^
@@ -1612,7 +1613,7 @@ if (1 || abc === 'str') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (1 || abc === 'str') { }
       │     ^^^^^^^^^^^^^^^^^^
@@ -1629,7 +1630,7 @@ if (abc === 'str' || true) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (abc === 'str' || true) { }
       │     ^^^^^^^^^^^^^^^^^^^^^
@@ -1646,7 +1647,7 @@ if (abc === 'str' || true || def === 'str') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (abc === 'str' || true || def === 'str') { }
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1663,7 +1664,7 @@ if (false || true) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (false || true) { }
       │     ^^^^^^^^^^^^^
@@ -1680,7 +1681,7 @@ if (typeof abc === 'str' || true) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (typeof abc === 'str' || true) { }
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1697,7 +1698,7 @@ if ('str' || a) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if ('str' || a) { }
       │     ^^^^^^^^^^
@@ -1714,7 +1715,7 @@ if ('str' || abc === 'str') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if ('str' || abc === 'str') { }
       │     ^^^^^^^^^^^^^^^^^^^^^^
@@ -1731,7 +1732,7 @@ if ('str1' || 'str2') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if ('str1' || 'str2') { }
       │     ^^^^^^^^^^^^^^^^
@@ -1748,7 +1749,7 @@ if ('str1' && 'str2') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if ('str1' && 'str2') { }
       │     ^^^^^^^^^^^^^^^^
@@ -1765,7 +1766,7 @@ if (abc === 'str' || 'str') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (abc === 'str' || 'str') { }
       │     ^^^^^^^^^^^^^^^^^^^^^^
@@ -1782,7 +1783,7 @@ if (a || 'str') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (a || 'str') { }
       │     ^^^^^^^^^^
@@ -1799,7 +1800,7 @@ function* foo() { while (1) { } yield 'foo'; }
 ```
 invalid.jsonc:1:26 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ function* foo() { while (1) { } yield 'foo'; }
       │                          ^
@@ -1816,7 +1817,7 @@ function* foo() { while (1) { if (true) { yield 'foo'; } } }
 ```
 invalid.jsonc:1:26 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ function* foo() { while (1) { if (true) { yield 'foo'; } } }
       │                          ^
@@ -1827,7 +1828,7 @@ invalid.jsonc:1:26 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 invalid.jsonc:1:35 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ function* foo() { while (1) { if (true) { yield 'foo'; } } }
       │                                   ^^^^
@@ -1844,7 +1845,7 @@ function* foo() { while (1) { yield 'foo'; } while (1) { } }
 ```
 invalid.jsonc:1:53 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ function* foo() { while (1) { yield 'foo'; } while (1) { } }
       │                                                     ^
@@ -1861,7 +1862,7 @@ var a = function* foo() { while (1) { } yield 'foo'; }
 ```
 invalid.jsonc:1:34 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ var a = function* foo() { while (1) { } yield 'foo'; }
       │                                  ^
@@ -1878,7 +1879,7 @@ while (1) { function* foo() { yield; } }
 ```
 invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ while (1) { function* foo() { yield; } }
       │        ^
@@ -1895,7 +1896,7 @@ function* foo() { if (true) { yield 'foo'; } }
 ```
 invalid.jsonc:1:23 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ function* foo() { if (true) { yield 'foo'; } }
       │                       ^^^^
@@ -1912,7 +1913,7 @@ function* foo() { for (let foo = yield; true;) { } }
 ```
 invalid.jsonc:1:41 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ function* foo() { for (let foo = yield; true;) { } }
       │                                         ^^^^
@@ -1929,7 +1930,7 @@ function* foo() { for (foo = yield; true;) { } }
 ```
 invalid.jsonc:1:37 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ function* foo() { for (foo = yield; true;) { } }
       │                                     ^^^^
@@ -1946,7 +1947,7 @@ function foo() { while (1) { function* bar() { while (1) { yield; } } } }
 ```
 invalid.jsonc:1:25 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ function foo() { while (1) { function* bar() { while (1) { yield; } } } }
       │                         ^
@@ -1963,7 +1964,7 @@ function foo() { while (1) { const bar = function* () { while (1) { yield; } } }
 ```
 invalid.jsonc:1:25 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ function foo() { while (1) { const bar = function* () { while (1) { yield; } } } }
       │                         ^
@@ -1980,7 +1981,7 @@ function* foo() { for (let foo = 1 + 2 + 3 + (yield); true; baz) { } }
 ```
 invalid.jsonc:1:55 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ function* foo() { for (let foo = 1 + 2 + 3 + (yield); true; baz) { } }
       │                                                       ^^^^
@@ -1997,7 +1998,7 @@ if ([a]) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if ([a]) { }
       │     ^^^
@@ -2014,7 +2015,7 @@ if ([]) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if ([]) { }
       │     ^^
@@ -2031,7 +2032,7 @@ if ('' + ['a']) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if ('' + ['a']) { }
       │     ^^^^^^^^^^
@@ -2048,7 +2049,7 @@ if ('' + []) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if ('' + []) { }
       │     ^^^^^^^
@@ -2065,7 +2066,7 @@ if (+1) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (+1) { }
       │     ^^
@@ -2082,7 +2083,7 @@ if ([,] + '') { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if ([,] + '') { }
       │     ^^^^^^^^
@@ -2099,7 +2100,7 @@ if (/foo/ui);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (/foo/ui);
       │     ^^^^^^^
@@ -2116,7 +2117,7 @@ if (0n);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (0n);
       │     ^^
@@ -2133,7 +2134,7 @@ if (0b0n);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (0b0n);
       │     ^^^^
@@ -2150,7 +2151,7 @@ if (0o0n);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (0o0n);
       │     ^^^^
@@ -2167,7 +2168,7 @@ if (0x0n);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (0x0n);
       │     ^^^^
@@ -2184,7 +2185,7 @@ if (0b1n);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (0b1n);
       │     ^^^^
@@ -2201,7 +2202,7 @@ if (0o1n);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (0o1n);
       │     ^^^^
@@ -2218,7 +2219,7 @@ if (0x1n);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (0x1n);
       │     ^^^^
@@ -2235,7 +2236,7 @@ if (0x1n || foo);
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (0x1n || foo);
       │     ^^^^^^^^^^^
@@ -2252,7 +2253,7 @@ if (class { }) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (class { }) { }
       │     ^^^^^^^^^
@@ -2269,7 +2270,7 @@ if (new Foo()) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (new Foo()) { }
       │     ^^^^^^^^^
@@ -2286,7 +2287,7 @@ if (new Boolean(foo)) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (new Boolean(foo)) { }
       │     ^^^^^^^^^^^^^^^^
@@ -2303,7 +2304,7 @@ if (new String(foo)) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (new String(foo)) { }
       │     ^^^^^^^^^^^^^^^
@@ -2320,7 +2321,7 @@ if (new Number(foo)) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (new Number(foo)) { }
       │     ^^^^^^^^^^^^^^^
@@ -2337,7 +2338,7 @@ if (`${[...['a']]}`) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (`${[...['a']]}`) { }
       │     ^^^^^^^^^^^^^^^
@@ -2354,7 +2355,7 @@ if (undefined) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (undefined) { }
       │     ^^^^^^^^^
@@ -2371,7 +2372,7 @@ if (Boolean(1)) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (Boolean(1)) { }
       │     ^^^^^^^^^^
@@ -2388,7 +2389,7 @@ if (Boolean()) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (Boolean()) { }
       │     ^^^^^^^^^
@@ -2405,12 +2406,10 @@ if (Boolean([a])) { }
 ```
 invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected constant condition.
+  × Unexpected constant condition.
   
   > 1 │ if (Boolean([a])) { }
       │     ^^^^^^^^^^^^
   
 
 ```
-
-

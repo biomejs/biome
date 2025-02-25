@@ -1,0 +1,108 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/tags/openging-at-end.html
+---
+# Input
+
+```html
+<p
+  >Want to write us a letter? Use our<a
+    ><b
+      ><a>mailing address</a></b
+    ></a
+  >.</p
+>
+
+<p
+  >Want to write us a letter? Use our<a
+  href="contacts.html#Mailing_address"
+    ><b
+      ><a>mailing address</a></b
+    ></a
+  >.</p
+>
+
+<p
+  >Want to write us a letter? Use our<a
+  href="contacts.html#Mailing_address"
+  href1="contacts.html#Mailing_address"
+  href2="contacts.html#Mailing_address"
+  href3="contacts.html#Mailing_address"
+  href4="contacts.html#Mailing_address"
+    ><b
+      ><a>mailing address</a></b
+    ></a
+  >.</p
+>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,12 +1,16 @@
+ <p>
+   Want to write us a letter? Use our<a
+-    ><b><a>mailing address</a></b></a
++    ><b
++      ><a>mailing address</a></b
++    ></a
+   >.
+ </p>
+ 
+ <p>
+   Want to write us a letter? Use our<a href="contacts.html#Mailing_address"
+-    ><b><a>mailing address</a></b></a
++    ><b
++      ><a>mailing address</a></b
++    ></a
+   >.
+ </p>
+ 
+@@ -17,6 +21,8 @@
+     href2="contacts.html#Mailing_address"
+     href3="contacts.html#Mailing_address"
+     href4="contacts.html#Mailing_address"
+-    ><b><a>mailing address</a></b></a
++    ><b
++      ><a>mailing address</a></b
++    ></a
+   >.
+ </p>
+```
+
+# Output
+
+```html
+<p>
+  Want to write us a letter? Use our<a
+    ><b
+      ><a>mailing address</a></b
+    ></a
+  >.
+</p>
+
+<p>
+  Want to write us a letter? Use our<a href="contacts.html#Mailing_address"
+    ><b
+      ><a>mailing address</a></b
+    ></a
+  >.
+</p>
+
+<p>
+  Want to write us a letter? Use our<a
+    href="contacts.html#Mailing_address"
+    href1="contacts.html#Mailing_address"
+    href2="contacts.html#Mailing_address"
+    href3="contacts.html#Mailing_address"
+    href4="contacts.html#Mailing_address"
+    ><b
+      ><a>mailing address</a></b
+    ></a
+  >.
+</p>
+```

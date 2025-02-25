@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidIndexParameter.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -25,7 +26,7 @@ export interface Y {
 ```
 invalidIndexParameter.ts:2:6 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This index parameter name should be in camelCase.
+  i This index parameter name should be in camelCase.
   
     1 │ export interface X {
   > 2 │     [PascalCase: string]: unknown
@@ -47,7 +48,7 @@ invalidIndexParameter.ts:2:6 lint/style/useNamingConvention  FIXABLE  ━━━�
 ```
 invalidIndexParameter.ts:4:6 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This index parameter name should be in camelCase.
+  i This index parameter name should be in camelCase.
   
     2 │     [PascalCase: string]: unknown
     3 │ 
@@ -71,7 +72,7 @@ invalidIndexParameter.ts:4:6 lint/style/useNamingConvention  FIXABLE  ━━━�
 ```
 invalidIndexParameter.ts:6:6 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This index parameter name should be in camelCase.
+  i This index parameter name should be in camelCase.
   
     4 │     [CONSTANT_CASE: number]: unknown
     5 │ 
@@ -95,7 +96,7 @@ invalidIndexParameter.ts:6:6 lint/style/useNamingConvention  FIXABLE  ━━━�
 ```
 invalidIndexParameter.ts:10:15 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This index parameter name should be in camelCase.
+  i This index parameter name should be in camelCase.
   
      9 │ export interface Y {
   > 10 │     readonly [PascalCase: string]: unknown
@@ -118,7 +119,7 @@ invalidIndexParameter.ts:10:15 lint/style/useNamingConvention  FIXABLE  ━━�
 ```
 invalidIndexParameter.ts:12:15 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This index parameter name should be in camelCase.
+  i This index parameter name should be in camelCase.
   
     10 │     readonly [PascalCase: string]: unknown
     11 │ 
@@ -142,7 +143,7 @@ invalidIndexParameter.ts:12:15 lint/style/useNamingConvention  FIXABLE  ━━�
 ```
 invalidIndexParameter.ts:14:15 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This index parameter name should be in camelCase.
+  i This index parameter name should be in camelCase.
   
     12 │     readonly [CONSTANT_CASE: number]: unknown
     13 │ 

@@ -49,9 +49,9 @@ checksum = "15c4c2c83f81532e5845a733998b6971faca23490340a418e9b72a3ec9de12ea"
 
 [[package]]
 name = "anyhow"
-version = "1.0.95"
+version = "1.0.96"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34ac096ce696dc2fcabef30516bb13c0a68a11d30131d3df6f04711467681b04"
+checksum = "6b964d184e89d9b6b67dd2715bc8e74cf3107fb2b529990c90cf517326150bf4"
 
 [[package]]
 name = "append-only-vec"
@@ -129,7 +129,7 @@ dependencies = [
  "camino",
  "enumflags2",
  "indexmap",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "tracing",
@@ -195,7 +195,7 @@ dependencies = [
  "quick-junit",
  "rayon",
  "regex",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "serde",
  "serde_json",
  "smallvec",
@@ -237,7 +237,7 @@ dependencies = [
  "camino",
  "insta",
  "oxc_resolver",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "serde_ini",
@@ -263,7 +263,7 @@ name = "biome_control_flow"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
 ]
 
 [[package]]
@@ -287,7 +287,7 @@ dependencies = [
  "camino",
  "insta",
  "regex",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "tests_macros",
@@ -355,7 +355,7 @@ dependencies = [
  "biome_css_parser",
  "biome_css_syntax",
  "biome_rowan",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
 ]
 
 [[package]]
@@ -387,7 +387,7 @@ dependencies = [
  "once_cell",
  "oxc_resolver",
  "papaya",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "seize",
  "serde_json",
 ]
@@ -415,7 +415,7 @@ name = "biome_deserialize_macros"
 version = "0.6.0"
 dependencies = [
  "biome_string_case",
- "proc-macro-error",
+ "proc-macro-error2",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -460,7 +460,7 @@ dependencies = [
 name = "biome_diagnostics_macros"
 version = "0.5.7"
 dependencies = [
- "proc-macro-error",
+ "proc-macro-error2",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -491,7 +491,7 @@ dependencies = [
  "drop_bomb",
  "indexmap",
  "insta",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "tracing",
@@ -531,8 +531,9 @@ dependencies = [
  "oxc_resolver",
  "papaya",
  "parking_lot",
+ "path-absolutize",
  "rayon",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "serde_json",
@@ -630,7 +631,7 @@ dependencies = [
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_rowan",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
 ]
 
 [[package]]
@@ -719,7 +720,7 @@ dependencies = [
  "path-absolutize",
  "rand 0.8.5",
  "regex",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "serde_json",
@@ -833,7 +834,7 @@ dependencies = [
  "natord",
  "regex",
  "roaring",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "smallvec",
@@ -902,7 +903,7 @@ dependencies = [
  "insta",
  "quickcheck",
  "quickcheck_macros",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "serde_json",
@@ -921,7 +922,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_rowan",
  "rust-lapper",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "smallvec",
 ]
 
@@ -974,7 +975,7 @@ dependencies = [
  "camino",
  "insta",
  "natord",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "tests_macros",
 ]
 
@@ -1052,7 +1053,7 @@ dependencies = [
  "biome_rowan",
  "indexmap",
  "oxc_resolver",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "static_assertions",
 ]
 
@@ -1074,7 +1075,7 @@ dependencies = [
  "camino",
  "futures",
  "papaya",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "serde",
  "serde_json",
  "tokio",
@@ -1089,7 +1090,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "biome_rowan",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "tower",
  "tower-lsp",
 ]
@@ -1135,7 +1136,7 @@ dependencies = [
 name = "biome_markup"
 version = "0.5.7"
 dependencies = [
- "proc-macro-error",
+ "proc-macro-error2",
  "proc-macro2",
  "quote",
 ]
@@ -1157,7 +1158,7 @@ dependencies = [
  "biome_test_utils",
  "camino",
  "insta",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "tests_macros",
 ]
 
@@ -1180,7 +1181,7 @@ dependencies = [
  "insta",
  "node-semver",
  "oxc_resolver",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "serde",
  "static_assertions",
  "tests_macros",
@@ -1217,6 +1218,8 @@ dependencies = [
  "grit-pattern-matcher",
  "grit-util",
  "insta",
+ "papaya",
+ "rustc-hash 2.1.1",
  "serde",
 ]
 
@@ -1228,7 +1231,7 @@ dependencies = [
  "biome_parser",
  "camino",
  "papaya",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
 ]
 
 [[package]]
@@ -1238,11 +1241,11 @@ dependencies = [
  "biome_text_edit",
  "biome_text_size",
  "countme",
- "hashbrown 0.14.5",
+ "hashbrown 0.15.2",
  "iai",
  "quickcheck",
  "quickcheck_macros",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "serde_json",
@@ -1289,6 +1292,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_package",
  "biome_parser",
+ "biome_plugin_loader",
  "biome_project_layout",
  "biome_rowan",
  "biome_string_case",
@@ -1302,7 +1306,7 @@ dependencies = [
  "papaya",
  "rayon",
  "regex",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "schemars",
  "serde",
  "serde_json",
@@ -1450,9 +1454,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitflags"
-version = "2.6.0"
+version = "2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b048fb63fd8b5923fc5aa7b340d8e156aec7ec02f0c78fa8a6ddc2613f6f71de"
+checksum = "8f68f53c83ab957f72c32642f3868eec03eb974d1fb82e453128456482613d36"
 
 [[package]]
 name = "bitvec"
@@ -2276,7 +2280,7 @@ version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3fda788993cc341f69012feba8bf45c0ba4f3291fcc08e214b4d5a7332d88aff"
 dependencies = [
- "bitflags 2.6.0",
+ "bitflags 2.8.0",
  "libc",
  "libgit2-sys",
  "log",
@@ -2308,7 +2312,7 @@ version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0bf760ebf69878d9fd8f110c89703d90ce35095324d1f1edcb595c63945ee757"
 dependencies = [
- "bitflags 2.6.0",
+ "bitflags 2.8.0",
  "ignore",
  "walkdir",
 ]
@@ -2353,9 +2357,9 @@ checksum = "e5274423e17b7c9fc20b6e7e208532f9b19825d82dfd615708b70edd83df41f1"
 
 [[package]]
 name = "hashbrown"
-version = "0.15.0"
+version = "0.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e087f84d4f86bf4b218b927129862374b72199ae7d8657835f1e89000eea4fb"
+checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
 
 [[package]]
 name = "hermit-abi"
@@ -2554,7 +2558,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8c9c992b02b5b4c94ea26e32fe5bccb7aa7d9f390ab5c1221ff895bc7ea8b652"
 dependencies = [
  "equivalent",
- "hashbrown 0.15.0",
+ "hashbrown 0.15.2",
  "serde",
 ]
 
@@ -2701,7 +2705,7 @@ version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c0ff37bd590ca25063e35af745c343cb7a0271906fb7b37e4813e8f79f00268d"
 dependencies = [
- "bitflags 2.6.0",
+ "bitflags 2.8.0",
  "libc",
 ]
 
@@ -2984,7 +2988,7 @@ dependencies = [
  "json-strip-comments",
  "once_cell",
  "papaya",
- "rustc-hash 2.1.0",
+ "rustc-hash 2.1.1",
  "seize",
  "serde",
  "serde_json",
@@ -2995,9 +2999,9 @@ dependencies = [
 
 [[package]]
 name = "papaya"
-version = "0.1.8"
+version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc7c76487f7eaa00a0fc1d7f88dc6b295aec478d11b0fc79f857b62c2874124c"
+checksum = "aeb8b9616002a83f9779ea70a2a44364fe804f8b532b96989d0790a34ad76479"
 dependencies = [
  "equivalent",
  "seize",
@@ -3175,6 +3179,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "proc-macro-error-attr2"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96de42df36bb9bba5542fe9f1a054b8cc87e172759a1868aa05c1f3acc89dfc5"
+dependencies = [
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
+name = "proc-macro-error2"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11ec05c52be0a07b08061f7dd003e7d7092e0472bc731b4af7bb1ef876109802"
+dependencies = [
+ "proc-macro-error-attr2",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.93"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3189,7 +3214,7 @@ version = "0.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f86ba2052aebccc42cbbb3ed234b8b13ce76f75c3551a303cb2bcffcff12bb14"
 dependencies = [
- "bitflags 2.6.0",
+ "bitflags 2.8.0",
  "getopts",
  "memchr",
  "pulldown-cmark-escape",
@@ -3521,9 +3546,9 @@ checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
 name = "rustc-hash"
-version = "2.1.0"
+version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7fb8039b3032c191086b10f11f319a6e99e1e82889c5cc6046f515c9db1d497"
+checksum = "357703d41365b4b27c590e3ed91eabb1b663f07c4c084095e60cbed4362dff0d"
 
 [[package]]
 name = "rustix"
@@ -3545,7 +3570,7 @@ version = "0.38.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dc99bc2d4f1fed22595588a013687477aedf3cdcfb26558c559edb67b4d9b22e"
 dependencies = [
- "bitflags 2.6.0",
+ "bitflags 2.8.0",
  "errno",
  "libc",
  "linux-raw-sys 0.4.15",
@@ -3658,9 +3683,9 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.217"
+version = "1.0.218"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02fc4265df13d6fa1d00ecff087228cc0a2b5f3c0e87e258d8b94a156e984c70"
+checksum = "e8dfc9d19bdbf6d17e22319da49161d5d0108e4188e8b680aef6299eed22df60"
 dependencies = [
  "serde_derive",
 ]
@@ -3678,9 +3703,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.217"
+version = "1.0.218"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a9bf7cf98d04a2b28aead066b7496853d4779c9cc183c440dbac457641e19a0"
+checksum = "f09503e191f4e797cb8aac08e9a4a4695c5edf6a2e70e376d961ddd5c969f82b"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3711,9 +3736,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.137"
+version = "1.0.139"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "930cfb6e6abf99298aaad7d29abbef7a9999a9a8806a40088f55f0dcec03146b"
+checksum = "44f86c3acccc9c65b153fe1b85a3be07fe5515274ec9f0653b4a0875731c72a6"
 dependencies = [
  "indexmap",
  "itoa",
@@ -3965,7 +3990,7 @@ dependencies = [
  "biome_string_case",
  "case",
  "globwalk",
- "proc-macro-error",
+ "proc-macro-error2",
  "proc-macro2",
  "quote",
  "syn 2.0.96",
@@ -4440,9 +4465,9 @@ dependencies = [
 
 [[package]]
 name = "url"
-version = "2.5.3"
+version = "2.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d157f1b96d14500ffdc1f10ba712e780825526c03d9a49b4d0324b0d9113ada"
+checksum = "32f8b686cadd1473f4bd0117a5d28d36b1ade384ea9b5069a1c40aefed7fda60"
 dependencies = [
  "form_urlencoded",
  "idna",
@@ -4954,6 +4979,9 @@ dependencies = [
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_grit_patterns",
+ "biome_html_formatter",
+ "biome_html_parser",
+ "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_formatter",
  "biome_js_parser",

@@ -10,44 +10,25 @@ use biome_analyze::RuleDomain;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
-    LineWidth,
+    LineWidth, ObjectWrap,
 };
 use bpaf::Bpaf;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Overrides(pub Vec<OverridePattern>);
 
-impl FromStr for Overrides {
-    type Err = String;
-
-    fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::default())
-    }
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverridePattern {
-    /// A list of Unix shell style patterns. Biome will ignore files/folders that will
-    /// match these patterns.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ignore: Option<Vec<Box<str>>>,
-
-    /// A list of Unix shell style patterns. Biome will include files/folders that will
-    /// match these patterns.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub include: Option<Vec<Box<str>>>,
-
     /// A list of glob patterns. Biome will include files/folders that will
     /// match these patterns.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub includes: Option<Vec<biome_glob::Glob>>,
+    pub includes: Option<OverrideGlobs>,
 
     /// Specific configuration for the JavaScript language
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -86,17 +67,41 @@ pub struct OverridePattern {
     pub assist: Option<OverrideAssistConfiguration>,
 }
 
-impl FromStr for OverridePattern {
-    type Err = String;
-
-    fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::default())
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(untagged)]
+pub enum OverrideGlobs {
+    Globs(Box<[biome_glob::Glob]>),
+    EditorconfigGlob(Box<biome_glob::editorconfig::EditorconfigGlob>),
+}
+impl OverrideGlobs {
+    /// Normalize `path` and match it against the list of globs.
+    pub fn is_match_candidate(&self, path: &biome_glob::CandidatePath) -> bool {
+        match self {
+            OverrideGlobs::Globs(globs) => path.matches_with_exceptions(globs),
+            OverrideGlobs::EditorconfigGlob(glob) => glob.is_match_candidate(path),
+        }
+    }
+}
+impl biome_deserialize::Deserializable for OverrideGlobs {
+    fn deserialize(
+        ctx: &mut impl biome_deserialize::DeserializationContext,
+        value: &impl biome_deserialize::DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        biome_deserialize::Deserializable::deserialize(ctx, value, name).map(OverrideGlobs::Globs)
+    }
+}
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for OverrideGlobs {
+    fn schema_name() -> String {
+        "OverrideGlobs".to_string()
+    }
+    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        Vec::<biome_glob::Glob>::json_schema(gen)
     }
 }
 
-#[derive(
-    Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideFormatterConfiguration {
@@ -151,11 +156,14 @@ pub struct OverrideFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("bracket-spacing"), argument("true|false"))]
     pub bracket_spacing: Option<BracketSpacing>,
+
+    /// Whether to enforce collapsing object literals when possible. Defaults to preserve.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("object-wrap"), argument("preserve|collapse"))]
+    pub object_wrap: Option<ObjectWrap>,
 }
 
-#[derive(
-    Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideLinterConfiguration {
@@ -175,9 +183,7 @@ pub struct OverrideLinterConfiguration {
     pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
 }
 
-#[derive(
-    Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
-)]
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideAssistConfiguration {

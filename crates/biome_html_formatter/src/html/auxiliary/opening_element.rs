@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, utils::metadata::is_element_whitespace_sensitive};
 use biome_formatter::{write, FormatRuleWithOptions, GroupId};
 use biome_html_syntax::{HtmlOpeningElement, HtmlOpeningElementFields};
 #[derive(Debug, Clone, Default)]
@@ -41,6 +41,9 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
             r_angle_token,
         } = node.as_fields();
 
+        let name = name?;
+        let is_whitespace_sensitive = is_element_whitespace_sensitive(f, &name);
+
         let bracket_same_line = f.options().bracket_same_line().value();
         write!(f, [l_angle_token.format(), name.format()])?;
 
@@ -64,6 +67,14 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
             }))
             .with_group_id(self.attr_group_id)]
         )?;
+
+        // Handle whitespace sensitivity in cases where the HtmlElementList formatter is not invoked because the element has no children.
+        if let Ok(r_angle_token) = &r_angle_token {
+            if is_whitespace_sensitive && r_angle_token.has_trailing_whitespace() {
+                // we can't get rid of the whitespace if the element is whitespace sensitive
+                write!(f, [space()])?;
+            }
+        }
 
         Ok(())
     }
