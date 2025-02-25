@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidExplicit.js
+snapshot_kind: text
 ---
 # Input
 ```js
@@ -31,7 +32,7 @@ const invalidExplicit = {
 ```
 invalidExplicit.js:3:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  × Do not use explicit object property syntax when shorthand syntax is possible.
   
     1 │ const invalidExplicit = {
     2 │     // Basic property shorthand violations
@@ -48,7 +49,7 @@ invalidExplicit.js:3:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidExplicit.js:4:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  × Do not use explicit object property syntax when shorthand syntax is possible.
   
     2 │     // Basic property shorthand violations
     3 │     foo: foo,
@@ -65,7 +66,7 @@ invalidExplicit.js:4:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidExplicit.js:5:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  × Do not use explicit object property syntax when shorthand syntax is possible.
   
     3 │     foo: foo,
     4 │     bar: bar,
@@ -82,7 +83,7 @@ invalidExplicit.js:5:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidExplicit.js:8:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  × Do not use explicit object property syntax when shorthand syntax is possible.
   
      7 │     // Method shorthand violations
    > 8 │     method: function () { return "method"; },
@@ -98,7 +99,7 @@ invalidExplicit.js:8:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidExplicit.js:9:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  × Do not use explicit object property syntax when shorthand syntax is possible.
   
      7 │     // Method shorthand violations
      8 │     method: function () { return "method"; },
@@ -115,7 +116,7 @@ invalidExplicit.js:9:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidExplicit.js:10:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  × Do not use explicit object property syntax when shorthand syntax is possible.
   
      8 │     method: function () { return "method"; },
      9 │     async: async function () { return "async"; },
@@ -132,7 +133,7 @@ invalidExplicit.js:10:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidExplicit.js:11:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  × Do not use explicit object property syntax when shorthand syntax is possible.
   
      9 │     async: async function () { return "async"; },
     10 │     generator: function* () { yield "gen"; },
@@ -149,7 +150,7 @@ invalidExplicit.js:11:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidExplicit.js:14:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  × Do not use explicit object property syntax when shorthand syntax is possible.
   
     13 │     // Computed methods shorthand violations
   > 14 │     [computed]: function () { return "computed"; },
@@ -165,7 +166,7 @@ invalidExplicit.js:14:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidExplicit.js:15:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  × Do not use explicit object property syntax when shorthand syntax is possible.
   
     13 │     // Computed methods shorthand violations
     14 │     [computed]: function () { return "computed"; },
@@ -182,7 +183,7 @@ invalidExplicit.js:15:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidExplicit.js:16:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  × Do not use explicit object property syntax when shorthand syntax is possible.
   
     14 │     [computed]: function () { return "computed"; },
     15 │     [computed]: async function () { return "async computed"; },
@@ -199,7 +200,7 @@ invalidExplicit.js:16:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidExplicit.js:17:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  × Do not use explicit object property syntax when shorthand syntax is possible.
   
     15 │     [computed]: async function () { return "async computed"; },
     16 │     [computed]: function* () { yield "computed gen"; },
@@ -216,7 +217,7 @@ invalidExplicit.js:17:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidExplicit.js:18:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  × Do not use explicit object property syntax when shorthand syntax is possible.
   
     16 │     [computed]: function* () { yield "computed gen"; },
     17 │     ["computed-string"]: function () { return "computed string"; },
@@ -233,7 +234,7 @@ invalidExplicit.js:18:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidExplicit.js:19:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use explicit object property syntax when shorthand syntax is possible.
+  × Do not use explicit object property syntax when shorthand syntax is possible.
   
     17 │     ["computed-string"]: function () { return "computed string"; },
     18 │     ["comp" + "uted" + "-con" + "cat"]: function () { return "computed concat"; },
