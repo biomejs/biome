@@ -37,7 +37,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
                 project_key: ctx.project_key,
                 document_file_source: None,
                 path: path.clone(),
-                version: 0,
+                version: None,
                 content: FileContent::FromClient(input.clone()),
                 persist_node_cache: false,
             },

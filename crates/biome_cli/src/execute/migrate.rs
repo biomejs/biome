@@ -79,7 +79,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         project_key,
         path: biome_path.clone(),
         content: FileContent::FromClient(biome_config_content.to_string()),
-        version: 0,
+        version: Some(0),
         document_file_source: Some(JsonFileSource::json().into()),
         persist_node_cache: false,
     })?;

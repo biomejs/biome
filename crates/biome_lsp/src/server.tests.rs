@@ -1581,7 +1581,6 @@ async fn pull_diagnostics_for_rome_json() -> Result<()> {
 
 #[tokio::test]
 async fn pull_diagnostics_for_css_files() -> Result<()> {
-    let factory = ServerFactory::default();
     let mut fs = MemoryFileSystem::default();
     let config = r#"{
         "css": {
@@ -1596,7 +1595,9 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
         Utf8PathBuf::from_path_buf(url!("biome.json").to_file_path().unwrap()).unwrap(),
         config,
     );
-    let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
+
+    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let (service, client) = factory.create(None).into_inner();
 
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -1931,7 +1932,6 @@ if(a === -0) {}
 
 #[tokio::test]
 async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Result<()> {
-    let factory = ServerFactory::default();
     let mut fs = MemoryFileSystem::default();
     let config = r#"{
     "$schema": "https://biomejs.dev/schemas/1.7.3/schema.json",
@@ -1963,7 +1963,9 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
         Utf8PathBuf::from_path_buf(url!("biome.json").to_file_path().unwrap()).unwrap(),
         config,
     );
-    let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
+
+    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2448,7 +2450,6 @@ async fn format_jsx_in_javascript_file() -> Result<()> {
 
 #[tokio::test]
 async fn does_not_format_ignored_files() -> Result<()> {
-    let factory = ServerFactory::default();
     let mut fs = MemoryFileSystem::default();
     let config = r#"{
         "files": {
@@ -2460,7 +2461,9 @@ async fn does_not_format_ignored_files() -> Result<()> {
         Utf8PathBuf::from_path_buf(url!("biome.json").to_file_path().unwrap()).unwrap(),
         config,
     );
-    let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
+
+    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2766,7 +2769,6 @@ async fn multiple_projects() -> Result<()> {
 
 #[tokio::test]
 async fn pull_source_assist_action() -> Result<()> {
-    let factory = ServerFactory::default();
     let mut fs = MemoryFileSystem::default();
     let config = r#"{
         "assist": {
@@ -2783,7 +2785,9 @@ async fn pull_source_assist_action() -> Result<()> {
         Utf8PathBuf::from_path_buf(url!("biome.json").to_file_path().unwrap()).unwrap(),
         config,
     );
-    let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
+
+    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let (service, client) = factory.create(None).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 

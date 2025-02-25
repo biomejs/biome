@@ -600,7 +600,7 @@ pub fn execute_mode(
                     project_key,
                     content: FileContent::FromClient(content),
                     path: report_file.clone(),
-                    version: 0,
+                    version: None,
                     document_file_source: None,
                     persist_node_cache: false,
                 })?;
