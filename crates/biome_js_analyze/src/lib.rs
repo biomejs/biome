@@ -202,15 +202,14 @@ mod tests {
     #[test]
     fn quick_test() {
         const SOURCE: &str = r#"
-let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
-
+let Component = (props) => <ol>{props.data.map(d => <li>{d.text}</li>)}</ol>;
         "#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let options = AnalyzerOptions::default();
-        let rule_filter = RuleFilter::Rule("nursery", "noDestructuredProps");
+        let rule_filter = RuleFilter::Rule("nursery", "usePreferFor");
 
         let mut dependencies = Dependencies::default();
         dependencies.add("buffer", "latest");

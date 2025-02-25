@@ -397,6 +397,8 @@ pub type UseOptionalChain =
     <lint::complexity::use_optional_chain::UseOptionalChain as biome_analyze::Rule>::Options;
 pub type UseParseIntRadix =
     <lint::nursery::use_parse_int_radix::UseParseIntRadix as biome_analyze::Rule>::Options;
+pub type UsePreferFor =
+    <lint::nursery::use_prefer_for::UsePreferFor as biome_analyze::Rule>::Options;
 pub type UseRegexLiterals =
     <lint::complexity::use_regex_literals::UseRegexLiterals as biome_analyze::Rule>::Options;
 pub type UseSelfClosingElements = < lint :: style :: use_self_closing_elements :: UseSelfClosingElements as biome_analyze :: Rule > :: Options ;

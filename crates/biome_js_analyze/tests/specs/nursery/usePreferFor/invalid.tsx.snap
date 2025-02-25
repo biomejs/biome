@@ -1,0 +1,139 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.tsx
+snapshot_kind: text
+---
+# Input
+```tsx
+let Component = (props) => <ol>{props.data.map(d => <li>{d.text}</li>)}</ol>;
+
+let Component = (props) => <>{props.data.map(d => <li>{d.text}</li>)}</>;
+
+let Component = (props) => <ol>{props.data.map(d => <li key={d.id}>{d.text}</li>)}</ol>;
+
+function Component(props) {
+  return <ol>{props.data.map(d => <li>{d.text}</li>)}</ol>;
+}
+
+function Component(props) {
+  return <ol>{props.data?.map(d => <li>{d.text}</li>)}</ol>;
+}
+
+let Component = (props) => <ol>{props.data.map(() => <li />)}</ol>;
+
+let Component = (props) => <ol>{props.data.map((...args) => <li>{args[0].text}</li>)}</ol>;
+```
+
+# Diagnostics
+```
+invalid.tsx:1:33 lint/nursery/usePreferFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Array#map causes DOM elements to be recreated.
+  
+  > 1 │ let Component = (props) => <ol>{props.data.map(d => <li>{d.text}</li>)}</ol>;
+      │                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ let Component = (props) => <>{props.data.map(d => <li>{d.text}</li>)}</>;
+  
+  i Use Solid's `<For />` component for efficiently rendering lists.
+  
+
+```
+
+```
+invalid.tsx:3:31 lint/nursery/usePreferFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Array#map causes DOM elements to be recreated.
+  
+    1 │ let Component = (props) => <ol>{props.data.map(d => <li>{d.text}</li>)}</ol>;
+    2 │ 
+  > 3 │ let Component = (props) => <>{props.data.map(d => <li>{d.text}</li>)}</>;
+      │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ let Component = (props) => <ol>{props.data.map(d => <li key={d.id}>{d.text}</li>)}</ol>;
+  
+  i Use Solid's `<For />` component for efficiently rendering lists.
+  
+
+```
+
+```
+invalid.tsx:5:33 lint/nursery/usePreferFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Array#map causes DOM elements to be recreated.
+  
+    3 │ let Component = (props) => <>{props.data.map(d => <li>{d.text}</li>)}</>;
+    4 │ 
+  > 5 │ let Component = (props) => <ol>{props.data.map(d => <li key={d.id}>{d.text}</li>)}</ol>;
+      │                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ function Component(props) {
+  
+  i Use Solid's `<For />` component for efficiently rendering lists.
+  
+
+```
+
+```
+invalid.tsx:8:15 lint/nursery/usePreferFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Array#map causes DOM elements to be recreated.
+  
+     7 │ function Component(props) {
+   > 8 │   return <ol>{props.data.map(d => <li>{d.text}</li>)}</ol>;
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i Use Solid's `<For />` component for efficiently rendering lists.
+  
+
+```
+
+```
+invalid.tsx:12:15 lint/nursery/usePreferFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Array#map causes DOM elements to be recreated.
+  
+    11 │ function Component(props) {
+  > 12 │   return <ol>{props.data?.map(d => <li>{d.text}</li>)}</ol>;
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i Use Solid's `<For />` component for efficiently rendering lists.
+  
+
+```
+
+```
+invalid.tsx:15:33 lint/nursery/usePreferFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Array#map causes DOM elements to be recreated.
+  
+    13 │ }
+    14 │ 
+  > 15 │ let Component = (props) => <ol>{props.data.map(() => <li />)}</ol>;
+       │                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ let Component = (props) => <ol>{props.data.map((...args) => <li>{args[0].text}</li>)}</ol>;
+  
+  i Use Solid's `<For />` component or `<Index />` component for rendering lists.
+  
+
+```
+
+```
+invalid.tsx:17:33 lint/nursery/usePreferFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Array#map causes DOM elements to be recreated.
+  
+    15 │ let Component = (props) => <ol>{props.data.map(() => <li />)}</ol>;
+    16 │ 
+  > 17 │ let Component = (props) => <ol>{props.data.map((...args) => <li>{args[0].text}</li>)}</ol>;
+       │                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Use Solid's `<For />` component or `<Index />` component for rendering lists.
+  
+
+```
