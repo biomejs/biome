@@ -54,15 +54,13 @@
 mod client;
 mod scanner;
 mod server;
+mod watcher;
 
-pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
-use crate::file_handlers::Capabilities;
 pub use crate::file_handlers::DocumentFileSource;
-use crate::projects::ProjectKey;
-use crate::settings::WorkspaceSettingsHandle;
-use crate::{Deserialize, Serialize, WorkspaceError};
-use biome_analyze::ActionCategory;
-pub use biome_analyze::RuleCategories;
+pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
+pub use server::WorkspaceServer;
+
+use biome_analyze::{ActionCategory, RuleCategories};
 use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::Configuration;
 use biome_console::{markup, Markup, MarkupBuf};
@@ -75,14 +73,20 @@ use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use core::str;
+use crossbeam::channel::bounded;
 use enumflags2::{bitflags, BitFlags};
 #[cfg(feature = "schema")]
 use schemars::{gen::SchemaGenerator, schema::Schema};
 use smallvec::SmallVec;
 use std::collections::HashMap;
 use std::time::Duration;
-use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
+use std::{borrow::Cow, panic::RefUnwindSafe};
 use tracing::{debug, instrument};
+
+use crate::file_handlers::Capabilities;
+use crate::projects::ProjectKey;
+use crate::settings::WorkspaceSettingsHandle;
+use crate::{Deserialize, Serialize, WorkspaceError};
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -564,7 +568,7 @@ pub struct OpenFileParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub content: FileContent,
-    pub version: i32,
+    pub version: Option<i32>,
     pub document_file_source: Option<DocumentFileSource>,
 
     /// Set to `true` to persist the node cache used during parsing, in order to
@@ -999,6 +1003,11 @@ pub struct ScanProjectFolderParams {
     /// which part of the project they are interested in. The server may or may
     /// not use this to avoid scanning parts that are irrelevant to clients.
     pub path: Option<BiomePath>,
+
+    /// Should the watcher be instructed to start watching this path?
+    ///
+    /// Does nothing if the watcher is already watching this path.
+    pub watch: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1208,12 +1217,8 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
 /// Convenience function for constructing a server instance of [Workspace]
 pub fn server(fs: Box<dyn FileSystem>) -> Box<dyn Workspace> {
-    Box::new(server::WorkspaceServer::new(fs))
-}
-
-/// Convenience function for constructing a server instance of [Workspace]
-pub fn server_sync(fs: Box<dyn FileSystem>) -> Arc<dyn Workspace> {
-    Arc::new(server::WorkspaceServer::new(fs))
+    let (tx, _) = bounded(0);
+    Box::new(WorkspaceServer::new(fs, tx))
 }
 
 /// Convenience function for constructing a client instance of [Workspace]

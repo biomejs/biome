@@ -168,7 +168,6 @@ export class Biome {
 			this.workspace.openFile({
 				projectKey,
 				content: { type: "fromClient", content },
-				version: 0,
 				path,
 			});
 

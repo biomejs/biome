@@ -51,8 +51,8 @@ pub(crate) async fn did_open(
     session.workspace.open_file(OpenFileParams {
         project_key,
         path,
-        version,
         content: FileContent::FromClient(content),
+        version: Some(version),
         document_file_source: Some(language_hint),
         persist_node_cache: true,
     })?;

@@ -8,19 +8,20 @@ use crate::utils::{into_lsp_error, panic_to_lsp_error};
 use crate::{handlers, requests};
 use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
-use biome_fs::{ConfigName, FileSystem, OsFileSystem};
+use biome_fs::{ConfigName, FileSystem, MemoryFileSystem, OsFileSystem};
 use biome_service::workspace::{
     CloseProjectParams, OpenProjectParams, RageEntry, RageParams, RageResult,
 };
-use biome_service::{workspace, Workspace};
+use biome_service::{WatcherInstruction, WorkspaceServer};
 use camino::Utf8PathBuf;
+use crossbeam::channel::{bounded, Sender};
 use futures::future::ready;
 use futures::FutureExt;
 use rustc_hash::FxHashMap;
 use serde_json::json;
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::{Arc, Mutex};
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::sync::Notify;
 use tokio::task::spawn_blocking;
@@ -530,16 +531,13 @@ macro_rules! workspace_method {
 
 /// Factory data structure responsible for creating [ServerConnection] handles
 /// for each incoming connection accepted by the server
-#[derive(Default)]
 pub struct ServerFactory {
     /// Synchronization primitive used to broadcast a shutdown signal to all
     /// active connections
     cancellation: Arc<Notify>,
 
     /// [Workspace] instance shared between all clients.
-    ///
-    /// Initialized when the first connection is created.
-    workspace: OnceLock<Arc<dyn Workspace>>,
+    workspace: Arc<WorkspaceServer>,
 
     /// The sessions of the connected clients indexed by session key.
     sessions: Sessions,
@@ -550,16 +548,27 @@ pub struct ServerFactory {
     /// If this is true the server will broadcast a shutdown signal once the
     /// last client disconnected
     stop_on_disconnect: bool,
+
     /// This shared flag is set to true once at least one sessions has been
     /// initialized on this server instance
     is_initialized: Arc<AtomicBool>,
 }
 
+impl Default for ServerFactory {
+    fn default() -> Self {
+        Self::new_with_fs(Box::new(MemoryFileSystem::default()))
+    }
+}
+
 impl ServerFactory {
-    pub fn new(stop_on_disconnect: bool) -> Self {
+    /// Regular constructor for use in the daemon.
+    pub fn new(stop_on_disconnect: bool, instruction_tx: Sender<WatcherInstruction>) -> Self {
         Self {
             cancellation: Arc::default(),
-            workspace: OnceLock::default(),
+            workspace: Arc::new(WorkspaceServer::new(
+                Box::new(OsFileSystem::default()),
+                instruction_tx,
+            )),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect,
@@ -567,20 +576,22 @@ impl ServerFactory {
         }
     }
 
-    pub fn create(&self, config_path: Option<Utf8PathBuf>) -> ServerConnection {
-        self.create_with_fs(config_path, Box::new(OsFileSystem::default()))
+    /// Constructor for use in tests.
+    pub fn new_with_fs(fs: Box<dyn FileSystem>) -> Self {
+        let (tx, _) = bounded(0);
+        Self {
+            cancellation: Arc::default(),
+            workspace: Arc::new(WorkspaceServer::new(fs, tx)),
+            sessions: Sessions::default(),
+            next_session_key: AtomicU64::new(0),
+            stop_on_disconnect: true,
+            is_initialized: Arc::default(),
+        }
     }
 
-    /// Create a new [ServerConnection] from this factory
-    pub fn create_with_fs(
-        &self,
-        config_path: Option<Utf8PathBuf>,
-        fs: Box<dyn FileSystem>,
-    ) -> ServerConnection {
-        let workspace = self
-            .workspace
-            .get_or_init(|| workspace::server_sync(fs))
-            .clone();
+    /// Creates a new [ServerConnection] from this factory.
+    pub fn create(&self, config_path: Option<Utf8PathBuf>) -> ServerConnection {
+        let workspace = self.workspace.clone();
 
         let session_key = SessionKey(self.next_session_key.fetch_add(1, Ordering::Relaxed));
 
@@ -646,6 +657,11 @@ impl ServerFactory {
     /// Return a handle to the cancellation token for this server process
     pub fn cancellation(&self) -> Arc<Notify> {
         self.cancellation.clone()
+    }
+
+    /// Returns the workspace used by this server.
+    pub fn workspace(&self) -> Arc<WorkspaceServer> {
+        self.workspace.clone()
     }
 }
 

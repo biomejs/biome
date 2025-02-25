@@ -50,7 +50,7 @@ pub(crate) fn run<'a>(
             workspace.open_file(OpenFileParams {
                 project_key,
                 path: biome_path.clone(),
-                version: 0,
+                version: None,
                 content: FileContent::FromClient(content.into()),
                 document_file_source: None,
                 persist_node_cache: false,
@@ -85,7 +85,7 @@ pub(crate) fn run<'a>(
         workspace.open_file(OpenFileParams {
             project_key,
             path: biome_path.clone(),
-            version: 0,
+            version: None,
             content: FileContent::FromClient(content.into()),
             document_file_source: None,
             persist_node_cache: false,

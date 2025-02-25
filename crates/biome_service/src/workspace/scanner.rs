@@ -1,3 +1,13 @@
+//! Scanner for crawling the file system and loading documents into projects.
+//!
+//! Conceptually, the scanner is more than just the scanning logic in this
+//! module. Rather, we also consider the [watcher](crate::WorkspaceWatcher)
+//! (which is partly implemented outside the workspace because of its
+//! threading requirements) to be a part of the scanner.
+//!
+//! In other words, the scanner is both the scanning logic in this module as
+//! well as the watcher to allow continuous scanning.
+
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, TraversalContext, TraversalScope};
@@ -26,6 +36,8 @@ pub(crate) struct ScanResult {
 }
 
 impl WorkspaceServer {
+    /// Performs a file system scan and loads all supported documents into the
+    /// project.
     #[instrument(level = "debug", skip(self))]
     pub(super) fn scan(
         &self,
@@ -128,7 +140,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     }));
 
     ctx.workspace
-        .update_dependency_graph_for_paths(&handleable_paths);
+        .update_dependency_graph_for_paths(&handleable_paths, &[]);
 
     start.elapsed()
 }
@@ -234,7 +246,7 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
             path: path.clone(),
             content: FileContent::FromServer,
             document_file_source: None,
-            version: 0,
+            version: None,
             persist_node_cache: false,
         })
     }) {
