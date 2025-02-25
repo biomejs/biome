@@ -728,12 +728,8 @@ impl Features {
     }
 
     /// Returns the [Capabilities] associated with a [BiomePath]
-    pub(crate) fn get_capabilities(
-        &self,
-        path: &Utf8Path,
-        language_hint: DocumentFileSource,
-    ) -> Capabilities {
-        match DocumentFileSource::from_path(path).or(language_hint) {
+    pub(crate) fn get_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
+        match language_hint {
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
                 EmbeddingKind::Astro => self.astro.capabilities(),
                 EmbeddingKind::Vue => self.vue.capabilities(),

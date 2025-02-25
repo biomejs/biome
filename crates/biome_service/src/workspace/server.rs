@@ -225,7 +225,7 @@ impl WorkspaceServer {
     ))]
     fn get_file_capabilities(&self, path: &BiomePath) -> Capabilities {
         let language = self.get_file_source(path);
-        self.features.get_capabilities(path, language)
+        self.features.get_capabilities(language)
     }
 
     /// Retrieves the supported language of a file.
@@ -307,7 +307,7 @@ impl WorkspaceServer {
         } = params;
         let path: Utf8PathBuf = path.into();
 
-        if !DocumentFileSource::can_read(path.as_path()) {
+        if document_file_source.is_none() && !DocumentFileSource::can_read(path.as_path()) {
             return Ok(());
         }
 
@@ -345,7 +345,7 @@ impl WorkspaceServer {
             return Ok(());
         }
 
-        if !DocumentFileSource::can_parse(path.as_path()) {
+        if document_file_source.is_none() && !DocumentFileSource::can_parse(path.as_path()) {
             self.documents.pin().insert(
                 path,
                 Document {
@@ -447,11 +447,14 @@ impl WorkspaceServer {
         let documents = self.documents.pin();
         let syntax = documents
             .get(path)
-            .and_then(|document| document.syntax.as_ref())
-            .ok_or_else(WorkspaceError::not_found)?;
+            .and_then(|doc| doc.syntax.clone())
+            .transpose();
 
         match syntax {
-            Ok(syntax) => Ok(syntax.clone()),
+            Ok(syntax) => match syntax {
+                None => Err(WorkspaceError::not_found()),
+                Some(syntax) => Ok(syntax.clone()),
+            },
             Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
         }
     }
@@ -467,7 +470,7 @@ impl WorkspaceServer {
         let file_source = self
             .get_source(file_source_index)
             .ok_or_else(WorkspaceError::not_found)?;
-        let capabilities = self.features.get_capabilities(path, file_source);
+        let capabilities = self.features.get_capabilities(file_source);
 
         let parse = capabilities
             .parser
@@ -697,7 +700,7 @@ impl Workspace for WorkspaceServer {
                 .ok_or_else(WorkspaceError::no_project)?,
         );
         let mut file_features = FileFeaturesResult::new();
-        let language = DocumentFileSource::from_path(path);
+        let language = self.get_file_source(path);
         let file_name = path.file_name();
         file_features = file_features.with_capabilities(&capabilities);
         file_features = file_features.with_settings_and_language(&handle, path, &capabilities);
@@ -1129,6 +1132,7 @@ impl Workspace for WorkspaceServer {
     )]
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError> {
         let capabilities = self.get_file_capabilities(&params.path);
+
         let format = capabilities
             .formatter
             .format
@@ -1138,6 +1142,7 @@ impl Workspace for WorkspaceServer {
                 .get_settings(params.project_key)
                 .ok_or_else(WorkspaceError::no_project)?,
         );
+
         let parse = self.get_parse(&params.path)?;
 
         if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
