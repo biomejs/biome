@@ -109,9 +109,7 @@ impl Rule for UsePreferFor {
                                         .items()
                                         .first()
                                         .and_then(|item| item.ok())
-                                        .map_or(false, |param| {
-                                            param.as_js_rest_parameter().is_some()
-                                        })
+                                        .is_some_and(|param| param.as_js_rest_parameter().is_some())
                             }
                         };
 
@@ -125,19 +123,19 @@ impl Rule for UsePreferFor {
                         }
                     }
                     AnyJsExpression::JsFunctionExpression(arg) => {
-                        arg.parameters().ok().and_then(|params| {
+                        arg.parameters().ok().map(|params| {
                             let is_valid = params.items().len() == 1
                                 && params
                                     .items()
                                     .first()
-                                    .and_then(|item| item.ok()) // 合并 Option 解包
-                                    .map_or(false, |param| param.as_js_rest_parameter().is_none()); // 条件2: 非 Rest 参数
+                                    .and_then(|item| item.ok())
+                                    .is_some_and(|param| param.as_js_rest_parameter().is_none());
 
-                            Some(if is_valid {
+                            if is_valid {
                                 ReportType::PreferFor(node.clone())
                             } else {
                                 ReportType::PreferForOrIndex(node.clone())
-                            })
+                            }
                         });
                     }
                     _ => return None,
