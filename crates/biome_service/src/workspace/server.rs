@@ -615,7 +615,7 @@ impl WorkspaceServer {
             if vcs_settings.is_ignore_file(path) && is_in_project_path {
                 let content = self.fs.read_file_from_path(path)?;
                 let patterns = content.lines().collect::<Vec<_>>();
-                vcs_settings.store_ignore_matches(path.as_path(), patterns.as_slice())?;
+                vcs_settings.store_ignore_patterns(path.as_path(), patterns.as_slice())?;
             }
         }
 

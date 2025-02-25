@@ -115,7 +115,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     ctx.workspace.update_project_layout_for_paths(&paths);
     let result = ctx
         .workspace
-        .update_project_ignore_files(&ignore_paths, ctx.project_key);
+        .update_project_ignore_files(ctx.project_key, &ignore_paths);
 
     if let Err(error) = result {
         ctx.send_diagnostic(error);

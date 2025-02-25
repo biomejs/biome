@@ -341,12 +341,7 @@ impl DocumentFileSource {
     pub fn can_parse(path: &Utf8Path) -> bool {
         let file_source = DocumentFileSource::from(path);
         match file_source {
-            DocumentFileSource::Js(js) => match js.as_embedding_kind() {
-                EmbeddingKind::Astro => true,
-                EmbeddingKind::Vue => true,
-                EmbeddingKind::Svelte => true,
-                EmbeddingKind::None => true,
-            },
+            DocumentFileSource::Js(_) => true,
             DocumentFileSource::Css(_)
             | DocumentFileSource::Graphql(_)
             | DocumentFileSource::Json(_)

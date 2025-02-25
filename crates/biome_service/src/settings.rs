@@ -74,8 +74,6 @@ impl Settings {
         &mut self,
         configuration: Configuration,
         working_directory: Option<Utf8PathBuf>,
-        // vcs_path: Option<Utf8PathBuf>,
-        // gitignore_matches: &[String],
     ) -> Result<(), WorkspaceError> {
         // formatter part
         if let Some(formatter) = configuration.formatter {
@@ -639,7 +637,7 @@ impl VcsSettings {
     ) -> Result<(), WorkspaceError> {
         match self.client_kind {
             Some(VcsClientKind::Git) => {
-                let git_ignore = VcsIgnoredMatches::git_ignore(path, matches)?;
+                let git_ignore = VcsIgnoredMatches::git_ignore(path, patterns)?;
                 if let Some(ignore_matches) = self.ignore_matches.as_mut() {
                     ignore_matches.insert_git_match(git_ignore);
                 } else {
