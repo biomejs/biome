@@ -100,8 +100,8 @@ declare_lint_rule! {
     /// ### syntax
     ///
     /// The syntax to use:
-    /// - `explicit`: enforces the use of explicit object property syntax in every case
-    /// - `shorthand`: enforces the use of shorthand object property syntax when possible
+    /// - `explicit`: enforces the use of explicit object property syntax in every case.
+    /// - `shorthand`: enforces the use of shorthand object property syntax when possible.
     ///
     /// **Default:** `explicit`
     ///
@@ -120,6 +120,7 @@ declare_lint_rule! {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseConsistentObjectDefinitionOptions {
+    /// The preferred syntax to enforce.
     syntax: ObjectPropertySyntax,
 }
 
@@ -127,10 +128,10 @@ pub struct UseConsistentObjectDefinitionOptions {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub enum ObjectPropertySyntax {
-    /// {foo: foo}
+    /// `{foo: foo}`
     #[default]
     Explicit,
-    /// {foo}
+    /// `{foo}`
     Shorthand,
 }
 
@@ -172,7 +173,7 @@ impl Rule for UseConsistentObjectDefinition {
                     _ => return None,
                 };
                 let name_token = source.name().ok()?;
-                let _name_id = match name_token {
+                match name_token {
                     AnyJsObjectMemberName::JsLiteralMemberName(literal_token) => {
                         match options.syntax {
                             ObjectPropertySyntax::Shorthand => {
@@ -180,14 +181,12 @@ impl Rule for UseConsistentObjectDefinition {
                                 // We use `text_trimmed` to preserve quotes when comparing, we need this
                                 // because {foo: foo} can be shorthanded, but {"foo": foo} cannot
                                 if literal_token.value().ok()?.text_trimmed() == value_id.trim() {
-                                    return Some(());
+                                    Some(())
                                 } else {
-                                    return None;
+                                    None
                                 }
                             }
-                            ObjectPropertySyntax::Explicit => {
-                                return None;
-                            }
+                            ObjectPropertySyntax::Explicit => None,
                         }
                     }
                     AnyJsObjectMemberName::JsComputedMemberName(_computed_token) => {
@@ -196,15 +195,15 @@ impl Rule for UseConsistentObjectDefinition {
                         match reference_token {
                             AnyJsExpression::JsFunctionExpression(_function_token) => {
                                 match options.syntax {
-                                    ObjectPropertySyntax::Shorthand => return Some(()),
-                                    ObjectPropertySyntax::Explicit => return None,
+                                    ObjectPropertySyntax::Shorthand => Some(()),
+                                    ObjectPropertySyntax::Explicit => None,
                                 }
                             }
-                            _ => return None,
+                            _ => None,
                         }
                     }
-                    _ => return None,
-                };
+                    _ => None,
+                }
             }
             _ => None,
         }

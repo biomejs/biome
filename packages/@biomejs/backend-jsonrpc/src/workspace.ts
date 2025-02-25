@@ -2791,6 +2791,9 @@ export interface ConsistentMemberAccessibilityOptions {
 	accessibility?: Accessibility;
 }
 export interface UseConsistentObjectDefinitionOptions {
+	/**
+	 * The preferred syntax to enforce.
+	 */
 	syntax?: ObjectPropertySyntax;
 }
 export interface UtilityClassSortingOptions {

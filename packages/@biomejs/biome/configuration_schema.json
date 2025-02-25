@@ -2926,8 +2926,12 @@
 		},
 		"ObjectPropertySyntax": {
 			"oneOf": [
-				{ "description": "{foo: foo}", "type": "string", "enum": ["explicit"] },
-				{ "description": "{foo}", "type": "string", "enum": ["shorthand"] }
+				{
+					"description": "`{foo: foo}`",
+					"type": "string",
+					"enum": ["explicit"]
+				},
+				{ "description": "`{foo}`", "type": "string", "enum": ["shorthand"] }
 			]
 		},
 		"Options": {
@@ -4903,6 +4907,7 @@
 			"type": "object",
 			"properties": {
 				"syntax": {
+					"description": "The preferred syntax to enforce.",
 					"default": "explicit",
 					"allOf": [{ "$ref": "#/definitions/ObjectPropertySyntax" }]
 				}
