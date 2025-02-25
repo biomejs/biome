@@ -1462,6 +1462,10 @@ export interface Nursery {
 	 */
 	noDescendingSpecificity?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow destructuring props inside JSX components in Solid projects.
+	 */
+	noDestructuredProps?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow direct assignments to document.cookie.
 	 */
 	noDocumentCookie?: RuleConfiguration_for_Null;
@@ -3163,6 +3167,7 @@ export type Category =
 	| "lint/nursery/noPackagePrivateImports"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noProcessGlobal"
+	| "lint/nursery/noDestructuredProps"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
