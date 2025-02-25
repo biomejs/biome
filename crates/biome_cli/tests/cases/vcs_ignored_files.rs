@@ -84,10 +84,10 @@ fn ignore_vcs_os_independent_parse() {
     let result = run_cli_with_dyn_fs(
         Box::new(fs.create_os()),
         &mut console,
-        Args::from(["check", fs.cli_path()].as_slice()),
+        Args::from(["check", "--write", fs.cli_path()].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

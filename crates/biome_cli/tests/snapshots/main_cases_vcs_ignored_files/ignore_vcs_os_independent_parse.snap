@@ -41,55 +41,8 @@ foo.call(); bar.call();
 console.log('biome is cool');
 ```
 
-# Termination Message
-
-```block
-check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Some errors were emitted while running checks.
-  
-
-
-```
-
 # Emitted Messages
 
 ```block
-/biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-    1 1 │   {
-    2   │ - ········"vcs":·{
-    3   │ - ············"enabled":·true,
-    4   │ - ············"clientKind":·"git",
-    5   │ - ············"useIgnoreFile":·true
-    6   │ - ········}
-    7   │ - ····}
-      2 │ + → "vcs":·{
-      3 │ + → → "enabled":·true,
-      4 │ + → → "clientKind":·"git",
-      5 │ + → → "useIgnoreFile":·true
-      6 │ + → }
-      7 │ + }
-      8 │ + 
-  
-
-```
-
-```block
-/file1.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-    1   │ - blah.call();
-      1 │ + blah.call();
-      2 │ + 
-  
-
-```
-
-```block
-Checked 2 files in <TIME>. No fixes applied.
-Found 2 errors.
+Checked 2 files in <TIME>. Fixed 2 files.
 ```
