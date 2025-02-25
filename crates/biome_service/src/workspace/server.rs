@@ -44,11 +44,10 @@ use biome_project_layout::ProjectLayout;
 use biome_rowan::NodeCache;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
-use rayon::ThreadPoolBuilder;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex, Once};
+use std::sync::{Arc, Mutex};
 use tracing::{error, info, instrument, warn};
 
 pub(super) struct WorkspaceServer {
@@ -1340,9 +1339,9 @@ impl Workspace for WorkspaceServer {
 fn init_thread_pool() {
     #[cfg(not(target_family = "wasm"))]
     {
-        static INIT_ONCE: Once = Once::new();
+        static INIT_ONCE: std::sync::Once = std::sync::Once::new();
         INIT_ONCE.call_once(|| {
-            ThreadPoolBuilder::new()
+            rayon::ThreadPoolBuilder::new()
                 .thread_name(|index| format!("biome::workspace_worker_{index}"))
                 .build_global()
                 .expect("failed to initialize the global thread pool");
