@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: logicalAndCases2.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // case with a jump (i.e. a non-nullish prop)
 foo && foo.bar && foo.bar.baz.buzz && bing
 foo.bar && foo.bar.baz.buzz && bing
@@ -778,5 +779,3 @@ logicalAndCases2.js:60:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
   
 
 ```
-
-

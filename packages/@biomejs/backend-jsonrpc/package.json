@@ -1,6 +1,6 @@
 {
   "name": "@biomejs/backend-jsonrpc",
-  "version": "1.9.3",
+  "version": "1.9.4",
   "main": "dist/index.js",
   "scripts": {
     "test": "vitest",
@@ -36,10 +36,10 @@
   },
   "license": "MIT OR Apache-2.0",
   "devDependencies": {
-    "@types/node": "20.17.14",
+    "@types/node": "20.17.19",
     "typescript": "5.7.3",
-    "vite": "5.4.11",
-    "vitest": "1.6.0"
+    "vite": "5.4.14",
+    "vitest": "1.6.1"
   },
   "publishConfig": {
     "provenance": true

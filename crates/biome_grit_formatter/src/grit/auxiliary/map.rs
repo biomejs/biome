@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{write, FormatOptions};
+use biome_formatter::write;
 use biome_grit_syntax::{GritMap, GritMapFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritMap;

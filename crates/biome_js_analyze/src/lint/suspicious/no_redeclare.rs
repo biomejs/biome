@@ -2,6 +2,7 @@ use crate::services::semantic::SemanticServices;
 use biome_analyze::{context::RuleContext, Rule, RuleDiagnostic};
 use biome_analyze::{declare_lint_rule, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::Scope;
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{JsSyntaxKind, TextRange};
@@ -67,6 +68,7 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("no-redeclare"),
         ],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -143,7 +145,7 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                 if let Some(decl) = id_binding.declaration() {
                     // Ignore the function itself.
                     if !matches!(decl, AnyJsBindingDeclaration::JsFunctionExpression(_)) {
-                        let name = id_binding.text();
+                        let name = id_binding.to_trimmed_string();
                         declarations.insert(name, (id_binding.syntax().text_trimmed_range(), decl));
                     }
                 }
@@ -156,7 +158,7 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
         // We consider only binding of a declaration
         // This allows to skip function parameters, methods, ...
         if let Some(decl) = id_binding.declaration() {
-            let name = id_binding.text();
+            let name = id_binding.to_trimmed_string();
             if let Some((first_text_range, first_decl)) = declarations.get(&name) {
                 // Do not report:
                 // - mergeable declarations.

@@ -112,7 +112,7 @@ use crate::{Language, SyntaxNode, SyntaxSlot, SyntaxToken};
 ///
 /// // It replaced the number literal expression with a bogus node.
 /// assert_eq!(bogus.len(), 1);
-/// assert_eq!(bogus.pop().unwrap().text(), "5");
+/// assert_eq!(bogus.pop().unwrap().text_with_trivia(), "5");
 /// ```
 pub trait SyntaxRewriter {
     type Language: Language;

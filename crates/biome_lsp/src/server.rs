@@ -8,17 +8,17 @@ use crate::utils::{into_lsp_error, panic_to_lsp_error};
 use crate::{handlers, requests};
 use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
-use biome_fs::{ConfigName, FileSystem, OsFileSystem, ROME_JSON};
+use biome_fs::{ConfigName, FileSystem, OsFileSystem};
 use biome_service::workspace::{
-    RageEntry, RageParams, RageResult, RegisterProjectFolderParams, UnregisterProjectFolderParams,
+    CloseProjectParams, OpenProjectParams, RageEntry, RageParams, RageResult,
 };
-use biome_service::{workspace, DynRef, Workspace};
+use biome_service::{workspace, Workspace};
+use camino::Utf8PathBuf;
 use futures::future::ready;
 use futures::FutureExt;
 use rustc_hash::FxHashMap;
 use serde_json::json;
 use std::panic::RefUnwindSafe;
-use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use tokio::io::{AsyncRead, AsyncWrite};
@@ -27,10 +27,10 @@ use tokio::task::spawn_blocking;
 use tower_lsp::jsonrpc::Result as LspResult;
 use tower_lsp::{lsp_types::*, ClientSocket};
 use tower_lsp::{LanguageServer, LspService, Server};
-use tracing::{error, info, trace, warn};
+use tracing::{error, info, warn};
 
 pub struct LSPServer {
-    session: SessionHandle,
+    pub(crate) session: SessionHandle,
     /// Map of all sessions connected to the same [ServerFactory] as this [LSPServer].
     sessions: Sessions,
     /// If this is true the server will broadcast a shutdown signal once the
@@ -59,12 +59,6 @@ impl LSPServer {
     }
 
     async fn syntax_tree_request(&self, params: SyntaxTreePayload) -> LspResult<String> {
-        trace!(
-            "Calling method: {}\n with params: {:?}",
-            SYNTAX_TREE_REQUEST,
-            &params
-        );
-
         let url = params.text_document.uri;
         requests::syntax_tree::syntax_tree(&self.session, &url).map_err(into_lsp_error)
     }
@@ -139,29 +133,21 @@ impl LSPServer {
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::String(format!(
                                 "{}/biome.json",
-                                base_path.display()
+                                base_path.as_str()
                             )),
                             kind: Some(WatchKind::all()),
                         },
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::String(format!(
                                 "{}/biome.jsonc",
-                                base_path.display()
+                                base_path.as_str()
                             )),
                             kind: Some(WatchKind::all()),
                         },
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::String(format!(
                                 "{}/.editorconfig",
-                                base_path.display()
-                            )),
-                            kind: Some(WatchKind::all()),
-                        },
-                        // TODO: Biome 2.0 remove it
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(format!(
-                                "{}/rome.json",
-                                base_path.display()
+                                base_path.as_str()
                             )),
                             kind: Some(WatchKind::all()),
                         }
@@ -242,7 +228,7 @@ impl LanguageServer for LSPServer {
     // The `root_path` field is deprecated, but we still read it so we can print a warning about it
     #[expect(deprecated)]
     #[tracing::instrument(
-        level = "trace",
+        level = "debug",
         skip_all,
         fields(
             root_uri = params.root_uri.as_ref().map(display),
@@ -283,7 +269,7 @@ impl LanguageServer for LSPServer {
         Ok(init)
     }
 
-    #[tracing::instrument(level = "trace", skip(self))]
+    #[tracing::instrument(level = "debug", skip(self))]
     async fn initialized(&self, params: InitializedParams) {
         let _ = params;
 
@@ -292,7 +278,6 @@ impl LanguageServer for LSPServer {
         futures::join!(
             self.session.load_extension_settings(),
             self.session.load_workspace_settings(),
-            self.session.load_manifest()
         );
 
         let msg = format!("Server initialized with PID: {}", std::process::id());
@@ -311,7 +296,7 @@ impl LanguageServer for LSPServer {
         Ok(())
     }
 
-    #[tracing::instrument(level = "trace", skip(self))]
+    #[tracing::instrument(level = "debug", skip(self))]
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
         let _ = params;
         self.session.load_workspace_settings().await;
@@ -320,7 +305,7 @@ impl LanguageServer for LSPServer {
         self.session.update_all_diagnostics().await;
     }
 
-    #[tracing::instrument(level = "trace", skip(self))]
+    #[tracing::instrument(level = "debug", skip(self))]
     async fn did_change_watched_files(&self, params: DidChangeWatchedFilesParams) {
         let file_paths = params
             .changes
@@ -331,15 +316,13 @@ impl LanguageServer for LSPServer {
                 Ok(file_path) => {
                     let base_path = self.session.base_path();
                     if let Some(base_path) = base_path {
-                        let possible_rome_json = file_path.strip_prefix(&base_path);
-                        if let Ok(watched_file) = possible_rome_json {
-                            if watched_file.display().to_string() == ROME_JSON
-                                || ConfigName::file_names()
-                                    .contains(&&*watched_file.display().to_string())
+                        let possible_biome_json = file_path.strip_prefix(&base_path);
+                        if let Ok(watched_file) = possible_biome_json {
+                            if ConfigName::file_names()
+                                .contains(&&*watched_file.display().to_string())
                                 || watched_file.ends_with(".editorconfig")
                             {
                                 self.session.load_workspace_settings().await;
-                                self.session.load_manifest().await;
                                 self.setup_capabilities().await;
                                 self.session.update_all_diagnostics().await;
                                 // for now we are only interested to the configuration file,
@@ -377,11 +360,16 @@ impl LanguageServer for LSPServer {
 
     async fn did_change_workspace_folders(&self, params: DidChangeWorkspaceFoldersParams) {
         for removed in &params.event.removed {
-            if let Ok(project_path) = self.session.file_path(&removed.uri) {
+            if let Some(project_key) = self
+                .session
+                .file_path(&removed.uri)
+                .ok()
+                .and_then(|project_path| self.session.project_for_path(&project_path))
+            {
                 let result = self
                     .session
                     .workspace
-                    .unregister_project_folder(UnregisterProjectFolderParams { path: project_path })
+                    .close_project(CloseProjectParams { project_key })
                     .map_err(into_lsp_error);
 
                 if let Err(err) = result {
@@ -399,18 +387,30 @@ impl LanguageServer for LSPServer {
                 let result = self
                     .session
                     .workspace
-                    .register_project_folder(RegisterProjectFolderParams {
-                        path: Some(project_path.to_path_buf()),
-                        set_as_current_workspace: true,
+                    .open_project(OpenProjectParams {
+                        path: project_path.clone(),
+                        open_uninitialized: true,
                     })
                     .map_err(into_lsp_error);
 
-                if let Err(err) = result {
-                    error!("Failed to add project to the workspace: {}", err);
-                    self.session
-                        .client
-                        .log_message(MessageType::ERROR, err)
-                        .await;
+                match result {
+                    Ok(project_key) => {
+                        self.session
+                            .insert_project(project_path.clone(), project_key);
+
+                        self.session
+                            .scan_project_folder(project_key, project_path)
+                            .await;
+
+                        self.session.update_all_diagnostics().await;
+                    }
+                    Err(err) => {
+                        error!("Failed to add project to the workspace: {err}");
+                        self.session
+                            .client
+                            .log_message(MessageType::ERROR, err)
+                            .await;
+                    }
                 }
             }
         }
@@ -567,31 +567,26 @@ impl ServerFactory {
         }
     }
 
-    pub fn create(&self, config_path: Option<PathBuf>) -> ServerConnection {
-        self.create_with_fs(config_path, DynRef::Owned(Box::<OsFileSystem>::default()))
+    pub fn create(&self, config_path: Option<Utf8PathBuf>) -> ServerConnection {
+        self.create_with_fs(config_path, Box::new(OsFileSystem::default()))
     }
 
     /// Create a new [ServerConnection] from this factory
     pub fn create_with_fs(
         &self,
-        config_path: Option<PathBuf>,
-        fs: DynRef<'static, dyn FileSystem>,
+        config_path: Option<Utf8PathBuf>,
+        fs: Box<dyn FileSystem>,
     ) -> ServerConnection {
         let workspace = self
             .workspace
             .clone()
-            .unwrap_or_else(workspace::server_sync);
+            .unwrap_or_else(|| workspace::server_sync(fs));
 
         let session_key = SessionKey(self.next_session_key.fetch_add(1, Ordering::Relaxed));
 
         let mut builder = LspService::build(move |client| {
-            let mut session = Session::new(
-                session_key,
-                client,
-                workspace,
-                self.cancellation.clone(),
-                fs,
-            );
+            let mut session =
+                Session::new(session_key, client, workspace, self.cancellation.clone());
             if let Some(path) = config_path {
                 session.set_config_path(path);
             }
@@ -622,14 +617,15 @@ impl ServerFactory {
         workspace_method!(builder, file_features);
         workspace_method!(builder, is_path_ignored);
         workspace_method!(builder, update_settings);
-        workspace_method!(builder, register_project_folder);
-        workspace_method!(builder, unregister_project_folder);
+        workspace_method!(builder, open_project);
+        workspace_method!(builder, scan_project_folder);
+        workspace_method!(builder, close_project);
         workspace_method!(builder, open_file);
-        workspace_method!(builder, set_manifest_for_project);
         workspace_method!(builder, get_syntax_tree);
         workspace_method!(builder, get_control_flow_graph);
         workspace_method!(builder, get_formatter_ir);
         workspace_method!(builder, change_file);
+        workspace_method!(builder, check_file_size);
         workspace_method!(builder, get_file_content);
         workspace_method!(builder, close_file);
         workspace_method!(builder, pull_diagnostics);
@@ -639,7 +635,9 @@ impl ServerFactory {
         workspace_method!(builder, format_on_type);
         workspace_method!(builder, fix_file);
         workspace_method!(builder, rename);
-        workspace_method!(builder, organize_imports);
+        workspace_method!(builder, parse_pattern);
+        workspace_method!(builder, search_pattern);
+        workspace_method!(builder, drop_pattern);
 
         let (service, socket) = builder.finish();
         ServerConnection { socket, service }

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -23,7 +24,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:3:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
     1 │ <>
     2 │ 	{/* invalid */}
@@ -40,7 +41,7 @@ invalid.jsx:3:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━
 ```
 invalid.jsx:4:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
     2 │ 	{/* invalid */}
     3 │ 	<iframe />
@@ -57,7 +58,7 @@ invalid.jsx:4:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━
 ```
 invalid.jsx:5:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
     3 │ 	<iframe />
     4 │ 	<iframe></iframe>
@@ -74,7 +75,7 @@ invalid.jsx:5:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━
 ```
 invalid.jsx:6:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
     4 │ 	<iframe></iframe>
     5 │ 	<iframe title="" />
@@ -91,7 +92,7 @@ invalid.jsx:6:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━
 ```
 invalid.jsx:7:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
     5 │ 	<iframe title="" />
     6 │ 	<iframe title={""} />
@@ -108,7 +109,7 @@ invalid.jsx:7:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━
 ```
 invalid.jsx:8:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
      6 │ 	<iframe title={""} />
      7 │ 	<iframe title={``} />
@@ -125,7 +126,7 @@ invalid.jsx:8:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━
 ```
 invalid.jsx:9:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
      7 │ 	<iframe title={``} />
      8 │ 	<iframe title={undefined} />
@@ -142,7 +143,7 @@ invalid.jsx:9:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━
 ```
 invalid.jsx:10:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
      8 │ 	<iframe title={undefined} />
      9 │ 	<iframe title={false} />
@@ -159,7 +160,7 @@ invalid.jsx:10:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━�
 ```
 invalid.jsx:11:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a title attribute when using iframe elements.
+  × Provide a title attribute when using iframe elements.
   
      9 │ 	<iframe title={false} />
     10 │ 	<iframe title={true} />
@@ -172,5 +173,3 @@ invalid.jsx:11:2 lint/a11y/useIframeTitle ━━━━━━━━━━━━�
   
 
 ```
-
-

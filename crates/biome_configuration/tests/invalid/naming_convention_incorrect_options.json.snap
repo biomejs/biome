@@ -1,0 +1,20 @@
+---
+source: crates/biome_configuration/tests/spec_tests.rs
+expression: naming_convention_incorrect_options.json
+---
+naming_convention_incorrect_options.json:9:7 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `strictCaseTYPO`.
+  
+     7 │ 					"level": "error",
+     8 │ 					"options": {
+   > 9 │ 						"strictCaseTYPO": {}
+       │ 						^^^^^^^^^^^^^^^^
+    10 │ 					}
+    11 │ 				}
+  
+  i Known keys:
+  
+  - strictCase
+  - requireAscii
+  - conventions

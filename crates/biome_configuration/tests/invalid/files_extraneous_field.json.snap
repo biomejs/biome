@@ -1,0 +1,21 @@
+---
+source: crates/biome_configuration/tests/spec_tests.rs
+assertion_line: 58
+expression: files_extraneous_field.json
+---
+files_extraneous_field.json:3:3 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `foo`.
+  
+    1 │ {
+    2 │ 	"files": {
+  > 3 │ 		"foo": "bar"
+      │ 		^^^^^
+    4 │ 	}
+    5 │ }
+  
+  i Known keys:
+  
+  - maxSize
+  - ignoreUnknown
+  - includes

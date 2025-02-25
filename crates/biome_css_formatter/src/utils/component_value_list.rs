@@ -178,8 +178,11 @@ where
     let is_grid_property = list
         .parent::<CssGenericProperty>()
         .and_then(|parent| parent.name().ok())
-        .and_then(|name| name.as_css_identifier().map(|name| name.text()))
-        .map_or(false, |name| {
+        .and_then(|name| {
+            name.as_css_identifier()
+                .map(|name| name.to_trimmed_string())
+        })
+        .is_some_and(|name| {
             let name = name.to_ascii_lowercase_cow();
 
             name.starts_with("grid-template") || name == "grid"

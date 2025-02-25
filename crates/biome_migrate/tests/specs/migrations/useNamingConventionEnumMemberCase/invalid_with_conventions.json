@@ -1,0 +1,15 @@
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "useNamingConvention": {
+          "level": "on",
+          "options": {
+            "enumMemberCase": "camelCase",
+            "conventions": [{ "selector": { "kind": "let" }, "formats": ["camelCase"] }]
+          }
+        }
+      }
+    }
+  }
+}

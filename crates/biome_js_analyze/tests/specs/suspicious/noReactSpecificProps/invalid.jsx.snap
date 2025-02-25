@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -19,7 +20,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:6 lint/suspicious/noReactSpecificProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This JSX attribute is specific to React.
+  i This JSX attribute is specific to React.
   
     1 │ //Case with className
   > 2 │ <div className="greeting">Hello world!</div>;
@@ -49,7 +50,7 @@ invalid.jsx:2:6 lint/suspicious/noReactSpecificProps  FIXABLE  ━━━━━�
 ```
 invalid.jsx:5:6 lint/suspicious/noReactSpecificProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This JSX attribute is specific to React.
+  i This JSX attribute is specific to React.
   
     4 │ //Case with className with expression
   > 5 │ <div className={"greeting"}>Hello world!</div>;
@@ -80,7 +81,7 @@ invalid.jsx:5:6 lint/suspicious/noReactSpecificProps  FIXABLE  ━━━━━�
 ```
 invalid.jsx:8:6 lint/suspicious/noReactSpecificProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This JSX attribute is specific to React.
+  i This JSX attribute is specific to React.
   
     7 │ //Case with htmlFor
   > 8 │ <div htmlFor="greeting">Hello world!</div>;

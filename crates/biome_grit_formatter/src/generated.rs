@@ -559,6 +559,44 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritDoubleLiteral {
         )
     }
 }
+impl FormatRule<biome_grit_syntax::GritEngineName>
+    for crate::grit::auxiliary::engine_name::FormatGritEngineName
+{
+    type Context = GritFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_grit_syntax::GritEngineName,
+        f: &mut GritFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_grit_syntax::GritEngineName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<GritFormatContext> for biome_grit_syntax::GritEngineName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_grit_syntax::GritEngineName,
+        crate::grit::auxiliary::engine_name::FormatGritEngineName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::grit::auxiliary::engine_name::FormatGritEngineName::default(),
+        )
+    }
+}
+impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritEngineName {
+    type Format = FormatOwnedWithRule<
+        biome_grit_syntax::GritEngineName,
+        crate::grit::auxiliary::engine_name::FormatGritEngineName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::grit::auxiliary::engine_name::FormatGritEngineName::default(),
+        )
+    }
+}
 impl FormatRule<biome_grit_syntax::GritEvery> for crate::grit::auxiliary::every::FormatGritEvery {
     type Context = GritFormatContext;
     #[inline(always)]
@@ -697,6 +735,51 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritIntLiteral {
             self,
             crate::grit::value::int_literal::FormatGritIntLiteral::default(),
         )
+    }
+}
+impl FormatRule<biome_grit_syntax::GritJavascriptBodyWrapper>
+    for crate::grit::auxiliary::javascript_body_wrapper::FormatGritJavascriptBodyWrapper
+{
+    type Context = GritFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_grit_syntax::GritJavascriptBodyWrapper,
+        f: &mut GritFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_grit_syntax::GritJavascriptBodyWrapper>::fmt(self, node, f)
+    }
+}
+impl AsFormat<GritFormatContext> for biome_grit_syntax::GritJavascriptBodyWrapper {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_grit_syntax::GritJavascriptBodyWrapper,
+        crate::grit::auxiliary::javascript_body_wrapper::FormatGritJavascriptBodyWrapper,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: grit :: auxiliary :: javascript_body_wrapper :: FormatGritJavascriptBodyWrapper :: default ())
+    }
+}
+impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritJavascriptBodyWrapper {
+    type Format = FormatOwnedWithRule<
+        biome_grit_syntax::GritJavascriptBodyWrapper,
+        crate::grit::auxiliary::javascript_body_wrapper::FormatGritJavascriptBodyWrapper,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: grit :: auxiliary :: javascript_body_wrapper :: FormatGritJavascriptBodyWrapper :: default ())
+    }
+}
+impl FormatRule < biome_grit_syntax :: GritJavascriptFunctionDefinition > for crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition { type Context = GritFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_grit_syntax :: GritJavascriptFunctionDefinition , f : & mut GritFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_grit_syntax :: GritJavascriptFunctionDefinition > :: fmt (self , node , f) } }
+impl AsFormat<GritFormatContext> for biome_grit_syntax::GritJavascriptFunctionDefinition {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_grit_syntax :: GritJavascriptFunctionDefinition , crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition :: default ())
+    }
+}
+impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritJavascriptFunctionDefinition {
+    type Format = FormatOwnedWithRule < biome_grit_syntax :: GritJavascriptFunctionDefinition , crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: grit :: declarations :: javascript_function_definition :: FormatGritJavascriptFunctionDefinition :: default ())
     }
 }
 impl FormatRule<biome_grit_syntax::GritLanguageDeclaration>
@@ -1635,38 +1718,6 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternContains {
         )
     }
 }
-impl FormatRule<biome_grit_syntax::GritPatternContainsUntilClause>
-    for crate::grit::patterns::pattern_contains_until_clause::FormatGritPatternContainsUntilClause
-{
-    type Context = GritFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_grit_syntax::GritPatternContainsUntilClause,
-        f: &mut GritFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_grit_syntax::GritPatternContainsUntilClause>::fmt(self, node, f)
-    }
-}
-impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternContainsUntilClause {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_grit_syntax::GritPatternContainsUntilClause,
-        crate::grit::patterns::pattern_contains_until_clause::FormatGritPatternContainsUntilClause,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule :: new (self , crate :: grit :: patterns :: pattern_contains_until_clause :: FormatGritPatternContainsUntilClause :: default ())
-    }
-}
-impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternContainsUntilClause {
-    type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternContainsUntilClause,
-        crate::grit::patterns::pattern_contains_until_clause::FormatGritPatternContainsUntilClause,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule :: new (self , crate :: grit :: patterns :: pattern_contains_until_clause :: FormatGritPatternContainsUntilClause :: default ())
-    }
-}
 impl FormatRule<biome_grit_syntax::GritPatternDefinition>
     for crate::grit::patterns::pattern_definition::FormatGritPatternDefinition
 {
@@ -2038,6 +2089,44 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternOrElse {
         FormatOwnedWithRule::new(
             self,
             crate::grit::patterns::pattern_or_else::FormatGritPatternOrElse::default(),
+        )
+    }
+}
+impl FormatRule<biome_grit_syntax::GritPatternUntilClause>
+    for crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause
+{
+    type Context = GritFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_grit_syntax::GritPatternUntilClause,
+        f: &mut GritFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_grit_syntax::GritPatternUntilClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternUntilClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_grit_syntax::GritPatternUntilClause,
+        crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause::default(),
+        )
+    }
+}
+impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternUntilClause {
+    type Format = FormatOwnedWithRule<
+        biome_grit_syntax::GritPatternUntilClause,
+        crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::grit::patterns::pattern_until_clause::FormatGritPatternUntilClause::default(),
         )
     }
 }
@@ -3819,6 +3908,44 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusLanguageFlavo
         FormatOwnedWithRule :: new (self , crate :: grit :: bogus :: bogus_language_flavor_kind :: FormatGritBogusLanguageFlavorKind :: default ())
     }
 }
+impl FormatRule<biome_grit_syntax::GritBogusLanguageName>
+    for crate::grit::bogus::bogus_language_name::FormatGritBogusLanguageName
+{
+    type Context = GritFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_grit_syntax::GritBogusLanguageName,
+        f: &mut GritFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_grit_syntax::GritBogusLanguageName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<GritFormatContext> for biome_grit_syntax::GritBogusLanguageName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_grit_syntax::GritBogusLanguageName,
+        crate::grit::bogus::bogus_language_name::FormatGritBogusLanguageName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::grit::bogus::bogus_language_name::FormatGritBogusLanguageName::default(),
+        )
+    }
+}
+impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritBogusLanguageName {
+    type Format = FormatOwnedWithRule<
+        biome_grit_syntax::GritBogusLanguageName,
+        crate::grit::bogus::bogus_language_name::FormatGritBogusLanguageName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::grit::bogus::bogus_language_name::FormatGritBogusLanguageName::default(),
+        )
+    }
+}
 impl FormatRule<biome_grit_syntax::GritBogusLiteral>
     for crate::grit::bogus::bogus_literal::FormatGritBogusLiteral
 {
@@ -4169,6 +4296,31 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageFlavorK
         FormatOwnedWithRule::new(
             self,
             crate::grit::any::language_flavor_kind::FormatAnyGritLanguageFlavorKind::default(),
+        )
+    }
+}
+impl AsFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_grit_syntax::AnyGritLanguageName,
+        crate::grit::any::language_name::FormatAnyGritLanguageName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::grit::any::language_name::FormatAnyGritLanguageName::default(),
+        )
+    }
+}
+impl IntoFormat<GritFormatContext> for biome_grit_syntax::AnyGritLanguageName {
+    type Format = FormatOwnedWithRule<
+        biome_grit_syntax::AnyGritLanguageName,
+        crate::grit::any::language_name::FormatAnyGritLanguageName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::grit::any::language_name::FormatAnyGritLanguageName::default(),
         )
     }
 }

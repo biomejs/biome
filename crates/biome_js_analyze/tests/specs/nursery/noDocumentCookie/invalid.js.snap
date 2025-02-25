@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 document.cookie = "foo=bar";
 document.cookie += ";foo=bar"
 
@@ -33,7 +34,7 @@ function document_is_global3(){
 ```
 invalid.js:1:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Direct assigning to document.cookie is not recommended.
+  i Direct assigning to document.cookie is not recommended.
   
   > 1 │ document.cookie = "foo=bar";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -48,7 +49,7 @@ invalid.js:1:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
 ```
 invalid.js:2:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Direct assigning to document.cookie is not recommended.
+  i Direct assigning to document.cookie is not recommended.
   
     1 │ document.cookie = "foo=bar";
   > 2 │ document.cookie += ";foo=bar"
@@ -64,7 +65,7 @@ invalid.js:2:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
 ```
 invalid.js:4:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Direct assigning to document.cookie is not recommended.
+  i Direct assigning to document.cookie is not recommended.
   
     2 │ document.cookie += ";foo=bar"
     3 │ 
@@ -81,7 +82,7 @@ invalid.js:4:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
 ```
 invalid.js:5:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Direct assigning to document.cookie is not recommended.
+  i Direct assigning to document.cookie is not recommended.
   
     4 │ window.document.cookie = "foo=bar";
   > 5 │ globalThis.window.document.cookie = "foo=bar";
@@ -97,7 +98,7 @@ invalid.js:5:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
 ```
 invalid.js:7:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Direct assigning to document.cookie is not recommended.
+  i Direct assigning to document.cookie is not recommended.
   
     5 │ globalThis.window.document.cookie = "foo=bar";
     6 │ 
@@ -114,7 +115,7 @@ invalid.js:7:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
 ```
 invalid.js:11:5 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Direct assigning to document.cookie is not recommended.
+  i Direct assigning to document.cookie is not recommended.
   
      9 │ function document_is_global1(){
     10 │     const doc = document;
@@ -131,7 +132,7 @@ invalid.js:11:5 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
 ```
 invalid.js:17:5 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Direct assigning to document.cookie is not recommended.
+  i Direct assigning to document.cookie is not recommended.
   
     15 │     const foo = window.document;
     16 │     const bar = foo;
@@ -148,7 +149,7 @@ invalid.js:17:5 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
 ```
 invalid.js:22:5 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Direct assigning to document.cookie is not recommended.
+  i Direct assigning to document.cookie is not recommended.
   
     20 │ const global_doc = globalThis.document;
     21 │ function document_is_global3(){

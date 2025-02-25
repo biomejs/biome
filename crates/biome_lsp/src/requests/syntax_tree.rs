@@ -1,5 +1,4 @@
-use crate::session::Session;
-use anyhow::Result;
+use crate::{diagnostics::LspError, session::Session};
 use biome_service::workspace::GetSyntaxTreeParams;
 use serde::{Deserialize, Serialize};
 use tower_lsp::lsp_types::{TextDocumentIdentifier, Url};
@@ -13,11 +12,13 @@ pub struct SyntaxTreePayload {
     pub text_document: TextDocumentIdentifier,
 }
 
-pub(crate) fn syntax_tree(session: &Session, url: &Url) -> Result<String> {
+pub(crate) fn syntax_tree(session: &Session, url: &Url) -> Result<String, LspError> {
     info!("Showing syntax tree");
-    let biome_path = session.file_path(url)?;
-    let syntax_tree = session
-        .workspace
-        .get_syntax_tree(GetSyntaxTreeParams { path: biome_path })?;
+    let path = session.file_path(url)?;
+    let doc = session.document(url)?;
+    let syntax_tree = session.workspace.get_syntax_tree(GetSyntaxTreeParams {
+        project_key: doc.project_key,
+        path,
+    })?;
     Ok(syntax_tree.ast)
 }

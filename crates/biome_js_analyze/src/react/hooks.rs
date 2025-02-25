@@ -2,7 +2,8 @@ use crate::react::{is_react_call_api, ReactLibrary};
 
 use biome_console::markup;
 use biome_deserialize::{
-    DeserializableTypes, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    DeserializableTypes, DeserializableValue, DeserializationContext, DeserializationDiagnostic,
+    DeserializationVisitor,
 };
 use biome_diagnostics::Severity;
 use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
@@ -319,11 +320,11 @@ impl JsonSchema for StableHookResult {
 
 impl biome_deserialize::Deserializable for StableHookResult {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(StableResultVisitor, name, diagnostics)
+        value.deserialize(ctx, StableResultVisitor, name)
     }
 }
 
@@ -337,14 +338,14 @@ impl DeserializationVisitor for StableResultVisitor {
 
     fn visit_array(
         self,
+        ctx: &mut impl DeserializationContext,
         items: impl Iterator<Item = Option<impl DeserializableValue>>,
         _range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         let indices: Vec<u8> = items
             .filter_map(|value| {
-                DeserializableValue::deserialize(&value?, StableResultIndexVisitor, "", diagnostics)
+                DeserializableValue::deserialize(&value?, ctx, StableResultIndexVisitor, "")
             })
             .collect();
 
@@ -357,15 +358,15 @@ impl DeserializationVisitor for StableResultVisitor {
 
     fn visit_bool(
         self,
+        ctx: &mut impl DeserializationContext,
         value: bool,
         range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         match value {
             true => Some(StableHookResult::Identity),
             false => {
-                diagnostics.push(
+                ctx.report(
                     DeserializationDiagnostic::new(
                         markup! { "This hook is configured to not have a stable result" },
                     )
@@ -379,19 +380,13 @@ impl DeserializationVisitor for StableResultVisitor {
 
     fn visit_number(
         self,
+        ctx: &mut impl DeserializationContext,
         value: biome_deserialize::TextNumber,
         range: TextRange,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
-        StableResultIndexVisitor::visit_number(
-            StableResultIndexVisitor,
-            value,
-            range,
-            name,
-            diagnostics,
-        )
-        .map(|index| StableHookResult::Indices(vec![index]))
+        StableResultIndexVisitor::visit_number(StableResultIndexVisitor, ctx, value, range, name)
+            .map(|index| StableHookResult::Indices(vec![index]))
     }
 }
 
@@ -403,15 +398,15 @@ impl DeserializationVisitor for StableResultIndexVisitor {
 
     fn visit_number(
         self,
+        ctx: &mut impl DeserializationContext,
         value: biome_deserialize::TextNumber,
         range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         match value.parse::<u8>() {
             Ok(index) => Some(index),
             Err(_) => {
-                diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+                ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
                     0, 255, range,
                 ));
                 None
@@ -452,7 +447,7 @@ pub fn is_binding_react_stable(
     let Some(callee) = declarator
         .initializer()
         .and_then(|initializer| initializer.expression().ok())
-        .and_then(|initializer| initializer.as_js_call_expression()?.callee().ok())
+        .and_then(|initializer| unwrap_to_call_expression(initializer)?.callee().ok())
     else {
         return false;
     };
@@ -477,6 +472,32 @@ pub fn is_binding_react_stable(
             (_, _) => false,
         }
     })
+}
+
+/// Unwrap the expression to a call expression without changing the result of the expression,
+/// such as type assertions.
+fn unwrap_to_call_expression(mut expression: AnyJsExpression) -> Option<JsCallExpression> {
+    loop {
+        match expression {
+            AnyJsExpression::JsCallExpression(expr) => return Some(expr),
+            AnyJsExpression::JsParenthesizedExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            AnyJsExpression::JsSequenceExpression(expr) => {
+                expression = expr.right().ok()?;
+            }
+            AnyJsExpression::TsAsExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            AnyJsExpression::TsSatisfiesExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            AnyJsExpression::TsNonNullAssertionExpression(expr) => {
+                expression = expr.expression().ok()?;
+            }
+            _ => return None,
+        }
+    }
 }
 
 #[cfg(test)]

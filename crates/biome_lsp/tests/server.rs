@@ -7,8 +7,9 @@ use biome_lsp::LSPServer;
 use biome_lsp::ServerFactory;
 use biome_lsp::WorkspaceSettings;
 use biome_service::workspace::GetSyntaxTreeResult;
+use biome_service::workspace::OpenProjectParams;
 use biome_service::workspace::{GetFileContentParams, GetSyntaxTreeParams};
-use biome_service::DynRef;
+use camino::Utf8PathBuf;
 use futures::channel::mpsc::{channel, Sender};
 use futures::Sink;
 use futures::SinkExt;
@@ -491,12 +492,27 @@ async fn document_lifecycle() -> Result<()> {
         )
         .await?;
 
+    // `open_project()` will return an existing key if called with a path
+    // for an existing project.
+    let project_key = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: BiomePath::new(""),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+
     let res: GetSyntaxTreeResult = server
         .request(
             "biome/get_syntax_tree",
             "get_syntax_tree",
             GetSyntaxTreeParams {
-                path: BiomePath::new(url!("document.js").to_file_path().unwrap()),
+                project_key,
+                path: BiomePath::try_from(url!("document.js").to_file_path().unwrap()).unwrap(),
             },
         )
         .await?
@@ -957,22 +973,72 @@ async fn pull_quick_fixes() -> Result<()> {
         }],
     );
 
-    let expected_suppression_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
-        title: String::from("Suppress rule lint/suspicious/noCompareNegZero"),
-        kind: Some(lsp::CodeActionKind::new("quickfix.suppressRule.biome")),
-        diagnostics: Some(vec![fixable_diagnostic(0)?]),
-        edit: Some(lsp::WorkspaceEdit {
-            changes: Some(suppression_changes),
-            document_changes: None,
-            change_annotations: None,
-        }),
-        command: None,
-        is_preferred: None,
-        disabled: None,
-        data: None,
-    });
+    let expected_inline_suppression_action =
+        lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+            title: String::from("Suppress rule lint/suspicious/noCompareNegZero"),
+            kind: Some(lsp::CodeActionKind::new(
+                "quickfix.suppressRule.inline.biome",
+            )),
+            diagnostics: Some(vec![fixable_diagnostic(0)?]),
+            edit: Some(lsp::WorkspaceEdit {
+                changes: Some(suppression_changes),
+                document_changes: None,
+                change_annotations: None,
+            }),
+            command: None,
+            is_preferred: None,
+            disabled: None,
+            data: None,
+        });
 
-    assert_eq!(res, vec![expected_suppression_action, expected_code_action]);
+    let mut top_level_changes = HashMap::default();
+    top_level_changes.insert(
+        url!("document.js"),
+        vec![TextEdit {
+            range: Range {
+                start: Position {
+                    line: 0,
+                    character: 0,
+                },
+                end: Position {
+                    line: 0,
+                    character: 0,
+                },
+            },
+            new_text: String::from(
+                "/** biome-ignore-all lint/suspicious/noCompareNegZero: <explanation> */\n\n",
+            ),
+        }],
+    );
+
+    let expected_top_level_suppression_action =
+        lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+            title: String::from(
+                "Suppress rule lint/suspicious/noCompareNegZero for the whole file.",
+            ),
+            kind: Some(lsp::CodeActionKind::new(
+                "quickfix.suppressRule.topLevel.biome",
+            )),
+            diagnostics: Some(vec![fixable_diagnostic(0)?]),
+            edit: Some(lsp::WorkspaceEdit {
+                changes: Some(top_level_changes),
+                document_changes: None,
+                change_annotations: None,
+            }),
+            command: None,
+            is_preferred: None,
+            disabled: None,
+            data: None,
+        });
+
+    assert_eq!(
+        res,
+        vec![
+            expected_top_level_suppression_action,
+            expected_inline_suppression_action,
+            expected_code_action
+        ]
+    );
 
     server.close_document().await?;
 
@@ -1287,24 +1353,69 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
         }],
     );
 
-    let expected_suppression_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
-        title: String::from("Suppress rule lint/suspicious/noDoubleEquals"),
-        kind: Some(lsp::CodeActionKind::new("quickfix.suppressRule.biome")),
-        diagnostics: Some(vec![unsafe_fixable]),
-        edit: Some(lsp::WorkspaceEdit {
-            changes: Some(suppression_changes),
-            document_changes: None,
-            change_annotations: None,
-        }),
-        command: None,
-        is_preferred: None,
-        disabled: None,
-        data: None,
-    });
+    let expected_inline_suppression_action =
+        lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+            title: String::from("Suppress rule lint/suspicious/noDoubleEquals"),
+            kind: Some(lsp::CodeActionKind::new(
+                "quickfix.suppressRule.inline.biome",
+            )),
+            diagnostics: Some(vec![unsafe_fixable.clone()]),
+            edit: Some(lsp::WorkspaceEdit {
+                changes: Some(suppression_changes),
+                document_changes: None,
+                change_annotations: None,
+            }),
+            command: None,
+            is_preferred: None,
+            disabled: None,
+            data: None,
+        });
+
+    let mut top_level_changes = HashMap::default();
+    top_level_changes.insert(
+        url!("document.js"),
+        vec![TextEdit {
+            range: Range {
+                start: Position {
+                    line: 0,
+                    character: 0,
+                },
+                end: Position {
+                    line: 0,
+                    character: 0,
+                },
+            },
+            new_text: String::from(
+                "/** biome-ignore-all lint/suspicious/noDoubleEquals: <explanation> */\n\n",
+            ),
+        }],
+    );
+
+    let expected_toplevel_suppression_action =
+        lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+            title: String::from("Suppress rule lint/suspicious/noDoubleEquals for the whole file."),
+            kind: Some(lsp::CodeActionKind::new(
+                "quickfix.suppressRule.topLevel.biome",
+            )),
+            diagnostics: Some(vec![unsafe_fixable]),
+            edit: Some(lsp::WorkspaceEdit {
+                changes: Some(top_level_changes),
+                document_changes: None,
+                change_annotations: None,
+            }),
+            command: None,
+            is_preferred: None,
+            disabled: None,
+            data: None,
+        });
 
     assert_eq!(
         res,
-        vec![expected_suppression_action, expected_code_action,]
+        vec![
+            expected_toplevel_suppression_action,
+            expected_inline_suppression_action,
+            expected_code_action,
+        ]
     );
 
     server.close_document().await?;
@@ -1395,10 +1506,11 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
         }
     }"#;
 
-    fs.insert(url!("biome.json").to_file_path().unwrap(), config);
-    let (service, client) = factory
-        .create_with_fs(None, DynRef::Owned(Box::new(fs)))
-        .into_inner();
+    fs.insert(
+        Utf8PathBuf::from_path_buf(url!("biome.json").to_file_path().unwrap()).unwrap(),
+        config,
+    );
+    let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
 
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -1737,7 +1849,7 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
     let mut fs = MemoryFileSystem::default();
     let config = r#"{
     "$schema": "https://biomejs.dev/schemas/1.7.3/schema.json",
-    "organizeImports": { "enabled": false },
+    "assist": { "enabled": false },
     "linter": {
         "enabled": true,
         "rules": {
@@ -1749,7 +1861,7 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
     },
     "overrides": [
         {
-            "include": ["*.ts", "*.tsx"],
+            "includes": ["**/*.ts", "**/*.tsx"],
             "linter": {
                 "rules": {
                     "style": {
@@ -1761,10 +1873,11 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
     ]
 }"#;
 
-    fs.insert(url!("biome.json").to_file_path().unwrap(), config);
-    let (service, client) = factory
-        .create_with_fs(None, DynRef::Owned(Box::new(fs)))
-        .into_inner();
+    fs.insert(
+        Utf8PathBuf::from_path_buf(url!("biome.json").to_file_path().unwrap()).unwrap(),
+        config,
+    );
+    let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2091,12 +2204,30 @@ isSpreadAssignment;
         )
         .await?;
 
+    // `open_project()` will return an existing key if called with a path
+    // for an existing project.
+    let project_key = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: BiomePath::new(""),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+
     let actual: String = server
         .request(
             "biome/get_file_content",
             "get_file_content",
             GetFileContentParams {
-                path: BiomePath::new(url!("document.js").to_file_path().unwrap()),
+                project_key,
+                path: BiomePath::new(
+                    Utf8PathBuf::from_path_buf(url!("document.js").to_file_path().unwrap())
+                        .unwrap(),
+                ),
             },
         )
         .await?
@@ -2235,14 +2366,15 @@ async fn does_not_format_ignored_files() -> Result<()> {
     let mut fs = MemoryFileSystem::default();
     let config = r#"{
         "files": {
-            "ignore": ["document.js"]
+            "includes": ["**", "!**/document.js"]
         }
     }"#;
 
-    fs.insert(url!("biome.json").to_file_path().unwrap(), config);
-    let (service, client) = factory
-        .create_with_fs(None, DynRef::Owned(Box::new(fs)))
-        .into_inner();
+    fs.insert(
+        Utf8PathBuf::from_path_buf(url!("biome.json").to_file_path().unwrap()).unwrap(),
+        config,
+    );
+    let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2541,6 +2673,182 @@ async fn multiple_projects() -> Result<()> {
 
     cancellation.await;
 
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_source_assist_action() -> Result<()> {
+    let factory = ServerFactory::default();
+    let mut fs = MemoryFileSystem::default();
+    let config = r#"{
+        "assist": {
+            "enabled": true,
+            "actions": {
+                "source": {
+                    "useSortedKeys": "on"
+                }
+            }
+        }
+    }"#;
+
+    fs.insert(
+        Utf8PathBuf::from_path_buf(url!("biome.json").to_file_path().unwrap()).unwrap(),
+        config,
+    );
+    let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let unsafe_fixable = lsp::Diagnostic {
+        range: Range {
+            start: Position {
+                line: 0,
+                character: 6,
+            },
+            end: Position {
+                line: 0,
+                character: 9,
+            },
+        },
+        severity: Some(lsp::DiagnosticSeverity::ERROR),
+        code: Some(lsp::NumberOrString::String(String::from(
+            "lint/suspicious/noDoubleEquals",
+        ))),
+        code_description: None,
+        source: Some(String::from("biome")),
+        message: String::from("Use === instead of ==."),
+        related_information: None,
+        tags: None,
+        data: None,
+    };
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_named_document(
+            r#"{"zod": true,"lorem": "ipsum","foo": "bar"}"#,
+            url!("file.json"),
+            "json",
+        )
+        .await?;
+
+    let res: lsp::CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            lsp::CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: url!("file.json"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 15,
+                    },
+                },
+                context: lsp::CodeActionContext {
+                    diagnostics: vec![unsafe_fixable.clone()],
+                    only: Some(vec![lsp::CodeActionKind::new("source.biome.useSortedKeys")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: lsp::PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+    let mut changes = HashMap::default();
+    changes.insert(
+        url!("file.json"),
+        vec![
+            TextEdit {
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 2,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 5,
+                    },
+                },
+                new_text: "foo".to_string(),
+            },
+            TextEdit {
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 8,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 12,
+                    },
+                },
+                new_text: "\"bar\"".to_string(),
+            },
+            TextEdit {
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 31,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 34,
+                    },
+                },
+                new_text: "zod".to_string(),
+            },
+            TextEdit {
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 37,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 42,
+                    },
+                },
+                new_text: "true".to_string(),
+            },
+        ],
+    );
+    let expected_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+        title: String::from("They keys of the current object can be sorted."),
+        kind: Some(lsp::CodeActionKind::new("source.biome.useSortedKeys")),
+        diagnostics: None,
+        edit: Some(lsp::WorkspaceEdit {
+            changes: Some(changes),
+            document_changes: None,
+            change_annotations: None,
+        }),
+        command: None,
+        is_preferred: Some(true),
+        disabled: None,
+        data: None,
+    });
+
+    assert_eq!(res, vec![expected_action]);
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
     reader.abort();
 
     Ok(())

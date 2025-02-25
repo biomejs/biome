@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsBreakStatement.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function JsBreakStatement1() {
     while (true) {
         break;
@@ -24,7 +25,7 @@ function JsBreakStatement2() {
 ```
 JsBreakStatement.js:4:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     2 │     while (true) {
     3 │         break;
@@ -48,7 +49,7 @@ JsBreakStatement.js:4:9 lint/correctness/noUnreachable ━━━━━━━━�
 ```
 JsBreakStatement.js:11:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
      9 │     while (true) {
     10 │         break;
@@ -68,5 +69,3 @@ JsBreakStatement.js:11:9 lint/correctness/noUnreachable ━━━━━━━━
   
 
 ```
-
-

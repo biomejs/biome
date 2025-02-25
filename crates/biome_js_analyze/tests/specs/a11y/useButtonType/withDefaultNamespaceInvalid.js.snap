@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: withDefaultNamespaceInvalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import * as DefaultNamespace  from "react";
 
 DefaultNamespace.createElement('button');
@@ -19,7 +20,7 @@ DefaultNamespace.createElement('button', {
 ```
 withDefaultNamespaceInvalid.js:3:32 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an explicit type prop for the button element.
+  × Provide an explicit type prop for the button element.
   
     1 │ import * as DefaultNamespace  from "react";
     2 │ 
@@ -38,7 +39,7 @@ withDefaultNamespaceInvalid.js:3:32 lint/a11y/useButtonType ━━━━━━�
 ```
 withDefaultNamespaceInvalid.js:5:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
     3 │ DefaultNamespace.createElement('button');
     4 │ DefaultNamespace.createElement('button', {
@@ -57,7 +58,7 @@ withDefaultNamespaceInvalid.js:5:13 lint/a11y/useButtonType ━━━━━━�
 ```
 withDefaultNamespaceInvalid.js:8:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
     6 │ });
     7 │ DefaultNamespace.createElement('button', {
@@ -71,5 +72,3 @@ withDefaultNamespaceInvalid.js:8:13 lint/a11y/useButtonType ━━━━━━�
   
 
 ```
-
-

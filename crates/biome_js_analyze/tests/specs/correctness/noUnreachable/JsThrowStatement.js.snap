@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsThrowStatement.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function JsThrowStatement1() {
     throw new Error();
     afterThrow();
@@ -15,7 +16,7 @@ function JsThrowStatement1() {
 ```
 JsThrowStatement.js:3:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     1 │ function JsThrowStatement1() {
     2 │     throw new Error();
@@ -34,5 +35,3 @@ JsThrowStatement.js:3:5 lint/correctness/noUnreachable ━━━━━━━━�
   
 
 ```
-
-

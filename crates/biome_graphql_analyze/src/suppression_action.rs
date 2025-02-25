@@ -7,7 +7,25 @@ pub(crate) struct GraphqlSuppressionAction;
 impl SuppressionAction for GraphqlSuppressionAction {
     type Language = GraphqlLanguage;
 
-    fn find_token_to_apply_suppression(
+    fn apply_top_level_suppression(
+        &self,
+        mutation: &mut BatchMutation<Self::Language>,
+        token: GraphqlSyntaxToken,
+        suppression_text: &str,
+    ) {
+        let new_token = token.with_leading_trivia([
+            (
+                TriviaPieceKind::SingleLineComment,
+                format!("# {suppression_text}: <explanation>").as_str(),
+            ),
+            (TriviaPieceKind::Newline, "\n"),
+            (TriviaPieceKind::Newline, "\n"),
+        ]);
+
+        mutation.replace_token_discard_trivia(token, new_token);
+    }
+
+    fn find_token_for_inline_suppression(
         &self,
         token: GraphqlSyntaxToken,
     ) -> Option<ApplySuppression<Self::Language>> {
@@ -34,7 +52,7 @@ impl SuppressionAction for GraphqlSuppressionAction {
         Some(apply_suppression)
     }
 
-    fn apply_suppression(
+    fn apply_inline_suppression(
         &self,
         mutation: &mut BatchMutation<Self::Language>,
         apply_suppression: ApplySuppression<Self::Language>,
@@ -53,7 +71,7 @@ impl SuppressionAction for GraphqlSuppressionAction {
             .filter(|trivia| trivia.is_whitespace())
             .collect();
 
-        let suppression_comment = format!("# {}: {}", suppression_text, suppression_reason);
+        let suppression_comment = format!("# {suppression_text}: {suppression_reason}");
         let suppression_comment = suppression_comment.as_str();
         let trivia = [
             (TriviaPieceKind::SingleLineComment, suppression_comment),

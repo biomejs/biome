@@ -1,0 +1,54 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/doctype_declarations/html4.01_transitional.html
+---
+# Input
+
+```html
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <title>An HTML standard template</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <p>… Your HTML content here …</p>
+  </body>
+</html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
++<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+ <html>
+   <head>
+     <title>An HTML standard template</title>
+```
+
+# Output
+
+```html
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <title>An HTML standard template</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <p>… Your HTML content here …</p>
+  </body>
+</html>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+```

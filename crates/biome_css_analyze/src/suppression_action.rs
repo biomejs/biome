@@ -7,7 +7,25 @@ pub(crate) struct CssSuppressionAction;
 impl SuppressionAction for CssSuppressionAction {
     type Language = CssLanguage;
 
-    fn find_token_to_apply_suppression(
+    fn apply_top_level_suppression(
+        &self,
+        mutation: &mut BatchMutation<Self::Language>,
+        token: CssSyntaxToken,
+        suppression_text: &str,
+    ) {
+        let new_token = token.with_leading_trivia([
+            (
+                TriviaPieceKind::SingleLineComment,
+                format!("/** {suppression_text}: <explanation> */").as_str(),
+            ),
+            (TriviaPieceKind::Newline, "\n"),
+            (TriviaPieceKind::Newline, "\n"),
+        ]);
+
+        mutation.replace_token_discard_trivia(token, new_token);
+    }
+
+    fn find_token_for_inline_suppression(
         &self,
         token: CssSyntaxToken,
     ) -> Option<ApplySuppression<Self::Language>> {
@@ -36,7 +54,7 @@ impl SuppressionAction for CssSuppressionAction {
         Some(apply_suppression)
     }
 
-    fn apply_suppression(
+    fn apply_inline_suppression(
         &self,
         mutation: &mut BatchMutation<Self::Language>,
         apply_suppression: ApplySuppression<Self::Language>,
@@ -59,12 +77,12 @@ impl SuppressionAction for CssSuppressionAction {
             new_token = new_token.with_trailing_trivia([
                 (
                     TriviaPieceKind::SingleLineComment,
-                    format!("/* {}: {} */", suppression_text, suppression_reason).as_str(),
+                    format!("/* {suppression_text}: {suppression_reason} */").as_str(),
                 ),
                 (TriviaPieceKind::Newline, "\n"),
             ]);
         } else if has_leading_whitespace {
-            let suppression_comment = format!("/* {}: {} */", suppression_text, suppression_reason);
+            let suppression_comment = format!("/* {suppression_text}: {suppression_reason} */");
             let mut trivia = vec![
                 (
                     TriviaPieceKind::SingleLineComment,
@@ -86,7 +104,7 @@ impl SuppressionAction for CssSuppressionAction {
             new_token = new_token.with_leading_trivia([
                 (
                     TriviaPieceKind::SingleLineComment,
-                    format!("/* {}: {} */", suppression_text, suppression_reason).as_str(),
+                    format!("/* {suppression_text}: {suppression_reason} */").as_str(),
                 ),
                 (TriviaPieceKind::Newline, "\n"),
             ]);

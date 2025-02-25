@@ -1,0 +1,115 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+snapshot_kind: text
+---
+## `file.js`
+
+```js
+
+let foo = 2;
+/**
+* biome-ignore-all lint/style/useConst: reason
+* biome-ignore-all lint/suspicious/noDebugger: reason
+*/
+debugger
+let bar = 33;
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.js:3:1 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Top level suppressions can only be used at the beginning of the file.
+  
+    2 │ let foo = 2;
+  > 3 │ /**
+      │ ^^^
+  > 4 │ * biome-ignore-all lint/style/useConst: reason
+  > 5 │ * biome-ignore-all lint/suspicious/noDebugger: reason
+  > 6 │ */
+      │ ^^
+    7 │ debugger
+    8 │ let bar = 33;
+  
+  i Rename this to biome-ignore or move it to the top of the file
+  
+    2 │ let foo = 2;
+    3 │ /**
+  > 4 │ * biome-ignore-all lint/style/useConst: reason
+      │   ^^^^^^^^^^^^^^^^
+    5 │ * biome-ignore-all lint/suspicious/noDebugger: reason
+    6 │ */
+  
+
+```
+
+```block
+file.js:3:1 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Top level suppressions can only be used at the beginning of the file.
+  
+    2 │ let foo = 2;
+  > 3 │ /**
+      │ ^^^
+  > 4 │ * biome-ignore-all lint/style/useConst: reason
+  > 5 │ * biome-ignore-all lint/suspicious/noDebugger: reason
+  > 6 │ */
+      │ ^^
+    7 │ debugger
+    8 │ let bar = 33;
+  
+  i Rename this to biome-ignore or move it to the top of the file
+  
+    2 │ let foo = 2;
+    3 │ /**
+  > 4 │ * biome-ignore-all lint/style/useConst: reason
+      │   ^^^^^^^^^^^^^^^^
+    5 │ * biome-ignore-all lint/suspicious/noDebugger: reason
+    6 │ */
+  
+
+```
+
+```block
+file.js:7:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+    5 │ * biome-ignore-all lint/suspicious/noDebugger: reason
+    6 │ */
+  > 7 │ debugger
+      │ ^^^^^^^^
+    8 │ let bar = 33;
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1 1 │   
+    2 2 │   let foo = 2;
+    3   │ - /**
+    4   │ - *·biome-ignore-all·lint/style/useConst:·reason
+    5   │ - *·biome-ignore-all·lint/suspicious/noDebugger:·reason
+    6   │ - */
+    7   │ - debugger
+    8 3 │   let bar = 33;
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+Found 2 warnings.
+```

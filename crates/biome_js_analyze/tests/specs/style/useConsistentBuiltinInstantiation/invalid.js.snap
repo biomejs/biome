@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 Object()
 Array()
 Date()
@@ -31,7 +32,7 @@ function foo() {
 ```
 invalid.js:1:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Object() instead of Object().
+  i Use new Object() instead of Object().
   
   > 1 │ Object()
       │ ^^^^^^^^
@@ -48,7 +49,7 @@ invalid.js:1:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
 ```
 invalid.js:2:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Array() instead of Array().
+  i Use new Array() instead of Array().
   
     1 │ Object()
   > 2 │ Array()
@@ -66,7 +67,7 @@ invalid.js:2:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
 ```
 invalid.js:3:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Date() instead of Date().
+  i Use new Date() instead of Date().
   
     1 │ Object()
     2 │ Array()
@@ -85,7 +86,7 @@ invalid.js:3:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
 ```
 invalid.js:4:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Error() instead of Error().
+  i Use new Error() instead of Error().
   
     2 │ Array()
     3 │ Date()
@@ -104,7 +105,7 @@ invalid.js:4:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
 ```
 invalid.js:6:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Promise() instead of Promise().
+  i Use new Promise() instead of Promise().
   
     4 │ Error()
     5 │ Function()
@@ -123,7 +124,7 @@ invalid.js:6:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
 ```
 invalid.js:7:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new RegExp() instead of RegExp().
+  i Use new RegExp() instead of RegExp().
   
     5 │ Function()
     6 │ Promise()
@@ -142,7 +143,7 @@ invalid.js:7:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
 ```
 invalid.js:8:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Object() instead of Object().
+  i Use new Object() instead of Object().
   
      6 │ Promise()
      7 │ RegExp()
@@ -161,7 +162,7 @@ invalid.js:8:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
 ```
 invalid.js:9:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Object() instead of Object().
+  i Use new Object() instead of Object().
   
      7 │ RegExp()
      8 │ window.Object({})
@@ -180,7 +181,7 @@ invalid.js:9:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
 ```
 invalid.js:11:25 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use new Object() instead of Object().
+  i Use new Object() instead of Object().
   
      9 │ globalThis.Object()
     10 │ function foo() {
@@ -199,7 +200,7 @@ invalid.js:11:25 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━�
 ```
 invalid.js:14:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Boolean() instead of new Boolean().
+  i Use Boolean() instead of new Boolean().
   
     12 │ }
     13 │ 
@@ -218,7 +219,7 @@ invalid.js:14:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━
 ```
 invalid.js:15:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use Number() instead of new Number().
+  i Use Number() instead of new Number().
   
     14 │ new Boolean()
   > 15 │ new Number()
@@ -236,7 +237,7 @@ invalid.js:15:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━
 ```
 invalid.js:16:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use String() instead of new String().
+  i Use String() instead of new String().
   
     14 │ new Boolean()
     15 │ new Number()
@@ -255,7 +256,7 @@ invalid.js:16:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━
 ```
 invalid.js:17:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use String() instead of new String().
+  i Use String() instead of new String().
   
     15 │ new Number()
     16 │ new String()
@@ -274,7 +275,7 @@ invalid.js:17:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━
 ```
 invalid.js:18:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use String() instead of new String().
+  i Use String() instead of new String().
   
     16 │ new String()
     17 │ new window.String(123)
@@ -293,7 +294,7 @@ invalid.js:18:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━
 ```
 invalid.js:20:25 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use String() instead of new String().
+  i Use String() instead of new String().
   
     18 │ new globalThis.String()
     19 │ function foo() {

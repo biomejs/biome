@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 class A extends B{
     constructor() {
     }
@@ -66,7 +67,7 @@ export default class A extends null {
 ```
 invalid.js:14:9 lint/correctness/noInvalidConstructorSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class calls super(), but the class extends from a non-constructor.
+  × This class calls super(), but the class extends from a non-constructor.
   
     12 │ class A  extends  null {
     13 │     constructor() {
@@ -90,7 +91,7 @@ invalid.js:14:9 lint/correctness/noInvalidConstructorSuper ━━━━━━━
 ```
 invalid.js:20:42 lint/correctness/noInvalidConstructorSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class calls super(), but the class extends from a non-constructor.
+  × This class calls super(), but the class extends from a non-constructor.
   
     18 │ class A extends Object { constructor() { return a; } }
     19 │ 
@@ -114,7 +115,7 @@ invalid.js:20:42 lint/correctness/noInvalidConstructorSuper ━━━━━━�
 ```
 invalid.js:22:39 lint/correctness/noInvalidConstructorSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class calls super(), but the class extends from a non-constructor.
+  × This class calls super(), but the class extends from a non-constructor.
   
     20 │ class A extends 'test' { constructor() { super(); } }
     21 │ 
@@ -138,7 +139,7 @@ invalid.js:22:39 lint/correctness/noInvalidConstructorSuper ━━━━━━�
 ```
 invalid.js:24:43 lint/correctness/noInvalidConstructorSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class calls super(), but the class extends from a non-constructor.
+  × This class calls super(), but the class extends from a non-constructor.
   
     22 │ class A extends 100 { constructor() { super(); } }
     23 │ 
@@ -162,7 +163,7 @@ invalid.js:24:43 lint/correctness/noInvalidConstructorSuper ━━━━━━�
 ```
 invalid.js:26:44 lint/correctness/noInvalidConstructorSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class calls super(), but the class extends from a non-constructor.
+  × This class calls super(), but the class extends from a non-constructor.
   
     24 │ class A extends (B = 5) { constructor() { super(); } }
     25 │ 
@@ -186,7 +187,7 @@ invalid.js:26:44 lint/correctness/noInvalidConstructorSuper ━━━━━━�
 ```
 invalid.js:28:45 lint/correctness/noInvalidConstructorSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class calls super(), but the class extends from a non-constructor.
+  × This class calls super(), but the class extends from a non-constructor.
   
     26 │ class A extends (B && 5) { constructor() { super(); } }
     27 │ 
@@ -210,7 +211,7 @@ invalid.js:28:45 lint/correctness/noInvalidConstructorSuper ━━━━━━�
 ```
 invalid.js:30:44 lint/correctness/noInvalidConstructorSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class calls super(), but the class extends from a non-constructor.
+  × This class calls super(), but the class extends from a non-constructor.
   
     28 │ class A extends (B &&= 5) { constructor() { super(); } }
     29 │ 
@@ -234,7 +235,7 @@ invalid.js:30:44 lint/correctness/noInvalidConstructorSuper ━━━━━━�
 ```
 invalid.js:32:44 lint/correctness/noInvalidConstructorSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class calls super(), but the class extends from a non-constructor.
+  × This class calls super(), but the class extends from a non-constructor.
   
     30 │ class A extends (B += C) { constructor() { super(); } }
     31 │ 
@@ -258,7 +259,7 @@ invalid.js:32:44 lint/correctness/noInvalidConstructorSuper ━━━━━━�
 ```
 invalid.js:34:45 lint/correctness/noInvalidConstructorSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class calls super(), but the class extends from a non-constructor.
+  × This class calls super(), but the class extends from a non-constructor.
   
     32 │ class A extends (B -= C) { constructor() { super(); } }
     33 │ 
@@ -282,7 +283,7 @@ invalid.js:34:45 lint/correctness/noInvalidConstructorSuper ━━━━━━�
 ```
 invalid.js:36:44 lint/correctness/noInvalidConstructorSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class calls super(), but the class extends from a non-constructor.
+  × This class calls super(), but the class extends from a non-constructor.
   
     34 │ class A extends (B **= C) { constructor() { super(); } }
     35 │ 
@@ -306,7 +307,7 @@ invalid.js:36:44 lint/correctness/noInvalidConstructorSuper ━━━━━━�
 ```
 invalid.js:38:45 lint/correctness/noInvalidConstructorSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class calls super(), but the class extends from a non-constructor.
+  × This class calls super(), but the class extends from a non-constructor.
   
     36 │ class A extends (B |= C) { constructor() { super(); } }
     37 │ 
@@ -330,7 +331,7 @@ invalid.js:38:45 lint/correctness/noInvalidConstructorSuper ━━━━━━�
 ```
 invalid.js:53:9 lint/correctness/noInvalidConstructorSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class calls super(), but the class extends from a non-constructor.
+  × This class calls super(), but the class extends from a non-constructor.
   
     51 │ export default class A extends null {
     52 │     constructor() {
@@ -350,5 +351,3 @@ invalid.js:53:9 lint/correctness/noInvalidConstructorSuper ━━━━━━━
   
 
 ```
-
-

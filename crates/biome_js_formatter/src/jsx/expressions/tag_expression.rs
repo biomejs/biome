@@ -106,5 +106,5 @@ pub fn should_expand(expression: &JsxTagExpression) -> bool {
     };
 
     call.parent()
-        .map_or(false, |parent| JsxExpressionChild::can_cast(parent.kind()))
+        .is_some_and(|parent| JsxExpressionChild::can_cast(parent.kind()))
 }

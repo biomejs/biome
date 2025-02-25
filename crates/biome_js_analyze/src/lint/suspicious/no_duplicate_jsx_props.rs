@@ -1,6 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{AnyJsxAttribute, JsxAttribute};
 use biome_rowan::AstNode;
@@ -36,6 +37,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-no-duplicate-props")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
@@ -53,7 +55,7 @@ impl Rule for NoDuplicateJsxProps {
             if let AnyJsxAttribute::JsxAttribute(attr) = attribute {
                 if let Ok(name) = attr.name() {
                     defined_attributes
-                        .entry(name.text())
+                        .entry(name.to_trimmed_string())
                         .or_default()
                         .push(attr);
                 }

@@ -4,15 +4,15 @@ use crate::registry::{RegistryVisitor, RuleLanguage, RuleSuppressions};
 use crate::{
     Phase, Phases, Queryable, SourceActionKind, SuppressionAction, SuppressionCommentEmitterPayload,
 };
-use biome_console::fmt::Display;
-use biome_console::{markup, MarkupBuf};
+use biome_console::fmt::{Display, Formatter};
+use biome_console::{markup, MarkupBuf, Padding};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::location::AsSpan;
-use biome_diagnostics::Applicability;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
     Visit,
 };
+use biome_diagnostics::{Applicability, Severity};
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
 use std::borrow::Cow;
 use std::cmp::Ordering;
@@ -41,6 +41,159 @@ pub struct RuleMetadata {
     pub sources: &'static [RuleSource],
     /// The source kind of the rule
     pub source_kind: Option<RuleSourceKind>,
+    /// The default severity of the rule
+    pub severity: Severity,
+    /// Domains applied by this rule
+    pub domains: &'static [RuleDomain],
+}
+
+impl biome_console::fmt::Display for RuleMetadata {
+    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
+        fmt.write_markup(markup! {
+            <Emphasis>"Summary"</Emphasis>
+        })?;
+        fmt.write_str("\n")?;
+        fmt.write_str("\n")?;
+
+        fmt.write_markup(markup! {
+            "- Name: "<Emphasis>{self.name}</Emphasis>
+        })?;
+        fmt.write_str("\n")?;
+        match self.fix_kind {
+            FixKind::None => {
+                fmt.write_markup(markup! {
+                    "- No fix available."
+                })?;
+            }
+            kind => {
+                fmt.write_markup(markup! {
+                    "- Fix: "<Emphasis>{kind}</Emphasis>
+                })?;
+            }
+        }
+        fmt.write_str("\n")?;
+
+        fmt.write_markup(markup! {
+            "- Default severity: "<Emphasis>{self.severity}</Emphasis>
+        })?;
+        fmt.write_str("\n")?;
+
+        fmt.write_markup(markup! {
+            "- Available from version: "<Emphasis>{self.version}</Emphasis>
+        })?;
+        fmt.write_str("\n")?;
+
+        if self.domains.is_empty() && self.recommended {
+            fmt.write_markup(markup! {
+                "- This rule is not recommended"
+            })?;
+        }
+
+        let domains = DisplayDomains(self.domains, self.recommended);
+
+        fmt.write_str("\n")?;
+
+        fmt.write_markup(markup!({ domains }))?;
+
+        fmt.write_str("\n")?;
+
+        fmt.write_markup(markup! {
+            <Emphasis>"Description"</Emphasis>
+        })?;
+        fmt.write_str("\n")?;
+        fmt.write_str("\n")?;
+
+        for line in self.docs.lines() {
+            if let Some((_, remainder)) = line.split_once("## ") {
+                fmt.write_markup(markup! {
+                    <Emphasis>{remainder.trim_start()}</Emphasis>
+                })?;
+            } else if let Some((_, remainder)) = line.split_once("### ") {
+                fmt.write_markup(markup! {
+                    <Emphasis>{remainder.trim_start()}</Emphasis>
+                })?;
+            } else {
+                fmt.write_str(line)?;
+            }
+
+            fmt.write_str("\n")?;
+        }
+
+        Ok(())
+    }
+}
+
+struct DisplayDomains(&'static [RuleDomain], bool);
+
+impl Display for DisplayDomains {
+    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
+        let domains = self.0;
+        let recommended = self.1;
+
+        if domains.is_empty() {
+            return Ok(());
+        }
+
+        fmt.write_markup(markup!(
+            <Emphasis>"Domains"</Emphasis>
+        ))?;
+        fmt.write_str("\n")?;
+        fmt.write_str("\n")?;
+
+        for domain in domains {
+            let dependencies = domain.manifest_dependencies();
+
+            fmt.write_markup(markup! {
+                "- Name: "<Emphasis>{domain}</Emphasis>
+            })?;
+            fmt.write_str("\n")?;
+
+            if recommended {
+                fmt.write_markup(markup! {
+                    "- The rule is recommended for this domain"
+                })?;
+                fmt.write_str("\n")?;
+            }
+
+            if !dependencies.is_empty() {
+                fmt.write_markup(markup! {
+                    "- The rule is enabled when one of these dependencies are detected:"
+                })?;
+                fmt.write_str("\n")?;
+                let padding = Padding::new(2);
+                for (index, (dep, range)) in dependencies.iter().enumerate() {
+                    fmt.write_markup(
+                        markup! { {padding}"- "<Emphasis>{dep}"@"{range}</Emphasis> },
+                    )?;
+                    if index + 1 < dependencies.len() {
+                        fmt.write_str("\n")?;
+                    }
+                }
+                fmt.write_str("\n")?;
+            }
+
+            let globals = domain.globals();
+
+            if !globals.is_empty() {
+                fmt.write_markup(markup! {
+                    "- The rule adds the following globals: "
+                })?;
+                fmt.write_str("\n")?;
+
+                let padding = Padding::new(2);
+                for (index, global) in globals.iter().enumerate() {
+                    fmt.write_markup(markup! { {padding}"- "<Emphasis>{global}</Emphasis> })?;
+                    if index + 1 < globals.len() {
+                        fmt.write_str("\n")?;
+                    }
+                }
+                fmt.write_str("\n")?;
+            }
+            fmt.write_str("\n")?;
+        }
+
+        Ok(())
+    }
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -48,12 +201,12 @@ pub struct RuleMetadata {
     feature = "serde",
     derive(
         biome_deserialize_macros::Deserializable,
-        schemars::JsonSchema,
         serde::Deserialize,
         serde::Serialize
     )
 )]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 /// Used to identify the kind of code action emitted by a rule
 pub enum FixKind {
     /// The rule doesn't emit code actions.
@@ -69,9 +222,9 @@ pub enum FixKind {
 impl Display for FixKind {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         match self {
-            FixKind::None => fmt.write_str("None"),
-            FixKind::Safe => fmt.write_str("Safe"),
-            FixKind::Unsafe => fmt.write_str("Unsafe"),
+            FixKind::None => fmt.write_markup(markup!("none")),
+            FixKind::Safe => fmt.write_markup(markup!(<Success>"safe"</Success>)),
+            FixKind::Unsafe => fmt.write_markup(markup!(<Warn>"unsafe"</Warn>)),
         }
     }
 }
@@ -88,7 +241,8 @@ impl TryFrom<FixKind> for Applicability {
 }
 
 #[derive(Debug, Clone, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, schemars::JsonSchema))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum RuleSource {
     /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
@@ -260,7 +414,7 @@ impl RuleSource {
 
     pub fn to_rule_url(&self) -> String {
         match self {
-            Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"),
+            Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#{rule_name}"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
             Self::EslintGraphql(rule_name) => format!("https://the-guild.dev/graphql/eslint/rules/{rule_name}"),
             Self::EslintGraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),
@@ -307,8 +461,9 @@ impl RuleSource {
 }
 
 #[derive(Debug, Default, Clone, Copy)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, schemars::JsonSchema))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum RuleSourceKind {
     /// The rule implements the same logic of the source
     #[default]
@@ -320,6 +475,81 @@ pub enum RuleSourceKind {
 impl RuleSourceKind {
     pub const fn is_inspired(&self) -> bool {
         matches!(self, Self::Inspired)
+    }
+}
+
+/// Rule domains
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(
+        serde::Deserialize,
+        serde::Serialize,
+        biome_deserialize_macros::Deserializable
+    )
+)]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum RuleDomain {
+    /// React library rules
+    React,
+    /// Testing rules
+    Test,
+    /// Solid.js framework rules
+    Solid,
+    /// Next.js framework rules
+    Next,
+}
+
+impl Display for RuleDomain {
+    fn fmt(&self, fmt: &mut Formatter) -> std::io::Result<()> {
+        // use lower case naming, it needs to match the name of the configuration
+        match self {
+            RuleDomain::React => fmt.write_str("react"),
+            RuleDomain::Test => fmt.write_str("test"),
+            RuleDomain::Solid => fmt.write_str("solid"),
+            RuleDomain::Next => fmt.write_str("next"),
+        }
+    }
+}
+
+impl RuleDomain {
+    /// If the project has one of these dependencies, the domain will be automatically enabled, unless it's explicitly disabled by the configuration.
+    ///
+    /// If the array is empty, it means that the rules that belong to a certain domain won't enable themselves automatically.
+    pub const fn manifest_dependencies(self) -> &'static [&'static (&'static str, &'static str)] {
+        match self {
+            RuleDomain::React => &[&("react", ">=16.0.0")],
+            RuleDomain::Test => &[
+                &("jest", ">=26.0.0"),
+                &("mocha", ">=8.0.0"),
+                &("ava", ">=2.0.0"),
+                &("vitest", ">=1.0.0"),
+            ],
+            RuleDomain::Solid => &[&("solid", ">=1.0.0")],
+            RuleDomain::Next => &[&("next", ">=14.0.0")],
+        }
+    }
+
+    /// Global identifiers that should be added to the `globals` of the [crate::AnalyzerConfiguration] type
+    pub const fn globals(self) -> &'static [&'static str] {
+        match self {
+            RuleDomain::React => &[],
+            RuleDomain::Test => &[
+                "after",
+                "afterAll",
+                "afterEach",
+                "before",
+                "beforeEach",
+                "beforeAll",
+                "describe",
+                "it",
+                "expect",
+                "test",
+            ],
+            RuleDomain::Solid => &[],
+            RuleDomain::Next => &[],
+        }
     }
 }
 
@@ -340,6 +570,8 @@ impl RuleMetadata {
             fix_kind: FixKind::None,
             sources: &[],
             source_kind: None,
+            severity: Severity::Information,
+            domains: &[],
         }
     }
 
@@ -373,6 +605,16 @@ impl RuleMetadata {
 
     pub const fn language(mut self, language: &'static str) -> Self {
         self.language = language;
+        self
+    }
+
+    pub const fn severity(mut self, severity: Severity) -> Self {
+        self.severity = severity;
+        self
+    }
+
+    pub const fn domains(mut self, domains: &'static [RuleDomain]) -> Self {
+        self.domains = domains;
         self
     }
 
@@ -488,6 +730,7 @@ macro_rules! declare_syntax_rule {
                 version: $version,
                 name: $name,
                 language: $language,
+                severity: biome_diagnostics::Severity::Error,
                 $( $key: $value, )*
             }
         );
@@ -566,7 +809,7 @@ macro_rules! declare_source_rule {
         /// This macro returns the corresponding [ActionCategory] to use inside the [RuleAction]
         #[expect(unused_macros)]
         macro_rules! rule_action_category {
-            () => { ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed(concat!($language, ".", $name) )))  };
+            () => { biome_analyze::ActionCategory::Source(biome_analyze::SourceActionKind::Other(Cow::Borrowed($name)))  };
         }
     };
 }
@@ -623,7 +866,7 @@ macro_rules! declare_lint_group {
 /// This macro is used by the codegen script to declare an analyzer rule group,
 /// and implement the [RuleGroup] trait for it
 #[macro_export]
-macro_rules! declare_assists_group {
+macro_rules! declare_assist_group {
     ( $vis:vis $id:ident { name: $name:tt, rules: [ $( $( $rule:ident )::* , )* ] } ) => {
         $vis enum $id {}
 
@@ -648,7 +891,7 @@ macro_rules! declare_assists_group {
         // "lint" prefix, the name of this group, and the rule name argument
         #[expect(unused_macros)]
         macro_rules! group_category {
-            ( $rule_name:tt ) => { $crate::category_concat!( "assists", $name, $rule_name ) };
+            ( $rule_name:tt ) => { $crate::category_concat!( "assist", $name, $rule_name ) };
         }
 
         // Re-export the macro for child modules, so `declare_rule!` can access
@@ -902,9 +1145,42 @@ pub trait Rule: RuleMeta + Sized {
         None
     }
 
+    fn top_level_suppression(
+        ctx: &RuleContext<Self>,
+        suppression_action: &dyn SuppressionAction<Language = RuleLanguage<Self>>,
+    ) -> Option<SuppressAction<RuleLanguage<Self>>>
+    where
+        Self: 'static,
+    {
+        if <Self::Group as RuleGroup>::Category::CATEGORY == RuleCategory::Lint {
+            let rule_category = format!(
+                "lint/{}/{}",
+                <Self::Group as RuleGroup>::NAME,
+                Self::METADATA.name
+            );
+            let suppression_text = format!("biome-ignore-all {rule_category}");
+            let root = ctx.root();
+
+            if let Some(first_token) = root.syntax().first_token() {
+                let mut mutation = root.begin();
+                suppression_action.apply_top_level_suppression(
+                    &mut mutation,
+                    first_token,
+                    suppression_text.as_str(),
+                );
+                return Some(SuppressAction {
+                    mutation,
+                    message: markup! { "Suppress rule " {rule_category} " for the whole file."}
+                        .to_owned(),
+                });
+            }
+        }
+        None
+    }
+
     /// Create a code action that allows to suppress the rule. The function
     /// returns the node to which the suppression comment is applied.
-    fn suppress(
+    fn inline_suppression(
         ctx: &RuleContext<Self>,
         text_range: &TextRange,
         suppression_action: &dyn SuppressionAction<Language = RuleLanguage<Self>>,
@@ -924,7 +1200,7 @@ pub trait Rule: RuleMeta + Sized {
             let root = ctx.root();
             let token = root.syntax().token_at_offset(text_range.start());
             let mut mutation = root.begin();
-            suppression_action.apply_suppression_comment(SuppressionCommentEmitterPayload {
+            suppression_action.inline_suppression(SuppressionCommentEmitterPayload {
                 suppression_text: suppression_text.as_str(),
                 mutation: &mut mutation,
                 token_offset: token,
@@ -951,10 +1227,11 @@ pub trait Rule: RuleMeta + Sized {
 }
 
 /// Diagnostic object returned by a single analysis rule
-#[derive(Debug, Diagnostic)]
+#[derive(Clone, Debug, Diagnostic)]
 pub struct RuleDiagnostic {
     #[category]
     pub(crate) category: &'static Category,
+    pub(crate) subcategory: Option<String>,
     #[location(span)]
     pub(crate) span: Option<TextRange>,
     #[message]
@@ -964,9 +1241,11 @@ pub struct RuleDiagnostic {
     pub(crate) tags: DiagnosticTags,
     #[advice]
     pub(crate) rule_advice: RuleAdvice,
+    #[severity]
+    pub(crate) severity: Severity,
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 /// It contains possible advices to show when printing a diagnostic that belong to the rule
 pub struct RuleAdvice {
     pub(crate) details: Vec<Detail>,
@@ -975,7 +1254,7 @@ pub struct RuleAdvice {
     pub(crate) code_suggestion_list: Vec<CodeSuggestionAdvice<MarkupBuf>>,
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct SuggestionList {
     pub(crate) message: MarkupBuf,
     pub(crate) list: Vec<MarkupBuf>,
@@ -1017,7 +1296,7 @@ impl Advices for RuleAdvice {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Detail {
     pub log_category: LogCategory,
     pub message: MarkupBuf,
@@ -1031,10 +1310,12 @@ impl RuleDiagnostic {
         let message = markup!({ title }).to_owned();
         Self {
             category,
+            subcategory: None,
             span: span.as_span(),
             message: MessageAndDescription::from(message),
             tags: DiagnosticTags::empty(),
             rule_advice: RuleAdvice::default(),
+            severity: Severity::default(),
         }
     }
 
@@ -1059,6 +1340,14 @@ impl RuleDiagnostic {
     /// This does not have any influence on the diagnostic rendering.
     pub fn unnecessary(mut self) -> Self {
         self.tags |= DiagnosticTags::UNNECESSARY_CODE;
+        self
+    }
+
+    /// Marks this diagnostic as verbose.
+    ///
+    /// The diagnostic will only be shown when using the `--verbose` argument.
+    pub fn verbose(mut self) -> Self {
+        self.tags |= DiagnosticTags::VERBOSE;
         self
     }
 
@@ -1120,6 +1409,11 @@ impl RuleDiagnostic {
 
     pub fn advices(&self) -> &RuleAdvice {
         &self.rule_advice
+    }
+
+    pub fn subcategory(mut self, subcategory: String) -> Self {
+        self.subcategory = Some(subcategory);
+        self
     }
 }
 

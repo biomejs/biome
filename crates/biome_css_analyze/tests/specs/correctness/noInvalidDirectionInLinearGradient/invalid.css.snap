@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -94,7 +95,7 @@ expression: invalid.css
 ```
 invalid.css:2:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     1 │ .foo {
   > 2 │ 	background: linear-gradient(bottom, #fff, #000);
@@ -112,7 +113,7 @@ invalid.css:2:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:5:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     3 │ }
     4 │ .foo {
@@ -131,7 +132,7 @@ invalid.css:5:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:8:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
      6 │ }
      7 │ .foo {
@@ -150,7 +151,7 @@ invalid.css:8:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:11:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
      9 │ }
     10 │ .foo {
@@ -169,7 +170,7 @@ invalid.css:11:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:14:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     12 │ }
     13 │ .foo {
@@ -188,7 +189,7 @@ invalid.css:14:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:17:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     15 │ }
     16 │ .foo {
@@ -207,7 +208,7 @@ invalid.css:17:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:20:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     18 │ }
     19 │ .foo {
@@ -226,7 +227,7 @@ invalid.css:20:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:23:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     21 │ }
     22 │ .foo {
@@ -245,7 +246,7 @@ invalid.css:23:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:26:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     24 │ }
     25 │ .foo {
@@ -264,7 +265,7 @@ invalid.css:26:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:29:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     27 │ }
     28 │ .foo {
@@ -283,7 +284,7 @@ invalid.css:29:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:32:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     30 │ }
     31 │ .foo {
@@ -302,7 +303,7 @@ invalid.css:32:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:35:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     33 │ }
     34 │ .foo {
@@ -321,7 +322,7 @@ invalid.css:35:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:38:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     36 │ }
     37 │ .foo {
@@ -340,7 +341,7 @@ invalid.css:38:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:41:38 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     39 │ }
     40 │ .foo {
@@ -359,7 +360,7 @@ invalid.css:41:38 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:44:35 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     42 │ }
     43 │ .foo {
@@ -378,7 +379,7 @@ invalid.css:44:35 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:47:33 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     45 │ }
     46 │ .foo {
@@ -397,7 +398,7 @@ invalid.css:47:33 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:50:52 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     48 │ }
     49 │ .foo {
@@ -416,7 +417,7 @@ invalid.css:50:52 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:53:49 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     51 │ }
     52 │ .foo {
@@ -435,7 +436,7 @@ invalid.css:53:49 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:56:47 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     54 │ }
     55 │ .foo {
@@ -454,7 +455,7 @@ invalid.css:56:47 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:59:38 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     57 │ }
     58 │ .foo {
@@ -473,7 +474,7 @@ invalid.css:59:38 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:62:49 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     60 │ }
     61 │ .foo {
@@ -492,7 +493,7 @@ invalid.css:62:49 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:66:33 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     64 │ }
     65 │ .foo {
@@ -511,7 +512,7 @@ invalid.css:66:33 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:69:52 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     67 │ }
     68 │ .foo {
@@ -530,7 +531,7 @@ invalid.css:69:52 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:73:49 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     71 │ }
     72 │ .foo {
@@ -549,7 +550,7 @@ invalid.css:73:49 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:77:47 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     75 │ }
     76 │ .foo {
@@ -568,7 +569,7 @@ invalid.css:77:47 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
 ```
 invalid.css:81:48 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected nonstandard direction
+  × Unexpected nonstandard direction
   
     79 │ }
     80 │ .foo {

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidWithoutAutofix.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // shouldn't autofix if the call doesn't have exactly two arguments
 Math.pow()
 Math.pow(a)
@@ -135,5 +136,3 @@ invalidWithoutAutofix.js:11:1 lint/style/useExponentiationOperator ━━━━�
   
 
 ```
-
-

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var thing = foo ? bar : baz === qux ? quxx : foobar;
 
 foo ? baz === qux ? quxx() : foobar() : bar();
@@ -13,7 +14,7 @@ foo ? baz === qux ? quxx() : foobar() : bar();
 ```
 invalid.js:1:25 lint/nursery/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not nest ternary expressions.
+  i Do not nest ternary expressions.
   
   > 1 │ var thing = foo ? bar : baz === qux ? quxx : foobar;
       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -30,7 +31,7 @@ invalid.js:1:25 lint/nursery/noNestedTernary ━━━━━━━━━━━�
 ```
 invalid.js:3:7 lint/nursery/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not nest ternary expressions.
+  i Do not nest ternary expressions.
   
     1 │ var thing = foo ? bar : baz === qux ? quxx : foobar;
     2 │ 

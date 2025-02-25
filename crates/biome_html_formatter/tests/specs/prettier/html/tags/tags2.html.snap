@@ -1,0 +1,125 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/tags/tags2.html
+---
+# Input
+
+```html
+<div>before<noscript>noscript long long long long long long long long</noscript>after</div>
+
+<div>before<details><summary>summary long long long long </summary>details</details>after</div>
+
+<div>before<dialog open>dialog long long long long  long long long long </dialog>after</div>
+
+<div>before<object data="horse.wav"><param name="autoplay" value="true"/><param name="autoplay" value="true"/></object>after</div>
+
+<div>before<meter min="0" max="1" low=".4" high=".7" optimum=".5" value=".2"></meter>after</div>
+
+<div>before<progress value=".5" max="1"></progress>after</div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,40 +1,36 @@
+ <div>
+-  before<noscript>noscript long long long long long long long long</noscript
+-  >after
++  before<noscript>noscript long long long long long long long long</noscript>
++  after
+ </div>
+ 
+ <div>
+   before
+   <details>
+-    <summary>summary long long long long</summary>
+-    details
++    <summary>summary long long long long </summary>details
+   </details>
+   after
+ </div>
+ 
+ <div>
+-  before
+-  <dialog open>dialog long long long long long long long long</dialog>
++  before<dialog open>dialog long long long long long long long long </dialog>
+   after
+ </div>
+ 
+ <div>
+-  before<object data="horse.wav">
++  before
++  <object data="horse.wav">
++    <param name="autoplay" value="true" />
+     <param name="autoplay" value="true" />
+-    <param name="autoplay" value="true" /></object
+-  >after
++  </object>
++  after
+ </div>
+ 
+ <div>
+-  before<meter
+-    min="0"
+-    max="1"
+-    low=".4"
+-    high=".7"
+-    optimum=".5"
+-    value=".2"
+-  ></meter
+-  >after
++  before
++  <meter min="0" max="1" low=".4" high=".7" optimum=".5" value=".2"></meter>
++  after
+ </div>
+ 
+-<div>before<progress value=".5" max="1"></progress>after</div>
++<div>
++  before<progress value=".5" max="1"></progress>after
++</div>
+```
+
+# Output
+
+```html
+<div>
+  before<noscript>noscript long long long long long long long long</noscript>
+  after
+</div>
+
+<div>
+  before
+  <details>
+    <summary>summary long long long long </summary>details
+  </details>
+  after
+</div>
+
+<div>
+  before<dialog open>dialog long long long long long long long long </dialog>
+  after
+</div>
+
+<div>
+  before
+  <object data="horse.wav">
+    <param name="autoplay" value="true" />
+    <param name="autoplay" value="true" />
+  </object>
+  after
+</div>
+
+<div>
+  before
+  <meter min="0" max="1" low=".4" high=".7" optimum=".5" value=".2"></meter>
+  after
+</div>
+
+<div>
+  before<progress value=".5" max="1"></progress>after
+</div>
+```

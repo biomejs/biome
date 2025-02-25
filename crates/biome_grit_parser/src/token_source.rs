@@ -101,7 +101,7 @@ impl<'source> GritTokenSource<'source> {
     }
 }
 
-impl<'source> TokenSource for GritTokenSource<'source> {
+impl TokenSource for GritTokenSource<'_> {
     type Kind = GritSyntaxKind;
 
     fn current(&self) -> Self::Kind {

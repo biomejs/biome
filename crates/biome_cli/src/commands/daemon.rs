@@ -4,9 +4,11 @@ use crate::{
     CliDiagnostic, CliSession,
 };
 use biome_console::{markup, ConsoleExt};
+use biome_fs::OsFileSystem;
 use biome_lsp::ServerFactory;
 use biome_service::{workspace::WorkspaceClient, TransportError, WorkspaceError};
-use std::{env, fs, path::PathBuf};
+use camino::{Utf8Path, Utf8PathBuf};
+use std::{env, fs};
 use tokio::io;
 use tokio::runtime::Runtime;
 use tracing::subscriber::Interest;
@@ -21,8 +23,8 @@ use tracing_tree::HierarchicalLayer;
 
 pub(crate) fn start(
     session: CliSession,
-    config_path: Option<PathBuf>,
-    log_path: Option<PathBuf>,
+    config_path: Option<Utf8PathBuf>,
+    log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
@@ -50,7 +52,7 @@ pub(crate) fn stop(session: CliSession) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
 
     if let Some(transport) = open_transport(rt)? {
-        let client = WorkspaceClient::new(transport)?;
+        let client = WorkspaceClient::new(transport, Box::new(OsFileSystem::default()))?;
         match client.shutdown() {
             // The `ChannelClosed` error is expected since the server can
             // shutdown before sending a response
@@ -72,16 +74,21 @@ pub(crate) fn stop(session: CliSession) -> Result<(), CliDiagnostic> {
 
 pub(crate) fn run_server(
     stop_on_disconnect: bool,
-    config_path: Option<PathBuf>,
-    log_path: Option<PathBuf>,
+    config_path: Option<Utf8PathBuf>,
+    log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> Result<(), CliDiagnostic> {
-    setup_tracing_subscriber(log_path, log_file_name_prefix);
+    setup_tracing_subscriber(log_path.as_deref(), log_file_name_prefix.as_deref());
 
     let rt = Runtime::new()?;
     let factory = ServerFactory::new(stop_on_disconnect);
     let cancellation = factory.cancellation();
-    let span = debug_span!("Running Server", pid = std::process::id());
+    let span = debug_span!("Running Server",
+        pid = std::process::id(),
+        config_path = ?config_path.as_ref(),
+        log_path = ?log_path.as_ref(),
+        log_file_name_prefix = &log_file_name_prefix.as_deref(),
+    );
 
     rt.block_on(async move {
         tokio::select! {
@@ -106,8 +113,8 @@ pub(crate) fn print_socket() -> Result<(), CliDiagnostic> {
 }
 
 pub(crate) fn lsp_proxy(
-    config_path: Option<PathBuf>,
-    log_path: Option<PathBuf>,
+    config_path: Option<Utf8PathBuf>,
+    log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
@@ -126,8 +133,8 @@ pub(crate) fn lsp_proxy(
 /// Copy to the process on `stdout` when the LSP responds to a message
 async fn start_lsp_proxy(
     rt: &Runtime,
-    config_path: Option<PathBuf>,
-    log_path: Option<PathBuf>,
+    config_path: Option<Utf8PathBuf>,
+    log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> Result<(), CliDiagnostic> {
     ensure_daemon(true, config_path, log_path, log_file_name_prefix).await?;
@@ -173,14 +180,14 @@ async fn start_lsp_proxy(
 }
 
 pub(crate) fn read_most_recent_log_file(
-    log_path: Option<PathBuf>,
+    log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: String,
 ) -> io::Result<Option<String>> {
     let biome_log_path = log_path.unwrap_or(default_biome_log_path());
 
     let most_recent = fs::read_dir(biome_log_path)?
         .flatten()
-        .filter(|file| file.file_type().map_or(false, |ty| ty.is_file()))
+        .filter(|file| file.file_type().is_ok_and(|ty| ty.is_file()))
         .filter_map(|file| {
             match file
                 .file_name()
@@ -205,11 +212,14 @@ pub(crate) fn read_most_recent_log_file(
 /// is written to log files rotated on a hourly basis (in
 /// `biome-logs/server.log.yyyy-MM-dd-HH` files inside the system temporary
 /// directory)
-fn setup_tracing_subscriber(log_path: Option<PathBuf>, log_file_name_prefix: Option<String>) {
-    let biome_log_path = log_path.unwrap_or(biome_fs::ensure_cache_dir().join("biome-logs"));
+fn setup_tracing_subscriber(log_path: Option<&Utf8Path>, log_file_name_prefix: Option<&str>) {
+    let biome_log_path = log_path.map_or_else(
+        || biome_fs::ensure_cache_dir().join("biome-logs"),
+        |path| path.to_path_buf(),
+    );
     let appender_builder = tracing_appender::rolling::RollingFileAppender::builder();
     let file_appender = appender_builder
-        .filename_prefix(log_file_name_prefix.unwrap_or(String::from("server.log")))
+        .filename_prefix(log_file_name_prefix.map_or(String::from("server.log"), Into::into))
         .max_log_files(7)
         .rotation(Rotation::HOURLY)
         .build(biome_log_path)
@@ -229,14 +239,10 @@ fn setup_tracing_subscriber(log_path: Option<PathBuf>, log_file_name_prefix: Opt
         .init();
 }
 
-pub fn default_biome_log_path() -> PathBuf {
+pub fn default_biome_log_path() -> Utf8PathBuf {
     match env::var_os("BIOME_LOG_PATH") {
-        Some(directory) => PathBuf::from(directory),
-        // TODO: Remove in Biome v2, and use the None part as fallback.
-        None => match env::var_os("BIOME_LOG_DIR") {
-            Some(directory) => PathBuf::from(directory),
-            None => biome_fs::ensure_cache_dir().join("biome-logs"),
-        },
+        Some(directory) => Utf8PathBuf::from(directory.as_os_str().to_str().unwrap()),
+        None => biome_fs::ensure_cache_dir().join("biome-logs"),
     }
 }
 

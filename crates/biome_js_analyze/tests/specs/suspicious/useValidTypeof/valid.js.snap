@@ -4,7 +4,7 @@ expression: valid.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 typeof foo === "string";
 typeof foo === "object";
 typeof foo === "function";
@@ -51,7 +51,7 @@ class C {
 ```
 valid.js:28:38 lint/suspicious/useValidTypeof ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Invalid typeof comparison.
+  × Invalid typeof comparison.
   
     26 │ someType == typeof bar;
     27 │ var oddUse = typeof foo + "thing";

@@ -1,0 +1,49 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: json/bracket-spacing/bracket-spacing-none.json
+---
+# Input
+
+```json
+{ "foo": { "bar": { "baz": "qux" } } }
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Trailing commas: None
+Expand: Follow Source
+Bracket spacing: true
+Object wrap: Preserve
+-----
+
+```json
+{ "foo": { "bar": { "baz": "qux" } } }
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Trailing commas: None
+Expand: Follow Source
+Bracket spacing: false
+Object wrap: Preserve
+-----
+
+```json
+{"foo": {"bar": {"baz": "qux"}}}
+```

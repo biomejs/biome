@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+snapshot_kind: text
+---
+# Input
+```js
+async function returnsPromise() {
+  return 'value';
+}
+returnsPromise();
+returnsPromise().then(() => { }).finally(() => { });
+
+```
+
+# Diagnostics
+```
+invalid.js:4:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    2 │   return 'value';
+    3 │ }
+  > 4 │ returnsPromise();
+      │ ^^^^^^^^^^^^^^^^^
+    5 │ returnsPromise().then(() => { }).finally(() => { });
+    6 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    3 │ }
+    4 │ returnsPromise();
+  > 5 │ returnsPromise().then(() => { }).finally(() => { });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+
+```

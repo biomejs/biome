@@ -1,0 +1,102 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/object/object-wrap/object-wrap-collapse.js
+---
+# Input
+
+```js
+const a = {
+	name1: "value1",
+	name2: "value2",
+};
+
+const b = { name1: "value1",
+	name2: "value2",
+};
+
+const c = {
+	name1: "value1", name2: "value2",
+};
+
+const d = {
+	name1: "value1", name2: "value2", };
+
+const e = { name1: "value1", name2: "value2", };
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Object wrap: Preserve
+-----
+
+```js
+const a = {
+	name1: "value1",
+	name2: "value2",
+};
+
+const b = { name1: "value1", name2: "value2" };
+
+const c = {
+	name1: "value1",
+	name2: "value2",
+};
+
+const d = {
+	name1: "value1",
+	name2: "value2",
+};
+
+const e = { name1: "value1", name2: "value2" };
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Object wrap: Collapse
+-----
+
+```js
+const a = { name1: "value1", name2: "value2" };
+
+const b = { name1: "value1", name2: "value2" };
+
+const c = { name1: "value1", name2: "value2" };
+
+const d = { name1: "value1", name2: "value2" };
+
+const e = { name1: "value1", name2: "value2" };
+```

@@ -1,0 +1,55 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "style": "error"
+    }
+  }
+}
+```
+
+## `test1.js`
+
+```js
+function f() { console.log(arguments); }
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test1.js:1:28 lint/style/noArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use the rest parameters instead of arguments.
+  
+  > 1 │ function f() { console.log(arguments); }
+      │                            ^^^^^^^^^
+    2 │ 
+  
+  i arguments does not have Array.prototype methods and can be inconvenient to use.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

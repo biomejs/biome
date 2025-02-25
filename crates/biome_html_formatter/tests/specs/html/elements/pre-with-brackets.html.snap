@@ -1,0 +1,50 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: elements/pre-with-brackets.html
+---
+# Input
+
+```html
+<pre>
+ _______
+< Biome >
+ -------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+</pre>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+-----
+
+```html
+<pre>
+ _______
+< Biome >
+ -------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+</pre>
+```

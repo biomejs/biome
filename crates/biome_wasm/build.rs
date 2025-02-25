@@ -7,6 +7,7 @@ use biome_js_formatter::{context::JsFormatOptions, format_node};
 use biome_rowan::AstNode;
 use biome_service::workspace_types::{generate_type, methods, ModuleQueue};
 use quote::{format_ident, quote};
+use schemars::gen::{SchemaGenerator, SchemaSettings};
 use std::{env, fs, io, path::PathBuf};
 
 fn main() -> io::Result<()> {
@@ -15,10 +16,15 @@ fn main() -> io::Result<()> {
     let mut items = Vec::new();
     let mut queue = ModuleQueue::default();
 
+    // FIXME: a lot of this code is duplicated in xtask/codegen/src/generate_bindings.rs
     for method in &methods {
         generate_type(&mut items, &mut queue, &method.params);
         generate_type(&mut items, &mut queue, &method.result);
     }
+    // HACK: SupportKind doesn't get picked up in the loop above, so we add it manually
+    let support_kind_schema = SchemaGenerator::from(SchemaSettings::openapi3())
+        .root_schema_for::<biome_service::workspace::SupportKind>();
+    generate_type(&mut items, &mut queue, &support_kind_schema);
 
     let module = make::js_module(
         make::js_directive_list(None),

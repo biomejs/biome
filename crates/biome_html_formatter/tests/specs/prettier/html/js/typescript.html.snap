@@ -1,0 +1,293 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/js/typescript.html
+---
+# Input
+
+```html
+<script type="application/x-typescript">
+  class Student {
+    fullName: string;
+    constructor(public firstName: string, public middleInitial: string, public lastName: string) {
+    this.fullName = firstName + " " + middleInitial + " " + lastName;
+  }
+  }
+
+  interface Person {
+    firstName: string;
+    lastName: string;
+  }
+
+  function greeter(person : Person) {
+    return "Hello, " + person.firstName + " " + person.lastName;
+  }
+
+  let user = new Student("Jane", "M.", "User");
+
+  document.body.innerHTML = greeter(user);
+</script>
+<script lang="ts">
+  class Student {
+    fullName: string;
+    constructor(public firstName: string, public middleInitial: string, public lastName: string) {
+    this.fullName = firstName + " " + middleInitial + " " + lastName;
+  }
+  }
+
+  interface Person {
+    firstName: string;
+    lastName: string;
+  }
+
+  function greeter(person : Person) {
+    return "Hello, " + person.firstName + " " + person.lastName;
+  }
+
+  let user = new Student("Jane", "M.", "User");
+
+  document.body.innerHTML = greeter(user);
+</script>
+<script lang="tsx">
+  class CommentBox extends React.Component<{ url: string, pollInterval: number}, CommentData> {
+    constructor(){
+      super()
+      this.state = { data: [] };
+    }
+    fetchComments() {
+      $.ajax({
+        url: this.props.url,
+        dataType: 'json',
+        cache: false,
+        success: (data) => this.setState({ data: data }),
+        error: (xhr, status, err) => console.error(status, err)
+      })
+    }
+    componentDidMount() {
+      this.fetchComments();
+      setInterval(this.fetchComments.bind(this), this.props.pollInterval);
+    }
+    render() {
+      let handleCommentSubmit = (comment: { author: string, text: string }) => {
+        console.warn('comment submitted!', comment);
+        const updated = this.state.data.slice(0);
+        updated.push(comment);
+        this.setState({ data: updated });
+      }
+      return (
+        <div className="commentBox">
+        <h1>Comments</h1>
+        <CommentList data={this.state.data}/>
+      <CommentForm onCommentSubmit={handleCommentSubmit} />
+      </div>
+    );
+    }
+  }
+</script>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,13 +1,9 @@
+ <script type="application/x-typescript">
+   class Student {
+     fullName: string;
+-    constructor(
+-      public firstName: string,
+-      public middleInitial: string,
+-      public lastName: string,
+-    ) {
+-      this.fullName = firstName + " " + middleInitial + " " + lastName;
+-    }
++    constructor(public firstName: string, public middleInitial: string, public lastName: string) {
++    this.fullName = firstName + " " + middleInitial + " " + lastName;
++  }
+   }
+ 
+   interface Person {
+@@ -15,7 +11,7 @@
+     lastName: string;
+   }
+ 
+-  function greeter(person: Person) {
++  function greeter(person : Person) {
+     return "Hello, " + person.firstName + " " + person.lastName;
+   }
+ 
+@@ -26,13 +22,9 @@
+ <script lang="ts">
+   class Student {
+     fullName: string;
+-    constructor(
+-      public firstName: string,
+-      public middleInitial: string,
+-      public lastName: string,
+-    ) {
+-      this.fullName = firstName + " " + middleInitial + " " + lastName;
+-    }
++    constructor(public firstName: string, public middleInitial: string, public lastName: string) {
++    this.fullName = firstName + " " + middleInitial + " " + lastName;
++  }
+   }
+ 
+   interface Person {
+@@ -40,7 +32,7 @@
+     lastName: string;
+   }
+ 
+-  function greeter(person: Person) {
++  function greeter(person : Person) {
+     return "Hello, " + person.firstName + " " + person.lastName;
+   }
+ 
+@@ -49,41 +41,38 @@
+   document.body.innerHTML = greeter(user);
+ </script>
+ <script lang="tsx">
+-  class CommentBox extends React.Component<
+-    { url: string; pollInterval: number },
+-    CommentData
+-  > {
+-    constructor() {
+-      super();
++  class CommentBox extends React.Component<{ url: string, pollInterval: number}, CommentData> {
++    constructor(){
++      super()
+       this.state = { data: [] };
+     }
+     fetchComments() {
+       $.ajax({
+         url: this.props.url,
+-        dataType: "json",
++        dataType: 'json',
+         cache: false,
+         success: (data) => this.setState({ data: data }),
+-        error: (xhr, status, err) => console.error(status, err),
+-      });
++        error: (xhr, status, err) => console.error(status, err)
++      })
+     }
+     componentDidMount() {
+       this.fetchComments();
+       setInterval(this.fetchComments.bind(this), this.props.pollInterval);
+     }
+     render() {
+-      let handleCommentSubmit = (comment: { author: string; text: string }) => {
+-        console.warn("comment submitted!", comment);
++      let handleCommentSubmit = (comment: { author: string, text: string }) => {
++        console.warn('comment submitted!', comment);
+         const updated = this.state.data.slice(0);
+         updated.push(comment);
+         this.setState({ data: updated });
+-      };
++      }
+       return (
+         <div className="commentBox">
+-          <h1>Comments</h1>
+-          <CommentList data={this.state.data} />
+-          <CommentForm onCommentSubmit={handleCommentSubmit} />
+-        </div>
+-      );
++        <h1>Comments</h1>
++        <CommentList data={this.state.data}/>
++      <CommentForm onCommentSubmit={handleCommentSubmit} />
++      </div>
++    );
+     }
+   }
+ </script>
+```
+
+# Output
+
+```html
+<script type="application/x-typescript">
+  class Student {
+    fullName: string;
+    constructor(public firstName: string, public middleInitial: string, public lastName: string) {
+    this.fullName = firstName + " " + middleInitial + " " + lastName;
+  }
+  }
+
+  interface Person {
+    firstName: string;
+    lastName: string;
+  }
+
+  function greeter(person : Person) {
+    return "Hello, " + person.firstName + " " + person.lastName;
+  }
+
+  let user = new Student("Jane", "M.", "User");
+
+  document.body.innerHTML = greeter(user);
+</script>
+<script lang="ts">
+  class Student {
+    fullName: string;
+    constructor(public firstName: string, public middleInitial: string, public lastName: string) {
+    this.fullName = firstName + " " + middleInitial + " " + lastName;
+  }
+  }
+
+  interface Person {
+    firstName: string;
+    lastName: string;
+  }
+
+  function greeter(person : Person) {
+    return "Hello, " + person.firstName + " " + person.lastName;
+  }
+
+  let user = new Student("Jane", "M.", "User");
+
+  document.body.innerHTML = greeter(user);
+</script>
+<script lang="tsx">
+  class CommentBox extends React.Component<{ url: string, pollInterval: number}, CommentData> {
+    constructor(){
+      super()
+      this.state = { data: [] };
+    }
+    fetchComments() {
+      $.ajax({
+        url: this.props.url,
+        dataType: 'json',
+        cache: false,
+        success: (data) => this.setState({ data: data }),
+        error: (xhr, status, err) => console.error(status, err)
+      })
+    }
+    componentDidMount() {
+      this.fetchComments();
+      setInterval(this.fetchComments.bind(this), this.props.pollInterval);
+    }
+    render() {
+      let handleCommentSubmit = (comment: { author: string, text: string }) => {
+        console.warn('comment submitted!', comment);
+        const updated = this.state.data.slice(0);
+        updated.push(comment);
+        this.setState({ data: updated });
+      }
+      return (
+        <div className="commentBox">
+        <h1>Comments</h1>
+        <CommentList data={this.state.data}/>
+      <CommentForm onCommentSubmit={handleCommentSubmit} />
+      </div>
+    );
+    }
+  }
+</script>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4:     constructor(public firstName: string, public middleInitial: string, public lastName: string) {
+   25:     constructor(public firstName: string, public middleInitial: string, public lastName: string) {
+   44:   class CommentBox extends React.Component<{ url: string, pollInterval: number}, CommentData> {
+```

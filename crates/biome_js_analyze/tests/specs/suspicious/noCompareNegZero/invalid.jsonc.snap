@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -11,7 +12,7 @@ x === -0;
 ```
 invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the === operator to compare against -0.
+  × Do not use the === operator to compare against -0.
   
   > 1 │ x === -0;
       │ ^^^^^^^^
@@ -32,7 +33,7 @@ x == -0;
 ```
 invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the == operator to compare against -0.
+  × Do not use the == operator to compare against -0.
   
   > 1 │ x == -0;
       │ ^^^^^^^
@@ -53,7 +54,7 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the == operator to compare against -0.
+  × Do not use the == operator to compare against -0.
   
   > 1 │ -0 == x;
       │ ^^^^^^^
@@ -74,7 +75,7 @@ x < -0;
 ```
 invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the < operator to compare against -0.
+  × Do not use the < operator to compare against -0.
   
   > 1 │ x < -0;
       │ ^^^^^^
@@ -95,7 +96,7 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the < operator to compare against -0.
+  × Do not use the < operator to compare against -0.
   
   > 1 │ -0 < x;
       │ ^^^^^^
@@ -116,7 +117,7 @@ x <= -0;
 ```
 invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the <= operator to compare against -0.
+  × Do not use the <= operator to compare against -0.
   
   > 1 │ x <= -0;
       │ ^^^^^^^
@@ -137,7 +138,7 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the <= operator to compare against -0.
+  × Do not use the <= operator to compare against -0.
   
   > 1 │ -0 <= x;
       │ ^^^^^^^
@@ -158,7 +159,7 @@ x > -0;
 ```
 invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the > operator to compare against -0.
+  × Do not use the > operator to compare against -0.
   
   > 1 │ x > -0;
       │ ^^^^^^
@@ -179,7 +180,7 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the > operator to compare against -0.
+  × Do not use the > operator to compare against -0.
   
   > 1 │ -0 > x;
       │ ^^^^^^
@@ -200,7 +201,7 @@ x >= -0;
 ```
 invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the >= operator to compare against -0.
+  × Do not use the >= operator to compare against -0.
   
   > 1 │ x >= -0;
       │ ^^^^^^^
@@ -221,7 +222,7 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the >= operator to compare against -0.
+  × Do not use the >= operator to compare against -0.
   
   > 1 │ -0 >= x;
       │ ^^^^^^^
@@ -242,7 +243,7 @@ x != -0;
 ```
 invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the != operator to compare against -0.
+  × Do not use the != operator to compare against -0.
   
   > 1 │ x != -0;
       │ ^^^^^^^
@@ -263,7 +264,7 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the != operator to compare against -0.
+  × Do not use the != operator to compare against -0.
   
   > 1 │ -0 != x;
       │ ^^^^^^^
@@ -284,7 +285,7 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the !== operator to compare against -0.
+  × Do not use the !== operator to compare against -0.
   
   > 1 │ -0 !== x;
       │ ^^^^^^^^
@@ -305,7 +306,7 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
 ```
 invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the === operator to compare against -0.
+  × Do not use the === operator to compare against -0.
   
   > 1 │ -0 === -0;
       │ ^^^^^^^^^
@@ -316,5 +317,3 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
       │ -      -  
 
 ```
-
-

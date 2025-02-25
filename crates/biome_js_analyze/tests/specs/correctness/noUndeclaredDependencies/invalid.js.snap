@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import "notInstalled";
 import("notInstalled");
 require("notInstalled")
@@ -18,7 +19,7 @@ require("@testing-library/react");
 ```
 invalid.js:1:8 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The current dependency isn't specified in your package.json.
+  i Dependency notInstalled isn't specified in package.json.
   
   > 1 │ import "notInstalled";
       │        ^^^^^^^^^^^^^^
@@ -35,7 +36,7 @@ invalid.js:1:8 lint/correctness/noUndeclaredDependencies ━━━━━━━�
 ```
 invalid.js:2:1 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The current dependency isn't specified in your package.json.
+  i Dependency notInstalled isn't specified in package.json.
   
     1 │ import "notInstalled";
   > 2 │ import("notInstalled");
@@ -53,7 +54,7 @@ invalid.js:2:1 lint/correctness/noUndeclaredDependencies ━━━━━━━�
 ```
 invalid.js:3:1 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The current dependency isn't specified in your package.json.
+  i Dependency notInstalled isn't specified in package.json.
   
     1 │ import "notInstalled";
     2 │ import("notInstalled");
@@ -72,7 +73,7 @@ invalid.js:3:1 lint/correctness/noUndeclaredDependencies ━━━━━━━�
 ```
 invalid.js:5:8 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The current dependency isn't specified in your package.json.
+  i Dependency @testing-library/react isn't specified in package.json.
   
     3 │ require("notInstalled")
     4 │ 
@@ -91,7 +92,7 @@ invalid.js:5:8 lint/correctness/noUndeclaredDependencies ━━━━━━━�
 ```
 invalid.js:6:1 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The current dependency isn't specified in your package.json.
+  i Dependency @testing-library/react isn't specified in package.json.
   
     5 │ import "@testing-library/react";
   > 6 │ import("@testing-library/react");
@@ -109,7 +110,7 @@ invalid.js:6:1 lint/correctness/noUndeclaredDependencies ━━━━━━━�
 ```
 invalid.js:7:1 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The current dependency isn't specified in your package.json.
+  i Dependency @testing-library/react isn't specified in package.json.
   
     5 │ import "@testing-library/react";
     6 │ import("@testing-library/react");

@@ -1,7 +1,7 @@
 //! `biome_glob` provides globbing functionality. When listing the globs to match,
-//! it also possible to provide globs that function as "exceptions" by prefixing the globs with `!`.
+//! it is also possible to provide globs that function as "exceptions" by prefixing the globs with `!`.
 //!
-//! A glob is primarlly used to select or filter a set of file paths by matching every file paths against the glob.
+//! A glob is primarily used to select or filter a set of file paths by matching every file paths against the glob.
 //! A file path either matches or doesn't match a glob.
 //! For example, the path `lib.rs` matches the glob `*.rs`.
 //!
@@ -10,7 +10,7 @@
 //! You have to understand the structure of a path to understand which path match a glob.
 //! A path is divided in path segments.
 //! Every path segment is delimited by the path separator `/` or the start/end of the path.
-//! For instance `src/lib.rs` cosnists of two path segments: `src` and `lib.rs`.
+//! For instance `src/lib.rs` consists of two path segments: `src` and `lib.rs`.
 //! A Biome glob supports the following patterns:
 //!
 //! - star `*` that matches zero or more characters inside a path segment
@@ -25,7 +25,7 @@
 //!   For example, `**/**` is not a valid glob.
 //!
 //!   `lib.rs` and `src/lib.rs` match `**` and `**/*.rs`
-//!   Conversely, `README.txt` doesn't match `**/*.rs` because the pat hends with `.txt`.
+//!   Conversely, `README.txt` doesn't match `**/*.rs` because the pat ends with `.txt`.
 //!
 //! - Use `\*` to escape `*`
 //!
@@ -44,7 +44,7 @@
 //! You can create a glob from a string using the `parse` method.
 //! Use [Glob::is_match] to match against anything that can be turned into a [std::path::Path], such as a string.
 //!
-//! In the following example we parse the string `"*.rs"` into a glob and we match against two strings.
+//! In the following example we parse the string `"*.rs"` into a glob, and we match against two strings.
 //! `lib.rs` matches the glob because the path has a single path segment that ends with `.rs`.
 //! Conversely, `src/lib.rs` doesn't match because it has two path segments (`src` and `lib.rs`).
 //!
@@ -61,7 +61,7 @@
 //! When a path is expected to be matched against several globs,
 //! you should compile the path into a [CandidatePath] using [CandidatePath::new].
 //! [CandidatePath] may speed up matching against several globs.
-//! To get adavantage of the speed-up, you have to use the [CandidatePath::matches] method instead of [Glob::is_match].
+//! To get advantage of the speed-up, you have to use the [CandidatePath::matches] method instead of [Glob::is_match].
 //!
 //! In the following example, we create a list of two globs and we match them against a path compiled into a candidate path.
 //! The path matches the second glob of the list.
@@ -104,9 +104,9 @@
 //!
 //! Taking the previous example, the directory path `a/path` doesn't match `**/*.rs` the list of glob,
 //! because the path doesn't end with the `.rs` extension.
-//! This behavior is porblematic when you write a file crawler that traverse the file hierarchy and
+//! This behavior is problematic when you write a file crawler that traverse the file hierarchy and
 //! ignore directories with files that never match the list of globs.
-//! Biome provides a deidcated method [CandidatePath::matches_directory_with_exceptions] for this purpose.
+//! Biome provides a dedicated method [CandidatePath::matches_directory_with_exceptions] for this purpose.
 //! The method only check if the directory is not excluded by an exception.
 //!
 //! In the following example, `dir1` matches the list of globs, while `dir2` doesn't.
@@ -127,8 +127,10 @@
 //! ```
 //!
 
+pub mod editorconfig;
+
 /// A Biome glob pattern.
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
 pub struct Glob {
@@ -147,6 +149,22 @@ impl Glob {
     /// ```
     pub fn is_negated(&self) -> bool {
         self.is_negated
+    }
+
+    /// Returns the negated version of this glob.
+    ///
+    /// ```
+    /// let glob = "!*.js".parse::<biome_glob::Glob>().unwrap();
+    /// assert!(!glob.negated().is_negated());
+    ///
+    /// let glob = "*.js".parse::<biome_glob::Glob>().unwrap();
+    /// assert!(glob.negated().is_negated());
+    /// ```
+    pub fn negated(self) -> Self {
+        Self {
+            is_negated: !self.is_negated,
+            glob: self.glob,
+        }
     }
 
     /// Tests whether the given path matches this pattern.
@@ -186,6 +204,11 @@ impl std::fmt::Display for Glob {
         let repr = self.glob.glob();
         let negation = if self.is_negated { "!" } else { "" };
         write!(f, "{negation}{repr}")
+    }
+}
+impl std::fmt::Debug for Glob {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self, f)
     }
 }
 impl From<Glob> for String {
@@ -228,11 +251,11 @@ impl TryFrom<String> for Glob {
 #[cfg(feature = "biome_deserialize")]
 impl biome_deserialize::Deserializable for Glob {
     fn deserialize(
+        ctx: &mut impl biome_deserialize::DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let glob = String::deserialize(value, name, diagnostics)?;
+        let glob = String::deserialize(ctx, value, name)?;
         match glob.parse() {
             Ok(glob) => Some(glob),
             Err(error) => {
@@ -243,7 +266,7 @@ impl biome_deserialize::Deserializable for Glob {
                         1u32.into(),
                     )
                 });
-                diagnostics.push(
+                ctx.report(
                     biome_deserialize::DeserializationDiagnostic::new(format_args!("{error}"))
                         .with_range(range),
                 );
@@ -252,10 +275,10 @@ impl biome_deserialize::Deserializable for Glob {
         }
     }
 }
-#[cfg(feature = "schemars")]
+#[cfg(feature = "schema")]
 impl schemars::JsonSchema for Glob {
     fn schema_name() -> String {
-        "Regex".to_string()
+        "Glob".to_string()
     }
 
     fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
@@ -272,7 +295,7 @@ impl schemars::JsonSchema for Glob {
 pub struct CandidatePath<'a>(globset::Candidate<'a>);
 impl<'a> CandidatePath<'a> {
     /// Create a new candidate for matching from the given path.
-    pub fn new(path: &'a impl AsRef<std::path::Path>) -> Self {
+    pub fn new<P: AsRef<std::path::Path> + ?Sized>(path: &'a P) -> Self {
         Self(globset::Candidate::new(path))
     }
 
@@ -372,7 +395,7 @@ pub enum GlobError {
         kind: GlobErrorKind,
         index: u32,
     },
-    /// Error caused by a a third-party module.
+    /// Error caused by a third-party module.
     Generic(Box<str>),
 }
 impl GlobError {
@@ -402,8 +425,8 @@ pub enum GlobErrorKind {
     InvalidEscape,
     /// Occurs when `**` isn't enclosed by the path separator `/` or the start/end of the glob.
     InvalidGlobStar,
-    /// `{}` is not supported.
-    UnsupportedAlternates,
+    /// Nested `{}` are not supported.
+    UnsupportedNestedAlternates,
     /// `[]` is not supported.
     UnsupportedCharacterClass,
     /// `?` is not supported.
@@ -417,8 +440,8 @@ impl std::fmt::Display for GlobErrorKind {
             Self::InvalidGlobStar => {
                 r"`**` must be enclosed by the path separator `/`, or the start/end of the glob and mustn't be followed by `/**`."
             }
-            Self::UnsupportedAlternates => {
-                r"Alternates `{}` are not supported. Use `\{` and `\}` to escape the characters."
+            Self::UnsupportedNestedAlternates => {
+                r"Nested alternates `{}` are not supported. Use a separate glob for each nested alternate."
             }
             Self::UnsupportedCharacterClass => {
                 r"Character class `[]` are not supported. Use `\[` and `\]` to escape the characters."
@@ -435,6 +458,7 @@ impl std::fmt::Display for GlobErrorKind {
 fn validate_glob(pattern: &str) -> Result<(), GlobError> {
     let mut it = pattern.bytes().enumerate();
     let mut allow_globstar = true;
+    let mut alternates_found = false;
     while let Some((i, c)) = it.next() {
         match c {
             b'*' => {
@@ -480,11 +504,18 @@ fn validate_glob(pattern: &str) -> Result<(), GlobError> {
                     index: i as u32,
                 });
             }
-            b'{' | b'}' => {
-                return Err(GlobError::Regular {
-                    kind: GlobErrorKind::UnsupportedAlternates,
-                    index: i as u32,
-                });
+            b'{' => {
+                if alternates_found {
+                    return Err(GlobError::Regular {
+                        kind: GlobErrorKind::UnsupportedNestedAlternates,
+                        index: i as u32,
+                    });
+                } else {
+                    alternates_found = true;
+                }
+            }
+            b'}' => {
+                alternates_found = false;
             }
             _ => {}
         }
@@ -565,6 +596,14 @@ mod tests {
             })
         );
 
+        assert_eq!(
+            validate_glob(r"file.{{spec,test}}"),
+            Err(GlobError::Regular {
+                kind: GlobErrorKind::UnsupportedNestedAlternates,
+                index: 6
+            })
+        );
+
         assert!(validate_glob("!*.js").is_ok());
         assert!(validate_glob("!").is_ok());
         assert!(validate_glob("*.js").is_ok());
@@ -575,14 +614,19 @@ mod tests {
         assert!(validate_glob(r"/**/").is_ok());
         assert!(validate_glob(r"**/").is_ok());
         assert!(validate_glob(r"/**").is_ok());
+        assert!(validate_glob(r"*.{js,jsx}").is_ok());
     }
 
     #[test]
     fn test_is_match() {
         assert!("*.rs".parse::<Glob>().unwrap().is_match("lib.rs"));
         assert!(!"*.rs".parse::<Glob>().unwrap().is_match("src/lib.rs"));
-
         assert!("**/*.rs".parse::<Glob>().unwrap().is_match("src/lib.rs"));
+        assert!("file.{js,jsx}".parse::<Glob>().unwrap().is_match("file.js"));
+        assert!("file.{js,jsx}"
+            .parse::<Glob>()
+            .unwrap()
+            .is_match("file.jsx"));
     }
 
     #[test]
@@ -608,5 +652,9 @@ mod tests {
     fn test_to_string() {
         assert_eq!(Glob::from_str("**/*.rs").unwrap().to_string(), "**/*.rs");
         assert_eq!(Glob::from_str("!**/*.rs").unwrap().to_string(), "!**/*.rs");
+        assert_eq!(
+            Glob::from_str("file.{js,jsx}").unwrap().to_string(),
+            "file.{js,jsx}"
+        );
     }
 }

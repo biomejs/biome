@@ -1048,6 +1048,7 @@ pub const ES_2020: &[&str] = &[
     "RegExpConstructor",
     "RegExpExecArray",
     "RegExpMatchArray",
+    "RegExpStringIterator",
     "Required",
     "ReturnType",
     "Set",

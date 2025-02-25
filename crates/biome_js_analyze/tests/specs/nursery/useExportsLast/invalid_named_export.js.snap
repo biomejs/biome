@@ -4,7 +4,7 @@ expression: invalid_named_export.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export const foo = 1;
 
 const bar = 2;
@@ -15,7 +15,7 @@ const bar = 2;
 ```
 invalid_named_export.js:1:1 lint/nursery/useExportsLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All exports should be declared after all non-export statements.
+  i All exports should be declared after all non-export statements.
   
   > 1 │ export const foo = 1;
       │ ^^^^^^^^^^^^^^^^^^^^^

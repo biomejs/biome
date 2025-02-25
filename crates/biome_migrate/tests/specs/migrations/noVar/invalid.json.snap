@@ -1,0 +1,49 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "noVar": "error"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rule style/noVar has ben moved to the suspicious group.
+  
+    3 │     "rules": {
+    4 │       "style": {
+  > 5 │         "noVar": "error"
+      │         ^^^^^^^^^^^^^^^^
+    6 │       }
+    7 │     }
+  
+  i Safe fix: Move the rule in the correct group.
+  
+     2  2 │     "linter": {
+     3  3 │       "rules": {
+     4    │ - ······"style":·{
+        4 │ + ······"suspicious":··{
+        5 │ + ········"noVar":·"error"
+        6 │ + ····},
+        7 │ + ····"suspicious":··{
+     5  8 │           "noVar": "error"
+     6    │ - ······}
+        9 │ + ····}
+     7 10 │       }
+     8 11 │     }
+  
+
+```

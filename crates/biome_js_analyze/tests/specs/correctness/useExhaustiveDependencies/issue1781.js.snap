@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue1781.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import { useMemo } from 'react';
 
 const data = {}

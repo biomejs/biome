@@ -1,11 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 86
 expression: invalid_with_import.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // head comment
 import a from 'b';
 
@@ -16,7 +15,7 @@ const c = process.env;
 ```
 invalid_with_import.js:4:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Usage of the `process` global is discouraged.
+  i Usage of the `process` global is discouraged.
   
     2 │ import a from 'b';
     3 │ 

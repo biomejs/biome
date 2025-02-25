@@ -1,6 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::{AnyCssProperty, CssDashedIdentifier, CssDeclaration, CssSyntaxKind};
+use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 
 use crate::services::semantic::Semantic;
@@ -117,13 +118,15 @@ declare_lint_rule! {
         name: "noMissingVarFunction",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("custom-property-no-missing-var-function")],
     }
 }
 
-pub const IGNORED_PROPERTIES: [&str; 17] = [
+pub const IGNORED_PROPERTIES: [&str; 18] = [
     "animation",
     "animation-name",
+    "container-name",
     "counter-increment",
     "counter-reset",
     "counter-set",
@@ -154,7 +157,7 @@ impl Rule for NoMissingVarFunction {
         }
 
         let property_name = get_property_name(node)?;
-        let custom_variable_name = node.text();
+        let custom_variable_name = node.to_trimmed_string();
 
         if IGNORED_PROPERTIES.contains(&property_name.as_str()) {
             return None;
@@ -198,7 +201,7 @@ impl Rule for NoMissingVarFunction {
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
         let span = node.range();
-        let custom_variable_name = node.text();
+        let custom_variable_name = node.to_trimmed_string();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -239,8 +242,12 @@ fn get_property_name(node: &CssDashedIdentifier) -> Option<String> {
             let prop = node.property().ok()?;
             return match prop {
                 AnyCssProperty::CssBogusProperty(_) => None,
-                AnyCssProperty::CssComposesProperty(prop) => Some(prop.name().ok()?.text()),
-                AnyCssProperty::CssGenericProperty(prop) => Some(prop.name().ok()?.text()),
+                AnyCssProperty::CssComposesProperty(prop) => {
+                    Some(prop.name().ok()?.to_trimmed_string())
+                }
+                AnyCssProperty::CssGenericProperty(prop) => {
+                    Some(prop.name().ok()?.to_trimmed_string())
+                }
             };
         }
         current_node = parent.parent();

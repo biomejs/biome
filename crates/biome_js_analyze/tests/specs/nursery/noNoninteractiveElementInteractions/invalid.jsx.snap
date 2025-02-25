@@ -102,7 +102,7 @@ snapshot_kind: text
 ```
 invalid.jsx:2:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     1 │ <>
   > 2 │     <div onClick={() => { }} />
@@ -118,7 +118,7 @@ invalid.jsx:2:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━
 ```
 invalid.jsx:3:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     1 │ <>
     2 │     <div onClick={() => { }} />
@@ -135,7 +135,7 @@ invalid.jsx:3:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━
 ```
 invalid.jsx:4:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     2 │     <div onClick={() => { }} />
     3 │     <main onClick={() => void 0} />
@@ -152,7 +152,7 @@ invalid.jsx:4:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━
 ```
 invalid.jsx:5:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     3 │     <main onClick={() => void 0} />
     4 │     <article onClick={() => { }} />
@@ -169,7 +169,7 @@ invalid.jsx:5:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━
 ```
 invalid.jsx:6:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     4 │     <article onClick={() => { }} />
     5 │     <aside onClick={() => { }} />
@@ -186,7 +186,7 @@ invalid.jsx:6:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━
 ```
 invalid.jsx:7:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     5 │     <aside onClick={() => { }} />
     6 │     <blockquote onClick={() => { }} />
@@ -203,7 +203,7 @@ invalid.jsx:7:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━
 ```
 invalid.jsx:8:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
      6 │     <blockquote onClick={() => { }} />
      7 │     <body onClick={() => { }} />
@@ -220,7 +220,7 @@ invalid.jsx:8:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━
 ```
 invalid.jsx:9:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
      7 │     <body onClick={() => { }} />
      8 │     <br onClick={() => { }} />
@@ -237,7 +237,7 @@ invalid.jsx:9:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━
 ```
 invalid.jsx:10:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
      8 │     <br onClick={() => { }} />
      9 │     <caption onClick={() => { }} />
@@ -254,7 +254,7 @@ invalid.jsx:10:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:11:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
      9 │     <caption onClick={() => { }} />
     10 │     <dd onClick={() => { }} />
@@ -271,7 +271,7 @@ invalid.jsx:11:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:12:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     10 │     <dd onClick={() => { }} />
     11 │     <details onClick={() => { }} />
@@ -288,7 +288,7 @@ invalid.jsx:12:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:14:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     12 │     <dfn onClick={() => { }} />
     13 │     <dl onClick={() => { }} />
@@ -305,7 +305,7 @@ invalid.jsx:14:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:15:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     13 │     <dl onClick={() => { }} />
     14 │     <dir onClick={() => { }} />
@@ -322,7 +322,7 @@ invalid.jsx:15:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:16:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     14 │     <dir onClick={() => { }} />
     15 │     <dt onClick={() => { }} />
@@ -339,7 +339,7 @@ invalid.jsx:16:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:17:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     15 │     <dt onClick={() => { }} />
     16 │     <fieldset onClick={() => { }} />
@@ -356,7 +356,7 @@ invalid.jsx:17:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:18:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     16 │     <fieldset onClick={() => { }} />
     17 │     <figcaption onClick={() => { }} />
@@ -373,7 +373,7 @@ invalid.jsx:18:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:19:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     17 │     <figcaption onClick={() => { }} />
     18 │     <figure onClick={() => { }} />
@@ -390,7 +390,7 @@ invalid.jsx:19:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:20:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     18 │     <figure onClick={() => { }} />
     19 │     <footer onClick={() => { }} />
@@ -407,7 +407,7 @@ invalid.jsx:20:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:21:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     19 │     <footer onClick={() => { }} />
     20 │     <form onClick={() => { }} />
@@ -424,7 +424,7 @@ invalid.jsx:21:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:22:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     20 │     <form onClick={() => { }} />
     21 │     <frame onClick={() => { }} />
@@ -441,7 +441,7 @@ invalid.jsx:22:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:23:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     21 │     <frame onClick={() => { }} />
     22 │     <h1 onClick={() => { }} />
@@ -458,7 +458,7 @@ invalid.jsx:23:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:24:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     22 │     <h1 onClick={() => { }} />
     23 │     <h2 onClick={() => { }} />
@@ -475,7 +475,7 @@ invalid.jsx:24:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:25:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     23 │     <h2 onClick={() => { }} />
     24 │     <h3 onClick={() => { }} />
@@ -492,7 +492,7 @@ invalid.jsx:25:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:26:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     24 │     <h3 onClick={() => { }} />
     25 │     <h4 onClick={() => { }} />
@@ -509,7 +509,7 @@ invalid.jsx:26:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:27:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     25 │     <h4 onClick={() => { }} />
     26 │     <h5 onClick={() => { }} />
@@ -526,7 +526,7 @@ invalid.jsx:27:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:28:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     26 │     <h5 onClick={() => { }} />
     27 │     <h6 onClick={() => { }} />
@@ -543,7 +543,7 @@ invalid.jsx:28:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:29:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     27 │     <h6 onClick={() => { }} />
     28 │     <iframe onClick={() => { }} />
@@ -560,7 +560,7 @@ invalid.jsx:29:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:30:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     28 │     <iframe onClick={() => { }} />
     29 │     <img onClick={() => { }} />
@@ -577,7 +577,7 @@ invalid.jsx:30:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:31:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     29 │     <img onClick={() => { }} />
     30 │     <label onClick={() => { }} />
@@ -594,7 +594,7 @@ invalid.jsx:31:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:32:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     30 │     <label onClick={() => { }} />
     31 │     <legend onClick={() => { }} />
@@ -611,7 +611,7 @@ invalid.jsx:32:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:33:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     31 │     <legend onClick={() => { }} />
     32 │     <li onClick={() => { }} />
@@ -628,7 +628,7 @@ invalid.jsx:33:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:34:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     32 │     <li onClick={() => { }} />
     33 │     <mark onClick={() => { }} />
@@ -645,7 +645,7 @@ invalid.jsx:34:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:35:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     33 │     <mark onClick={() => { }} />
     34 │     <marquee onClick={() => { }} />
@@ -662,7 +662,7 @@ invalid.jsx:35:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:36:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     34 │     <marquee onClick={() => { }} />
     35 │     <menu onClick={() => { }} />
@@ -679,7 +679,7 @@ invalid.jsx:36:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:37:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     35 │     <menu onClick={() => { }} />
     36 │     <meter onClick={() => { }} />
@@ -696,7 +696,7 @@ invalid.jsx:37:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:38:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     36 │     <meter onClick={() => { }} />
     37 │     <nav onClick={() => { }} />
@@ -713,7 +713,7 @@ invalid.jsx:38:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:39:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     37 │     <nav onClick={() => { }} />
     38 │     <ol onClick={() => { }} />
@@ -730,7 +730,7 @@ invalid.jsx:39:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:40:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     38 │     <ol onClick={() => { }} />
     39 │     <optgroup onClick={() => { }} />
@@ -747,7 +747,7 @@ invalid.jsx:40:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:41:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     39 │     <optgroup onClick={() => { }} />
     40 │     <output onClick={() => { }} />
@@ -764,7 +764,7 @@ invalid.jsx:41:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:42:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     40 │     <output onClick={() => { }} />
     41 │     <p onClick={() => { }} />
@@ -781,7 +781,7 @@ invalid.jsx:42:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:43:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     41 │     <p onClick={() => { }} />
     42 │     <pre onClick={() => { }} />
@@ -798,7 +798,7 @@ invalid.jsx:43:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:44:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     42 │     <pre onClick={() => { }} />
     43 │     <progress onClick={() => { }} />
@@ -815,7 +815,7 @@ invalid.jsx:44:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:45:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     43 │     <progress onClick={() => { }} />
     44 │     <ruby onClick={() => { }} />
@@ -832,7 +832,7 @@ invalid.jsx:45:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:46:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     44 │     <ruby onClick={() => { }} />
     45 │     <section onClick={() => { }} aria-label="Aardvark" />
@@ -849,7 +849,7 @@ invalid.jsx:46:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:47:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     45 │     <section onClick={() => { }} aria-label="Aardvark" />
     46 │     <section onClick={() => { }} aria-labelledby="js_1" />
@@ -866,7 +866,7 @@ invalid.jsx:47:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:48:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     46 │     <section onClick={() => { }} aria-labelledby="js_1" />
     47 │     <table onClick={() => { }} />
@@ -883,7 +883,7 @@ invalid.jsx:48:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:49:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     47 │     <table onClick={() => { }} />
     48 │     <tbody onClick={() => { }} />
@@ -900,7 +900,7 @@ invalid.jsx:49:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:50:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     48 │     <tbody onClick={() => { }} />
     49 │     <td onClick={() => { }} />
@@ -917,7 +917,7 @@ invalid.jsx:50:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:51:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     49 │     <td onClick={() => { }} />
     50 │     <tfoot onClick={() => { }} />
@@ -934,7 +934,7 @@ invalid.jsx:51:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:52:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     50 │     <tfoot onClick={() => { }} />
     51 │     <thead onClick={() => { }} />
@@ -951,7 +951,7 @@ invalid.jsx:52:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:53:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     51 │     <thead onClick={() => { }} />
     52 │     <time onClick={() => { }} />
@@ -968,7 +968,7 @@ invalid.jsx:53:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:54:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     52 │     <time onClick={() => { }} />
     53 │     <ul onClick={() => { }} />
@@ -985,7 +985,7 @@ invalid.jsx:54:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:55:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     53 │     <ul onClick={() => { }} />
     54 │     <ul contentEditable="false" onClick={() => { }} />
@@ -1002,7 +1002,7 @@ invalid.jsx:55:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:56:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     54 │     <ul contentEditable="false" onClick={() => { }} />
     55 │     <div role="alert" onClick={() => { }} />
@@ -1019,7 +1019,7 @@ invalid.jsx:56:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:57:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     55 │     <div role="alert" onClick={() => { }} />
     56 │     <div role="alertdialog" onClick={() => { }} />
@@ -1036,7 +1036,7 @@ invalid.jsx:57:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:58:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     56 │     <div role="alertdialog" onClick={() => { }} />
     57 │     <div role="application" onClick={() => { }} />
@@ -1053,7 +1053,7 @@ invalid.jsx:58:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:59:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     57 │     <div role="application" onClick={() => { }} />
     58 │     <div role="banner" onClick={() => { }} />
@@ -1070,7 +1070,7 @@ invalid.jsx:59:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:60:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     58 │     <div role="banner" onClick={() => { }} />
     59 │     <div role="cell" onClick={() => { }} />
@@ -1087,7 +1087,7 @@ invalid.jsx:60:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:61:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     59 │     <div role="cell" onClick={() => { }} />
     60 │     <div role="complementary" onClick={() => { }} />
@@ -1104,7 +1104,7 @@ invalid.jsx:61:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:62:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     60 │     <div role="complementary" onClick={() => { }} />
     61 │     <div role="contentinfo" onClick={() => { }} />
@@ -1121,7 +1121,7 @@ invalid.jsx:62:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:63:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     61 │     <div role="contentinfo" onClick={() => { }} />
     62 │     <div role="definition" onClick={() => { }} />
@@ -1138,7 +1138,7 @@ invalid.jsx:63:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:64:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     62 │     <div role="definition" onClick={() => { }} />
     63 │     <div role="dialog" onClick={() => { }} />
@@ -1155,7 +1155,7 @@ invalid.jsx:64:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:65:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     63 │     <div role="dialog" onClick={() => { }} />
     64 │     <div role="directory" onClick={() => { }} />
@@ -1172,7 +1172,7 @@ invalid.jsx:65:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:66:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     64 │     <div role="directory" onClick={() => { }} />
     65 │     <div role="document" onClick={() => { }} />
@@ -1189,7 +1189,7 @@ invalid.jsx:66:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:67:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     65 │     <div role="document" onClick={() => { }} />
     66 │     <div role="feed" onClick={() => { }} />
@@ -1206,7 +1206,7 @@ invalid.jsx:67:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:68:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     66 │     <div role="feed" onClick={() => { }} />
     67 │     <div role="figure" onClick={() => { }} />
@@ -1223,7 +1223,7 @@ invalid.jsx:68:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:69:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     67 │     <div role="figure" onClick={() => { }} />
     68 │     <div role="form" onClick={() => { }} />
@@ -1240,7 +1240,7 @@ invalid.jsx:69:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:70:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     68 │     <div role="form" onClick={() => { }} />
     69 │     <div role="group" onClick={() => { }} />
@@ -1257,7 +1257,7 @@ invalid.jsx:70:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:71:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     69 │     <div role="group" onClick={() => { }} />
     70 │     <div role="heading" onClick={() => { }} />
@@ -1274,7 +1274,7 @@ invalid.jsx:71:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:72:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     70 │     <div role="heading" onClick={() => { }} />
     71 │     <div role="img" onClick={() => { }} />
@@ -1291,7 +1291,7 @@ invalid.jsx:72:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:73:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     71 │     <div role="img" onClick={() => { }} />
     72 │     <div role="list" onClick={() => { }} />
@@ -1308,7 +1308,7 @@ invalid.jsx:73:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:74:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     72 │     <div role="list" onClick={() => { }} />
     73 │     <div role="listitem" onClick={() => { }} />
@@ -1325,7 +1325,7 @@ invalid.jsx:74:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:75:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     73 │     <div role="listitem" onClick={() => { }} />
     74 │     <div role="log" onClick={() => { }} />
@@ -1342,7 +1342,7 @@ invalid.jsx:75:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:76:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     74 │     <div role="log" onClick={() => { }} />
     75 │     <div role="main" onClick={() => { }} />
@@ -1359,7 +1359,7 @@ invalid.jsx:76:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:77:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     75 │     <div role="main" onClick={() => { }} />
     76 │     <div role="marquee" onClick={() => { }} />
@@ -1376,7 +1376,7 @@ invalid.jsx:77:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:78:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     76 │     <div role="marquee" onClick={() => { }} />
     77 │     <div role="math" onClick={() => { }} />
@@ -1393,7 +1393,7 @@ invalid.jsx:78:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:79:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     77 │     <div role="math" onClick={() => { }} />
     78 │     <div role="navigation" onClick={() => { }} />
@@ -1410,7 +1410,7 @@ invalid.jsx:79:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:80:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     78 │     <div role="navigation" onClick={() => { }} />
     79 │     <div role="note" onClick={() => { }} />
@@ -1427,7 +1427,7 @@ invalid.jsx:80:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:81:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     79 │     <div role="note" onClick={() => { }} />
     80 │     <div role="region" onClick={() => { }} />
@@ -1444,7 +1444,7 @@ invalid.jsx:81:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:82:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     80 │     <div role="region" onClick={() => { }} />
     81 │     <div role="rowgroup" onClick={() => { }} />
@@ -1461,7 +1461,7 @@ invalid.jsx:82:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:83:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     81 │     <div role="rowgroup" onClick={() => { }} />
     82 │     <div role="search" onClick={() => { }} />
@@ -1478,7 +1478,7 @@ invalid.jsx:83:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:84:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     82 │     <div role="search" onClick={() => { }} />
     83 │     <div role="status" onClick={() => { }} />
@@ -1495,7 +1495,7 @@ invalid.jsx:84:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:85:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     83 │     <div role="status" onClick={() => { }} />
     84 │     <div role="table" onClick={() => { }} />
@@ -1512,7 +1512,7 @@ invalid.jsx:85:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:86:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     84 │     <div role="table" onClick={() => { }} />
     85 │     <div role="tabpanel" onClick={() => { }} />
@@ -1529,7 +1529,7 @@ invalid.jsx:86:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:87:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     85 │     <div role="tabpanel" onClick={() => { }} />
     86 │     <div role="term" onClick={() => { }} />
@@ -1546,7 +1546,7 @@ invalid.jsx:87:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:88:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     86 │     <div role="term" onClick={() => { }} />
     87 │     <div role="timer" onClick={() => { }} />
@@ -1563,7 +1563,7 @@ invalid.jsx:88:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 ```
 invalid.jsx:89:4 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Non-interactive element should not have event handler.
+  i Non-interactive element should not have event handler.
   
     87 │     <div role="timer" onClick={() => { }} />
     88 │     <div role="tooltip" onClick={() => { }} />

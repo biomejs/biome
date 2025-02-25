@@ -1,0 +1,322 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  changesets:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+
+      - name: Install pnpm
+        run: |
+          npm install -g corepack
+          corepack enable
+          pnpm --version
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Create Release Pull Request
+        uses: changesets/action@v1
+        with:
+          version: pnpm run version
+          commit: "ci: release"
+          title: "ci: release"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Retrieve version of `@biomejs/biome` and `@biomejs/js-api`
+  version:
+    runs-on: ubuntu-latest
+    needs: changesets
+    if: needs.changesets.outputs.hasChangesets == 'false' && github.head_ref == 'changeset-release/main'
+    outputs:
+      cli-version: ${{ env.cli-version }}
+      js-api-version: ${{ env.cli-js-api-version }}
+
+    steps:
+      - name: Check CLI version changes
+        uses: EndBug/version-check@36ff30f37c7deabe56a30caa043d127be658c425 # v2.1.5
+        id: cli-version-changed
+        with:
+          diff-search: true
+          file-name: packages/@biomejs/biome/package.json
+
+      - name: Check JS API version changes
+        uses: EndBug/version-check@36ff30f37c7deabe56a30caa043d127be658c425 # v2.1.5
+        id: js-api-version-changed
+        with:
+          diff-search: true
+          file-name: packages/@biomejs/js-api/package.json
+
+      - name: Set Biome Version as Environment Variable
+        run: |
+          echo "cli-version=${{ steps.cli-version-changed.outputs.version }}" >> $GITHUB_ENV
+          echo "js-api-version=${{ steps.js-api-version-changed.outputs.version }}" >> $GITHUB_ENV
+
+  # Building jobs
+
+  build-binaries:
+    needs: version
+    if: needs.cli-version-changed.outputs.changed == 'true'
+    strategy:
+      matrix:
+        include:
+          - os: windows-2022
+            target: x86_64-pc-windows-msvc
+            code-target: win32-x64
+          - os: windows-2022
+            target: aarch64-pc-windows-msvc
+            code-target: win32-arm64
+          - os: ubuntu-20.04
+            target: x86_64-unknown-linux-gnu
+            code-target: linux-x64
+          - os: ubuntu-20.04
+            target: aarch64-unknown-linux-gnu
+            code-target: linux-arm64
+          - os: ubuntu-20.04
+            target: x86_64-unknown-linux-musl
+            code-target: linux-x64-musl
+          - os: ubuntu-20.04
+            target: aarch64-unknown-linux-musl
+            code-target: linux-arm64-musl
+          - os: macos-14
+            target: x86_64-apple-darwin
+            code-target: darwin-x64
+          - os: macos-14
+            target: aarch64-apple-darwin
+            code-target: darwin-arm64
+
+    name: Package ${{ matrix.code-target }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: 20
+
+      - name: Install Rust toolchain
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Install arm64 toolchain
+        if: matrix.code-target == 'linux-arm64' || matrix.code-target == 'linux-arm64-musl'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+
+      - name: Install musl toolchain
+        if: matrix.code-target == 'linux-x64-musl' || matrix.code-target == 'linux-arm64-musl'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
+
+      - name: Audit crates.io dependencies
+        if: matrix.code-target == 'linux-x64'
+        run: cargo audit
+
+      - name: Set jemalloc page size for linux-arm64
+        if: matrix.code-target == 'linux-arm64'
+        run: |
+          echo "JEMALLOC_SYS_WITH_LG_PAGE=16" >> $GITHUB_ENV
+
+      # Build the CLI binary
+      - name: Build binaries
+        run: cargo build -p biome_cli --release --target ${{ matrix.target }}
+        env:
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-gnu-gcc
+          # Strip all debug symbols from the resulting binaries
+          RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
+          # Inline the version of the npm package in the CLI binary
+          BIOME_VERSION: ${{ env.cli-version }}
+
+      # Copy the CLI binary and rename it to include the name of the target platform
+      - name: Copy CLI binary
+        if: matrix.os == 'windows-2022'
+        run: |
+          mkdir dist
+          cp target/${{ matrix.target }}/release/biome.exe ./dist/biome-${{ matrix.code-target }}.exe
+      - name: Copy CLI binary
+        if: matrix.os != 'windows-2022'
+        run: |
+          mkdir dist
+          cp target/${{ matrix.target }}/release/biome ./dist/biome-${{ matrix.code-target }}
+
+      # Upload the CLI binary as a build artifact
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: cli-${{ matrix.target }}
+          path: ./dist/biome-*
+          if-no-files-found: error
+
+  build-wasm:
+    name: Build WASM
+    runs-on: ubuntu-latest
+    needs: version
+    if: needs.cli-version-changed.outputs.changed == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Build WASM module for bundlers
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --release --scope biomejs crates/biome_wasm
+      - name: Build WASM module for node.js
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-nodejs --target nodejs --release --scope biomejs crates/biome_wasm
+      - name: Build WASM module for the web
+        run: wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomejs crates/biome_wasm
+
+      - name: Upload WASM artifact
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: wasm-${{ matrix.target }}
+          path: |
+            ./packages/@biomejs/wasm-bundler
+            ./packages/@biomejs/wasm-nodejs
+            ./packages/@biomejs/wasm-web
+          if-no-files-found: error
+
+  build-js-api:
+    name: Package JavaScript APIs
+    runs-on: ubuntu-latest
+    needs: version
+    if: needs.js-api-version-changed.outputs.changed == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: 20
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Cache pnpm modules
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+
+      - name: Compile backends
+        run: |
+          pnpm --filter @biomejs/js-api run build:wasm-bundler
+          pnpm --filter @biomejs/js-api run build:wasm-node
+          pnpm --filter @biomejs/js-api run build:wasm-web
+          pnpm --filter @biomejs/backend-jsonrpc i
+          pnpm --filter @biomejs/backend-jsonrpc run build
+
+      - name: Build package
+        run: |
+          pnpm --filter @biomejs/js-api i
+          pnpm --filter @biomejs/js-api run build
+
+      - name: Upload JS API artifact
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: js-api
+          path: |
+            ./packages/@biomejs/js-api/dist
+          if-no-files-found: error
+
+  # Publishing jobs
+
+  publish-cli:
+    name: Publish
+    runs-on: ubuntu-latest
+    needs:
+      - build-binaries
+      - build-wasm
+    environment: npm-publish
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Download CLI artifacts
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          pattern: cli-*
+          merge-multiple: true
+      - name: Download WASM artifacts
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          pattern: wasm-*
+          merge-multiple: true
+          path: packages/@biomejs
+
+      - name: Install Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Generate npm packages
+        run: node packages/@biomejs/biome/scripts/generate-packages.mjs
+
+      - name: Publish npm packages as latest
+        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package --tag latest --access public --provenance; fi; done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Upload assets to the latest tag
+        run: |
+          files=$(ls biome-* | tr '\n' ' ')
+          gh release upload @biomejs/biome@${{ env.cli-version }} $files
+
+  publish-js-api:
+    name: Publish
+    runs-on: ubuntu-latest
+    needs: build-js-api
+    environment: npm-publish
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Download package artifact
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: js-api
+          path: packages/@biomejs/js-api/dist
+
+      - name: Install Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+      - name: Publish npm package as latest
+        run: npm publish packages/@biomejs/js-api --tag latest --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

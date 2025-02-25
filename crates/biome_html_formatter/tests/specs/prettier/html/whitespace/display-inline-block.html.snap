@@ -1,0 +1,74 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/whitespace/display-inline-block.html
+---
+# Input
+
+```html
+<button>Click here! Click here! Click here! Click here! Click here! Click here!</button>
+<button>
+Click here! Click here! Click here! Click here! Click here! Click here!
+</button>
+<div>
+<button>Click here! Click here! Click here! Click here! Click here! Click here!</button><button>Click here! Click here! Click here! Click here! Click here! Click here!</button>
+</div>
+<div>
+<button>Click here! Click here! Click here! Click here! Click here! Click here!</button>
+<button>Click here! Click here! Click here! Click here! Click here! Click here!</button>
+</div>
+<video src="brave.webm"><track kind=subtitles src=brave.en.vtt srclang=en label="English"><track kind=subtitles src=brave.en.vtt srclang=en label="English"></video>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -6,10 +6,11 @@
+ </button>
+ <div>
+   <button>
+-    Click here! Click here! Click here! Click here! Click here! Click here!</button
+-  ><button>
+     Click here! Click here! Click here! Click here! Click here! Click here!
+   </button>
++  <button>
++    Click here! Click here! Click here! Click here! Click here! Click here!
++  </button>
+ </div>
+ <div>
+   <button>
+```
+
+# Output
+
+```html
+<button>
+  Click here! Click here! Click here! Click here! Click here! Click here!
+</button>
+<button>
+  Click here! Click here! Click here! Click here! Click here! Click here!
+</button>
+<div>
+  <button>
+    Click here! Click here! Click here! Click here! Click here! Click here!
+  </button>
+  <button>
+    Click here! Click here! Click here! Click here! Click here! Click here!
+  </button>
+</div>
+<div>
+  <button>
+    Click here! Click here! Click here! Click here! Click here! Click here!
+  </button>
+  <button>
+    Click here! Click here! Click here! Click here! Click here! Click here!
+  </button>
+</div>
+<video src="brave.webm">
+  <track kind="subtitles" src="brave.en.vtt" srclang="en" label="English" />
+  <track kind="subtitles" src="brave.en.vtt" srclang="en" label="English" />
+</video>
+```

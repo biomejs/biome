@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -29,7 +30,7 @@ namespace Ns2 {}
 ```
 invalid.ts:4:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Shouldn't redeclare 'a'. Consider to delete it or rename it.
+  × Shouldn't redeclare 'a'. Consider to delete it or rename it.
   
     2 │ 	static {
     3 │ 		var a;
@@ -53,7 +54,7 @@ invalid.ts:4:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━�
 ```
 invalid.ts:8:15 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Shouldn't redeclare 'T'. Consider to delete it or rename it.
+  × Shouldn't redeclare 'T'. Consider to delete it or rename it.
   
      6 │ }
      7 │ 
@@ -77,7 +78,7 @@ invalid.ts:8:15 lint/suspicious/noRedeclare ━━━━━━━━━━━━
 ```
 invalid.ts:11:10 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Shouldn't redeclare 'T'. Consider to delete it or rename it.
+  × Shouldn't redeclare 'T'. Consider to delete it or rename it.
   
     10 │ function g<T>() {
   > 11 │     type T = number;
@@ -100,7 +101,7 @@ invalid.ts:11:10 lint/suspicious/noRedeclare ━━━━━━━━━━━�
 ```
 invalid.ts:15:11 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Shouldn't redeclare 'Ns1'. Consider to delete it or rename it.
+  × Shouldn't redeclare 'Ns1'. Consider to delete it or rename it.
   
     14 │ import * as Ns1 from ""
   > 15 │ namespace Ns1 {}
@@ -123,7 +124,7 @@ invalid.ts:15:11 lint/suspicious/noRedeclare ━━━━━━━━━━━�
 ```
 invalid.ts:18:11 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Shouldn't redeclare 'Ns2'. Consider to delete it or rename it.
+  × Shouldn't redeclare 'Ns2'. Consider to delete it or rename it.
   
     17 │ import type * as Ns2 from ""
   > 18 │ namespace Ns2 {}

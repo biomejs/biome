@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validArithmetic.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 obj?.foo | bar
 obj?.foo & bar
 obj?.foo >> obj?.bar;
@@ -98,5 +99,3 @@ async function foo() { (foo || await obj?.foo) + bar;}
 async function foo() { bar + (foo || await obj?.foo); }
 
 ```
-
-

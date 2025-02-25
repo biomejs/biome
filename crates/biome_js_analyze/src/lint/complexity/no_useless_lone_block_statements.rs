@@ -3,6 +3,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsStatement, AnyJsSwitchClause, JsBlockStatement, JsFileSource, JsLabeledStatement,
@@ -47,6 +48,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-lone-blocks")],
         recommended: true,
+        severity: Severity::Information,
         fix_kind: FixKind::Safe,
     }
 }
@@ -128,12 +130,12 @@ impl Rule for NoUselessLoneBlockStatements {
         let mut mutation = ctx.root().begin();
         mutation.replace_node_discard_trivia(stmts_list, new_stmts_list);
 
-        return Some(JsRuleAction::new(
+        Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove redundant block." }.to_owned(),
             mutation,
-        ));
+        ))
     }
 }
 
@@ -179,5 +181,5 @@ fn is_not_var_declaration(variable: &JsVariableStatement) -> bool {
     variable
         .declaration()
         .ok()
-        .map_or(false, |decl| !decl.is_var())
+        .is_some_and(|decl| !decl.is_var())
 }

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import "./sub/foo";
 import "./sub/Foo";
 import "./sub/Bar/";
@@ -45,7 +46,7 @@ require("./foo")
 ```
 invalid.js:1:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
   > 1 │ import "./sub/foo";
       │        ^^^^^^^^^^^
@@ -67,7 +68,7 @@ invalid.js:1:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━
 ```
 invalid.js:2:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     1 │ import "./sub/foo";
   > 2 │ import "./sub/Foo";
@@ -91,7 +92,7 @@ invalid.js:2:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━
 ```
 invalid.js:3:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     1 │ import "./sub/foo";
     2 │ import "./sub/Foo";
@@ -112,7 +113,7 @@ invalid.js:3:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━
 ```
 invalid.js:6:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     5 │ // Guaranteed resolve to 'index.js' file
   > 6 │ import './foo/../'
@@ -137,7 +138,7 @@ invalid.js:6:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━
 ```
 invalid.js:7:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     5 │ // Guaranteed resolve to 'index.js' file
     6 │ import './foo/../'
@@ -163,7 +164,7 @@ invalid.js:7:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━
 ```
 invalid.js:8:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
      6 │ import './foo/../'
      7 │ import './foo/..'
@@ -189,7 +190,7 @@ invalid.js:8:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━
 ```
 invalid.js:9:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
      7 │ import './foo/..'
      8 │ import './foo/.'
@@ -215,7 +216,7 @@ invalid.js:9:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━
 ```
 invalid.js:10:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
      8 │ import './foo/.'
      9 │ import './foo/./'
@@ -241,7 +242,7 @@ invalid.js:10:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.js:12:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     10 │ import './foo/'
     11 │ 
@@ -267,7 +268,7 @@ invalid.js:12:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.js:13:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     12 │ import './../'
   > 13 │ import './..'
@@ -292,7 +293,7 @@ invalid.js:13:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.js:14:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     12 │ import './../'
     13 │ import './..'
@@ -318,7 +319,7 @@ invalid.js:14:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.js:15:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     13 │ import './..'
     14 │ import './.'
@@ -344,7 +345,7 @@ invalid.js:15:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.js:16:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     14 │ import './.'
     15 │ import './'
@@ -370,7 +371,7 @@ invalid.js:16:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.js:18:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     16 │ import '.'
     17 │ 
@@ -396,7 +397,7 @@ invalid.js:18:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.js:19:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     18 │ import '../../'
   > 19 │ import '../..'
@@ -421,7 +422,7 @@ invalid.js:19:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.js:20:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     18 │ import '../../'
     19 │ import '../..'
@@ -447,7 +448,7 @@ invalid.js:20:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.js:21:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     19 │ import '../..'
     20 │ import '../.'
@@ -473,7 +474,7 @@ invalid.js:21:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.js:22:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     20 │ import '../.'
     21 │ import '../'
@@ -499,7 +500,7 @@ invalid.js:22:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.js:24:18 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     22 │ import '..'
     23 │ 
@@ -525,7 +526,7 @@ invalid.js:24:18 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.js:27:8 lint/correctness/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     26 │ // Query and hash
   > 27 │ import './foo?worker'
@@ -541,7 +542,7 @@ invalid.js:27:8 lint/correctness/useImportExtensions ━━━━━━━━━
 ```
 invalid.js:28:8 lint/correctness/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     26 │ // Query and hash
     27 │ import './foo?worker'
@@ -558,7 +559,7 @@ invalid.js:28:8 lint/correctness/useImportExtensions ━━━━━━━━━
 ```
 invalid.js:29:8 lint/correctness/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     27 │ import './foo?worker'
     28 │ import './foo#hash'
@@ -575,7 +576,7 @@ invalid.js:29:8 lint/correctness/useImportExtensions ━━━━━━━━━
 ```
 invalid.js:32:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     31 │ // Dynamic imports
   > 32 │ import('./foo')
@@ -600,7 +601,7 @@ invalid.js:32:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.js:33:18 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     31 │ // Dynamic imports
     32 │ import('./foo')
@@ -626,7 +627,7 @@ invalid.js:33:18 lint/correctness/useImportExtensions  FIXABLE  ━━━━━�
 ```
 invalid.js:34:9 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Add a file extension for relative imports.
+  i Add a file extension for relative imports.
   
     32 │ import('./foo')
     33 │ import( /** A **/'./foo'/** B **/ )

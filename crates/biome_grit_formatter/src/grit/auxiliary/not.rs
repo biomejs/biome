@@ -5,6 +5,6 @@ use biome_grit_syntax::GritNot;
 pub(crate) struct FormatGritNot;
 impl FormatNodeRule<GritNot> for FormatGritNot {
     fn fmt_fields(&self, node: &GritNot, f: &mut GritFormatter) -> FormatResult<()> {
-        write!(f, [node.token().format()])
+        write!(f, [node.token().format(), space()])
     }
 }

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 let x = "\8"
 let x = "\9"
 let x = "\"\8\""
@@ -55,7 +56,7 @@ let x = "\0\\n\8"
 ```
 invalid.js:1:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
   > 1 │ let x = "\8"
       │          ^^
@@ -74,7 +75,7 @@ invalid.js:1:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
 ```
 invalid.js:2:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     1 │ let x = "\8"
   > 2 │ let x = "\9"
@@ -94,7 +95,7 @@ invalid.js:2:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
 ```
 invalid.js:3:12 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     1 │ let x = "\8"
     2 │ let x = "\9"
@@ -115,7 +116,7 @@ invalid.js:3:12 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
 ```
 invalid.js:4:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     2 │ let x = "\9"
     3 │ let x = "\"\8\""
@@ -141,7 +142,7 @@ invalid.js:4:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
 ```
 invalid.js:5:12 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     3 │ let x = "\"\8\""
     4 │ let x = "f\9"
@@ -167,7 +168,7 @@ invalid.js:5:12 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
 ```
 invalid.js:6:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     4 │ let x = "f\9"
     5 │ let x = "fo\9"
@@ -193,7 +194,7 @@ invalid.js:6:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
 ```
 invalid.js:7:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     5 │ let x = "fo\9"
     6 │ let x = "foo\9"
@@ -219,7 +220,7 @@ invalid.js:7:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
 ```
 invalid.js:8:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
      6 │ let x = "foo\9"
      7 │ let x = "foo\8bar"
@@ -240,7 +241,7 @@ invalid.js:8:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
 ```
 invalid.js:9:12 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
      7 │ let x = "foo\8bar"
      8 │ let x = "👍\8"
@@ -261,7 +262,7 @@ invalid.js:9:12 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━�
 ```
 invalid.js:10:14 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
      8 │ let x = "👍\8"
      9 │ let x = "\\\8"
@@ -282,7 +283,7 @@ invalid.js:10:14 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:11:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
      9 │ let x = "\\\8"
     10 │ let x = "\\\\\9"
@@ -303,7 +304,7 @@ invalid.js:11:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:12:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     10 │ let x = "\\\\\9"
     11 │ let x = "foo\\\8"
@@ -324,7 +325,7 @@ invalid.js:12:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:13:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     11 │ let x = "foo\\\8"
     12 │ let x = "\\ \8"
@@ -350,7 +351,7 @@ invalid.js:13:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:14:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     12 │ let x = "\\ \8"
     13 │ let x = "\\1\9"
@@ -376,7 +377,7 @@ invalid.js:14:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:15:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     13 │ let x = "\\1\9"
     14 │ let x = "foo\\1\9"
@@ -402,7 +403,7 @@ invalid.js:15:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:16:17 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     14 │ let x = "foo\\1\9"
     15 │ let x = "\\n\\n\8\\n"
@@ -428,7 +429,7 @@ invalid.js:16:17 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:17:18 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     15 │ let x = "\\n\\n\8\\n"
     16 │ let x = "\\n.\\n\8\\n"
@@ -454,7 +455,7 @@ invalid.js:17:18 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:18:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     16 │ let x = "\\n.\\n\8\\n"
     17 │ let x = "\\n.\\nn\8\\n"
@@ -475,7 +476,7 @@ invalid.js:18:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:19:12 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     17 │ let x = "\\n.\\nn\8\\n"
     18 │ let x = "\\👍\8"
@@ -496,7 +497,7 @@ invalid.js:19:12 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:20:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     18 │ let x = "\\👍\8"
     19 │ let x = "\\\8\9"
@@ -517,7 +518,7 @@ invalid.js:20:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:21:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     19 │ let x = "\\\8\9"
     20 │ let x = "\8\\\9"
@@ -538,7 +539,7 @@ invalid.js:21:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:21:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     19 │ let x = "\\\8\9"
     20 │ let x = "\8\\\9"
@@ -559,7 +560,7 @@ invalid.js:21:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:22:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     20 │ let x = "\8\\\9"
     21 │ let x = "\8 \\\9"
@@ -580,7 +581,7 @@ invalid.js:22:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:23:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     21 │ let x = "\8 \\\9"
     22 │ let x = "\8\8"
@@ -601,7 +602,7 @@ invalid.js:23:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:24:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     22 │ let x = "\8\8"
     23 │ let x = "\9\8"
@@ -627,7 +628,7 @@ invalid.js:24:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:24:18 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     22 │ let x = "\8\8"
     23 │ let x = "\9\8"
@@ -653,7 +654,7 @@ invalid.js:24:18 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:25:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     23 │ let x = "\9\8"
     24 │ let x = "foo\8bar\9baz"
@@ -674,7 +675,7 @@ invalid.js:25:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:25:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     23 │ let x = "\9\8"
     24 │ let x = "foo\8bar\9baz"
@@ -700,7 +701,7 @@ invalid.js:25:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:26:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     24 │ let x = "foo\8bar\9baz"
     25 │ let x = "\8\\1\9"
@@ -721,7 +722,7 @@ invalid.js:26:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:26:18 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     24 │ let x = "foo\8bar\9baz"
     25 │ let x = "\8\\1\9"
@@ -742,7 +743,7 @@ invalid.js:26:18 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:27:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     25 │ let x = "\8\\1\9"
     26 │ let x = "\9\\n9\\\9\9"
@@ -763,7 +764,7 @@ invalid.js:27:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:28:21 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     26 │ let x = "\9\\n9\\\9\9"
     27 │ let x = "\8\\\\\9"
@@ -784,7 +785,7 @@ invalid.js:28:21 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:28:31 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     26 │ let x = "\9\\n9\\\9\9"
     27 │ let x = "\8\\\\\9"
@@ -805,7 +806,7 @@ invalid.js:28:31 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:29:34 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     27 │ let x = "\8\\\\\9"
     28 │ let x = "var foo = '\8'; bar('\9')"
@@ -826,7 +827,7 @@ invalid.js:29:34 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:30:14 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     28 │ let x = "var foo = '\8'; bar('\9')"
     29 │ let x = "var foo = '8'\n  bar = '\9'"
@@ -852,7 +853,7 @@ invalid.js:30:14 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:31:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     29 │ let x = "var foo = '8'\n  bar = '\9'"
     30 │ let x = "\\\n\8"
@@ -878,7 +879,7 @@ invalid.js:31:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:32:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     30 │ let x = "\\\n\8"
     31 │ let x = "\\\r\n\9"
@@ -904,7 +905,7 @@ invalid.js:32:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:33:20 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     31 │ let x = "\\\r\n\9"
     32 │ let x = "\\\\\n\8"
@@ -930,7 +931,7 @@ invalid.js:33:20 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:34:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     32 │ let x = "\\\\\n\8"
     33 │ let x = "foo\\\nbar\9baz"
@@ -956,7 +957,7 @@ invalid.js:34:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:34:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     32 │ let x = "\\\\\n\8"
     33 │ let x = "foo\\\nbar\9baz"
@@ -982,7 +983,7 @@ invalid.js:34:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:35:14 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     33 │ let x = "foo\\\nbar\9baz"
     34 │ let x = "\\0\8"
@@ -1008,7 +1009,7 @@ invalid.js:35:14 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:35:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     33 │ let x = "foo\\\nbar\9baz"
     34 │ let x = "\\0\8"
@@ -1034,7 +1035,7 @@ invalid.js:35:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:36:14 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     34 │ let x = "\\0\8"
     35 │ let x = "foo\\0\9bar"
@@ -1060,7 +1061,7 @@ invalid.js:36:14 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:36:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     34 │ let x = "\\0\8"
     35 │ let x = "foo\\0\9bar"
@@ -1086,7 +1087,7 @@ invalid.js:36:16 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:37:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     35 │ let x = "foo\\0\9bar"
     36 │ let x = "\\1\\0\8"
@@ -1112,7 +1113,7 @@ invalid.js:37:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:37:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     35 │ let x = "foo\\0\9bar"
     36 │ let x = "\\1\\0\8"
@@ -1138,7 +1139,7 @@ invalid.js:37:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:38:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     36 │ let x = "\\1\\0\8"
     37 │ let x = "\\0\8\9"
@@ -1159,7 +1160,7 @@ invalid.js:38:10 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:38:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     36 │ let x = "\\1\\0\8"
     37 │ let x = "\\0\8\9"
@@ -1185,7 +1186,7 @@ invalid.js:38:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:38:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     36 │ let x = "\\1\\0\8"
     37 │ let x = "\\0\8\9"
@@ -1211,7 +1212,7 @@ invalid.js:38:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:39:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     37 │ let x = "\\0\8\9"
     38 │ let x = "\8\\0\9"
@@ -1237,7 +1238,7 @@ invalid.js:39:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:40:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     38 │ let x = "\8\\0\9"
     39 │ let x = "0\8"
@@ -1263,7 +1264,7 @@ invalid.js:40:11 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:40:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     38 │ let x = "\8\\0\9"
     39 │ let x = "0\8"
@@ -1289,7 +1290,7 @@ invalid.js:40:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:41:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     39 │ let x = "0\8"
     40 │ let x = "\\0\8"
@@ -1310,7 +1311,7 @@ invalid.js:41:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:42:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     40 │ let x = "\\0\8"
     41 │ let x = "\0 \8"
@@ -1336,7 +1337,7 @@ invalid.js:42:13 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:43:14 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     41 │ let x = "\0 \8"
     42 │ let x = "\01\8"
@@ -1362,7 +1363,7 @@ invalid.js:43:14 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
 ```
 invalid.js:44:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use `\8` and `\9` escape sequences in string literals.
+  × Don't use `\8` and `\9` escape sequences in string literals.
   
     42 │ let x = "\01\8"
     43 │ let x = "\0\1\8"
@@ -1382,5 +1383,3 @@ invalid.js:44:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   
 
 ```
-
-

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 const x1 = "test";
 x1: expr;
 
@@ -21,7 +22,7 @@ function test() {
 ```
 invalid.js:2:1 lint/suspicious/noLabelVar ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the x1 variable name as a label
+  × Do not use the x1 variable name as a label
   
     1 │ const x1 = "test";
   > 2 │ x1: expr;
@@ -44,7 +45,7 @@ invalid.js:2:1 lint/suspicious/noLabelVar ━━━━━━━━━━━━�
 ```
 invalid.js:7:5 lint/suspicious/noLabelVar ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the x1 variable name as a label
+  × Do not use the x1 variable name as a label
   
     5 │ function test() {
     6 │   {
@@ -64,5 +65,3 @@ invalid.js:7:5 lint/suspicious/noLabelVar ━━━━━━━━━━━━�
   
 
 ```
-
-

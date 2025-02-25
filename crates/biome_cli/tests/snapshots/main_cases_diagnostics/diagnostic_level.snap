@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -9,7 +10,7 @@ expression: content
   "formatter": {
     "enabled": true
   },
-  "organizeImports": {
+  "assist": {
     "enabled": true
   },
   "linter": {
@@ -40,9 +41,9 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-src/index.js organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+src/index.js assist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Import statements could be sorted:
+  × Not all actions were applied:
   
     1   │ - import·{·graphql,·useFragment,·useMutation·}·from·"react-relay";
     2   │ - import·{·FC,·memo,·useCallback·}·from·"react";
@@ -50,12 +51,6 @@ src/index.js organizeImports ━━━━━━━━━━━━━━━━━
       2 │ + import·{·graphql,·useFragment,·useMutation·}·from·"react-relay";
     3 3 │   
   
-
-```
-
-```block
-Skipped 1 suggested fixes.
-If you wish to apply the suggested (unsafe) fixes, use the command biome check --fix --unsafe
 
 ```
 

@@ -3,6 +3,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{
     jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_ident, jsx_name,
     jsx_string, jsx_string_literal, token,
@@ -93,6 +94,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-no-target-blank")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
 }

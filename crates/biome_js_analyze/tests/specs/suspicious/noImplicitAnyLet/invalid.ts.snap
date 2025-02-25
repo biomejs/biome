@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -26,7 +27,7 @@ function ex() {
 ```
 invalid.ts:1:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable implicitly has the any type.
+  × This variable implicitly has the any type.
   
   > 1 │ let someVar1;
       │     ^^^^^^^^
@@ -41,7 +42,7 @@ invalid.ts:1:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━�
 ```
 invalid.ts:5:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable implicitly has the any type.
+  × This variable implicitly has the any type.
   
     3 │ someVar1 = 123;
     4 │ 
@@ -58,7 +59,7 @@ invalid.ts:5:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━�
 ```
 invalid.ts:9:12 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable implicitly has the any type.
+  × This variable implicitly has the any type.
   
      7 │ someVar1 = 123;
      8 │ 
@@ -75,7 +76,7 @@ invalid.ts:9:12 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━�
 ```
 invalid.ts:10:12 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable implicitly has the any type.
+  × This variable implicitly has the any type.
   
      9 │ let x = 0, y, z = 0;
   > 10 │ var x = 0, y, z = 0;
@@ -91,7 +92,7 @@ invalid.ts:10:12 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━
 ```
 invalid.ts:11:16 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable implicitly has the any type.
+  × This variable implicitly has the any type.
   
      9 │ let x = 0, y, z = 0;
     10 │ var x = 0, y, z = 0;
@@ -108,7 +109,7 @@ invalid.ts:11:16 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━
 ```
 invalid.ts:14:9 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This variable implicitly has the any type.
+  × This variable implicitly has the any type.
   
     13 │ function ex() {
   > 14 │     let b;
@@ -120,5 +121,3 @@ invalid.ts:14:9 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━�
   
 
 ```
-
-

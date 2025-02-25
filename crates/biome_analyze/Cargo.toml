@@ -17,16 +17,20 @@ biome_console            = { workspace = true }
 biome_deserialize        = { workspace = true, optional = true }
 biome_deserialize_macros = { workspace = true, optional = true }
 biome_diagnostics        = { workspace = true }
+biome_parser             = { workspace = true }
 biome_rowan              = { workspace = true }
+biome_suppression        = { workspace = true }
+camino                   = { workspace = true }
 enumflags2               = { workspace = true }
+indexmap                 = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"], optional = true }
 tracing                  = { workspace = true }
 
-
 [features]
-serde = ["dep:serde", "dep:schemars", "dep:biome_deserialize", "dep:biome_deserialize_macros"]
+schema = ["dep:schemars", "biome_console/schema", "serde"]
+serde  = ["dep:serde", "dep:biome_deserialize", "dep:biome_deserialize_macros"]
 
 [lints]
 workspace = true

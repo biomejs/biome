@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsDoWhileStatement.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function JsDoWhileStatement1() {
     do {
         break;
@@ -23,7 +24,7 @@ function JsDoWhileStatement2() {
 ```
 JsDoWhileStatement.js:4:14 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     2 │     do {
     3 │         break;
@@ -47,7 +48,7 @@ JsDoWhileStatement.js:4:14 lint/correctness/noUnreachable ━━━━━━━�
 ```
 JsDoWhileStatement.js:10:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
      8 │     do {
      9 │         continue;
@@ -67,5 +68,3 @@ JsDoWhileStatement.js:10:9 lint/correctness/noUnreachable ━━━━━━━�
   
 
 ```
-
-

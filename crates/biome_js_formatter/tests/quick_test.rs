@@ -9,14 +9,14 @@ mod language {
     include!("language.rs");
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-export let shim: typeof import("./foo2") = {
-    Bar: Bar2
-};
+const c = [
+  , /* this */
+];
     "#;
     let source_type = JsFileSource::tsx();
     let tree = parse(

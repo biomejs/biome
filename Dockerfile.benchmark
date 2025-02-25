@@ -1,4 +1,4 @@
-FROM rust:1.84.0@sha256:f7cbb35003d4ffb5543f8ad6480c1e36bbae5c3609523c9f0c2e223668ee9c1a
+FROM rust:1.84.1@sha256:738ae99a3d75623f41e6882566b4ef37e38a9840244a47efd4a0ca22e9628b88
 WORKDIR /usr/src/
 
 # https://github.com/nodesource/distributions

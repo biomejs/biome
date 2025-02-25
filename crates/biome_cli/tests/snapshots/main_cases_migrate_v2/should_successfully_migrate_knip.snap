@@ -1,0 +1,174 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `biome.json`
+
+```json
+{
+  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "files": {
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/fixtures",
+      "!**/packages/knip/package.json",
+      "!**/packages/knip/vendor/bash-parser/index.js",
+      "!**/packages/docs/.astro"
+    ]
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "style": {
+        "noParameterAssign": "off",
+        "useNodeAssertStrict": "error",
+        "useLiteralEnumMembers": "error",
+        "noCommaOperator": "error",
+        "useNodejsImportProtocol": "error",
+        "useAsConstAssertion": "error",
+        "useNumericLiterals": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useConst": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error",
+        "useExponentiationOperator": "error",
+        "useTemplate": "error",
+        "noNonNullAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "noArguments": "error",
+        "useExportType": "error",
+        "noUselessElse": "error",
+        "useShorthandFunctionType": "error"
+      },
+      "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error"
+      },
+      "nursery": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "node:path": "Please use src/util/path.js instead.",
+              "path": "Please use src/util/path.js instead."
+            }
+          }
+        }
+      },
+      "complexity": {
+        "useLiteralKeys": "off"
+      },
+      "suspicious": {
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": ["log"]
+          }
+        },
+        "noExplicitAny": "off"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "lineWidth": 120,
+    "indentStyle": "space",
+    "formatWithErrors": true
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "arrowParentheses": "asNeeded",
+      "trailingCommas": "es5"
+    }
+  },
+  "json": {
+    "formatter": {
+      "lineWidth": 80
+    }
+  },
+  "css": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.astro"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/packages/docs/**",
+        "**/packages/knip/scripts/**",
+        "**/packages/knip/src/cli.ts",
+        "**/packages/knip/src/reporters/**",
+        "**/packages/knip/src/util/cli-arguments.ts",
+        "**/packages/knip/src/util/debug.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": {
+              "level": "off",
+              "options": {
+                "allow": ["log"]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/packages/knip/fixtures/**"],
+      "assist": {
+        "actions": {
+          "source": {
+            "organizeImports": "off"
+          }
+        }
+      },
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          },
+          "style": {
+            "useImportType": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/packages/knip/test/util/get-inputs-from-scripts.test.ts"
+      ],
+      "formatter": {
+        "lineWidth": 200
+      }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+The configuration biome.json has been successfully migrated.
+```

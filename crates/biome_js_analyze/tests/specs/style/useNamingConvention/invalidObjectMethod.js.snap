@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidObjectMethod.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export default {
     METHOD() {},
 
@@ -19,7 +20,7 @@ export default {
 ```
 invalidObjectMethod.js:2:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object method name should be in camelCase.
+  i This object method name should be in camelCase.
   
     1 │ export default {
   > 2 │     METHOD() {},
@@ -33,7 +34,7 @@ invalidObjectMethod.js:2:5 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidObjectMethod.js:4:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
+  i Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
   
     2 │     METHOD() {},
     3 │ 
@@ -51,7 +52,7 @@ invalidObjectMethod.js:4:5 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidObjectMethod.js:6:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object method name should be in camelCase.
+  i This object method name should be in camelCase.
   
     4 │     AMethod() {},
     5 │ 
@@ -66,7 +67,7 @@ invalidObjectMethod.js:6:5 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidObjectMethod.js:8:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This object method name should be in camelCase.
+  i This object method name should be in camelCase.
   
     6 │     method_1() {},
     7 │ 

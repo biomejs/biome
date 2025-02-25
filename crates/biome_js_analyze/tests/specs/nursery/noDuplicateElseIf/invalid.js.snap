@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // ref: https://github.com/eslint/eslint/blob/main/tests/lib/rules/no-dupe-else-if.js
 
 if (isSomething(x)) {
@@ -81,7 +82,7 @@ if (a) {
 ```
 invalid.js:5:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
   
     3 │ if (isSomething(x)) {
     4 │     foo();
@@ -96,7 +97,7 @@ invalid.js:5:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━
 ```
 invalid.js:15:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
   
     13 │ } else if (c && d) {
     14 │     baz();
@@ -111,7 +112,7 @@ invalid.js:15:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━�
 ```
 invalid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
   
     25 │ } else if (n === 3) {
     26 │     baz();
@@ -126,7 +127,7 @@ invalid.js:27:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━�
 ```
 invalid.js:35:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
   
     33 │ if (a || b) {
     34 │     foo();
@@ -141,7 +142,7 @@ invalid.js:35:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━�
 ```
 invalid.js:43:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
   
     41 │ } else if (b) {
     42 │     bar();
@@ -156,7 +157,7 @@ invalid.js:43:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━�
 ```
 invalid.js:49:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
   
     47 │ if (a) {
     48 │     foo();
@@ -171,7 +172,7 @@ invalid.js:49:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━�
 ```
 invalid.js:55:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
   
     53 │ if (a && b) {
     54 │     foo();
@@ -186,7 +187,7 @@ invalid.js:55:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━�
 ```
 invalid.js:61:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
   
     59 │ if (a || b) {
     60 │     foo();
@@ -201,7 +202,7 @@ invalid.js:61:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━�
 ```
 invalid.js:69:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
   
     67 │ } else if (b && c) {
     68 │     bar();
@@ -212,5 +213,3 @@ invalid.js:69:12 lint/nursery/noDuplicateElseIf ━━━━━━━━━━�
   
 
 ```
-
-

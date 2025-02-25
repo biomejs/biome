@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `file.vue`
 
@@ -55,79 +56,6 @@ file.vue:2:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━�
 ```
 
 ```block
-file.vue:3:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Avoid the delete operator which can impact performance.
-  
-    1 │ <script setup lang="ts">
-    2 │ a == b;
-  > 3 │ delete a.c;
-      │ ^^^^^^^^^^
-    4 │ 
-    5 │ var foo: string = "";
-  
-  i Unsafe fix: Use an undefined assignment instead.
-  
-    1 1 │   a == b;
-    2   │ - delete·a.c;
-      2 │ + a.c·=·undefined;
-    3 3 │   
-    4 4 │   var foo: string = "";
-  
-
-```
-
-```block
-file.vue:5:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This type annotation is trivially inferred from its initialization.
-  
-    3 │ delete a.c;
-    4 │ 
-  > 5 │ var foo: string = "";
-      │        ^^^^^^^^
-    6 │ </script>
-    7 │ <template></template>
-  
-  i Safe fix: Remove the type annotation.
-  
-    2 2 │   delete a.c;
-    3 3 │   
-    4   │ - var·foo:·string·=·"";
-      4 │ + var·foo·=·"";
-    5 5 │   
-  
-
-```
-
-```block
-file.vue:5:1 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Use let or const instead of var.
-  
-    3 │ delete a.c;
-    4 │ 
-  > 5 │ var foo: string = "";
-      │ ^^^^^^^^^^^^^^^^^^^^
-    6 │ </script>
-    7 │ <template></template>
-  
-  i A variable declared with var is accessible in the whole module. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
-  
-  i See MDN web docs for more details.
-  
-  i Unsafe fix: Use 'const' instead.
-  
-    2 2 │   delete a.c;
-    3 3 │   
-    4   │ - var·foo:·string·=·"";
-      4 │ + const·foo:·string·=·"";
-    5 5 │   
-  
-
-```
-
-```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 4 errors.
+Found 1 error.
 ```

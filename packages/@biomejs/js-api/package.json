@@ -50,8 +50,8 @@
     "@biomejs/wasm-nodejs": "link:../wasm-nodejs",
     "@biomejs/wasm-web": "link:../wasm-web",
     "typescript": "5.7.3",
-    "vite": "5.4.11",
-    "vitest": "1.6.0"
+    "vite": "5.4.14",
+    "vitest": "1.6.1"
   },
   "peerDependencies": {
     "@biomejs/wasm-bundler": "^1.9.4",

@@ -1,5 +1,5 @@
 use proc_macro2::{Ident, TokenStream};
-use proc_macro_error::*;
+use proc_macro_error2::*;
 use quote::{quote, ToTokens};
 use syn::{
     parse::{discouraged::Speculative, Error, Parse, ParseStream, Parser, Result},

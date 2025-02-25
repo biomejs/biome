@@ -1,0 +1,41 @@
+---
+source: crates/biome_package/tests/manifest_spec_tests.rs
+expression: tsconfig.valid.paths.json
+---
+## Input
+
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@/services": [
+        "services",
+        "vendor/services"
+      ]
+    }
+  },
+}
+
+
+## Data structure
+
+TsConfigJson {
+    root: false,
+    path: "",
+    extends: None,
+    compiler_options: CompilerOptions {
+        base_url: Some(
+            "src",
+        ),
+        paths: Some(
+            {
+                "@/services": [
+                    "services",
+                    "vendor/services",
+                ],
+            },
+        ),
+        paths_base: "",
+    },
+    references: [],
+}

@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: unsorted.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -76,7 +77,7 @@ clsx({
 ```
 unsorted.jsx:4:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     2 │ 	{/* attributes */}
     3 │ 	{/* SHOULD emit diagnostics (class/className attributes supported by default) */}
@@ -100,7 +101,7 @@ unsorted.jsx:4:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
 ```
 unsorted.jsx:5:17 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     3 │ 	{/* SHOULD emit diagnostics (class/className attributes supported by default) */}
     4 │ 	<div class="px-2 foo p-4 bar" />
@@ -124,7 +125,7 @@ unsorted.jsx:5:17 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
 ```
 unsorted.jsx:11:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
      9 │ 	{/* utility sorting */}
     10 │ 	{/* SHOULD emit diagnostics (class attribute supported by default) */}
@@ -148,7 +149,7 @@ unsorted.jsx:11:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:12:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     10 │ 	{/* SHOULD emit diagnostics (class attribute supported by default) */}
     11 │ 	<div class="text-center custom-style1 p-4 bg-blue-500 text-white foo rounded-lg shadow-lg" />
@@ -172,7 +173,7 @@ unsorted.jsx:12:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:13:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     11 │ 	<div class="text-center custom-style1 p-4 bg-blue-500 text-white foo rounded-lg shadow-lg" />
     12 │ 	<div class="flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold" />
@@ -196,7 +197,7 @@ unsorted.jsx:13:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:14:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     12 │ 	<div class="flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold" />
     13 │ 	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
@@ -220,7 +221,7 @@ unsorted.jsx:14:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:15:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     13 │ 	<div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
     14 │ 	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
@@ -244,7 +245,7 @@ unsorted.jsx:15:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:16:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     14 │ 	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
     15 │ 	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
@@ -268,7 +269,7 @@ unsorted.jsx:16:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:17:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     15 │ 	<div class="inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button" />
     16 │ 	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
@@ -292,7 +293,7 @@ unsorted.jsx:17:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:18:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     16 │ 	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
     17 │ 	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
@@ -316,7 +317,7 @@ unsorted.jsx:18:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:19:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     17 │ 	<div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
     18 │ 	<div class="underline custom-text foo text-2xl font-semibold my-2" />
@@ -340,7 +341,7 @@ unsorted.jsx:19:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:20:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     18 │ 	<div class="underline custom-text foo text-2xl font-semibold my-2" />
     19 │ 	<div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
@@ -364,7 +365,7 @@ unsorted.jsx:20:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:23:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     21 │ 	{/* variant sorting */}
     22 │ 	{/* SHOULD emit diagnostics (arbitrary variants not supported yet) */}
@@ -388,7 +389,7 @@ unsorted.jsx:23:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:24:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     22 │ 	{/* SHOULD emit diagnostics (arbitrary variants not supported yet) */}
     23 │ 	<div class="checked:text-center custom-style1 p-4 hover:bg-blue-500 focus:text-white foo hover:focus:rounded-lg shadow-lg" />
@@ -412,7 +413,7 @@ unsorted.jsx:24:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:25:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     23 │ 	<div class="checked:text-center custom-style1 p-4 hover:bg-blue-500 focus:text-white foo hover:focus:rounded-lg shadow-lg" />
     24 │ 	<div class="flex valid:required:bg-gray-200 custom-layout items-center required:justify-center valid:h-screen bar first-letter:text-lg font-bold" />
@@ -436,7 +437,7 @@ unsorted.jsx:25:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:26:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     24 │ 	<div class="flex valid:required:bg-gray-200 custom-layout items-center required:justify-center valid:h-screen bar first-letter:text-lg font-bold" />
     25 │ 	<div class="focus-within:hover:shadow-md grid custom-grid grid-cols-3 gap-4 p-6 m-6 focus-within:border focus-within:border-gray-300 optional:rounded-md" />
@@ -460,7 +461,7 @@ unsorted.jsx:26:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:27:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     25 │ 	<div class="focus-within:hover:shadow-md grid custom-grid grid-cols-3 gap-4 p-6 m-6 focus-within:border focus-within:border-gray-300 optional:rounded-md" />
     26 │ 	<div class="lg:absolute sm:top-0 md:right-0 lg:m-4 md:p-2 xl:text-sm sm:bg-red-600 sm:text-white sm:rounded-full lg:custom-alert" />
@@ -484,7 +485,7 @@ unsorted.jsx:27:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:29:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     27 │ 	<div class="checked:sm:inline-block bar hover:md:bg-green-300 hover:lg:text-green-800 p-2 rounded border sm:checked:border-green-500 custom-button" />
     28 │ 	{/* TODO: arbitrary variant */}
@@ -508,7 +509,7 @@ unsorted.jsx:29:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:30:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     28 │ 	{/* TODO: arbitrary variant */}
     29 │ 	<div class="[&nth-child(2)]:[&nth-child(6)]:text-red-200 [&nth-child(2)]:text-red-300 group-hover:flex-col focus:bg-red-100 py-4 text-red-500 hover:focus:bg-red-200 has-[:visited]:flex print:text-red-50 [&nth-child(3)]:text-red-200  container" />
@@ -532,7 +533,7 @@ unsorted.jsx:30:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:31:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     29 │ 	<div class="[&nth-child(2)]:[&nth-child(6)]:text-red-200 [&nth-child(2)]:text-red-300 group-hover:flex-col focus:bg-red-100 py-4 text-red-500 hover:focus:bg-red-200 has-[:visited]:flex print:text-red-50 [&nth-child(3)]:text-red-200  container" />
     30 │ 	<div class="text-black [&nth-child(2)]:focus:text-red-100 [&nth-child(1)]:group-first:text-red-100 [&nth-child(2)]:hover:focus:bg-red-900 group-first:text-yellow-400 [&nth-child(2)]:text-black focus:bg-sky-100 py-4 checked:visited:bg-yellow-300 hover:text-red-400" />
@@ -556,7 +557,7 @@ unsorted.jsx:31:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:32:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     30 │ 	<div class="text-black [&nth-child(2)]:focus:text-red-100 [&nth-child(1)]:group-first:text-red-100 [&nth-child(2)]:hover:focus:bg-red-900 group-first:text-yellow-400 [&nth-child(2)]:text-black focus:bg-sky-100 py-4 checked:visited:bg-yellow-300 hover:text-red-400" />
     31 │ 	<div class="group-aria-disabled:bg-red-50 group-[:visited]:text-red-400 group-target:font-bold" />
@@ -580,7 +581,7 @@ unsorted.jsx:32:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:46:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     44 │ // nested values
     45 │ /* SHOULD emit diagnostics (class attribute supported by default) */
@@ -604,7 +605,7 @@ unsorted.jsx:46:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:47:14 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     45 │ /* SHOULD emit diagnostics (class attribute supported by default) */
     46 │ <div class={"px-2 foo p-4 bar"} />;
@@ -628,7 +629,7 @@ unsorted.jsx:47:14 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:48:14 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     46 │ <div class={"px-2 foo p-4 bar"} />;
     47 │ <div class={`px-2 foo p-4 bar`} />;
@@ -652,7 +653,7 @@ unsorted.jsx:48:14 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:49:15 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     47 │ <div class={`px-2 foo p-4 bar`} />;
     48 │ <div class={["px-2 foo p-4 bar"]} />;
@@ -676,7 +677,7 @@ unsorted.jsx:49:15 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:52:3 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     50 │ <div
     51 │ 	class={{
@@ -700,7 +701,7 @@ unsorted.jsx:52:3 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
 ```
 unsorted.jsx:53:4 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     51 │ 	class={{
     52 │ 		"px-2 foo p-4 bar": [
@@ -724,7 +725,7 @@ unsorted.jsx:53:4 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
 ```
 unsorted.jsx:54:6 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     52 │ 		"px-2 foo p-4 bar": [
     53 │ 			"px-2 foo p-4 bar",
@@ -748,7 +749,7 @@ unsorted.jsx:54:6 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
 ```
 unsorted.jsx:54:26 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     52 │ 		"px-2 foo p-4 bar": [
     53 │ 			"px-2 foo p-4 bar",
@@ -772,7 +773,7 @@ unsorted.jsx:54:26 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 unsorted.jsx:54:55 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! These CSS classes should be sorted.
+  i These CSS classes should be sorted.
   
     52 │ 		"px-2 foo p-4 bar": [
     53 │ 			"px-2 foo p-4 bar",

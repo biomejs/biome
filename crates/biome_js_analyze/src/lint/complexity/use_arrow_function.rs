@@ -4,6 +4,7 @@ use biome_analyze::{
     Rule, RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, JsConstructorClassMember, JsFileSource,
@@ -72,6 +73,7 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("prefer-arrow-callback")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }

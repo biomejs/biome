@@ -1,0 +1,45 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid.json
+---
+# Input
+```json
+{
+  "organizeImports": {
+    "enabled": false
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:3:5 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The organizeImports configuration has been moved.
+  
+    1 │ {
+    2 │   "organizeImports": {
+  > 3 │     "enabled": false
+      │     ^^^^^^^^^
+    4 │   }
+    5 │ }
+  
+  i The import sorting was the first assist action, however Biome analyzer infrastructure wasn't mature enough, so it was exposed as a standalone tool. The infrastructure is now ready to welcome it as an assist action.
+  
+  i Safe fix: Remove the old configuration, and turn off the relative assist action.
+  
+    1  1 │   {
+    2    │ - ··"organizeImports":·{
+    3    │ - ····"enabled":·false
+       2 │ + ··"assist":··{
+       3 │ + ····"actions":··{
+       4 │ + ······"source":··{
+       5 │ + ········"organizeImports":·"off"
+       6 │ + ······}
+       7 │ + ····}
+    4  8 │     }
+    5  9 │   }
+  
+
+```

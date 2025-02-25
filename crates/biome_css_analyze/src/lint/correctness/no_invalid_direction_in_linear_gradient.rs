@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{CssFunction, CssParameter};
+use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 use biome_rowan::AstSeparatedList;
 use biome_string_case::StrLikeExtension;
@@ -47,6 +48,7 @@ declare_lint_rule! {
         name: "noInvalidDirectionInLinearGradient",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("function-linear-gradient-no-nonstandard-direction")],
     }
 }
@@ -75,7 +77,7 @@ impl Rule for NoInvalidDirectionInLinearGradient {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let node_name = node.name().ok()?.text();
+        let node_name = node.name().ok()?.to_trimmed_string();
         let linear_gradient_property = [
             "linear-gradient",
             "-webkit-linear-gradient",
@@ -89,7 +91,7 @@ impl Rule for NoInvalidDirectionInLinearGradient {
         let css_parameter = node.items();
 
         let first_css_parameter = css_parameter.first()?.ok()?;
-        let first_css_parameter_text = first_css_parameter.text();
+        let first_css_parameter_text = first_css_parameter.to_trimmed_string();
         if IN_KEYWORD.is_match(&first_css_parameter_text) {
             return None;
         }

@@ -11,7 +11,7 @@ const rootManifest = JSON.parse(
 
 let [major, minor, patch] = rootManifest.version
 	.split(".")
-	.map((num) => Number.parseInt(num));
+	.map((num) => Number.parseInt(num, 10));
 // increment patch version
 patch += 1;
 let version = `${major}.${minor}.${patch}`;
@@ -23,7 +23,7 @@ if (
 	throw new Error("GITHUB_SHA environment variable is undefined");
 }
 
-version += `-nightly.${process.env.GITHUB_SHA.substring(0, 7)}`;
+version += `-preview.${process.env.GITHUB_SHA.substring(0, 7)}`;
 rootManifest.version = version;
 
 const content = JSON.stringify(rootManifest);

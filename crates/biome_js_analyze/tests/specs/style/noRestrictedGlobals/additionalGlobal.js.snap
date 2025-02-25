@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: additionalGlobal.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 console.log($);
 
 ```
@@ -12,7 +13,7 @@ console.log($);
 ```
 additionalGlobal.js:1:13 lint/style/noRestrictedGlobals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use the global variable $.
+  i Do not use the global variable $.
   
   > 1 │ console.log($);
       │             ^
@@ -22,5 +23,3 @@ additionalGlobal.js:1:13 lint/style/noRestrictedGlobals ━━━━━━━━
   
 
 ```
-
-

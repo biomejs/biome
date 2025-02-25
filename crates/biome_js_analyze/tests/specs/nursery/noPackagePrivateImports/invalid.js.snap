@@ -1,0 +1,84 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+snapshot_kind: text
+---
+# Input
+```js
+// Attempt to import from `foo.js` from outside its `sub` module.
+import { fooPackageVariable } from "./sub/foo.js";
+
+// Attempt to import from `bar.ts` from outside its `aunt` module.
+import { barPackageVariable } from "../aunt/bar.ts";
+
+// Assumed to resolve to a JS/TS file.
+import { fooPackageVariable } from "./sub/foo";
+
+// If the `sub/foo` module is inaccessible, so is its index file.
+import { fooPackageVariable } from "./sub/foo/index.js";
+
+```
+
+# Diagnostics
+```
+invalid.js:2:36 lint/nursery/noPackagePrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Importing package private symbols is disallowed from outside the module directory.
+  
+    1 │ // Attempt to import from `foo.js` from outside its `sub` module.
+  > 2 │ import { fooPackageVariable } from "./sub/foo.js";
+      │                                    ^^^^^^^^^^^^^^
+    3 │ 
+    4 │ // Attempt to import from `bar.ts` from outside its `aunt` module.
+  
+  i Please import from ./sub instead (you may need to re-export the symbol(s) from ./sub/foo.js).
+  
+
+```
+
+```
+invalid.js:5:36 lint/nursery/noPackagePrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Importing package private symbols is disallowed from outside the module directory.
+  
+    4 │ // Attempt to import from `bar.ts` from outside its `aunt` module.
+  > 5 │ import { barPackageVariable } from "../aunt/bar.ts";
+      │                                    ^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ // Assumed to resolve to a JS/TS file.
+  
+  i Please import from ../aunt instead (you may need to re-export the symbol(s) from ../aunt/bar.ts).
+  
+
+```
+
+```
+invalid.js:8:36 lint/nursery/noPackagePrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Importing package private symbols is disallowed from outside the module directory.
+  
+     7 │ // Assumed to resolve to a JS/TS file.
+   > 8 │ import { fooPackageVariable } from "./sub/foo";
+       │                                    ^^^^^^^^^^^
+     9 │ 
+    10 │ // If the `sub/foo` module is inaccessible, so is its index file.
+  
+  i Please import from ./sub instead (you may need to re-export the symbol(s) from ./sub/foo).
+  
+
+```
+
+```
+invalid.js:11:36 lint/nursery/noPackagePrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Importing package private symbols is disallowed from outside the module directory.
+  
+    10 │ // If the `sub/foo` module is inaccessible, so is its index file.
+  > 11 │ import { fooPackageVariable } from "./sub/foo/index.js";
+       │                                    ^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+  
+  i Please import from ./sub/index.js instead (you may need to re-export the symbol(s) from ./sub/foo/index.js).
+  
+
+```

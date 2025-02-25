@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid_hooked_component.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -13,7 +14,7 @@ export default hoge(Fuga)
 ```
 invalid_hooked_component.jsx:1:7 lint/nursery/useComponentExportOnlyModules ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Components should be exported.
+  i Components should be exported.
   
   > 1 │ const Fuga = () => <></>
       │       ^^^^

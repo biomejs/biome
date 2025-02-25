@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `check.js`
 
@@ -21,26 +22,6 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 # Emitted Messages
-
-```block
-check.js:1:1 lint/style/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Use a while loop instead of a for loop.
-  
-  > 1 │ for(;true;);
-      │ ^^^^^^^^^^^
-    2 │ 
-  
-  i Prefer a while loop over a for loop without initialization and update.
-  
-  i Safe fix: Use a while loop.
-  
-    1   │ - for(;true;);
-      1 │ + while(true);
-    2 2 │   
-  
-
-```
 
 ```block
 check.js:1:6 lint/correctness/noConstantCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -66,5 +47,5 @@ check.js format ━━━━━━━━━━━━━━━━━━━━━�
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 3 errors.
+Found 2 errors.
 ```

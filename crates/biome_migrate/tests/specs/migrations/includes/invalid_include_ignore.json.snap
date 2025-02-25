@@ -1,0 +1,161 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid_include_ignore.json
+---
+# Input
+```json
+{
+  "files": {
+    "include": ["./src", "*.js"],
+    "ignore": ["tests", "*.test.js"]
+  },
+  "formatter": {
+    "include": ["src/**/*.js"],
+    "ignore": ["*.gen.js"]
+  },
+  "assist": {
+    "include": ["src/**/*.js"],
+    "ignore": ["*.gen.js"]
+  },
+  "linter": {
+    "include": ["src/**/*.js"],
+    "ignore": ["*.gen.js"]
+  },
+  "overrides": [
+    {
+      "include": ["*.json"],
+      "ignore": ["*.gen.json"],
+      "linter": {
+        "rules": {}
+      }
+    }
+  ]
+}
+
+```
+
+# Diagnostics
+```
+invalid_include_ignore.json:3:5 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! include and ignore configurations have been replaced by the includes configuration.
+  
+    1 │ {
+    2 │   "files": {
+  > 3 │     "include": ["./src", "*.js"],
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │     "ignore": ["tests", "*.test.js"]
+    5 │   },
+  
+  i Safe fix: Use includes instead.
+  
+     1  1 │   {
+     2  2 │     "files": {
+     3    │ - ····"include":·["./src",·"*.js"],
+     4    │ - ····"ignore":·["tests",·"*.test.js"]
+        3 │ + ····"includes":·["src/**",·"**/*.js",·"!**/tests",·"!**/*.test.js"]
+     5  4 │     },
+     6  5 │     "formatter": {
+  
+
+```
+
+```
+invalid_include_ignore.json:7:5 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! include and ignore configurations have been replaced by the includes configuration.
+  
+    5 │   },
+    6 │   "formatter": {
+  > 7 │     "include": ["src/**/*.js"],
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │     "ignore": ["*.gen.js"]
+    9 │   },
+  
+  i Safe fix: Use includes instead.
+  
+     5  5 │     },
+     6  6 │     "formatter": {
+     7    │ - ····"include":·["src/**/*.js"],
+     8    │ - ····"ignore":·["*.gen.js"]
+        7 │ + ····"includes":·["**/src/**/*.js",·"!**/*.gen.js"]
+     9  8 │     },
+    10  9 │     "assist": {
+  
+
+```
+
+```
+invalid_include_ignore.json:11:5 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! include and ignore configurations have been replaced by the includes configuration.
+  
+     9 │   },
+    10 │   "assist": {
+  > 11 │     "include": ["src/**/*.js"],
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │     "ignore": ["*.gen.js"]
+    13 │   },
+  
+  i Safe fix: Use includes instead.
+  
+     9  9 │     },
+    10 10 │     "assist": {
+    11    │ - ····"include":·["src/**/*.js"],
+    12    │ - ····"ignore":·["*.gen.js"]
+       11 │ + ····"includes":·["**/src/**/*.js",·"!**/*.gen.js"]
+    13 12 │     },
+    14 13 │     "linter": {
+  
+
+```
+
+```
+invalid_include_ignore.json:15:5 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! include and ignore configurations have been replaced by the includes configuration.
+  
+    13 │   },
+    14 │   "linter": {
+  > 15 │     "include": ["src/**/*.js"],
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │     "ignore": ["*.gen.js"]
+    17 │   },
+  
+  i Safe fix: Use includes instead.
+  
+    13 13 │     },
+    14 14 │     "linter": {
+    15    │ - ····"include":·["src/**/*.js"],
+    16    │ - ····"ignore":·["*.gen.js"]
+       15 │ + ····"includes":·["**/src/**/*.js",·"!**/*.gen.js"]
+    17 16 │     },
+    18 17 │     "overrides": [
+  
+
+```
+
+```
+invalid_include_ignore.json:20:7 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! include and ignore configurations have been replaced by the includes configuration.
+  
+    18 │   "overrides": [
+    19 │     {
+  > 20 │       "include": ["*.json"],
+       │       ^^^^^^^^^^^^^^^^^^^^^
+    21 │       "ignore": ["*.gen.json"],
+    22 │       "linter": {
+  
+  i Safe fix: Use includes instead.
+  
+    18 18 │     "overrides": [
+    19 19 │       {
+    20    │ - ······"include":·["*.json"],
+    21    │ - ······"ignore":·["*.gen.json"],
+       20 │ + ······"includes":·["**/*.json",·"!**/*.gen.json"],
+    22 21 │         "linter": {
+    23 22 │           "rules": {}
+  
+
+```

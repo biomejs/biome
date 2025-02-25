@@ -155,7 +155,7 @@ impl SemanticEventExtractor {
             }
 
             AnyCssSelector::CssCompoundSelector(selector) => {
-                let selector_text = selector.text();
+                let selector_text = selector.to_trimmed_string();
                 if selector_text == ROOT_SELECTOR {
                     self.stash.push_back(SemanticEvent::RootSelectorStart);
                     self.is_in_root_selector = true;
@@ -203,15 +203,15 @@ impl SemanticEventExtractor {
                 declaration.property()
             {
                 if let Ok(prop_name) = prop.name() {
-                    match prop_name.text().as_str() {
+                    match prop_name.to_trimmed_string().as_str() {
                         "initial-value" => {
                             initial_value = Some(CssValue::from(prop.value()));
                         }
                         "syntax" => {
-                            syntax = Some(prop.value().text().to_string());
+                            syntax = Some(prop.value().to_trimmed_string().to_string());
                         }
                         "inherits" => {
-                            inherits = Some(prop.value().text() == "true");
+                            inherits = Some(prop.value().to_trimmed_string() == "true");
                         }
                         _ => {}
                     }

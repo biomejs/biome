@@ -1,0 +1,93 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+snapshot_kind: text
+---
+# Input
+```js
+for (; true; ) {}
+
+let i =0;
+for (; i < 10; ) {
+    i++;
+}
+
+// Comment
+for /*a*/ ( /*init*/; /*test before*/ true /*test after*/; /*update*/ ) /*b*/ {
+    // body
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/complexity/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a while loop instead of a for loop.
+  
+  > 1 │ for (; true; ) {}
+      │ ^^^^^^^^^^^^^^
+    2 │ 
+    3 │ let i =0;
+  
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
+  
+     1    │ - for·(;·true;·)·{}
+        1 │ + while·(true)·{}
+     2  2 │   
+     3  3 │   let i =0;
+  
+
+```
+
+```
+invalid.js:4:1 lint/complexity/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a while loop instead of a for loop.
+  
+    3 │ let i =0;
+  > 4 │ for (; i < 10; ) {
+      │ ^^^^^^^^^^^^^^^^
+    5 │     i++;
+    6 │ }
+  
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
+  
+     2  2 │   
+     3  3 │   let i =0;
+     4    │ - for·(;·i·<·10;·)·{
+        4 │ + while·(i·<·10)·{
+     5  5 │       i++;
+     6  6 │   }
+  
+
+```
+
+```
+invalid.js:9:1 lint/complexity/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a while loop instead of a for loop.
+  
+     8 │ // Comment
+   > 9 │ for /*a*/ ( /*init*/; /*test before*/ true /*test after*/; /*update*/ ) /*b*/ {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     // body
+    11 │ }
+  
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
+  
+     7  7 │   
+     8  8 │   // Comment
+     9    │ - for·/*a*/·(·/*init*/;·/*test·before*/·true·/*test·after*/;·/*update*/·)·/*b*/·{
+        9 │ + while·/*a*/·(/*test·before*/·true·/*test·after*/)·/*b*/·{
+    10 10 │       // body
+    11 11 │   }
+  
+
+```

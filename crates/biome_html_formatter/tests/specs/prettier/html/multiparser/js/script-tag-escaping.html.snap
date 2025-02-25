@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/multiparser/js/script-tag-escaping.html
+---
+# Input
+
+```html
+<script>
+  document.write(/* HTML */ `
+    <script>
+      document.write(/* HTML */ \`
+        <!-- foo1 -->
+        <script>
+          document.write(/* HTML */ \\\`<!-- bar1 --> bar <!-- bar2 -->\\\`);
+        <\\/script>
+        <!-- foo2 -->
+      \`);
+    <\/script>
+  `);
+</script>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -4,11 +4,7 @@
+       document.write(/* HTML */ \`
+         <!-- foo1 -->
+         <script>
+-          document.write(
+-            /* HTML */ \\\`<!-- bar1 -->
+-              bar
+-              <!-- bar2 -->\\\`,
+-          );
++          document.write(/* HTML */ \\\`<!-- bar1 --> bar <!-- bar2 -->\\\`);
+         <\\/script>
+         <!-- foo2 -->
+       \`);
+```
+
+# Output
+
+```html
+<script>
+  document.write(/* HTML */ `
+    <script>
+      document.write(/* HTML */ \`
+        <!-- foo1 -->
+        <script>
+          document.write(/* HTML */ \\\`<!-- bar1 --> bar <!-- bar2 -->\\\`);
+        <\\/script>
+        <!-- foo2 -->
+      \`);
+    <\/script>
+  `);
+</script>
+```

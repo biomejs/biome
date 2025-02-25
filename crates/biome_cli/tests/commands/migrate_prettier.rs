@@ -2,9 +2,8 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
-use std::path::Path;
+use camino::Utf8Path;
 
 #[test]
 fn prettier_migrate() {
@@ -14,16 +13,16 @@ fn prettier_migrate() {
     let configuration = r#"{ "linter": { "enabled": true } }"#;
     let prettier = r#"{ "useTabs": false, "semi": true, "singleQuote": true }"#;
 
-    let configuration_path = Path::new("biome.json");
+    let configuration_path = Utf8Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let prettier_path = Path::new(".prettierrc");
+    let prettier_path = Utf8Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier"].as_slice()),
+        Args::from(["migrate", "prettier"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -45,16 +44,16 @@ fn prettier_migrate_end_of_line() {
     let configuration = r#"{}"#;
     let prettier = r#"{ "endOfLine": "auto" }"#;
 
-    let configuration_path = Path::new("biome.json");
+    let configuration_path = Utf8Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let prettier_path = Path::new(".prettierrc");
+    let prettier_path = Utf8Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier"].as_slice()),
+        Args::from(["migrate", "prettier"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -84,19 +83,19 @@ node_modules/**
 generated/*.spec.js
 "#;
 
-    let configuration_path = Path::new("biome.json");
+    let configuration_path = Utf8Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let prettier_path = Path::new(".prettierrc");
+    let prettier_path = Utf8Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let prettier_ignore_path = Path::new(".prettierignore");
+    let prettier_ignore_path = Utf8Path::new(".prettierignore");
     fs.insert(prettier_ignore_path.into(), prettier_ignore.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier"].as_slice()),
+        Args::from(["migrate", "prettier"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -118,16 +117,16 @@ fn prettier_migrate_jsonc() {
     let configuration = r#"{ "linter": { "enabled": true } }"#;
     let prettier = r#"{ "useTabs": false, "semi": true, "singleQuote": true }"#;
 
-    let configuration_path = Path::new("biome.jsonc");
+    let configuration_path = Utf8Path::new("biome.jsonc");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let prettier_path = Path::new(".prettierrc");
+    let prettier_path = Utf8Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier"].as_slice()),
+        Args::from(["migrate", "prettier"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -148,13 +147,13 @@ fn prettier_migrate_no_file() {
 
     let configuration = r#"{ "linter": { "enabled": true } }"#;
 
-    let configuration_path = Path::new("biome.json");
+    let configuration_path = Utf8Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier"].as_slice()),
+        Args::from(["migrate", "prettier"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -176,16 +175,16 @@ fn prettier_migrate_yml_file() {
     let configuration = r#"{ "linter": { "enabled": true } }"#;
     let prettier = r#"useTabs: true"#;
 
-    let configuration_path = Path::new("biome.json");
+    let configuration_path = Utf8Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let prettier_path = Path::new(".prettierrc");
+    let prettier_path = Utf8Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier"].as_slice()),
+        Args::from(["migrate", "prettier"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -207,16 +206,16 @@ fn prettier_migrate_write() {
     let configuration = r#"{ "linter": { "enabled": true } }"#;
     let prettier = r#"{ "useTabs": false, "semi": true, "singleQuote": true }"#;
 
-    let configuration_path = Path::new("biome.json");
+    let configuration_path = Utf8Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let prettier_path = Path::new(".prettierrc");
+    let prettier_path = Utf8Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier", "--write"].as_slice()),
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -238,16 +237,16 @@ fn prettier_migrate_fix() {
     let configuration = r#"{ "linter": { "enabled": true } }"#;
     let prettier = r#"{ "useTabs": false, "semi": true, "singleQuote": true }"#;
 
-    let configuration_path = Path::new("biome.json");
+    let configuration_path = Utf8Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let prettier_path = Path::new(".prettierrc");
+    let prettier_path = Utf8Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier", "--fix"].as_slice()),
+        Args::from(["migrate", "prettier", "--fix"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -269,16 +268,16 @@ fn prettierjson_migrate_write() {
     let configuration = r#"{ "linter": { "enabled": true } }"#;
     let prettier = r#"{ "useTabs": false, "semi": true, "singleQuote": true }"#;
 
-    let configuration_path = Path::new("biome.json");
+    let configuration_path = Utf8Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let prettier_path = Path::new(".prettierrc.json");
+    let prettier_path = Utf8Path::new(".prettierrc.json");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier", "--write"].as_slice()),
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -304,16 +303,16 @@ fn prettier_migrate_write_packagejson() {
         "prettier": { "useTabs": false, "semi": true, "singleQuote": true }
     }"#;
 
-    let configuration_path = Path::new("biome.json");
+    let configuration_path = Utf8Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let prettier_path = Path::new("package.json");
+    let prettier_path = Utf8Path::new("package.json");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier", "--write"].as_slice()),
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -343,19 +342,19 @@ node_modules/**
 generated/*.spec.js
 "#;
 
-    let configuration_path = Path::new("biome.json");
+    let configuration_path = Utf8Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let prettier_path = Path::new(".prettierrc");
+    let prettier_path = Utf8Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let prettier_ignore_path = Path::new(".prettierignore");
+    let prettier_ignore_path = Utf8Path::new(".prettierignore");
     fs.insert(prettier_ignore_path.into(), prettier_ignore.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier", "--write"].as_slice()),
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -377,16 +376,16 @@ fn prettier_migrate_write_biome_jsonc() {
     let configuration = r#"{ "linter": { "enabled": true } }"#;
     let prettier = r#"{ "useTabs": false, "semi": true, "singleQuote": true }"#;
 
-    let configuration_path = Path::new("biome.jsonc");
+    let configuration_path = Utf8Path::new("biome.jsonc");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let prettier_path = Path::new(".prettierrc");
+    let prettier_path = Utf8Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier", "--write"].as_slice()),
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -419,16 +418,16 @@ fn prettier_migrate_overrides() {
         }]
     }"#;
 
-    let configuration_path = Path::new("biome.json");
+    let configuration_path = Utf8Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let prettier_path = Path::new(".prettierrc");
+    let prettier_path = Utf8Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier"].as_slice()),
+        Args::from(["migrate", "prettier"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

@@ -1,3 +1,4 @@
+#![allow(clippy::needless_lifetimes)]
 use grit_pattern_matcher::pattern::VariableSource;
 use grit_util::ByteRange;
 
@@ -5,11 +6,12 @@ use crate::{
     diagnostics::CompilerDiagnostic, grit_built_in_functions::BuiltIns,
     grit_target_language::GritTargetLanguage,
 };
-use std::{collections::BTreeMap, path::Path};
+use camino::Utf8Path;
+use std::collections::BTreeMap;
 
 pub(crate) struct CompilationContext<'a> {
     /// Path of the source file being compiled.
-    pub source_path: Option<&'a Path>,
+    pub source_path: Option<&'a Utf8Path>,
 
     /// The target language being matched on.
     pub lang: GritTargetLanguage,
@@ -23,7 +25,7 @@ pub(crate) struct CompilationContext<'a> {
 impl<'a> CompilationContext<'a> {
     #[cfg(test)]
     pub(crate) fn new(
-        source_path: Option<&'a Path>,
+        source_path: Option<&'a Utf8Path>,
         lang: GritTargetLanguage,
         built_ins: &'a BuiltIns,
     ) -> Self {

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 /**
  * Safe fixes:
  */
@@ -112,7 +113,7 @@ if (condition) {
 ```
 invalid.js:7:9 lint/style/useCollapsedElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into an else if statement.
+  i This if statement can be collapsed into an else if statement.
   
      5 │ if (condition) {
      6 │ 	// ...
@@ -145,7 +146,7 @@ invalid.js:7:9 lint/style/useCollapsedElseIf  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:15:9 lint/style/useCollapsedElseIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into an else if statement.
+  i This if statement can be collapsed into an else if statement.
   
     13 │ if (condition) {
     14 │ 	// ...
@@ -182,7 +183,7 @@ invalid.js:15:9 lint/style/useCollapsedElseIf  FIXABLE  ━━━━━━━━
 ```
 invalid.js:29:20 lint/style/useCollapsedElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into an else if statement.
+  i This if statement can be collapsed into an else if statement.
   
     27 │ if (condition) {
     28 │ 	// ...
@@ -201,7 +202,7 @@ invalid.js:29:20 lint/style/useCollapsedElseIf ━━━━━━━━━━━
 ```
 invalid.js:37:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into an else if statement.
+  i This if statement can be collapsed into an else if statement.
   
     35 │ if (condition) {
     36 │ 	// ...
@@ -221,7 +222,7 @@ invalid.js:37:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━�
 ```
 invalid.js:46:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into an else if statement.
+  i This if statement can be collapsed into an else if statement.
   
     44 │ if (condition) {
     45 │ 	// ...
@@ -240,7 +241,7 @@ invalid.js:46:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━�
 ```
 invalid.js:54:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into an else if statement.
+  i This if statement can be collapsed into an else if statement.
   
     52 │ if (condition) {
     53 │ 	// ...
@@ -259,7 +260,7 @@ invalid.js:54:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━�
 ```
 invalid.js:63:20 lint/style/useCollapsedElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into an else if statement.
+  i This if statement can be collapsed into an else if statement.
   
     61 │ if (condition) {
     62 │ 	// ...
@@ -280,7 +281,7 @@ invalid.js:63:20 lint/style/useCollapsedElseIf ━━━━━━━━━━━
 ```
 invalid.js:73:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into an else if statement.
+  i This if statement can be collapsed into an else if statement.
   
     71 │ if (condition) {
     72 │ 	// ...
@@ -300,7 +301,7 @@ invalid.js:73:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━�
 ```
 invalid.js:84:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into an else if statement.
+  i This if statement can be collapsed into an else if statement.
   
     82 │ if (condition) {
     83 │ 	// ...
@@ -321,7 +322,7 @@ invalid.js:84:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━�
 ```
 invalid.js:94:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This if statement can be collapsed into an else if statement.
+  i This if statement can be collapsed into an else if statement.
   
      92 │ if (condition) {
      93 │ 	// ...
@@ -338,5 +339,3 @@ invalid.js:94:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━�
   
 
 ```
-
-

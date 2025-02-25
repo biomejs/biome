@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 els.forEach((el) => {});
 
 els.forEach(el => {});
@@ -136,5 +137,3 @@ invalid.js:13:1 lint/complexity/noForEach ━━━━━━━━━━━━�
   
 
 ```
-
-

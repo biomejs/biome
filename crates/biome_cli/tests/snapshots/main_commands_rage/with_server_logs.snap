@@ -24,7 +24,8 @@ Environment:
   NODE_PACKAGE_MANAGER:         unset
 
 Biome Configuration:
-  Status:                       unset
+  Status:                       Not set
+  Path:                         unset
 
 Server:
   Version:                      0.0.0

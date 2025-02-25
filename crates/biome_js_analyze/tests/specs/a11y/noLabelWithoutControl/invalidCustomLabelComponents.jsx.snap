@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidCustomLabelComponents.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -12,7 +13,7 @@ expression: invalidCustomLabelComponents.jsx
 ```
 invalidCustomLabelComponents.jsx:1:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with an input.
+  × A form label must be associated with an input.
   
   > 1 │ <CustomLabel aria-label="A label" />;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 switch (foo) {
     // comment
     case false:
@@ -57,7 +58,7 @@ switch (foo) {
 ```
 invalid.js:4:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A switch clause should only have a single statement.
+  i A switch clause should only have a single statement.
   
     2 │     // comment
     3 │     case false:
@@ -87,7 +88,7 @@ invalid.js:4:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━━
 ```
 invalid.js:10:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A switch clause should only have a single statement.
+  i A switch clause should only have a single statement.
   
      8 │ switch (foo) {
      9 │     case false: // comment
@@ -117,7 +118,7 @@ invalid.js:10:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
 ```
 invalid.js:17:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A switch clause should only have a single statement.
+  i A switch clause should only have a single statement.
   
     15 │     case false
     16 │     /* comment */ :
@@ -147,7 +148,7 @@ invalid.js:17:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
 ```
 invalid.js:24:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A switch clause should only have a single statement.
+  i A switch clause should only have a single statement.
   
     22 │     case true:
     23 │     default:
@@ -177,7 +178,7 @@ invalid.js:24:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
 ```
 invalid.js:31:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A switch clause should only have a single statement.
+  i A switch clause should only have a single statement.
   
     29 │     // comment
     30 │     default:
@@ -207,7 +208,7 @@ invalid.js:31:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
 ```
 invalid.js:37:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A switch clause should only have a single statement.
+  i A switch clause should only have a single statement.
   
     35 │ switch (foo) {
     36 │     default: // comment
@@ -237,7 +238,7 @@ invalid.js:37:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━�
 ```
 invalid.js:44:9 lint/style/useSingleCaseStatement  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A switch clause should only have a single statement.
+  i A switch clause should only have a single statement.
   
     42 │     default
     43 │     /* comment */ :

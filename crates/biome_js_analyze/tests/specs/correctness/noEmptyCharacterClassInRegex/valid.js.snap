@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 /^abc[a-zA-Z]/;
 /^abc/;
 /[\[]/;
@@ -33,7 +34,7 @@ expression: valid.js
 ```
 valid.js:15:3 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this negated empty character class.
+  × The regular expression includes this negated empty character class.
   
     13 │ /[\]]/d;
     14 │ /\[]/;
@@ -52,7 +53,7 @@ valid.js:15:3 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━�
 ```
 valid.js:22:3 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The regular expression includes this negated empty character class.
+  × The regular expression includes this negated empty character class.
   
     20 │ /[[a][b]]/v;
     21 │ /[\q{}]/v;
@@ -66,5 +67,3 @@ valid.js:22:3 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━�
   
 
 ```
-
-

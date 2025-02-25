@@ -1,6 +1,7 @@
 use crate::utils::is_node_equal;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_diagnostics::Severity;
 use biome_js_syntax::JsBinaryExpression;
 use biome_rowan::AstNode;
 
@@ -33,6 +34,7 @@ declare_lint_rule! {
             RuleSource::Clippy("eq_op"),
         ],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

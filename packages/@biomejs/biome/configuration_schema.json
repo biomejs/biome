@@ -8,10 +8,10 @@
 			"description": "A field for the [JSON schema](https://json-schema.org/) specification",
 			"type": ["string", "null"]
 		},
-		"assists": {
+		"assist": {
 			"description": "Specific configuration for assists",
 			"anyOf": [
-				{ "$ref": "#/definitions/AssistsConfiguration" },
+				{ "$ref": "#/definitions/AssistConfiguration" },
 				{ "type": "null" }
 			]
 		},
@@ -24,7 +24,8 @@
 		},
 		"extends": {
 			"description": "A list of paths to other JSON files, used to extends the current configuration.",
-			"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+			"type": ["array", "null"],
+			"items": { "type": "string" }
 		},
 		"files": {
 			"description": "The configuration of the filesystem",
@@ -47,12 +48,23 @@
 				{ "type": "null" }
 			]
 		},
-		"javascript": {
-			"description": "Specific configuration for the JavaScript language",
+		"grit": {
+			"description": "Specific configuration for the GraphQL language",
 			"anyOf": [
-				{ "$ref": "#/definitions/JavascriptConfiguration" },
+				{ "$ref": "#/definitions/GritConfiguration" },
 				{ "type": "null" }
 			]
+		},
+		"html": {
+			"description": "Specific configuration for the HTML language",
+			"anyOf": [
+				{ "$ref": "#/definitions/HtmlConfiguration" },
+				{ "type": "null" }
+			]
+		},
+		"javascript": {
+			"description": "Specific configuration for the JavaScript language",
+			"anyOf": [{ "$ref": "#/definitions/JsConfiguration" }, { "type": "null" }]
 		},
 		"json": {
 			"description": "Specific configuration for the Json language",
@@ -68,13 +80,17 @@
 				{ "type": "null" }
 			]
 		},
-		"organizeImports": {
-			"description": "The configuration of the import sorting",
-			"anyOf": [{ "$ref": "#/definitions/OrganizeImports" }, { "type": "null" }]
-		},
 		"overrides": {
 			"description": "A list of granular patterns that should be applied only to a sub set of files",
 			"anyOf": [{ "$ref": "#/definitions/Overrides" }, { "type": "null" }]
+		},
+		"plugins": {
+			"description": "List of plugins to load.",
+			"anyOf": [{ "$ref": "#/definitions/Plugins" }, { "type": "null" }]
+		},
+		"root": {
+			"description": "Indicates whether this configuration file is at the root of a Biome project. By default, this is `true`.",
+			"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 		},
 		"vcs": {
 			"description": "The configuration of the VCS integration",
@@ -90,10 +106,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noAccessKey": {
 					"description": "Enforce that the accessKey attribute is not used on any HTML element.",
 					"anyOf": [
@@ -346,6 +358,10 @@
 		"Actions": {
 			"type": "object",
 			"properties": {
+				"recommended": {
+					"description": "It enables the assist actions recommended by Biome. `true` by default.",
+					"type": ["boolean", "null"]
+				},
 				"source": {
 					"anyOf": [{ "$ref": "#/definitions/Source" }, { "type": "null" }]
 				}
@@ -370,38 +386,36 @@
 			"additionalProperties": false
 		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
-		"AssistsConfiguration": {
+		"AssistConfiguration": {
 			"type": "object",
 			"properties": {
 				"actions": {
-					"description": "Whether Biome should fail in CLI if the assists were not applied to the code.",
+					"description": "Whether Biome should fail in CLI if the assist were not applied to the code.",
 					"anyOf": [{ "$ref": "#/definitions/Actions" }, { "type": "null" }]
 				},
 				"enabled": {
-					"description": "Whether Biome should enable assists via LSP.",
-					"type": ["boolean", "null"]
+					"description": "Whether Biome should enable assist via LSP.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				"includes": {
+					"description": "A list of glob patterns. Biome will include files/folders that will match these patterns.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/definitions/Glob" }
 				}
 			},
 			"additionalProperties": false
 		},
 		"AttributePosition": { "type": "string", "enum": ["auto", "multiline"] },
+		"Bool": { "type": "boolean" },
+		"BracketSameLine": {
+			"description": "Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
+			"type": "boolean"
+		},
 		"BracketSpacing": { "type": "boolean" },
 		"Complexity": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noBannedTypes": {
 					"description": "Disallow primitive type aliases and misleading types.",
 					"anyOf": [
@@ -629,6 +643,13 @@
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useWhile": {
+					"description": "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -721,10 +742,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noChildrenProp": {
 					"description": "Prevent passing of children as props.",
 					"anyOf": [
@@ -1103,13 +1120,13 @@
 			},
 			"additionalProperties": false
 		},
-		"CssAssists": {
-			"description": "Options that changes how the CSS assists behaves",
+		"CssAssistConfiguration": {
+			"description": "Options that changes how the CSS assist behaves",
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the assists for CSS files.",
-					"type": ["boolean", "null"]
+					"description": "Control the assist for CSS files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1118,35 +1135,54 @@
 			"description": "Options applied to CSS files",
 			"type": "object",
 			"properties": {
-				"assists": {
-					"description": "CSS assists options",
-					"anyOf": [{ "$ref": "#/definitions/CssAssists" }, { "type": "null" }]
-				},
-				"formatter": {
-					"description": "CSS formatter options",
+				"assist": {
+					"description": "CSS assist options",
+					"default": null,
 					"anyOf": [
-						{ "$ref": "#/definitions/CssFormatter" },
+						{ "$ref": "#/definitions/CssAssistConfiguration" },
 						{ "type": "null" }
 					]
 				},
+				"formatter": {
+					"description": "CSS formatter options",
+					"default": null,
+					"anyOf": [
+						{ "$ref": "#/definitions/CssFormatterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"globals": {
+					"description": "CSS globals",
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
+				},
 				"linter": {
 					"description": "CSS linter options",
-					"anyOf": [{ "$ref": "#/definitions/CssLinter" }, { "type": "null" }]
+					"default": null,
+					"anyOf": [
+						{ "$ref": "#/definitions/CssLinterConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"parser": {
 					"description": "CSS parsing options",
-					"anyOf": [{ "$ref": "#/definitions/CssParser" }, { "type": "null" }]
+					"default": null,
+					"anyOf": [
+						{ "$ref": "#/definitions/CssParserConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
 		},
-		"CssFormatter": {
+		"CssFormatterConfiguration": {
 			"description": "Options that changes how the CSS formatter behaves",
 			"type": "object",
 			"properties": {
 				"enabled": {
 					"description": "Control the formatter for CSS (and its super languages) files.",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"indentStyle": {
 					"description": "The indent style applied to CSS (and its super languages) files.",
@@ -1171,28 +1207,30 @@
 			},
 			"additionalProperties": false
 		},
-		"CssLinter": {
+		"CssLinterConfiguration": {
 			"description": "Options that changes how the CSS linter behaves",
 			"type": "object",
 			"properties": {
 				"enabled": {
 					"description": "Control the linter for CSS files.",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
-		"CssParser": {
+		"CssParserConfiguration": {
 			"description": "Options that changes how the CSS parser behaves",
 			"type": "object",
 			"properties": {
 				"allowWrongLineComments": {
 					"description": "Allow comments to appear on incorrect lines in `.css` files",
-					"type": ["boolean", "null"]
+					"default": null,
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"cssModules": {
 					"description": "Enables parsing of CSS Modules specific features.",
-					"type": ["boolean", "null"]
+					"default": null,
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1268,6 +1306,7 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"Expand": { "type": "string", "enum": ["always", "followSource"] },
 		"FilenameCase": {
 			"description": "Supported cases for file names.",
 			"oneOf": [
@@ -1332,23 +1371,18 @@
 			"description": "The configuration of the filesystem",
 			"type": "object",
 			"properties": {
-				"ignore": {
-					"description": "A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
 				"ignoreUnknown": {
 					"description": "Tells Biome to not emit diagnostics when handling files that doesn't know",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
-				"include": {
-					"description": "A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				"includes": {
+					"description": "A list of glob patterns. Biome will handle only those files/folders that will match these patterns.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/definitions/Glob" }
 				},
 				"maxSize": {
 					"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB",
-					"type": ["integer", "null"],
-					"format": "uint64",
-					"minimum": 1.0
+					"anyOf": [{ "$ref": "#/definitions/MaxSize" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1388,9 +1422,16 @@
 			"type": "object",
 			"properties": {
 				"attributePosition": {
-					"description": "The attribute position style in HTMLish languages. By default auto.",
+					"description": "The attribute position style in HTML-ish languages. Defaults to auto.",
 					"anyOf": [
 						{ "$ref": "#/definitions/AttributePosition" },
+						{ "type": "null" }
+					]
+				},
+				"bracketSameLine": {
+					"description": "Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSameLine" },
 						{ "type": "null" }
 					]
 				},
@@ -1401,22 +1442,17 @@
 						{ "type": "null" }
 					]
 				},
-				"enabled": { "type": ["boolean", "null"] },
+				"enabled": {
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				},
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
-				"indentSize": {
-					"description": "The size of the indentation, 2 by default (deprecated, use `indent-width`)",
-					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
+				"includes": {
+					"description": "A list of glob patterns. The formatter will include files/folders that will match these patterns.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/definitions/Glob" }
 				},
 				"indentStyle": {
 					"description": "The indent style.",
@@ -1434,9 +1470,26 @@
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
+				"objectWrap": {
+					"description": "Whether to enforce collapsing object literals when possible. Defaults to preserve.",
+					"anyOf": [{ "$ref": "#/definitions/ObjectWrap" }, { "type": "null" }]
+				},
 				"useEditorconfig": {
-					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration. Default: false.",
-					"type": ["boolean", "null"]
+					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.\n\nDefault: `false`.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"Glob": { "type": "string" },
+		"GraphqlAssistConfiguration": {
+			"description": "Options that changes how the GraphQL linter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for GraphQL files.",
+					"default": null,
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1445,28 +1498,36 @@
 			"description": "Options applied to GraphQL files",
 			"type": "object",
 			"properties": {
+				"assist": {
+					"description": "Assist options",
+					"anyOf": [
+						{ "$ref": "#/definitions/GraphqlAssistConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"formatter": {
 					"description": "GraphQL formatter options",
 					"anyOf": [
-						{ "$ref": "#/definitions/GraphqlFormatter" },
+						{ "$ref": "#/definitions/GraphqlFormatterConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"linter": {
 					"anyOf": [
-						{ "$ref": "#/definitions/GraphqlLinter" },
+						{ "$ref": "#/definitions/GraphqlLinterConfiguration" },
 						{ "type": "null" }
 					]
 				}
 			},
 			"additionalProperties": false
 		},
-		"GraphqlFormatter": {
+		"GraphqlFormatterConfiguration": {
 			"description": "Options that changes how the GraphQL formatter behaves",
 			"type": "object",
 			"properties": {
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"default": null,
 					"anyOf": [
 						{ "$ref": "#/definitions/BracketSpacing" },
 						{ "type": "null" }
@@ -1474,41 +1535,151 @@
 				},
 				"enabled": {
 					"description": "Control the formatter for GraphQL files.",
-					"type": ["boolean", "null"]
+					"default": null,
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"indentStyle": {
 					"description": "The indent style applied to GraphQL files.",
+					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
 				},
 				"indentWidth": {
 					"description": "The size of the indentation applied to GraphQL files. Default to 2.",
+					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"lineEnding": {
 					"description": "The type of line ending applied to GraphQL files.",
+					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
 				},
 				"lineWidth": {
 					"description": "What's the max width of a line applied to GraphQL files. Defaults to 80.",
+					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
 				"quoteStyle": {
 					"description": "The type of quotes used in GraphQL code. Defaults to double.",
+					"default": null,
 					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
-		"GraphqlLinter": {
-			"description": "Options that changes how the GraphQL linter behaves",
+		"GraphqlLinterConfiguration": {
+			"description": "Options that change how the GraphQL linter behaves.",
 			"type": "object",
 			"properties": {
 				"enabled": {
 					"description": "Control the formatter for GraphQL files.",
-					"type": ["boolean", "null"]
+					"default": null,
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
+		},
+		"GritAssistConfiguration": {
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the assist functionality for Grit files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"GritConfiguration": {
+			"description": "Options applied to GritQL files",
+			"type": "object",
+			"properties": {
+				"assist": {
+					"description": "Assist options",
+					"anyOf": [
+						{ "$ref": "#/definitions/GritAssistConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"formatter": {
+					"description": "Formatting options",
+					"anyOf": [
+						{ "$ref": "#/definitions/GritFormatterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"linter": {
+					"description": "Formatting options",
+					"anyOf": [
+						{ "$ref": "#/definitions/GritLinterConfiguration" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"GritFormatterConfiguration": {
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for Grit files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				},
+				"indentStyle": {
+					"description": "The indent style applied to Grit files.",
+					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to Grit files. Default to 2.",
+					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to Grit files.",
+					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to Grit files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"GritLinterConfiguration": {
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for Grit files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"GroupPlainConfiguration": {
+			"oneOf": [
+				{
+					"description": "It disables all the rules of this group",
+					"type": "string",
+					"enum": ["off"]
+				},
+				{
+					"description": "It enables all the rules of this group, with their default severity",
+					"type": "string",
+					"enum": ["on"]
+				},
+				{
+					"description": "It enables all the rules of this group, and set their severity to \"info\"",
+					"type": "string",
+					"enum": ["info"]
+				},
+				{
+					"description": "It enables all the rules of this group, and set their severity to \"warn\"",
+					"type": "string",
+					"enum": ["warn"]
+				},
+				{
+					"description": "It enables all the rules of this group, and set their severity to \"error+\"",
+					"type": "string",
+					"enum": ["error"]
+				}
+			]
 		},
 		"Hook": {
 			"type": "object",
@@ -1543,11 +1714,95 @@
 			},
 			"additionalProperties": false
 		},
+		"HtmlConfiguration": {
+			"description": "Options applied to HTML files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"description": "HTML formatter options",
+					"anyOf": [
+						{ "$ref": "#/definitions/HtmlFormatterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"parser": {
+					"description": "HTML parsing options",
+					"anyOf": [
+						{ "$ref": "#/definitions/HtmlParserConfiguration" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"HtmlFormatterConfiguration": {
+			"description": "Options that changes how the HTML formatter behaves",
+			"type": "object",
+			"properties": {
+				"attributePosition": {
+					"description": "The attribute position style in HTML elements. Defaults to auto.",
+					"anyOf": [
+						{ "$ref": "#/definitions/AttributePosition" },
+						{ "type": "null" }
+					]
+				},
+				"bracketSameLine": {
+					"description": "Whether to hug the closing bracket of multiline HTML tags to the end of the last line, rather than being alone on the following line. Defaults to false.",
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSameLine" },
+						{ "type": "null" }
+					]
+				},
+				"enabled": {
+					"description": "Control the formatter for HTML (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				},
+				"indentScriptAndStyle": {
+					"description": "Whether to indent the `<script>` and `<style>` tags for HTML (and its super languages). Defaults to false.",
+					"anyOf": [
+						{ "$ref": "#/definitions/IndentScriptAndStyle" },
+						{ "type": "null" }
+					]
+				},
+				"indentStyle": {
+					"description": "The indent style applied to HTML (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to HTML (and its super languages) files. Default to 2.",
+					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to HTML (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to HTML (and its super languages) files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"whitespaceSensitivity": {
+					"description": "Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to \"css\".",
+					"anyOf": [
+						{ "$ref": "#/definitions/WhitespaceSensitivity" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"HtmlParserConfiguration": {
+			"description": "Options that changes how the HTML parser behaves",
+			"type": "null"
+		},
 		"ImportGroup": {
 			"anyOf": [
 				{ "$ref": "#/definitions/PredefinedImportGroup" },
-				{ "$ref": "#/definitions/Regex" }
+				{ "$ref": "#/definitions/Glob" }
 			]
+		},
+		"IndentScriptAndStyle": {
+			"description": "Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).\n\nWhen true, the content of `<script>` and `<style>` tags will be indented one level.",
+			"type": "boolean"
 		},
 		"IndentStyle": {
 			"oneOf": [
@@ -1556,38 +1811,40 @@
 			]
 		},
 		"IndentWidth": { "type": "integer", "format": "uint8", "minimum": 0.0 },
-		"JavascriptAssists": {
-			"description": "Linter options specific to the JavaScript linter",
+		"JsAssistConfiguration": {
+			"description": "Assist options specific to the JavaScript assist",
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the linter for JavaScript (and its super languages) files.",
-					"type": ["boolean", "null"]
+					"description": "Control the assist for JavaScript (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
-		"JavascriptConfiguration": {
+		"JsConfiguration": {
 			"description": "A set of options applied to the JavaScript files",
 			"type": "object",
 			"properties": {
-				"assists": {
-					"description": "Assists options",
+				"assist": {
+					"description": "Assist options",
 					"anyOf": [
-						{ "$ref": "#/definitions/JavascriptAssists" },
+						{ "$ref": "#/definitions/JsAssistConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"formatter": {
 					"description": "Formatting options",
 					"anyOf": [
-						{ "$ref": "#/definitions/JavascriptFormatter" },
+						{ "$ref": "#/definitions/JsFormatterConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"globals": {
 					"description": "A list of global bindings that should be ignored by the analyzers\n\nIf defined here, they should not emit diagnostics.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
 				},
 				"jsxRuntime": {
 					"description": "Indicates the type of runtime or transformation used for interpreting JSX.",
@@ -1596,27 +1853,21 @@
 				"linter": {
 					"description": "Linter options",
 					"anyOf": [
-						{ "$ref": "#/definitions/JavascriptLinter" },
-						{ "type": "null" }
-					]
-				},
-				"organizeImports": {
-					"anyOf": [
-						{ "$ref": "#/definitions/JavascriptOrganizeImports" },
+						{ "$ref": "#/definitions/JsLinterConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"parser": {
 					"description": "Parsing options",
 					"anyOf": [
-						{ "$ref": "#/definitions/JavascriptParser" },
+						{ "$ref": "#/definitions/JsParserConfiguration" },
 						{ "type": "null" }
 					]
 				}
 			},
 			"additionalProperties": false
 		},
-		"JavascriptFormatter": {
+		"JsFormatterConfiguration": {
 			"description": "Formatting options specific to the JavaScript files",
 			"type": "object",
 			"properties": {
@@ -1628,7 +1879,7 @@
 					]
 				},
 				"attributePosition": {
-					"description": "The attribute position style in jsx elements. Defaults to auto.",
+					"description": "The attribute position style in JSX elements. Defaults to auto.",
 					"anyOf": [
 						{ "$ref": "#/definitions/AttributePosition" },
 						{ "type": "null" }
@@ -1636,7 +1887,10 @@
 				},
 				"bracketSameLine": {
 					"description": "Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.",
-					"type": ["boolean", "null"]
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSameLine" },
+						{ "type": "null" }
+					]
 				},
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
@@ -1647,11 +1901,7 @@
 				},
 				"enabled": {
 					"description": "Control the formatter for JavaScript (and its super languages) files.",
-					"type": ["boolean", "null"]
-				},
-				"indentSize": {
-					"description": "The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.",
-					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"indentStyle": {
 					"description": "The indent style applied to JavaScript (and its super languages) files.",
@@ -1673,6 +1923,10 @@
 					"description": "What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
+				"objectWrap": {
+					"description": "Whether to enforce collapsing object literals when possible. Defaults to preserve.",
+					"anyOf": [{ "$ref": "#/definitions/ObjectWrap" }, { "type": "null" }]
+				},
 				"quoteProperties": {
 					"description": "When properties in objects are quoted. Defaults to asNeeded.",
 					"anyOf": [
@@ -1688,13 +1942,6 @@
 					"description": "Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.",
 					"anyOf": [{ "$ref": "#/definitions/Semicolons" }, { "type": "null" }]
 				},
-				"trailingComma": {
-					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
-					"anyOf": [
-						{ "$ref": "#/definitions/TrailingCommas" },
-						{ "type": "null" }
-					]
-				},
 				"trailingCommas": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
 					"anyOf": [
@@ -1705,43 +1952,43 @@
 			},
 			"additionalProperties": false
 		},
-		"JavascriptLinter": {
+		"JsLinterConfiguration": {
 			"description": "Linter options specific to the JavaScript linter",
 			"type": "object",
 			"properties": {
 				"enabled": {
 					"description": "Control the linter for JavaScript (and its super languages) files.",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
-		"JavascriptOrganizeImports": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"JavascriptParser": {
+		"JsParserConfiguration": {
 			"description": "Options that changes how the JavaScript parser behaves",
 			"type": "object",
 			"properties": {
 				"gritMetavariables": {
 					"description": "Enables parsing of Grit metavariables. Defaults to `false`.",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				},
+				"jsxEverywhere": {
+					"description": "When enabled, files like `.js`/`.ts` can contain JSX syntax. Defaults to `true`.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"unsafeParameterDecoratorsEnabled": {
 					"description": "It enables the experimental and unsafe parsing of parameter decorators\n\nThese decorators belong to an old proposal, and they are subject to change.",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
-		"JsonAssists": {
+		"JsonAssistConfiguration": {
 			"description": "Linter options specific to the JSON linter",
 			"type": "object",
 			"properties": {
 				"enabled": {
-					"description": "Control the linter for JSON (and its super languages) files.",
-					"type": ["boolean", "null"]
+					"description": "Control the assist for JSON (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1750,38 +1997,54 @@
 			"description": "Options applied to JSON files",
 			"type": "object",
 			"properties": {
-				"assists": {
-					"description": "Assists options",
-					"anyOf": [{ "$ref": "#/definitions/JsonAssists" }, { "type": "null" }]
+				"assist": {
+					"description": "Assist options",
+					"anyOf": [
+						{ "$ref": "#/definitions/JsonAssistConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"formatter": {
 					"description": "Formatting options",
 					"anyOf": [
-						{ "$ref": "#/definitions/JsonFormatter" },
+						{ "$ref": "#/definitions/JsonFormatterConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"linter": {
 					"description": "Linting options",
-					"anyOf": [{ "$ref": "#/definitions/JsonLinter" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/JsonLinterConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"parser": {
 					"description": "Parsing options",
-					"anyOf": [{ "$ref": "#/definitions/JsonParser" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/JsonParserConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
 		},
-		"JsonFormatter": {
+		"JsonFormatterConfiguration": {
 			"type": "object",
 			"properties": {
+				"bracketSpacing": {
+					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSpacing" },
+						{ "type": "null" }
+					]
+				},
 				"enabled": {
 					"description": "Control the formatter for JSON (and its super languages) files.",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
-				"indentSize": {
-					"description": "The size of the indentation applied to JSON (and its super languages) files. Default to 2.",
-					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
+				"expand": {
+					"description": "Whether to expand arrays and objects on multiple lines. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"followSource\".",
+					"anyOf": [{ "$ref": "#/definitions/Expand" }, { "type": "null" }]
 				},
 				"indentStyle": {
 					"description": "The indent style applied to JSON (and its super languages) files.",
@@ -1799,6 +2062,10 @@
 					"description": "What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
 				},
+				"objectWrap": {
+					"description": "Whether to enforce collapsing object literals when possible. Defaults to preserve.",
+					"anyOf": [{ "$ref": "#/definitions/ObjectWrap" }, { "type": "null" }]
+				},
 				"trailingCommas": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"none\".",
 					"anyOf": [
@@ -1809,28 +2076,28 @@
 			},
 			"additionalProperties": false
 		},
-		"JsonLinter": {
+		"JsonLinterConfiguration": {
 			"description": "Linter options specific to the JSON linter",
 			"type": "object",
 			"properties": {
 				"enabled": {
 					"description": "Control the linter for JSON (and its super languages) files.",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
-		"JsonParser": {
+		"JsonParserConfiguration": {
 			"description": "Options that changes how the JSON parser behaves",
 			"type": "object",
 			"properties": {
 				"allowComments": {
 					"description": "Allow parsing comments in `.json` files",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"allowTrailingCommas": {
 					"description": "Allow parsing trailing commas in `.json` files",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1981,17 +2248,19 @@
 		"LinterConfiguration": {
 			"type": "object",
 			"properties": {
+				"domains": {
+					"description": "An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.",
+					"type": ["object", "null"],
+					"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" }
+				},
 				"enabled": {
 					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				"includes": {
+					"description": "A list of glob patterns. The analyzer will handle only those files/folders that will match these patterns.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/definitions/Glob" }
 				},
 				"rules": {
 					"description": "List of rules",
@@ -2000,6 +2269,7 @@
 			},
 			"additionalProperties": false
 		},
+		"MaxSize": { "type": "integer", "format": "uint64", "minimum": 1.0 },
 		"Modifiers": {
 			"type": "array",
 			"items": { "$ref": "#/definitions/RestrictedModifier" },
@@ -2019,10 +2289,6 @@
 					"description": "Custom conventions.",
 					"type": "array",
 					"items": { "$ref": "#/definitions/Convention" }
-				},
-				"enumMemberCase": {
-					"description": "Allowed cases for _TypeScript_ `enum` member names.",
-					"allOf": [{ "$ref": "#/definitions/Format" }]
 				},
 				"requireAscii": {
 					"description": "If `false`, then non-ASCII characters are allowed.",
@@ -2186,12 +2452,22 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
+				"noAwaitInLoop": {
+					"description": "Disallow await inside loops.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				},
 				"noCommonJs": {
 					"description": "Disallow use of CommonJs module system in favor of ESM style imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noConstantBinaryExpression": {
+					"description": "Disallow expressions where the operation doesn't affect the value",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2267,6 +2543,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noFloatingPromises": {
+					"description": "Require Promise-like statements to be handled appropriately.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noGlobalDirnameFilename": {
 					"description": "Disallow the use of __dirname and __filename in the global scope.",
 					"anyOf": [
@@ -2290,6 +2573,13 @@
 				},
 				"noImgElement": {
 					"description": "Prevent usage of \\<img> element in a Next.js project.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImportCycles": {
+					"description": "Prevent import cycles.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2325,6 +2615,13 @@
 				},
 				"noOctalEscape": {
 					"description": "Disallow octal escape sequences in string literals",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPackagePrivateImports": {
+					"description": "Restricts imports of \"package private\" exports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2386,6 +2683,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noTsIgnore": {
+					"description": "Prevents the use of the TypeScript directive @ts-ignore.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownAtRule": {
 					"description": "Disallow unknown at-rules.",
 					"anyOf": [
@@ -2409,6 +2713,13 @@
 				},
 				"noUnknownTypeSelector": {
 					"description": "Disallow unknown type selectors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnwantedPolyfillio": {
+					"description": "Prevent duplicate polyfills from Polyfill.io.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2541,13 +2852,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useImportRestrictions": {
-					"description": "Disallows package private imports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useNamedOperation": {
 					"description": "Enforce specifying the name of GraphQL operations.",
 					"anyOf": [
@@ -2600,6 +2904,7 @@
 			},
 			"additionalProperties": false
 		},
+		"ObjectWrap": { "type": "string", "enum": ["preserve", "collapse"] },
 		"Options": {
 			"type": "object",
 			"properties": {
@@ -2612,20 +2917,16 @@
 			},
 			"additionalProperties": false
 		},
-		"OrganizeImports": {
+		"OverrideAssistConfiguration": {
 			"type": "object",
 			"properties": {
+				"actions": {
+					"description": "List of actions",
+					"anyOf": [{ "$ref": "#/definitions/Actions" }, { "type": "null" }]
+				},
 				"enabled": {
-					"description": "Enables the organization of imports",
-					"type": ["boolean", "null"]
-				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
-				},
-				"include": {
-					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"description": "if `false`, it disables the feature and the assist won't be executed. `true` by default",
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -2640,6 +2941,13 @@
 						{ "type": "null" }
 					]
 				},
+				"bracketSameLine": {
+					"description": "Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
+					"anyOf": [
+						{ "$ref": "#/definitions/BracketSameLine" },
+						{ "type": "null" }
+					]
+				},
 				"bracketSpacing": {
 					"description": "Whether to insert spaces around brackets in object literals. Defaults to true.",
 					"anyOf": [
@@ -2647,10 +2955,12 @@
 						{ "type": "null" }
 					]
 				},
-				"enabled": { "type": ["boolean", "null"] },
+				"enabled": {
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
+				},
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"indentSize": {
 					"description": "The size of the indentation, 2 by default (deprecated, use `indent-width`)",
@@ -2671,16 +2981,29 @@
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"objectWrap": {
+					"description": "Whether to enforce collapsing object literals when possible. Defaults to preserve.",
+					"anyOf": [{ "$ref": "#/definitions/ObjectWrap" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
 		},
+		"OverrideGlobs": {
+			"type": "array",
+			"items": { "$ref": "#/definitions/Glob" }
+		},
 		"OverrideLinterConfiguration": {
 			"type": "object",
 			"properties": {
+				"domains": {
+					"description": "List of rules",
+					"type": ["object", "null"],
+					"additionalProperties": { "$ref": "#/definitions/RuleDomainValue" }
+				},
 				"enabled": {
 					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"rules": {
 					"description": "List of rules",
@@ -2689,21 +3012,18 @@
 			},
 			"additionalProperties": false
 		},
-		"OverrideOrganizeImportsConfiguration": {
-			"type": "object",
-			"properties": {
-				"enabled": {
-					"description": "if `false`, it disables the feature and the linter won't be executed. `true` by default",
-					"type": ["boolean", "null"]
-				}
-			},
-			"additionalProperties": false
-		},
 		"OverridePattern": {
 			"type": "object",
 			"properties": {
+				"assist": {
+					"description": "Specific configuration for the Json language",
+					"anyOf": [
+						{ "$ref": "#/definitions/OverrideAssistConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"css": {
-					"description": "Specific configuration for the Css language",
+					"description": "Specific configuration for the CSS language",
 					"anyOf": [
 						{ "$ref": "#/definitions/CssConfiguration" },
 						{ "type": "null" }
@@ -2723,18 +3043,31 @@
 						{ "type": "null" }
 					]
 				},
-				"ignore": {
-					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				"grit": {
+					"description": "Specific configuration for the GritQL language",
+					"anyOf": [
+						{ "$ref": "#/definitions/GritConfiguration" },
+						{ "type": "null" }
+					]
 				},
-				"include": {
-					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+				"html": {
+					"description": "Specific configuration for the GritQL language",
+					"anyOf": [
+						{ "$ref": "#/definitions/HtmlConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"includes": {
+					"description": "A list of glob patterns. Biome will include files/folders that will match these patterns.",
+					"anyOf": [
+						{ "$ref": "#/definitions/OverrideGlobs" },
+						{ "type": "null" }
+					]
 				},
 				"javascript": {
 					"description": "Specific configuration for the JavaScript language",
 					"anyOf": [
-						{ "$ref": "#/definitions/JavascriptConfiguration" },
+						{ "$ref": "#/definitions/JsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2751,13 +3084,6 @@
 						{ "$ref": "#/definitions/OverrideLinterConfiguration" },
 						{ "type": "null" }
 					]
-				},
-				"organizeImports": {
-					"description": "Specific configuration for the Json language",
-					"anyOf": [
-						{ "$ref": "#/definitions/OverrideOrganizeImportsConfiguration" },
-						{ "type": "null" }
-					]
 				}
 			},
 			"additionalProperties": false
@@ -2770,10 +3096,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noAccumulatingSpread": {
 					"description": "Disallow the use of spread (...) syntax on accumulators.",
 					"anyOf": [
@@ -2815,6 +3137,11 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"PluginConfiguration": { "anyOf": [{ "type": "string" }] },
+		"Plugins": {
+			"type": "array",
+			"items": { "$ref": "#/definitions/PluginConfiguration" }
 		},
 		"PredefinedImportGroup": {
 			"type": "string",
@@ -2877,7 +3204,7 @@
 				{ "$ref": "#/definitions/RuleAssistWithOptions_for_Options" }
 			]
 		},
-		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["on", "off"] },
+		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["off", "on"] },
 		"RuleAssistWithOptions_for_Null": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -2911,6 +3238,25 @@
 				{ "$ref": "#/definitions/RuleWithNoOptions" }
 			]
 		},
+		"RuleDomainValue": {
+			"oneOf": [
+				{
+					"description": "Enables all the rules that belong to this domain",
+					"type": "string",
+					"enum": ["all"]
+				},
+				{
+					"description": "Disables all the rules that belong to this domain",
+					"type": "string",
+					"enum": ["none"]
+				},
+				{
+					"description": "It enables only the recommended rules for this domain",
+					"type": "string",
+					"enum": ["recommended"]
+				}
+			]
+		},
 		"RuleFixConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2918,8 +3264,29 @@
 			]
 		},
 		"RulePlainConfiguration": {
-			"type": "string",
-			"enum": ["warn", "error", "info", "off"]
+			"oneOf": [
+				{ "type": "string", "enum": ["off"] },
+				{
+					"description": "Enables the rule using the default severity of the rule",
+					"type": "string",
+					"enum": ["on"]
+				},
+				{
+					"description": "Enables the rule, and it will emit a diagnostic with information severity",
+					"type": "string",
+					"enum": ["info"]
+				},
+				{
+					"description": "Enables the rule, and it will emit a diagnostic with warning severity",
+					"type": "string",
+					"enum": ["warn"]
+				},
+				{
+					"description": "Enables the rule, and it will emit a diagnostic with error severity",
+					"type": "string",
+					"enum": ["error"]
+				}
+			]
 		},
 		"RuleWithAllowDomainOptions": {
 			"type": "object",
@@ -3357,36 +3724,56 @@
 			"type": "object",
 			"properties": {
 				"a11y": {
-					"anyOf": [{ "$ref": "#/definitions/A11y" }, { "type": "null" }]
-				},
-				"all": {
-					"description": "It enables ALL rules. The rules that belong to `nursery` won't be enabled.",
-					"type": ["boolean", "null"]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_A11y" },
+						{ "type": "null" }
+					]
 				},
 				"complexity": {
-					"anyOf": [{ "$ref": "#/definitions/Complexity" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_Complexity" },
+						{ "type": "null" }
+					]
 				},
 				"correctness": {
-					"anyOf": [{ "$ref": "#/definitions/Correctness" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_Correctness" },
+						{ "type": "null" }
+					]
 				},
 				"nursery": {
-					"anyOf": [{ "$ref": "#/definitions/Nursery" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_Nursery" },
+						{ "type": "null" }
+					]
 				},
 				"performance": {
-					"anyOf": [{ "$ref": "#/definitions/Performance" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_Performance" },
+						{ "type": "null" }
+					]
 				},
 				"recommended": {
 					"description": "It enables the lint rules recommended by Biome. `true` by default.",
 					"type": ["boolean", "null"]
 				},
 				"security": {
-					"anyOf": [{ "$ref": "#/definitions/Security" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_Security" },
+						{ "type": "null" }
+					]
 				},
 				"style": {
-					"anyOf": [{ "$ref": "#/definitions/Style" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_Style" },
+						{ "type": "null" }
+					]
 				},
 				"suspicious": {
-					"anyOf": [{ "$ref": "#/definitions/Suspicious" }, { "type": "null" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/SeverityOrGroup_for_Suspicious" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -3396,10 +3783,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noDangerouslySetInnerHtml": {
 					"description": "Prevent the usage of dangerous JSX props",
 					"anyOf": [
@@ -3447,6 +3830,54 @@
 			"additionalProperties": false
 		},
 		"Semicolons": { "type": "string", "enum": ["always", "asNeeded"] },
+		"SeverityOrGroup_for_A11y": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/A11y" }
+			]
+		},
+		"SeverityOrGroup_for_Complexity": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/Complexity" }
+			]
+		},
+		"SeverityOrGroup_for_Correctness": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/Correctness" }
+			]
+		},
+		"SeverityOrGroup_for_Nursery": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/Nursery" }
+			]
+		},
+		"SeverityOrGroup_for_Performance": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/Performance" }
+			]
+		},
+		"SeverityOrGroup_for_Security": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/Security" }
+			]
+		},
+		"SeverityOrGroup_for_Style": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/Style" }
+			]
+		},
+		"SeverityOrGroup_for_Suspicious": {
+			"anyOf": [
+				{ "$ref": "#/definitions/GroupPlainConfiguration" },
+				{ "$ref": "#/definitions/Suspicious" }
+			]
+		},
 		"Source": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -3458,6 +3889,10 @@
 						{ "type": "null" }
 					]
 				},
+				"recommended": {
+					"description": "It enables the recommended rules for this group",
+					"type": ["boolean", "null"]
+				},
 				"useSortedAttributes": {
 					"description": "Enforce attribute sorting in JSX elements.",
 					"anyOf": [
@@ -3467,6 +3902,13 @@
 				},
 				"useSortedKeys": {
 					"description": "Sorts the keys of a JSON object in natural order",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
+						{ "type": "null" }
+					]
+				},
+				"useSortedProperties": {
+					"description": "Enforce ordering of CSS properties and nested rules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
 						{ "type": "null" }
@@ -3494,19 +3936,10 @@
 				}
 			]
 		},
-		"StringSet": {
-			"type": "array",
-			"items": { "type": "string" },
-			"uniqueItems": true
-		},
 		"Style": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noArguments": {
 					"description": "Disallow the use of arguments.",
 					"anyOf": [
@@ -3614,13 +4047,6 @@
 				},
 				"noUselessElse": {
 					"description": "Disallow else block when the if block breaks early.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noVar": {
-					"description": "Disallow the use of var",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -3853,13 +4279,6 @@
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
-				},
-				"useWhile": {
-					"description": "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
 				}
 			},
 			"additionalProperties": false
@@ -3884,10 +4303,6 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"all": {
-					"description": "It enables ALL rules for this group.",
-					"type": ["boolean", "null"]
-				},
 				"noApproximativeNumericConstant": {
 					"description": "Use standard constants instead of approximated literals.",
 					"anyOf": [
@@ -3962,13 +4377,6 @@
 					"description": "Disallow the use of console.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoConsoleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noConsoleLog": {
-					"description": "Disallow the use of console.log",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4267,7 +4675,7 @@
 					]
 				},
 				"noSparseArray": {
-					"description": "Disallow sparse arrays",
+					"description": "Prevents the use of sparse arrays (arrays with holes).",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -4296,6 +4704,13 @@
 				},
 				"noUnsafeNegation": {
 					"description": "Disallow using unsafe negation.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVar": {
+					"description": "Disallow the use of var",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -4355,7 +4770,7 @@
 					]
 				},
 				"useValidTypeof": {
-					"description": "This rule checks that the result of a `typeof' expression is compared to a valid value.",
+					"description": "This rule checks that the result of a typeof expression is compared to a valid value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -4387,12 +4802,12 @@
 		"TrailingCommas2": {
 			"oneOf": [
 				{
-					"description": "The formatter will remove the trailing commas",
+					"description": "The formatter will remove the trailing commas.",
 					"type": "string",
 					"enum": ["none"]
 				},
 				{
-					"description": "The trailing commas are allowed and advised",
+					"description": "The trailing commas are allowed and advised only in JSONC files. Trailing commas are removed from JSON files.",
 					"type": "string",
 					"enum": ["all"]
 				}
@@ -4583,7 +4998,7 @@
 				},
 				"enabled": {
 					"description": "Whether Biome should integrate itself with the VCS client",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"root": {
 					"description": "The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.\n\nIf Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted",
@@ -4591,10 +5006,30 @@
 				},
 				"useIgnoreFile": {
 					"description": "Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.",
-					"type": ["boolean", "null"]
+					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
+		},
+		"WhitespaceSensitivity": {
+			"description": "Whitespace sensitivity for HTML formatting.\n\nThe following two cases won't produce the same output:\n\n|                |      html      |    output    | | -------------- | :------------: | :----------: | | with spaces    | `1<b> 2 </b>3` | 1<b> 2 </b>3 | | without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |\n\nThis happens because whitespace is significant in inline elements.\n\nAs a consequence of this, the formatter must format blocks that look like this (assume a small line width, <20): ```html <span>really long content</span> ``` as this, where the content hugs the tags: ```html <span >really long content</span > ```\n\nNote that this is only necessary for inline elements. Block elements do not have this restriction.",
+			"oneOf": [
+				{
+					"description": "The formatter considers whitespace significant for elements that have an \"inline\" display style by default in browser's user agent style sheets.",
+					"type": "string",
+					"enum": ["css"]
+				},
+				{
+					"description": "Leading and trailing whitespace in content is considered significant for all elements.\n\nThe formatter should leave at least one whitespace character if whitespace is present. Otherwise, if there is no whitespace, it should not add any after `>` or before `<`. In other words, if there's no whitespace, the text content should hug the tags.\n\nExample of text hugging the tags: ```html <b >content</b > ```",
+					"type": "string",
+					"enum": ["strict"]
+				},
+				{
+					"description": "Whitespace is considered insignificant. The formatter is free to remove or add whitespace as it sees fit.",
+					"type": "string",
+					"enum": ["ignore"]
+				}
+			]
 		}
 	}
 }

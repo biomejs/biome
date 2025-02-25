@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: nestedControlFlowStructures.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function nestedControlFlowStructures(num) {
     try {
         if (condition1) {                        // +1
@@ -22,7 +23,7 @@ function nestedControlFlowStructures(num) {
 ```
 nestedControlFlowStructures.js:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━
 
-  ! Excessive complexity of 9 detected (max: 8).
+  i Excessive complexity of 9 detected (max: 8).
   
   > 1 │ function nestedControlFlowStructures(num) {
       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -33,5 +34,3 @@ nestedControlFlowStructures.js:1:10 lint/complexity/noExcessiveCognitiveComplexi
   
 
 ```
-
-

@@ -1,0 +1,49 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/whitespace/template.html
+---
+# Input
+
+```html
+<template>
+  <template>foo</template>
+</template>
+
+<template>
+  <template>foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo</template>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,7 +3,7 @@
+ </template>
+ 
+ <template>
+-  <template
+-    >foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo</template
+-  >
++  <template>
++    foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
++  </template>
+ </template>
+```
+
+# Output
+
+```html
+<template>
+  <template>foo</template>
+</template>
+
+<template>
+  <template>
+    foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+  </template>
+</template>
+```

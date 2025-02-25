@@ -4,11 +4,34 @@ This document outlines the governance model for Biome.
 
 It describes various parts of how the project is managed as well as accepted practices for day-to-day operation:
 
-- [Contributor Model](#contributor-model)
-- [Project Direction](#project-direction)
-- [Code Review](#code-review)
-- [Financial Contributions](#financial-contributions)
-- [Moderation](#moderation)
+* [Contributor Model](#contributor-model)
+  + [Lead](#lead)
+    - [Lead nomination](#lead-nomination)
+  + [Core Contributor](#core-contributor)
+    - [Core contributor nomination](#core-contributor-nomination)
+  + [Maintainer](#maintainer)
+    - [Maintainer nomination](#maintainer-nomination)
+  + [Voting Rules](#voting-rules)
+  + [Ownership](#ownership)
+  + [Inactivity](#inactivity)
+  + [Contributions](#contributions)
+  + [Governance changes](#governance-changes)
+* [Project Direction](#project-direction)
+  + [Roadmap](#roadmap)
+* [Code review](#code-review)
+* [Financial Contributions](#financial-contributions)
+  + [Sponsorship](#sponsorship)
+  + [Community-Funded Bounties](#community-funded-bounties)
+  + [Project-Funded Bounties](#project-funded-bounties)
+  + [Paid Contracting](#paid-contracting)
+  + [Fund Allocation](#fund-allocation)
+    - [Expenses](#expenses)
+* [Moderation](#moderation)
+  + [Reporting](#reporting)
+  + [Who gets involved?](#who-gets-involved)
+  + [Review](#review)
+  + [Resolution](#resolution)
+
 
 ## Contributor Model
 
@@ -21,16 +44,18 @@ Leads are the owners of the organisation.
 Leads have additional privileges over core contributors. Leads control and maintain sensitive project assets and act as tiebreakers in the event of disagreements. In case of disagreements, only **one** lead must be involved in the resolution.
 
 These assets and responsibilities are but are not limited to:
-- Access to social accounts
-- Administration privileges of the [Biome Discord server][discord]
-- Administration privileges of the [Biome GitHub org][gh-org]
-- Website accesses (hosting platform, domain name, etc.)
-- Access to sensitive emails, such as the CoC email
+- Access to social accounts.
+- Administration privileges of the [Biome Discord server][discord].
+- Administration privileges of the [Biome GitHub org][gh-org].
+- Website credentials (hosting platform, domain name, etc.).
+- Access to sensitive emails, such as the CoC email.
 
 Also:
-- Ability to vote for new leads
-- Onboard new [core contributors](#core-contributor) and new leads;
-- Takes part in [project decisions](#project-direction-and-planning)
+- Ability to vote for new leads.
+- Onboard new [core contributors](#core-contributor) and new leads.
+- Takes part in [project decisions](#project-direction-and-planning).
+- Access to the Discord `Lead` category and channels that belong to this category.
+- Propose changes to the governance document via PR.
 
 The ownership of assets is only sometimes evenly distributed among all the leads.
 
@@ -58,6 +83,8 @@ Core Contributors are outstanding [maintainers](#maintainer), are ambassadors of
 - Ability to [vote](#maintainer-nomination) on new maintainers and [vote](#core-contributor-nomination) on new core contributors
 - Onboard new [maintainers](#maintainer)
 - Assign [pledges to issues](#bounties).
+- Access to the Discord `Core contributors` category and channels that belong to this category.
+- Propose changes to the governance document via PR.
 
 #### Core contributor nomination
 
@@ -93,7 +120,7 @@ Maintainers are those with a history of consistent contributions, including but 
 - `Maintainer` status on the [Biome Discord server][discord]
 - Ability to [vote](#voting) on project decisions
 - Ability to [vote](#maintainer-nomination) on new maintainers
-
+- Access to the Discord `Maintainers` category and channels that belong to this category.
 #### Maintainer nomination
 
 Maintainers may either be nominated by another [maintainer](#maintainer), [Core contributor](#core-contributor), [lead](#lead).
@@ -147,6 +174,10 @@ Contributions to the project aren't only limited to code. Contributions come in 
 - Support in primary channels of the organization, e.g. GitHub and Discord
 - Support in secondary channels, e.g. StackOverflow, etc.
 - Website;
+
+### Governance changes
+
+Changes to the governance document must be approved by at least fifty percent of the Core Contributors and a majority of the Leads.
 
 ## Project Direction
 
@@ -247,7 +278,7 @@ conditions:
     or indirectly benefits the roadmap, a customized fee may be negotiated.
   - If the last-published roadmap is more than 12 months old, the Core Contributor is asked to
     consult with the Core team about alignment with the project goals.
-  - Fee negotiation may happen either publically in the `Community > #funding` channel, or privately
+  - Fee negotiation may happen either publicly in the `Community > #funding` channel, or privately
     in the `Core > #core-team` channel.
   - Custom fees require the approval of at least one Lead.
 - The work may not conflict with the project direction or

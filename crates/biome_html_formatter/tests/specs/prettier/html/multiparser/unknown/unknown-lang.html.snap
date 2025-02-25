@@ -1,0 +1,142 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/multiparser/unknown/unknown-lang.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <style lang="unknown">
+.prettier {
+content:
+"awesome"
+          }
+</style>
+
+<script lang="unknown">
+prettier.is
+                  .awesome(
+)
+</script>
+
+<script type="unknown">
+prettier.is
+                  .awesome(
+)
+</script>
+
+<script type="unknown" lang="unknown">
+prettier.is
+                  .awesome(
+)
+</script>
+</body>
+</html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+-<!doctype html>
++<!DOCTYPE html>
+ <html lang="en">
+   <head>
+     <meta charset="UTF-8" />
+@@ -7,28 +7,28 @@
+   </head>
+   <body>
+     <style lang="unknown">
+-      .prettier {
+-      content:
+-      "awesome"
+-                }
+-    </style>
++.prettier {
++content:
++"awesome"
++          }
++</style>
+ 
+     <script lang="unknown">
+-      prettier.is
+-                        .awesome(
+-      )
+-    </script>
++prettier.is
++                  .awesome(
++)
++</script>
+ 
+     <script type="unknown">
+-      prettier.is
+-                        .awesome(
+-      )
+-    </script>
++prettier.is
++                  .awesome(
++)
++</script>
+ 
+     <script type="unknown" lang="unknown">
+-      prettier.is
+-                        .awesome(
+-      )
+-    </script>
++prettier.is
++                  .awesome(
++)
++</script>
+   </body>
+ </html>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <style lang="unknown">
+.prettier {
+content:
+"awesome"
+          }
+</style>
+
+    <script lang="unknown">
+prettier.is
+                  .awesome(
+)
+</script>
+
+    <script type="unknown">
+prettier.is
+                  .awesome(
+)
+</script>
+
+    <script type="unknown" lang="unknown">
+prettier.is
+                  .awesome(
+)
+</script>
+  </body>
+</html>
+```

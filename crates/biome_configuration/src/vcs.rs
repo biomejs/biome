@@ -1,5 +1,8 @@
-use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
-use biome_deserialize_macros::{Deserializable, Merge, Partial};
+use crate::bool::Bool;
+use biome_deserialize::{
+    DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
+};
+use biome_deserialize_macros::{Deserializable, Merge};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -7,25 +10,29 @@ use std::str::FromStr;
 const GIT_IGNORE_FILE_NAME: &str = ".gitignore";
 
 /// Set of properties to integrate Biome with a VCS software.
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
-#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
-#[partial(deserializable(with_validator))]
-#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
-#[partial(serde(deny_unknown_fields, rename_all = "camelCase"))]
+#[derive(
+    Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Bpaf, Deserializable, Default, Merge,
+)]
+#[deserializable(with_validator)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct VcsConfiguration {
     /// Whether Biome should integrate itself with the VCS client
-    #[partial(bpaf(long("vcs-enabled"), argument("true|false")))]
-    pub enabled: bool,
+    #[bpaf(long("vcs-enabled"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<Bool<false>>,
 
     /// The kind of client.
-    #[partial(bpaf(long("vcs-client-kind"), argument("git"), optional))]
-    #[partial(deserializable(bail_on_error))]
-    pub client_kind: VcsClientKind,
+    #[bpaf(long("vcs-client-kind"), argument("git"), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[deserializable(bail_on_error)]
+    pub client_kind: Option<VcsClientKind>,
 
     /// Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files
     /// specified in the ignore file.
-    #[partial(bpaf(long("vcs-use-ignore-file"), argument("true|false")))]
-    pub use_ignore_file: bool,
+    #[bpaf(long("vcs-use-ignore-file"), argument("true|false"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_ignore_file: Option<Bool<true>>,
 
     /// The folder where Biome should check for VCS files. By default, Biome will use the same
     /// folder where `biome.json` was found.
@@ -33,47 +40,37 @@ pub struct VcsConfiguration {
     /// If Biome can't find the configuration, it will attempt to use the current working directory.
     /// If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic
     /// will be emitted
-    #[partial(bpaf(long("vcs-root"), argument("PATH"), optional))]
-    pub root: String,
+    #[bpaf(long("vcs-root"), argument("PATH"), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub root: Option<String>,
 
     /// The main branch of the project
-    #[partial(bpaf(long("vcs-default-branch"), argument("BRANCH"), optional))]
-    pub default_branch: String,
+    #[bpaf(long("vcs-default-branch"), argument("BRANCH"), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub default_branch: Option<String>,
 }
 
-impl Default for VcsConfiguration {
-    fn default() -> Self {
-        Self {
-            client_kind: VcsClientKind::Git,
-            enabled: false,
-            use_ignore_file: true,
-            root: Default::default(),
-            default_branch: Default::default(),
-        }
+impl VcsConfiguration {
+    pub fn is_enabled(&self) -> bool {
+        self.enabled.unwrap_or_default().into()
     }
-}
-
-impl PartialVcsConfiguration {
-    pub const fn is_enabled(&self) -> bool {
-        matches!(self.enabled, Some(true))
-    }
-    pub const fn is_disabled(&self) -> bool {
+    pub fn is_disabled(&self) -> bool {
         !self.is_enabled()
     }
-    pub const fn ignore_file_disabled(&self) -> bool {
-        matches!(self.use_ignore_file, Some(false))
+    pub fn should_use_ignore_file(&self) -> bool {
+        self.use_ignore_file.unwrap_or_default().into()
     }
 }
 
-impl DeserializableValidator for PartialVcsConfiguration {
+impl DeserializableValidator for VcsConfiguration {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializationContext,
         _name: &str,
         range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         if self.client_kind.is_none() && self.is_enabled() {
-            diagnostics.push(
+            ctx.report(
                 DeserializationDiagnostic::new(
                     "You enabled the VCS integration, but you didn't specify a client.",
                 )

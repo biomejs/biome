@@ -3,12 +3,17 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "check:apply": "cargo biome-cli-dev check --fix --unsafe",
+    "check:write": "cargo biome-cli-dev check --write --unsafe",
     "check": "cargo biome-cli-dev check",
-    "ci": "cargo biome-cli-dev ci"
+    "ci": "cargo biome-cli-dev ci",
+    "version": "changeset version && pnpm install --no-frozen-lockfile"
   },
   "keywords": [],
   "author": "Biome Developers and Contributors",
   "license": "MIT OR Apache-2.0",
-  "packageManager": "pnpm@9.15.3"
+  "packageManager": "pnpm@10.4.1",
+  "devDependencies": {
+    "@changesets/cli": "2.28.1",
+    "@changesets/changelog-github": "0.5.1"
+  }
 }

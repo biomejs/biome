@@ -1,7 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 86
 expression: invalidNoNull.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -19,7 +19,7 @@ let a = <button
 ```
 invalidNoNull.jsx:3:51 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     1 │ let a = <button
     2 │     className="SomeManyClasses"

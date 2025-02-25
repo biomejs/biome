@@ -44,6 +44,20 @@ pub fn html_attribute_initializer_clause(
         ],
     ))
 }
+pub fn html_cdata_section(
+    cdata_start_token: SyntaxToken,
+    content_token: SyntaxToken,
+    cdata_end_token: SyntaxToken,
+) -> HtmlCdataSection {
+    HtmlCdataSection::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_CDATA_SECTION,
+        [
+            Some(SyntaxElement::Token(cdata_start_token)),
+            Some(SyntaxElement::Token(content_token)),
+            Some(SyntaxElement::Token(cdata_end_token)),
+        ],
+    ))
+}
 pub fn html_closing_element(
     l_angle_token: SyntaxToken,
     slash_token: SyntaxToken,

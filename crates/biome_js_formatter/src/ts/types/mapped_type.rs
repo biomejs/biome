@@ -30,10 +30,9 @@ impl FormatNodeRule<TsMappedType> for FormatTsMappedType {
         let should_expand = has_line_break_before_property_name(node)?;
 
         let comments = f.comments().clone();
-        let type_annotation_has_leading_comment =
-            mapped_type.as_ref().map_or(false, |annotation| {
-                comments.has_leading_comments(annotation.syntax())
-            });
+        let type_annotation_has_leading_comment = mapped_type
+            .as_ref()
+            .is_some_and(|annotation| comments.has_leading_comments(annotation.syntax()));
 
         let format_inner = format_with(|f| {
             write!(

@@ -1,0 +1,72 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: elements/bracket-same-line/element.html
+---
+# Input
+
+```html
+<div
+  id="hello"
+  class="world really-long-class-name another-really-long-class-name"
+  style="color: red"
+  data-foo="bar"
+  data-bar="foo"
+>
+  hello world
+</div>
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: false
+Whitespace sensitivity: css
+Indent script and style: false
+-----
+
+```html
+<div
+	id="hello"
+	class="world really-long-class-name another-really-long-class-name"
+	style="color: red"
+	data-foo="bar"
+	data-bar="foo"
+>
+	hello world
+</div>
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+Bracket same line: true
+Whitespace sensitivity: css
+Indent script and style: false
+-----
+
+```html
+<div
+	id="hello"
+	class="world really-long-class-name another-really-long-class-name"
+	style="color: red"
+	data-foo="bar"
+	data-bar="foo">
+	hello world
+</div>
+```

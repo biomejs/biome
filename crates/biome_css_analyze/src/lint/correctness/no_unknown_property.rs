@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::CssGenericProperty;
+use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
 use biome_string_case::StrLikeExtension;
 
@@ -61,6 +62,7 @@ declare_lint_rule! {
         name: "noUnknownProperty",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("property-no-unknown")],
     }
 }
@@ -73,7 +75,7 @@ impl Rule for NoUnknownProperty {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let property_name = node.name().ok()?.text();
+        let property_name = node.name().ok()?.to_trimmed_string();
         let property_name_lower = property_name.to_ascii_lowercase_cow();
         if !property_name_lower.starts_with("--")
             // Ignore `composes` property.

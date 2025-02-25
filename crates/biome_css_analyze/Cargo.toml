@@ -23,19 +23,23 @@ biome_diagnostics        = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_string_case        = { workspace = true }
 biome_suppression        = { workspace = true }
+camino                   = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
-biome_css_parser = { path = "../biome_css_parser" }
-biome_test_utils = { path = "../biome_test_utils" }
-insta            = { workspace = true, features = ["glob"] }
-tests_macros     = { path = "../tests_macros" }
+biome_css_parser    = { path = "../biome_css_parser" }
+biome_fs            = { workspace = true }
+biome_plugin_loader = { workspace = true }
+biome_test_utils    = { path = "../biome_test_utils" }
+camino              = { workspace = true }
+insta               = { workspace = true, features = ["glob"] }
+tests_macros        = { path = "../tests_macros" }
 
 [features]
-schema = ["schemars", "biome_deserialize/schema"]
+schema = ["schemars"]
 
 [lints]
 workspace = true

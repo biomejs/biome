@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var foo = {
     get bar() {}
 };
@@ -140,7 +141,7 @@ var foo = {
 ```
 invalid.js:2:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter should return a value.
+  × This getter should return a value.
   
     1 │ var foo = {
   > 2 │     get bar() {}
@@ -154,7 +155,7 @@ invalid.js:2:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━
 ```
 invalid.js:6:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter should return a value.
+  × This getter should return a value.
   
      5 │ var foo = {
    > 6 │     get bar(){
@@ -173,7 +174,7 @@ invalid.js:6:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━
 ```
 invalid.js:14:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter should return a value.
+  × This getter should return a value.
   
     13 │ var foo = {
   > 14 │     get bar() {
@@ -192,7 +193,7 @@ invalid.js:14:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
 ```
 invalid.js:23:9 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This return should return a value because it is located in a getter.
+  × This return should return a value because it is located in a getter.
   
     21 │ var foo = {
     22 │     get bar() {
@@ -207,7 +208,7 @@ invalid.js:23:9 lint/suspicious/useGetterReturn ━━━━━━━━━━�
 ```
 invalid.js:28:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter should return a value.
+  × This getter should return a value.
   
     27 │ class Foo {
   > 28 │     get bar() {}
@@ -221,7 +222,7 @@ invalid.js:28:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
 ```
 invalid.js:32:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter should return a value.
+  × This getter should return a value.
   
     31 │ class Foo {
   > 32 │     get bar(){
@@ -240,7 +241,7 @@ invalid.js:32:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
 ```
 invalid.js:40:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter should return a value.
+  × This getter should return a value.
   
     39 │ class Foo {
   > 40 │     get bar() {
@@ -259,7 +260,7 @@ invalid.js:40:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
 ```
 invalid.js:49:9 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This return should return a value because it is located in a getter.
+  × This return should return a value because it is located in a getter.
   
     47 │ class Foo {
     48 │     get bar() {
@@ -274,7 +275,7 @@ invalid.js:49:9 lint/suspicious/useGetterReturn ━━━━━━━━━━�
 ```
 invalid.js:54:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter should return a value.
+  × This getter should return a value.
   
     53 │ class Foo {
   > 54 │     get bar(){
@@ -293,7 +294,7 @@ invalid.js:54:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
 ```
 invalid.js:62:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter should return a value.
+  × This getter should return a value.
   
     61 │ class Foo {
   > 62 │     get bar(){
@@ -312,7 +313,7 @@ invalid.js:62:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
 ```
 invalid.js:74:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter should return a value.
+  × This getter should return a value.
   
     73 │ var foo = {
   > 74 │     get bar(){
@@ -331,7 +332,7 @@ invalid.js:74:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
 ```
 invalid.js:84:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter should return a value.
+  × This getter should return a value.
   
     83 │ var foo = {
   > 84 │     get bar(){
@@ -350,7 +351,7 @@ invalid.js:84:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
 ```
 invalid.js:94:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter should return a value.
+  × This getter should return a value.
   
      93 │ var foo = {
    > 94 │     get bar(){
@@ -369,7 +370,7 @@ invalid.js:94:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
 ```
 invalid.js:105:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter should return a value.
+  × This getter should return a value.
   
     104 │ var foo = {
   > 105 │     get bar(){
@@ -388,7 +389,7 @@ invalid.js:105:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
 ```
 invalid.js:120:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This getter should return a value.
+  × This getter should return a value.
   
     119 │ var foo = {
   > 120 │     get bar(){
@@ -403,5 +404,3 @@ invalid.js:120:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
   
 
 ```
-
-

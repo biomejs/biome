@@ -3,9 +3,8 @@ use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayloa
 use crate::{run_cli, UNFORMATTED};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
-use biome_service::DynRef;
 use bpaf::Args;
-use std::path::{Path, PathBuf};
+use camino::{Utf8Path, Utf8PathBuf};
 
 const CUSTOM_CONFIGURATION_BEFORE: &str = r#"function f() {
   return { a, b }
@@ -24,26 +23,26 @@ fn formatter_biome_json() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     fs.insert(file_path.into(), CONFIG_FORMAT.as_bytes());
 
-    let file_path = Path::new("file.js");
+    let file_path = Utf8Path::new("file.js");
     fs.insert(file_path.into(), CUSTOM_CONFIGURATION_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--line-width"),
-                ("10"),
-                ("--indent-style"),
-                ("space"),
-                ("--indent-size"),
-                ("8"),
-                ("--write"),
-                file_path.as_os_str().to_str().unwrap(),
+                "format",
+                "--line-width",
+                "10",
+                "--indent-style",
+                "space",
+                "--indent-width",
+                "8",
+                "--write",
+                file_path.as_str(),
             ]
             .as_slice(),
         ),
@@ -66,10 +65,10 @@ fn linter_biome_json() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), "debugger;\n".as_bytes());
 
-    let config_path = Path::new("biome.json");
+    let config_path = Utf8Path::new("biome.json");
     fs.insert(
         config_path.into(),
         r#"{
@@ -85,17 +84,10 @@ fn linter_biome_json() {
         .as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                ("--apply"),
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -122,10 +114,10 @@ fn check_biome_json() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("fix.js");
+    let file_path = Utf8Path::new("fix.js");
     fs.insert(file_path.into(), "debugger".as_bytes());
 
-    let config_path = Path::new("biome.json");
+    let config_path = Utf8Path::new("biome.json");
     fs.insert(
         config_path.into(),
         r#"{
@@ -141,17 +133,10 @@ fn check_biome_json() {
         .as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("check"),
-                ("--apply"),
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -179,7 +164,7 @@ fn ci_biome_json() {
     let mut console = BufferConsole::default();
 
     fs.insert(
-        PathBuf::from("biome.json"),
+        Utf8PathBuf::from("biome.json"),
         r#"{
   "formatter": {
     "enabled": false
@@ -189,14 +174,14 @@ fn ci_biome_json() {
         .as_bytes(),
     );
 
-    let input_file = Path::new("file.js");
+    let input_file = Utf8Path::new("file.js");
 
     fs.insert(input_file.into(), "  statement(  )  ".as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("ci"), input_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["ci", input_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -218,30 +203,26 @@ fn biome_json_is_not_ignored() {
     let mut console = BufferConsole::default();
 
     fs.insert(
-        PathBuf::from("biome.json"),
+        Utf8PathBuf::from("biome.json"),
         r#"{
-        "files": { "ignore": ["*.json"] },
-  "formatter": {
-    "enabled": false
-  }
-}
-"#
+            "files": { "includes": ["**", "!*.json"] },
+            "formatter": {
+                "enabled": false
+            }
+        }
+        "#
         .as_bytes(),
     );
 
-    let input_file = Path::new("file.js");
+    let input_file = Utf8Path::new("file.js");
 
     fs.insert(input_file.into(), "  statement(  )  ".as_bytes());
 
-    let input_file = Path::new("file.json");
+    let input_file = Utf8Path::new("file.json");
 
     fs.insert(input_file.into(), "  statement(  )  ".as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("ci"), "./"].as_slice()),
-    );
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["ci", "./"].as_slice()));
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -259,7 +240,7 @@ fn always_disable_trailing_commas_biome_json() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Path::new("biome.json");
+    let file_path = Utf8Path::new("biome.json");
     let config = r#"{
     "formatter": {
         "indentStyle": "space",
@@ -274,8 +255,8 @@ fn always_disable_trailing_commas_biome_json() {
 "#;
     fs.insert(file_path.into(), config);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["check", "--write", "."].as_slice()),
     );

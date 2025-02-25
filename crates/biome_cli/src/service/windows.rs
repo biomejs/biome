@@ -1,3 +1,5 @@
+use biome_lsp::{ServerConnection, ServerFactory};
+use camino::Utf8PathBuf;
 use std::{
     convert::Infallible,
     env,
@@ -5,15 +7,12 @@ use std::{
     io::{self, ErrorKind},
     mem::swap,
     os::windows::process::CommandExt,
-    path::PathBuf,
     pin::Pin,
     process::Command,
     sync::Arc,
     task::{Context, Poll},
     time::Duration,
 };
-
-use biome_lsp::{ServerConnection, ServerFactory};
 use tokio::{
     io::{AsyncRead, AsyncWrite, ReadBuf},
     net::windows::named_pipe::{ClientOptions, NamedPipeClient, NamedPipeServer, ServerOptions},
@@ -27,18 +26,17 @@ fn get_pipe_name() -> String {
     format!(r"\\.\pipe\biome-service-{}", biome_configuration::VERSION)
 }
 
-pub(crate) fn enumerate_pipes() -> io::Result<impl Iterator<Item = String>> {
+pub(crate) fn enumerate_pipes() -> io::Result<impl Iterator<Item = (String, Utf8PathBuf)>> {
     read_dir(r"\\.\pipe").map(|iter| {
         iter.filter_map(|entry| {
-            let entry = entry.ok()?.path();
+            let entry = Utf8PathBuf::from_path_buf(entry.ok()?.path()).ok()?;
             let file_name = entry.file_name()?;
-            let file_name = file_name.to_str()?;
 
             let version = file_name.strip_prefix("rome-service")?;
             if version.is_empty() {
-                Some(String::new())
+                Some((String::new(), entry))
             } else {
-                Some(version.strip_prefix('-')?.to_string())
+                Some((version.strip_prefix('-')?.to_string(), entry))
             }
         })
     })
@@ -65,13 +63,13 @@ async fn try_connect() -> io::Result<NamedPipeClient> {
 
 /// Process creation flag from the Win32 API, ensures the process is created
 /// in its own group and will not be killed when the parent process exits
-const CREATE_NEW_PROCESS_GROUP: u32 = 0x00000200;
+const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
 
 /// Spawn the daemon server process in the background
 fn spawn_daemon(
     stop_on_disconnect: bool,
-    config_path: Option<PathBuf>,
-    log_path: Option<PathBuf>,
+    config_path: Option<Utf8PathBuf>,
+    log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> io::Result<()> {
     let binary = env::current_exe()?;
@@ -84,10 +82,10 @@ fn spawn_daemon(
     }
 
     if let Some(config_path) = config_path {
-        cmd.arg(format!("--config-path={}", config_path.display()));
+        cmd.arg(format!("--config-path={}", config_path.as_str()));
     }
     if let Some(log_path) = log_path {
-        cmd.arg(format!("--log-path={}", log_path.display()));
+        cmd.arg(format!("--log-path={}", log_path.as_str()));
     }
     if let Some(log_file_name_prefix) = log_file_name_prefix {
         cmd.arg(format!("--log-prefix-name={}", log_file_name_prefix));
@@ -185,8 +183,8 @@ impl AsyncWrite for ClientWriteHalf {
 /// to be started
 pub(crate) async fn ensure_daemon(
     stop_on_disconnect: bool,
-    config_path: Option<PathBuf>,
-    log_path: Option<PathBuf>,
+    config_path: Option<Utf8PathBuf>,
+    log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> io::Result<bool> {
     let mut did_spawn = false;
@@ -223,7 +221,7 @@ pub(crate) async fn print_socket() -> io::Result<()> {
 /// provided [ServerFactory]
 pub(crate) async fn run_daemon(
     factory: ServerFactory,
-    config_path: Option<PathBuf>,
+    config_path: Option<Utf8PathBuf>,
 ) -> io::Result<Infallible> {
     let mut prev_server = ServerOptions::new()
         .first_pipe_instance(true)

@@ -4,7 +4,7 @@ expression: invalid.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var xs = Array();
 
 var xs = Array(0, 1, 2);
@@ -42,7 +42,7 @@ var xs = window.Array();
 ```
 invalid.js:1:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use an array literal instead of the Array constructor.
+  i Use an array literal instead of the Array constructor.
   
   > 1 │ var xs = Array();
       │          ^^^^^^^
@@ -64,7 +64,7 @@ invalid.js:1:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.js:3:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use an array literal instead of the Array constructor.
+  i Use an array literal instead of the Array constructor.
   
     1 │ var xs = Array();
     2 │ 
@@ -90,7 +90,7 @@ invalid.js:3:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.js:5:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use an array literal instead of the Array constructor.
+  i Use an array literal instead of the Array constructor.
   
     3 │ var xs = Array(0, 1, 2);
     4 │ 
@@ -116,7 +116,7 @@ invalid.js:5:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.js:7:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use an array literal instead of the Array constructor.
+  i Use an array literal instead of the Array constructor.
   
     5 │ var xs = Array(...args);
     6 │ 
@@ -142,7 +142,7 @@ invalid.js:7:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.js:9:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use an array literal instead of the Array constructor.
+  i Use an array literal instead of the Array constructor.
   
      7 │ var xs = new Array;
      8 │ 
@@ -168,7 +168,7 @@ invalid.js:9:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.js:11:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use an array literal instead of the Array constructor.
+  i Use an array literal instead of the Array constructor.
   
      9 │ var xs = new Array();
     10 │ 
@@ -194,7 +194,7 @@ invalid.js:11:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.js:13:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use an array literal instead of the Array constructor.
+  i Use an array literal instead of the Array constructor.
   
     11 │ var xs = new Array(0, 1, 2);
     12 │ 
@@ -220,7 +220,7 @@ invalid.js:13:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.js:15:17 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use an array literal instead of the Array constructor.
+  i Use an array literal instead of the Array constructor.
   
     13 │ var xs = new Array(...args);
     14 │ 
@@ -246,7 +246,7 @@ invalid.js:15:17 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.js:17:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use an array literal instead of the Array constructor.
+  i Use an array literal instead of the Array constructor.
   
     15 │ var xs = /**A*/ new /**B*/ Array /**C*/ ( /**D*/ 0 /**E*/, /**F*/ 1 /**G*/) /**H*/;
     16 │ 
@@ -280,7 +280,7 @@ invalid.js:17:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.js:22:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use an array literal instead of the Array constructor.
+  i Use an array literal instead of the Array constructor.
   
     20 │ );
     21 │ 
@@ -306,7 +306,7 @@ invalid.js:22:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.js:26:1 lint/correctness/useArrayLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use an array literal instead of the Array constructor.
+  i Use an array literal instead of the Array constructor.
   
     24 │ // ASI
     25 │ foo
@@ -323,7 +323,7 @@ invalid.js:26:1 lint/correctness/useArrayLiterals ━━━━━━━━━━
 ```
 invalid.js:28:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use an array literal instead of the Array constructor.
+  i Use an array literal instead of the Array constructor.
   
     26 │ new Array
     27 │ 
@@ -349,7 +349,7 @@ invalid.js:28:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━�
 ```
 invalid.js:30:10 lint/correctness/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use an array literal instead of the Array constructor.
+  i Use an array literal instead of the Array constructor.
   
     28 │ var xs = globalThis.Array();
     29 │ 

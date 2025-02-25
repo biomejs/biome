@@ -36,10 +36,11 @@ Environment:
 Biome Configuration:
   Error:                        Expected an array, an object, or a literal but instead found '}'.
   Status:                       Loaded with errors
-  Formatter disabled:           false
-  Linter disabled:              false
-  Organize imports disabled:    false
-  VCS disabled:                 true
+  Path:                         biome.json
+  Formatter enabled:            true
+  Linter enabled:               true
+  Assist enabled:               true
+  VCS enabled:                  false
 
 Server:
   Version:                      0.0.0

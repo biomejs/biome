@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid_without_trivia.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var a = x?true:true;
 var a = x?false:false;
 
@@ -24,7 +25,7 @@ var a= !foo?true:false;
 ```
 invalid_without_trivia.js:1:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
   > 1 │ var a = x?true:true;
       │         ^^^^^^^^^^^
@@ -49,7 +50,7 @@ invalid_without_trivia.js:1:9 lint/complexity/noUselessTernary  FIXABLE  ━━�
 ```
 invalid_without_trivia.js:2:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     1 │ var a = x?true:true;
   > 2 │ var a = x?false:false;
@@ -76,7 +77,7 @@ invalid_without_trivia.js:2:9 lint/complexity/noUselessTernary  FIXABLE  ━━�
 ```
 invalid_without_trivia.js:4:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     2 │ var a = x?false:false;
     3 │ 
@@ -105,7 +106,7 @@ invalid_without_trivia.js:4:9 lint/complexity/noUselessTernary  FIXABLE  ━━�
 ```
 invalid_without_trivia.js:5:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     4 │ var a = foo()?false:true;
   > 5 │ var a = foo?false:true;
@@ -133,7 +134,7 @@ invalid_without_trivia.js:5:9 lint/complexity/noUselessTernary  FIXABLE  ━━�
 ```
 invalid_without_trivia.js:6:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     4 │ var a = foo()?false:true;
     5 │ var a = foo?false:true;
@@ -162,7 +163,7 @@ invalid_without_trivia.js:6:9 lint/complexity/noUselessTernary  FIXABLE  ━━�
 ```
 invalid_without_trivia.js:7:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     5 │ var a = foo?false:true;
     6 │ var a = foo===1?false:true;
@@ -191,7 +192,7 @@ invalid_without_trivia.js:7:9 lint/complexity/noUselessTernary  FIXABLE  ━━�
 ```
 invalid_without_trivia.js:9:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
      7 │ var a = foo+1?false:true;
      8 │ 
@@ -220,7 +221,7 @@ invalid_without_trivia.js:9:9 lint/complexity/noUselessTernary  FIXABLE  ━━�
 ```
 invalid_without_trivia.js:10:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
      9 │ var a = foo()?true:false;
   > 10 │ var a = foo?true:false;
@@ -248,7 +249,7 @@ invalid_without_trivia.js:10:9 lint/complexity/noUselessTernary  FIXABLE  ━━
 ```
 invalid_without_trivia.js:11:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
      9 │ var a = foo()?true:false;
     10 │ var a = foo?true:false;
@@ -277,7 +278,7 @@ invalid_without_trivia.js:11:9 lint/complexity/noUselessTernary  FIXABLE  ━━
 ```
 invalid_without_trivia.js:12:9 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     10 │ var a = foo?true:false;
     11 │ var a = foo===1?true:false;
@@ -306,7 +307,7 @@ invalid_without_trivia.js:12:9 lint/complexity/noUselessTernary  FIXABLE  ━━
 ```
 invalid_without_trivia.js:14:8 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unnecessary use of boolean literals in conditional expression.
+  i Unnecessary use of boolean literals in conditional expression.
   
     12 │ var a = foo+1?true:false;
     13 │ 

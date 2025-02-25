@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: withBindingInvalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import React, { createElement } from "react";
 
 React.createElement('button');
@@ -24,7 +25,7 @@ createElement('button', {
 ```
 withBindingInvalid.js:3:21 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an explicit type prop for the button element.
+  × Provide an explicit type prop for the button element.
   
     1 │ import React, { createElement } from "react";
     2 │ 
@@ -43,7 +44,7 @@ withBindingInvalid.js:3:21 lint/a11y/useButtonType ━━━━━━━━━�
 ```
 withBindingInvalid.js:5:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
     3 │ React.createElement('button');
     4 │ React.createElement('button', {
@@ -62,7 +63,7 @@ withBindingInvalid.js:5:13 lint/a11y/useButtonType ━━━━━━━━━�
 ```
 withBindingInvalid.js:9:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
      8 │ createElement('button', {
    > 9 │     "type": "bar"
@@ -80,7 +81,7 @@ withBindingInvalid.js:9:13 lint/a11y/useButtonType ━━━━━━━━━�
 ```
 withBindingInvalid.js:13:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
     12 │ createElement('button', {
   > 13 │     "type": 1
@@ -93,5 +94,3 @@ withBindingInvalid.js:13:13 lint/a11y/useButtonType ━━━━━━━━━�
   
 
 ```
-
-

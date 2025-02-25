@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/front-matter/issue-9042.html
+---
+# Input
+
+```html
+---
+layout: foo
+---
+
+Test <a
+href="https://prettier.io">abc</a>.
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1 @@
+----
+-layout: foo
+----
+-
+-Test <a href="https://prettier.io">abc</a>.
++--- layout: foo --- Test <a href="https://prettier.io">abc</a>.
+```
+
+# Output
+
+```html
+--- layout: foo --- Test <a href="https://prettier.io">abc</a>.
+```

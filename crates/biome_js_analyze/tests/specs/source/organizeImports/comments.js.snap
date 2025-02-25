@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: comments.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // leading b
 import b, {
     B, // dangling b
@@ -56,5 +57,3 @@ import c, {
  // leading eof
 
 ```
-
-

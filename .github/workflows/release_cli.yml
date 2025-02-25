@@ -15,9 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ env.version }}
-      prerelease: ${{ env.prerelease }}
-      nightly: ${{ env.nightly }}
-      version_changed: ${{ steps.version.outputs.changed }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
@@ -28,7 +25,6 @@ jobs:
 
       - name: Check version changes
         uses: EndBug/version-check@36ff30f37c7deabe56a30caa043d127be658c425 # v2.1.5
-        if: env.nightly != 'true'
         id: version
         with:
           diff-search: true
@@ -91,7 +87,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Install Node.js
-        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: 20
 
@@ -204,7 +200,7 @@ jobs:
           path: packages/@biomejs
 
       - name: Install Node.js
-        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'

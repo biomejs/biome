@@ -1,0 +1,62 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: json/expand/nested_object.json
+---
+# Input
+
+```json
+{"number": 123, "string": "some-string", "object":  { "object":  {"number":  123, "boolean":  false}}}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Trailing commas: None
+Expand: Follow Source
+Bracket spacing: true
+Object wrap: Preserve
+-----
+
+```json
+{
+	"number": 123,
+	"string": "some-string",
+	"object": { "object": { "number": 123, "boolean": false } }
+}
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Trailing commas: None
+Expand: Always
+Bracket spacing: true
+Object wrap: Preserve
+-----
+
+```json
+{
+	"number": 123,
+	"string": "some-string",
+	"object": {
+		"object": {
+			"number": 123,
+			"boolean": false
+		}
+	}
+}
+```

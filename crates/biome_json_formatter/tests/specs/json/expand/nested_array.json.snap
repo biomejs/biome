@@ -1,0 +1,93 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: json/expand/nested_array.json
+---
+# Input
+
+```json
+{
+	"array": [111111, [1, 2, "a"], 4444444444444444444444444444, 666666666666666, "abababababababababababababababababab"],
+	"long": [11111, ["nestedddddddddddd", 22222222222222222222222222, true, 5555555555555555555555, "indenteddddddddddddddddddddddddddddd"], "Element"]
+}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Trailing commas: None
+Expand: Follow Source
+Bracket spacing: true
+Object wrap: Preserve
+-----
+
+```json
+{
+	"array": [
+		111111,
+		[1, 2, "a"],
+		4444444444444444444444444444,
+		666666666666666,
+		"abababababababababababababababababab"
+	],
+	"long": [
+		11111,
+		[
+			"nestedddddddddddd",
+			22222222222222222222222222,
+			true,
+			5555555555555555555555,
+			"indenteddddddddddddddddddddddddddddd"
+		],
+		"Element"
+	]
+}
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Trailing commas: None
+Expand: Always
+Bracket spacing: true
+Object wrap: Preserve
+-----
+
+```json
+{
+	"array": [
+		111111,
+		[
+			1,
+			2,
+			"a"
+		],
+		4444444444444444444444444444,
+		666666666666666,
+		"abababababababababababababababababab"
+	],
+	"long": [
+		11111,
+		[
+			"nestedddddddddddd",
+			22222222222222222222222222,
+			true,
+			5555555555555555555555,
+			"indenteddddddddddddddddddddddddddddd"
+		],
+		"Element"
+	]
+}
+```

@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidFunctions.js
+snapshot_kind: text
+---
+# Input
+```js
+export function f(x) {
+    if(x) {
+        // assign 'y'
+        var /* @type number */ y /*: number */ = 2*x;
+        // assign 'y' to 'x'
+        x = y;
+    }
+    return x;
+}
+```
+
+# Diagnostics
+```
+invalidFunctions.js:4:9 lint/suspicious/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use let or const instead of var.
+  
+    2 │     if(x) {
+    3 │         // assign 'y'
+  > 4 │         var /* @type number */ y /*: number */ = 2*x;
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │         // assign 'y' to 'x'
+    6 │         x = y;
+  
+  i A variable declared with var is accessible in the whole body of the function. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
+  
+  i See MDN web docs for more details.
+  
+  i Unsafe fix: Use 'const' instead.
+  
+    2 2 │       if(x) {
+    3 3 │           // assign 'y'
+    4   │ - ········var·/*·@type·number·*/·y·/*:·number·*/·=·2*x;
+      4 │ + ········const·/*·@type·number·*/·y·/*:·number·*/·=·2*x;
+    5 5 │           // assign 'y' to 'x'
+    6 6 │           x = y;
+  
+
+```

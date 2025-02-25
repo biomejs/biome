@@ -1,0 +1,55 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+// The "function" AST name can conflict with the "function" keyword
+function($parameters)
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritNodeLike {
+            name: GritName {
+                value_token: GRIT_NAME@0..76 "function" [Comments("// The \"function\" AST ..."), Newline("\n")] [],
+            },
+            l_paren_token: L_PAREN@76..77 "(" [] [],
+            named_args: GritNamedArgList [
+                GritVariable {
+                    value_token: GRIT_VARIABLE@77..88 "$parameters" [] [],
+                },
+            ],
+            r_paren_token: R_PAREN@88..89 ")" [] [],
+        },
+    ],
+    eof_token: EOF@89..90 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..90
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..89
+    0: GRIT_NODE_LIKE@0..89
+      0: GRIT_NAME@0..76
+        0: GRIT_NAME@0..76 "function" [Comments("// The \"function\" AST ..."), Newline("\n")] []
+      1: L_PAREN@76..77 "(" [] []
+      2: GRIT_NAMED_ARG_LIST@77..88
+        0: GRIT_VARIABLE@77..88
+          0: GRIT_VARIABLE@77..88 "$parameters" [] []
+      3: R_PAREN@88..89 ")" [] []
+  4: EOF@89..90 "" [Newline("\n")] []
+
+```

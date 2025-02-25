@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidCustomStyle.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -18,7 +19,7 @@ interface Other {}
 ```
 invalidCustomStyle.ts:7:12 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name part should be in PascalCase.
+  i This interface name part should be in PascalCase.
   
     6 │ // Invalid
   > 7 │ interface Invalid {}
@@ -39,7 +40,7 @@ invalidCustomStyle.ts:7:12 lint/style/useNamingConvention  FIXABLE  ━━━━
 ```
 invalidCustomStyle.ts:8:11 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This interface name should match the following regex /I(.+)|(.*)Error/.
+  i This interface name should match the following regex /I(.+)|(.*)Error/.
   
     6 │ // Invalid
     7 │ interface Invalid {}

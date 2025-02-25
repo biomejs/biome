@@ -11,15 +11,6 @@ impl FormatNodeRule<GritNamedArg> for FormatGritNamedArg {
             eq_token,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                name.format(),
-                space(),
-                eq_token.format(),
-                space(),
-                pattern.format()
-            ]
-        )
+        write!(f, [name.format(), eq_token.format(), pattern.format()])
     }
 }

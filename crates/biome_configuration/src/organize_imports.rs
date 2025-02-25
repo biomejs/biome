@@ -12,15 +12,10 @@ pub struct OrganizeImports {
     #[partial(bpaf(hide))]
     pub enabled: bool,
 
-    /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
+    /// A list of glob patterns. The import organizer will include files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub ignore: StringSet,
-
-    /// A list of Unix shell style patterns. The formatter will include files/folders that will
-    /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub include: StringSet,
+    #[partial(bpaf(pure(Default::default()), hide))]
+    pub includes: Vec<biome_glob::Glob>,
 }
 
 impl Default for OrganizeImports {
@@ -28,7 +23,7 @@ impl Default for OrganizeImports {
         Self {
             enabled: true,
             ignore: Default::default(),
-            include: Default::default(),
+            includes: Default::default(),
         }
     }
 }

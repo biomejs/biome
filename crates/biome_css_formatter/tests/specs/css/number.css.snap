@@ -26,6 +26,9 @@ sup {
 	margin-left: calc(var(--bs-gutter-x) * -.5);
 }
 
+.bar {
+	opacity: 1.0;
+}
 ```
 
 
@@ -49,13 +52,13 @@ hr {
 }
 
 h3 {
-	font-size: calc(1.3rem + .6vw);
+	font-size: calc(1.3rem + 0.6vw);
 }
 h4 {
-	font-size: calc(1.275rem + .3vw);
+	font-size: calc(1.275rem + 0.3vw);
 }
 sup {
-	top: -.5em;
+	top: -0.5em;
 }
 .row {
 	--bs-gutter-x: 1.5rem;
@@ -63,5 +66,9 @@ sup {
 	margin-top: calc(var(--bs-gutter-y) * -1);
 	margin-right: calc(var(--bs-gutter-x) * -0.5);
 	margin-left: calc(var(--bs-gutter-x) * -0.5);
+}
+
+.bar {
+	opacity: 1;
 }
 ```

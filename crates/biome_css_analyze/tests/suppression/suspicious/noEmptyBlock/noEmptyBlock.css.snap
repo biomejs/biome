@@ -1,0 +1,678 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: noEmptyBlock.css
+snapshot_kind: text
+---
+# Input
+```css
+/* CssDeclarationOrRuleBlock */
+a {}
+a { }
+a {
+
+}
+
+.b {}
+.b { }
+.b {
+
+}
+
+/* CssRuleBlock */
+@media print {}
+@media print {
+
+}
+@media print { a {} }
+
+/* CssDeclarationBlock */
+@font-palette-values --ident {}
+@font-face {}
+
+/* CssKeyframesBlock */
+@keyframes slidein {}
+@keyframes slidein {
+    from {
+    }
+
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+/* CssFontFeatureValuesBlock */
+@font-feature-values Font One {
+  @styleset {
+
+  }
+}
+
+/* CssPageAtRuleBlock */
+@page {}
+@page :right {
+}
+
+
+/* CssDeclarationOrAtRuleBlock */
+@page :left { @left-middle {} background: red; }
+@page {
+    @top-right {
+
+    }
+}
+```
+
+# Diagnostics
+```
+noEmptyBlock.css:2:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+    1 │ /* CssDeclarationOrRuleBlock */
+  > 2 │ a {}
+      │   ^^
+    3 │ a { }
+    4 │ a {
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+     1  1 │   /* CssDeclarationOrRuleBlock */
+     2    │ - a·{}
+        2 │ + /*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        3 │ + a··{}
+     3  4 │   a { }
+     4  5 │   a {
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:3:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+    1 │ /* CssDeclarationOrRuleBlock */
+    2 │ a {}
+  > 3 │ a { }
+      │   ^^^
+    4 │ a {
+    5 │ 
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+     1  1 │   /* CssDeclarationOrRuleBlock */
+     2  2 │   a {}
+     3    │ - a·{·}
+        3 │ + /*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        4 │ + a··{·}
+     4  5 │   a {
+     5  6 │   
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:4:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+    2 │ a {}
+    3 │ a { }
+  > 4 │ a {
+      │   ^
+  > 5 │ 
+  > 6 │ }
+      │ ^
+    7 │ 
+    8 │ .b {}
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+     2  2 │   a {}
+     3  3 │   a { }
+     4    │ - a·{
+        4 │ + /*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        5 │ + a··{
+     5  6 │   
+     6  7 │   }
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:8:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+     6 │ }
+     7 │ 
+   > 8 │ .b {}
+       │    ^^
+     9 │ .b { }
+    10 │ .b {
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+     6  6 │   }
+     7  7 │   
+        8 │ + /*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+     8  9 │   .b {}
+     9 10 │   .b { }
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:9:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+     8 │ .b {}
+   > 9 │ .b { }
+       │    ^^^
+    10 │ .b {
+    11 │ 
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+     7  7 │   
+     8  8 │   .b {}
+        9 │ + /*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+     9 10 │   .b { }
+    10 11 │   .b {
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:10:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+     8 │ .b {}
+     9 │ .b { }
+  > 10 │ .b {
+       │    ^
+  > 11 │ 
+  > 12 │ }
+       │ ^
+    13 │ 
+    14 │ /* CssRuleBlock */
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+     8  8 │   .b {}
+     9  9 │   .b { }
+       10 │ + /*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+    10 11 │   .b {
+    11 12 │   
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:15:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+    14 │ /* CssRuleBlock */
+  > 15 │ @media print {}
+       │              ^^
+    16 │ @media print {
+    17 │ 
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+    13 13 │   
+    14 14 │   /* CssRuleBlock */
+       15 │ + /*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+    15 16 │   @media print {}
+    16 17 │   @media print {
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:16:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+    14 │ /* CssRuleBlock */
+    15 │ @media print {}
+  > 16 │ @media print {
+       │              ^
+  > 17 │ 
+  > 18 │ }
+       │ ^
+    19 │ @media print { a {} }
+    20 │ 
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+    14 14 │   /* CssRuleBlock */
+    15 15 │   @media print {}
+       16 │ + /*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+    16 17 │   @media print {
+    17 18 │   
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:19:18 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+    18 │ }
+  > 19 │ @media print { a {} }
+       │                  ^^
+    20 │ 
+    21 │ /* CssDeclarationBlock */
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+    17 17 │   
+    18 18 │   }
+       19 │ + /*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+    19 20 │   @media print { a {} }
+    20 21 │   
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:22:30 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+    21 │ /* CssDeclarationBlock */
+  > 22 │ @font-palette-values --ident {}
+       │                              ^^
+    23 │ @font-face {}
+    24 │ 
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+    20 20 │   
+    21 21 │   /* CssDeclarationBlock */
+       22 │ + /*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+    22 23 │   @font-palette-values --ident {}
+    23 24 │   @font-face {}
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:23:12 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+    21 │ /* CssDeclarationBlock */
+    22 │ @font-palette-values --ident {}
+  > 23 │ @font-face {}
+       │            ^^
+    24 │ 
+    25 │ /* CssKeyframesBlock */
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+    21 21 │   /* CssDeclarationBlock */
+    22 22 │   @font-palette-values --ident {}
+       23 │ + /*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+    23 24 │   @font-face {}
+    24 25 │   
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:26:20 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+    25 │ /* CssKeyframesBlock */
+  > 26 │ @keyframes slidein {}
+       │                    ^^
+    27 │ @keyframes slidein {
+    28 │     from {
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+    24 24 │   
+    25 25 │   /* CssKeyframesBlock */
+       26 │ + /*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+    26 27 │   @keyframes slidein {}
+    27 28 │   @keyframes slidein {
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:28:10 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+    26 │ @keyframes slidein {}
+    27 │ @keyframes slidein {
+  > 28 │     from {
+       │          ^
+  > 29 │     }
+       │     ^
+    30 │ 
+    31 │     to {
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+    26 26 │   @keyframes slidein {}
+    27 27 │   @keyframes slidein {
+    28    │ - ····from·{
+       28 │ + ····/*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+       29 │ + ····from··{
+    29 30 │       }
+    30 31 │   
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:38:13 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+    36 │ /* CssFontFeatureValuesBlock */
+    37 │ @font-feature-values Font One {
+  > 38 │   @styleset {
+       │             ^
+  > 39 │ 
+  > 40 │   }
+       │   ^
+    41 │ }
+    42 │ 
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+    36 36 │   /* CssFontFeatureValuesBlock */
+    37 37 │   @font-feature-values Font One {
+    38    │ - ··@styleset·{
+       38 │ + ··/*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+       39 │ + ··@styleset·{
+    39 40 │   
+    40 41 │     }
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:44:7 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+    43 │ /* CssPageAtRuleBlock */
+  > 44 │ @page {}
+       │       ^^
+    45 │ @page :right {
+    46 │ }
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+    42 42 │   
+    43 43 │   /* CssPageAtRuleBlock */
+       44 │ + /*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+    44 45 │   @page {}
+    45 46 │   @page :right {
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:45:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+    43 │ /* CssPageAtRuleBlock */
+    44 │ @page {}
+  > 45 │ @page :right {
+       │              ^
+  > 46 │ }
+       │ ^
+    47 │ 
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+    43 43 │   /* CssPageAtRuleBlock */
+    44 44 │   @page {}
+       45 │ + /*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+    45 46 │   @page :right {
+    46 47 │   }
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:50:28 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+    49 │ /* CssDeclarationOrAtRuleBlock */
+  > 50 │ @page :left { @left-middle {} background: red; }
+       │                            ^^
+    51 │ @page {
+    52 │     @top-right {
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+    48 48 │   
+    49 49 │   /* CssDeclarationOrAtRuleBlock */
+       50 │ + /*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+    50 51 │   @page :left { @left-middle {} background: red; }
+    51 52 │   @page {
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```
+
+```
+noEmptyBlock.css:52:16 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An empty block isn't allowed.
+  
+    50 │ @page :left { @left-middle {} background: red; }
+    51 │ @page {
+  > 52 │     @top-right {
+       │                ^
+  > 53 │ 
+  > 54 │     }
+       │     ^
+    55 │ }
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  
+    50 50 │   @page :left { @left-middle {} background: red; }
+    51 51 │   @page {
+    52    │ - ····@top-right·{
+       52 │ + ····/*·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+       53 │ + ····@top-right·{
+    53 54 │   
+    54 55 │       }
+  
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
+  
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore-all·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
+  
+
+```

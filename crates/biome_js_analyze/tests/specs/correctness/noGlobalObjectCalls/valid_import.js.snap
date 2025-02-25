@@ -1,12 +1,11 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid_import.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import { foo as JSON } from "./somewhere.js"
 let result = JSON();
 
 ```
-
-

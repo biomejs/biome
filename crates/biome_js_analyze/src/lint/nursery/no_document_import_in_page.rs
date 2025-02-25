@@ -1,5 +1,6 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_syntax::{JsFileSource, JsImport};
@@ -35,7 +36,8 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintNext("no-document-import-in-page")],
         source_kind: RuleSourceKind::SameLogic,
-        recommended: false,
+        recommended: true,
+        domains: &[RuleDomain::Next],
     }
 }
 
@@ -68,8 +70,8 @@ impl Rule for NoDocumentImportInPage {
             return None;
         }
 
-        let file_name = path.file_stem()?.to_str()?;
-        let parent_name = path.parent()?.file_stem()?.to_str()?;
+        let file_name = path.file_stem()?;
+        let parent_name = path.parent()?.file_stem()?;
 
         if parent_name == "_document" || file_name == "_document" {
             return None;
@@ -79,7 +81,7 @@ impl Rule for NoDocumentImportInPage {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        return Some(
+        Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 ctx.query().range(),
@@ -90,6 +92,6 @@ impl Rule for NoDocumentImportInPage {
             .note(markup! {
                 "Only import "<Emphasis>"next/document"</Emphasis>" within "<Emphasis>"pages/_document.jsx"</Emphasis>" to customize the global document structure."
             })
-        );
+        )
     }
 }
