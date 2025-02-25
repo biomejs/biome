@@ -6,7 +6,7 @@ use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
 
 use crate::{
-    model::{CssProperty, CssValue},
+    model::{CssProperty, CssPropertyInitialValue},
     semantic_model::model::Specificity,
     specificity::{evaluate_complex_selector, evaluate_compound_selector},
 };
@@ -24,7 +24,7 @@ pub enum SemanticEvent {
     PropertyDeclaration {
         node: CssSyntaxNode,
         property: CssProperty,
-        value: CssValue,
+        value: CssPropertyInitialValue,
     },
     /// Indicates the start of a `:root` selector
     RootSelectorStart,
@@ -33,7 +33,7 @@ pub enum SemanticEvent {
     /// Indicates the start of an `@property` rule
     AtProperty {
         property: CssProperty,
-        initial_value: Option<CssValue>,
+        initial_value: Option<CssPropertyInitialValue>,
         syntax: Option<String>,
         inherits: Option<bool>,
         range: TextRange,
@@ -109,14 +109,14 @@ impl SemanticEventExtractor {
                             self.stash.push_back(SemanticEvent::PropertyDeclaration {
                                 node: node.clone(),
                                 property: property_name.into(),
-                                value: CssValue::from(property_value),
+                                value: CssPropertyInitialValue::from(property_value),
                             });
                         }
                         AnyCssProperty::CssGenericProperty(generic) => {
                             let Ok(name) = generic.name() else {
                                 return;
                             };
-                            let value = CssValue::from(generic.value());
+                            let value = CssPropertyInitialValue::from(generic.value());
 
                             let property = match name {
                                 AnyCssDeclarationName::CssDashedIdentifier(name) => {
@@ -205,7 +205,7 @@ impl SemanticEventExtractor {
                 if let Ok(prop_name) = prop.name() {
                     match prop_name.to_trimmed_string().as_str() {
                         "initial-value" => {
-                            initial_value = Some(CssValue::from(prop.value()));
+                            initial_value = Some(CssPropertyInitialValue::from(prop.value()));
                         }
                         "syntax" => {
                             syntax = Some(prop.value().to_trimmed_string().to_string());

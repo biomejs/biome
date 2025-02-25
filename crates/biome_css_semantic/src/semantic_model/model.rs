@@ -241,7 +241,7 @@ impl std::fmt::Display for Specificity {
 pub struct CssDeclaration {
     pub(crate) node: CssSyntaxNode,
     pub(crate) property: CssProperty,
-    pub(crate) value: CssValue,
+    pub(crate) value: CssPropertyInitialValue,
 }
 
 impl CssDeclaration {
@@ -257,7 +257,7 @@ impl CssDeclaration {
         &self.property
     }
 
-    pub fn value(&self) -> &CssValue {
+    pub fn value(&self) -> &CssPropertyInitialValue {
         &self.value
     }
 }
@@ -277,8 +277,22 @@ impl CssProperty {
     }
 }
 
-declare_node_union! {
-    pub CssValue = CssGenericComponentValueList | CssComposesPropertyValue
+#[derive(Debug, Clone)]
+pub enum CssPropertyInitialValue {
+    GenericComponent(CssGenericComponentValueList),
+    Composes(CssComposesPropertyValue),
+}
+
+impl From<CssGenericComponentValueList> for CssPropertyInitialValue {
+    fn from(value: CssGenericComponentValueList) -> Self {
+        Self::GenericComponent(value)
+    }
+}
+
+impl From<CssComposesPropertyValue> for CssPropertyInitialValue {
+    fn from(value: CssComposesPropertyValue) -> Self {
+        Self::Composes(value)
+    }
 }
 
 /// Represents a CSS global custom variable declaration.
@@ -301,7 +315,7 @@ pub enum CssGlobalCustomVariable {
         property: CssProperty,
         syntax: Option<String>,
         inherits: Option<bool>,
-        initial_value: Option<CssValue>,
+        initial_value: Option<CssPropertyInitialValue>,
         range: TextRange,
     },
 }
