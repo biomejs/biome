@@ -512,7 +512,7 @@ impl WorkspaceServer {
                 // Apply feature-level `include`/`ignore`
                 ignored_by_features);
 
-        tracing::Span::current().record("ignored", &ignored);
+        tracing::Span::current().record("ignored", ignored);
 
         ignored
     }
