@@ -87,6 +87,180 @@ impl MdHeaderBuilder {
         ))
     }
 }
+pub fn md_header1(before: MdHashList, after: MdHashList) -> MdHeader1Builder {
+    MdHeader1Builder {
+        before,
+        after,
+        md_paragraph: None,
+    }
+}
+pub struct MdHeader1Builder {
+    before: MdHashList,
+    after: MdHashList,
+    md_paragraph: Option<MdParagraph>,
+}
+impl MdHeader1Builder {
+    pub fn with_md_paragraph(mut self, md_paragraph: MdParagraph) -> Self {
+        self.md_paragraph = Some(md_paragraph);
+        self
+    }
+    pub fn build(self) -> MdHeader1 {
+        MdHeader1::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_HEADER1,
+            [
+                Some(SyntaxElement::Node(self.before.into_syntax())),
+                self.md_paragraph
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.after.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn md_header2(before: MdHashList, after: MdHashList) -> MdHeader2Builder {
+    MdHeader2Builder {
+        before,
+        after,
+        md_paragraph: None,
+    }
+}
+pub struct MdHeader2Builder {
+    before: MdHashList,
+    after: MdHashList,
+    md_paragraph: Option<MdParagraph>,
+}
+impl MdHeader2Builder {
+    pub fn with_md_paragraph(mut self, md_paragraph: MdParagraph) -> Self {
+        self.md_paragraph = Some(md_paragraph);
+        self
+    }
+    pub fn build(self) -> MdHeader2 {
+        MdHeader2::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_HEADER2,
+            [
+                Some(SyntaxElement::Node(self.before.into_syntax())),
+                self.md_paragraph
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.after.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn md_header3(before: MdHashList, after: MdHashList) -> MdHeader3Builder {
+    MdHeader3Builder {
+        before,
+        after,
+        md_paragraph: None,
+    }
+}
+pub struct MdHeader3Builder {
+    before: MdHashList,
+    after: MdHashList,
+    md_paragraph: Option<MdParagraph>,
+}
+impl MdHeader3Builder {
+    pub fn with_md_paragraph(mut self, md_paragraph: MdParagraph) -> Self {
+        self.md_paragraph = Some(md_paragraph);
+        self
+    }
+    pub fn build(self) -> MdHeader3 {
+        MdHeader3::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_HEADER3,
+            [
+                Some(SyntaxElement::Node(self.before.into_syntax())),
+                self.md_paragraph
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.after.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn md_header4(before: MdHashList, after: MdHashList) -> MdHeader4Builder {
+    MdHeader4Builder {
+        before,
+        after,
+        md_paragraph: None,
+    }
+}
+pub struct MdHeader4Builder {
+    before: MdHashList,
+    after: MdHashList,
+    md_paragraph: Option<MdParagraph>,
+}
+impl MdHeader4Builder {
+    pub fn with_md_paragraph(mut self, md_paragraph: MdParagraph) -> Self {
+        self.md_paragraph = Some(md_paragraph);
+        self
+    }
+    pub fn build(self) -> MdHeader4 {
+        MdHeader4::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_HEADER4,
+            [
+                Some(SyntaxElement::Node(self.before.into_syntax())),
+                self.md_paragraph
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.after.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn md_header5(before: MdHashList, after: MdHashList) -> MdHeader5Builder {
+    MdHeader5Builder {
+        before,
+        after,
+        md_paragraph: None,
+    }
+}
+pub struct MdHeader5Builder {
+    before: MdHashList,
+    after: MdHashList,
+    md_paragraph: Option<MdParagraph>,
+}
+impl MdHeader5Builder {
+    pub fn with_md_paragraph(mut self, md_paragraph: MdParagraph) -> Self {
+        self.md_paragraph = Some(md_paragraph);
+        self
+    }
+    pub fn build(self) -> MdHeader5 {
+        MdHeader5::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_HEADER5,
+            [
+                Some(SyntaxElement::Node(self.before.into_syntax())),
+                self.md_paragraph
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.after.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn md_header6(before: MdHashList, after: MdHashList) -> MdHeader6Builder {
+    MdHeader6Builder {
+        before,
+        after,
+        md_paragraph: None,
+    }
+}
+pub struct MdHeader6Builder {
+    before: MdHashList,
+    after: MdHashList,
+    md_paragraph: Option<MdParagraph>,
+}
+impl MdHeader6Builder {
+    pub fn with_md_paragraph(mut self, md_paragraph: MdParagraph) -> Self {
+        self.md_paragraph = Some(md_paragraph);
+        self
+    }
+    pub fn build(self) -> MdHeader6 {
+        MdHeader6::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MD_HEADER6,
+            [
+                Some(SyntaxElement::Node(self.before.into_syntax())),
+                self.md_paragraph
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.after.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn md_html_block(md_textual: MdTextual) -> MdHtmlBlock {
     MdHtmlBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_HTML_BLOCK,

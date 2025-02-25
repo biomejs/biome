@@ -58,6 +58,13 @@ AnyContainerBlock = MdQuote | MdBulletListItem | MdOrderListItem
 // h1..h6
 MdHeader = before:MdHashList MdParagraph? after:MdHashList
 
+MdHeader1 = before:MdHashList MdParagraph? after:MdHashList
+MdHeader2 = before:MdHashList MdParagraph? after:MdHashList
+MdHeader3 = before:MdHashList MdParagraph? after:MdHashList
+MdHeader4 = before:MdHashList MdParagraph? after:MdHashList
+MdHeader5 = before:MdHashList MdParagraph? after:MdHashList
+MdHeader6 = before:MdHashList MdParagraph? after:MdHashList
+
 MdHashList = MdHash*
 
 MdHash = '#'
