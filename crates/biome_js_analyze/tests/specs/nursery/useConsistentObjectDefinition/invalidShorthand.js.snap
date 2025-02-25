@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidShorthand.js
+snapshot_kind: text
 ---
 # Input
 ```js
@@ -35,7 +36,7 @@ const invalidShorthand = {
 ```
 invalidShorthand.js:3:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use shorthand object property syntax.
+  × Do not use shorthand object property syntax.
   
     1 │ const invalidShorthand = {
     2 │     // Basic property explicit violations
@@ -52,7 +53,7 @@ invalidShorthand.js:3:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidShorthand.js:4:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use shorthand object property syntax.
+  × Do not use shorthand object property syntax.
   
     2 │     // Basic property explicit violations
     3 │     prop,
@@ -69,7 +70,7 @@ invalidShorthand.js:4:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidShorthand.js:7:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use shorthand object property syntax.
+  × Do not use shorthand object property syntax.
   
     6 │     // Method explicit violations
   > 7 │     method() { return "method"; },
@@ -85,7 +86,7 @@ invalidShorthand.js:7:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidShorthand.js:8:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use shorthand object property syntax.
+  × Do not use shorthand object property syntax.
   
      6 │     // Method explicit violations
      7 │     method() { return "method"; },
@@ -102,7 +103,7 @@ invalidShorthand.js:8:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidShorthand.js:9:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use shorthand object property syntax.
+  × Do not use shorthand object property syntax.
   
      7 │     method() { return "method"; },
      8 │     async async() { return "async"; },
@@ -119,7 +120,7 @@ invalidShorthand.js:9:5 lint/nursery/useConsistentObjectDefinition ━━━━�
 ```
 invalidShorthand.js:10:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use shorthand object property syntax.
+  × Do not use shorthand object property syntax.
   
      8 │     async async() { return "async"; },
      9 │     *generator() { yield "gen"; },
@@ -136,7 +137,7 @@ invalidShorthand.js:10:5 lint/nursery/useConsistentObjectDefinition ━━━━
 ```
 invalidShorthand.js:13:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use shorthand object property syntax.
+  × Do not use shorthand object property syntax.
   
     12 │     // Computed methods
   > 13 │     [computed]() { return "computed"; },
@@ -152,7 +153,7 @@ invalidShorthand.js:13:5 lint/nursery/useConsistentObjectDefinition ━━━━
 ```
 invalidShorthand.js:14:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use shorthand object property syntax.
+  × Do not use shorthand object property syntax.
   
     12 │     // Computed methods
     13 │     [computed]() { return "computed"; },
@@ -169,7 +170,7 @@ invalidShorthand.js:14:5 lint/nursery/useConsistentObjectDefinition ━━━━
 ```
 invalidShorthand.js:15:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use shorthand object property syntax.
+  × Do not use shorthand object property syntax.
   
     13 │     [computed]() { return "computed"; },
     14 │     async [computed]() { return "async computed"; },
@@ -186,7 +187,7 @@ invalidShorthand.js:15:5 lint/nursery/useConsistentObjectDefinition ━━━━
 ```
 invalidShorthand.js:16:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use shorthand object property syntax.
+  × Do not use shorthand object property syntax.
   
     14 │     async [computed]() { return "async computed"; },
     15 │     *[computed]() { yield "computed gen"; },
@@ -203,7 +204,7 @@ invalidShorthand.js:16:5 lint/nursery/useConsistentObjectDefinition ━━━━
 ```
 invalidShorthand.js:17:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use shorthand object property syntax.
+  × Do not use shorthand object property syntax.
   
     15 │     *[computed]() { yield "computed gen"; },
     16 │     ["computed-string"]() { return "computed string"; },
@@ -220,7 +221,7 @@ invalidShorthand.js:17:5 lint/nursery/useConsistentObjectDefinition ━━━━
 ```
 invalidShorthand.js:18:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use shorthand object property syntax.
+  × Do not use shorthand object property syntax.
   
     16 │     ["computed-string"]() { return "computed string"; },
     17 │     ["comp" + "uted" + "-con" + "cat"]() { return "computed concat"; },
@@ -237,7 +238,7 @@ invalidShorthand.js:18:5 lint/nursery/useConsistentObjectDefinition ━━━━
 ```
 invalidShorthand.js:21:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use shorthand object property syntax.
+  × Do not use shorthand object property syntax.
   
     20 │     // String literal methods
   > 21 │     'quotedMethod'() { return "quoted"; },
@@ -253,7 +254,7 @@ invalidShorthand.js:21:5 lint/nursery/useConsistentObjectDefinition ━━━━
 ```
 invalidShorthand.js:22:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use shorthand object property syntax.
+  × Do not use shorthand object property syntax.
   
     20 │     // String literal methods
     21 │     'quotedMethod'() { return "quoted"; },
@@ -270,7 +271,7 @@ invalidShorthand.js:22:5 lint/nursery/useConsistentObjectDefinition ━━━━
 ```
 invalidShorthand.js:23:5 lint/nursery/useConsistentObjectDefinition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use shorthand object property syntax.
+  × Do not use shorthand object property syntax.
   
     21 │     'quotedMethod'() { return "quoted"; },
     22 │     "doubleQuoted"() { return "double quoted"; },
