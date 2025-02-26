@@ -1,5 +1,3 @@
-//! An extremely fast, lookup table based, JSON lexer which yields SyntaxKind tokens used by the rome-json parser.
-
 #[rustfmt::skip]
 mod tests;
 
