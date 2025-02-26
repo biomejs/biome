@@ -297,3 +297,35 @@ async function testInvalidObejctMethodCalls(): Promise<void> {
 		.finally(() => {});
 	invalidTestObject["returnsPromiseMethod"]();
 }
+
+type Props = {
+	a: string;
+	returnsPromise: () => Promise<void>;
+};
+async function testCallingReturnsPromise(props: Props) {
+	props.returnsPromise().then(() => {});
+}
+const testDestructuringAndCallingReturnsPromise = async ({
+	returnsPromise,
+}: Props) => {
+	returnsPromise();
+};
+async function testPassingReturnsPromiseDirectly(
+	returnsPromise: () => Promise<void>
+) {
+	returnsPromise();
+}
+async function testCallingReturnsPromiseFromObject(props: {
+	returnsPromise: () => Promise<void>;
+}) {
+	props.returnsPromise();
+}
+async function testDestructuringAndCallingReturnsPromiseFromRest({
+	a,
+	...rest
+}: Props) {
+	rest
+		.returnsPromise()
+		.then(() => {})
+		.finally(() => {});
+}

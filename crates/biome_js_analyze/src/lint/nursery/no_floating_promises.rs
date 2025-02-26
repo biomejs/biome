@@ -8,13 +8,14 @@ use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, global_identifier, AnyJsClassMember, AnyJsExpression,
     AnyJsObjectMember, AnyTsType, JsArrowFunctionExpression, JsCallExpression, JsClassDeclaration,
     JsClassExpression, JsClassMemberList, JsExpressionStatement, JsExtendsClause,
-    JsFunctionDeclaration, JsIdentifierExpression, JsInitializerClause, JsMethodClassMember,
-    JsMethodObjectMember, JsObjectMemberList, JsStaticMemberExpression, JsSyntaxKind,
-    JsSyntaxToken, JsThisExpression, JsVariableDeclarator, TsReturnTypeAnnotation,
+    JsFormalParameter, JsFunctionDeclaration, JsIdentifierExpression, JsInitializerClause,
+    JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsObjectMemberList,
+    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxToken, JsThisExpression, JsVariableDeclarator,
+    TsReturnTypeAnnotation,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TokenText,
-    TriviaPieceKind,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNode, SyntaxNodeCast,
+    TokenText, TriviaPieceKind,
 };
 
 use crate::{services::semantic::Semantic, JsRuleAction};
@@ -103,7 +104,7 @@ declare_lint_rule! {
     /// api.returnsPromise().then(() => {}).finally(() => {});
     /// ```
     ///
-    /// ```typescript
+    /// ```ts,expect_diagnostic
     /// const obj = {
     ///   async returnsPromise(): Promise<string> {
     ///     return 'value';
@@ -111,6 +112,16 @@ declare_lint_rule! {
     /// };
     ///
     /// obj.returnsPromise();
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// type Props = {
+    ///   returnsPromise: () => Promise<void>;
+    /// };
+    ///
+    /// async function testCallingReturnsPromise(props: Props) {
+    ///   props.returnsPromise();
+    /// }
     /// ```
     /// ### Valid
     ///
@@ -141,6 +152,16 @@ declare_lint_rule! {
     ///   async someMethod() {
     ///     await this.returnsPromise();
     ///   }
+    /// }
+    /// ```
+    ///
+    /// ```ts
+    /// type Props = {
+    ///   returnsPromise: () => Promise<void>;
+    /// };
+    ///
+    /// async function testCallingReturnsPromise(props: Props) {
+    ///   return props.returnsPromise();
     /// }
     /// ```
     ///
@@ -346,8 +367,34 @@ fn is_binding_a_promise(
         AnyJsBindingDeclaration::JsVariableDeclarator(js_var_decl) => Some(
             is_initializer_a_promise(&js_var_decl.initializer()?, model, target_method_name)
                 .unwrap_or_default()
-                || is_variable_annotation_a_promise(&js_var_decl).unwrap_or_default(),
+                || is_variable_annotation_a_promise(&js_var_decl, model).unwrap_or_default(),
         ),
+        AnyJsBindingDeclaration::JsFormalParameter(js_formal_param) => {
+            // function foo(props: Type)
+            let value_token = reference.value_token().ok()?;
+            let ts_type_annotation = js_formal_param.type_annotation()?;
+            let any_ts_type = ts_type_annotation.ty().ok()?;
+            is_ts_type_a_promise(
+                &any_ts_type,
+                model,
+                target_method_name.or_else(|| Some(value_token.text_trimmed())),
+            )
+        }
+        AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(js_obj_binding) => {
+            // function foo({ bar }: Type)
+            let value_token = reference.value_token().ok()?;
+            let js_formal_param = find_js_format_parameter(js_obj_binding.syntax())?;
+            let type_annotation = js_formal_param.type_annotation()?;
+            let any_ts_type = type_annotation.ty().ok()?;
+            is_ts_type_a_promise(&any_ts_type, model, Some(value_token.text_trimmed()))
+        }
+        AnyJsBindingDeclaration::JsObjectBindingPatternRest(js_obj_binding) => {
+            // function foo({ bar, ...rest }: Type)
+            let js_formal_param = find_js_format_parameter(js_obj_binding.syntax())?;
+            let type_annotation = js_formal_param.type_annotation()?;
+            let any_ts_type = type_annotation.ty().ok()?;
+            is_ts_type_a_promise(&any_ts_type, model, target_method_name)
+        }
         _ => Some(false),
     }
 }
@@ -663,11 +710,14 @@ fn is_initializer_a_promise(
 ///
 /// const promise: Promise<string> = new Promise((resolve) => resolve('value'));
 /// ```
-fn is_variable_annotation_a_promise(js_variable_declarator: &JsVariableDeclarator) -> Option<bool> {
+fn is_variable_annotation_a_promise(
+    js_variable_declarator: &JsVariableDeclarator,
+    model: &SemanticModel,
+) -> Option<bool> {
     let any_ts_var_anno = js_variable_declarator.variable_annotation()?;
     let ts_type_anno = any_ts_var_anno.as_ts_type_annotation()?;
     let any_ts_type = ts_type_anno.ty().ok()?;
-    is_ts_type_a_promise(&any_ts_type)
+    is_ts_type_a_promise(&any_ts_type, model, None)
 }
 
 /// Checks if an expression is a `Promise`.
@@ -884,7 +934,7 @@ fn is_class_member_a_promise(
                 let ts_type_annotation = property_annotation.as_ts_type_annotation()?;
                 let any_ts_type = ts_type_annotation.ty().ok()?;
 
-                return is_ts_type_a_promise(&any_ts_type);
+                return is_ts_type_a_promise(&any_ts_type, model, None);
             }
 
             if let Some(initializer_clause) = property.value() {
@@ -897,7 +947,11 @@ fn is_class_member_a_promise(
     }
 }
 
-fn is_ts_type_a_promise(any_ts_type: &AnyTsType) -> Option<bool> {
+fn is_ts_type_a_promise(
+    any_ts_type: &AnyTsType,
+    model: &SemanticModel,
+    target_member_name: Option<&str>,
+) -> Option<bool> {
     match any_ts_type {
         AnyTsType::TsFunctionType(func_type) => {
             let return_type = func_type.return_type().ok()?;
@@ -910,8 +964,34 @@ fn is_ts_type_a_promise(any_ts_type: &AnyTsType) -> Option<bool> {
         AnyTsType::TsReferenceType(ts_ref_type) => {
             let name = ts_ref_type.name().ok()?;
             let identifier = name.as_js_reference_identifier()?;
+            if identifier.has_name("Promise") {
+                return Some(true);
+            }
 
-            Some(identifier.has_name("Promise"))
+            let binding = model.binding(identifier)?;
+            let any_js_binding_decl = binding.tree().declaration()?;
+            match any_js_binding_decl {
+                AnyJsBindingDeclaration::TsTypeAliasDeclaration(ts_type_alias) => {
+                    let any_ts_type = ts_type_alias.ty().ok()?;
+                    is_ts_type_a_promise(&any_ts_type, model, target_member_name)
+                }
+                _ => None,
+            }
+        }
+        AnyTsType::TsObjectType(ts_object_type) => {
+            let target_name = target_member_name?;
+            for member in ts_object_type.members() {
+                let property = member.as_ts_property_signature_type_member()?;
+                let name = property.name().ok()?;
+                let js_literal_member_name = name.as_js_literal_member_name()?;
+                let value = js_literal_member_name.value().ok()?;
+                if value.text_trimmed() == target_name {
+                    let ts_type_annotation = property.type_annotation()?;
+                    let any_ts_type = ts_type_annotation.ty().ok()?;
+                    return is_ts_type_a_promise(&any_ts_type, model, None);
+                }
+            }
+            None
         }
         _ => None,
     }
@@ -982,4 +1062,18 @@ fn find_and_check_object_member(
         }
         _ => None,
     }
+}
+
+/// Traverses up the syntax tree from the given node to find `JsFormalParameter`.
+///
+/// This function traverses up the syntax tree from the given `SyntaxNode` to find the nearest
+/// `JsFormalParameter`. It returns `Some(JsFormalParameter)` if a `JsFormalParameter` is found,
+/// otherwise it returns `None`.
+fn find_js_format_parameter(node: &SyntaxNode<JsLanguage>) -> Option<JsFormalParameter> {
+    node.ancestors()
+        .skip(1)
+        .find_map(|ancestor| match ancestor.kind() {
+            JsSyntaxKind::JS_FORMAL_PARAMETER => ancestor.cast::<JsFormalParameter>(),
+            _ => None,
+        })
 }
