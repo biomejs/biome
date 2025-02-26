@@ -8,6 +8,7 @@ impl FormatRule<AnyJsxChild> for FormatAnyJsxChild {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyJsxChild, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
+            AnyJsxChild::JsMetavariable(node) => node.format().fmt(f),
             AnyJsxChild::JsxElement(node) => node.format().fmt(f),
             AnyJsxChild::JsxExpressionChild(node) => node.format().fmt(f),
             AnyJsxChild::JsxFragment(node) => node.format().fmt(f),

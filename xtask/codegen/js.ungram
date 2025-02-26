@@ -2350,6 +2350,7 @@ AnyJsxElementName =
 	| JsxReferenceIdentifier
 	| JsxMemberName
 	| JsxNamespaceName
+	| JsMetavariable
 
 AnyJsxObjectName =
 	JsxReferenceIdentifier
@@ -2375,6 +2376,7 @@ JsxAttributeList = AnyJsxAttribute*
 AnyJsxAttribute =
 	JsxAttribute
 	| JsxSpreadAttribute
+	| JsMetavariable
 
 JsxAttribute =
 	name: AnyJsxAttributeName
@@ -2419,6 +2421,7 @@ AnyJsxChild =
 	| JsxExpressionChild
 	| JsxSpreadChild
 	| JsxFragment
+	| JsMetavariable
 
 JsxExpressionChild =
 	'{'
