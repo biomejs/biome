@@ -1696,7 +1696,7 @@ export interface Nursery {
 	/**
 	 * Enforce using Solid's \<For /> component for mapping an array to JSX elements.
 	 */
-	usePreferFor?: RuleConfiguration_for_Null;
+	useForComponent?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
@@ -3244,7 +3244,7 @@ export type Category =
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useParseIntRadix"
-	| "lint/nursery/usePreferFor"
+	| "lint/nursery/useForComponent"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useStrictMode"

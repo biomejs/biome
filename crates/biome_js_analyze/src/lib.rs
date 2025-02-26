@@ -209,7 +209,7 @@ let Component = (props) => <ol>{props.data.map(d => <li>{d.text}</li>)}</ol>;
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let options = AnalyzerOptions::default();
-        let rule_filter = RuleFilter::Rule("nursery", "usePreferFor");
+        let rule_filter = RuleFilter::Rule("nursery", "useForComponent");
 
         let mut dependencies = Dependencies::default();
         dependencies.add("buffer", "latest");

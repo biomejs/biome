@@ -3246,7 +3246,7 @@ pub struct Nursery {
         Option<RuleFixConfiguration<biome_js_analyze::options::UseParseIntRadix>>,
     #[doc = "Enforce using Solid's \\<For /> component for mapping an array to JSX elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_prefer_for: Option<RuleConfiguration<biome_js_analyze::options::UsePreferFor>>,
+    pub use_for_component: Option<RuleConfiguration<biome_js_analyze::options::UseForComponent>>,
     #[doc = "Enforce the sorting of CSS utility classes."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_classes:
@@ -3327,7 +3327,7 @@ impl Nursery {
         "useNamedOperation",
         "useNamingConvention",
         "useParseIntRadix",
-        "usePreferFor",
+        "useForComponent",
         "useSortedClasses",
         "useStrictMode",
         "useTrimStartEnd",
@@ -3736,7 +3736,7 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[60]));
             }
         }
-        if let Some(rule) = self.use_prefer_for.as_ref() {
+        if let Some(rule) = self.use_for_component.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[61]));
             }
@@ -4070,7 +4070,7 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[60]));
             }
         }
-        if let Some(rule) = self.use_prefer_for.as_ref() {
+        if let Some(rule) = self.use_for_component.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[61]));
             }
@@ -4369,8 +4369,8 @@ impl RuleGroupExt for Nursery {
                 .use_parse_int_radix
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "usePreferFor" => self
-                .use_prefer_for
+            "useForComponent" => self
+                .use_for_component
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useSortedClasses" => self

@@ -219,7 +219,7 @@ define_categories! {
     "lint/nursery/useNamedOperation": "https://biomejs.dev/linter/rules/use-named-operation",
     "lint/nursery/useNamingConvention": "https://biomejs.dev/linter/rules/use-naming-convention",
     "lint/nursery/useParseIntRadix": "https://biomejs.dev/linter/rules/use-parse-int-radix",
-    "lint/nursery/usePreferFor": "https://biomejs.dev/linter/rules/use-prefer-for",
+    "lint/nursery/useForComponent": "https://biomejs.dev/linter/rules/use-for-component",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useSortedProperties": "https://biomejs.dev/linter/rules/use-sorted-properties",
     "lint/nursery/useStrictMode": "https://biomejs.dev/linter/rules/use-strict-mode",
