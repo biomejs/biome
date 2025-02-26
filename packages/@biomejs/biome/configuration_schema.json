@@ -2847,6 +2847,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useForComponent": {
+					"description": "Enforce using Solid's \\<For /> component for mapping an array to JSX elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGoogleFontDisplay": {
 					"description": "Enforces the use of a recommended display strategy with Google Fonts.",
 					"anyOf": [
@@ -2886,13 +2893,6 @@
 					"description": "Enforce the consistent use of the radix argument when using parseInt().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"usePreferFor": {
-					"description": "Enforce using Solid's \\<For /> component for mapping an array to JSX elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},

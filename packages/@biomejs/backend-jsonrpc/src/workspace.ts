@@ -1668,6 +1668,10 @@ export interface Nursery {
 	 */
 	useExportsLast?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce using Solid's \<For /> component for mapping an array to JSX elements.
+	 */
+	useForComponent?: RuleConfiguration_for_Null;
+	/**
 	 * Enforces the use of a recommended display strategy with Google Fonts.
 	 */
 	useGoogleFontDisplay?: RuleConfiguration_for_Null;
@@ -1691,10 +1695,6 @@ export interface Nursery {
 	 * Enforce the consistent use of the radix argument when using parseInt().
 	 */
 	useParseIntRadix?: RuleFixConfiguration_for_Null;
-	/**
-	 * Enforce using Solid's \<For /> component for mapping an array to JSX elements.
-	 */
-	usePreferFor?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
@@ -3242,7 +3242,7 @@ export type Category =
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useParseIntRadix"
-	| "lint/nursery/usePreferFor"
+	| "lint/nursery/useForComponent"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useStrictMode"
