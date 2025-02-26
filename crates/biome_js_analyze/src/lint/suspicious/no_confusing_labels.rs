@@ -89,6 +89,8 @@ impl Rule for NoConfusingLabels {
         let labeled_stmt = ctx.query();
         let label = labeled_stmt.label_token().ok()?;
         let label = label.text_trimmed();
+
+        // Allow $ label which marks reactive statements in Svelte
         if label == "$"
             && ctx
                 .source_type::<JsFileSource>()
@@ -97,6 +99,13 @@ impl Rule for NoConfusingLabels {
         {
             return None;
         }
+
+        // Allow custom allowed labels
+        if ctx.options().allowed_labels.iter().any(|s| s.as_ref() == label) {
+            return None;
+        }
+
+        // Allow labels in loops
         match labeled_stmt.body().ok()? {
             AnyJsStatement::JsDoWhileStatement(_)
             | AnyJsStatement::JsForInStatement(_)
