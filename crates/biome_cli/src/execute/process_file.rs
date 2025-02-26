@@ -10,7 +10,9 @@ use crate::execute::traverse::TraversalOptions;
 use crate::execute::TraversalMode;
 use biome_diagnostics::{category, DiagnosticExt, DiagnosticTags, Error};
 use biome_fs::BiomePath;
-use biome_service::workspace::{FeatureKind, SupportKind, SupportsFeatureParams};
+use biome_service::workspace::{
+    DocumentFileSource, FeatureKind, SupportKind, SupportsFeatureParams,
+};
 use check::check_file;
 use format::format;
 use lint::lint;
@@ -143,7 +145,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
     // first we stop if there are some files that don't have ALL features enabled, e.g. images, fonts, etc.
     if file_features.is_ignored() || file_features.is_not_enabled() {
         return Ok(FileStatus::Ignored);
-    } else if file_features.is_not_supported() {
+    } else if file_features.is_not_supported() || !DocumentFileSource::can_read(biome_path) {
         return Err(Message::from(
             UnhandledDiagnostic.with_file_path(biome_path.to_string()),
         ));

@@ -44,6 +44,8 @@ use biome_project_layout::ProjectLayout;
 use biome_rowan::{FileSourceError, NodeCache};
 use biome_string_case::StrLikeExtension;
 
+use crate::file_handlers::ignore::IgnoreFileHandler;
+use biome_configuration::vcs::{GIT_IGNORE_FILE_NAME, IGNORE_FILE_NAME};
 use camino::Utf8Path;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
@@ -58,6 +60,7 @@ pub(crate) mod css;
 pub(crate) mod graphql;
 pub(crate) mod grit;
 pub(crate) mod html;
+mod ignore;
 pub(crate) mod javascript;
 pub(crate) mod json;
 mod svelte;
@@ -75,6 +78,8 @@ pub enum DocumentFileSource {
     Graphql(GraphqlFileSource),
     Html(HtmlFileSource),
     Grit(GritFileSource),
+    // Ignore files
+    Ignore,
     #[default]
     Unknown,
 }
@@ -122,7 +127,6 @@ impl From<&Utf8Path> for DocumentFileSource {
 }
 
 impl DocumentFileSource {
-    #[instrument(level = "debug", fields(result))]
     fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = JsonFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
@@ -145,7 +149,6 @@ impl DocumentFileSource {
         Self::try_from_well_known(path).unwrap_or(DocumentFileSource::Unknown)
     }
 
-    #[instrument(level = "debug", fields(result))]
     fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
@@ -208,7 +211,6 @@ impl DocumentFileSource {
         Self::try_from_language_id(language_id).unwrap_or(DocumentFileSource::Unknown)
     }
 
-    #[instrument(level = "debug", fields(result))]
     pub(crate) fn try_from_path(path: &Utf8Path) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = Self::try_from_well_known(path) {
             return Ok(file_source);
@@ -226,6 +228,10 @@ impl DocumentFileSource {
         // because the same logic is also used in JsFileSource::try_from
         // and we may support more and more extensions with more than one dots.
         let extension = &match filename {
+            // Ignore files are extensionless files, so they need to be handled in particular way
+            Some(filename) if filename == GIT_IGNORE_FILE_NAME || filename == IGNORE_FILE_NAME => {
+                return Ok(DocumentFileSource::Ignore);
+            }
             Some(filename) if filename.ends_with(".d.ts") => Cow::Borrowed("d.ts"),
             Some(filename) if filename.ends_with(".d.mts") => Cow::Borrowed("d.mts"),
             Some(filename) if filename.ends_with(".d.cts") => Cow::Borrowed("d.cts"),
@@ -331,20 +337,32 @@ impl DocumentFileSource {
         }
     }
 
-    pub fn can_parse(path: &Utf8Path, content: &str) -> bool {
+    /// The file can be parsed
+    pub fn can_parse(path: &Utf8Path) -> bool {
         let file_source = DocumentFileSource::from(path);
         match file_source {
-            DocumentFileSource::Js(js) => match js.as_embedding_kind() {
-                EmbeddingKind::Astro => ASTRO_FENCE.is_match(content),
-                EmbeddingKind::Vue => VUE_FENCE.is_match(content),
-                EmbeddingKind::Svelte => SVELTE_FENCE.is_match(content),
-                EmbeddingKind::None => true,
-            },
+            DocumentFileSource::Js(_) => true,
             DocumentFileSource::Css(_)
             | DocumentFileSource::Graphql(_)
             | DocumentFileSource::Json(_)
             | DocumentFileSource::Grit(_) => true,
             DocumentFileSource::Html(_) => cfg!(feature = "experimental-html"),
+            DocumentFileSource::Ignore => false,
+            DocumentFileSource::Unknown => false,
+        }
+    }
+
+    /// The file can be read from the file system
+    pub fn can_read(path: &Utf8Path) -> bool {
+        let file_source = DocumentFileSource::from(path);
+        match file_source {
+            DocumentFileSource::Js(_)
+            | DocumentFileSource::Css(_)
+            | DocumentFileSource::Graphql(_)
+            | DocumentFileSource::Json(_)
+            | DocumentFileSource::Grit(_) => true,
+            DocumentFileSource::Html(_) => cfg!(feature = "experimental-html"),
+            DocumentFileSource::Ignore => true,
             DocumentFileSource::Unknown => false,
         }
     }
@@ -378,6 +396,7 @@ impl biome_console::fmt::Display for DocumentFileSource {
             DocumentFileSource::Graphql(_) => fmt.write_markup(markup! { "GraphQL" }),
             DocumentFileSource::Html(_) => fmt.write_markup(markup! { "HTML" }),
             DocumentFileSource::Grit(_) => fmt.write_markup(markup! { "Grit" }),
+            DocumentFileSource::Ignore => fmt.write_markup(markup! { "Ignore" }),
             DocumentFileSource::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
@@ -688,6 +707,7 @@ pub(crate) struct Features {
     graphql: GraphqlFileHandler,
     html: HtmlFileHandler,
     grit: GritFileHandler,
+    ignore: IgnoreFileHandler,
 }
 
 impl Features {
@@ -702,17 +722,14 @@ impl Features {
             graphql: GraphqlFileHandler {},
             html: HtmlFileHandler {},
             grit: GritFileHandler {},
+            ignore: IgnoreFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
     }
 
     /// Returns the [Capabilities] associated with a [BiomePath]
-    pub(crate) fn get_capabilities(
-        &self,
-        path: &Utf8Path,
-        language_hint: DocumentFileSource,
-    ) -> Capabilities {
-        match DocumentFileSource::from_path(path).or(language_hint) {
+    pub(crate) fn get_capabilities(&self, language_hint: DocumentFileSource) -> Capabilities {
+        match language_hint {
             DocumentFileSource::Js(source) => match source.as_embedding_kind() {
                 EmbeddingKind::Astro => self.astro.capabilities(),
                 EmbeddingKind::Vue => self.vue.capabilities(),
@@ -724,6 +741,7 @@ impl Features {
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
             DocumentFileSource::Html(_) => self.html.capabilities(),
             DocumentFileSource::Grit(_) => self.grit.capabilities(),
+            DocumentFileSource::Ignore => self.ignore.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
         }
     }

@@ -1,14 +1,9 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
-## `./.git`
-
-```git
-
-```
-
-## `./.gitignore`
+## `.gitignore`
 
 ```gitignore
 
@@ -42,7 +37,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-file1.js:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+/file1.js:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The call chain .map().flat() can be replaced with a single .flatMap() call.
   

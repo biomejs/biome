@@ -11,9 +11,7 @@ use biome_deserialize::Merge;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDescription};
 use biome_fs::BiomePath;
 use biome_lsp_converters::{negotiated_encoding, PositionEncoding, WideEncoding};
-use biome_service::configuration::{
-    load_configuration, load_editorconfig, ConfigurationExt, LoadedConfiguration,
-};
+use biome_service::configuration::{load_configuration, load_editorconfig, LoadedConfiguration};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::ScanProjectFolderParams;
@@ -535,18 +533,41 @@ impl Session {
         project_path: BiomePath,
     ) {
         let session = self.clone();
-        let _ = spawn_blocking(move || {
+        // NOTE: we use an inline function because async closures aren't supported yet
+        // Once we switch to Rust 2024 edition, we should be able to inline the function
+        async fn scan_project(
+            session: Arc<Session>,
+            project_key: ProjectKey,
+            project_path: BiomePath,
+        ) {
             let result = session
                 .workspace
                 .scan_project_folder(ScanProjectFolderParams {
                     project_key,
                     path: Some(project_path),
                 });
-            if let Err(err) = result {
-                error!("Failed to scan project: {err}");
+
+            match result {
+                Ok(result) => {
+                    for diagnostic in result.diagnostics {
+                        let message = PrintDescription(&diagnostic).to_string();
+                        session
+                            .client
+                            .log_message(MessageType::ERROR, message)
+                            .await;
+                    }
+                }
+                Err(err) => {
+                    let message = PrintDescription(&err).to_string();
+                    session
+                        .client
+                        .log_message(MessageType::ERROR, message)
+                        .await;
+                }
             }
-        })
-        .await;
+        }
+
+        let _ = spawn_blocking(move || scan_project(session, project_key, project_path)).await;
     }
 
     #[tracing::instrument(level = "debug", skip(self))]
@@ -614,16 +635,6 @@ impl Session {
 
         configuration.merge_with(fs_configuration);
 
-        let result = configuration.retrieve_gitignore_matches(fs, configuration_path.as_deref());
-        let (vcs_base_path, gitignore_matches) = match result {
-            Ok(result) => result,
-            Err(err) => {
-                error!("Couldn't load the configuration file, reason:\n {err}");
-                self.client.log_message(MessageType::ERROR, &err).await;
-                return ConfigurationStatus::Error;
-            }
-        };
-
         let path = match &base_path {
             ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path) => {
                 path.as_path().into()
@@ -650,8 +661,6 @@ impl Session {
             project_key,
             workspace_directory: configuration_path.map(BiomePath::from),
             configuration,
-            vcs_base_path: vcs_base_path.map(BiomePath::from),
-            gitignore_matches,
         });
 
         self.scan_project_folder(project_key, path).await;

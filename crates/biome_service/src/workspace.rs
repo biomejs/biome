@@ -443,6 +443,19 @@ impl std::fmt::Display for FeatureKind {
 )]
 pub struct FeatureName(BitFlags<FeatureKind>);
 
+impl std::fmt::Display for FeatureName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut iter = self.0.iter();
+        if let Some(first) = iter.next() {
+            write!(f, "{}", first)?;
+            for kind in iter {
+                write!(f, ", {}", kind)?;
+            }
+        }
+        Ok(())
+    }
+}
+
 impl FeatureName {
     pub fn iter(&self) -> enumflags2::Iter<FeatureKind> {
         self.0.iter()
@@ -523,10 +536,6 @@ impl FeaturesBuilder {
 pub struct UpdateSettingsParams {
     pub project_key: ProjectKey,
     pub configuration: Configuration,
-    // @ematipico TODO: have a better data structure for this
-    pub vcs_base_path: Option<BiomePath>,
-    // @ematipico TODO: have a better data structure for this
-    pub gitignore_matches: Vec<String>,
     pub workspace_directory: Option<BiomePath>,
 }
 

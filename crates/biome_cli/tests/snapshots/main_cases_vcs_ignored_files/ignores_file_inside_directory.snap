@@ -1,18 +1,13 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
-## `./.git`
-
-```git
-
-```
-
-## `./.gitignore`
+## `.gitignore`
 
 ```gitignore
 
-ignored/**
+**/ignored/
 
 ```
 

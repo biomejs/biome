@@ -220,7 +220,7 @@ impl Display for RageConfiguration<'_> {
                     let vcs_enabled = configuration.is_vcs_enabled();
                     let mut settings = Settings::default();
                     settings
-                        .merge_with_configuration(configuration.clone(), None, None, &[])
+                        .merge_with_configuration(configuration.clone(), None)
                         .unwrap();
 
                     let status = if !diagnostics.is_empty() {

@@ -86,11 +86,14 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     let mut configs = Vec::new();
     let mut manifests = Vec::new();
     let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
+    let mut ignore_paths = Vec::new();
     for path in evaluated_paths {
         if path.is_config() {
             configs.push(path);
         } else if path.is_manifest() {
             manifests.push(path);
+        } else if path.is_ignore() {
+            ignore_paths.push(path);
         } else {
             handleable_paths.push(path);
         }
@@ -110,6 +113,13 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     let mut paths = configs;
     paths.append(&mut manifests);
     ctx.workspace.update_project_layout_for_paths(&paths);
+    let result = ctx
+        .workspace
+        .update_project_ignore_files(ctx.project_key, &ignore_paths);
+
+    if let Err(error) = result {
+        ctx.send_diagnostic(error);
+    }
 
     fs.traversal(Box::new(|scope: &dyn TraversalScope| {
         for path in &handleable_paths {
@@ -197,7 +207,7 @@ impl TraversalContext for ScanContext<'_> {
     }
 
     fn can_handle(&self, path: &BiomePath) -> bool {
-        path.is_dir() || DocumentFileSource::try_from_path(path).is_ok()
+        path.is_dir() || DocumentFileSource::try_from_path(path).is_ok() || path.is_ignore()
     }
 
     fn handle_path(&self, path: BiomePath) {

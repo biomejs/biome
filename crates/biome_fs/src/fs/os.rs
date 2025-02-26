@@ -186,7 +186,6 @@ struct OsFile {
 }
 
 impl File for OsFile {
-    #[instrument(level = "debug")]
     fn read_to_string(&mut self, buffer: &mut String) -> io::Result<()> {
         // Reset the cursor to the starting position
         self.inner.rewind()?;
@@ -523,11 +522,17 @@ impl TemporaryFs {
     /// Creates a file under the working directory
     pub fn create_file(&mut self, name: &str, content: &str) {
         let path = self.working_directory.join(name);
-        std::fs::create_dir_all(path.parent().expect("parent dir exists."))
+        fs::create_dir_all(path.parent().expect("parent dir exists."))
             .expect("Temporary directory to exist and being writable");
-        std::fs::write(path.as_std_path(), content)
+        fs::write(path.as_std_path(), content)
             .expect("Temporary directory to exist and being writable");
         self.files.push((path, content.to_string()));
+    }
+
+    pub fn create_folder(&mut self, name: &str) {
+        let path = self.working_directory.join(name);
+        fs::create_dir_all(path.parent().expect("parent dir exists."))
+            .expect("Temporary directory to exist and being writable");
     }
 
     /// Returns the path to use when running the CLI

@@ -14,9 +14,7 @@ export interface FileFeaturesResult {
 }
 export interface UpdateSettingsParams {
 	configuration: Configuration;
-	gitignoreMatches: string[];
 	projectKey: ProjectKey;
-	vcsBasePath?: BiomePath;
 	workspaceDirectory?: BiomePath;
 }
 /**
@@ -3529,6 +3527,7 @@ export type FileContent =
 	| { content: string; type: "fromClient" }
 	| { type: "fromServer" };
 export type DocumentFileSource =
+	| "Ignore"
 	| "Unknown"
 	| { Js: JsFileSource }
 	| { Json: JsonFileSource }

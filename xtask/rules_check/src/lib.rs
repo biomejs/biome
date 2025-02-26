@@ -380,7 +380,7 @@ fn assert_lint(
         };
 
         if let Some(mut settings) = workspace_settings.get_settings(project_key) {
-            settings.merge_with_configuration(partial_config.clone(), None, None, &[])?;
+            settings.merge_with_configuration(partial_config.clone(), None)?;
             workspace_settings.set_settings(project_key, settings);
         }
     }
@@ -594,7 +594,7 @@ fn assert_lint(
         DocumentFileSource::Grit(..) => todo!("Grit analysis is not yet supported"),
 
         // Unknown code blocks should be ignored by tests
-        DocumentFileSource::Unknown => {}
+        DocumentFileSource::Unknown | DocumentFileSource::Ignore => {}
     }
 
     if test.expect_diagnostic {

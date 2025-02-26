@@ -41,8 +41,6 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
                 }),
                 ..Default::default()
             },
-            vcs_base_path: None,
-            gitignore_matches: vec![],
             workspace_directory: None,
         })
     };
