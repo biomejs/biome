@@ -12,7 +12,6 @@ use crate::diagnostics::FileTooLarge;
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
-use crate::is_dir;
 use crate::projects::Projects;
 use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{
@@ -20,6 +19,7 @@ use crate::workspace::{
     RageResult, ServerInfo,
 };
 use crate::{file_handlers::Features, Workspace, WorkspaceError};
+use crate::{is_dir, WatcherInstruction};
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::AnalyzerPluginVec;
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
@@ -43,6 +43,7 @@ use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::NodeCache;
 use camino::{Utf8Path, Utf8PathBuf};
+use crossbeam::channel::Sender;
 use papaya::HashMap;
 use rayon::ThreadPoolBuilder;
 use rustc_hash::{FxBuildHasher, FxHashMap};
@@ -51,13 +52,13 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex, Once};
 use tracing::{info, instrument, warn};
 
-pub(super) struct WorkspaceServer {
+pub struct WorkspaceServer {
     /// features available throughout the application
     features: Features,
 
     /// Open projects, including their settings, nested packages, and other
     /// metadata.
-    projects: Projects,
+    pub(super) projects: Projects,
 
     /// The layout of projects and their internal packages.
     project_layout: Arc<ProjectLayout>,
@@ -69,7 +70,7 @@ pub(super) struct WorkspaceServer {
     plugin_caches: Arc<HashMap<ProjectKey, PluginCache>>,
 
     /// Stores the document (text content + version number) associated with a URL
-    documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
+    pub(super) documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
 
     /// Stores the document sources used across the workspace
     file_sources: AppendOnlyVec<DocumentFileSource>,
@@ -95,10 +96,13 @@ pub(super) struct WorkspaceServer {
     /// anticipated. For other documents, the performance degradation due to
     /// lock contention would not be worth the potential of faster reparsing
     /// that may never actually happen.
-    node_cache: Mutex<FxHashMap<Utf8PathBuf, NodeCache>>,
+    pub(super) node_cache: Mutex<FxHashMap<Utf8PathBuf, NodeCache>>,
 
     /// File system implementation.
-    fs: Box<dyn FileSystem>,
+    pub(super) fs: Box<dyn FileSystem>,
+
+    /// Channel sender for instructions to the [crate::WorkspaceWatcher].
+    watcher_tx: Sender<WatcherInstruction>,
 }
 
 /// The `Workspace` object is long-lived, so we want it to be able to cross
@@ -127,16 +131,12 @@ pub(crate) struct Document {
     /// Note it doesn't matter if the file is *also* opened explicitly through
     /// the LSP Proxy, for instance. In such a case, the scanner's "claim" on
     /// the file should be considered leading.
-    opened_by_scanner: bool,
+    pub(super) opened_by_scanner: bool,
 }
 
 impl WorkspaceServer {
     /// Creates a new [Workspace].
-    ///
-    /// This is implemented as a crate-private method instead of using
-    /// [Default] to disallow instances of [Workspace] from being created
-    /// outside a [crate::App]
-    pub(crate) fn new(fs: Box<dyn FileSystem>) -> Self {
+    pub fn new(fs: Box<dyn FileSystem>, watcher_tx: Sender<WatcherInstruction>) -> Self {
         init_thread_pool();
 
         Self {
@@ -150,6 +150,7 @@ impl WorkspaceServer {
             patterns: Default::default(),
             node_cache: Default::default(),
             fs,
+            watcher_tx,
         }
     }
 
@@ -289,7 +290,7 @@ impl WorkspaceServer {
     #[tracing::instrument(level = "debug", skip(self, params), fields(
         project_key = display(params.project_key),
         path = display(params.path.as_path()),
-        version = display(params.version),
+        version = debug(params.version),
     ))]
     fn open_file_internal(
         &self,
@@ -305,6 +306,8 @@ impl WorkspaceServer {
             persist_node_cache,
         } = params;
         let path: Utf8PathBuf = path.into();
+        let version = version.unwrap_or_default();
+
         let mut source = document_file_source.unwrap_or(DocumentFileSource::from_path(&path));
 
         if let DocumentFileSource::Js(js) = &mut source {
@@ -560,13 +563,16 @@ impl WorkspaceServer {
 
     pub(super) fn update_project_layout_for_paths(&self, paths: &[BiomePath]) {
         for path in paths {
-            if let Err(error) = self.update_project_layout_for_path(path) {
+            if let Err(error) = self.update_project_layout_for_added_or_changed_path(path) {
                 warn!("Error while updating project layout: {error}");
             }
         }
     }
 
-    fn update_project_layout_for_path(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    pub(super) fn update_project_layout_for_added_or_changed_path(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<(), WorkspaceError> {
         if path
             .file_name()
             .is_some_and(|filename| filename == "package.json")
@@ -583,12 +589,34 @@ impl WorkspaceServer {
         Ok(())
     }
 
-    pub(super) fn update_dependency_graph_for_paths(&self, paths: &[BiomePath]) {
+    pub(super) fn update_project_layout_for_removed_path(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<(), WorkspaceError> {
+        if path
+            .file_name()
+            .is_some_and(|filename| filename == "package.json")
+        {
+            let package_path = path
+                .parent()
+                .map(|parent| parent.to_path_buf())
+                .ok_or_else(WorkspaceError::not_found)?;
+            self.project_layout.remove_package(&package_path);
+        }
+
+        Ok(())
+    }
+
+    pub(super) fn update_dependency_graph_for_paths(
+        &self,
+        added_or_changed_paths: &[BiomePath],
+        removed_paths: &[BiomePath],
+    ) {
         self.dependency_graph.update_imports_for_js_paths(
             self.fs.as_ref(),
             &self.project_layout,
-            paths,
-            &[],
+            added_or_changed_paths,
+            removed_paths,
             |path| {
                 let documents = self.documents.pin();
                 let doc = documents.get(path)?;
@@ -599,6 +627,34 @@ impl WorkspaceServer {
                 }
             },
         );
+    }
+
+    pub(super) fn update_service_data_with_added_or_updated_path(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<(), WorkspaceError> {
+        let path = BiomePath::from(path);
+        if path.is_manifest() {
+            self.update_project_layout_for_added_or_changed_path(&path)?;
+        }
+
+        self.update_dependency_graph_for_paths(&[path], &[]);
+
+        Ok(())
+    }
+
+    pub(super) fn update_service_data_with_removed_path(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<(), WorkspaceError> {
+        let path = BiomePath::from(path);
+        if path.is_manifest() {
+            self.update_project_layout_for_removed_path(&path)?;
+        }
+
+        self.update_dependency_graph_for_paths(&[], &[path]);
+
+        Ok(())
     }
 }
 
@@ -750,6 +806,12 @@ impl Workspace for WorkspaceServer {
             .or_else(|| self.projects.get_project_path(params.project_key))
             .ok_or_else(WorkspaceError::no_project)?;
 
+        if params.watch {
+            let _ = self
+                .watcher_tx
+                .try_send(WatcherInstruction::WatchFolder(path.clone()));
+        }
+
         let result = self.scan(params.project_key, &path)?;
 
         Ok(ScanProjectFolderResult {
@@ -763,6 +825,10 @@ impl Workspace for WorkspaceServer {
             .projects
             .get_project_path(params.project_key)
             .ok_or_else(WorkspaceError::no_project)?;
+
+        let _ = self
+            .watcher_tx
+            .try_send(WatcherInstruction::UnwatchFolder(project_path.clone()));
 
         // Limit the scope of the pin and the lock inside.
         {
@@ -907,22 +973,23 @@ impl Workspace for WorkspaceServer {
     /// opened by the scanner as well. If the scanner has opened the file, it
     /// may still be required for multi-file analysis.
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
-        {
+        let path = params.path.as_path();
+
+        let result = {
             let documents = self.documents.pin();
-            let document = documents
-                .get(params.path.as_path())
-                .ok_or_else(WorkspaceError::not_found)?;
-            if !document.opened_by_scanner {
-                documents.remove(params.path.as_path());
+            let document = documents.get(path).ok_or_else(WorkspaceError::not_found)?;
+            if document.opened_by_scanner {
+                Ok(()) // We may need the file for multi-file analysis still.
+            } else {
+                documents.remove(path);
+
+                self.update_service_data_with_removed_path(path)
             }
-        }
+        };
 
-        self.node_cache
-            .lock()
-            .unwrap()
-            .remove(params.path.as_path());
+        self.node_cache.lock().unwrap().remove(path);
 
-        Ok(())
+        result
     }
 
     /// Retrieves the list of diagnostics associated with a file
@@ -952,8 +1019,10 @@ impl Workspace for WorkspaceServer {
             enabled_rules,
         } = params;
         let parse = self.get_parse(&path)?;
+        let language = self.get_file_source(&path);
+        let capabilities = self.features.get_capabilities(&path, language);
         let (diagnostics, errors, skipped_diagnostics) =
-            if let Some(lint) = self.get_file_capabilities(&path).analyzer.lint {
+            if let Some(lint) = capabilities.analyzer.lint {
                 let settings = self
                     .projects
                     .get_settings(project_key)
@@ -965,7 +1034,7 @@ impl Workspace for WorkspaceServer {
                     path: &path,
                     only,
                     skip,
-                    language: self.get_file_source(&path),
+                    language,
                     categories,
                     dependency_graph: self.dependency_graph.clone(),
                     project_layout: self.project_layout.clone(),

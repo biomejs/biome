@@ -9,7 +9,7 @@ use snap_test::assert_cli_snapshot;
 
 use biome_cli::{biome_command, CliDiagnostic, CliSession};
 use biome_console::{markup, BufferConsole, Console, ConsoleExt};
-use biome_fs::{FileSystem, MemoryFileSystem};
+use biome_fs::{FileSystem, MemoryFileSystem, OsFileSystem};
 use biome_service::App;
 use bpaf::ParseFailure;
 
@@ -359,7 +359,7 @@ pub(crate) fn run_cli_with_dyn_fs(
         runtime::Runtime,
     };
 
-    let factory = ServerFactory::default();
+    let factory = ServerFactory::new_with_fs(Box::new(OsFileSystem::default()));
     let connection = factory.create(None);
 
     let runtime = Runtime::new().expect("failed to create runtime");

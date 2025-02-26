@@ -1,0 +1,174 @@
+use camino::Utf8PathBuf;
+use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
+use notify::{
+    event::{CreateKind, ModifyKind, RemoveKind, RenameMode},
+    recommended_watcher, Error as NotifyError, Event as NotifyEvent, EventKind, RecursiveMode,
+    Result as NotifyResult, Watcher,
+};
+use tracing::warn;
+
+use crate::{diagnostics::WatchError, WorkspaceError, WorkspaceServer};
+
+/// Instructions to let the watcher either watch or unwatch a given folder.
+pub enum WatcherInstruction {
+    WatchFolder(Utf8PathBuf),
+    UnwatchFolder(Utf8PathBuf),
+
+    /// Stops the watcher entirely.
+    Stop,
+}
+
+/// Channel for sending instructions to the watcher.
+///
+/// Only exposes the sender of the channel.
+///
+/// Implements [Drop] so that the watcher is stopped when the channel goes out
+/// of scope.
+pub struct WatcherInstructionChannel {
+    pub sender: Sender<WatcherInstruction>,
+}
+
+impl Drop for WatcherInstructionChannel {
+    fn drop(&mut self) {
+        let _ = self.sender.send(WatcherInstruction::Stop);
+    }
+}
+
+/// Watcher to keep the [WorkspaceServer] in sync with the filesystem state.
+///
+/// Conceptually, it helps to think of the watcher as a helper to the scanner.
+/// The watcher watches the same directories as those scanned by the scanner, so
+/// the watcher is also instructed to watch folders that were scanned through
+/// [WorkspaceServer::scan_project_folder()].
+///
+/// When watch events are received, they are handed back to the workspace. If
+/// this results in opening new documents, we say they were opened by the
+/// scanner, because the end result should be the same. And if we treat the
+/// watcher as part of the scanner, it's not even a contradiction :)
+pub struct WorkspaceWatcher {
+    /// Internal [`notify::Watcher`] instance.
+    // Note: The `Watcher` trait doesn't require its implementations to be
+    //       `Send`, but it appears all platform implementations are.
+    watcher: Box<dyn Watcher + Send>,
+
+    /// Channel receiver for the events from our
+    /// [internal watcher](Self::watcher).
+    notify_rx: Receiver<NotifyResult<NotifyEvent>>,
+
+    /// Channel receiver for watch instructions.
+    instruction_rx: Receiver<WatcherInstruction>,
+}
+
+impl WorkspaceWatcher {
+    /// Constructor.
+    ///
+    /// Returns both the watcher as well as the channel for sending instructions
+    /// to the watcher.
+    pub fn new() -> Result<(Self, WatcherInstructionChannel), WorkspaceError> {
+        // We use a bounded channel, because watchers are
+        // [intrinsically unreliable](https://docs.rs/notify/latest/notify/#watching-large-directories).
+        // If we block the sender, some events may get dropped, but that was
+        // already a possibility. So there doesn't really seem to be a
+        // justification for using an unbounded sender, which could end up
+        // consuming an ever-increasing amount of memory.
+        let (tx, rx) = bounded::<NotifyResult<NotifyEvent>>(128);
+
+        let watcher = recommended_watcher(tx)?;
+
+        let (instruction_tx, instruction_rx) = unbounded();
+        let instruction_channel = WatcherInstructionChannel {
+            sender: instruction_tx,
+        };
+        let watcher = Self {
+            watcher: Box::new(watcher),
+            notify_rx: rx,
+            instruction_rx,
+        };
+
+        Ok((watcher, instruction_channel))
+    }
+
+    /// Runs the watcher.
+    ///
+    /// This function is expected to run continuously until either the workspace
+    /// is dropped (because the workspace server is the one holding the sending
+    /// end of the instructions channel) or the watcher (unexpectedly) stops.
+    /// Under normal operation, neither should happen before the daemon
+    /// terminates.
+    pub fn run(&mut self, workspace: &WorkspaceServer) {
+        loop {
+            crossbeam::channel::select! {
+                recv(self.notify_rx) -> event => match event {
+                    Ok(Ok(event)) => {
+                        let result = match event.kind {
+                            EventKind::Access(_) => Ok(()),
+                            EventKind::Create(create_kind) => match create_kind {
+                                CreateKind::Folder => workspace.open_folders_through_watcher(event.paths),
+                                _ => workspace.open_files_through_watcher(event.paths),
+                            },
+                            EventKind::Modify(modify_kind) => match modify_kind {
+                                ModifyKind::Data(_) => {
+                                    workspace.open_files_through_watcher(event.paths)
+                                },
+                                ModifyKind::Name(RenameMode::From) => {
+                                    workspace.close_folders_through_watcher(event.paths)
+                                },
+                                ModifyKind::Name(RenameMode::To) => {
+                                    workspace.open_files_through_watcher(event.paths)
+                                },
+                                ModifyKind::Name(RenameMode::Both) => {
+                                    workspace.rename_path_through_watcher(&event.paths[0], &event.paths[1])
+                                },
+                                _ => Ok(()),
+                            },
+                            EventKind::Remove(remove_kind) => match remove_kind {
+                                RemoveKind::File => workspace.close_files_through_watcher(event.paths),
+                                _ => workspace.close_folders_through_watcher(event.paths),
+                            },
+                            EventKind::Any | EventKind::Other => Ok(()),
+                        };
+                        if let Err(error) = result {
+                            // TODO: Improve error propagation.
+                            warn!("Error processing watch event: {error}");
+                        }
+                    },
+                    Ok(Err(error)) => {
+                        // TODO: Improve error propagation.
+                        warn!("Watcher error: {error}");
+                        break;
+                    },
+                    Err(_) => {
+                        // TODO: Improve error propagation.
+                        warn!("Watcher stopped unexpectedly");
+                        break;
+                    }
+                },
+                recv(self.instruction_rx) -> instruction => match instruction {
+                    Ok(WatcherInstruction::WatchFolder(path)) => {
+                        if let Err(error) = self.watcher.watch(path.as_std_path(), RecursiveMode::Recursive) {
+                            // TODO: Improve error propagation.
+                            warn!("Error watching path {path}: {error}");
+                        }
+                    }
+                    Ok(WatcherInstruction::UnwatchFolder(path)) => {
+                        if let Err(error) = self.watcher.unwatch(path.as_std_path()) {
+                            // TODO: Improve error propagation.
+                            warn!("Error unwatching path {path}: {error}");
+                        }
+                    }
+                    Ok(WatcherInstruction::Stop) | Err(_) => {
+                        break; // Received stop instruction or workspace dropped.
+                    }
+                }
+            }
+        }
+    }
+}
+
+impl From<NotifyError> for WorkspaceError {
+    fn from(error: NotifyError) -> Self {
+        Self::WatchError(WatchError {
+            reason: error.to_string(),
+        })
+    }
+}

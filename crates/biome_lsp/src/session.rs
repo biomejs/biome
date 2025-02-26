@@ -541,6 +541,7 @@ impl Session {
                 .scan_project_folder(ScanProjectFolderParams {
                     project_key,
                     path: Some(project_path),
+                    watch: true,
                 });
             if let Err(err) = result {
                 error!("Failed to scan project: {err}");
