@@ -3,7 +3,8 @@ use biome_lsp_converters::{negotiated_encoding, PositionEncoding, WideEncoding};
 use tower_lsp::lsp_types::{
     ClientCapabilities, CodeActionKind, CodeActionOptions, CodeActionProviderCapability,
     DocumentOnTypeFormattingOptions, OneOf, PositionEncodingKind, ServerCapabilities,
-    TextDocumentSyncCapability, TextDocumentSyncKind,
+    TextDocumentSyncCapability, TextDocumentSyncKind, WorkspaceFoldersServerCapabilities,
+    WorkspaceServerCapabilities,
 };
 
 /// The capabilities to send from server as part of [`InitializeResult`]
@@ -93,6 +94,13 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
         document_on_type_formatting_provider: supports_on_type_formatter_dynamic_registration,
         code_action_provider,
         rename_provider: None,
+        workspace: Some(WorkspaceServerCapabilities {
+            workspace_folders: Some(WorkspaceFoldersServerCapabilities {
+                supported: Some(true),
+                change_notifications: Some(OneOf::Left(true)),
+            }),
+            ..Default::default()
+        }),
         ..Default::default()
     }
 }
