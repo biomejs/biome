@@ -1694,7 +1694,7 @@ export interface Nursery {
 	 */
 	useParseIntRadix?: RuleFixConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Enforce using Solid's \<For /> component for mapping an array to JSX elements.
 	 */
 	usePreferFor?: RuleConfiguration_for_Null;
 	/**

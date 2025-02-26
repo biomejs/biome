@@ -2890,7 +2890,7 @@
 					]
 				},
 				"usePreferFor": {
-					"description": "Succinct description of the rule.",
+					"description": "Enforce using Solid's \\<For /> component for mapping an array to JSX elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
