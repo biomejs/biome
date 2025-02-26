@@ -25,6 +25,7 @@ macro_rules! assert_lex {
             tokens.push((lexer.current(), lexer.current_range()));
         }
 
+
         $(
             assert_eq!(
                 tokens[idx].0,
@@ -208,6 +209,19 @@ fn heading_level_6() {
         MD_HEADER6:6,
         WHITESPACE:1,
         MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+// todo: this should be a MD_TEXTUAL_LITERAL token
+fn not_a_heading() {
+    assert_lex! {
+        "############## not-heading",
+        ERROR_TOKEN:14,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:3,
+        ERROR_TOKEN:1,
+        MD_TEXTUAL_LITERAL:7,
     }
 }
 
