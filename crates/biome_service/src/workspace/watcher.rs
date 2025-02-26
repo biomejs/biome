@@ -1,9 +1,13 @@
-//! Watcher that helps to scanner to keep scanned files up-to-date with the
+//! Watcher that helps the scanner to keep scanned files up-to-date with the
 //! file system.
 //!
 //! This module only contains the methods on the
 //! [workspace server](crate::WorkspaceServer) that facilitate the watcher.
 //! The heart of the watcher is implemented inside [crate::WorkspaceWatcher].
+//!
+//! All the *public* methods in this module are intended to be called by the
+//! watcher. Apart from updating open documents, they are also responsible for
+//! updating service data such as the dependency graph.
 
 use std::path::{Path, PathBuf};
 
@@ -48,11 +52,11 @@ impl WorkspaceServer {
         Ok(())
     }
 
-    /// Used by the watcher to open an individual file.
+    /// Used indirectly by the watcher to open an individual file.
     ///
     /// Note that we don't always know whether the path belongs to a file, so we
     /// explicitly need to check the kind here.
-    pub fn open_file_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    fn open_file_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
         if let PathKind::Directory { .. } = self.fs.path_kind(path)? {
             return self.open_folder_through_watcher(path);
         }
@@ -68,11 +72,13 @@ impl WorkspaceServer {
             version: None,
             document_file_source: None,
             persist_node_cache: false,
-        })
+        })?;
+
+        self.update_service_data_with_added_or_updated_path(path)
     }
 
-    /// Used by the watcher to open an individual folder.
-    pub fn open_folder_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    /// Used indirectly by the watcher to open an individual folder.
+    fn open_folder_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
         let Some(project_key) = self.projects.find_project_for_path(path) else {
             return Ok(()); // file events outside our projects can be safely ignored.
         };
@@ -100,19 +106,19 @@ impl WorkspaceServer {
 
     /// Used by the watcher to close one or more folders.
     pub fn close_folders_through_watcher(&self, paths: Vec<PathBuf>) -> Result<(), WorkspaceError> {
-        for path in paths {
+        for path in &paths {
             self.close_folder_through_watcher(
                 path.as_path()
                     .try_into()
-                    .map_err(|_| FileSystemDiagnostic::non_utf8_path(&path))?,
+                    .map_err(|_| FileSystemDiagnostic::non_utf8_path(path))?,
             )?;
         }
 
         Ok(())
     }
 
-    /// Used by the watcher to close an individual file.
-    pub fn close_file_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    /// Used indirectly by the watcher to close an individual file.
+    fn close_file_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
         // Assign to a temporary to release the lock ASAP.
         let has_node_cache = self.node_cache.lock().unwrap().contains_key(path);
 
@@ -135,12 +141,14 @@ impl WorkspaceServer {
             });
         } else {
             documents.remove(path);
+
+            self.update_service_data_with_removed_path(path)?;
         }
 
         Ok(())
     }
 
-    /// Used by the watcher to close an individual folder.
+    /// Used indirectly by the watcher to close an individual folder.
     ///
     /// Note that we don't really have a concept of open folders in the
     /// workspace, so instead we just iterate the documents to find paths that
@@ -150,7 +158,7 @@ impl WorkspaceServer {
     /// don't know which kind it is. This is because the watcher would only
     /// attempt to close a file or folder after it has been removed, so asking
     /// the file system for the kind wouldn't work anymore.
-    pub fn close_folder_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    fn close_folder_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
         for document_path in self.documents.pin().keys() {
             if document_path.starts_with(path) {
                 self.close_file_through_watcher(document_path)?;
@@ -167,13 +175,16 @@ impl WorkspaceServer {
         from: &Path,
         to: &Path,
     ) -> Result<(), WorkspaceError> {
-        self.close_folder_through_watcher(
-            from.try_into()
-                .map_err(|_| FileSystemDiagnostic::non_utf8_path(from))?,
-        )?;
-        self.open_file_through_watcher(
-            to.try_into()
-                .map_err(|_| FileSystemDiagnostic::non_utf8_path(to))?,
-        )
+        let from = from
+            .try_into()
+            .map_err(|_| FileSystemDiagnostic::non_utf8_path(from))?;
+        self.close_folder_through_watcher(from)?;
+
+        let to = to
+            .try_into()
+            .map_err(|_| FileSystemDiagnostic::non_utf8_path(to))?;
+        self.open_file_through_watcher(to)?;
+
+        Ok(())
     }
 }

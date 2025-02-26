@@ -1074,6 +1074,7 @@ dependencies = [
  "camino",
  "crossbeam",
  "futures",
+ "insta",
  "papaya",
  "rustc-hash 2.1.1",
  "serde",

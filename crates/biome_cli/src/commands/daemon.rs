@@ -8,7 +8,6 @@ use biome_fs::OsFileSystem;
 use biome_lsp::ServerFactory;
 use biome_service::{workspace::WorkspaceClient, TransportError, WorkspaceError, WorkspaceWatcher};
 use camino::{Utf8Path, Utf8PathBuf};
-use crossbeam::channel::unbounded;
 use std::{env, fs};
 use tokio::io;
 use tokio::runtime::Runtime;
@@ -81,10 +80,10 @@ pub(crate) fn run_server(
 ) -> Result<(), CliDiagnostic> {
     setup_tracing_subscriber(log_path.as_deref(), log_file_name_prefix.as_deref());
 
-    let (instruction_tx, instruction_rx) = unbounded();
+    let (mut watcher, instruction_channel) = WorkspaceWatcher::new()?;
 
     let rt = Runtime::new()?;
-    let factory = ServerFactory::new(stop_on_disconnect, instruction_tx);
+    let factory = ServerFactory::new(stop_on_disconnect, instruction_channel.sender.clone());
     let cancellation = factory.cancellation();
     let span = debug_span!("Running Server",
         pid = std::process::id(),
@@ -94,7 +93,6 @@ pub(crate) fn run_server(
     );
 
     let workspace = factory.workspace();
-    let mut watcher = WorkspaceWatcher::new(instruction_rx)?;
     rt.spawn_blocking(move || {
         watcher.run(workspace.as_ref());
     });

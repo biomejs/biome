@@ -563,13 +563,16 @@ impl WorkspaceServer {
 
     pub(super) fn update_project_layout_for_paths(&self, paths: &[BiomePath]) {
         for path in paths {
-            if let Err(error) = self.update_project_layout_for_path(path) {
+            if let Err(error) = self.update_project_layout_for_added_or_changed_path(path) {
                 warn!("Error while updating project layout: {error}");
             }
         }
     }
 
-    fn update_project_layout_for_path(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    pub(super) fn update_project_layout_for_added_or_changed_path(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<(), WorkspaceError> {
         if path
             .file_name()
             .is_some_and(|filename| filename == "package.json")
@@ -586,12 +589,34 @@ impl WorkspaceServer {
         Ok(())
     }
 
-    pub(super) fn update_dependency_graph_for_paths(&self, paths: &[BiomePath]) {
+    pub(super) fn update_project_layout_for_removed_path(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<(), WorkspaceError> {
+        if path
+            .file_name()
+            .is_some_and(|filename| filename == "package.json")
+        {
+            let package_path = path
+                .parent()
+                .map(|parent| parent.to_path_buf())
+                .ok_or_else(WorkspaceError::not_found)?;
+            self.project_layout.remove_package(&package_path);
+        }
+
+        Ok(())
+    }
+
+    pub(super) fn update_dependency_graph_for_paths(
+        &self,
+        added_or_changed_paths: &[BiomePath],
+        removed_paths: &[BiomePath],
+    ) {
         self.dependency_graph.update_imports_for_js_paths(
             self.fs.as_ref(),
             &self.project_layout,
-            paths,
-            &[],
+            added_or_changed_paths,
+            removed_paths,
             |path| {
                 let documents = self.documents.pin();
                 let doc = documents.get(path)?;
@@ -602,6 +627,34 @@ impl WorkspaceServer {
                 }
             },
         );
+    }
+
+    pub(super) fn update_service_data_with_added_or_updated_path(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<(), WorkspaceError> {
+        let path = BiomePath::from(path);
+        if path.is_manifest() {
+            self.update_project_layout_for_added_or_changed_path(&path)?;
+        }
+
+        self.update_dependency_graph_for_paths(&[path], &[]);
+
+        Ok(())
+    }
+
+    pub(super) fn update_service_data_with_removed_path(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<(), WorkspaceError> {
+        let path = BiomePath::from(path);
+        if path.is_manifest() {
+            self.update_project_layout_for_removed_path(&path)?;
+        }
+
+        self.update_dependency_graph_for_paths(&[], &[path]);
+
+        Ok(())
     }
 }
 
@@ -920,22 +973,23 @@ impl Workspace for WorkspaceServer {
     /// opened by the scanner as well. If the scanner has opened the file, it
     /// may still be required for multi-file analysis.
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
-        {
+        let path = params.path.as_path();
+
+        let result = {
             let documents = self.documents.pin();
-            let document = documents
-                .get(params.path.as_path())
-                .ok_or_else(WorkspaceError::not_found)?;
-            if !document.opened_by_scanner {
-                documents.remove(params.path.as_path());
+            let document = documents.get(path).ok_or_else(WorkspaceError::not_found)?;
+            if document.opened_by_scanner {
+                Ok(()) // We may need the file for multi-file analysis still.
+            } else {
+                documents.remove(path);
+
+                self.update_service_data_with_removed_path(path)
             }
-        }
+        };
 
-        self.node_cache
-            .lock()
-            .unwrap()
-            .remove(params.path.as_path());
+        self.node_cache.lock().unwrap().remove(path);
 
-        Ok(())
+        result
     }
 
     /// Retrieves the list of diagnostics associated with a file
@@ -965,8 +1019,10 @@ impl Workspace for WorkspaceServer {
             enabled_rules,
         } = params;
         let parse = self.get_parse(&path)?;
+        let language = self.get_file_source(&path);
+        let capabilities = self.features.get_capabilities(&path, language);
         let (diagnostics, errors, skipped_diagnostics) =
-            if let Some(lint) = self.get_file_capabilities(&path).analyzer.lint {
+            if let Some(lint) = capabilities.analyzer.lint {
                 let settings = self
                     .projects
                     .get_settings(project_key)
@@ -978,7 +1034,7 @@ impl Workspace for WorkspaceServer {
                     path: &path,
                     only,
                     skip,
-                    language: self.get_file_source(&path),
+                    language,
                     categories,
                     dependency_graph: self.dependency_graph.clone(),
                     project_layout: self.project_layout.clone(),

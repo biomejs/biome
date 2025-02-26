@@ -5,10 +5,14 @@ use std::slice;
 use std::time::Duration;
 
 use anyhow::{bail, Context, Error, Result};
-use biome_fs::{BiomePath, MemoryFileSystem};
+use biome_analyze::RuleCategories;
+use biome_configuration::analyzer::RuleSelector;
+use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
 use biome_service::workspace::{
     GetFileContentParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenProjectParams,
+    PullDiagnosticsParams, PullDiagnosticsResult, ScanProjectFolderParams, ScanProjectFolderResult,
 };
+use biome_service::WorkspaceWatcher;
 use camino::Utf8PathBuf;
 use futures::channel::mpsc::{channel, Sender};
 use futures::{Sink, SinkExt, Stream, StreamExt};
@@ -172,12 +176,12 @@ impl Server {
         Ok(())
     }
 
-    /// It creates two workspaces, one at folder `test_one` and the other in `test_two`.
+    /// It creates two projects, one at folder `test_one` and the other in `test_two`.
     ///
     /// Hence, the two roots will be `/workspace/test_one` and `/workspace/test_two`
     // The `root_path` field is deprecated, but we still need to specify it
     #[expect(deprecated)]
-    async fn initialize_workspaces(&mut self) -> Result<()> {
+    async fn initialize_projects(&mut self) -> Result<()> {
         let _res: InitializeResult = self
             .request(
                 "initialize",
@@ -2658,7 +2662,7 @@ async fn multiple_projects() -> Result<()> {
     let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
     let reader = tokio::spawn(client_handler(stream, sink, sender));
 
-    server.initialize_workspaces().await?;
+    server.initialize_projects().await?;
     server.initialized().await?;
 
     let config_only_formatter = r#"{
@@ -2937,6 +2941,211 @@ async fn pull_source_assist_action() -> Result<()> {
     assert_eq!(res, vec![expected_action]);
 
     server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn watcher_updates_dependency_graph() -> Result<()> {
+    // ARRANGE: Set up FS and LSP connection in order to test import cycles.
+    let mut fs = TemporaryFs::new("watcher_updates_dependency_graph");
+    fs.create_file(
+        "biome.json",
+        r#"{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "nursery": {
+        "noImportCycles": "error"
+      }
+    }
+  }
+}
+"#,
+    );
+
+    fs.create_file(
+        "foo.ts",
+        r#"import { bar } from "./bar.ts";
+
+export function foo() {
+    bar();
+}
+"#,
+    );
+
+    fs.create_file(
+        "bar.ts",
+        r#"import { foo } from "./foo.ts";
+
+export function bar() {
+    foo();
+}
+"#,
+    );
+
+    let (mut watcher, instruction_channel) = WorkspaceWatcher::new()?;
+
+    let factory = ServerFactory::new(true, instruction_channel.sender.clone());
+
+    let workspace = factory.workspace();
+    tokio::task::spawn_blocking(move || {
+        watcher.run(workspace.as_ref());
+    });
+
+    let (service, client) = factory.create(None).into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+
+    let project_key = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: fs.working_directory.clone().into(),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+
+    // ARRANGE: Scanning the project folder initializes the service data.
+    let result: ScanProjectFolderResult = server
+        .request(
+            "biome/scan_project_folder",
+            "scan_project_folder",
+            ScanProjectFolderParams {
+                project_key,
+                path: None,
+                watch: true,
+            },
+        )
+        .await?
+        .expect("scan_project_folder returned an error");
+    assert_eq!(result.diagnostics.len(), 0);
+
+    // ACT: Pull diagnostics.
+    let result: PullDiagnosticsResult = server
+        .request(
+            "biome/pull_diagnostics",
+            "pull_diagnostics",
+            PullDiagnosticsParams {
+                project_key,
+                path: fs.working_directory.join("foo.ts").into(),
+                categories: RuleCategories::all(),
+                max_diagnostics: 10,
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+            },
+        )
+        .await?
+        .expect("pull_diagnostics returned an error");
+
+    // ASSERT: One diagnostic should be emitted for the cyclic dependency.
+    assert_eq!(result.diagnostics.len(), 1);
+    insta::assert_snapshot!(format!("{:#?}", result.diagnostics));
+
+    // ARRANGE: Remove `bar.ts`.
+    std::fs::remove_file(fs.working_directory.join("bar.ts")).expect("Cannot remove bar.ts");
+
+    // FIXME: If this test is unstable, we may need to wait here.
+    //        Right now, we don't know if the watcher already processed the
+    //        removal. It seems everything works fine though :D
+
+    // ACT: Pull diagnostics.
+    let result: PullDiagnosticsResult = server
+        .request(
+            "biome/pull_diagnostics",
+            "pull_diagnostics",
+            PullDiagnosticsParams {
+                project_key,
+                path: fs.working_directory.join("foo.ts").into(),
+                categories: RuleCategories::empty(),
+                max_diagnostics: 10,
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+            },
+        )
+        .await?
+        .expect("pull_diagnostics returned an error");
+
+    // ASSERT: Diagnostic should've disappeared because `bar.ts` is removed.
+    assert_eq!(result.diagnostics.len(), 0);
+
+    // ARRANGE: Recreate `bar.ts`.
+    fs.create_file(
+        "bar.ts",
+        r#"import { foo } from "./foo.ts";
+
+    export function bar() {
+        foo();
+    }
+    "#,
+    );
+
+    // ACT: Pull diagnostics.
+    let result: PullDiagnosticsResult = server
+        .request(
+            "biome/pull_diagnostics",
+            "pull_diagnostics",
+            PullDiagnosticsParams {
+                project_key,
+                path: fs.working_directory.join("foo.ts").into(),
+                categories: RuleCategories::all(),
+                max_diagnostics: 10,
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+            },
+        )
+        .await?
+        .expect("pull_diagnostics returned an error");
+
+    // ASSERT: Diagnostic is expected to reappear.
+    assert_eq!(result.diagnostics.len(), 1);
+    insta::assert_snapshot!(format!("{:#?}", result.diagnostics));
+
+    // ARRANGE: Fix `bar.ts`.
+    fs.create_file(
+        "bar.ts",
+        r#"import { foo } from "./shared.ts";
+
+    export function bar() {
+        foo();
+    }
+    "#,
+    );
+
+    // ACT: Pull diagnostics.
+    let result: PullDiagnosticsResult = server
+        .request(
+            "biome/pull_diagnostics",
+            "pull_diagnostics",
+            PullDiagnosticsParams {
+                project_key,
+                path: fs.working_directory.join("foo.ts").into(),
+                categories: RuleCategories::all(),
+                max_diagnostics: 10,
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: vec![RuleSelector::Rule("nursery", "noImportCycles")],
+            },
+        )
+        .await?
+        .expect("pull_diagnostics returned an error");
+
+    // ASSERT: Diagnostic should disappear again with a fixed `bar.ts`.
+    assert_eq!(result.diagnostics.len(), 0);
 
     server.shutdown().await?;
     reader.abort();

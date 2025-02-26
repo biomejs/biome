@@ -28,6 +28,7 @@ biome_text_edit      = { workspace = true }
 camino               = { workspace = true }
 crossbeam            = { workspace = true }
 futures              = "0.3.31"
+insta                = { workspace = true }
 papaya               = { workspace = true }
 rustc-hash           = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }

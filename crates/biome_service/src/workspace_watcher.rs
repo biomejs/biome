@@ -1,7 +1,7 @@
 use camino::Utf8PathBuf;
-use crossbeam::channel::{bounded, Receiver};
+use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
 use notify::{
-    event::{CreateKind, DataChange, ModifyKind, RemoveKind, RenameMode},
+    event::{CreateKind, ModifyKind, RemoveKind, RenameMode},
     recommended_watcher, Error as NotifyError, Event as NotifyEvent, EventKind, RecursiveMode,
     Result as NotifyResult, Watcher,
 };
@@ -13,6 +13,25 @@ use crate::{diagnostics::WatchError, WorkspaceError, WorkspaceServer};
 pub enum WatcherInstruction {
     WatchFolder(Utf8PathBuf),
     UnwatchFolder(Utf8PathBuf),
+
+    /// Stops the watcher entirely.
+    Stop,
+}
+
+/// Channel for sending instructions to the watcher.
+///
+/// Only exposes the sender of the channel.
+///
+/// Implements [Drop] so that the watcher is stopped when the channel goes out
+/// of scope.
+pub struct WatcherInstructionChannel {
+    pub sender: Sender<WatcherInstruction>,
+}
+
+impl Drop for WatcherInstructionChannel {
+    fn drop(&mut self) {
+        let _ = self.sender.send(WatcherInstruction::Stop);
+    }
 }
 
 /// Watcher to keep the [WorkspaceServer] in sync with the filesystem state.
@@ -43,9 +62,9 @@ pub struct WorkspaceWatcher {
 impl WorkspaceWatcher {
     /// Constructor.
     ///
-    /// Takes the receiver of a [crossbeam channel](crossbeam::channel) that
-    /// should be used for instructing the watcher on which paths to watch.
-    pub fn new(instruction_rx: Receiver<WatcherInstruction>) -> Result<Self, WorkspaceError> {
+    /// Returns both the watcher as well as the channel for sending instructions
+    /// to the watcher.
+    pub fn new() -> Result<(Self, WatcherInstructionChannel), WorkspaceError> {
         // We use a bounded channel, because watchers are
         // [intrinsically unreliable](https://docs.rs/notify/latest/notify/#watching-large-directories).
         // If we block the sender, some events may get dropped, but that was
@@ -56,11 +75,17 @@ impl WorkspaceWatcher {
 
         let watcher = recommended_watcher(tx)?;
 
-        Ok(Self {
+        let (instruction_tx, instruction_rx) = unbounded();
+        let instruction_channel = WatcherInstructionChannel {
+            sender: instruction_tx,
+        };
+        let watcher = Self {
             watcher: Box::new(watcher),
             notify_rx: rx,
             instruction_rx,
-        })
+        };
+
+        Ok((watcher, instruction_channel))
     }
 
     /// Runs the watcher.
@@ -82,7 +107,7 @@ impl WorkspaceWatcher {
                                 _ => workspace.open_files_through_watcher(event.paths),
                             },
                             EventKind::Modify(modify_kind) => match modify_kind {
-                                ModifyKind::Data(DataChange::Content) => {
+                                ModifyKind::Data(_) => {
                                     workspace.open_files_through_watcher(event.paths)
                                 },
                                 ModifyKind::Name(RenameMode::From) => {
@@ -131,8 +156,8 @@ impl WorkspaceWatcher {
                             warn!("Error unwatching path {path}: {error}");
                         }
                     }
-                    Err(_) => {
-                        break; // Workspace dropped.
+                    Ok(WatcherInstruction::Stop) | Err(_) => {
+                        break; // Received stop instruction or workspace dropped.
                     }
                 }
             }

@@ -130,7 +130,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     }));
 
     ctx.workspace
-        .update_dependency_graph_for_paths(&handleable_paths);
+        .update_dependency_graph_for_paths(&handleable_paths, &[]);
 
     start.elapsed()
 }
