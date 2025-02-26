@@ -17,3 +17,5 @@ const { µkey: key } = { µkey: µvalue };
 function µfunctionName() {}
 
 type µType = µOtherType;
+
+<µtag>µ_</µtag>

@@ -796,7 +796,7 @@ mod tests {
             .unwrap()
             .replace_all(&formatted, "normalizer: [address redacted]");
 
-        insta::assert_snapshot!(&snapshot, @r###"
+        insta::assert_snapshot!(&snapshot, @r#"
         CodeSnippet(
             GritCodeSnippet {
                 patterns: [
@@ -1114,32 +1114,6 @@ mod tests {
                     ),
                     (
                         JsSyntaxKind(
-                            JSX_TEXT,
-                        ),
-                        AstNode(
-                            GritNodePattern {
-                                kind: JsSyntaxKind(
-                                    JSX_TEXT,
-                                ),
-                                args: [
-                                    GritNodePatternArg {
-                                        slot_index: 0,
-                                        pattern: AstLeafNode(
-                                            GritLeafNodePattern {
-                                                kind: JsSyntaxKind(
-                                                    JSX_TEXT_LITERAL,
-                                                ),
-                                                equivalence_class: None,
-                                                text: "µfn && µfn()",
-                                            },
-                                        ),
-                                    },
-                                ],
-                            },
-                        ),
-                    ),
-                    (
-                        JsSyntaxKind(
                             JS_PROPERTY_OBJECT_MEMBER,
                         ),
                         AstNode(
@@ -1329,6 +1303,6 @@ mod tests {
                 ),
             },
         )
-        "###);
+        "#);
     }
 }

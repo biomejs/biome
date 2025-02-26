@@ -120,6 +120,7 @@ impl Rule for UseKeyWithClickEvents {
                 AnyJsxAttribute::JsxSpreadAttribute(_) => {
                     return None;
                 }
+                AnyJsxAttribute::JsMetavariable(_) => todo!(),
             }
         }
 

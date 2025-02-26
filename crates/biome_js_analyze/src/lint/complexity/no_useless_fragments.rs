@@ -266,6 +266,7 @@ impl Rule for NoUselessFragments {
                         jsx_reference_identifier_is_fragment(&identifier, model)?
                     }
                     AnyJsxElementName::JsxName(_) | AnyJsxElementName::JsxNamespaceName(_) => false,
+                    AnyJsxElementName::JsMetavariable(_) => todo!(),
                 };
 
                 if is_valid_react_fragment {
@@ -414,6 +415,7 @@ impl Rule for NoUselessFragments {
                     // for example `<>{...foo}</>` would become `{...foo}` which would produce
                     // a syntax error
                     AnyJsxChild::JsxSpreadChild(_) => return None,
+                    AnyJsxChild::JsMetavariable(_) => todo!(),
                 };
                 if let Some(new_node) = new_node {
                     mutation.replace_element(parent.into(), new_node.into());

@@ -344,6 +344,7 @@ impl AnyJsxElementName {
             AnyJsxElementName::JsxName(name) => name.value_token(),
             AnyJsxElementName::JsxNamespaceName(name) => name.name()?.value_token(),
             AnyJsxElementName::JsxReferenceIdentifier(name) => name.value_token(),
+            AnyJsxElementName::JsMetavariable(_) => todo!(),
         }
     }
 }
