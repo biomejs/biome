@@ -83,6 +83,24 @@ impl NeedsParentheses for AnyJsExpressionLeftSide {
     }
 }
 
+impl NeedsParentheses for AnyJsFunctionBody {
+    fn needs_parentheses(&self) -> bool {
+        match self {
+            Self::AnyJsExpression(expression) => {
+                expression.needs_parentheses()
+                // () => (first, second)
+                || matches!(expression, AnyJsExpression::JsSequenceExpression(_))
+                    // () => ({ ... })
+                    || expression
+                        .syntax()
+                        .first_token()
+                        .is_some_and(|token| token.kind() == T!['{'])
+            }
+            Self::JsFunctionBody(_) => false,
+        }
+    }
+}
+
 impl NeedsParentheses for AnyJsLiteralExpression {
     #[inline]
     fn needs_parentheses(&self) -> bool {
