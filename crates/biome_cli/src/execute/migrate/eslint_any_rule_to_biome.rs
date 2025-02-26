@@ -2112,6 +2112,21 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "solidjs/perfer-for" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_prefer_for
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "sonarjs/cognitive-complexity" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group

@@ -3244,7 +3244,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_parse_int_radix:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseParseIntRadix>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Enforce using Solid's \\<For /> component for mapping an array to JSX elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_prefer_for: Option<RuleConfiguration<biome_js_analyze::options::UsePreferFor>>,
     #[doc = "Enforce the sorting of CSS utility classes."]
