@@ -151,6 +151,17 @@ fn heading_level_1() {
 }
 
 #[test]
+fn heading_level_1_with_newline() {
+    assert_lex! {
+        "# Heading 1\n",
+        MD_HEADER1:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+        NEWLINE:1,
+    }
+}
+
+#[test]
 fn heading_level_2() {
     assert_lex! {
         "## Heading 2",
