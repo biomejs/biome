@@ -693,14 +693,14 @@ impl Workspace for WorkspaceServer {
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         let project_key = params.project_key;
         let path = params.path.as_path();
-        let capabilities = self.get_file_capabilities(&params.path);
+        let language = self.get_file_source(path);
+        let capabilities = self.features.get_capabilities(language);
         let handle = WorkspaceSettingsHandle::from(
             self.projects
                 .get_settings(project_key)
                 .ok_or_else(WorkspaceError::no_project)?,
         );
         let mut file_features = FileFeaturesResult::new();
-        let language = self.get_file_source(path);
         let file_name = path.file_name();
         file_features = file_features.with_capabilities(&capabilities);
         file_features = file_features.with_settings_and_language(&handle, path, &capabilities);

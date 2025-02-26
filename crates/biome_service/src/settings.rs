@@ -604,7 +604,7 @@ pub struct VcsSettings {
     pub use_ignore_file: Option<VcsUseIgnoreFile>,
     pub enabled: Option<VcsEnabled>,
 
-    pub ignore_matches: Option<VcsIgnoredMatches>,
+    pub ignore_matches: Option<VcsIgnoredPatterns>,
 }
 
 impl VcsSettings {
@@ -637,11 +637,11 @@ impl VcsSettings {
     ) -> Result<(), WorkspaceError> {
         match self.client_kind {
             Some(VcsClientKind::Git) => {
-                let git_ignore = VcsIgnoredMatches::git_ignore(path, patterns)?;
+                let git_ignore = VcsIgnoredPatterns::git_ignore(path, patterns)?;
                 if let Some(ignore_matches) = self.ignore_matches.as_mut() {
                     ignore_matches.insert_git_match(git_ignore);
                 } else {
-                    self.ignore_matches = Some(VcsIgnoredMatches::Git {
+                    self.ignore_matches = Some(VcsIgnoredPatterns::Git {
                         root: git_ignore,
                         nested: vec![],
                     });
@@ -655,7 +655,7 @@ impl VcsSettings {
 }
 
 #[derive(Clone, Debug)]
-pub enum VcsIgnoredMatches {
+pub enum VcsIgnoredPatterns {
     Git {
         // Represents the `.gitignore` file at the root of the project
         root: Gitignore,
@@ -664,11 +664,11 @@ pub enum VcsIgnoredMatches {
     },
 }
 
-impl VcsIgnoredMatches {
+impl VcsIgnoredPatterns {
     #[instrument(level = "debug", skip(self, path, is_dir), fields(result))]
     pub fn is_ignored(&self, path: &Utf8Path, is_dir: bool) -> bool {
         match self {
-            VcsIgnoredMatches::Git { root, nested } => {
+            VcsIgnoredPatterns::Git { root, nested } => {
                 root.matched(path, is_dir).is_ignore()
                     || nested.iter().any(|gitignore| {
                         let ignore_directory = if gitignore.path().is_file() {
@@ -692,16 +692,21 @@ impl VcsIgnoredMatches {
 
     pub fn insert_git_match(&mut self, git_ignore: Gitignore) {
         match self {
-            VcsIgnoredMatches::Git { nested, .. } => {
+            VcsIgnoredPatterns::Git { nested, .. } => {
                 nested.push(git_ignore);
             }
         }
     }
 
-    fn git_ignore(path: &Utf8Path, matches: &[&str]) -> Result<Gitignore, WorkspaceError> {
+    /// Creates an instance of [Gitignore] for the given patterns.
+    ///
+    /// ## Error
+    ///
+    /// If the patterns are invalid
+    fn git_ignore(path: &Utf8Path, patterns: &[&str]) -> Result<Gitignore, WorkspaceError> {
         let mut gitignore_builder = GitignoreBuilder::new(path.as_std_path());
 
-        for the_match in matches {
+        for the_match in patterns {
             gitignore_builder
                 .add_line(Some(path.to_path_buf().into_std_path_buf()), the_match)
                 .map_err(|err| {

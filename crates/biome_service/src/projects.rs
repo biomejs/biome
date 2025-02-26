@@ -1,5 +1,5 @@
 use crate::is_dir;
-use crate::settings::{FilesSettings, Settings, VcsIgnoredMatches};
+use crate::settings::{FilesSettings, Settings, VcsIgnoredPatterns};
 use crate::workspace::FeatureKind;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
@@ -108,7 +108,7 @@ impl Projects {
     }
 
     /// Retrieves the ignore matches that have been stored inside the settings of the current project
-    pub fn get_vcs_ignored_matches(&self, project_key: ProjectKey) -> Option<VcsIgnoredMatches> {
+    pub fn get_vcs_ignored_matches(&self, project_key: ProjectKey) -> Option<VcsIgnoredPatterns> {
         self.0
             .pin()
             .get(&project_key)
