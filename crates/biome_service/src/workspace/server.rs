@@ -760,10 +760,7 @@ impl Workspace for WorkspaceServer {
 
         let workspace_directory = params.workspace_directory.map(|p| p.to_path_buf());
 
-        settings.merge_with_configuration(
-            params.configuration,
-            workspace_directory.clone(),
-        )?;
+        settings.merge_with_configuration(params.configuration, workspace_directory.clone())?;
 
         let diagnostics = self.load_plugins(
             params.project_key,
