@@ -7,6 +7,7 @@ use std::time::Duration;
 use anyhow::{bail, Context, Error, Result};
 use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::RuleSelector;
+use biome_diagnostics::PrintDescription;
 use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
 use biome_service::workspace::{
     GetFileContentParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenProjectParams,
@@ -3052,7 +3053,10 @@ export function bar() {
 
     // ASSERT: One diagnostic should be emitted for the cyclic dependency.
     assert_eq!(result.diagnostics.len(), 1);
-    insta::assert_snapshot!(format!("{:#?}", result.diagnostics));
+    assert_eq!(
+        PrintDescription(&result.diagnostics[0]).to_string(),
+        "This import is part of a cycle."
+    );
 
     // ARRANGE: Remove `bar.ts`.
     std::fs::remove_file(fs.working_directory.join("bar.ts")).expect("Cannot remove bar.ts");
@@ -3113,7 +3117,10 @@ export function bar() {
 
     // ASSERT: Diagnostic is expected to reappear.
     assert_eq!(result.diagnostics.len(), 1);
-    insta::assert_snapshot!(format!("{:#?}", result.diagnostics));
+    assert_eq!(
+        PrintDescription(&result.diagnostics[0]).to_string(),
+        "This import is part of a cycle."
+    );
 
     // ARRANGE: Fix `bar.ts`.
     fs.create_file(
