@@ -76,7 +76,7 @@ declare_lint_rule! {
 pub struct NoConfusingLabelsOptions {
     /// A list of (non-confusing) labels that should be allowed
     #[serde(skip_serializing_if = "<[_]>::is_empty")]
-    pub allowed_labels: Box<[Box<str>]>
+    pub allowed_labels: Box<[Box<str>]>,
 }
 
 impl Rule for NoConfusingLabels {
@@ -101,7 +101,12 @@ impl Rule for NoConfusingLabels {
         }
 
         // Allow custom allowed labels
-        if ctx.options().allowed_labels.iter().any(|s| s.as_ref() == label) {
+        if ctx
+            .options()
+            .allowed_labels
+            .iter()
+            .any(|s| s.as_ref() == label)
+        {
             return None;
         }
 
@@ -118,6 +123,14 @@ impl Rule for NoConfusingLabels {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let labeled_stmt = ctx.query();
+        let allowed_labels = &ctx.options().allowed_labels;
+
+        let message = if allowed_labels.is_empty() {
+            "Only loops should be labeled.\nThe use of labels for other statements is suspicious and unfamiliar."
+        } else {
+            "Some labels are explicitly allowed, but this one is not.\nOtherwise, only loops should be labeled."
+        };
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -126,7 +139,7 @@ impl Rule for NoConfusingLabels {
                     "Unexpected "<Emphasis>"label"</Emphasis>"."
                 },
             )
-            .note("Only loops should be labeled.\nThe use of labels for other statements is suspicious and unfamiliar."),
+            .note(message),
         )
     }
 }
