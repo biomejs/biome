@@ -202,18 +202,19 @@ mod tests {
     #[test]
     fn quick_test() {
         const SOURCE: &str = r#"
-let Component = (props) => <ol>{props.data.map(d => <li>{d.text}</li>)}</ol>;
+import { createEffect } from 'solid-js';
+
+createEffect(() => {
+  console.log(signal());
+});
         "#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let options = AnalyzerOptions::default();
-        let rule_filter = RuleFilter::Rule("nursery", "useForComponent");
-
-        let mut dependencies = Dependencies::default();
+        let rule_filter = RuleFilter::Rule("nursery", "noReactDeps");
         dependencies.add("buffer", "latest");
-
         let services = JsAnalyzerServices::from((
             Default::default(),
             project_layout_with_top_level_dependencies(dependencies),
