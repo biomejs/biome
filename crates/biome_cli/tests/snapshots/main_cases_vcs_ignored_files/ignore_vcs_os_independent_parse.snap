@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -17,29 +18,31 @@ expression: content
 ## `.gitignore`
 
 ```gitignore
-
+something.js
 file2.js
-
+file3.js
 ```
 
 ## `file1.js`
 
 ```js
-array.map((sentence) => sentence.split(" ")).flat();
-
+blah.call();
 ```
 
 ## `file2.js`
 
 ```js
-foo.call();
+foo.call(); bar.call();
+```
 
+## `file3.js`
 
-	bar.call();
+```js
+console.log('biome is cool');
 ```
 
 # Emitted Messages
 
 ```block
-Formatted 1 file in <TIME>. Fixed 1 file.
+Checked 2 files in <TIME>. Fixed 2 files.
 ```

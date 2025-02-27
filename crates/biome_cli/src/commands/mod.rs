@@ -26,9 +26,7 @@ use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
-use biome_service::configuration::{
-    load_configuration, load_editorconfig, ConfigurationExt, LoadedConfiguration,
-};
+use biome_service::configuration::{load_configuration, load_editorconfig, LoadedConfiguration};
 use biome_service::documentation::Doc;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
@@ -788,9 +786,6 @@ pub(crate) trait CommandRunner: Sized {
         );
         let configuration_path = loaded_configuration.directory_path.clone();
         let configuration = self.merge_configuration(loaded_configuration, fs, console)?;
-        let vcs_base_path = configuration_path.clone().or(fs.working_directory());
-        let (vcs_base_path, gitignore_matches) =
-            configuration.retrieve_gitignore_matches(fs, vcs_base_path.as_deref())?;
         let paths = self.get_files_to_process(fs, &configuration)?;
         let project_path = fs
             .working_directory()
@@ -805,8 +800,6 @@ pub(crate) trait CommandRunner: Sized {
             project_key,
             workspace_directory: configuration_path.map(BiomePath::from),
             configuration,
-            vcs_base_path: vcs_base_path.map(BiomePath::from),
-            gitignore_matches,
         })?;
         for diagnostic in &result.diagnostics {
             console.log(markup! {{PrintDiagnostic::simple(diagnostic)}});
@@ -820,7 +813,7 @@ pub(crate) trait CommandRunner: Sized {
                 path: Some(project_path),
             })?;
             for diagnostic in result.diagnostics {
-                if diagnostic.severity() == Severity::Fatal {
+                if diagnostic.severity() >= Severity::Error {
                     console.log(markup! {{PrintDiagnostic::simple(&diagnostic)}});
                 }
             }

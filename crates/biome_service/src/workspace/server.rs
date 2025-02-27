@@ -44,12 +44,11 @@ use biome_project_layout::ProjectLayout;
 use biome_rowan::NodeCache;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
-use rayon::ThreadPoolBuilder;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex, Once};
-use tracing::{info, instrument, warn};
+use std::sync::{Arc, Mutex};
+use tracing::{error, info, instrument, warn};
 
 pub(super) struct WorkspaceServer {
     /// features available throughout the application
@@ -119,7 +118,11 @@ pub(crate) struct Document {
     pub(crate) file_source_index: usize,
 
     /// The result of the parser (syntax tree + diagnostics).
-    pub(crate) syntax: Result<AnyParse, FileTooLarge>,
+    /// Types explained:
+    /// - `Option`: if the file can be read
+    /// - `Result`: if the file is read, but the  file is too large
+    /// - `AnyParse`: the result of the parsed file
+    pub(crate) syntax: Option<Result<AnyParse, FileTooLarge>>,
 
     /// If `true`, this indicates the document has been opened by the scanner,
     /// and should be unloaded only when the project is unregistered.
@@ -222,7 +225,7 @@ impl WorkspaceServer {
     ))]
     fn get_file_capabilities(&self, path: &BiomePath) -> Capabilities {
         let language = self.get_file_source(path);
-        self.features.get_capabilities(path, language)
+        self.features.get_capabilities(language)
     }
 
     /// Retrieves the supported language of a file.
@@ -240,7 +243,6 @@ impl WorkspaceServer {
     fn build_capability_error<'a>(
         &'a self,
         path: &'a Utf8Path,
-        // feature_name: &'a str,
     ) -> impl FnOnce() -> WorkspaceError + 'a {
         move || {
             let file_source = self.get_file_source(path);
@@ -257,7 +259,6 @@ impl WorkspaceServer {
     /// Returns a previously inserted file source by index.
     ///
     /// File sources can be inserted using `insert_source()`.
-    #[tracing::instrument(level = "debug", skip_all)]
     fn get_source(&self, index: usize) -> Option<DocumentFileSource> {
         if index < self.file_sources.len() {
             Some(self.file_sources[index])
@@ -305,6 +306,11 @@ impl WorkspaceServer {
             persist_node_cache,
         } = params;
         let path: Utf8PathBuf = path.into();
+
+        if document_file_source.is_none() && !DocumentFileSource::can_read(path.as_path()) {
+            return Ok(());
+        }
+
         let mut source = document_file_source.unwrap_or(DocumentFileSource::from_path(&path));
 
         if let DocumentFileSource::Js(js) = &mut source {
@@ -332,7 +338,21 @@ impl WorkspaceServer {
                     content,
                     version,
                     file_source_index: index,
-                    syntax: Err(FileTooLarge { size, limit }),
+                    syntax: Some(Err(FileTooLarge { size, limit })),
+                    opened_by_scanner,
+                },
+            );
+            return Ok(());
+        }
+
+        if document_file_source.is_none() && !DocumentFileSource::can_parse(path.as_path()) {
+            self.documents.pin().insert(
+                path,
+                Document {
+                    content,
+                    version,
+                    file_source_index: index,
+                    syntax: None,
                     opened_by_scanner,
                 },
             );
@@ -358,7 +378,7 @@ impl WorkspaceServer {
                 content,
                 version,
                 file_source_index: index,
-                syntax: Ok(parsed.any_parse),
+                syntax: Some(Ok(parsed.any_parse)),
                 opened_by_scanner,
             };
 
@@ -427,11 +447,14 @@ impl WorkspaceServer {
         let documents = self.documents.pin();
         let syntax = documents
             .get(path)
-            .map(|document| document.syntax.as_ref())
-            .ok_or_else(WorkspaceError::not_found)?;
+            .and_then(|doc| doc.syntax.clone())
+            .transpose();
 
         match syntax {
-            Ok(syntax) => Ok(syntax.clone()),
+            Ok(syntax) => match syntax {
+                None => Err(WorkspaceError::not_found()),
+                Some(syntax) => Ok(syntax.clone()),
+            },
             Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
         }
     }
@@ -447,7 +470,7 @@ impl WorkspaceServer {
         let file_source = self
             .get_source(file_source_index)
             .ok_or_else(WorkspaceError::not_found)?;
-        let capabilities = self.features.get_capabilities(path, file_source);
+        let capabilities = self.features.get_capabilities(file_source);
 
         let parse = capabilities
             .parser
@@ -470,6 +493,7 @@ impl WorkspaceServer {
 
     /// Checks whether a file is ignored in the top-level config's
     /// `files.ignore`/`files.include` or in the feature's `ignore`/`include`.
+    #[instrument(level = "debug", skip(self), fields(ignored))]
     fn is_ignored(&self, project_key: ProjectKey, path: &Utf8Path, features: FeatureName) -> bool {
         let file_name = path.file_name();
         let ignored_by_features = {
@@ -484,11 +508,15 @@ impl WorkspaceServer {
             ignored
         };
         // Never ignore Biome's config file regardless `include`/`ignore`
-        (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
+        let ignored = (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
             // Apply top-level `include`/`ignore`
             (self.is_ignored_by_top_level_config(project_key, path) ||
                 // Apply feature-level `include`/`ignore`
-                ignored_by_features)
+                ignored_by_features);
+
+        tracing::Span::current().record("ignored", ignored);
+
+        ignored
     }
 
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
@@ -507,20 +535,12 @@ impl WorkspaceServer {
             };
         }
 
+        let ignore_matches = self.projects.get_vcs_ignored_matches(project_key);
+
         !is_included
-            || files_settings.git_ignore.as_ref().is_some_and(|ignore| {
-                // `matched_path_or_any_parents` panics if `source` is not under the gitignore root.
-                // This checks excludes absolute paths that are not a prefix of the base root.
-                if !path.has_root() || path.starts_with(ignore.path()) {
-                    // Because Biome passes a list of paths,
-                    // we use `matched_path_or_any_parents` instead of `matched`.
-                    ignore
-                        .matched_path_or_any_parents(path, path.is_dir())
-                        .is_ignore()
-                } else {
-                    false
-                }
-            })
+            || ignore_matches
+                .as_ref()
+                .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)))
     }
 
     fn load_plugins(
@@ -558,15 +578,57 @@ impl WorkspaceServer {
             .unwrap_or_default()
     }
 
+    // TODO: add documentation for this method
     pub(super) fn update_project_layout_for_paths(&self, paths: &[BiomePath]) {
         for path in paths {
             if let Err(error) = self.update_project_layout_for_path(path) {
-                warn!("Error while updating project layout: {error}");
+                error!("Error while updating project layout: {error}");
             }
         }
     }
 
-    fn update_project_layout_for_path(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    /// It accepts a list of ignore files. If the VCS integration is enabled, the files
+    /// are read and the [Settings] are updated.
+    ///
+    /// ## Errors
+    ///
+    /// - If the project doesn't exist
+    /// - If it's not possible to read the ignore file
+    /// - If the ignore file contains lines that contain incorrect globs
+    pub(super) fn update_project_ignore_files(
+        &self,
+        project_key: ProjectKey,
+        paths: &[BiomePath],
+    ) -> Result<(), WorkspaceError> {
+        let project_path = self.projects.get_project_path(project_key);
+        let mut settings = self
+            .projects
+            .get_settings(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+
+        let vcs_settings = &mut settings.vcs_settings;
+        if !vcs_settings.is_enabled() {
+            return Ok(());
+        }
+        for path in paths.iter().filter(|path| path.is_ignore()) {
+            let is_in_project_path = project_path
+                .as_ref()
+                .is_some_and(|project_path| path.starts_with(project_path));
+
+            if vcs_settings.is_ignore_file(path) && is_in_project_path {
+                let content = self.fs.read_file_from_path(path)?;
+                let patterns = content.lines().collect::<Vec<_>>();
+                vcs_settings.store_ignore_patterns(path.as_path(), patterns.as_slice())?;
+            }
+        }
+
+        self.projects.set_settings(project_key, settings);
+
+        Ok(())
+    }
+
+    // TODO: add documentation for this method
+    fn update_project_layout_for_path(&self, path: &BiomePath) -> Result<(), WorkspaceError> {
         if path
             .file_name()
             .is_some_and(|filename| filename == "package.json")
@@ -594,7 +656,11 @@ impl WorkspaceServer {
                 let doc = documents.get(path)?;
                 let file_source = self.file_sources[doc.file_source_index];
                 match file_source {
-                    DocumentFileSource::Js(_) => doc.syntax.as_ref().map(AnyParse::tree).ok(),
+                    DocumentFileSource::Js(_) => doc
+                        .syntax
+                        .as_ref()
+                        .and_then(|syntax| syntax.as_ref().ok())
+                        .map(AnyParse::tree),
                     _ => None,
                 }
             },
@@ -627,15 +693,14 @@ impl Workspace for WorkspaceServer {
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         let project_key = params.project_key;
         let path = params.path.as_path();
-        let capabilities = self.get_file_capabilities(&params.path);
-
+        let language = self.get_file_source(path);
+        let capabilities = self.features.get_capabilities(language);
         let handle = WorkspaceSettingsHandle::from(
             self.projects
                 .get_settings(project_key)
                 .ok_or_else(WorkspaceError::no_project)?,
         );
         let mut file_features = FileFeaturesResult::new();
-        let language = DocumentFileSource::from_path(path);
         let file_name = path.file_name();
         file_features = file_features.with_capabilities(&capabilities);
         file_features = file_features.with_settings_and_language(&handle, path, &capabilities);
@@ -695,12 +760,7 @@ impl Workspace for WorkspaceServer {
 
         let workspace_directory = params.workspace_directory.map(|p| p.to_path_buf());
 
-        settings.merge_with_configuration(
-            params.configuration,
-            workspace_directory.clone(),
-            params.vcs_base_path.map(|p| p.to_path_buf()),
-            params.gitignore_matches.as_slice(),
-        )?;
+        settings.merge_with_configuration(params.configuration, workspace_directory.clone())?;
 
         let diagnostics = self.load_plugins(
             params.project_key,
@@ -884,7 +944,7 @@ impl Workspace for WorkspaceServer {
             content,
             version,
             file_source_index: index,
-            syntax: Ok(parsed.any_parse),
+            syntax: Some(Ok(parsed.any_parse)),
             opened_by_scanner,
         };
 
@@ -1067,6 +1127,7 @@ impl Workspace for WorkspaceServer {
     )]
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError> {
         let capabilities = self.get_file_capabilities(&params.path);
+
         let format = capabilities
             .formatter
             .format
@@ -1076,6 +1137,7 @@ impl Workspace for WorkspaceServer {
                 .get_settings(params.project_key)
                 .ok_or_else(WorkspaceError::no_project)?,
         );
+
         let parse = self.get_parse(&params.path)?;
 
         if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
@@ -1277,9 +1339,9 @@ impl Workspace for WorkspaceServer {
 fn init_thread_pool() {
     #[cfg(not(target_family = "wasm"))]
     {
-        static INIT_ONCE: Once = Once::new();
+        static INIT_ONCE: std::sync::Once = std::sync::Once::new();
         INIT_ONCE.call_once(|| {
-            ThreadPoolBuilder::new()
+            rayon::ThreadPoolBuilder::new()
                 .thread_name(|index| format!("biome::workspace_worker_{index}"))
                 .build_global()
                 .expect("failed to initialize the global thread pool");

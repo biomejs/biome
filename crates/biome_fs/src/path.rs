@@ -211,6 +211,8 @@ impl BiomePath {
             "package.json" | "tsconfig.json" | "jsconfig.json"
         ) {
             FileKind::Manifest.into()
+        } else if matches!(file_name, ".gitignore" | ".ignore") {
+            FileKind::Ignore.into()
         } else {
             FileKind::Handleable.into()
         }
@@ -310,6 +312,8 @@ mod test {
         );
         assert_eq!(BiomePath::priority("biome.json"), FileKind::Config.into());
         assert_eq!(BiomePath::priority("biome.jsonc"), FileKind::Config.into());
+        assert_eq!(BiomePath::priority(".gitignore"), FileKind::Ignore.into());
+        assert_eq!(BiomePath::priority(".ignore"), FileKind::Ignore.into());
     }
 
     #[test]

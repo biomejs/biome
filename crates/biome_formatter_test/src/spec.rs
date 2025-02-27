@@ -249,7 +249,7 @@ where
                 deserialize_from_str::<Configuration>(options_path.get_buffer_from_file().as_str())
                     .consume();
             settings
-                .merge_with_configuration(test_options.unwrap_or_default(), None, None, &[])
+                .merge_with_configuration(test_options.unwrap_or_default(), None)
                 .unwrap();
 
             if !diagnostics.is_empty() {
