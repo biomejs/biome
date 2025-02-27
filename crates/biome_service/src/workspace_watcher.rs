@@ -71,6 +71,8 @@ impl WorkspaceWatcher {
         // already a possibility. So there doesn't really seem to be a
         // justification for using an unbounded sender, which could end up
         // consuming an ever-increasing amount of memory.
+        // The actual size of the buffer is an arbitrary choice that we can
+        // tweak if we find a need for it.
         let (tx, rx) = bounded::<NotifyResult<NotifyEvent>>(128);
 
         let watcher = recommended_watcher(tx)?;
