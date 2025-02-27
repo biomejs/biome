@@ -22,14 +22,13 @@ use super::{
 };
 
 impl WorkspaceServer {
-    /// Used by the watcher to open one or more files.
+    /// Used by the watcher to open one or more files or folders.
     ///
-    /// This method can also be used if we don't know whether the paths are
-    /// files or folders, because [Self::open_file_through_watcher()] checks the
-    /// kind internally.
-    pub fn open_files_through_watcher(&self, paths: Vec<PathBuf>) -> Result<(), WorkspaceError> {
+    /// If you already know the paths are folders, use
+    /// [Self::open_folders_through_watcher()] instead.
+    pub fn open_paths_through_watcher(&self, paths: Vec<PathBuf>) -> Result<(), WorkspaceError> {
         for path in paths {
-            self.open_file_through_watcher(
+            self.open_path_through_watcher(
                 path.as_path()
                     .try_into()
                     .map_err(|_| FileSystemDiagnostic::non_utf8_path(&path))?,
@@ -52,11 +51,11 @@ impl WorkspaceServer {
         Ok(())
     }
 
-    /// Used indirectly by the watcher to open an individual file.
+    /// Used indirectly by the watcher to open an individual file or folder.
     ///
-    /// Note that we don't always know whether the path belongs to a file, so we
-    /// explicitly need to check the kind here.
-    fn open_file_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    /// If you already know the path is a folder, use
+    /// [Self::open_folder_through_watcher()] instead.
+    fn open_path_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
         if let PathKind::Directory { .. } = self.fs.path_kind(path)? {
             return self.open_folder_through_watcher(path);
         }
@@ -69,7 +68,6 @@ impl WorkspaceServer {
             project_key,
             path: path.into(),
             content: FileContent::FromServer,
-            version: None,
             document_file_source: None,
             persist_node_cache: false,
         })?;
@@ -104,10 +102,13 @@ impl WorkspaceServer {
         Ok(())
     }
 
-    /// Used by the watcher to close one or more folders.
-    pub fn close_folders_through_watcher(&self, paths: Vec<PathBuf>) -> Result<(), WorkspaceError> {
+    /// Used by the watcher to close one or more files or folders.
+    ///
+    /// If you know the paths are files, use
+    /// [Self::close_files_through_watcher()] instead.
+    pub fn close_paths_through_watcher(&self, paths: Vec<PathBuf>) -> Result<(), WorkspaceError> {
         for path in &paths {
-            self.close_folder_through_watcher(
+            self.close_path_through_watcher(
                 path.as_path()
                     .try_into()
                     .map_err(|_| FileSystemDiagnostic::non_utf8_path(path))?,
@@ -119,7 +120,7 @@ impl WorkspaceServer {
 
     /// Used indirectly by the watcher to close an individual file.
     fn close_file_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
-        // Assign to a temporary to release the lock ASAP.
+        // Assign to a variable outside the `if` condition to release the lock ASAP.
         let has_node_cache = self.node_cache.lock().unwrap().contains_key(path);
 
         // This one is a bit tricky: If the user has the path open in an editor,
@@ -148,17 +149,19 @@ impl WorkspaceServer {
         Ok(())
     }
 
-    /// Used indirectly by the watcher to close an individual folder.
+    /// Used indirectly by the watcher to close an individual file or folder.
     ///
     /// Note that we don't really have a concept of open folders in the
     /// workspace, so instead we just iterate the documents to find paths that
     /// would be inside the closed folder.
     ///
-    /// This method is also used when closing an individual file or folder if we
-    /// don't know which kind it is. This is because the watcher would only
-    /// attempt to close a file or folder after it has been removed, so asking
-    /// the file system for the kind wouldn't work anymore.
-    fn close_folder_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    /// If you already know the path is a file, use
+    /// [Self::close_file_through_watcher()] instead.
+    fn close_path_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+        // Note that we cannot check the kind of the path, because the watcher
+        // would only attempt to close a file or folder after it has been
+        // removed. So asking the file system wouldn't work anymore.
+
         for document_path in self.documents.pin().keys() {
             if document_path.starts_with(path) {
                 self.close_file_through_watcher(document_path)?;
@@ -178,12 +181,12 @@ impl WorkspaceServer {
         let from = from
             .try_into()
             .map_err(|_| FileSystemDiagnostic::non_utf8_path(from))?;
-        self.close_folder_through_watcher(from)?;
+        self.close_path_through_watcher(from)?;
 
         let to = to
             .try_into()
             .map_err(|_| FileSystemDiagnostic::non_utf8_path(to))?;
-        self.open_file_through_watcher(to)?;
+        self.open_path_through_watcher(to)?;
 
         Ok(())
     }

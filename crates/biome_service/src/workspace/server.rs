@@ -291,7 +291,6 @@ impl WorkspaceServer {
     #[tracing::instrument(level = "debug", skip(self, params), fields(
         project_key = display(params.project_key),
         path = display(params.path.as_path()),
-        version = debug(params.version),
     ))]
     fn open_file_internal(
         &self,
@@ -302,12 +301,10 @@ impl WorkspaceServer {
             project_key,
             path,
             content,
-            version,
             document_file_source,
             persist_node_cache,
         } = params;
         let path: Utf8PathBuf = path.into();
-        let version = version.unwrap_or_default();
 
         if document_file_source.is_none() && !DocumentFileSource::can_read(path.as_path()) {
             return Ok(());
@@ -324,9 +321,9 @@ impl WorkspaceServer {
             }
         }
 
-        let content = match content {
-            FileContent::FromClient(content) => content,
-            FileContent::FromServer => self.fs.read_file_from_path(&path)?,
+        let (content, version) = match content {
+            FileContent::FromClient { content, version } => (content, version),
+            FileContent::FromServer => (self.fs.read_file_from_path(&path)?, 0),
         };
 
         let mut index = self.insert_source(source);

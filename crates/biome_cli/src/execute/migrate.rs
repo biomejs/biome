@@ -78,8 +78,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     workspace.open_file(OpenFileParams {
         project_key,
         path: biome_path.clone(),
-        content: FileContent::FromClient(biome_config_content.to_string()),
-        version: Some(0),
+        content: FileContent::from_client(&biome_config_content),
         document_file_source: Some(JsonFileSource::json().into()),
         persist_node_cache: false,
     })?;

@@ -3526,10 +3526,9 @@ This should only be enabled if reparsing is to be expected, such as when the fil
 	 */
 	persistNodeCache?: boolean;
 	projectKey: ProjectKey;
-	version?: number;
 }
 export type FileContent =
-	| { content: string; type: "fromClient" }
+	| { content: string; type: "fromClient"; version: number }
 	| { type: "fromServer" };
 export type DocumentFileSource =
 	| "Ignore"

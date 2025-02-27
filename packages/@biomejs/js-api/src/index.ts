@@ -167,7 +167,7 @@ export class Biome {
 		return this.tryCatchWrapper(() => {
 			this.workspace.openFile({
 				projectKey,
-				content: { type: "fromClient", content },
+				content: { type: "fromClient", content, version: 0 },
 				path,
 			});
 

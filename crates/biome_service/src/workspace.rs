@@ -568,7 +568,6 @@ pub struct OpenFileParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub content: FileContent,
-    pub version: Option<i32>,
     pub document_file_source: Option<DocumentFileSource>,
 
     /// Set to `true` to persist the node cache used during parsing, in order to
@@ -582,13 +581,22 @@ pub struct OpenFileParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", tag = "type", content = "content")]
+#[serde(rename_all = "camelCase", tag = "type")]
 pub enum FileContent {
     /// The client has loaded the content and submits it to the server.
-    FromClient(String),
+    FromClient { content: String, version: i32 },
 
     /// The server will be responsible for loading the content from the file system.
     FromServer,
+}
+
+impl FileContent {
+    pub fn from_client(content: impl Into<String>) -> Self {
+        Self::FromClient {
+            content: content.into(),
+            version: 0,
+        }
+    }
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1004,7 +1012,7 @@ pub struct ScanProjectFolderParams {
     /// not use this to avoid scanning parts that are irrelevant to clients.
     pub path: Option<BiomePath>,
 
-    /// Should the watcher be instructed to start watching this path?
+    /// Whether the watcher should watch this path.
     ///
     /// Does nothing if the watcher is already watching this path.
     pub watch: bool,

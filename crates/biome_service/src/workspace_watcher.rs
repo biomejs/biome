@@ -95,6 +95,7 @@ impl WorkspaceWatcher {
     /// end of the instructions channel) or the watcher (unexpectedly) stops.
     /// Under normal operation, neither should happen before the daemon
     /// terminates.
+    #[tracing::instrument(level = "debug", skip(self, workspace))]
     pub fn run(&mut self, workspace: &WorkspaceServer) {
         loop {
             crossbeam::channel::select! {
@@ -104,17 +105,17 @@ impl WorkspaceWatcher {
                             EventKind::Access(_) => Ok(()),
                             EventKind::Create(create_kind) => match create_kind {
                                 CreateKind::Folder => workspace.open_folders_through_watcher(event.paths),
-                                _ => workspace.open_files_through_watcher(event.paths),
+                                _ => workspace.open_paths_through_watcher(event.paths),
                             },
                             EventKind::Modify(modify_kind) => match modify_kind {
                                 ModifyKind::Data(_) => {
-                                    workspace.open_files_through_watcher(event.paths)
+                                    workspace.open_paths_through_watcher(event.paths)
                                 },
                                 ModifyKind::Name(RenameMode::From) => {
-                                    workspace.close_folders_through_watcher(event.paths)
+                                    workspace.close_paths_through_watcher(event.paths)
                                 },
                                 ModifyKind::Name(RenameMode::To) => {
-                                    workspace.open_files_through_watcher(event.paths)
+                                    workspace.open_paths_through_watcher(event.paths)
                                 },
                                 ModifyKind::Name(RenameMode::Both) => {
                                     workspace.rename_path_through_watcher(&event.paths[0], &event.paths[1])
@@ -123,7 +124,7 @@ impl WorkspaceWatcher {
                             },
                             EventKind::Remove(remove_kind) => match remove_kind {
                                 RemoveKind::File => workspace.close_files_through_watcher(event.paths),
-                                _ => workspace.close_folders_through_watcher(event.paths),
+                                _ => workspace.close_paths_through_watcher(event.paths),
                             },
                             EventKind::Any | EventKind::Other => Ok(()),
                         };

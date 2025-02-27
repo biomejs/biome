@@ -43,8 +43,7 @@ fn debug_control_flow() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("file.js"),
-            content: FileContent::FromClient(SOURCE.into()),
-            version: None,
+            content: FileContent::from_client(SOURCE),
             document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
             persist_node_cache: false,
         },
@@ -66,8 +65,7 @@ fn recognize_typescript_definition_file() {
             project_key,
             path: BiomePath::new("file.d.ts"),
             // the following code snippet can be correctly parsed in .d.ts file but not in .ts file
-            content: FileContent::FromClient("export const foo: number".into()),
-            version: None,
+            content: FileContent::from_client("export const foo: number"),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -87,8 +85,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("a.json"),
-            content: FileContent::FromClient(r#"{"a": 42}"#.into()),
-            version: None,
+            content: FileContent::from_client(r#"{"a": 42}"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -102,8 +99,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("b.json"),
-            content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
-            version: None,
+            content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -117,8 +113,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("c.json"),
-            content: FileContent::FromClient(r#"{"a": 42,}"#.into()),
-            version: None,
+            content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -132,8 +127,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("d.jsonc"),
-            content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
-            version: None,
+            content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -147,8 +141,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("e.jsonc"),
-            content: FileContent::FromClient(r#"{"a": 42,}"#.into()),
-            version: None,
+            content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -162,8 +155,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new(".eslintrc.json"),
-            content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
-            version: None,
+            content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -177,8 +169,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("project/.vscode/settings.json"),
-            content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
-            version: None,
+            content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -192,8 +183,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("dir/.eslintrc.json"),
-            content: FileContent::FromClient(r#"{"a": 42,}"#.into()),
-            version: None,
+            content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -209,8 +199,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("tsconfig.json"),
-            content: FileContent::FromClient(r#"{"a": 42,}//comment"#.into()),
-            version: None,
+            content: FileContent::from_client(r#"{"a": 42,}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -230,7 +219,7 @@ fn correctly_parses_graphql_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("file.graphql"),
-            content: FileContent::FromClient(
+            content: FileContent::from_client(
                 r#"type Query {
   me: User
 }
@@ -238,10 +227,8 @@ fn correctly_parses_graphql_files() {
 type User {
   id: ID
   name: String
-}"#
-                .into(),
+}"#,
             ),
-            version: None,
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -263,13 +250,11 @@ fn correctly_pulls_lint_diagnostics() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("file.graphql"),
-            content: FileContent::FromClient(
+            content: FileContent::from_client(
                 r#"query {
   member @deprecated(abc: 123)
-}"#
-                .into(),
+}"#,
             ),
-            version: None,
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -298,13 +283,11 @@ fn pull_grit_debug_info() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("file.grit"),
-            content: FileContent::FromClient(
+            content: FileContent::from_client(
                 r#"`function ($args) { $body }` where {
   $args <: contains `x`
-}"#
-                .into(),
+}"#,
             ),
-            version: None,
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -363,7 +346,6 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
             project_key,
             path: BiomePath::new("/project/a.ts"),
             content: FileContent::FromServer,
-            version: None,
             document_file_source: None,
             persist_node_cache: false,
         })

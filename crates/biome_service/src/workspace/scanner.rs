@@ -246,7 +246,6 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
             path: path.clone(),
             content: FileContent::FromServer,
             document_file_source: None,
-            version: None,
             persist_node_cache: false,
         })
     }) {
