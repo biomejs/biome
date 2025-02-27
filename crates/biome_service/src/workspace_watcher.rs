@@ -5,7 +5,7 @@ use notify::{
     recommended_watcher, Error as NotifyError, Event as NotifyEvent, EventKind, RecursiveMode,
     Result as NotifyResult, Watcher,
 };
-use tracing::warn;
+use tracing::{debug, warn};
 
 use crate::{diagnostics::WatchError, WorkspaceError, WorkspaceServer};
 
@@ -103,6 +103,10 @@ impl WorkspaceWatcher {
             crossbeam::channel::select! {
                 recv(self.notify_rx) -> event => match event {
                     Ok(Ok(event)) => {
+                        if !matches!(event.kind, EventKind::Access(_)) {
+                            debug!(event = debug(&event), "watcher_event");
+                        }
+
                         let result = match event.kind {
                             EventKind::Access(_) => Ok(()),
                             EventKind::Create(create_kind) => match create_kind {
@@ -148,18 +152,21 @@ impl WorkspaceWatcher {
                 },
                 recv(self.instruction_rx) -> instruction => match instruction {
                     Ok(WatcherInstruction::WatchFolder(path)) => {
+                        debug!(%path, "watch_folder");
                         if let Err(error) = self.watcher.watch(path.as_std_path(), RecursiveMode::Recursive) {
                             // TODO: Improve error propagation.
                             warn!("Error watching path {path}: {error}");
                         }
                     }
                     Ok(WatcherInstruction::UnwatchFolder(path)) => {
+                        debug!(%path, "unwatch_folder");
                         if let Err(error) = self.watcher.unwatch(path.as_std_path()) {
                             // TODO: Improve error propagation.
                             warn!("Error unwatching path {path}: {error}");
                         }
                     }
                     Ok(WatcherInstruction::Stop) | Err(_) => {
+                        debug!("stop");
                         break; // Received stop instruction or workspace dropped.
                     }
                 }
