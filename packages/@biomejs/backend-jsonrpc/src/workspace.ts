@@ -1558,6 +1558,10 @@ export interface Nursery {
 	 */
 	noProcessGlobal?: RuleFixConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noReactDeps?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow specified modules when loaded by import or require.
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
@@ -3161,6 +3165,7 @@ export type Category =
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantBinaryExpression"
 	| "lint/nursery/noDescendingSpecificity"
+	| "lint/nursery/noDestructuredProps"
 	| "lint/nursery/noDocumentCookie"
 	| "lint/nursery/noDocumentImportInPage"
 	| "lint/nursery/noDoneCallback"
@@ -3191,7 +3196,7 @@ export type Category =
 	| "lint/nursery/noPackagePrivateImports"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noProcessGlobal"
-	| "lint/nursery/noDestructuredProps"
+	| "lint/nursery/noReactDeps"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
