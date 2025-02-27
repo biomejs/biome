@@ -21,7 +21,7 @@ describe("Workspace API", () => {
 		await workspace.openFile({
 			projectKey,
 			path: "test.js",
-			content: { type: "fromClient", content: "statement()" },
+			content: { type: "fromClient", content: "statement()", version: 0 },
 		});
 
 		const printed = await workspace.formatFile({
