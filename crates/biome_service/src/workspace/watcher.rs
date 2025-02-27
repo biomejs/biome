@@ -14,7 +14,7 @@ use std::path::{Path, PathBuf};
 use biome_fs::{FileSystemDiagnostic, PathKind};
 use camino::Utf8Path;
 
-use crate::WorkspaceError;
+use crate::{workspace_watcher::WatcherSignalKind, WorkspaceError};
 
 use super::{
     server::Document, FileContent, OpenFileParams, ScanProjectFolderParams, Workspace,
@@ -72,7 +72,7 @@ impl WorkspaceServer {
             persist_node_cache: false,
         })?;
 
-        self.update_service_data_with_added_or_updated_path(path)
+        self.update_service_data(WatcherSignalKind::AddedOrChanged, path)
     }
 
     /// Used indirectly by the watcher to open an individual folder.
@@ -143,7 +143,7 @@ impl WorkspaceServer {
         } else {
             documents.remove(path);
 
-            self.update_service_data_with_removed_path(path)?;
+            self.update_service_data(WatcherSignalKind::Removed, path)?;
         }
 
         Ok(())

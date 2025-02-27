@@ -23,6 +23,7 @@ use tracing::instrument;
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
 use crate::workspace::{DocumentFileSource, FileContent, OpenFileParams};
+use crate::workspace_watcher::WatcherSignalKind;
 use crate::{Workspace, WorkspaceError};
 
 use super::server::WorkspaceServer;
@@ -124,7 +125,8 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
 
     let mut paths = configs;
     paths.append(&mut manifests);
-    ctx.workspace.update_project_layout_for_paths(&paths);
+    ctx.workspace
+        .update_project_layout_for_paths(WatcherSignalKind::AddedOrChanged, &paths);
     let result = ctx
         .workspace
         .update_project_ignore_files(ctx.project_key, &ignore_paths);
@@ -140,7 +142,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     }));
 
     ctx.workspace
-        .update_dependency_graph_for_paths(&handleable_paths, &[]);
+        .update_dependency_graph(WatcherSignalKind::AddedOrChanged, &handleable_paths);
 
     start.elapsed()
 }

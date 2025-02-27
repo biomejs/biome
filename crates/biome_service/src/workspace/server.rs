@@ -18,6 +18,7 @@ use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, RageEntry, RageParams,
     RageResult, ServerInfo,
 };
+use crate::workspace_watcher::WatcherSignalKind;
 use crate::{file_handlers::Features, Workspace, WorkspaceError};
 use crate::{is_dir, WatcherInstruction};
 use append_only_vec::AppendOnlyVec;
@@ -577,10 +578,14 @@ impl WorkspaceServer {
             .unwrap_or_default()
     }
 
-    // TODO: add documentation for this method
-    pub(super) fn update_project_layout_for_paths(&self, paths: &[BiomePath]) {
+    /// Updates the [ProjectLayout] for multiple `paths` at once.
+    pub(super) fn update_project_layout_for_paths(
+        &self,
+        signal_kind: WatcherSignalKind,
+        paths: &[BiomePath],
+    ) {
         for path in paths {
-            if let Err(error) = self.update_project_layout_for_added_or_changed_path(path) {
+            if let Err(error) = self.update_project_layout(signal_kind, path) {
                 error!("Error while updating project layout: {error}");
             }
         }
@@ -626,9 +631,10 @@ impl WorkspaceServer {
         Ok(())
     }
 
-    // TODO: add documentation for this method
-    pub(super) fn update_project_layout_for_added_or_changed_path(
+    /// Updates the [ProjectLayout] for the given `path`.
+    pub(super) fn update_project_layout(
         &self,
+        signal_kind: WatcherSignalKind,
         path: &Utf8Path,
     ) -> Result<(), WorkspaceError> {
         if path
@@ -639,37 +645,34 @@ impl WorkspaceServer {
                 .parent()
                 .map(|parent| parent.to_path_buf())
                 .ok_or_else(WorkspaceError::not_found)?;
-            let parsed = self.get_parse(path)?;
-            self.project_layout
-                .insert_serialized_node_manifest(package_path, parsed);
+
+            match signal_kind {
+                WatcherSignalKind::AddedOrChanged => {
+                    let parsed = self.get_parse(path)?;
+                    self.project_layout
+                        .insert_serialized_node_manifest(package_path, parsed);
+                }
+                WatcherSignalKind::Removed => {
+                    self.project_layout.remove_package(&package_path);
+                }
+            }
         }
 
         Ok(())
     }
 
-    pub(super) fn update_project_layout_for_removed_path(
+    /// Updates the [DependencyGraph] for the given `paths`.
+    pub(super) fn update_dependency_graph(
         &self,
-        path: &Utf8Path,
-    ) -> Result<(), WorkspaceError> {
-        if path
-            .file_name()
-            .is_some_and(|filename| filename == "package.json")
-        {
-            let package_path = path
-                .parent()
-                .map(|parent| parent.to_path_buf())
-                .ok_or_else(WorkspaceError::not_found)?;
-            self.project_layout.remove_package(&package_path);
-        }
-
-        Ok(())
-    }
-
-    pub(super) fn update_dependency_graph_for_paths(
-        &self,
-        added_or_changed_paths: &[BiomePath],
-        removed_paths: &[BiomePath],
+        signal_kind: WatcherSignalKind,
+        paths: &[BiomePath],
     ) {
+        let no_paths: &[BiomePath] = &[];
+        let (added_or_changed_paths, removed_paths) = match signal_kind {
+            WatcherSignalKind::AddedOrChanged => (paths, no_paths),
+            WatcherSignalKind::Removed => (no_paths, paths),
+        };
+
         self.dependency_graph.update_imports_for_js_paths(
             self.fs.as_ref(),
             &self.project_layout,
@@ -691,30 +694,18 @@ impl WorkspaceServer {
         );
     }
 
-    pub(super) fn update_service_data_with_added_or_updated_path(
+    /// Updates the state of any services relevant to the given `path`.
+    pub(super) fn update_service_data(
         &self,
+        signal_kind: WatcherSignalKind,
         path: &Utf8Path,
     ) -> Result<(), WorkspaceError> {
         let path = BiomePath::from(path);
         if path.is_manifest() {
-            self.update_project_layout_for_added_or_changed_path(&path)?;
+            self.update_project_layout(signal_kind, &path)?;
         }
 
-        self.update_dependency_graph_for_paths(&[path], &[]);
-
-        Ok(())
-    }
-
-    pub(super) fn update_service_data_with_removed_path(
-        &self,
-        path: &Utf8Path,
-    ) -> Result<(), WorkspaceError> {
-        let path = BiomePath::from(path);
-        if path.is_manifest() {
-            self.update_project_layout_for_removed_path(&path)?;
-        }
-
-        self.update_dependency_graph_for_paths(&[], &[path]);
+        self.update_dependency_graph(signal_kind, &[path]);
 
         Ok(())
     }
@@ -1039,7 +1030,7 @@ impl Workspace for WorkspaceServer {
             } else {
                 documents.remove(path);
 
-                self.update_service_data_with_removed_path(path)
+                self.update_service_data(WatcherSignalKind::Removed, path)
             }
         };
 

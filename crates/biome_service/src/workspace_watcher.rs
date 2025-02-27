@@ -34,6 +34,13 @@ impl Drop for WatcherInstructionChannel {
     }
 }
 
+/// Kind of change being reported.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum WatcherSignalKind {
+    AddedOrChanged,
+    Removed,
+}
+
 /// Watcher to keep the [WorkspaceServer] in sync with the filesystem state.
 ///
 /// Conceptually, it helps to think of the watcher as a helper to the scanner.
