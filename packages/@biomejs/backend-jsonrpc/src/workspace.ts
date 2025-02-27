@@ -1668,6 +1668,10 @@ export interface Nursery {
 	 */
 	useExportsLast?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce using Solid's \<For /> component for mapping an array to JSX elements.
+	 */
+	useForComponent?: RuleConfiguration_for_Null;
+	/**
 	 * Enforces the use of a recommended display strategy with Google Fonts.
 	 */
 	useGoogleFontDisplay?: RuleConfiguration_for_Null;
@@ -3159,6 +3163,7 @@ export type Category =
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantBinaryExpression"
 	| "lint/nursery/noDescendingSpecificity"
+	| "lint/nursery/noDestructuredProps"
 	| "lint/nursery/noDocumentCookie"
 	| "lint/nursery/noDocumentImportInPage"
 	| "lint/nursery/noDoneCallback"
@@ -3189,7 +3194,6 @@ export type Category =
 	| "lint/nursery/noPackagePrivateImports"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noProcessGlobal"
-	| "lint/nursery/noDestructuredProps"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
@@ -3238,6 +3242,7 @@ export type Category =
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useParseIntRadix"
+	| "lint/nursery/useForComponent"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useStrictMode"

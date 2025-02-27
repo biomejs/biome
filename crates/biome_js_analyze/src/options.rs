@@ -347,6 +347,8 @@ pub type UseExportsLast =
 pub type UseFilenamingConvention = < lint :: style :: use_filenaming_convention :: UseFilenamingConvention as biome_analyze :: Rule > :: Options ;
 pub type UseFlatMap = <lint::complexity::use_flat_map::UseFlatMap as biome_analyze::Rule>::Options;
 pub type UseFocusableInteractive = < lint :: a11y :: use_focusable_interactive :: UseFocusableInteractive as biome_analyze :: Rule > :: Options ;
+pub type UseForComponent =
+    <lint::nursery::use_for_component::UseForComponent as biome_analyze::Rule>::Options;
 pub type UseForOf = <lint::style::use_for_of::UseForOf as biome_analyze::Rule>::Options;
 pub type UseFragmentSyntax =
     <lint::style::use_fragment_syntax::UseFragmentSyntax as biome_analyze::Rule>::Options;
