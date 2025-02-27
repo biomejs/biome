@@ -108,7 +108,8 @@ impl Rule for UseForComponent {
             "Array.prototype.map will cause DOM elements to be recreated, it is not recommended to use it in Solid here."
             },
         ).note(markup! {
-            "Use Solid's [`<For />`](https://docs.solidjs.com/reference/components/for) component for efficiently rendering lists."
+            "Use Solid's `<For />` component for efficiently rendering lists. See \
+            "<Hyperlink href="https://docs.solidjs.com/reference/components/for">"Solid docs"</Hyperlink>" for more details."
         }))
     }
 }
