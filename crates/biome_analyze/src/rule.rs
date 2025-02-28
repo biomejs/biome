@@ -85,7 +85,7 @@ impl biome_console::fmt::Display for RuleMetadata {
 
         if self.domains.is_empty() && self.recommended {
             fmt.write_markup(markup! {
-                "- This rule is not recommended"
+                "- This rule is recommended"
             })?;
         }
 
