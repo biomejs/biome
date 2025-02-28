@@ -43,6 +43,24 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
+biome.json:2:24 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The configuration schema version does not match the CLI version.
+  
+    1 │ {
+  > 2 │             "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+      │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │             "assist": {
+    4 │                 "enabled": true
+  
+  i   Expected:                     0.0.0
+      Found:                        1.6.1
+  
+  
+
+```
+
+```block
 build/file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Formatter would have printed the following content:

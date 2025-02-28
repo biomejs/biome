@@ -342,7 +342,7 @@ pub fn create_config(
         let schema_path = Utf8Path::new("./node_modules/@biomejs/biome/configuration_schema.json");
         let options = OpenOptions::default().read(true);
         if fs.open_with_options(schema_path, options).is_ok() {
-            configuration.schema = Some(Box::from(schema_path.as_str()));
+            configuration.schema = Some(schema_path.to_string().into());
         }
     } else {
         configuration.schema =

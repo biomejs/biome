@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 snapshot_kind: text
 ---
 ## `biome.json`
@@ -25,11 +25,21 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-The configuration schema version does not match the CLI version.
-  Expect:                       0.0.0
-  Found:                        0.0.1
+biome.json:2:16 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-If you wish to update the configuration schema, setting the `$schema` option to the expected version.
+  ! The configuration schema version does not match the CLI version.
+  
+    1 │ {
+  > 2 │     "$schema": "https://biomejs.dev/schemas/0.0.1/schema.json"
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ }
+    4 │         
+  
+  i   Expected:                     0.0.0
+      Found:                        0.0.1
+  
+  
+
 ```
 
 ```block

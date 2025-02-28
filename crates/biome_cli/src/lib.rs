@@ -9,7 +9,6 @@
 use biome_console::{ColorMode, Console};
 use biome_service::{App, Workspace, WorkspaceRef};
 use commands::search::SearchCommandPayload;
-use std::cmp::Ordering;
 use std::env;
 
 mod changed;
@@ -36,50 +35,6 @@ pub use execute::{execute_mode, Execution, TraversalMode, VcsTargeted};
 pub use panic::setup_panic_handler;
 pub use reporter::{DiagnosticsPayload, Reporter, ReporterVisitor, TraversalSummary};
 pub use service::{open_transport, SocketTransport};
-
-#[derive(PartialEq, Eq)]
-pub struct Version(String);
-
-impl Version {
-    pub fn new(version: &str) -> Self {
-        Version(version.to_string())
-    }
-
-    fn parse_version(&self) -> Vec<u32> {
-        self.0
-            .split('.')
-            .filter_map(|part| part.parse::<u32>().ok())
-            .collect()
-    }
-}
-
-impl PartialOrd for Version {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for Version {
-    fn cmp(&self, other: &Self) -> Ordering {
-        let self_parts = self.parse_version();
-        let other_parts = other.parse_version();
-
-        for (a, b) in self_parts.iter().zip(other_parts.iter()) {
-            match a.cmp(b) {
-                Ordering::Equal => continue,
-                non_eq => return non_eq,
-            }
-        }
-
-        self_parts.len().cmp(&other_parts.len())
-    }
-}
-
-impl Display for Version {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::io::Error> {
-        write!(f, "{}", self.0)
-    }
-}
 
 pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {
     Some(version) => version,
@@ -327,33 +282,4 @@ pub(crate) fn run_command(
 ) -> Result<(), CliDiagnostic> {
     let command = &mut command;
     command.run(session, cli_options)
-}
-
-pub fn check_schema_version(
-    loaded_configuration: &PartialConfiguration,
-    console: &mut dyn Console,
-) {
-    let schema = &loaded_configuration.schema;
-    let version_regex =
-        regex::Regex::new(r"https://biomejs.dev/schemas/([\d.]+)/schema.json").unwrap();
-    if let Some(schema_string) = schema {
-        if let Some(captures) = version_regex.captures(schema_string) {
-            if let Some(config_version_match) = captures.get(1) {
-                let cli_version = Version::new(VERSION);
-                let config_version_str = Version::new(config_version_match.as_str());
-                match config_version_str.cmp(&cli_version) {
-                    Ordering::Less =>
-                        console.log(markup!(<Warn>"The configuration schema version does not match the CLI version.\n"
-                        {KeyValuePair("Expect", markup!({VERSION}))}
-                        {KeyValuePair("Found", markup!({config_version_str}))}</Warn>"\n"
-                    <Info>"If you wish to update the configuration schema, run `biome migrate --write`."</Info>)),
-                    Ordering::Greater => console.log(markup!(<Warn>"The configuration schema version does not match the CLI version.\n"
-                        {KeyValuePair("Expect", markup!({VERSION}))}
-                        {KeyValuePair("Found", markup!({config_version_str}))}</Warn>"\n"
-                    <Info>"If you wish to update the configuration schema, setting the `$schema` option to the expected version."</Info>)),
-                    _ => {}
-                }
-            }
-        }
-    }
 }

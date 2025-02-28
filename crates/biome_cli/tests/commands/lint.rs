@@ -3909,7 +3909,7 @@ fn should_report_when_schema_version_mismatch() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
 
-    let biome_json = Path::new("biome.json");
+    let biome_json = Utf8Path::new("biome.json");
     fs.insert(
         biome_json.into(),
         r#"{
@@ -3917,11 +3917,7 @@ fn should_report_when_schema_version_mismatch() {
 }
         "#,
     );
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("check")].as_slice()),
-    );
+    let (fs, result) = run_cli(fs, &mut console, Args::from([("check")].as_slice()));
 
     assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
