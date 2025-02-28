@@ -22,6 +22,9 @@ pub struct WorkspaceSettings {
     /// Only run Biome if a `biome.json` configuration file exists.
     pub require_configuration: Option<bool>,
 
+    /// Path to the configuration file to prefer over the default `biome.json`.
+    pub configuration_path: Option<String>,
+
     /// Experimental settings
     pub experimental: Option<ExperimentalSettings>,
 }
@@ -31,9 +34,6 @@ pub struct WorkspaceSettings {
 pub struct ExperimentalSettings {
     /// Enable experimental symbol renaming
     pub rename: Option<bool>,
-
-    /// Path to the configuration file to prefer over the default `biome.json`.
-    pub configuration_path: Option<String>,
 }
 
 /// The `biome.*` extension settings
@@ -77,9 +77,8 @@ impl ExtensionSettings {
 
     pub(crate) fn configuration_path(&self) -> Option<Utf8PathBuf> {
         self.settings
-            .experimental
-            .as_ref()
-            .and_then(|e| e.configuration_path.as_deref())
+            .configuration_path
+            .as_deref()
             .map(|config_path| Utf8PathBuf::from_str(config_path).unwrap()) // infallible
     }
 }
