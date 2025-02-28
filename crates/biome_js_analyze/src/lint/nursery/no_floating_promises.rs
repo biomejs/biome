@@ -1070,10 +1070,5 @@ fn find_and_check_object_member(
 /// `JsFormalParameter`. It returns `Some(JsFormalParameter)` if a `JsFormalParameter` is found,
 /// otherwise it returns `None`.
 fn find_js_formal_parameter(node: &SyntaxNode<JsLanguage>) -> Option<JsFormalParameter> {
-    node.ancestors()
-        .skip(1)
-        .find_map(|ancestor| match ancestor.kind() {
-            JsSyntaxKind::JS_FORMAL_PARAMETER => ancestor.cast::<JsFormalParameter>(),
-            _ => None,
-        })
+    node.ancestors().skip(1).find_map(JsFormalParameter::cast)
 }
