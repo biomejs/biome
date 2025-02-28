@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 const f = foo.substr;
 foo.substr()
 foo?.substr()
@@ -31,7 +32,7 @@ foo.substring(1, 2, 3)
 ```
 invalid.js:1:15 lint/nursery/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substr and consider using slice instead.
+  i Avoid using substr and consider using slice instead.
   
   > 1 │ const f = foo.substr;
       │               ^^^^^^
@@ -48,7 +49,7 @@ invalid.js:1:15 lint/nursery/noSubstr ━━━━━━━━━━━━━━
 ```
 invalid.js:2:5 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substr and consider using slice instead.
+  i Avoid using substr and consider using slice instead.
   
     1 │ const f = foo.substr;
   > 2 │ foo.substr()
@@ -74,7 +75,7 @@ invalid.js:2:5 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━
 ```
 invalid.js:3:6 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substr and consider using slice instead.
+  i Avoid using substr and consider using slice instead.
   
     1 │ const f = foo.substr;
     2 │ foo.substr()
@@ -102,7 +103,7 @@ invalid.js:3:6 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━
 ```
 invalid.js:4:10 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substring and consider using slice instead.
+  i Avoid using substring and consider using slice instead.
   
     2 │ foo.substr()
     3 │ foo?.substr()
@@ -130,7 +131,7 @@ invalid.js:4:10 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:5:11 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substring and consider using slice instead.
+  i Avoid using substring and consider using slice instead.
   
     3 │ foo?.substr()
     4 │ foo.bar?.substring()
@@ -158,7 +159,7 @@ invalid.js:5:11 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:6:9 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substr and consider using slice instead.
+  i Avoid using substr and consider using slice instead.
   
     4 │ foo.bar?.substring()
     5 │ foo?.[0]?.substring()
@@ -186,7 +187,7 @@ invalid.js:6:9 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━
 ```
 invalid.js:7:10 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substring and consider using slice instead.
+  i Avoid using substring and consider using slice instead.
   
     5 │ foo?.[0]?.substring()
     6 │ foo.bar.substr?.()
@@ -214,7 +215,7 @@ invalid.js:7:10 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:8:15 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substr and consider using slice instead.
+  i Avoid using substr and consider using slice instead.
   
      6 │ foo.bar.substr?.()
      7 │ foo.bar?.substring?.()
@@ -242,7 +243,7 @@ invalid.js:8:15 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:9:14 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substring and consider using slice instead.
+  i Avoid using substring and consider using slice instead.
   
      7 │ foo.bar?.substring?.()
      8 │ foo.bar?.baz?.substr()
@@ -270,7 +271,7 @@ invalid.js:9:14 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:10:14 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substr and consider using slice instead.
+  i Avoid using substr and consider using slice instead.
   
      8 │ foo.bar?.baz?.substr()
      9 │ foo.bar?.baz.substring()
@@ -298,7 +299,7 @@ invalid.js:10:14 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:11:7 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substr and consider using slice instead.
+  i Avoid using substr and consider using slice instead.
   
      9 │ foo.bar?.baz.substring()
     10 │ foo.bar.baz?.substr()
@@ -326,7 +327,7 @@ invalid.js:11:7 lint/nursery/noSubstr  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:12:7 lint/nursery/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substr and consider using slice instead.
+  i Avoid using substr and consider using slice instead.
   
     10 │ foo.bar.baz?.substr()
     11 │ "foo".substr()
@@ -345,7 +346,7 @@ invalid.js:12:7 lint/nursery/noSubstr ━━━━━━━━━━━━━━
 ```
 invalid.js:13:7 lint/nursery/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substr and consider using slice instead.
+  i Avoid using substr and consider using slice instead.
   
     11 │ "foo".substr()
     12 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
@@ -364,7 +365,7 @@ invalid.js:13:7 lint/nursery/noSubstr ━━━━━━━━━━━━━━
 ```
 invalid.js:14:7 lint/nursery/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substr and consider using slice instead.
+  i Avoid using substr and consider using slice instead.
   
     12 │ "foo".substr(bar.length, Math.min(baz, 100)) // "foo".slice(bar.length, bar.length + Math.min(baz, 100))
     13 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
@@ -383,7 +384,7 @@ invalid.js:14:7 lint/nursery/noSubstr ━━━━━━━━━━━━━━
 ```
 invalid.js:15:7 lint/nursery/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substring and consider using slice instead.
+  i Avoid using substring and consider using slice instead.
   
     13 │ "foo".substr(1, "abc".length) // "foo".slice(1, 1 + "abc".length)
     14 │ "foo".substr("1", 2)
@@ -402,7 +403,7 @@ invalid.js:15:7 lint/nursery/noSubstr ━━━━━━━━━━━━━━
 ```
 invalid.js:16:5 lint/nursery/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substring and consider using slice instead.
+  i Avoid using substring and consider using slice instead.
   
     14 │ "foo".substr("1", 2)
     15 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
@@ -421,7 +422,7 @@ invalid.js:16:5 lint/nursery/noSubstr ━━━━━━━━━━━━━━
 ```
 invalid.js:17:5 lint/nursery/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substring and consider using slice instead.
+  i Avoid using substring and consider using slice instead.
   
     15 │ "foo".substring(length, 0) // "foo".slice(0, Math.max(0, length))
     16 │ foo.substring(start) // foo.slice(Math.max(0, start))
@@ -440,7 +441,7 @@ invalid.js:17:5 lint/nursery/noSubstr ━━━━━━━━━━━━━━
 ```
 invalid.js:18:7 lint/nursery/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substring and consider using slice instead.
+  i Avoid using substring and consider using slice instead.
   
     16 │ foo.substring(start) // foo.slice(Math.max(0, start))
     17 │ foo.substring(start, end)
@@ -459,7 +460,7 @@ invalid.js:18:7 lint/nursery/noSubstr ━━━━━━━━━━━━━━
 ```
 invalid.js:20:5 lint/nursery/noSubstr ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using substring and consider using slice instead.
+  i Avoid using substring and consider using slice instead.
   
     18 │ "foo".substring(1, 3)
     19 │ // Extra arguments

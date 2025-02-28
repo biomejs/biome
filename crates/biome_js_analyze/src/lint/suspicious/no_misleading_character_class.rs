@@ -3,6 +3,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     global_identifier, static_value::StaticValue, AnyJsCallArgument, AnyJsExpression,
@@ -64,6 +65,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-misleading-character-class")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
 }
@@ -538,7 +540,7 @@ fn make_suggestion(
         Some(f) => match f {
             AnyJsCallArgument::AnyJsExpression(expr) => match expr {
                 AnyJsExpression::AnyJsLiteralExpression(e) => {
-                    let text = e.text();
+                    let text = e.to_trimmed_string();
                     if text.starts_with('\'') {
                         Some(AnyJsCallArgument::AnyJsExpression(
                             AnyJsExpression::AnyJsLiteralExpression(

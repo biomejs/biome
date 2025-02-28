@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 s.toUpperCase() === 'abc';
 s.toUpperCase() == 'abc';
 'abc' === s.toUpperCase();
@@ -32,7 +33,7 @@ switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
 ```
 invalid.js:1:1 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This expression always returns false.
+  × This expression always returns false.
   
   > 1 │ s.toUpperCase() === 'abc';
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -66,7 +67,7 @@ invalid.js:1:1 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━�
 ```
 invalid.js:2:1 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This expression always returns false.
+  × This expression always returns false.
   
     1 │ s.toUpperCase() === 'abc';
   > 2 │ s.toUpperCase() == 'abc';
@@ -104,7 +105,7 @@ invalid.js:2:1 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━�
 ```
 invalid.js:3:1 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This expression always returns false.
+  × This expression always returns false.
   
     1 │ s.toUpperCase() === 'abc';
     2 │ s.toUpperCase() == 'abc';
@@ -146,7 +147,7 @@ invalid.js:3:1 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━�
 ```
 invalid.js:5:1 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This expression always returns false.
+  × This expression always returns false.
   
     3 │ 'abc' === s.toUpperCase();
     4 │ s.toLowerCase() === "\u001aX";
@@ -188,7 +189,7 @@ invalid.js:5:1 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━�
 ```
 invalid.js:6:1 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This expression always returns false.
+  × This expression always returns false.
   
     4 │ s.toLowerCase() === "\u001aX";
     5 │ s.toLowerCase() === "\u{001a}X";
@@ -230,7 +231,7 @@ invalid.js:6:1 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━�
 ```
 invalid.js:9:5 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This expression always returns false.
+  × This expression always returns false.
   
      7 │ s.toLowerCase() === "\nX";
      8 │ 
@@ -272,7 +273,7 @@ invalid.js:9:5 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━�
 ```
 invalid.js:10:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This expression always returns false.
+  × This expression always returns false.
   
      9 │ if (s.toUpperCase() === 'abc' && c == d && e == f) {};
   > 10 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {};
@@ -311,7 +312,7 @@ invalid.js:10:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━�
 ```
 invalid.js:11:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This expression always returns false.
+  × This expression always returns false.
   
      9 │ if (s.toUpperCase() === 'abc' && c == d && e == f) {};
     10 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {};
@@ -353,7 +354,7 @@ invalid.js:11:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━�
 ```
 invalid.js:12:9 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This expression always returns false.
+  × This expression always returns false.
   
     10 │ while (s.toUpperCase() === 'abc' && c == d && e == f) {};
     11 │ while (s.toUpperCase() === 'abc') {};
@@ -395,7 +396,7 @@ invalid.js:12:9 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━�
 ```
 invalid.js:13:14 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This expression always returns false.
+  × This expression always returns false.
   
     11 │ while (s.toUpperCase() === 'abc') {};
     12 │ let b = s.toLowerCase() === `eFg`;;
@@ -437,7 +438,7 @@ invalid.js:13:14 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━
 ```
 invalid.js:14:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This expression always returns false.
+  × This expression always returns false.
   
     12 │ let b = s.toLowerCase() === `eFg`;;
     13 │ do {} while (s.toLowerCase() === 'ABC');;
@@ -479,7 +480,7 @@ invalid.js:14:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━�
 ```
 invalid.js:16:45 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This case will never match.
+  × This case will never match.
   
     14 │ for (; s.toLowerCase() === 'ABC'; ) {};
     15 │ 
@@ -521,7 +522,7 @@ invalid.js:16:45 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━
 ```
 invalid.js:16:57 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This case will never match.
+  × This case will never match.
   
     14 │ for (; s.toLowerCase() === 'ABC'; ) {};
     15 │ 
@@ -563,7 +564,7 @@ invalid.js:16:57 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━
 ```
 invalid.js:18:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This expression always returns false.
+  × This expression always returns false.
   
     16 │ switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
     17 │ 
@@ -605,7 +606,7 @@ invalid.js:18:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━�
 ```
 invalid.js:19:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This expression always returns false.
+  × This expression always returns false.
   
     18 │ for (; s['toLowerCase']() === 'ABC'; ) {}
   > 19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
@@ -644,7 +645,7 @@ invalid.js:19:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━�
 ```
 invalid.js:21:36 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This case will never match.
+  × This case will never match.
   
     19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
     20 │ 
@@ -682,7 +683,7 @@ invalid.js:21:36 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━
 ```
 invalid.js:21:48 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This case will never match.
+  × This case will never match.
   
     19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
     20 │ 
@@ -720,7 +721,7 @@ invalid.js:21:48 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━
 ```
 invalid.js:21:60 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This case will never match.
+  × This case will never match.
   
     19 │ for (; s[`toUpperCase`]() === 'abc'; ) {}
     20 │ 

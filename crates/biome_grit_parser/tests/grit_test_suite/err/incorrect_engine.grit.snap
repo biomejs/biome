@@ -4,7 +4,7 @@ expression: snapshot
 ---
 ## Input
 ```grit
-engine marzano (1.0)
+engine marzani (1.0)
 
 ```
 
@@ -22,7 +22,7 @@ GritRoot {
     definitions: GritDefinitionList [
         GritNodeLike {
             name: GritName {
-                value_token: GRIT_NAME@7..15 "marzano" [] [Whitespace(" ")],
+                value_token: GRIT_NAME@7..15 "marzani" [] [Whitespace(" ")],
             },
             l_paren_token: L_PAREN@15..16 "(" [] [],
             named_args: GritNamedArgList [
@@ -48,7 +48,7 @@ GritRoot {
   3: GRIT_DEFINITION_LIST@7..20
     0: GRIT_NODE_LIKE@7..20
       0: GRIT_NAME@7..15
-        0: GRIT_NAME@7..15 "marzano" [] [Whitespace(" ")]
+        0: GRIT_NAME@7..15 "marzani" [] [Whitespace(" ")]
       1: L_PAREN@15..16 "(" [] []
       2: GRIT_NAMED_ARG_LIST@16..19
         0: GRIT_DOUBLE_LITERAL@16..19
@@ -65,7 +65,7 @@ incorrect_engine.grit:1:8 parse ━━━━━━━━━━━━━━━━
 
   × Engine must be `biome`
   
-  > 1 │ engine marzano (1.0)
+  > 1 │ engine marzani (1.0)
       │        ^^^^^^^
     2 │ 
   

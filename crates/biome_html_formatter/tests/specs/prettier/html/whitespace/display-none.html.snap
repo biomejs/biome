@@ -1,0 +1,48 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/whitespace/display-none.html
+---
+# Input
+
+```html
+<!DOCTYPE html><HTML CLASS="no-js mY-ClAsS"><HEAD><META CHARSET="utf-8"><TITLE>My tITlE</TITLE><META NAME="description" content="My CoNtEnT"></HEAD></HTML>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,8 @@
+-<!doctype html>
+-<html class="no-js mY-ClAsS">
+-  <head>
+-    <meta charset="utf-8" />
+-    <title>My tITlE</title>
+-    <meta name="description" content="My CoNtEnT" />
+-  </head>
+-</html>
++<!DOCTYPE html>
++<HTML CLASS="no-js mY-ClAsS">
++  <HEAD>
++    <META CHARSET="utf-8" />
++    <TITLE>My tITlE</TITLE>
++    <META NAME="description" content="My CoNtEnT" />
++  </HEAD>
++</HTML>
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<HTML CLASS="no-js mY-ClAsS">
+  <HEAD>
+    <META CHARSET="utf-8" />
+    <TITLE>My tITlE</TITLE>
+    <META NAME="description" content="My CoNtEnT" />
+  </HEAD>
+</HTML>
+```

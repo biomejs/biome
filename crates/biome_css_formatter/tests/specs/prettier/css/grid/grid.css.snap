@@ -128,18 +128,7 @@ div {
 ```diff
 --- Prettier
 +++ Biome
-@@ -9,20 +9,20 @@
- /* numbers */
- div {
-   grid-template-columns:
--    [full-start] minmax(1.5em, 1fr)
--    [main-start] minmax(0.4ch, 75ch)
--    [main-end] minmax(1em, 1fr)
-+    [full-start] minmax(1.50em, 1fr)
-+    [main-start] minmax(.40ch, 75ch)
-+    [main-end] minmax(1em, 1.000fr)
-     [full-end];
- }
+@@ -17,12 +17,12 @@
  
  /* casing */
  div {
@@ -170,9 +159,9 @@ div {
 /* numbers */
 div {
   grid-template-columns:
-    [full-start] minmax(1.50em, 1fr)
-    [main-start] minmax(.40ch, 75ch)
-    [main-end] minmax(1em, 1.000fr)
+    [full-start] minmax(1.5em, 1fr)
+    [main-start] minmax(0.4ch, 75ch)
+    [main-end] minmax(1em, 1fr)
     [full-end];
 }
 

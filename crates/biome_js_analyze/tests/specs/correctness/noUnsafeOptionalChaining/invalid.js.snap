@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 (obj?.foo)();
 (obj.foo ?? bar?.baz)();
 (obj.foo || bar?.baz)();
@@ -92,7 +93,7 @@ async function foo() { with ( await obj?.foo) {}; }
 ```
 invalid.js:1:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
   > 1 │ (obj?.foo)();
       │     ^^
@@ -112,7 +113,7 @@ invalid.js:1:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
 ```
 invalid.js:2:16 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     1 │ (obj?.foo)();
   > 2 │ (obj.foo ?? bar?.baz)();
@@ -134,7 +135,7 @@ invalid.js:2:16 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
 ```
 invalid.js:3:16 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     1 │ (obj?.foo)();
     2 │ (obj.foo ?? bar?.baz)();
@@ -158,7 +159,7 @@ invalid.js:3:16 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
 ```
 invalid.js:4:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     2 │ (obj.foo ?? bar?.baz)();
     3 │ (obj.foo || bar?.baz)();
@@ -182,7 +183,7 @@ invalid.js:4:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
 ```
 invalid.js:5:12 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     3 │ (obj.foo || bar?.baz)();
     4 │ (obj?.foo && bar)();
@@ -206,7 +207,7 @@ invalid.js:5:12 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
 ```
 invalid.js:6:10 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     4 │ (obj?.foo && bar)();
     5 │ (bar && obj?.foo)();
@@ -230,7 +231,7 @@ invalid.js:6:10 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
 ```
 invalid.js:7:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     5 │ (bar && obj?.foo)();
     6 │ (obj?.foo?.())();
@@ -254,7 +255,7 @@ invalid.js:7:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
 ```
 invalid.js:8:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
      6 │ (obj?.foo?.())();
      7 │ (obj?.foo).bar;
@@ -278,7 +279,7 @@ invalid.js:8:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
 ```
 invalid.js:9:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
      7 │ (obj?.foo).bar;
      8 │ (obj?.foo)[1];
@@ -302,7 +303,7 @@ invalid.js:9:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
 ```
 invalid.js:10:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
      8 │ (obj?.foo)[1];
      9 │ (obj?.foo)`template`
@@ -326,7 +327,7 @@ invalid.js:10:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
 ```
 invalid.js:11:14 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
      9 │ (obj?.foo)`template`
     10 │ new (obj?.foo)();
@@ -350,7 +351,7 @@ invalid.js:11:14 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:12:25 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     10 │ new (obj?.foo)();
     11 │ new (obj?.foo?.())()
@@ -374,7 +375,7 @@ invalid.js:12:25 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:13:34 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     11 │ new (obj?.foo?.())()
     12 │ new (obj?.foo?.() || obj?.bar)()
@@ -398,7 +399,7 @@ invalid.js:13:34 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:14:34 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     12 │ new (obj?.foo?.() || obj?.bar)()
     13 │ async function foo() { (await obj?.foo)(); }
@@ -422,7 +423,7 @@ invalid.js:14:34 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:15:46 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     13 │ async function foo() { (await obj?.foo)(); }
     14 │ async function foo() { (await obj?.foo).bar; }
@@ -446,7 +447,7 @@ invalid.js:15:46 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:16:41 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     14 │ async function foo() { (await obj?.foo).bar; }
     15 │ async function foo() { (bar?.baz ?? await obj?.foo)(); }
@@ -470,7 +471,7 @@ invalid.js:16:41 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:17:42 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     15 │ async function foo() { (bar?.baz ?? await obj?.foo)(); }
     16 │ async function foo() { (bar && await obj?.foo)(); }
@@ -494,7 +495,7 @@ invalid.js:17:42 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:20:8 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     19 │ // spread
   > 20 │ [...obj?.foo];
@@ -516,7 +517,7 @@ invalid.js:20:8 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
 ```
 invalid.js:21:11 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     19 │ // spread
     20 │ [...obj?.foo];
@@ -540,7 +541,7 @@ invalid.js:21:11 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:22:15 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     20 │ [...obj?.foo];
     21 │ bar(...obj?.foo);
@@ -564,7 +565,7 @@ invalid.js:22:15 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:25:18 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     24 │ // destructuring
   > 25 │ const {foo} = obj?.bar;
@@ -586,7 +587,7 @@ invalid.js:25:18 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:26:18 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     24 │ // destructuring
     25 │ const {foo} = obj?.bar;
@@ -610,7 +611,7 @@ invalid.js:26:18 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:27:23 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     25 │ const {foo} = obj?.bar;
     26 │ const {foo} = obj?.bar();
@@ -634,7 +635,7 @@ invalid.js:27:23 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:28:18 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     26 │ const {foo} = obj?.bar();
     27 │ const {foo: bar} = obj?.bar();
@@ -658,7 +659,7 @@ invalid.js:28:18 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:29:30 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     27 │ const {foo: bar} = obj?.bar();
     28 │ const [foo] = obj?.bar;
@@ -682,7 +683,7 @@ invalid.js:29:30 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:30:13 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     28 │ const [foo] = obj?.bar;
     29 │ const [foo] = obj?.bar || obj?.foo;
@@ -706,7 +707,7 @@ invalid.js:30:13 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:31:23 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     29 │ const [foo] = obj?.bar || obj?.foo;
     30 │ ([foo] = obj?.bar);
@@ -730,7 +731,7 @@ invalid.js:31:23 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:32:15 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     30 │ ([foo] = obj?.bar);
     31 │ const [foo] = obj?.bar?.();
@@ -754,7 +755,7 @@ invalid.js:32:15 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:33:21 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     31 │ const [foo] = obj?.bar?.();
     32 │ [{ foo } = obj?.bar] = [];
@@ -778,7 +779,7 @@ invalid.js:33:21 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:34:15 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     32 │ [{ foo } = obj?.bar] = [];
     33 │ ({bar: [ foo ] = obj?.prop} = {});
@@ -802,7 +803,7 @@ invalid.js:34:15 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:35:47 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     33 │ ({bar: [ foo ] = obj?.prop} = {});
     34 │ [[ foo ] = obj?.bar] = [];
@@ -826,7 +827,7 @@ invalid.js:35:47 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:36:47 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     34 │ [[ foo ] = obj?.bar] = [];
     35 │ async function foo() { const {foo} = await obj?.bar; }
@@ -850,7 +851,7 @@ invalid.js:36:47 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:37:65 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     35 │ async function foo() { const {foo} = await obj?.bar; }
     36 │ async function foo() { const {foo} = await obj?.bar(); }
@@ -874,7 +875,7 @@ invalid.js:37:65 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:38:42 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     36 │ async function foo() { const {foo} = await obj?.bar(); }
     37 │ async function foo() { const [foo] = await obj?.bar || await obj?.foo; }
@@ -898,7 +899,7 @@ invalid.js:38:42 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:41:20 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     40 │ // class declaration
   > 41 │ class A extends obj?.foo {}
@@ -920,7 +921,7 @@ invalid.js:41:20 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:42:50 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     40 │ // class declaration
     41 │ class A extends obj?.foo {}
@@ -944,7 +945,7 @@ invalid.js:42:50 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:45:28 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     44 │ // class expression
   > 45 │ var a = class A extends obj?.foo {}
@@ -966,7 +967,7 @@ invalid.js:45:28 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:46:58 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     44 │ // class expression
     45 │ var a = class A extends obj?.foo {}
@@ -990,7 +991,7 @@ invalid.js:46:58 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:49:19 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     48 │ // relational operations
   > 49 │ foo instanceof obj?.prop
@@ -1012,7 +1013,7 @@ invalid.js:49:19 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:50:48 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     48 │ // relational operations
     49 │ foo instanceof obj?.prop
@@ -1036,7 +1037,7 @@ invalid.js:50:48 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:51:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     49 │ foo instanceof obj?.prop
     50 │ async function foo() { foo instanceof await obj?.prop }
@@ -1060,7 +1061,7 @@ invalid.js:51:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
 ```
 invalid.js:52:38 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     50 │ async function foo() { foo instanceof await obj?.prop }
     51 │ 1 in foo?.bar;
@@ -1084,7 +1085,7 @@ invalid.js:52:38 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:55:16 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     54 │ // for...of
   > 55 │ for (foo of obj?.bar);
@@ -1106,7 +1107,7 @@ invalid.js:55:16 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:56:45 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     54 │ // for...of
     55 │ for (foo of obj?.bar);
@@ -1130,7 +1131,7 @@ invalid.js:56:45 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:59:10 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     58 │ // sequence expression
   > 59 │ (foo, obj?.foo)();
@@ -1152,7 +1153,7 @@ invalid.js:59:10 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:60:10 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     58 │ // sequence expression
     59 │ (foo, obj?.foo)();
@@ -1176,7 +1177,7 @@ invalid.js:60:10 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:61:41 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     59 │ (foo, obj?.foo)();
     60 │ (foo, obj?.foo)[1];
@@ -1200,7 +1201,7 @@ invalid.js:61:41 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:62:40 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     60 │ (foo, obj?.foo)[1];
     61 │ async function foo() { (await (foo,  obj?.foo))(); }
@@ -1224,7 +1225,7 @@ invalid.js:62:40 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:63:39 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     61 │ async function foo() { (await (foo,  obj?.foo))(); }
     62 │ async function foo() { ((foo, await obj?.foo))(); }
@@ -1248,7 +1249,7 @@ invalid.js:63:39 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:64:40 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     62 │ async function foo() { ((foo, await obj?.foo))(); }
     63 │ async function foo() { (foo, await obj?.foo)[1]; }
@@ -1272,7 +1273,7 @@ invalid.js:64:40 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:67:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     66 │ // conditional expression
   > 67 │ (a ? obj?.foo : b)();
@@ -1294,7 +1295,7 @@ invalid.js:67:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
 ```
 invalid.js:68:13 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     66 │ // conditional expression
     67 │ (a ? obj?.foo : b)();
@@ -1318,7 +1319,7 @@ invalid.js:68:13 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:69:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     67 │ (a ? obj?.foo : b)();
     68 │ (a ? b : obj?.foo)();
@@ -1342,7 +1343,7 @@ invalid.js:69:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
 ```
 invalid.js:70:13 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     68 │ (a ? b : obj?.foo)();
     69 │ (a ? obj?.foo : b)[1];
@@ -1366,7 +1367,7 @@ invalid.js:70:13 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:71:39 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     69 │ (a ? obj?.foo : b)[1];
     70 │ (a ? b : obj?.foo).bar;
@@ -1390,7 +1391,7 @@ invalid.js:71:39 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:72:38 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     70 │ (a ? b : obj?.foo).bar;
     71 │ async function foo() { (await (a ? obj?.foo : b))(); }
@@ -1414,7 +1415,7 @@ invalid.js:72:38 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:73:43 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     71 │ async function foo() { (await (a ? obj?.foo : b))(); }
     72 │ async function foo() { (a ? await obj?.foo : b)(); }
@@ -1438,7 +1439,7 @@ invalid.js:73:43 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:74:39 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     72 │ async function foo() { (a ? await obj?.foo : b)(); }
     73 │ async function foo() { (await (a ? b : obj?.foo))(); }
@@ -1462,7 +1463,7 @@ invalid.js:74:39 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:75:43 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     73 │ async function foo() { (await (a ? b : obj?.foo))(); }
     74 │ async function foo() { (await (a ? obj?.foo : b))[1]; }
@@ -1486,7 +1487,7 @@ invalid.js:75:43 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:76:42 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     74 │ async function foo() { (await (a ? obj?.foo : b))[1]; }
     75 │ async function foo() { (await (a ? b : obj?.foo)).bar; }
@@ -1510,7 +1511,7 @@ invalid.js:76:42 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:78:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     76 │ async function foo() { (a ? b : await obj?.foo).bar; }
     77 │ 
@@ -1534,7 +1535,7 @@ invalid.js:78:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
 ```
 invalid.js:78:17 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     76 │ async function foo() { (a ? b : await obj?.foo).bar; }
     77 │ 
@@ -1558,7 +1559,7 @@ invalid.js:78:17 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:81:11 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     80 │ async function foo() { with ( await obj?.foo) {}; }
   > 81 │ (foo ? obj?.foo : obj?.bar).bar
@@ -1578,7 +1579,7 @@ invalid.js:81:11 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
 ```
 invalid.js:81:22 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
     80 │ async function foo() { with ( await obj?.foo) {}; }
   > 81 │ (foo ? obj?.foo : obj?.bar).bar
@@ -1594,5 +1595,3 @@ invalid.js:81:22 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
   
 
 ```
-
-

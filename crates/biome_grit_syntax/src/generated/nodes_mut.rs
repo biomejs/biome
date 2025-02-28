@@ -225,6 +225,14 @@ impl GritDoubleLiteral {
         )
     }
 }
+impl GritEngineName {
+    pub fn with_engine_kind_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl GritEvery {
     pub fn with_every_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -311,6 +319,58 @@ impl GritIntLiteral {
         )
     }
 }
+impl GritJavascriptBodyWrapper {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl GritJavascriptFunctionDefinition {
+    pub fn with_function_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_name(self, element: GritName) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_args(self, element: GritVariableList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_js_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(5usize..=5usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_grit_javascript_body_wrapper(self, element: GritJavascriptBodyWrapper) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(6usize..=6usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl GritLanguageDeclaration {
     pub fn with_language_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -318,7 +378,7 @@ impl GritLanguageDeclaration {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: GritLanguageName) -> Self {
+    pub fn with_name(self, element: AnyGritLanguageName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -374,7 +434,7 @@ impl GritLanguageName {
     }
 }
 impl GritLanguageSpecificSnippet {
-    pub fn with_language(self, element: GritLanguageName) -> Self {
+    pub fn with_language(self, element: AnyGritLanguageName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -794,25 +854,11 @@ impl GritPatternContains {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_until_clause(self, element: Option<GritPatternContainsUntilClause>) -> Self {
+    pub fn with_until_clause(self, element: Option<GritPatternUntilClause>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             2usize..=2usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
-    }
-}
-impl GritPatternContainsUntilClause {
-    pub fn with_until_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_until(self, element: AnyGritPattern) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
-        )
     }
 }
 impl GritPatternDefinition {
@@ -1048,6 +1094,20 @@ impl GritPatternOrElse {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into()))),
+        )
+    }
+}
+impl GritPatternUntilClause {
+    pub fn with_until_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_until(self, element: AnyGritPattern) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
@@ -1748,10 +1808,10 @@ impl GritVersion {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_biome_token(self, element: SyntaxToken) -> Self {
+    pub fn with_engine_name(self, element: GritEngineName) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
@@ -1785,5 +1845,11 @@ impl GritWithin {
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
+    }
+    pub fn with_until_clause(self, element: Option<GritPatternUntilClause>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            2usize..=2usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
 }

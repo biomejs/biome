@@ -4,6 +4,7 @@ use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
     ExceptionHandlerKind, InstructionKind,
 };
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClass, AnyJsExpression, JsCallExpression, JsConstructorClassMember, JsSyntaxKind,
     JsThrowStatement, TextRange, WalkEvent,
@@ -67,10 +68,10 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-this-before-super")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
-#[allow(clippy::enum_variant_names)]
 pub enum RuleState {
     /// The constructor may call `super` multiple times
     DuplicateSuper { first: TextRange, second: TextRange },

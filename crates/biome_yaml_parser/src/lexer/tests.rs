@@ -1,19 +1,35 @@
 #![cfg(test)]
-#![allow(unused_mut, unused_variables, unused_assignments)]
+#![expect(unused_mut)]
 
+use super::{TextSize, YamlLexContext};
 use crate::lexer::YamlLexer;
-
-use super::TextSize;
+use biome_parser::lexer::TokenFlags;
+use biome_yaml_syntax::YamlSyntaxKind;
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
 
+/// Creates a new lexer from the given string
+fn init_yaml_lexer(s: &str) -> YamlLexer {
+    YamlLexer {
+        source: s,
+        position: 0,
+        after_newline: false,
+        unicode_bom_length: 0,
+        current_start: TextSize::from(0),
+        current_kind: YamlSyntaxKind::EOF,
+        current_flags: TokenFlags::empty(),
+        diagnostics: vec![],
+        context: YamlLexContext::Regular,
+    }
+}
+
 // Assert the result of lexing a piece of source code,
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
     ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
-        let mut lexer = YamlLexer::from_str($src);
+        let mut lexer = init_yaml_lexer($src);
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
 
@@ -69,7 +85,7 @@ fn losslessness(string: String) -> bool {
     let cloned = string.clone();
     let (sender, receiver) = channel();
     thread::spawn(move || {
-        let mut lexer = YamlLexer::from_str(&cloned);
+        let mut lexer = init_yaml_lexer(&cloned);
         let tokens: Vec<_> = lexer.map(|token| token.range).collect();
 
         sender

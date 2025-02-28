@@ -1,0 +1,43 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "useWhile": "error"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rule useWhile has ben moved to the complexity group.
+  
+    3 │     "rules": {
+    4 │       "style": {
+  > 5 │         "useWhile": "error"
+      │         ^^^^^^^^^^
+    6 │       }
+    7 │     }
+  
+  i Safe fix: Move the rule in the correct group.
+  
+     2  2 │     "linter": {
+     3  3 │       "rules": {
+     4    │ - ······"style":·{
+        4 │ + ······"complexity":·{
+     5  5 │           "useWhile": "error"
+     6  6 │         }
+  
+
+```

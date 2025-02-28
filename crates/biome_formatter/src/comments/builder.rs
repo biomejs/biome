@@ -442,7 +442,7 @@ impl<L: Language> CommentsBuilder<L> {
                                 // a /* comment */ b;   //  Comment is a trailing comment
                                 // a, /* comment */ b;  // Comment should be a leading comment
                                 // ```
-                                if preceding.text_range().end()
+                                if preceding.text_range_with_trivia().end()
                                     == comment.piece().as_piece().token().text_range().end()
                                 {
                                     self.push_trailing_comment(&preceding, comment);
@@ -549,13 +549,12 @@ impl<'a> SourceParentheses<'a> {
     /// Must be called with offsets in increasing order.
     ///
     /// Returns the source range of the `)` if there's any `)` in the deleted range at this offset. Returns `None` otherwise
-
     fn r_paren_source_range(&mut self, offset: TextSize) -> Option<TextRange> {
         match self {
             SourceParentheses::Empty => None,
             SourceParentheses::SourceMap { next, tail, .. } => {
                 while let Some(range) = next {
-                    #[allow(clippy::comparison_chain)]
+                    #[expect(clippy::comparison_chain)]
                     if range.transformed == offset {
                         // A deleted range can contain multiple tokens. See if there's any `)` in the deleted
                         // range and compute its source range.

@@ -60,10 +60,11 @@ jobs:
           key: ${{ env.WASM_PACK_CACHE_KEY }}
 
       - name: Install pnpm
-        run: corepack enable
+        # workaround for the issue https://github.com/actions/setup-node/issues/1222
+        run: npm i -g --force corepack && corepack enable
 
       - name: Setup node
-        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: 20
           cache: pnpm

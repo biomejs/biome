@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/cdata/example.html
+---
+# Input
+
+```html
+<span><![CDATA[<sender>John Smith</sender>]]></span>
+
+<span><![CDATA[1]]> a <![CDATA[2]]></span>
+<span><![CDATA[1]]> <br> <![CDATA[2]]></span>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,8 @@
+ <span><![CDATA[<sender>John Smith</sender>]]></span>
+ 
+-<span><![CDATA[1]]> a <![CDATA[2]]></span>
++<span><![CDATA[1]]>a <![CDATA[2]]></span>
+ <span
+-  ><![CDATA[1]]> <br />
++  ><![CDATA[1]]>
++  <br />
+   <![CDATA[2]]></span
+ >
+```
+
+# Output
+
+```html
+<span><![CDATA[<sender>John Smith</sender>]]></span>
+
+<span><![CDATA[1]]>a <![CDATA[2]]></span>
+<span
+  ><![CDATA[1]]>
+  <br />
+  <![CDATA[2]]></span
+>
+```

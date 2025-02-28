@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: withRenamedImportInvalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import AwesomeReact, { createElement as awesomeCreateElement } from "react";
 
 AwesomeReact.createElement('button');
@@ -24,7 +25,7 @@ awesomeCreateElement('button', {
 ```
 withRenamedImportInvalid.js:3:28 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an explicit type prop for the button element.
+  × Provide an explicit type prop for the button element.
   
     1 │ import AwesomeReact, { createElement as awesomeCreateElement } from "react";
     2 │ 
@@ -43,7 +44,7 @@ withRenamedImportInvalid.js:3:28 lint/a11y/useButtonType ━━━━━━━�
 ```
 withRenamedImportInvalid.js:5:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
     3 │ AwesomeReact.createElement('button');
     4 │ AwesomeReact.createElement('button', {
@@ -62,7 +63,7 @@ withRenamedImportInvalid.js:5:13 lint/a11y/useButtonType ━━━━━━━�
 ```
 withRenamedImportInvalid.js:9:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
      8 │ awesomeCreateElement('button', {
    > 9 │     "type": "awesomeCreateElement"
@@ -80,7 +81,7 @@ withRenamedImportInvalid.js:9:13 lint/a11y/useButtonType ━━━━━━━�
 ```
 withRenamedImportInvalid.js:13:13 lint/a11y/useButtonType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide a valid type prop for the button element.
+  × Provide a valid type prop for the button element.
   
     12 │ awesomeCreateElement('button', {
   > 13 │     "type": 1
@@ -93,5 +94,3 @@ withRenamedImportInvalid.js:13:13 lint/a11y/useButtonType ━━━━━━━�
   
 
 ```
-
-

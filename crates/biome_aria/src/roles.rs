@@ -229,16 +229,16 @@ impl AriaRoles {
                 .find_attribute_by_name(|n| n == "type")
                 .as_ref()
                 .and_then(|attr| attr.value())
-                .map_or(false, |value| value.as_ref() == "hidden"),
+                .is_some_and(|value| value.as_ref() == "hidden"),
             _ => self
                 .get_implicit_role(element)
-                .map_or(false, |implicit_role| implicit_role.is_non_interactive()),
+                .is_some_and(|implicit_role| implicit_role.is_non_interactive()),
         }
     }
 
     /// Given an element name and attributes, it returns the role associated with that element.
     /// If no explicit role attribute is present, an implicit role is returned.
-    fn get_role_by_element_name(&self, element: &impl Element) -> Option<AriaRole> {
+    pub fn get_role_by_element_name(&self, element: &impl Element) -> Option<AriaRole> {
         element
             .find_attribute_by_name(|name| name == "role")
             .as_ref()

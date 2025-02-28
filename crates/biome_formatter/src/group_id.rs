@@ -1,61 +1,70 @@
 use std::num::NonZeroU32;
 use std::sync::atomic::{AtomicU32, Ordering};
 
-#[derive(Clone, Copy, Eq, PartialEq, Hash)]
-pub struct DebugGroupId {
-    value: NonZeroU32,
-    name: &'static str,
-}
+#[cfg(debug_assertions)]
+mod debug {
+    use super::*;
 
-impl DebugGroupId {
-    #[allow(unused)]
-    fn new(value: NonZeroU32, debug_name: &'static str) -> Self {
-        Self {
-            value,
-            name: debug_name,
+    #[derive(Clone, Copy, Eq, PartialEq, Hash)]
+    pub struct GroupId {
+        pub(super) value: NonZeroU32,
+        name: &'static str,
+    }
+
+    impl GroupId {
+        pub(super) fn new(value: NonZeroU32, debug_name: &'static str) -> Self {
+            Self {
+                value,
+                name: debug_name,
+            }
+        }
+    }
+
+    impl std::fmt::Debug for GroupId {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "#{}-{}", self.name, self.value)
         }
     }
 }
 
-impl std::fmt::Debug for DebugGroupId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "#{}-{}", self.name, self.value)
+#[cfg(not(debug_assertions))]
+mod release {
+    use super::*;
+
+    /// Unique identification for a group.
+    ///
+    /// See [crate::Formatter::group_id] on how to get a unique id.
+    #[repr(transparent)]
+    #[derive(Clone, Copy, Eq, PartialEq, Hash)]
+    pub struct GroupId {
+        pub(super) value: NonZeroU32,
+    }
+
+    impl GroupId {
+        /// Creates a new unique group id with the given debug name (only stored in debug builds)
+        #[cfg_attr(debug_assertions, expect(unused))]
+        pub(super) fn new(value: NonZeroU32, _: &'static str) -> Self {
+            Self { value }
+        }
+    }
+
+    impl std::fmt::Debug for GroupId {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "#{}", self.value)
+        }
     }
 }
 
-/// Unique identification for a group.
-///
-/// See [crate::Formatter::group_id] on how to get a unique id.
-#[repr(transparent)]
-#[derive(Clone, Copy, Eq, PartialEq, Hash)]
-pub struct ReleaseGroupId {
-    value: NonZeroU32,
-}
-
-impl ReleaseGroupId {
-    /// Creates a new unique group id with the given debug name (only stored in debug builds)
-    #[allow(unused)]
-    fn new(value: NonZeroU32, _: &'static str) -> Self {
-        Self { value }
-    }
-}
+#[cfg(not(debug_assertions))]
+pub type GroupId = release::GroupId;
+#[cfg(debug_assertions)]
+pub type GroupId = debug::GroupId;
 
 impl From<GroupId> for u32 {
     fn from(id: GroupId) -> Self {
         id.value.get()
     }
 }
-
-impl std::fmt::Debug for ReleaseGroupId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "#{}", self.value)
-    }
-}
-
-#[cfg(not(debug_assertions))]
-pub type GroupId = ReleaseGroupId;
-#[cfg(debug_assertions)]
-pub type GroupId = DebugGroupId;
 
 /// Builder to construct unique group ids that are unique if created with the same builder.
 pub(super) struct UniqueGroupIdBuilder {

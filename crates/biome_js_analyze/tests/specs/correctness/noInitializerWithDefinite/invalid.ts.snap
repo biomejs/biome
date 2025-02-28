@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -11,7 +12,7 @@ let a!: number = 5;
 ```
 invalid.ts:1:16 syntax/correctness/noInitializerWithDefinite ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Declarations with initializers cannot also have definite assignment assertions.
+  × Declarations with initializers cannot also have definite assignment assertions.
   
   > 1 │ let a!: number = 5;
       │                ^^^

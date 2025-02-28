@@ -6,13 +6,12 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use crate::ast::load_ast;
+use crate::language_kind::{LanguageKind, ALL_LANGUAGE_KIND};
 use git2::{Repository, Status, StatusOptions};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use xtask::project_root;
-
-use crate::ast::load_ast;
-use crate::language_kind::{LanguageKind, ALL_LANGUAGE_KIND};
 
 struct GitRepo {
     repo: Repository,
@@ -201,7 +200,7 @@ impl ModuleIndex {
                 // Clippy complains about child modules having the same
                 // names as their parent, eg. js/name/name.rs
                 if import == stem {
-                    content.push_str("#[allow(clippy::module_inception)]\n");
+                    content.push_str("#[expect(clippy::module_inception)]\n");
                 }
 
                 content.push_str("pub(crate) mod ");
@@ -513,7 +512,6 @@ impl BoilerplateImpls {
                 type Format<'a> = FormatRefWithRule<'a, #syntax_crate_ident::#node_id, #format_id>;
 
                 fn format(&self) -> Self::Format<'_> {
-                    #![allow(clippy::default_constructed_unit_structs)]
                     FormatRefWithRule::new(self, #format_id::default())
                 }
             }
@@ -522,7 +520,6 @@ impl BoilerplateImpls {
                 type Format = FormatOwnedWithRule<#syntax_crate_ident::#node_id, #format_id>;
 
                 fn into_format(self) -> Self::Format {
-                    #![allow(clippy::default_constructed_unit_structs)]
                     FormatOwnedWithRule::new(self, #format_id::default())
                 }
             }
@@ -536,6 +533,7 @@ impl BoilerplateImpls {
         let formatter_context_ident = self.language.format_context_ident();
 
         let tokens = quote! {
+            #![expect(clippy::default_constructed_unit_structs)]
             use crate::{AsFormat, IntoFormat, FormatNodeRule, FormatBogusNodeRule, #formatter_ident, #formatter_context_ident};
             use biome_formatter::{FormatRefWithRule, FormatOwnedWithRule, FormatRule, FormatResult};
 

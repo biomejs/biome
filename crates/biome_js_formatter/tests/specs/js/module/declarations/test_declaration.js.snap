@@ -1,0 +1,83 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/declarations/test_declaration.js
+---
+# Input
+
+```js
+describe("test", () => {
+  it(``, async () => {
+  });
+});
+  
+describe("test", () => {
+  it("wrooooooooooooooooooooooooooooooooooooooooooooong string" +
+    "second string", async () => {
+  });
+});
+
+it(`${foo + bar}
+  handles
+  some
+    newlines does something really long and complicated 
+    so I have to write a very long name for the test`, () => {
+});
+
+describe(`${foo + bar}`, 
+  () => {}
+);
+
+describe(`${foo + bar} wroooooooooooooooooooooooooooooong string`, 
+  () => {}
+);
+
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Object wrap: Preserve
+-----
+
+```js
+describe("test", () => {
+	it(``, async () => {});
+});
+
+describe("test", () => {
+	it(
+		"wrooooooooooooooooooooooooooooooooooooooooooooong string" +
+			"second string",
+		async () => {},
+	);
+});
+
+it(`${foo + bar}
+  handles
+  some
+    newlines does something really long and complicated 
+    so I have to write a very long name for the test`, () => {});
+
+describe(`${foo + bar}`, () => {});
+
+describe(`${foo + bar} wroooooooooooooooooooooooooooooong string`, () => {});
+```

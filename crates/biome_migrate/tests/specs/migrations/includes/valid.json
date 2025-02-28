@@ -1,0 +1,6 @@
+{
+    "files": {
+      "includes": ["src/**/*.js"]
+    }
+  }
+  

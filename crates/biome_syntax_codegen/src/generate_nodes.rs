@@ -199,7 +199,6 @@ where
 
                     /// Construct the `slot_map` for this node by checking the `kind` of
                     /// each child of `syntax` against the defined grammar for the node.
-                    #[allow(clippy::explicit_counter_loop)]
                     pub fn build_slot_map(syntax: &SyntaxNode) -> #slot_map_type {
                         #slot_map_builder_impl
                     }
@@ -891,13 +890,15 @@ where
         #![allow(clippy::enum_variant_names)]
         // sometimes we generate comparison of simple tokens
         #![allow(clippy::match_like_matches_macro)]
+        #![allow(clippy::explicit_counter_loop)]
+        #![allow(dead_code)]
+        #![allow(unused)]
         use crate::{
             macros::map_syntax_node,
             #language as Language, #syntax_element as SyntaxElement, #syntax_element_children as SyntaxElementChildren,
             #syntax_kind::{self as SyntaxKind, *},
             #syntax_list as SyntaxList, #syntax_node as SyntaxNode, #syntax_token as SyntaxToken,
         };
-        #[allow(unused)]
         use biome_rowan::{
             AstNodeList, AstNodeListIterator,  AstNodeSlotMap, AstSeparatedList, AstSeparatedListNodesIterator
         };
@@ -907,7 +908,6 @@ where
 
         /// Sentinel value indicating a missing element in a dynamic node, where
         /// the slots are not statically known.
-        #[allow(dead_code)]
         pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 
         #(#node_defs)*

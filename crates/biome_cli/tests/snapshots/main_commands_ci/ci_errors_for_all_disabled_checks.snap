@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -30,7 +31,7 @@ statement(    ) ; let a = !b || !c;
 internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The combination of configuration and arguments is invalid: 
-    Formatter, linter and organize imports are disabled, can't perform the command. At least one feature needs to be enabled. This is probably and error.
+    Formatter, linter and assist are disabled, can't perform the command. At least one feature needs to be enabled. This is probably and error.
   
 
 

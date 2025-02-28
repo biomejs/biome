@@ -13,8 +13,6 @@
 //! `>>` and `>>>` are not emitted as single tokens, they are emitted as multiple `>` tokens. This is because of
 //! TypeScript parsing and productions such as `T<U<N>>`
 
-#![allow(clippy::or_fun_call)]
-
 mod tests;
 
 use std::ops::{BitOr, BitOrAssign};
@@ -1048,7 +1046,7 @@ impl<'src> JsLexer<'src> {
 
     #[inline]
     fn special_number_start<F: Fn(char) -> bool>(&mut self, func: F) -> bool {
-        if self.byte_at(2).map_or(false, |b| func(b as char)) {
+        if self.byte_at(2).is_some_and(|b| func(b as char)) {
             self.advance(1);
             true
         } else {
@@ -1448,7 +1446,6 @@ impl<'src> JsLexer<'src> {
         )
     }
     #[inline]
-    #[allow(clippy::many_single_char_names)]
     fn read_regex(&mut self) -> JsSyntaxKind {
         #[derive(Copy, Clone)]
         #[bitflags]

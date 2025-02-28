@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 const x = Math.PI;
 const y = Math.LN10;
 const z = 2.301;
@@ -22,5 +23,3 @@ const tooMuchRounded = [
 ];
 
 ```
-
-

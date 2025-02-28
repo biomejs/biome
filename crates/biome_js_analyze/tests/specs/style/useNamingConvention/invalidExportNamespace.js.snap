@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidExportNamespace.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export * as X from ""
 
 export * as PascalCase from ""
@@ -20,7 +21,7 @@ export * as Unknown_Style from ""
 ```
 invalidExportNamespace.js:5:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This export namespace name should be in camelCase or PascalCase.
+  i This export namespace name should be in camelCase or PascalCase.
   
     3 │ export * as PascalCase from ""
     4 │ 
@@ -35,7 +36,7 @@ invalidExportNamespace.js:5:13 lint/style/useNamingConvention ━━━━━━
 ```
 invalidExportNamespace.js:7:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This export namespace name should be in camelCase or PascalCase.
+  i This export namespace name should be in camelCase or PascalCase.
   
     5 │ export * as CONSTANT_CASE from ""
     6 │ 
@@ -50,7 +51,7 @@ invalidExportNamespace.js:7:13 lint/style/useNamingConvention ━━━━━━
 ```
 invalidExportNamespace.js:9:13 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This export namespace name should be in camelCase or PascalCase.
+  i This export namespace name should be in camelCase or PascalCase.
   
      7 │ export * as snake_case from ""
      8 │ 

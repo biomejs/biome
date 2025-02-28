@@ -4,9 +4,6 @@
   "bin": {
     "biome": "bin/biome"
   },
-  "scripts": {
-    "postinstall": "node scripts/postinstall.js"
-  },
   "homepage": "https://biomejs.dev",
   "repository": {
     "type": "git",
@@ -19,7 +16,6 @@
   "description": "Biome is a toolchain for the web: formatter, linter and more",
   "files": [
     "bin/biome",
-    "scripts/postinstall.js",
     "configuration_schema.json",
     "README.md",
     "LICENSE-APACHE",

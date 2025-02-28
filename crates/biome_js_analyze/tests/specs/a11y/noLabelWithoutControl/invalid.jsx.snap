@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -21,7 +22,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:1:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with an input.
+  × A form label must be associated with an input.
   
   > 1 │ <label for="js_id" />;
       │ ^^^^^^^^^^^^^^^^^^^^^
@@ -36,7 +37,7 @@ invalid.jsx:1:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
 ```
 invalid.jsx:2:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with an input.
+  × A form label must be associated with an input.
   
     1 │ <label for="js_id" />;
   > 2 │ <label for="js_id"><input /></label>;
@@ -52,7 +53,7 @@ invalid.jsx:2:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
 ```
 invalid.jsx:3:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with an input.
+  × A form label must be associated with an input.
   
     1 │ <label for="js_id" />;
     2 │ <label for="js_id"><input /></label>;
@@ -69,7 +70,7 @@ invalid.jsx:3:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
 ```
 invalid.jsx:4:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with an input.
+  × A form label must be associated with an input.
   
     2 │ <label for="js_id"><input /></label>;
     3 │ <label for="js_id"><textarea /></label>;
@@ -86,7 +87,7 @@ invalid.jsx:4:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
 ```
 invalid.jsx:5:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with an input.
+  × A form label must be associated with an input.
   
     3 │ <label for="js_id"><textarea /></label>;
     4 │ <label htmlFor="js_id" />;
@@ -103,7 +104,7 @@ invalid.jsx:5:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
 ```
 invalid.jsx:6:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with an input.
+  × A form label must be associated with an input.
   
     4 │ <label htmlFor="js_id" />;
     5 │ <label htmlFor="js_id"><input /></label>;
@@ -120,7 +121,7 @@ invalid.jsx:6:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
 ```
 invalid.jsx:7:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with an input.
+  × A form label must be associated with an input.
   
     5 │ <label htmlFor="js_id"><input /></label>;
     6 │ <label htmlFor="js_id"><textarea /></label>;
@@ -139,7 +140,7 @@ invalid.jsx:7:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
 ```
 invalid.jsx:8:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with an input.
+  × A form label must be associated with an input.
   
      6 │ <label htmlFor="js_id"><textarea /></label>;
      7 │ <label></label>;
@@ -156,7 +157,7 @@ invalid.jsx:8:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
 ```
 invalid.jsx:9:6 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with an input.
+  × A form label must be associated with an input.
   
      7 │ <label></label>;
      8 │ <label>A label</label>;
@@ -175,7 +176,7 @@ invalid.jsx:9:6 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
 ```
 invalid.jsx:10:6 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! A form label must be associated with an input.
+  × A form label must be associated with an input.
   
      8 │ <label>A label</label>;
      9 │ <div><label /><input /></div>;

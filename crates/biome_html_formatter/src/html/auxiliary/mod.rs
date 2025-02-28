@@ -2,6 +2,7 @@
 
 pub(crate) mod attribute;
 pub(crate) mod attribute_initializer_clause;
+pub(crate) mod cdata_section;
 pub(crate) mod closing_element;
 pub(crate) mod comment;
 pub(crate) mod content;

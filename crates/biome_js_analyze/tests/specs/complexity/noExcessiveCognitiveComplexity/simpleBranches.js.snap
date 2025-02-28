@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: simpleBranches.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function simpleBranches() {
     if (firstCondition) {                 // +1
         return 1;
@@ -20,7 +21,7 @@ function simpleBranches() {
 ```
 simpleBranches.js:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Excessive complexity of 3 detected (max: 2).
+  i Excessive complexity of 3 detected (max: 2).
   
   > 1 │ function simpleBranches() {
       │          ^^^^^^^^^^^^^^
@@ -31,5 +32,3 @@ simpleBranches.js:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━━�
   
 
 ```
-
-

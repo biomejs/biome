@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: grit/marzano/engine.grit
+---
+# Input
+
+```grit
+engine marzano(0.1)
+
+`console.log($var)`     => `console.log($var)`
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+-----
+
+```grit
+engine marzano(0.1)
+
+`console.log($var)` => `console.log($var)`
+```

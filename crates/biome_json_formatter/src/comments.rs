@@ -69,7 +69,7 @@ impl CommentStyle for JsonCommentStyle {
         parse_suppression_comment(text)
             .filter_map(Result::ok)
             .flat_map(|suppression| suppression.categories)
-            .any(|(key, _)| key == category!("format"))
+            .any(|(key, ..)| key == category!("format"))
     }
 
     fn get_comment_kind(comment: &SyntaxTriviaPieceComments<Self::Language>) -> CommentKind {

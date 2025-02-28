@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsxTag, JsSyntaxToken, JsxElement, JsxOpeningElementFields, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPiece};
@@ -14,6 +15,8 @@ use crate::JsRuleAction;
 
 declare_lint_rule! {
     /// Prevent extra closing tags for components without children
+    ///
+    /// JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing.
     ///
     /// ## Examples
     ///
@@ -33,27 +36,27 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```jsx
     /// <div />
     ///```
     ///
-    /// ```js
+    /// ```jsx
     /// <div>child</div>
     ///```
     ///
-    /// ```js
+    /// ```jsx
     /// <Component />
     ///```
     ///
-    /// ```js
+    /// ```jsx
     /// <Component>child</Component>
     ///```
     ///
-    /// ```js
+    /// ```jsx
     /// <Foo.bar />
     ///```
     ///
-    /// ```js
+    /// ```jsx
     /// <Foo.bar>child</Foo.bar>
     ///```
     ///
@@ -88,8 +91,9 @@ declare_lint_rule! {
         name: "useSelfClosingElements",
         language: "js",
         sources: &[RuleSource::EslintStylistic("jsx-self-closing-comp")],
-        recommended: true,
-        fix_kind: FixKind::Unsafe,
+        recommended: false,
+        severity: Severity::Warning,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -178,7 +182,7 @@ impl Rule for UseSelfClosingElements {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Use a SelfClosingElement instead" }.to_owned(),
+            markup! { "Use a self-closing element instead." }.to_owned(),
             mutation,
         ))
     }

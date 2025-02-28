@@ -29,7 +29,7 @@ const object ={
 }
 
 a,
-	// rome-ignore format: Test suppression comments
+	// biome-ignore format: Test suppression comments
 	[
 		0,    1, 2
 	], d;
@@ -62,6 +62,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
+Object wrap: Preserve
 -----
 
 ```js
@@ -109,7 +110,7 @@ const object = {
 };
 
 a,
-	// rome-ignore format: Test suppression comments
+	// biome-ignore format: Test suppression comments
 	[
 		0,    1, 2
 	],

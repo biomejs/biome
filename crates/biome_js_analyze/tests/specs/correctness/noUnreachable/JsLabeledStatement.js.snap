@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsLabeledStatement.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function JsLabeledStatement1() {
     label: while (true) {
         if (true) {
@@ -32,7 +33,7 @@ function JsLabeledStatement2() {
 ```
 JsLabeledStatement.js:9:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
      7 │         }
      8 │ 
@@ -65,7 +66,7 @@ JsLabeledStatement.js:9:9 lint/correctness/noUnreachable ━━━━━━━�
 ```
 JsLabeledStatement.js:17:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     15 │         beforeBreak();
     16 │         break label;
@@ -85,5 +86,3 @@ JsLabeledStatement.js:17:9 lint/correctness/noUnreachable ━━━━━━━�
   
 
 ```
-
-

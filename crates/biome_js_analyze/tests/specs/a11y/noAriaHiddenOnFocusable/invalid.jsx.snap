@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -18,7 +19,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow aria-hidden="true" from being set on focusable elements.
+  × Disallow aria-hidden="true" from being set on focusable elements.
   
     1 │ <>
   > 2 │   <div aria-hidden="true" tabIndex="0" />
@@ -38,7 +39,7 @@ invalid.jsx:2:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
 ```
 invalid.jsx:3:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow aria-hidden="true" from being set on focusable elements.
+  × Disallow aria-hidden="true" from being set on focusable elements.
   
     1 │ <>
     2 │   <div aria-hidden="true" tabIndex="0" />
@@ -59,7 +60,7 @@ invalid.jsx:3:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
 ```
 invalid.jsx:4:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow aria-hidden="true" from being set on focusable elements.
+  × Disallow aria-hidden="true" from being set on focusable elements.
   
     2 │   <div aria-hidden="true" tabIndex="0" />
     3 │   <input aria-hidden="true" />
@@ -80,7 +81,7 @@ invalid.jsx:4:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
 ```
 invalid.jsx:5:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow aria-hidden="true" from being set on focusable elements.
+  × Disallow aria-hidden="true" from being set on focusable elements.
   
     3 │   <input aria-hidden="true" />
     4 │   <a href="/" aria-hidden="true" />
@@ -101,7 +102,7 @@ invalid.jsx:5:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
 ```
 invalid.jsx:6:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow aria-hidden="true" from being set on focusable elements.
+  × Disallow aria-hidden="true" from being set on focusable elements.
   
     4 │   <a href="/" aria-hidden="true" />
     5 │   <button aria-hidden="true" />
@@ -122,7 +123,7 @@ invalid.jsx:6:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
 ```
 invalid.jsx:7:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow aria-hidden="true" from being set on focusable elements.
+  × Disallow aria-hidden="true" from being set on focusable elements.
   
     5 │   <button aria-hidden="true" />
     6 │   <textarea aria-hidden="true" />
@@ -138,5 +139,3 @@ invalid.jsx:7:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━�
       │                   ------------------         
 
 ```
-
-

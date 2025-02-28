@@ -1,7 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 #![allow(clippy::redundant_closure)]
-#![allow(clippy::too_many_arguments)]
 use biome_json_syntax::{
     JsonSyntaxElement as SyntaxElement, JsonSyntaxNode as SyntaxNode,
     JsonSyntaxToken as SyntaxToken, *,

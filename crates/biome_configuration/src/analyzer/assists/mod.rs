@@ -19,15 +19,10 @@ pub struct AssistsConfiguration {
     #[partial(bpaf(pure(Default::default()), optional, hide))]
     pub actions: Actions,
 
-    /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
+    /// A list of glob patterns. Biome will include files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub ignore: StringSet,
-
-    /// A list of Unix shell style patterns. The formatter will include files/folders that will
-    /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub include: StringSet,
+    #[partial(bpaf(pure(Default::default()), hide))]
+    pub includes: Vec<biome_glob::Glob>,
 }
 
 impl Default for AssistsConfiguration {
@@ -35,8 +30,7 @@ impl Default for AssistsConfiguration {
         Self {
             enabled: true,
             actions: Actions::default(),
-            ignore: StringSet::default(),
-            include: StringSet::default(),
+            includes: Default::default(),
         }
     }
 }

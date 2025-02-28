@@ -64,7 +64,7 @@ pub fn main() -> io::Result<()> {
             }
         }
 
-        #[cfg(feature = "schemars")]
+        #[cfg(feature = "schema")]
         impl schemars::JsonSchema for &'static Category {
             fn schema_name() -> String {
                 String::from("Category")

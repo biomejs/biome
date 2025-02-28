@@ -581,7 +581,7 @@ pub struct AstListSeparatorConfiguration {
 
 #[derive(Debug)]
 pub struct AstNodeSrc {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub documentation: Vec<String>,
     pub name: String,
     // pub traits: Vec<String>,
@@ -615,7 +615,7 @@ pub enum Field {
 
 #[derive(Debug, Clone)]
 pub struct AstEnumSrc {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub documentation: Vec<String>,
     pub name: String,
     // pub traits: Vec<String>,
@@ -695,6 +695,8 @@ impl Field {
                     ("---", LanguageKind::Yaml) => "dashdashdash",
                     ("<!--", LanguageKind::Html) => "comment_start",
                     ("-->", LanguageKind::Html) => "comment_end",
+                    ("<![CDATA[", LanguageKind::Html) => "cdata_start",
+                    ("]]>", LanguageKind::Html) => "cdata_end",
                     _ => name,
                 };
 
@@ -726,7 +728,7 @@ impl Field {
             }
         }
     }
-    #[allow(dead_code)]
+
     pub fn ty(&self) -> proc_macro2::Ident {
         match self {
             Field::Token { .. } => format_ident!("SyntaxToken"),

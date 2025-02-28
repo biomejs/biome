@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -21,7 +22,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This JSX property is assigned multiple times.
+  × This JSX property is assigned multiple times.
   
     1 │ //Duplicate `name` property
   > 2 │ <Hello name="John" name="John" />;
@@ -43,7 +44,7 @@ invalid.jsx:2:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━�
 ```
 invalid.jsx:5:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This JSX property is assigned multiple times.
+  × This JSX property is assigned multiple times.
   
     4 │ //Case where property is repeated more than twice
   > 5 │ <Hello name="John" name="John" name="John" />;
@@ -73,7 +74,7 @@ invalid.jsx:5:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━�
 ```
 invalid.jsx:8:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This JSX property is assigned multiple times.
+  × This JSX property is assigned multiple times.
   
      7 │ //Case with two duplicates
    > 8 │ <Hello name="John" name="John" lastname="Doe" lastname="Doe" />;
@@ -95,7 +96,7 @@ invalid.jsx:8:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━�
 ```
 invalid.jsx:8:32 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This JSX property is assigned multiple times.
+  × This JSX property is assigned multiple times.
   
      7 │ //Case with two duplicates
    > 8 │ <Hello name="John" name="John" lastname="Doe" lastname="Doe" />;
@@ -117,7 +118,7 @@ invalid.jsx:8:32 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━
 ```
 invalid.jsx:10:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This JSX property is assigned multiple times.
+  × This JSX property is assigned multiple times.
   
      8 │ <Hello name="John" name="John" lastname="Doe" lastname="Doe" />;
      9 │ 
@@ -135,5 +136,3 @@ invalid.jsx:10:8 lint/suspicious/noDuplicateJsxProps ━━━━━━━━━
   
 
 ```
-
-

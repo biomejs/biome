@@ -1,0 +1,38 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/prettier_ignore/cases.html
+---
+# Input
+
+```html
+123<!--prettier-ignore-->456
+
+<span></span><!--prettier-ignore--><span></span>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,5 @@
+ 123<!--prettier-ignore-->456
+ 
+-<span></span
+-><!--prettier-ignore--><span></span>
++<span></span>
++<!--prettier-ignore-->
++<span></span>
+```
+
+# Output
+
+```html
+123<!--prettier-ignore-->456
+
+<span></span>
+<!--prettier-ignore-->
+<span></span>
+```

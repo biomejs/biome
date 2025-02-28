@@ -15,7 +15,6 @@ pub(crate) struct CssTokenSource<'src> {
     pub(super) trivia_list: Vec<Trivia>,
 }
 
-#[allow(dead_code)]
 pub(crate) type CssTokenSourceCheckpoint = TokenSourceCheckpoint<CssSyntaxKind>;
 
 impl<'src> CssTokenSource<'src> {
@@ -68,7 +67,6 @@ impl<'src> CssTokenSource<'src> {
     }
 
     /// Creates a checkpoint to which it can later return using [Self::rewind].
-    #[allow(dead_code)]
     pub fn checkpoint(&self) -> CssTokenSourceCheckpoint {
         CssTokenSourceCheckpoint {
             trivia_len: self.trivia_list.len() as u32,
@@ -84,7 +82,7 @@ impl<'src> CssTokenSource<'src> {
     }
 }
 
-impl<'source> TokenSource for CssTokenSource<'source> {
+impl TokenSource for CssTokenSource<'_> {
     type Kind = CssSyntaxKind;
 
     fn current(&self) -> Self::Kind {
@@ -116,7 +114,7 @@ impl<'source> TokenSource for CssTokenSource<'source> {
     }
 }
 
-impl<'source> BumpWithContext for CssTokenSource<'source> {
+impl BumpWithContext for CssTokenSource<'_> {
     type Context = CssLexContext;
 
     fn bump_with_context(&mut self, context: Self::Context) {

@@ -1,4 +1,4 @@
-use crate::workspace::DocumentFileSource;
+use crate::workspace::{CheckFileSizeResult, DocumentFileSource};
 use biome_analyze::RuleError;
 use biome_configuration::diagnostics::{ConfigurationDiagnostic, EditorConfigDiagnostic};
 use biome_configuration::{BiomeDiagnostic, CantLoadExtendFile};
@@ -13,9 +13,10 @@ use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
 use biome_grit_patterns::CompileError;
 use biome_js_analyze::utils::rename::RenameError;
+use biome_plugin_loader::PluginDiagnostic;
+use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
-use std::ffi::OsStr;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::process::{ExitCode, Termination};
@@ -40,19 +41,21 @@ pub enum WorkspaceError {
     CantReadFile(CantReadFile),
     /// Error thrown when validating the configuration. Once deserialized, further checks have to be done.
     Configuration(ConfigurationDiagnostic),
+    /// An operation is attempted on the registered project, but there is no registered project.
+    NoProject(NoProject),
     /// Error thrown when Biome cannot rename a symbol.
     RenameError(RenameError),
     /// Error emitted by the underlying transport layer for a remote Workspace
     TransportError(TransportError),
     /// Emitted when the file is ignored and should not be processed
     FileIgnored(FileIgnored),
-    /// Emitted when a file could not be parsed because it's larger than the size limit
-    FileTooLarge(FileTooLarge),
     /// Diagnostics emitted when querying the file system
     FileSystem(FileSystemDiagnostic),
     /// Raised when there's an issue around the VCS integration
     Vcs(VcsDiagnostic),
-    /// Diagnostic raised when a file is protected
+    /// One or more errors occurred during plugin loading.
+    PluginErrors(PluginErrors),
+    /// Diagnostic raised when a file is protected.
     ProtectedFile(ProtectedFile),
     /// Error when searching for a pattern
     SearchError(SearchError),
@@ -67,12 +70,16 @@ impl WorkspaceError {
         Self::CantReadFile(CantReadFile { path })
     }
 
+    pub fn invalid_pattern() -> Self {
+        Self::SearchError(SearchError::InvalidPattern(InvalidPattern))
+    }
+
     pub fn not_found() -> Self {
         Self::NotFound(NotFound)
     }
 
-    pub fn file_too_large(path: String, size: usize, limit: usize) -> Self {
-        Self::FileTooLarge(FileTooLarge { path, size, limit })
+    pub fn no_project() -> Self {
+        Self::NoProject(NoProject)
     }
 
     pub fn file_ignored(path: String) -> Self {
@@ -91,6 +98,10 @@ impl WorkspaceError {
         })
     }
 
+    pub fn plugin_errors(diagnostics: Vec<PluginDiagnostic>) -> Self {
+        Self::PluginErrors(PluginErrors { diagnostics })
+    }
+
     pub fn vcs_disabled() -> Self {
         Self::Vcs(VcsDiagnostic::DisabledVcs(DisabledVcs {}))
     }
@@ -100,6 +111,13 @@ impl WorkspaceError {
             file_path: file_path.into(),
             verbose_advice: ProtectedFileAdvice,
         })
+    }
+
+    pub fn is_editor_config_error(&self) -> bool {
+        matches!(
+            self,
+            WorkspaceError::Configuration(ConfigurationDiagnostic::EditorConfig(_))
+        )
     }
 }
 
@@ -165,6 +183,12 @@ impl From<CantLoadExtendFile> for WorkspaceError {
     }
 }
 
+impl From<WorkspaceError> for biome_diagnostics::serde::Diagnostic {
+    fn from(error: WorkspaceError) -> Self {
+        biome_diagnostics::serde::Diagnostic::new(error)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "internalError/fs",
@@ -172,6 +196,44 @@ impl From<CantLoadExtendFile> for WorkspaceError {
     tags(INTERNAL)
 )]
 pub struct NotFound;
+
+#[derive(Debug, Diagnostic, Deserialize, Serialize)]
+#[diagnostic(category = "internalError/panic", severity = Fatal, tags(INTERNAL))]
+pub struct Panic {
+    #[message]
+    #[description]
+    message: MessageAndDescription,
+}
+
+impl From<Panic> for biome_diagnostics::serde::Diagnostic {
+    fn from(error: Panic) -> Self {
+        biome_diagnostics::serde::Diagnostic::new(error)
+    }
+}
+
+impl Panic {
+    pub fn with_file(path: &Utf8Path) -> Self {
+        Self {
+            message: MessageAndDescription::from(
+                markup! {
+                    "A task panicked while processing "<Emphasis>{path.to_string()}</Emphasis>
+                }
+                .to_owned(),
+            ),
+        }
+    }
+
+    pub fn with_file_and_message(path: &Utf8Path, message: impl Into<String>) -> Self {
+        Self {
+            message: MessageAndDescription::from(
+                markup! {
+                    "A task panicked while processing "<Emphasis>{path.to_string()}</Emphasis>": "{message.into()}
+                }
+                .to_owned(),
+            ),
+        }
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
@@ -207,37 +269,45 @@ pub struct FileIgnored {
     path: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FileTooLarge {
-    path: String,
-    size: usize,
-    limit: usize,
+    pub size: usize,
+    pub limit: usize,
+}
+
+impl From<CheckFileSizeResult> for FileTooLarge {
+    fn from(value: CheckFileSizeResult) -> Self {
+        Self {
+            size: value.file_size,
+            limit: value.limit,
+        }
+    }
 }
 
 impl Diagnostic for FileTooLarge {
-    fn category(&self) -> Option<&'static Category> {
-        Some(category!("internalError/fs"))
+    fn severity(&self) -> Severity {
+        Severity::Information
     }
 
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         fmt.write_markup(
             markup!{
-                "Size of "{self.path}" is "{Bytes(self.size)}" which exceeds configured maximum of "{Bytes(self.limit)}" for this project.
-                The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-                Use the `files.maxSize` configuration to change the maximum size of files processed."
+                "The size of the file is "{Bytes(self.size)}", which exceeds the configured maximum of "{Bytes(self.limit)}" for this project.
+Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.ignore` to ignore the file."
             }
         )
     }
-
-    fn description(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
-        write!(fmt,
-               "Size of {} is {} which exceeds configured maximum of {} for this project.\n\
-               The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.\n\
-               Use the `files.maxSize` configuration to change the maximum size of files processed.",
-               self.path, Bytes(self.size), Bytes(self.limit)
-        )
-    }
 }
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "project",
+    message(
+        message("Biome attempted to perform an operation on the registered project, but no project was registered. This is a bug in Biome. If this problem persists, please report here: https://github.com/biomejs/biome/issues/"),
+        description = "Biome attempted to perform an operation on the registered project, but no project was registered. This is a bug in Biome. If this problem persists, please report here: https://github.com/biomejs/biome/issues/"
+    )
+)]
+pub struct NoProject;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SourceFileNotSupported {
@@ -354,11 +424,8 @@ pub fn extension_error(path: &BiomePath) -> WorkspaceError {
     let file_source = DocumentFileSource::from_path(path);
     WorkspaceError::source_file_not_supported(
         file_source,
-        path.clone().display().to_string(),
-        path.clone()
-            .extension()
-            .and_then(OsStr::to_str)
-            .map(str::to_string),
+        path.clone().to_string(),
+        path.clone().extension().map(|p| p.to_string()),
     )
 }
 
@@ -470,6 +537,31 @@ pub struct NoVcsFolderFound {
 )]
 pub struct DisabledVcs {}
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PluginErrors {
+    diagnostics: Vec<PluginDiagnostic>,
+}
+
+impl Diagnostic for PluginErrors {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("plugin"))
+    }
+
+    fn severity(&self) -> Severity {
+        Severity::Error
+    }
+
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_markup(markup!("Error(s) during loading of plugins:\n"))?;
+
+        for diagnostic in &self.diagnostics {
+            diagnostic.message(fmt)?;
+        }
+
+        Ok(())
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
     category = "project",
@@ -499,15 +591,12 @@ impl Advices for ProtectedFileAdvice {
 
 #[cfg(test)]
 mod test {
-    use crate::diagnostics::{
-        CantReadFile, FileIgnored, FileTooLarge, NotFound, SourceFileNotSupported,
-    };
+    use crate::diagnostics::{CantReadFile, FileIgnored, NotFound, SourceFileNotSupported};
     use crate::file_handlers::DocumentFileSource;
     use crate::{TransportError, WorkspaceError};
     use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt, Error};
     use biome_formatter::FormatError;
     use biome_fs::BiomePath;
-    use std::ffi::OsStr;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
         let content = print_diagnostic_to_string(&diagnostic);
@@ -562,23 +651,10 @@ mod test {
             "source_file_not_supported",
             WorkspaceError::SourceFileNotSupported(SourceFileNotSupported {
                 file_source: DocumentFileSource::Unknown,
-                path: path.display().to_string(),
-                extension: path.extension().and_then(OsStr::to_str).map(str::to_string),
+                path: path.to_string(),
+                extension: path.extension().map(str::to_string),
             })
             .with_file_path("not_supported.toml"),
-        )
-    }
-
-    #[test]
-    fn file_too_large() {
-        snap_diagnostic(
-            "file_too_large",
-            WorkspaceError::FileTooLarge(FileTooLarge {
-                path: "example.js".to_string(),
-                limit: 100,
-                size: 500,
-            })
-            .with_file_path("example.js"),
         )
     }
 

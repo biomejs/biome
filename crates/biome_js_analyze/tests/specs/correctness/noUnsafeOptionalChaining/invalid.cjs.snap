@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.cjs
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -12,7 +13,7 @@ with (obj?.foo) {};
 ```
 invalid.cjs:1:10 lint/correctness/noUnsafeOptionalChaining ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unsafe usage of optional chaining.
+  × Unsafe usage of optional chaining.
   
   > 1 │ with (obj?.foo) {};
       │          ^^
@@ -26,5 +27,3 @@ invalid.cjs:1:10 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
   
 
 ```
-
-

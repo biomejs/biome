@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 
 
 for (let i = 0; i < array.length; i++) {
@@ -79,7 +80,7 @@ for (let i = 0; i < this.array.length; ++i) {
 ```
 invalid.js:3:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
   > 3 │ for (let i = 0; i < array.length; i++) {
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -95,7 +96,7 @@ invalid.js:3:1 lint/style/useForOf ━━━━━━━━━━━━━━━
 ```
 invalid.js:7:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
      5 │ }
      6 │ 
@@ -113,7 +114,7 @@ invalid.js:7:1 lint/style/useForOf ━━━━━━━━━━━━━━━
 ```
 invalid.js:11:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
      9 │ }
     10 │ 
@@ -128,7 +129,7 @@ invalid.js:11:1 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:13:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
     11 │ for (var b = 0; b < arr.length; b++) console.log(arr[b]);
     12 │ 
@@ -146,7 +147,7 @@ invalid.js:13:1 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:17:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
     15 │ }
     16 │ 
@@ -160,7 +161,7 @@ invalid.js:17:1 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:20:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
   > 20 │ for (let a = 0; a < arr.length; a++) {
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -176,7 +177,7 @@ invalid.js:20:1 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:24:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
     22 │ }
     23 │ 
@@ -194,7 +195,7 @@ invalid.js:24:1 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:28:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
     26 │ }
     27 │ 
@@ -212,7 +213,7 @@ invalid.js:28:1 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:32:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
     30 │ }
     31 │ 
@@ -230,7 +231,7 @@ invalid.js:32:1 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:36:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
     34 │ }
     35 │ 
@@ -245,7 +246,7 @@ invalid.js:36:1 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:38:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
     36 │ for (let x = 0; x < arr.length; x = x + 1) {}
     37 │ 
@@ -263,7 +264,7 @@ invalid.js:38:1 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:39:3 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
     38 │ for (let shadow = 0; shadow < arr.length; shadow++) {
   > 39 │   for (let shadow = 0; shadow < arr.length; shadow++) {}
@@ -277,7 +278,7 @@ invalid.js:39:3 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:42:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
     40 │ }
     41 │ 
@@ -295,7 +296,7 @@ invalid.js:42:1 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:46:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
     44 │ }
     45 │ 
@@ -313,7 +314,7 @@ invalid.js:46:1 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:50:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
     48 │ }
     49 │ 
@@ -331,7 +332,7 @@ invalid.js:50:1 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:54:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
     52 │ }
     53 │ 
@@ -349,7 +350,7 @@ invalid.js:54:1 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:58:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
     56 │ }
     57 │ 
@@ -367,7 +368,7 @@ invalid.js:58:1 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:62:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
     60 │ }
     61 │ 
@@ -385,7 +386,7 @@ invalid.js:62:1 lint/style/useForOf ━━━━━━━━━━━━━━�
 ```
 invalid.js:66:1 lint/style/useForOf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use for-of loop instead of a for loop.
+  i Use for-of loop instead of a for loop.
   
     64 │ }
     65 │ 
@@ -398,5 +399,3 @@ invalid.js:66:1 lint/style/useForOf ━━━━━━━━━━━━━━�
   
 
 ```
-
-

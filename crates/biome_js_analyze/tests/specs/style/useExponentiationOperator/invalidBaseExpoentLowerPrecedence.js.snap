@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidBaseExpoentLowerPrecedence.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // base and exponent with a lower precedence
 Math.pow(a * b, c)
 Math.pow(a, b * c)
@@ -279,5 +280,3 @@ invalidBaseExpoentLowerPrecedence.js:12:17 lint/style/useExponentiationOperator 
   
 
 ```
-
-

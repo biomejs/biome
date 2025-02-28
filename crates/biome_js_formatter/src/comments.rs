@@ -80,7 +80,7 @@ impl CommentStyle for JsCommentStyle {
         parse_suppression_comment(text)
             .filter_map(Result::ok)
             .flat_map(|suppression| suppression.categories)
-            .any(|(key, _)| key == category!("format"))
+            .any(|(key, ..)| key == category!("format"))
     }
 
     fn get_comment_kind(comment: &SyntaxTriviaPieceComments<JsLanguage>) -> CommentKind {
@@ -119,7 +119,8 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_switch_default_case_comment)
                 .or_else(handle_after_arrow_fat_arrow_comment)
                 .or_else(handle_import_export_specifier_comment)
-                .or_else(handle_import_named_clause_comments),
+                .or_else(handle_import_named_clause_comments)
+                .or_else(handle_array_expression),
             CommentTextPosition::OwnLine => handle_member_expression_comment(comment)
                 .or_else(handle_function_comment)
                 .or_else(handle_if_statement_comment)
@@ -225,7 +226,7 @@ fn handle_after_arrow_param_comment(
 ) -> CommentPlacement<JsLanguage> {
     let is_next_arrow = comment
         .following_token()
-        .map_or(false, |token| token.kind() == JsSyntaxKind::FAT_ARROW);
+        .is_some_and(|token| token.kind() == JsSyntaxKind::FAT_ARROW);
 
     // Makes comments after the `(` and `=>` dangling comments
     // ```javascript
@@ -469,7 +470,7 @@ fn handle_class_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlaceme
     if (AnyJsClass::can_cast(comment.enclosing_node().kind())
         && comment
             .following_token()
-            .map_or(false, |token| token.kind() == JsSyntaxKind::CLASS_KW))
+            .is_some_and(|token| token.kind() == JsSyntaxKind::CLASS_KW))
         // ```javascript
         // @decorator
         // // comment
@@ -499,7 +500,7 @@ fn handle_class_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlaceme
         // ```
         if comment
             .following_token()
-            .map_or(false, |token| token.kind() == JsSyntaxKind::R_CURLY)
+            .is_some_and(|token| token.kind() == JsSyntaxKind::R_CURLY)
             && first_member.is_none()
         {
             return CommentPlacement::dangling(comment.enclosing_node().clone(), comment);
@@ -795,7 +796,7 @@ fn handle_if_statement_comment(
                 // Test if this is a comment right before the condition's `)`
                 if comment
                     .following_token()
-                    .map_or(false, |token| token.kind() == JsSyntaxKind::R_PAREN)
+                    .is_some_and(|token| token.kind() == JsSyntaxKind::R_PAREN)
                 {
                     return CommentPlacement::trailing(preceding.clone(), comment);
                 }
@@ -887,7 +888,7 @@ fn handle_while_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlaceme
         // Test if this is a comment right before the condition's `)`
         if comment
             .following_token()
-            .map_or(false, |token| token.kind() == JsSyntaxKind::R_PAREN)
+            .is_some_and(|token| token.kind() == JsSyntaxKind::R_PAREN)
         {
             return CommentPlacement::trailing(preceding.clone(), comment);
         }
@@ -1010,9 +1011,10 @@ fn handle_for_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlacement
     // for /* comment */ (;;);
     // for (;;a++) /* comment */;
     // ```
-    else if comment.following_node().map_or(false, |following| {
-        JsEmptyStatement::can_cast(following.kind())
-    }) {
+    else if comment
+        .following_node()
+        .is_some_and(|following| JsEmptyStatement::can_cast(following.kind()))
+    {
         if let Some(preceding) = comment.preceding_node() {
             CommentPlacement::trailing(preceding.clone(), comment)
         } else {
@@ -1068,7 +1070,7 @@ fn handle_variable_declarator_comment(
                     if initializer.syntax() == following
                         && initializer
                             .expression()
-                            .map_or(false, |expression| is_complex_value(expression.syntax())) =>
+                            .is_ok_and(|expression| is_complex_value(expression.syntax())) =>
                 {
                     return CommentPlacement::leading(initializer.into_syntax(), comment);
                 }
@@ -1359,6 +1361,14 @@ fn handle_import_named_clause_comments(
             CommentPlacement::Default(comment)
         }
         _ => CommentPlacement::Default(comment),
+    }
+}
+
+fn handle_array_expression(comment: DecoratedComment<JsLanguage>) -> CommentPlacement<JsLanguage> {
+    if let Some(preceding) = comment.preceding_node().and_then(JsArrayHole::cast_ref) {
+        CommentPlacement::leading(preceding.into_syntax(), comment)
+    } else {
+        CommentPlacement::Default(comment)
     }
 }
 

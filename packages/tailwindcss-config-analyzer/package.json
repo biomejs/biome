@@ -1,17 +1,21 @@
 {
   "name": "tailwindcss-config-analyzer",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Tools to introspect Tailwind CSS configurations for integration with Biome",
   "private": true,
   "license": "MIT OR Apache-2.0",
   "author": "Dani Guardiola",
   "type": "module",
   "dependencies": {
-    "tailwindcss": "^3.4.16"
+    "tailwindcss": "^3.4.17"
+  },
+  "scripts": {
+    "build": "tsc",
+    "execute": "node dist/generate-tailwind-preset.js"
   },
   "devDependencies": {
-    "@types/bun": "1.1.14",
+    "@types/node": "22.13.5",
     "read-package-up": "11.0.0",
-    "typescript": "5.7.2"
+    "typescript": "5.7.3"
   }
 }

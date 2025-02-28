@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsArrayElement, AnyJsExpression, JsArrayExpression, TriviaPieceKind};
 use biome_rowan::{AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt};
@@ -9,7 +10,17 @@ use biome_rowan::{AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt};
 use crate::JsRuleAction;
 
 declare_lint_rule! {
-    /// Disallow sparse arrays
+    /// Prevents the use of sparse arrays (arrays with holes).
+    ///
+    /// Sparse arrays may contain empty slots due to the use of multiple commas between two items, like the following:
+    ///
+    /// ```js,ignore
+    /// const items = [a,,,b];
+    /// ```
+    /// Arrays with holes might yield incorrect information. For example, the previous snippet, `items` has a length of `4`, but did the user
+    /// really intended to have an array with four items? Or was it a typo.
+    ///
+    /// This rule enforce the user to explicitly an `undefined` in places where there's a hole.
     ///
     /// ## Examples
     ///
@@ -18,12 +29,19 @@ declare_lint_rule! {
     /// ```js,expect_diagnostic
     /// [1,,2]
     /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js
+    /// [1, undefined, 2]
+    /// ```
     pub NoSparseArray {
         version: "1.0.0",
         name: "noSparseArray",
         language: "js",
         sources: &[RuleSource::Eslint("no-sparse-arrays")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -53,10 +71,10 @@ impl Rule for NoSparseArray {
         Some(RuleDiagnostic::new(rule_category!(),
             node.syntax().text_trimmed_range(),
 markup! {
-                "This "<Emphasis>"array"</Emphasis>" contains an "<Emphasis>"empty slot"</Emphasis>"."
+                "This "<Emphasis>"array"</Emphasis>" contains an "<Emphasis>"empty slots."</Emphasis>"."
             }
             .to_owned()
-        ))
+        ).note("The presences of empty slots may cause incorrect information and might be a typo."))
     }
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {

@@ -1,12 +1,11 @@
-use std::collections::hash_map::Entry;
-
+use crate::services::semantic::Semantic;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleList;
+use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
 use rustc_hash::FxHashMap;
-
-use crate::services::semantic::Semantic;
+use std::collections::hash_map::Entry;
 
 declare_lint_rule! {
     /// Disallow duplicate custom properties within declaration blocks.
@@ -40,6 +39,7 @@ declare_lint_rule! {
         name: "noDuplicateCustomProperties",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("declaration-block-no-duplicate-custom-properties")],
     }
 }
@@ -56,12 +56,12 @@ impl Rule for NoDuplicateCustomProperties {
 
         let rule = model.get_rule_by_range(node.range())?;
 
-        let mut seen: FxHashMap<&str, TextRange> = FxHashMap::default();
+        let mut seen: FxHashMap<Box<str>, TextRange> = FxHashMap::default();
 
-        for declaration in rule.declarations.iter() {
-            let prop = &declaration.property;
-            let prop_name = prop.name.as_str();
-            let prop_range = prop.range;
+        for declaration in rule.declarations() {
+            let prop = declaration.property();
+            let prop_name = prop.value().ok()?;
+            let prop_range = prop.range();
 
             let is_custom_property = prop_name.starts_with("--");
 
@@ -69,12 +69,12 @@ impl Rule for NoDuplicateCustomProperties {
                 continue;
             }
 
-            match seen.entry(prop_name) {
+            match seen.entry(prop_name.text().into()) {
                 Entry::Occupied(entry) => {
                     return Some((*entry.get(), (prop_range, prop_name.to_string())));
                 }
-                Entry::Vacant(_) => {
-                    seen.insert(prop_name, prop_range);
+                Entry::Vacant(entry) => {
+                    entry.insert(prop_range);
                 }
             }
         }

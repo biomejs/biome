@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidClassGetter.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export default class {
     get X() {}
 
@@ -31,7 +32,7 @@ export default class {
 ```
 invalidClassGetter.js:2:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class getter name should be in camelCase.
+  i This class getter name should be in camelCase.
   
     1 │ export default class {
   > 2 │     get X() {}
@@ -45,7 +46,7 @@ invalidClassGetter.js:2:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassGetter.js:4:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class getter name should be in camelCase.
+  i This class getter name should be in camelCase.
   
     2 │     get X() {}
     3 │ 
@@ -60,7 +61,7 @@ invalidClassGetter.js:4:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassGetter.js:6:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class getter name should be in camelCase.
+  i This class getter name should be in camelCase.
   
     4 │     get PROPERTY() {}
     5 │ 
@@ -75,7 +76,7 @@ invalidClassGetter.js:6:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassGetter.js:8:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class getter name should be in camelCase.
+  i This class getter name should be in camelCase.
   
      6 │     get SpecialProperty() {}
      7 │ 
@@ -90,7 +91,7 @@ invalidClassGetter.js:8:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassGetter.js:10:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class getter name should be in camelCase.
+  i This class getter name should be in camelCase.
   
      8 │     get special_property() {}
      9 │ 
@@ -105,7 +106,7 @@ invalidClassGetter.js:10:9 lint/style/useNamingConvention ━━━━━━━�
 ```
 invalidClassGetter.js:12:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class getter name should be in camelCase.
+  i This class getter name should be in camelCase.
   
     10 │     get Unknown_Style() {}
     11 │ 
@@ -120,7 +121,7 @@ invalidClassGetter.js:12:10 lint/style/useNamingConvention ━━━━━━━
 ```
 invalidClassGetter.js:14:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class getter name should be in camelCase.
+  i This class getter name should be in camelCase.
   
     12 │     get #X() {}
     13 │ 
@@ -135,7 +136,7 @@ invalidClassGetter.js:14:10 lint/style/useNamingConvention ━━━━━━━
 ```
 invalidClassGetter.js:16:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class getter name should be in camelCase.
+  i This class getter name should be in camelCase.
   
     14 │     get #PROPERTY() {}
     15 │ 
@@ -150,7 +151,7 @@ invalidClassGetter.js:16:10 lint/style/useNamingConvention ━━━━━━━
 ```
 invalidClassGetter.js:18:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class getter name should be in camelCase.
+  i This class getter name should be in camelCase.
   
     16 │     get #SpecialProperty() {}
     17 │ 
@@ -165,7 +166,7 @@ invalidClassGetter.js:18:10 lint/style/useNamingConvention ━━━━━━━
 ```
 invalidClassGetter.js:20:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This class getter name should be in camelCase.
+  i This class getter name should be in camelCase.
   
     18 │     get #special_property() {}
     19 │ 

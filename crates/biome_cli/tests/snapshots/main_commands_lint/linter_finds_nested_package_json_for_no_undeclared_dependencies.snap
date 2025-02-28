@@ -1,0 +1,64 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUndeclaredDependencies": "on"
+      }
+    }
+  }
+}
+```
+
+## `frontend/file1.js`
+
+```js
+import 'react-dom'
+```
+
+## `frontend/package.json`
+
+```json
+{
+    "dependencies": {
+        "react": "19.0.0"
+    }
+}
+```
+
+## `package.json`
+
+```json
+{
+    "dependencies": {
+        "react-dom": "19.0.0"
+    }
+}
+```
+
+# Emitted Messages
+
+```block
+frontend/file1.js:1:8 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Dependency react-dom isn't specified in frontend/package.json.
+  
+  > 1 │ import 'react-dom'
+      │        ^^^^^^^^^^^
+  
+  i This could lead to errors.
+  
+  i Add the dependency in your manifest.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

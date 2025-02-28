@@ -1,5 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
+#![allow(unused_mut)]
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, T, *};
 use biome_rowan::{
     AstNode, ParsedChildren, RawNodeSlots, RawSyntaxNode, SyntaxFactory, SyntaxKind,
@@ -8,7 +9,6 @@ use biome_rowan::{
 pub struct CssSyntaxFactory;
 impl SyntaxFactory for CssSyntaxFactory {
     type Kind = CssSyntaxKind;
-    #[allow(unused_mut)]
     fn make_syntax(
         kind: Self::Kind,
         children: ParsedChildren<Self::Kind>,
@@ -4292,7 +4292,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if element.kind() == T![U+] {
+                    if element.kind() == T!["U+"] {
                         slots.mark_present();
                         current_element = elements.next();
                     }

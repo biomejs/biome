@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsRegexLiteralExpression, JsSyntaxKind, JsSyntaxToken};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize};
 
@@ -44,6 +45,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-useless-escape")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
 }
@@ -126,7 +128,7 @@ impl Rule for NoUselessEscapeInRegex {
                                     | b'.' | b':' | b';' | b'<' | b'=' | b'>' | b'?'
                                     | b'@' | b'`' | b'~' if has_v_flag => {
                                         // SAFETY: there is at least one preceding character (`[`)
-                                        if bytes[index-1] != *escaped && !byte_it.next().is_some_and(|(_, byte)| byte == escaped) {
+                                        if bytes[index-1] != *escaped && byte_it.next().is_none_or(|(_, byte)| byte != escaped) {
                                             return Some(State {
                                                 backslash_index: index as u16,
                                                 escaped: *escaped,
@@ -136,8 +138,8 @@ impl Rule for NoUselessEscapeInRegex {
                                     }
                                     b'_' if has_v_flag => {
                                         // `[\_^^]`
-                                        if !byte_it.next().is_some_and(|(_, byte)| *byte == b'^') &&
-                                            !byte_it.next().is_some_and(|(_, byte)| *byte == b'^') {
+                                        if byte_it.next().is_none_or(|(_, byte)| *byte != b'^') &&
+                                            byte_it.next().is_none_or(|(_, byte)| *byte != b'^') {
                                             return Some(State {
                                                 backslash_index: index as u16,
                                                 escaped: *escaped,

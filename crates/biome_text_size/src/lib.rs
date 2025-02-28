@@ -23,7 +23,7 @@ mod range;
 mod size;
 mod traits;
 
-#[cfg(feature = "schemars")]
+#[cfg(feature = "schema")]
 mod schemars_impls;
 #[cfg(feature = "serde")]
 mod serde_impls;

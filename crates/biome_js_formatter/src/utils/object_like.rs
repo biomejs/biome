@@ -2,7 +2,9 @@ use crate::prelude::*;
 use crate::JsFormatContext;
 use biome_formatter::write;
 use biome_formatter::{Format, FormatResult};
-use biome_js_syntax::{JsObjectExpression, JsSyntaxToken, TsObjectType};
+use biome_js_syntax::{
+    JsFormalParameter, JsObjectExpression, JsSyntaxToken, TsObjectType, TsTypeAnnotation,
+};
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, AstSeparatedList, SyntaxResult};
 
 declare_node_union! {
@@ -61,7 +63,14 @@ impl Format<JsFormatContext> for JsObjectLike {
             )?;
         } else {
             let should_insert_space_around_brackets = f.options().bracket_spacing().value();
-            let should_expand = self.members_have_leading_newline();
+            let should_expand = f.options().object_wrap().is_preserve()
+                && self.members_have_leading_newline()
+                // const fn = ({ foo }: { foo: string }) => { ... };
+                //                      ^ do not break properties here
+                && self
+                    .parent::<TsTypeAnnotation>()
+                    .is_none_or(|node| node.parent::<JsFormalParameter>().is_none());
+
             write!(
                 f,
                 [group(&soft_block_indent_with_maybe_space(

@@ -159,7 +159,7 @@ impl NativeBacktrace {
             frame.symbols().iter().any(|symbol| {
                 symbol
                     .addr()
-                    .map_or(false, |addr| addr as usize == self.top_frame)
+                    .is_some_and(|addr| addr as usize == self.top_frame)
             })
         });
 
@@ -173,7 +173,7 @@ impl NativeBacktrace {
             frame.symbols().iter().any(|symbol| {
                 symbol
                     .addr()
-                    .map_or(false, |addr| addr as usize == self.bottom_frame)
+                    .is_some_and(|addr| addr as usize == self.bottom_frame)
             })
         });
 
@@ -209,7 +209,7 @@ thread_local! {
 /// On the main thread:
 /// ```
 /// # use biome_diagnostics::set_bottom_frame;
-/// # #[allow(clippy::needless_doctest_main)]
+/// # #[expect(clippy::needless_doctest_main)]
 /// pub fn main() {
 ///     set_bottom_frame(main as usize);
 ///

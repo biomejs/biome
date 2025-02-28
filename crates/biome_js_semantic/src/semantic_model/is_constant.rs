@@ -27,7 +27,7 @@ mod tests {
             .syntax()
             .descendants()
             .filter_map(|x| x.cast::<JsIdentifierBinding>())
-            .find(|x| x.text() == "a")
+            .find(|x| x.to_trimmed_string() == "a")
             .unwrap();
         let declarator = a_reference.parent::<JsVariableDeclarator>().unwrap();
         let initializer = declarator.initializer().unwrap();

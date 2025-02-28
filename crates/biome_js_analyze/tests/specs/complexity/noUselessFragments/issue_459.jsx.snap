@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue_459.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -12,7 +13,7 @@ expression: issue_459.jsx
 ```
 issue_459.jsx:1:16 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
   > 1 │ {'' != null && <>stuff</>}
       │                ^^^^^^^^^^
@@ -28,5 +29,3 @@ issue_459.jsx:1:16 lint/complexity/noUselessFragments  FIXABLE  ━━━━━�
   
 
 ```
-
-

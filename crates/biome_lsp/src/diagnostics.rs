@@ -54,9 +54,7 @@ pub(crate) async fn handle_lsp_error<T>(
     match err {
         LspError::WorkspaceError(err) => match err {
             // diagnostics that shouldn't raise an hard error, but send a message to the user
-            WorkspaceError::FormatWithErrorsDisabled(_)
-            | WorkspaceError::FileIgnored(_)
-            | WorkspaceError::FileTooLarge(_) => {
+            WorkspaceError::FormatWithErrorsDisabled(_) | WorkspaceError::FileIgnored(_) => {
                 let message = format!("{err}");
                 client.log_message(MessageType::WARNING, message).await;
                 Ok(None)

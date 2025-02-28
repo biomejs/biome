@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function* foo() {
 	return 0;
 }
@@ -68,7 +69,7 @@ function* foo() {
 ```
 invalid.js:1:1 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This generator function doesn't contain yield.
+  × This generator function doesn't contain yield.
   
   > 1 │ function* foo() {
       │ ^^^^^^^^^^^^^^^^^
@@ -84,7 +85,7 @@ invalid.js:1:1 lint/correctness/useYield ━━━━━━━━━━━━━
 ```
 invalid.js:5:2 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This generator function doesn't contain yield.
+  × This generator function doesn't contain yield.
   
     3 │ }
     4 │ 
@@ -102,7 +103,7 @@ invalid.js:5:2 lint/correctness/useYield ━━━━━━━━━━━━━
 ```
 invalid.js:10:2 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This generator function doesn't contain yield.
+  × This generator function doesn't contain yield.
   
      9 │ const obj = {
   > 10 │ 	*foo() {
@@ -119,7 +120,7 @@ invalid.js:10:2 lint/correctness/useYield ━━━━━━━━━━━━�
 ```
 invalid.js:16:2 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This generator function doesn't contain yield.
+  × This generator function doesn't contain yield.
   
     15 │ class A {
   > 16 │ 	*foo() {
@@ -136,7 +137,7 @@ invalid.js:16:2 lint/correctness/useYield ━━━━━━━━━━━━�
 ```
 invalid.js:21:1 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This generator function doesn't contain yield.
+  × This generator function doesn't contain yield.
   
     19 │ }
     20 │ 
@@ -156,7 +157,7 @@ invalid.js:21:1 lint/correctness/useYield ━━━━━━━━━━━━�
 ```
 invalid.js:28:2 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This generator function doesn't contain yield.
+  × This generator function doesn't contain yield.
   
     27 │ function* foo() {
   > 28 │ 	function* bar() {
@@ -173,7 +174,7 @@ invalid.js:28:2 lint/correctness/useYield ━━━━━━━━━━━━�
 ```
 invalid.js:34:1 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This generator function doesn't contain yield.
+  × This generator function doesn't contain yield.
   
     32 │ }
     33 │ 
@@ -194,7 +195,7 @@ invalid.js:34:1 lint/correctness/useYield ━━━━━━━━━━━━�
 ```
 invalid.js:43:3 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This generator function doesn't contain yield.
+  × This generator function doesn't contain yield.
   
     41 │ function* foo() {
     42 │ 	const obj = {
@@ -212,7 +213,7 @@ invalid.js:43:3 lint/correctness/useYield ━━━━━━━━━━━━�
 ```
 invalid.js:49:3 lint/correctness/useYield ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This generator function doesn't contain yield.
+  × This generator function doesn't contain yield.
   
     48 │ 	class A {
   > 49 │ 		*baz() {
@@ -225,5 +226,3 @@ invalid.js:49:3 lint/correctness/useYield ━━━━━━━━━━━━�
   
 
 ```
-
-

@@ -9,7 +9,6 @@ use biome_grit_syntax::GritLanguage;
 use std::fmt::Display;
 use std::rc::Rc;
 
-#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct GritFormatContext {
     options: GritFormatOptions,
@@ -62,6 +61,7 @@ pub struct GritFormatOptions {
     line_ending: LineEnding,
     line_width: LineWidth,
     attribute_position: AttributePosition,
+    bracket_spacing: BracketSpacing,
     _file_source: GritFileSource,
 }
 
@@ -73,6 +73,7 @@ impl GritFormatOptions {
             indent_width: IndentWidth::default(),
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
+            bracket_spacing: BracketSpacing::default(),
             attribute_position: AttributePosition::default(),
         }
     }
@@ -116,6 +117,10 @@ impl GritFormatOptions {
     pub fn attribute_position(&self) -> AttributePosition {
         self.attribute_position
     }
+
+    pub fn bracket_spacing(&self) -> BracketSpacing {
+        self.bracket_spacing
+    }
 }
 
 impl Display for GritFormatOptions {
@@ -143,14 +148,6 @@ impl FormatOptions for GritFormatOptions {
 
     fn line_ending(&self) -> LineEnding {
         self.line_ending
-    }
-
-    fn attribute_position(&self) -> biome_formatter::AttributePosition {
-        self.attribute_position
-    }
-
-    fn bracket_spacing(&self) -> biome_formatter::BracketSpacing {
-        BracketSpacing::default()
     }
 
     fn as_print_options(&self) -> biome_formatter::prelude::PrinterOptions {

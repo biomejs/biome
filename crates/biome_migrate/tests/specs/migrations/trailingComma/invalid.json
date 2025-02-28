@@ -1,17 +1,12 @@
 {
-	"javascript": {
-		"formatter": {
-			"trailingComma": "all"
-		}
-	},
-	"overrides": [
-		{
-			"include": ["scripts/**"],
-			"javascript": {
-				"formatter": {
-					"trailingComma": "es5"
-				}
-			}
-		}
-	]
+  "javascript": {
+    "formatter": {
+      "trailingComma": "always"
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingComma": "always"
+    }
+  }
 }

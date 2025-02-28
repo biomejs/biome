@@ -19,10 +19,10 @@ use crate::{AstNode, Language};
 ///
 /// let text = match_ast! {
 ///     match &root {
-///         RawLanguageRoot(root) => { format!("root: {}", root.text()) },
-///         LiteralExpression(literal) => { format!("literal: {}", literal.text()) },
+///         RawLanguageRoot(root) => { format!("root: {}", root.to_trimmed_string()) },
+///         LiteralExpression(literal) => { format!("literal: {}", literal.to_trimmed_string()) },
 ///         _ => {
-///             root.text().to_string()
+///             root.text_with_trivia().to_string()
 ///         }
 ///     }
 /// };
@@ -65,7 +65,7 @@ macro_rules! declare_node_union {
 
     ( $( #[$attr:meta] )* $vis:vis $name:ident = $( $variant:ident )|* ) => {
         $( #[$attr] )*
-        #[allow(clippy::enum_variant_names)]
+        #[expect(clippy::enum_variant_names)]
         #[derive(Clone, PartialEq, Eq, Hash)]
         $vis enum $name {
             $( $variant($variant), )*

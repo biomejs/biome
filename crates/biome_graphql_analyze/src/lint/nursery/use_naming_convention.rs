@@ -46,7 +46,12 @@ impl Rule for UseNamingConvention {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        if node.text().chars().any(|c| c.is_lowercase()) {
+        if node
+            .syntax()
+            .text_trimmed()
+            .chars()
+            .any(|c| c.is_lowercase())
+        {
             return Some(());
         }
 

@@ -1,0 +1,35 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Functionality for loading plugins and caching them in memory"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_plugin_loader"
+repository.workspace = true
+version              = "0.0.1"
+
+[dependencies]
+biome_analyze            = { workspace = true }
+biome_console            = { workspace = true }
+biome_deserialize        = { workspace = true }
+biome_deserialize_macros = { workspace = true }
+biome_diagnostics        = { workspace = true }
+biome_fs                 = { workspace = true }
+biome_grit_patterns      = { workspace = true }
+biome_json_parser        = { workspace = true }
+biome_parser             = { workspace = true }
+biome_rowan              = { workspace = true }
+camino                   = { workspace = true }
+grit-pattern-matcher     = { workspace = true }
+grit-util                = { workspace = true }
+papaya                   = { workspace = true }
+rustc-hash               = { workspace = true }
+serde                    = { workspace = true }
+
+[dev-dependencies]
+insta = { workspace = true }
+
+[lints]
+workspace = true

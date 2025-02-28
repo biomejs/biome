@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsClass, AnyJsClassMember, AnyJsExpression, JsArrowFunctionExpression, JsSuperExpression,
@@ -82,6 +83,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintMysticatea("no-this-in-static")],
         recommended: true,
+        severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }
 }

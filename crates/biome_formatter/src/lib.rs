@@ -58,7 +58,8 @@ use crate::trivia::{format_skipped_token_trivia, format_trimmed_token};
 pub use arguments::{Argument, Arguments};
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, TextNumber,
+    Deserializable, DeserializableValue, DeserializationContext, DeserializationDiagnostic,
+    TextNumber,
 };
 use biome_deserialize_macros::Deserializable;
 use biome_deserialize_macros::Merge;
@@ -82,9 +83,10 @@ use token::string::Quote;
 #[derive(Debug, Default, Clone, Copy, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum IndentStyle {
     /// Tab
     #[default]
@@ -132,9 +134,10 @@ impl Display for IndentStyle {
 #[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(Default)]
 pub enum LineEnding {
     ///  Line Feed only (\n), common on Linux and macOS as well as inside git repos
@@ -201,9 +204,10 @@ impl std::fmt::Display for LineEnding {
 #[derive(Clone, Copy, Eq, Merge, Hash, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, schemars::JsonSchema),
+    derive(serde::Serialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct IndentWidth(u8);
 
 impl IndentWidth {
@@ -225,15 +229,15 @@ impl Default for IndentWidth {
 
 impl Deserializable for IndentWidth {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -301,9 +305,10 @@ impl Debug for IndentWidth {
 #[derive(Clone, Copy, Eq, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, schemars::JsonSchema),
+    derive(serde::Serialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct LineWidth(u16);
 
 impl LineWidth {
@@ -326,15 +331,15 @@ impl Default for LineWidth {
 
 impl Deserializable for LineWidth {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -479,9 +484,10 @@ impl From<LineWidth> for u16 {
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum QuoteStyle {
     #[default]
     Double,
@@ -526,8 +532,8 @@ impl FromStr for QuoteStyle {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "double" | "Double" => Ok(Self::Double),
-            "single" | "Single" => Ok(Self::Single),
+            "double" => Ok(Self::Double),
+            "single" => Ok(Self::Single),
             // TODO: replace this error with a diagnostic
             _ => Err("Value not supported for QuoteStyle"),
         }
@@ -555,9 +561,10 @@ impl From<QuoteStyle> for Quote {
 #[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct BracketSpacing(bool);
 
 impl BracketSpacing {
@@ -581,7 +588,13 @@ impl From<bool> for BracketSpacing {
 
 impl std::fmt::Display for BracketSpacing {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::write!(f, "{}", self.value())
+        std::write!(f, "{:?}", self.value())
+    }
+}
+
+impl biome_console::fmt::Display for BracketSpacing {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        fmt.write_str(&self.0.to_string())
     }
 }
 
@@ -603,9 +616,10 @@ impl FromStr for BracketSpacing {
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum AttributePosition {
     #[default]
     Auto,
@@ -626,9 +640,95 @@ impl FromStr for AttributePosition {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "multiline" | "Multiline" => Ok(Self::Multiline),
-            "auto" | "Auto" => Ok(Self::Auto),
+            "multiline" => Ok(Self::Multiline),
+            "auto" => Ok(Self::Auto),
             _ => Err("Value not supported for attribute_position. Supported values are 'auto' and 'multiline'."),
+        }
+    }
+}
+
+/// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct BracketSameLine(bool);
+
+impl BracketSameLine {
+    /// Return the boolean value for this [BracketSameLine]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl From<bool> for BracketSameLine {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
+impl std::fmt::Display for BracketSameLine {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::write!(f, "{}", self.value())
+    }
+}
+
+impl FromStr for BracketSameLine {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match bool::from_str(s) {
+            Ok(value) => Ok(Self(value)),
+            Err(_) => Err(
+                "Value not supported for BracketSameLine. Supported values are 'true' and 'false'.",
+            ),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum ObjectWrap {
+    #[default]
+    Preserve,
+    Collapse,
+}
+
+impl ObjectWrap {
+    pub const fn is_preserve(&self) -> bool {
+        matches!(self, Self::Preserve)
+    }
+
+    pub const fn is_collapse(&self) -> bool {
+        matches!(self, Self::Collapse)
+    }
+}
+
+impl FromStr for ObjectWrap {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "preserve"  => Ok(Self::Preserve),
+            "contains"  => Ok(Self::Collapse),
+            _ => Err("Value not supported for objectWrap. Supported values are 'preserve' and 'collapse'."),
+        }
+    }
+}
+
+impl Display for ObjectWrap {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Preserve => std::write!(f, "Preserve"),
+            Self::Collapse => std::write!(f, "Collapse"),
         }
     }
 }
@@ -649,6 +749,11 @@ pub trait FormatContext {
 }
 
 /// Options customizing how the source code should be formatted.
+///
+/// **Note**: This trait should **only** contain the essential abstractions required for the printing phase.
+/// For example, do not add a `fn bracket_spacing(&self) -> BracketSpacing` method here,
+/// as the [BracketSpacing] option is not needed during the printing phase
+/// and enforcing its implementation for all structs using this trait is unnecessary.
 pub trait FormatOptions {
     /// The indent style.
     fn indent_style(&self) -> IndentStyle;
@@ -661,12 +766,6 @@ pub trait FormatOptions {
 
     /// The type of line ending.
     fn line_ending(&self) -> LineEnding;
-
-    /// The attribute position.
-    fn attribute_position(&self) -> AttributePosition;
-
-    /// Whether to insert spaces around brackets in object literals. Defaults to true.
-    fn bracket_spacing(&self) -> BracketSpacing;
 
     /// Derives the print options from the these format options
     fn as_print_options(&self) -> PrinterOptions;
@@ -716,8 +815,6 @@ pub struct SimpleFormatOptions {
     pub indent_width: IndentWidth,
     pub line_width: LineWidth,
     pub line_ending: LineEnding,
-    pub attribute_position: AttributePosition,
-    pub bracket_spacing: BracketSpacing,
 }
 
 impl FormatOptions for SimpleFormatOptions {
@@ -737,22 +834,12 @@ impl FormatOptions for SimpleFormatOptions {
         self.line_ending
     }
 
-    fn attribute_position(&self) -> AttributePosition {
-        self.attribute_position
-    }
-
-    fn bracket_spacing(&self) -> BracketSpacing {
-        self.bracket_spacing
-    }
-
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::default()
             .with_indent_style(self.indent_style)
             .with_indent_width(self.indent_width)
             .with_print_width(self.line_width.into())
             .with_line_ending(self.line_ending)
-            .with_attribute_position(self.attribute_position)
-            .with_bracket_spacing(self.bracket_spacing)
     }
 }
 
@@ -764,10 +851,8 @@ impl Display for SimpleFormatOptions {
 
 /// Lightweight sourcemap marker between source and output tokens
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
-)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct SourceMarker {
     /// Position of the marker in the original source
     pub source: TextSize,
@@ -836,8 +921,10 @@ pub type PrintResult<T> = Result<T, PrintError>;
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
 )]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct Printed {
     code: String,
     range: Option<TextRange>,
@@ -1364,72 +1451,71 @@ pub fn format_node<L: FormatLanguage>(
     root: &SyntaxNode<L::SyntaxLanguage>,
     language: L,
 ) -> FormatResult<Formatted<L::Context>> {
-    tracing::trace_span!("format_node").in_scope(move || {
-        let (root, source_map) = match language.transform(&root.clone()) {
-            Some((transformed, source_map)) => {
-                // we don't need to insert the node back if it has the same offset
-                if &transformed == root {
-                    (transformed, Some(source_map))
-                } else {
-                    match root
-                        .ancestors()
-                        // ancestors() always returns self as the first element of the iterator.
-                        .skip(1)
-                        .last()
-                    {
-                        // current root node is the topmost node we don't need to insert the transformed node back
-                        None => (transformed, Some(source_map)),
-                        Some(top_root) => {
-                            // we have to return transformed node back into subtree
-                            let transformed_range = transformed.text_range();
-                            let root_range = root.text_range();
+    let _ = tracing::trace_span!("format_node").entered();
+    let (root, source_map) = match language.transform(&root.clone()) {
+        Some((transformed, source_map)) => {
+            // we don't need to insert the node back if it has the same offset
+            if &transformed == root {
+                (transformed, Some(source_map))
+            } else {
+                match root
+                    .ancestors()
+                    // ancestors() always returns self as the first element of the iterator.
+                    .skip(1)
+                    .last()
+                {
+                    // current root node is the topmost node we don't need to insert the transformed node back
+                    None => (transformed, Some(source_map)),
+                    Some(top_root) => {
+                        // we have to return transformed node back into subtree
+                        let transformed_range = transformed.text_range_with_trivia();
+                        let root_range = root.text_range_with_trivia();
 
-                            let transformed_root = top_root
-                                .replace_child(root.clone().into(), transformed.into())
-                                // SAFETY: Calling `unwrap` is safe because we know that `root` is part of the `top_root` subtree.
-                                .unwrap();
-                            let transformed = transformed_root.covering_element(TextRange::new(
-                                root_range.start(),
-                                root_range.start() + transformed_range.len(),
-                            ));
+                        let transformed_root = top_root
+                            .replace_child(root.clone().into(), transformed.into())
+                            // SAFETY: Calling `unwrap` is safe because we know that `root` is part of the `top_root` subtree.
+                            .unwrap();
+                        let transformed = transformed_root.covering_element(TextRange::new(
+                            root_range.start(),
+                            root_range.start() + transformed_range.len(),
+                        ));
 
-                            let node = match transformed {
-                                NodeOrToken::Node(node) => node,
-                                NodeOrToken::Token(token) => {
-                                    // if we get a token we need to get the parent node
-                                    token.parent().unwrap_or(transformed_root)
-                                }
-                            };
+                        let node = match transformed {
+                            NodeOrToken::Node(node) => node,
+                            NodeOrToken::Token(token) => {
+                                // if we get a token we need to get the parent node
+                                token.parent().unwrap_or(transformed_root)
+                            }
+                        };
 
-                            (node, Some(source_map))
-                        }
+                        (node, Some(source_map))
                     }
                 }
             }
-            None => (root.clone(), None),
-        };
+        }
+        None => (root.clone(), None),
+    };
 
-        let context = language.create_context(&root, source_map);
-        let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
+    let context = language.create_context(&root, source_map);
+    let format_node = FormatRefWithRule::new(&root, L::FormatRule::default());
 
-        let mut state = FormatState::new(context);
-        let mut buffer = VecBuffer::new(&mut state);
+    let mut state = FormatState::new(context);
+    let mut buffer = VecBuffer::new(&mut state);
 
-        write!(buffer, [format_node])?;
+    write!(buffer, [format_node])?;
 
-        let mut document = Document::from(buffer.into_vec());
-        document.propagate_expand();
+    let mut document = Document::from(buffer.into_vec());
+    document.propagate_expand();
 
-        state.assert_formatted_all_tokens(&root);
+    state.assert_formatted_all_tokens(&root);
 
-        let context = state.into_context();
-        let comments = context.comments();
+    let context = state.into_context();
+    let comments = context.comments();
 
-        comments.assert_checked_all_suppressions(&root);
-        comments.assert_formatted_all_comments();
+    comments.assert_checked_all_suppressions(&root);
+    comments.assert_formatted_all_comments();
 
-        Ok(Formatted::new(document, context))
-    })
+    Ok(Formatted::new(document, context))
 }
 
 /// Returns the [TextRange] for this [SyntaxElement] with the leading and
@@ -1495,7 +1581,7 @@ pub fn format_range<Language: FormatLanguage>(
         ));
     }
 
-    let root_range = root.text_range();
+    let root_range = root.text_range_with_trivia();
     if range.start() < root_range.start() || range.end() > root_range.end() {
         return Err(FormatError::RangeError {
             input: range,
@@ -1591,18 +1677,20 @@ pub fn format_range<Language: FormatLanguage>(
         // from the ancestors of the start and end nodes (this is roughly the
         // same algorithm as the findSiblingAncestors function in Prettier, see
         // https://github.com/prettier/prettier/blob/cae195187f524dd74e60849e0a4392654423415b/src/main/range-util.js#L36)
-        let start_node_start = start_node.text_range().start();
-        let end_node_end = end_node.text_range().end();
+        let start_node_start = start_node.text_range_with_trivia().start();
+        let end_node_end = end_node.text_range_with_trivia().end();
 
         let result_end_node = end_node
             .ancestors()
-            .take_while(|end_parent| end_parent.text_range().start() >= start_node_start)
+            .take_while(|end_parent| {
+                end_parent.text_range_with_trivia().start() >= start_node_start
+            })
             .last()
             .unwrap_or(end_node);
 
         let result_start_node = start_node
             .ancestors()
-            .take_while(|start_parent| start_parent.text_range().end() <= end_node_end)
+            .take_while(|start_parent| start_parent.text_range_with_trivia().end() <= end_node_end)
             .last()
             .unwrap_or(start_node);
 
@@ -1614,9 +1702,9 @@ pub fn format_range<Language: FormatLanguage>(
         // nodes and iterating along the two paths at once to find the first
         // divergence (the ancestors have to be collected into vectors first
         // since the ancestor iterator isn't double ended)
-        #[allow(clippy::needless_collect)]
+        #[expect(clippy::needless_collect)]
         let start_to_root: Vec<_> = result_start_node.ancestors().collect();
-        #[allow(clippy::needless_collect)]
+        #[expect(clippy::needless_collect)]
         let end_to_root: Vec<_> = result_end_node.ancestors().collect();
 
         start_to_root
@@ -1708,12 +1796,15 @@ pub fn format_range<Language: FormatLanguage>(
     // the start/end marker default to the start/end of the input
     let (start_source, start_dest) = match range_start {
         Some(start_marker) => (start_marker.source, start_marker.dest),
-        None => (common_root.text_range().start(), TextSize::from(0)),
+        None => (
+            common_root.text_range_with_trivia().start(),
+            TextSize::from(0),
+        ),
     };
     let (end_source, end_dest) = match range_end {
         Some(end_marker) => (end_marker.source, end_marker.dest),
         None => (
-            common_root.text_range().end(),
+            common_root.text_range_with_trivia().end(),
             TextSize::try_from(printed.as_code().len()).expect("code length out of bounds"),
         ),
     };
@@ -1801,7 +1892,7 @@ pub fn format_sub_tree<L: FormatLanguage>(
 
     Ok(Printed::new(
         printed.into_code(),
-        Some(root.text_range()),
+        Some(root.text_range_with_trivia()),
         sourcemap,
         verbatim_ranges,
     ))
@@ -1887,14 +1978,15 @@ impl<Context> FormatState<Context> {
         self.group_id_builder.group_id(debug_name)
     }
 
-    /// Tracks the given token as formatted
+    #[cfg(not(debug_assertions))]
     #[inline]
-    pub fn track_token<L: Language>(&mut self, #[allow(unused_variables)] token: &SyntaxToken<L>) {
-        cfg_if::cfg_if! {
-            if #[cfg(debug_assertions)] {
-                self.printed_tokens.track_token(token);
-            }
-        }
+    pub fn track_token<L: Language>(&mut self, _token: &SyntaxToken<L>) {}
+
+    /// Tracks the given token as formatted
+    #[cfg(debug_assertions)]
+    #[inline]
+    pub fn track_token<L: Language>(&mut self, token: &SyntaxToken<L>) {
+        self.printed_tokens.track_token(token);
     }
 
     #[cfg(not(debug_assertions))]
@@ -1921,17 +2013,15 @@ impl<Context> FormatState<Context> {
         self.printed_tokens.is_disabled()
     }
 
-    /// Asserts in debug builds that all tokens have been printed.
+    #[cfg(not(debug_assertions))]
     #[inline]
-    pub fn assert_formatted_all_tokens<L: Language>(
-        &self,
-        #[allow(unused_variables)] root: &SyntaxNode<L>,
-    ) {
-        cfg_if::cfg_if! {
-            if #[cfg(debug_assertions)] {
-                self.printed_tokens.assert_all_tracked(root);
-            }
-        }
+    pub fn assert_formatted_all_tokens<L: Language>(&self, _root: &SyntaxNode<L>) {}
+
+    /// Asserts in debug builds that all tokens have been printed.
+    #[cfg(debug_assertions)]
+    #[inline]
+    pub fn assert_formatted_all_tokens<L: Language>(&self, root: &SyntaxNode<L>) {
+        self.printed_tokens.assert_all_tracked(root);
     }
 }
 
@@ -1989,7 +2079,7 @@ mod tests {
             }
         }
 
-        impl<'a> std::fmt::Display for DiagnosticPrinter<'a> {
+        impl std::fmt::Display for DiagnosticPrinter<'_> {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 for diagnostic in self.diagnostics {
                     diagnostic.description(f)?;

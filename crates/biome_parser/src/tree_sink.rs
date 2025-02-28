@@ -44,7 +44,7 @@ where
     trivia_pieces: Vec<TriviaPiece>,
 }
 
-impl<'a, L, Factory> TreeSink for LosslessTreeSink<'a, L, Factory>
+impl<L, Factory> TreeSink for LosslessTreeSink<'_, L, Factory>
 where
     L: Language,
     Factory: SyntaxFactory<Kind = L::Kind>,

@@ -1,0 +1,50 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: json/object/complex.options.json
+snapshot_kind: text
+---
+# Input
+
+```json
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "json": {
+    "formatter": {
+      "expandLists": "always"
+    }
+  }
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Trailing commas: None
+Expand lists: Follow Source
+-----
+
+```json
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"json": {
+		"formatter": {
+			"expandLists": "always"
+		}
+	}
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: 	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+```

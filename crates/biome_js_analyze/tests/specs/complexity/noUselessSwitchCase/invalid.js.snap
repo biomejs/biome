@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 switch (foo) {
 	case 0:
 	default:
@@ -28,7 +29,7 @@ switch (foo) {
 ```
 invalid.js:2:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless case clause.
+  i Useless case clause.
   
     1 │ switch (foo) {
   > 2 │ 	case 0:
@@ -60,7 +61,7 @@ invalid.js:2:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━�
 ```
 invalid.js:10:14 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless case clause.
+  i Useless case clause.
   
      9 │ switch (foo) {
   > 10 │ 	/* before */case 0:/* after */
@@ -91,7 +92,7 @@ invalid.js:10:14 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━�
 ```
 invalid.js:13:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless case clause.
+  i Useless case clause.
   
     11 │ 	// comment for default
     12 │ 	default:
@@ -123,7 +124,7 @@ invalid.js:13:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━
 ```
 invalid.js:14:2 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Useless case clause.
+  i Useless case clause.
   
     12 │ 	default:
     13 │ 	case 1:

@@ -11,6 +11,7 @@ impl FormatRule<AnyGritDefinition> for FormatAnyGritDefinition {
             AnyGritDefinition::AnyGritPattern(node) => node.format().fmt(f),
             AnyGritDefinition::GritBogusDefinition(node) => node.format().fmt(f),
             AnyGritDefinition::GritFunctionDefinition(node) => node.format().fmt(f),
+            AnyGritDefinition::GritJavascriptFunctionDefinition(node) => node.format().fmt(f),
             AnyGritDefinition::GritPatternDefinition(node) => node.format().fmt(f),
             AnyGritDefinition::GritPredicateDefinition(node) => node.format().fmt(f),
         }

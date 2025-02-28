@@ -195,16 +195,16 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 /// Utility type implementing [Advices] that emits a
 /// code suggestion with the provided text
-pub struct CodeSuggestionAdvice<M> {
+pub struct CodeSuggestionAdvice<M: Clone> {
     pub applicability: Applicability,
     pub msg: M,
     pub suggestion: TextEdit,
 }
 
-impl<M> Advices for CodeSuggestionAdvice<M>
+impl<M: Clone> Advices for CodeSuggestionAdvice<M>
 where
     M: Display,
 {

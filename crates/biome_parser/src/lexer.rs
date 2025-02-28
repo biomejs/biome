@@ -36,7 +36,6 @@ pub trait Lexer<'src> {
 
     /// Byte offset of the current token from the start of the source
     /// The range of the current token can be computed by `self.position - self.current_start`
-
     fn current_start(&self) -> TextSize;
 
     /// Tokenizes the next kind into a single coherent token within the given lexing context.
@@ -668,7 +667,7 @@ impl<'l, 't, Lex: Lexer<'t>> LookaheadIterator<'l, 't, Lex> {
     }
 }
 
-impl<'l, 't, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'l, 't, Lex> {
+impl<'t, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'_, 't, Lex> {
     type Item = LookaheadToken<Lex::Kind>;
 
     #[inline]
@@ -707,7 +706,7 @@ impl<'l, 't, Lex: LexerWithCheckpoint<'t>> Iterator for LookaheadIterator<'l, 't
     }
 }
 
-impl<'l, 't, Lex: LexerWithCheckpoint<'t>> FusedIterator for LookaheadIterator<'l, 't, Lex> {}
+impl<'t, Lex: LexerWithCheckpoint<'t>> FusedIterator for LookaheadIterator<'_, 't, Lex> {}
 
 #[derive(Debug)]
 pub struct LookaheadToken<Kind> {

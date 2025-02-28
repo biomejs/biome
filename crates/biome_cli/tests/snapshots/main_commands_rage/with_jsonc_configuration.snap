@@ -36,10 +36,11 @@ Environment:
 
 Biome Configuration:
   Status:                       Loaded successfully
-  Formatter disabled:           true
-  Linter disabled:              false
-  Organize imports disabled:    false
-  VCS disabled:                 true
+  Path:                         biome.jsonc
+  Formatter enabled:            false
+  Linter enabled:               true
+  Assist enabled:               true
+  VCS enabled:                  false
 
 Server:
   Version:                      0.0.0

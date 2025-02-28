@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -59,18 +60,17 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        8 │ + → → → "style":·{·"useDefaultParameterLast":·"off"·},
        9 │ + → → → "suspicious":·{·"noDoubleEquals":·"warn",·"useGetterReturn":·"error"·}
       10 │ + → → },
-      11 │ + → → "ignore":·["**/*.test.js"]
+      11 │ + → → "includes":·["**",·"**/*.test.js"]
       12 │ + → },
-      13 │ + → "javascript":·{·"globals":·["var2",·"var1"]·},
+      13 │ + → "javascript":·{·"globals":·["var1",·"var2"]·},
       14 │ + → "overrides":·[
       15 │ + → → {
-      16 │ + → → → "ignore":·["*.test.js"],
-      17 │ + → → → "include":·["bin/*.js",·"lib/*.js"],
-      18 │ + → → → "linter":·{·"rules":·{·"suspicious":·{·"noDoubleEquals":·"off"·}·}·}
-      19 │ + → → }
-      20 │ + → ]
-      21 │ + }
-      22 │ + 
+      16 │ + → → → "includes":·["bin/*.js",·"lib/*.js",·"!*.test.js"],
+      17 │ + → → → "linter":·{·"rules":·{·"suspicious":·{·"noDoubleEquals":·"off"·}·}·}
+      18 │ + → → }
+      19 │ + → ]
+      20 │ + }
+      21 │ + 
   
 
 ```

@@ -1,6 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-expression: content
+expression: redactor(content)
 ---
 ## `biome.jsonc`
 
@@ -25,31 +25,33 @@ biome.jsonc migrate ━━━━━━━━━━━━━━━━━━━━
        1 │ + {
        2 │ + → "formatter":·{
        3 │ + → → "enabled":·true,
-       4 │ + → → "useEditorconfig":·true,
-       5 │ + → → "formatWithErrors":·false,
-       6 │ + → → "indentStyle":·"space",
-       7 │ + → → "indentWidth":·2,
-       8 │ + → → "lineEnding":·"lf",
-       9 │ + → → "lineWidth":·80,
-      10 │ + → → "attributePosition":·"auto",
-      11 │ + → → "bracketSpacing":·true
-      12 │ + → },
-      13 │ + → "linter":·{·"enabled":·true·},
-      14 │ + → "javascript":·{
-      15 │ + → → "formatter":·{
-      16 │ + → → → "jsxQuoteStyle":·"double",
-      17 │ + → → → "quoteProperties":·"asNeeded",
-      18 │ + → → → "trailingCommas":·"all",
-      19 │ + → → → "semicolons":·"always",
-      20 │ + → → → "arrowParentheses":·"always",
-      21 │ + → → → "bracketSameLine":·false,
-      22 │ + → → → "quoteStyle":·"single",
-      23 │ + → → → "attributePosition":·"auto",
-      24 │ + → → → "bracketSpacing":·true
-      25 │ + → → }
-      26 │ + → }
-      27 │ + }
-      28 │ + 
+       4 │ + → → "formatWithErrors":·false,
+       5 │ + → → "indentStyle":·"space",
+       6 │ + → → "indentWidth":·2,
+       7 │ + → → "lineEnding":·"lf",
+       8 │ + → → "lineWidth":·80,
+       9 │ + → → "attributePosition":·"auto",
+      10 │ + → → "bracketSameLine":·false,
+      11 │ + → → "bracketSpacing":·true,
+      12 │ + → → "objectWrap":·"preserve",
+      13 │ + → → "useEditorconfig":·true
+      14 │ + → },
+      15 │ + → "linter":·{·"enabled":·true·},
+      16 │ + → "javascript":·{
+      17 │ + → → "formatter":·{
+      18 │ + → → → "jsxQuoteStyle":·"double",
+      19 │ + → → → "quoteProperties":·"asNeeded",
+      20 │ + → → → "trailingCommas":·"all",
+      21 │ + → → → "semicolons":·"always",
+      22 │ + → → → "arrowParentheses":·"always",
+      23 │ + → → → "bracketSameLine":·false,
+      24 │ + → → → "quoteStyle":·"single",
+      25 │ + → → → "attributePosition":·"auto",
+      26 │ + → → → "bracketSpacing":·true
+      27 │ + → → }
+      28 │ + → }
+      29 │ + }
+      30 │ + 
   
 
 ```

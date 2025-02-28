@@ -11,7 +11,7 @@ use biome_service::{
 };
 
 pub struct HtmlTestFormatLanguage {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     source_type: HtmlFileSource,
 }
 
@@ -38,7 +38,7 @@ impl TestFormatLanguage for HtmlTestFormatLanguage {
         let options = Self::ServiceLanguage::resolve_format_options(
             Some(&settings.formatter),
             Some(&settings.override_settings),
-            None,
+            Some(&settings.languages.html.formatter),
             &BiomePath::new(""),
             file_source,
         );

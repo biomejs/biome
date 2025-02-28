@@ -1,0 +1,187 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `biome.json`
+
+```json
+{
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true,
+		"defaultBranch": "master"
+	},
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "off"
+			}
+		}
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"style": {
+				"useLiteralEnumMembers": "error",
+				"noCommaOperator": "error",
+				"useNodejsImportProtocol": "error",
+				"useAsConstAssertion": "error",
+				"useNumericLiterals": "error",
+				"useEnumInitializers": "error",
+				"useSelfClosingElements": "error",
+				"useConst": "error",
+				"useSingleVarDeclarator": "error",
+				"noUnusedTemplateLiteral": "error",
+				"useNumberNamespace": "error",
+				"noInferrableTypes": "error",
+				"useExponentiationOperator": "error",
+				"useTemplate": "error",
+				"noParameterAssign": "error",
+				"noNonNullAssertion": "error",
+				"useDefaultParameterLast": "error",
+				"noArguments": "error",
+				"useImportType": "error",
+				"useExportType": "error",
+				"noUselessElse": "error",
+				"useShorthandFunctionType": "error"
+			},
+			"suspicious": {
+        "noDebugger": "error",
+        "noDoubleEquals": "error",
+        "noDuplicateJsxProps": "error",
+        "noDuplicateObjectKeys": "error",
+        "noDuplicateParameters": "error",
+        "noDuplicateCase": "error",
+        "noFallthroughSwitchClause": "error",
+        "noRedeclare": "error",
+        "noSparseArray": "error",
+        "noUnsafeDeclarationMerging": "error",
+        "noUnsafeNegation": "error",
+        "useIsArray": "error",
+        "noApproximativeNumericConstant": "error",
+        "noMisrefactoredShorthandAssign": "error",
+        "useAwait": "error",
+        "useNamespaceKeyword": "error",
+        "noFocusedTests": "error",
+        "noDuplicateTestHooks": "error",,,,,,,,,
+      }
+		}
+	},
+	"files": {
+		"ignoreUnknown": true,
+		"includes": [
+			"**",
+			"!**/*/trace.json",
+			"!**/static/app/data/world.json",
+			"!**/*.sourcemap.js",
+			"!**/*.min.js",
+			"!**/fixtures",
+			"!**/.devenv",
+			"!**/package.json"
+		]
+	},
+	"css": {
+		"formatter": {
+			"enabled": false
+		},
+		"linter": {
+			"enabled": false
+		}
+	},
+	"formatter": {
+		"enabled": true,
+		"formatWithErrors": true,
+		"indentStyle": "space",
+		"indentWidth": 2,
+		"lineEnding": "lf",
+		"includes": ["**", "!**/tests/**/*.json"]
+	},
+	"javascript": {
+		"formatter": {
+			"enabled": false,
+			"lineWidth": 90,
+			"quoteStyle": "single",
+			"jsxQuoteStyle": "double",
+			"quoteProperties": "asNeeded",
+			"trailingCommas": "es5",
+			"semicolons": "always",
+			"arrowParentheses": "asNeeded",
+			"bracketSpacing": false,
+			"bracketSameLine": false
+		}
+	},
+	"json": {
+		"formatter": {
+			"enabled": true
+		},
+		"parser": {
+			"allowComments": true,
+			"allowTrailingCommas": true
+		}
+	},
+	"overrides": [
+		{
+			"includes": [
+				"**/api-docs/*.ts",
+				"**/build-utils/*.ts",
+				"**/config/*.ts",
+				"**/scripts/**",
+				"**/tests/js/sentry-test/loadFixtures.ts",
+				"**/tests/js/jest-pegjs-transform.js",
+				"**/tests/js/setup.ts",
+				"**/tests/js/test-balancer/index.js",
+				"**/*.config.ts"
+			],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noNodejsModules": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["**/src/sentry/templates/sentry/error-page-embed.js"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noVar": "off"
+					},
+					"suspicious": {
+						"noVar": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": [
+				"**/static/app/utils/replays/types.tsx",
+				"**/static/app/utils/queryClient.tsx",
+				"**/static/app/views/performance/traceDetails/styles.tsx",
+				"**/static/app/icons/index.tsx",
+				"**/static/app/components/tabs/index.tsx",
+				"**/static/app/components/sparklines/line.tsx",
+				"**/static/app/types/index.tsx",
+				"**/tests/js/sentry-test/reactTestingLibrary.tsx",
+				"**/tests/js/sentry-test/index.tsx"
+			],
+			"linter": {
+				"rules": {
+					"performance": {
+						"noBarrelFile": "off"
+					}
+				}
+			}
+		}
+	]
+}
+```
+
+# Emitted Messages
+
+```block
+The configuration biome.json has been successfully migrated.
+```

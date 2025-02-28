@@ -1,7 +1,7 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-#![allow(clippy::enum_variant_names)]
-#![allow(clippy::match_like_matches_macro)]
+#![allow(dead_code)]
+#![allow(unused)]
 use crate::{
     macros::map_syntax_node,
     JsLanguage as Language, JsSyntaxElement as SyntaxElement,
@@ -9,18 +9,15 @@ use crate::{
     JsSyntaxKind::{self as SyntaxKind, *},
     JsSyntaxList as SyntaxList, JsSyntaxNode as SyntaxNode, JsSyntaxToken as SyntaxToken,
 };
-use biome_rowan::{support, AstNode, RawSyntaxKind, SyntaxKindSet, SyntaxResult};
-#[allow(unused)]
 use biome_rowan::{
-    AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
-    AstSeparatedListNodesIterator,
+    support, AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
+    AstSeparatedListNodesIterator, RawSyntaxKind, SyntaxKindSet, SyntaxResult,
 };
 use serde::ser::SerializeSeq;
 use serde::{Serialize, Serializer};
 use std::fmt::{Debug, Formatter};
 #[doc = r" Sentinel value indicating a missing element in a dynamic node, where"]
 #[doc = r" the slots are not statically known."]
-#[allow(dead_code)]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsAccessorModifier {
@@ -3509,13 +3506,13 @@ impl JsImportAssertion {
     }
     pub fn as_fields(&self) -> JsImportAssertionFields {
         JsImportAssertionFields {
-            assertion_kind: self.assertion_kind(),
+            with_token: self.with_token(),
             l_curly_token: self.l_curly_token(),
             assertions: self.assertions(),
             r_curly_token: self.r_curly_token(),
         }
     }
-    pub fn assertion_kind(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn with_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
     pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -3538,7 +3535,7 @@ impl Serialize for JsImportAssertion {
 }
 #[derive(Serialize)]
 pub struct JsImportAssertionFields {
-    pub assertion_kind: SyntaxResult<SyntaxToken>,
+    pub with_token: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub assertions: JsImportAssertionEntryList,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
@@ -10110,14 +10107,14 @@ impl TsImportTypeAssertion {
     }
     pub fn as_fields(&self) -> TsImportTypeAssertionFields {
         TsImportTypeAssertionFields {
-            assertion_kind: self.assertion_kind(),
+            with_token: self.with_token(),
             colon_token: self.colon_token(),
             l_curly_token: self.l_curly_token(),
             assertions: self.assertions(),
             r_curly_token: self.r_curly_token(),
         }
     }
-    pub fn assertion_kind(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn with_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -10143,7 +10140,7 @@ impl Serialize for TsImportTypeAssertion {
 }
 #[derive(Serialize)]
 pub struct TsImportTypeAssertionFields {
-    pub assertion_kind: SyntaxResult<SyntaxToken>,
+    pub with_token: SyntaxResult<SyntaxToken>,
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub assertions: JsImportAssertionEntryList,
@@ -16441,12 +16438,21 @@ impl AstNode for JsAccessorModifier {
 }
 impl std::fmt::Debug for JsAccessorModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsAccessorModifier")
-            .field(
-                "modifier_token",
-                &support::DebugSyntaxResult(self.modifier_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsAccessorModifier")
+                .field(
+                    "modifier_token",
+                    &support::DebugSyntaxResult(self.modifier_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsAccessorModifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsAccessorModifier> for SyntaxNode {
@@ -16482,17 +16488,26 @@ impl AstNode for JsArrayAssignmentPattern {
 }
 impl std::fmt::Debug for JsArrayAssignmentPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsArrayAssignmentPattern")
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("elements", &self.elements())
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsArrayAssignmentPattern")
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("elements", &self.elements())
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsArrayAssignmentPattern").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsArrayAssignmentPattern> for SyntaxNode {
@@ -16528,10 +16543,19 @@ impl AstNode for JsArrayAssignmentPatternElement {
 }
 impl std::fmt::Debug for JsArrayAssignmentPatternElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsArrayAssignmentPatternElement")
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .field("init", &support::DebugOptionalElement(self.init()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsArrayAssignmentPatternElement")
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .field("init", &support::DebugOptionalElement(self.init()))
+                .finish()
+        } else {
+            f.debug_struct("JsArrayAssignmentPatternElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsArrayAssignmentPatternElement> for SyntaxNode {
@@ -16568,13 +16592,23 @@ impl AstNode for JsArrayAssignmentPatternRestElement {
 }
 impl std::fmt::Debug for JsArrayAssignmentPatternRestElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsArrayAssignmentPatternRestElement")
-            .field(
-                "dotdotdot_token",
-                &support::DebugSyntaxResult(self.dotdotdot_token()),
-            )
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsArrayAssignmentPatternRestElement")
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugSyntaxResult(self.dotdotdot_token()),
+                )
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .finish()
+        } else {
+            f.debug_struct("JsArrayAssignmentPatternRestElement")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsArrayAssignmentPatternRestElement> for SyntaxNode {
@@ -16610,17 +16644,26 @@ impl AstNode for JsArrayBindingPattern {
 }
 impl std::fmt::Debug for JsArrayBindingPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsArrayBindingPattern")
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("elements", &self.elements())
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsArrayBindingPattern")
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("elements", &self.elements())
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsArrayBindingPattern").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsArrayBindingPattern> for SyntaxNode {
@@ -16656,10 +16699,19 @@ impl AstNode for JsArrayBindingPatternElement {
 }
 impl std::fmt::Debug for JsArrayBindingPatternElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsArrayBindingPatternElement")
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .field("init", &support::DebugOptionalElement(self.init()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsArrayBindingPatternElement")
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .field("init", &support::DebugOptionalElement(self.init()))
+                .finish()
+        } else {
+            f.debug_struct("JsArrayBindingPatternElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsArrayBindingPatternElement> for SyntaxNode {
@@ -16695,13 +16747,22 @@ impl AstNode for JsArrayBindingPatternRestElement {
 }
 impl std::fmt::Debug for JsArrayBindingPatternRestElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsArrayBindingPatternRestElement")
-            .field(
-                "dotdotdot_token",
-                &support::DebugSyntaxResult(self.dotdotdot_token()),
-            )
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsArrayBindingPatternRestElement")
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugSyntaxResult(self.dotdotdot_token()),
+                )
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .finish()
+        } else {
+            f.debug_struct("JsArrayBindingPatternRestElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsArrayBindingPatternRestElement> for SyntaxNode {
@@ -16737,17 +16798,26 @@ impl AstNode for JsArrayExpression {
 }
 impl std::fmt::Debug for JsArrayExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsArrayExpression")
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("elements", &self.elements())
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsArrayExpression")
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("elements", &self.elements())
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsArrayExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsArrayExpression> for SyntaxNode {
@@ -16819,26 +16889,35 @@ impl AstNode for JsArrowFunctionExpression {
 }
 impl std::fmt::Debug for JsArrowFunctionExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsArrowFunctionExpression")
-            .field(
-                "async_token",
-                &support::DebugOptionalElement(self.async_token()),
-            )
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field(
-                "return_type_annotation",
-                &support::DebugOptionalElement(self.return_type_annotation()),
-            )
-            .field(
-                "fat_arrow_token",
-                &support::DebugSyntaxResult(self.fat_arrow_token()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsArrowFunctionExpression")
+                .field(
+                    "async_token",
+                    &support::DebugOptionalElement(self.async_token()),
+                )
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field(
+                    "return_type_annotation",
+                    &support::DebugOptionalElement(self.return_type_annotation()),
+                )
+                .field(
+                    "fat_arrow_token",
+                    &support::DebugSyntaxResult(self.fat_arrow_token()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsArrowFunctionExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsArrowFunctionExpression> for SyntaxNode {
@@ -16874,14 +16953,23 @@ impl AstNode for JsAssignmentExpression {
 }
 impl std::fmt::Debug for JsAssignmentExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsAssignmentExpression")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "operator_token",
-                &support::DebugSyntaxResult(self.operator_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsAssignmentExpression")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "operator_token",
+                    &support::DebugSyntaxResult(self.operator_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("JsAssignmentExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsAssignmentExpression> for SyntaxNode {
@@ -16917,13 +17005,22 @@ impl AstNode for JsAwaitExpression {
 }
 impl std::fmt::Debug for JsAwaitExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsAwaitExpression")
-            .field(
-                "await_token",
-                &support::DebugSyntaxResult(self.await_token()),
-            )
-            .field("argument", &support::DebugSyntaxResult(self.argument()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsAwaitExpression")
+                .field(
+                    "await_token",
+                    &support::DebugSyntaxResult(self.await_token()),
+                )
+                .field("argument", &support::DebugSyntaxResult(self.argument()))
+                .finish()
+        } else {
+            f.debug_struct("JsAwaitExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsAwaitExpression> for SyntaxNode {
@@ -16959,12 +17056,21 @@ impl AstNode for JsBigintLiteralExpression {
 }
 impl std::fmt::Debug for JsBigintLiteralExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsBigintLiteralExpression")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsBigintLiteralExpression")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsBigintLiteralExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsBigintLiteralExpression> for SyntaxNode {
@@ -17000,14 +17106,23 @@ impl AstNode for JsBinaryExpression {
 }
 impl std::fmt::Debug for JsBinaryExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsBinaryExpression")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "operator_token",
-                &support::DebugSyntaxResult(self.operator_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsBinaryExpression")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "operator_token",
+                    &support::DebugSyntaxResult(self.operator_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("JsBinaryExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsBinaryExpression> for SyntaxNode {
@@ -17043,17 +17158,26 @@ impl AstNode for JsBlockStatement {
 }
 impl std::fmt::Debug for JsBlockStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsBlockStatement")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("statements", &self.statements())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsBlockStatement")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("statements", &self.statements())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsBlockStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsBlockStatement> for SyntaxNode {
@@ -17089,12 +17213,21 @@ impl AstNode for JsBooleanLiteralExpression {
 }
 impl std::fmt::Debug for JsBooleanLiteralExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsBooleanLiteralExpression")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsBooleanLiteralExpression")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsBooleanLiteralExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsBooleanLiteralExpression> for SyntaxNode {
@@ -17130,17 +17263,26 @@ impl AstNode for JsBreakStatement {
 }
 impl std::fmt::Debug for JsBreakStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsBreakStatement")
-            .field(
-                "break_token",
-                &support::DebugSyntaxResult(self.break_token()),
-            )
-            .field("label", &support::DebugOptionalElement(self.label()))
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsBreakStatement")
+                .field(
+                    "break_token",
+                    &support::DebugSyntaxResult(self.break_token()),
+                )
+                .field("label", &support::DebugOptionalElement(self.label()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsBreakStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsBreakStatement> for SyntaxNode {
@@ -17176,17 +17318,26 @@ impl AstNode for JsCallArguments {
 }
 impl std::fmt::Debug for JsCallArguments {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsCallArguments")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("args", &self.args())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsCallArguments")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("args", &self.args())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsCallArguments").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsCallArguments> for SyntaxNode {
@@ -17222,18 +17373,27 @@ impl AstNode for JsCallExpression {
 }
 impl std::fmt::Debug for JsCallExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsCallExpression")
-            .field("callee", &support::DebugSyntaxResult(self.callee()))
-            .field(
-                "optional_chain_token",
-                &support::DebugOptionalElement(self.optional_chain_token()),
-            )
-            .field(
-                "type_arguments",
-                &support::DebugOptionalElement(self.type_arguments()),
-            )
-            .field("arguments", &support::DebugSyntaxResult(self.arguments()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsCallExpression")
+                .field("callee", &support::DebugSyntaxResult(self.callee()))
+                .field(
+                    "optional_chain_token",
+                    &support::DebugOptionalElement(self.optional_chain_token()),
+                )
+                .field(
+                    "type_arguments",
+                    &support::DebugOptionalElement(self.type_arguments()),
+                )
+                .field("arguments", &support::DebugSyntaxResult(self.arguments()))
+                .finish()
+        } else {
+            f.debug_struct("JsCallExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsCallExpression> for SyntaxNode {
@@ -17269,15 +17429,24 @@ impl AstNode for JsCaseClause {
 }
 impl std::fmt::Debug for JsCaseClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsCaseClause")
-            .field("case_token", &support::DebugSyntaxResult(self.case_token()))
-            .field("test", &support::DebugSyntaxResult(self.test()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("consequent", &self.consequent())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsCaseClause")
+                .field("case_token", &support::DebugSyntaxResult(self.case_token()))
+                .field("test", &support::DebugSyntaxResult(self.test()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("consequent", &self.consequent())
+                .finish()
+        } else {
+            f.debug_struct("JsCaseClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsCaseClause> for SyntaxNode {
@@ -17313,17 +17482,26 @@ impl AstNode for JsCatchClause {
 }
 impl std::fmt::Debug for JsCatchClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsCatchClause")
-            .field(
-                "catch_token",
-                &support::DebugSyntaxResult(self.catch_token()),
-            )
-            .field(
-                "declaration",
-                &support::DebugOptionalElement(self.declaration()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsCatchClause")
+                .field(
+                    "catch_token",
+                    &support::DebugSyntaxResult(self.catch_token()),
+                )
+                .field(
+                    "declaration",
+                    &support::DebugOptionalElement(self.declaration()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsCatchClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsCatchClause> for SyntaxNode {
@@ -17359,21 +17537,30 @@ impl AstNode for JsCatchDeclaration {
 }
 impl std::fmt::Debug for JsCatchDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsCatchDeclaration")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("binding", &support::DebugSyntaxResult(self.binding()))
-            .field(
-                "type_annotation",
-                &support::DebugOptionalElement(self.type_annotation()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsCatchDeclaration")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("binding", &support::DebugSyntaxResult(self.binding()))
+                .field(
+                    "type_annotation",
+                    &support::DebugOptionalElement(self.type_annotation()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsCatchDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsCatchDeclaration> for SyntaxNode {
@@ -17409,39 +17596,48 @@ impl AstNode for JsClassDeclaration {
 }
 impl std::fmt::Debug for JsClassDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsClassDeclaration")
-            .field("decorators", &self.decorators())
-            .field(
-                "abstract_token",
-                &support::DebugOptionalElement(self.abstract_token()),
-            )
-            .field(
-                "class_token",
-                &support::DebugSyntaxResult(self.class_token()),
-            )
-            .field("id", &support::DebugSyntaxResult(self.id()))
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field(
-                "extends_clause",
-                &support::DebugOptionalElement(self.extends_clause()),
-            )
-            .field(
-                "implements_clause",
-                &support::DebugOptionalElement(self.implements_clause()),
-            )
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("members", &self.members())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsClassDeclaration")
+                .field("decorators", &self.decorators())
+                .field(
+                    "abstract_token",
+                    &support::DebugOptionalElement(self.abstract_token()),
+                )
+                .field(
+                    "class_token",
+                    &support::DebugSyntaxResult(self.class_token()),
+                )
+                .field("id", &support::DebugSyntaxResult(self.id()))
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field(
+                    "extends_clause",
+                    &support::DebugOptionalElement(self.extends_clause()),
+                )
+                .field(
+                    "implements_clause",
+                    &support::DebugOptionalElement(self.implements_clause()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("members", &self.members())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsClassDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsClassDeclaration> for SyntaxNode {
@@ -17477,39 +17673,48 @@ impl AstNode for JsClassExportDefaultDeclaration {
 }
 impl std::fmt::Debug for JsClassExportDefaultDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsClassExportDefaultDeclaration")
-            .field("decorators", &self.decorators())
-            .field(
-                "abstract_token",
-                &support::DebugOptionalElement(self.abstract_token()),
-            )
-            .field(
-                "class_token",
-                &support::DebugSyntaxResult(self.class_token()),
-            )
-            .field("id", &support::DebugOptionalElement(self.id()))
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field(
-                "extends_clause",
-                &support::DebugOptionalElement(self.extends_clause()),
-            )
-            .field(
-                "implements_clause",
-                &support::DebugOptionalElement(self.implements_clause()),
-            )
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("members", &self.members())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsClassExportDefaultDeclaration")
+                .field("decorators", &self.decorators())
+                .field(
+                    "abstract_token",
+                    &support::DebugOptionalElement(self.abstract_token()),
+                )
+                .field(
+                    "class_token",
+                    &support::DebugSyntaxResult(self.class_token()),
+                )
+                .field("id", &support::DebugOptionalElement(self.id()))
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field(
+                    "extends_clause",
+                    &support::DebugOptionalElement(self.extends_clause()),
+                )
+                .field(
+                    "implements_clause",
+                    &support::DebugOptionalElement(self.implements_clause()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("members", &self.members())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsClassExportDefaultDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsClassExportDefaultDeclaration> for SyntaxNode {
@@ -17545,35 +17750,44 @@ impl AstNode for JsClassExpression {
 }
 impl std::fmt::Debug for JsClassExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsClassExpression")
-            .field("decorators", &self.decorators())
-            .field(
-                "class_token",
-                &support::DebugSyntaxResult(self.class_token()),
-            )
-            .field("id", &support::DebugOptionalElement(self.id()))
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field(
-                "extends_clause",
-                &support::DebugOptionalElement(self.extends_clause()),
-            )
-            .field(
-                "implements_clause",
-                &support::DebugOptionalElement(self.implements_clause()),
-            )
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("members", &self.members())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsClassExpression")
+                .field("decorators", &self.decorators())
+                .field(
+                    "class_token",
+                    &support::DebugSyntaxResult(self.class_token()),
+                )
+                .field("id", &support::DebugOptionalElement(self.id()))
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field(
+                    "extends_clause",
+                    &support::DebugOptionalElement(self.extends_clause()),
+                )
+                .field(
+                    "implements_clause",
+                    &support::DebugOptionalElement(self.implements_clause()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("members", &self.members())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsClassExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsClassExpression> for SyntaxNode {
@@ -17609,18 +17823,27 @@ impl AstNode for JsComputedMemberAssignment {
 }
 impl std::fmt::Debug for JsComputedMemberAssignment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsComputedMemberAssignment")
-            .field("object", &support::DebugSyntaxResult(self.object()))
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("member", &support::DebugSyntaxResult(self.member()))
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsComputedMemberAssignment")
+                .field("object", &support::DebugSyntaxResult(self.object()))
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("member", &support::DebugSyntaxResult(self.member()))
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsComputedMemberAssignment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsComputedMemberAssignment> for SyntaxNode {
@@ -17656,22 +17879,31 @@ impl AstNode for JsComputedMemberExpression {
 }
 impl std::fmt::Debug for JsComputedMemberExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsComputedMemberExpression")
-            .field("object", &support::DebugSyntaxResult(self.object()))
-            .field(
-                "optional_chain_token",
-                &support::DebugOptionalElement(self.optional_chain_token()),
-            )
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("member", &support::DebugSyntaxResult(self.member()))
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsComputedMemberExpression")
+                .field("object", &support::DebugSyntaxResult(self.object()))
+                .field(
+                    "optional_chain_token",
+                    &support::DebugOptionalElement(self.optional_chain_token()),
+                )
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("member", &support::DebugSyntaxResult(self.member()))
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsComputedMemberExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsComputedMemberExpression> for SyntaxNode {
@@ -17707,17 +17939,26 @@ impl AstNode for JsComputedMemberName {
 }
 impl std::fmt::Debug for JsComputedMemberName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsComputedMemberName")
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsComputedMemberName")
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsComputedMemberName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsComputedMemberName> for SyntaxNode {
@@ -17753,19 +17994,28 @@ impl AstNode for JsConditionalExpression {
 }
 impl std::fmt::Debug for JsConditionalExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsConditionalExpression")
-            .field("test", &support::DebugSyntaxResult(self.test()))
-            .field(
-                "question_mark_token",
-                &support::DebugSyntaxResult(self.question_mark_token()),
-            )
-            .field("consequent", &support::DebugSyntaxResult(self.consequent()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("alternate", &support::DebugSyntaxResult(self.alternate()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsConditionalExpression")
+                .field("test", &support::DebugSyntaxResult(self.test()))
+                .field(
+                    "question_mark_token",
+                    &support::DebugSyntaxResult(self.question_mark_token()),
+                )
+                .field("consequent", &support::DebugSyntaxResult(self.consequent()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("alternate", &support::DebugSyntaxResult(self.alternate()))
+                .finish()
+        } else {
+            f.debug_struct("JsConditionalExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsConditionalExpression> for SyntaxNode {
@@ -17801,12 +18051,21 @@ impl AstNode for JsConstructorClassMember {
 }
 impl std::fmt::Debug for JsConstructorClassMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsConstructorClassMember")
-            .field("modifiers", &self.modifiers())
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsConstructorClassMember")
+                .field("modifiers", &self.modifiers())
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsConstructorClassMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsConstructorClassMember> for SyntaxNode {
@@ -17842,17 +18101,26 @@ impl AstNode for JsConstructorParameters {
 }
 impl std::fmt::Debug for JsConstructorParameters {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsConstructorParameters")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("parameters", &self.parameters())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsConstructorParameters")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("parameters", &self.parameters())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsConstructorParameters").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsConstructorParameters> for SyntaxNode {
@@ -17888,17 +18156,26 @@ impl AstNode for JsContinueStatement {
 }
 impl std::fmt::Debug for JsContinueStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsContinueStatement")
-            .field(
-                "continue_token",
-                &support::DebugSyntaxResult(self.continue_token()),
-            )
-            .field("label", &support::DebugOptionalElement(self.label()))
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsContinueStatement")
+                .field(
+                    "continue_token",
+                    &support::DebugSyntaxResult(self.continue_token()),
+                )
+                .field("label", &support::DebugOptionalElement(self.label()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsContinueStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsContinueStatement> for SyntaxNode {
@@ -17934,16 +18211,25 @@ impl AstNode for JsDebuggerStatement {
 }
 impl std::fmt::Debug for JsDebuggerStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsDebuggerStatement")
-            .field(
-                "debugger_token",
-                &support::DebugSyntaxResult(self.debugger_token()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsDebuggerStatement")
+                .field(
+                    "debugger_token",
+                    &support::DebugSyntaxResult(self.debugger_token()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsDebuggerStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsDebuggerStatement> for SyntaxNode {
@@ -17979,10 +18265,19 @@ impl AstNode for JsDecorator {
 }
 impl std::fmt::Debug for JsDecorator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsDecorator")
-            .field("at_token", &support::DebugSyntaxResult(self.at_token()))
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsDecorator")
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("JsDecorator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsDecorator> for SyntaxNode {
@@ -18018,17 +18313,26 @@ impl AstNode for JsDefaultClause {
 }
 impl std::fmt::Debug for JsDefaultClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsDefaultClause")
-            .field(
-                "default_token",
-                &support::DebugSyntaxResult(self.default_token()),
-            )
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("consequent", &self.consequent())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsDefaultClause")
+                .field(
+                    "default_token",
+                    &support::DebugSyntaxResult(self.default_token()),
+                )
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("consequent", &self.consequent())
+                .finish()
+        } else {
+            f.debug_struct("JsDefaultClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsDefaultClause> for SyntaxNode {
@@ -18064,9 +18368,18 @@ impl AstNode for JsDefaultImportSpecifier {
 }
 impl std::fmt::Debug for JsDefaultImportSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsDefaultImportSpecifier")
-            .field("local_name", &support::DebugSyntaxResult(self.local_name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsDefaultImportSpecifier")
+                .field("local_name", &support::DebugSyntaxResult(self.local_name()))
+                .finish()
+        } else {
+            f.debug_struct("JsDefaultImportSpecifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsDefaultImportSpecifier> for SyntaxNode {
@@ -18102,16 +18415,25 @@ impl AstNode for JsDirective {
 }
 impl std::fmt::Debug for JsDirective {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsDirective")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsDirective")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsDirective").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsDirective> for SyntaxNode {
@@ -18147,27 +18469,36 @@ impl AstNode for JsDoWhileStatement {
 }
 impl std::fmt::Debug for JsDoWhileStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsDoWhileStatement")
-            .field("do_token", &support::DebugSyntaxResult(self.do_token()))
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .field(
-                "while_token",
-                &support::DebugSyntaxResult(self.while_token()),
-            )
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("test", &support::DebugSyntaxResult(self.test()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsDoWhileStatement")
+                .field("do_token", &support::DebugSyntaxResult(self.do_token()))
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .field(
+                    "while_token",
+                    &support::DebugSyntaxResult(self.while_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("test", &support::DebugSyntaxResult(self.test()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsDoWhileStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsDoWhileStatement> for SyntaxNode {
@@ -18203,10 +18534,19 @@ impl AstNode for JsElseClause {
 }
 impl std::fmt::Debug for JsElseClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsElseClause")
-            .field("else_token", &support::DebugSyntaxResult(self.else_token()))
-            .field("alternate", &support::DebugSyntaxResult(self.alternate()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsElseClause")
+                .field("else_token", &support::DebugSyntaxResult(self.else_token()))
+                .field("alternate", &support::DebugSyntaxResult(self.alternate()))
+                .finish()
+        } else {
+            f.debug_struct("JsElseClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsElseClause> for SyntaxNode {
@@ -18242,12 +18582,21 @@ impl AstNode for JsEmptyClassMember {
 }
 impl std::fmt::Debug for JsEmptyClassMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsEmptyClassMember")
-            .field(
-                "semicolon_token",
-                &support::DebugSyntaxResult(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsEmptyClassMember")
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsEmptyClassMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsEmptyClassMember> for SyntaxNode {
@@ -18283,12 +18632,21 @@ impl AstNode for JsEmptyStatement {
 }
 impl std::fmt::Debug for JsEmptyStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsEmptyStatement")
-            .field(
-                "semicolon_token",
-                &support::DebugSyntaxResult(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsEmptyStatement")
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsEmptyStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsEmptyStatement> for SyntaxNode {
@@ -18324,17 +18682,26 @@ impl AstNode for JsExport {
 }
 impl std::fmt::Debug for JsExport {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsExport")
-            .field("decorators", &self.decorators())
-            .field(
-                "export_token",
-                &support::DebugSyntaxResult(self.export_token()),
-            )
-            .field(
-                "export_clause",
-                &support::DebugSyntaxResult(self.export_clause()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsExport")
+                .field("decorators", &self.decorators())
+                .field(
+                    "export_token",
+                    &support::DebugSyntaxResult(self.export_token()),
+                )
+                .field(
+                    "export_clause",
+                    &support::DebugSyntaxResult(self.export_clause()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsExport").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsExport> for SyntaxNode {
@@ -18370,13 +18737,22 @@ impl AstNode for JsExportAsClause {
 }
 impl std::fmt::Debug for JsExportAsClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsExportAsClause")
-            .field("as_token", &support::DebugSyntaxResult(self.as_token()))
-            .field(
-                "exported_name",
-                &support::DebugSyntaxResult(self.exported_name()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsExportAsClause")
+                .field("as_token", &support::DebugSyntaxResult(self.as_token()))
+                .field(
+                    "exported_name",
+                    &support::DebugSyntaxResult(self.exported_name()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsExportAsClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsExportAsClause> for SyntaxNode {
@@ -18412,20 +18788,29 @@ impl AstNode for JsExportDefaultDeclarationClause {
 }
 impl std::fmt::Debug for JsExportDefaultDeclarationClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsExportDefaultDeclarationClause")
-            .field(
-                "default_token",
-                &support::DebugSyntaxResult(self.default_token()),
-            )
-            .field(
-                "declaration",
-                &support::DebugSyntaxResult(self.declaration()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsExportDefaultDeclarationClause")
+                .field(
+                    "default_token",
+                    &support::DebugSyntaxResult(self.default_token()),
+                )
+                .field(
+                    "declaration",
+                    &support::DebugSyntaxResult(self.declaration()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsExportDefaultDeclarationClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsExportDefaultDeclarationClause> for SyntaxNode {
@@ -18461,17 +18846,26 @@ impl AstNode for JsExportDefaultExpressionClause {
 }
 impl std::fmt::Debug for JsExportDefaultExpressionClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsExportDefaultExpressionClause")
-            .field(
-                "default_token",
-                &support::DebugSyntaxResult(self.default_token()),
-            )
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsExportDefaultExpressionClause")
+                .field(
+                    "default_token",
+                    &support::DebugSyntaxResult(self.default_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsExportDefaultExpressionClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsExportDefaultExpressionClause> for SyntaxNode {
@@ -18507,27 +18901,36 @@ impl AstNode for JsExportFromClause {
 }
 impl std::fmt::Debug for JsExportFromClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsExportFromClause")
-            .field(
-                "type_token",
-                &support::DebugOptionalElement(self.type_token()),
-            )
-            .field("star_token", &support::DebugSyntaxResult(self.star_token()))
-            .field(
-                "export_as",
-                &support::DebugOptionalElement(self.export_as()),
-            )
-            .field("from_token", &support::DebugSyntaxResult(self.from_token()))
-            .field("source", &support::DebugSyntaxResult(self.source()))
-            .field(
-                "assertion",
-                &support::DebugOptionalElement(self.assertion()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsExportFromClause")
+                .field(
+                    "type_token",
+                    &support::DebugOptionalElement(self.type_token()),
+                )
+                .field("star_token", &support::DebugSyntaxResult(self.star_token()))
+                .field(
+                    "export_as",
+                    &support::DebugOptionalElement(self.export_as()),
+                )
+                .field("from_token", &support::DebugSyntaxResult(self.from_token()))
+                .field("source", &support::DebugSyntaxResult(self.source()))
+                .field(
+                    "assertion",
+                    &support::DebugOptionalElement(self.assertion()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsExportFromClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsExportFromClause> for SyntaxNode {
@@ -18563,25 +18966,34 @@ impl AstNode for JsExportNamedClause {
 }
 impl std::fmt::Debug for JsExportNamedClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsExportNamedClause")
-            .field(
-                "type_token",
-                &support::DebugOptionalElement(self.type_token()),
-            )
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("specifiers", &self.specifiers())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsExportNamedClause")
+                .field(
+                    "type_token",
+                    &support::DebugOptionalElement(self.type_token()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("specifiers", &self.specifiers())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsExportNamedClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsExportNamedClause> for SyntaxNode {
@@ -18617,31 +19029,40 @@ impl AstNode for JsExportNamedFromClause {
 }
 impl std::fmt::Debug for JsExportNamedFromClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsExportNamedFromClause")
-            .field(
-                "type_token",
-                &support::DebugOptionalElement(self.type_token()),
-            )
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("specifiers", &self.specifiers())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .field("from_token", &support::DebugSyntaxResult(self.from_token()))
-            .field("source", &support::DebugSyntaxResult(self.source()))
-            .field(
-                "assertion",
-                &support::DebugOptionalElement(self.assertion()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsExportNamedFromClause")
+                .field(
+                    "type_token",
+                    &support::DebugOptionalElement(self.type_token()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("specifiers", &self.specifiers())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .field("from_token", &support::DebugSyntaxResult(self.from_token()))
+                .field("source", &support::DebugSyntaxResult(self.source()))
+                .field(
+                    "assertion",
+                    &support::DebugOptionalElement(self.assertion()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsExportNamedFromClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsExportNamedFromClause> for SyntaxNode {
@@ -18677,20 +19098,29 @@ impl AstNode for JsExportNamedFromSpecifier {
 }
 impl std::fmt::Debug for JsExportNamedFromSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsExportNamedFromSpecifier")
-            .field(
-                "type_token",
-                &support::DebugOptionalElement(self.type_token()),
-            )
-            .field(
-                "source_name",
-                &support::DebugSyntaxResult(self.source_name()),
-            )
-            .field(
-                "export_as",
-                &support::DebugOptionalElement(self.export_as()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsExportNamedFromSpecifier")
+                .field(
+                    "type_token",
+                    &support::DebugOptionalElement(self.type_token()),
+                )
+                .field(
+                    "source_name",
+                    &support::DebugSyntaxResult(self.source_name()),
+                )
+                .field(
+                    "export_as",
+                    &support::DebugOptionalElement(self.export_as()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsExportNamedFromSpecifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsExportNamedFromSpecifier> for SyntaxNode {
@@ -18726,13 +19156,22 @@ impl AstNode for JsExportNamedShorthandSpecifier {
 }
 impl std::fmt::Debug for JsExportNamedShorthandSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsExportNamedShorthandSpecifier")
-            .field(
-                "type_token",
-                &support::DebugOptionalElement(self.type_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsExportNamedShorthandSpecifier")
+                .field(
+                    "type_token",
+                    &support::DebugOptionalElement(self.type_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("JsExportNamedShorthandSpecifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsExportNamedShorthandSpecifier> for SyntaxNode {
@@ -18768,18 +19207,27 @@ impl AstNode for JsExportNamedSpecifier {
 }
 impl std::fmt::Debug for JsExportNamedSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsExportNamedSpecifier")
-            .field(
-                "type_token",
-                &support::DebugOptionalElement(self.type_token()),
-            )
-            .field("local_name", &support::DebugSyntaxResult(self.local_name()))
-            .field("as_token", &support::DebugSyntaxResult(self.as_token()))
-            .field(
-                "exported_name",
-                &support::DebugSyntaxResult(self.exported_name()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsExportNamedSpecifier")
+                .field(
+                    "type_token",
+                    &support::DebugOptionalElement(self.type_token()),
+                )
+                .field("local_name", &support::DebugSyntaxResult(self.local_name()))
+                .field("as_token", &support::DebugSyntaxResult(self.as_token()))
+                .field(
+                    "exported_name",
+                    &support::DebugSyntaxResult(self.exported_name()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsExportNamedSpecifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsExportNamedSpecifier> for SyntaxNode {
@@ -18815,10 +19263,19 @@ impl AstNode for JsExpressionSnipped {
 }
 impl std::fmt::Debug for JsExpressionSnipped {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsExpressionSnipped")
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsExpressionSnipped")
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("JsExpressionSnipped").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsExpressionSnipped> for SyntaxNode {
@@ -18854,13 +19311,22 @@ impl AstNode for JsExpressionStatement {
 }
 impl std::fmt::Debug for JsExpressionStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsExpressionStatement")
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsExpressionStatement")
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsExpressionStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsExpressionStatement> for SyntaxNode {
@@ -18896,20 +19362,29 @@ impl AstNode for JsExtendsClause {
 }
 impl std::fmt::Debug for JsExtendsClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsExtendsClause")
-            .field(
-                "extends_token",
-                &support::DebugSyntaxResult(self.extends_token()),
-            )
-            .field(
-                "super_class",
-                &support::DebugSyntaxResult(self.super_class()),
-            )
-            .field(
-                "type_arguments",
-                &support::DebugOptionalElement(self.type_arguments()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsExtendsClause")
+                .field(
+                    "extends_token",
+                    &support::DebugSyntaxResult(self.extends_token()),
+                )
+                .field(
+                    "super_class",
+                    &support::DebugSyntaxResult(self.super_class()),
+                )
+                .field(
+                    "type_arguments",
+                    &support::DebugOptionalElement(self.type_arguments()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsExtendsClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsExtendsClause> for SyntaxNode {
@@ -18945,13 +19420,22 @@ impl AstNode for JsFinallyClause {
 }
 impl std::fmt::Debug for JsFinallyClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsFinallyClause")
-            .field(
-                "finally_token",
-                &support::DebugSyntaxResult(self.finally_token()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsFinallyClause")
+                .field(
+                    "finally_token",
+                    &support::DebugSyntaxResult(self.finally_token()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsFinallyClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsFinallyClause> for SyntaxNode {
@@ -18987,24 +19471,33 @@ impl AstNode for JsForInStatement {
 }
 impl std::fmt::Debug for JsForInStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsForInStatement")
-            .field("for_token", &support::DebugSyntaxResult(self.for_token()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field(
-                "initializer",
-                &support::DebugSyntaxResult(self.initializer()),
-            )
-            .field("in_token", &support::DebugSyntaxResult(self.in_token()))
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsForInStatement")
+                .field("for_token", &support::DebugSyntaxResult(self.for_token()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field(
+                    "initializer",
+                    &support::DebugSyntaxResult(self.initializer()),
+                )
+                .field("in_token", &support::DebugSyntaxResult(self.in_token()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsForInStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsForInStatement> for SyntaxNode {
@@ -19040,28 +19533,37 @@ impl AstNode for JsForOfStatement {
 }
 impl std::fmt::Debug for JsForOfStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsForOfStatement")
-            .field("for_token", &support::DebugSyntaxResult(self.for_token()))
-            .field(
-                "await_token",
-                &support::DebugOptionalElement(self.await_token()),
-            )
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field(
-                "initializer",
-                &support::DebugSyntaxResult(self.initializer()),
-            )
-            .field("of_token", &support::DebugSyntaxResult(self.of_token()))
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsForOfStatement")
+                .field("for_token", &support::DebugSyntaxResult(self.for_token()))
+                .field(
+                    "await_token",
+                    &support::DebugOptionalElement(self.await_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field(
+                    "initializer",
+                    &support::DebugSyntaxResult(self.initializer()),
+                )
+                .field("of_token", &support::DebugSyntaxResult(self.of_token()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsForOfStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsForOfStatement> for SyntaxNode {
@@ -19097,32 +19599,41 @@ impl AstNode for JsForStatement {
 }
 impl std::fmt::Debug for JsForStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsForStatement")
-            .field("for_token", &support::DebugSyntaxResult(self.for_token()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field(
-                "initializer",
-                &support::DebugOptionalElement(self.initializer()),
-            )
-            .field(
-                "first_semi_token",
-                &support::DebugSyntaxResult(self.first_semi_token()),
-            )
-            .field("test", &support::DebugOptionalElement(self.test()))
-            .field(
-                "second_semi_token",
-                &support::DebugSyntaxResult(self.second_semi_token()),
-            )
-            .field("update", &support::DebugOptionalElement(self.update()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsForStatement")
+                .field("for_token", &support::DebugSyntaxResult(self.for_token()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .field(
+                    "first_semi_token",
+                    &support::DebugSyntaxResult(self.first_semi_token()),
+                )
+                .field("test", &support::DebugOptionalElement(self.test()))
+                .field(
+                    "second_semi_token",
+                    &support::DebugSyntaxResult(self.second_semi_token()),
+                )
+                .field("update", &support::DebugOptionalElement(self.update()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsForStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsForStatement> for SyntaxNode {
@@ -19158,14 +19669,23 @@ impl AstNode for JsForVariableDeclaration {
 }
 impl std::fmt::Debug for JsForVariableDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsForVariableDeclaration")
-            .field(
-                "await_token",
-                &support::DebugOptionalElement(self.await_token()),
-            )
-            .field("kind_token", &support::DebugSyntaxResult(self.kind_token()))
-            .field("declarator", &support::DebugSyntaxResult(self.declarator()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsForVariableDeclaration")
+                .field(
+                    "await_token",
+                    &support::DebugOptionalElement(self.await_token()),
+                )
+                .field("kind_token", &support::DebugSyntaxResult(self.kind_token()))
+                .field("declarator", &support::DebugSyntaxResult(self.declarator()))
+                .finish()
+        } else {
+            f.debug_struct("JsForVariableDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsForVariableDeclaration> for SyntaxNode {
@@ -19201,22 +19721,31 @@ impl AstNode for JsFormalParameter {
 }
 impl std::fmt::Debug for JsFormalParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsFormalParameter")
-            .field("decorators", &self.decorators())
-            .field("binding", &support::DebugSyntaxResult(self.binding()))
-            .field(
-                "question_mark_token",
-                &support::DebugOptionalElement(self.question_mark_token()),
-            )
-            .field(
-                "type_annotation",
-                &support::DebugOptionalElement(self.type_annotation()),
-            )
-            .field(
-                "initializer",
-                &support::DebugOptionalElement(self.initializer()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsFormalParameter")
+                .field("decorators", &self.decorators())
+                .field("binding", &support::DebugSyntaxResult(self.binding()))
+                .field(
+                    "question_mark_token",
+                    &support::DebugOptionalElement(self.question_mark_token()),
+                )
+                .field(
+                    "type_annotation",
+                    &support::DebugOptionalElement(self.type_annotation()),
+                )
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsFormalParameter").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsFormalParameter> for SyntaxNode {
@@ -19252,18 +19781,27 @@ impl AstNode for JsFunctionBody {
 }
 impl std::fmt::Debug for JsFunctionBody {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsFunctionBody")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("directives", &self.directives())
-            .field("statements", &self.statements())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsFunctionBody")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("directives", &self.directives())
+                .field("statements", &self.statements())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsFunctionBody").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsFunctionBody> for SyntaxNode {
@@ -19299,31 +19837,40 @@ impl AstNode for JsFunctionDeclaration {
 }
 impl std::fmt::Debug for JsFunctionDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsFunctionDeclaration")
-            .field(
-                "async_token",
-                &support::DebugOptionalElement(self.async_token()),
-            )
-            .field(
-                "function_token",
-                &support::DebugSyntaxResult(self.function_token()),
-            )
-            .field(
-                "star_token",
-                &support::DebugOptionalElement(self.star_token()),
-            )
-            .field("id", &support::DebugSyntaxResult(self.id()))
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field(
-                "return_type_annotation",
-                &support::DebugOptionalElement(self.return_type_annotation()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsFunctionDeclaration")
+                .field(
+                    "async_token",
+                    &support::DebugOptionalElement(self.async_token()),
+                )
+                .field(
+                    "function_token",
+                    &support::DebugSyntaxResult(self.function_token()),
+                )
+                .field(
+                    "star_token",
+                    &support::DebugOptionalElement(self.star_token()),
+                )
+                .field("id", &support::DebugSyntaxResult(self.id()))
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field(
+                    "return_type_annotation",
+                    &support::DebugOptionalElement(self.return_type_annotation()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsFunctionDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsFunctionDeclaration> for SyntaxNode {
@@ -19359,31 +19906,41 @@ impl AstNode for JsFunctionExportDefaultDeclaration {
 }
 impl std::fmt::Debug for JsFunctionExportDefaultDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsFunctionExportDefaultDeclaration")
-            .field(
-                "async_token",
-                &support::DebugOptionalElement(self.async_token()),
-            )
-            .field(
-                "function_token",
-                &support::DebugSyntaxResult(self.function_token()),
-            )
-            .field(
-                "star_token",
-                &support::DebugOptionalElement(self.star_token()),
-            )
-            .field("id", &support::DebugOptionalElement(self.id()))
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field(
-                "return_type_annotation",
-                &support::DebugOptionalElement(self.return_type_annotation()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsFunctionExportDefaultDeclaration")
+                .field(
+                    "async_token",
+                    &support::DebugOptionalElement(self.async_token()),
+                )
+                .field(
+                    "function_token",
+                    &support::DebugSyntaxResult(self.function_token()),
+                )
+                .field(
+                    "star_token",
+                    &support::DebugOptionalElement(self.star_token()),
+                )
+                .field("id", &support::DebugOptionalElement(self.id()))
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field(
+                    "return_type_annotation",
+                    &support::DebugOptionalElement(self.return_type_annotation()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsFunctionExportDefaultDeclaration")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsFunctionExportDefaultDeclaration> for SyntaxNode {
@@ -19419,31 +19976,40 @@ impl AstNode for JsFunctionExpression {
 }
 impl std::fmt::Debug for JsFunctionExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsFunctionExpression")
-            .field(
-                "async_token",
-                &support::DebugOptionalElement(self.async_token()),
-            )
-            .field(
-                "function_token",
-                &support::DebugSyntaxResult(self.function_token()),
-            )
-            .field(
-                "star_token",
-                &support::DebugOptionalElement(self.star_token()),
-            )
-            .field("id", &support::DebugOptionalElement(self.id()))
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field(
-                "return_type_annotation",
-                &support::DebugOptionalElement(self.return_type_annotation()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsFunctionExpression")
+                .field(
+                    "async_token",
+                    &support::DebugOptionalElement(self.async_token()),
+                )
+                .field(
+                    "function_token",
+                    &support::DebugSyntaxResult(self.function_token()),
+                )
+                .field(
+                    "star_token",
+                    &support::DebugOptionalElement(self.star_token()),
+                )
+                .field("id", &support::DebugOptionalElement(self.id()))
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field(
+                    "return_type_annotation",
+                    &support::DebugOptionalElement(self.return_type_annotation()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsFunctionExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsFunctionExpression> for SyntaxNode {
@@ -19479,24 +20045,33 @@ impl AstNode for JsGetterClassMember {
 }
 impl std::fmt::Debug for JsGetterClassMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsGetterClassMember")
-            .field("modifiers", &self.modifiers())
-            .field("get_token", &support::DebugSyntaxResult(self.get_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field(
-                "return_type",
-                &support::DebugOptionalElement(self.return_type()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsGetterClassMember")
+                .field("modifiers", &self.modifiers())
+                .field("get_token", &support::DebugSyntaxResult(self.get_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field(
+                    "return_type",
+                    &support::DebugOptionalElement(self.return_type()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsGetterClassMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsGetterClassMember> for SyntaxNode {
@@ -19532,23 +20107,32 @@ impl AstNode for JsGetterObjectMember {
 }
 impl std::fmt::Debug for JsGetterObjectMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsGetterObjectMember")
-            .field("get_token", &support::DebugSyntaxResult(self.get_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field(
-                "return_type",
-                &support::DebugOptionalElement(self.return_type()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsGetterObjectMember")
+                .field("get_token", &support::DebugSyntaxResult(self.get_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field(
+                    "return_type",
+                    &support::DebugOptionalElement(self.return_type()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsGetterObjectMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsGetterObjectMember> for SyntaxNode {
@@ -19584,9 +20168,18 @@ impl AstNode for JsIdentifierAssignment {
 }
 impl std::fmt::Debug for JsIdentifierAssignment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsIdentifierAssignment")
-            .field("name_token", &support::DebugSyntaxResult(self.name_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsIdentifierAssignment")
+                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .finish()
+        } else {
+            f.debug_struct("JsIdentifierAssignment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsIdentifierAssignment> for SyntaxNode {
@@ -19622,9 +20215,18 @@ impl AstNode for JsIdentifierBinding {
 }
 impl std::fmt::Debug for JsIdentifierBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsIdentifierBinding")
-            .field("name_token", &support::DebugSyntaxResult(self.name_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsIdentifierBinding")
+                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .finish()
+        } else {
+            f.debug_struct("JsIdentifierBinding").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsIdentifierBinding> for SyntaxNode {
@@ -19660,9 +20262,18 @@ impl AstNode for JsIdentifierExpression {
 }
 impl std::fmt::Debug for JsIdentifierExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsIdentifierExpression")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsIdentifierExpression")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("JsIdentifierExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsIdentifierExpression> for SyntaxNode {
@@ -19698,23 +20309,32 @@ impl AstNode for JsIfStatement {
 }
 impl std::fmt::Debug for JsIfStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsIfStatement")
-            .field("if_token", &support::DebugSyntaxResult(self.if_token()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("test", &support::DebugSyntaxResult(self.test()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field("consequent", &support::DebugSyntaxResult(self.consequent()))
-            .field(
-                "else_clause",
-                &support::DebugOptionalElement(self.else_clause()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsIfStatement")
+                .field("if_token", &support::DebugSyntaxResult(self.if_token()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("test", &support::DebugSyntaxResult(self.test()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field("consequent", &support::DebugSyntaxResult(self.consequent()))
+                .field(
+                    "else_clause",
+                    &support::DebugOptionalElement(self.else_clause()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsIfStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsIfStatement> for SyntaxNode {
@@ -19750,20 +20370,29 @@ impl AstNode for JsImport {
 }
 impl std::fmt::Debug for JsImport {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsImport")
-            .field(
-                "import_token",
-                &support::DebugSyntaxResult(self.import_token()),
-            )
-            .field(
-                "import_clause",
-                &support::DebugSyntaxResult(self.import_clause()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsImport")
+                .field(
+                    "import_token",
+                    &support::DebugSyntaxResult(self.import_token()),
+                )
+                .field(
+                    "import_clause",
+                    &support::DebugSyntaxResult(self.import_clause()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsImport").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsImport> for SyntaxNode {
@@ -19799,21 +20428,27 @@ impl AstNode for JsImportAssertion {
 }
 impl std::fmt::Debug for JsImportAssertion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsImportAssertion")
-            .field(
-                "assertion_kind",
-                &support::DebugSyntaxResult(self.assertion_kind()),
-            )
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("assertions", &self.assertions())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsImportAssertion")
+                .field("with_token", &support::DebugSyntaxResult(self.with_token()))
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("assertions", &self.assertions())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsImportAssertion").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsImportAssertion> for SyntaxNode {
@@ -19849,17 +20484,26 @@ impl AstNode for JsImportAssertionEntry {
 }
 impl std::fmt::Debug for JsImportAssertionEntry {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsImportAssertionEntry")
-            .field("key", &support::DebugSyntaxResult(self.key()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsImportAssertionEntry")
+                .field("key", &support::DebugSyntaxResult(self.key()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsImportAssertionEntry").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsImportAssertionEntry> for SyntaxNode {
@@ -19895,13 +20539,22 @@ impl AstNode for JsImportBareClause {
 }
 impl std::fmt::Debug for JsImportBareClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsImportBareClause")
-            .field("source", &support::DebugSyntaxResult(self.source()))
-            .field(
-                "assertion",
-                &support::DebugOptionalElement(self.assertion()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsImportBareClause")
+                .field("source", &support::DebugSyntaxResult(self.source()))
+                .field(
+                    "assertion",
+                    &support::DebugOptionalElement(self.assertion()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsImportBareClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsImportBareClause> for SyntaxNode {
@@ -19937,13 +20590,22 @@ impl AstNode for JsImportCallExpression {
 }
 impl std::fmt::Debug for JsImportCallExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsImportCallExpression")
-            .field(
-                "import_token",
-                &support::DebugSyntaxResult(self.import_token()),
-            )
-            .field("arguments", &support::DebugSyntaxResult(self.arguments()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsImportCallExpression")
+                .field(
+                    "import_token",
+                    &support::DebugSyntaxResult(self.import_token()),
+                )
+                .field("arguments", &support::DebugSyntaxResult(self.arguments()))
+                .finish()
+        } else {
+            f.debug_struct("JsImportCallExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsImportCallExpression> for SyntaxNode {
@@ -19979,23 +20641,32 @@ impl AstNode for JsImportCombinedClause {
 }
 impl std::fmt::Debug for JsImportCombinedClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsImportCombinedClause")
-            .field(
-                "default_specifier",
-                &support::DebugSyntaxResult(self.default_specifier()),
-            )
-            .field(
-                "comma_token",
-                &support::DebugSyntaxResult(self.comma_token()),
-            )
-            .field("specifier", &support::DebugSyntaxResult(self.specifier()))
-            .field("from_token", &support::DebugSyntaxResult(self.from_token()))
-            .field("source", &support::DebugSyntaxResult(self.source()))
-            .field(
-                "assertion",
-                &support::DebugOptionalElement(self.assertion()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsImportCombinedClause")
+                .field(
+                    "default_specifier",
+                    &support::DebugSyntaxResult(self.default_specifier()),
+                )
+                .field(
+                    "comma_token",
+                    &support::DebugSyntaxResult(self.comma_token()),
+                )
+                .field("specifier", &support::DebugSyntaxResult(self.specifier()))
+                .field("from_token", &support::DebugSyntaxResult(self.from_token()))
+                .field("source", &support::DebugSyntaxResult(self.source()))
+                .field(
+                    "assertion",
+                    &support::DebugOptionalElement(self.assertion()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsImportCombinedClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsImportCombinedClause> for SyntaxNode {
@@ -20031,22 +20702,31 @@ impl AstNode for JsImportDefaultClause {
 }
 impl std::fmt::Debug for JsImportDefaultClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsImportDefaultClause")
-            .field(
-                "type_token",
-                &support::DebugOptionalElement(self.type_token()),
-            )
-            .field(
-                "default_specifier",
-                &support::DebugSyntaxResult(self.default_specifier()),
-            )
-            .field("from_token", &support::DebugSyntaxResult(self.from_token()))
-            .field("source", &support::DebugSyntaxResult(self.source()))
-            .field(
-                "assertion",
-                &support::DebugOptionalElement(self.assertion()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsImportDefaultClause")
+                .field(
+                    "type_token",
+                    &support::DebugOptionalElement(self.type_token()),
+                )
+                .field(
+                    "default_specifier",
+                    &support::DebugSyntaxResult(self.default_specifier()),
+                )
+                .field("from_token", &support::DebugSyntaxResult(self.from_token()))
+                .field("source", &support::DebugSyntaxResult(self.source()))
+                .field(
+                    "assertion",
+                    &support::DebugOptionalElement(self.assertion()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsImportDefaultClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsImportDefaultClause> for SyntaxNode {
@@ -20082,14 +20762,23 @@ impl AstNode for JsImportMetaExpression {
 }
 impl std::fmt::Debug for JsImportMetaExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsImportMetaExpression")
-            .field(
-                "import_token",
-                &support::DebugSyntaxResult(self.import_token()),
-            )
-            .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-            .field("meta_token", &support::DebugSyntaxResult(self.meta_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsImportMetaExpression")
+                .field(
+                    "import_token",
+                    &support::DebugSyntaxResult(self.import_token()),
+                )
+                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
+                .field("meta_token", &support::DebugSyntaxResult(self.meta_token()))
+                .finish()
+        } else {
+            f.debug_struct("JsImportMetaExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsImportMetaExpression> for SyntaxNode {
@@ -20125,22 +20814,31 @@ impl AstNode for JsImportNamedClause {
 }
 impl std::fmt::Debug for JsImportNamedClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsImportNamedClause")
-            .field(
-                "type_token",
-                &support::DebugOptionalElement(self.type_token()),
-            )
-            .field(
-                "named_specifiers",
-                &support::DebugSyntaxResult(self.named_specifiers()),
-            )
-            .field("from_token", &support::DebugSyntaxResult(self.from_token()))
-            .field("source", &support::DebugSyntaxResult(self.source()))
-            .field(
-                "assertion",
-                &support::DebugOptionalElement(self.assertion()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsImportNamedClause")
+                .field(
+                    "type_token",
+                    &support::DebugOptionalElement(self.type_token()),
+                )
+                .field(
+                    "named_specifiers",
+                    &support::DebugSyntaxResult(self.named_specifiers()),
+                )
+                .field("from_token", &support::DebugSyntaxResult(self.from_token()))
+                .field("source", &support::DebugSyntaxResult(self.source()))
+                .field(
+                    "assertion",
+                    &support::DebugOptionalElement(self.assertion()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsImportNamedClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsImportNamedClause> for SyntaxNode {
@@ -20176,22 +20874,31 @@ impl AstNode for JsImportNamespaceClause {
 }
 impl std::fmt::Debug for JsImportNamespaceClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsImportNamespaceClause")
-            .field(
-                "type_token",
-                &support::DebugOptionalElement(self.type_token()),
-            )
-            .field(
-                "namespace_specifier",
-                &support::DebugSyntaxResult(self.namespace_specifier()),
-            )
-            .field("from_token", &support::DebugSyntaxResult(self.from_token()))
-            .field("source", &support::DebugSyntaxResult(self.source()))
-            .field(
-                "assertion",
-                &support::DebugOptionalElement(self.assertion()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsImportNamespaceClause")
+                .field(
+                    "type_token",
+                    &support::DebugOptionalElement(self.type_token()),
+                )
+                .field(
+                    "namespace_specifier",
+                    &support::DebugSyntaxResult(self.namespace_specifier()),
+                )
+                .field("from_token", &support::DebugSyntaxResult(self.from_token()))
+                .field("source", &support::DebugSyntaxResult(self.source()))
+                .field(
+                    "assertion",
+                    &support::DebugOptionalElement(self.assertion()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsImportNamespaceClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsImportNamespaceClause> for SyntaxNode {
@@ -20227,11 +20934,20 @@ impl AstNode for JsInExpression {
 }
 impl std::fmt::Debug for JsInExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsInExpression")
-            .field("property", &support::DebugSyntaxResult(self.property()))
-            .field("in_token", &support::DebugSyntaxResult(self.in_token()))
-            .field("object", &support::DebugSyntaxResult(self.object()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsInExpression")
+                .field("property", &support::DebugSyntaxResult(self.property()))
+                .field("in_token", &support::DebugSyntaxResult(self.in_token()))
+                .field("object", &support::DebugSyntaxResult(self.object()))
+                .finish()
+        } else {
+            f.debug_struct("JsInExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsInExpression> for SyntaxNode {
@@ -20267,10 +20983,19 @@ impl AstNode for JsInitializerClause {
 }
 impl std::fmt::Debug for JsInitializerClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsInitializerClause")
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsInitializerClause")
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("JsInitializerClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsInitializerClause> for SyntaxNode {
@@ -20306,14 +21031,23 @@ impl AstNode for JsInstanceofExpression {
 }
 impl std::fmt::Debug for JsInstanceofExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsInstanceofExpression")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "instanceof_token",
-                &support::DebugSyntaxResult(self.instanceof_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsInstanceofExpression")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "instanceof_token",
+                    &support::DebugSyntaxResult(self.instanceof_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("JsInstanceofExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsInstanceofExpression> for SyntaxNode {
@@ -20349,12 +21083,21 @@ impl AstNode for JsLabel {
 }
 impl std::fmt::Debug for JsLabel {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsLabel")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsLabel")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsLabel").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsLabel> for SyntaxNode {
@@ -20390,14 +21133,23 @@ impl AstNode for JsLabeledStatement {
 }
 impl std::fmt::Debug for JsLabeledStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsLabeledStatement")
-            .field("label", &support::DebugSyntaxResult(self.label()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsLabeledStatement")
+                .field("label", &support::DebugSyntaxResult(self.label()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsLabeledStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsLabeledStatement> for SyntaxNode {
@@ -20433,9 +21185,18 @@ impl AstNode for JsLiteralExportName {
 }
 impl std::fmt::Debug for JsLiteralExportName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsLiteralExportName")
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsLiteralExportName")
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("JsLiteralExportName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsLiteralExportName> for SyntaxNode {
@@ -20471,9 +21232,18 @@ impl AstNode for JsLiteralMemberName {
 }
 impl std::fmt::Debug for JsLiteralMemberName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsLiteralMemberName")
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsLiteralMemberName")
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("JsLiteralMemberName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsLiteralMemberName> for SyntaxNode {
@@ -20509,14 +21279,23 @@ impl AstNode for JsLogicalExpression {
 }
 impl std::fmt::Debug for JsLogicalExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsLogicalExpression")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "operator_token",
-                &support::DebugSyntaxResult(self.operator_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsLogicalExpression")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "operator_token",
+                    &support::DebugSyntaxResult(self.operator_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("JsLogicalExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsLogicalExpression> for SyntaxNode {
@@ -20552,12 +21331,21 @@ impl AstNode for JsMetavariable {
 }
 impl std::fmt::Debug for JsMetavariable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsMetavariable")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsMetavariable")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsMetavariable").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsMetavariable> for SyntaxNode {
@@ -20593,32 +21381,41 @@ impl AstNode for JsMethodClassMember {
 }
 impl std::fmt::Debug for JsMethodClassMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsMethodClassMember")
-            .field("modifiers", &self.modifiers())
-            .field(
-                "async_token",
-                &support::DebugOptionalElement(self.async_token()),
-            )
-            .field(
-                "star_token",
-                &support::DebugOptionalElement(self.star_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "question_mark_token",
-                &support::DebugOptionalElement(self.question_mark_token()),
-            )
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field(
-                "return_type_annotation",
-                &support::DebugOptionalElement(self.return_type_annotation()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsMethodClassMember")
+                .field("modifiers", &self.modifiers())
+                .field(
+                    "async_token",
+                    &support::DebugOptionalElement(self.async_token()),
+                )
+                .field(
+                    "star_token",
+                    &support::DebugOptionalElement(self.star_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "question_mark_token",
+                    &support::DebugOptionalElement(self.question_mark_token()),
+                )
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field(
+                    "return_type_annotation",
+                    &support::DebugOptionalElement(self.return_type_annotation()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsMethodClassMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsMethodClassMember> for SyntaxNode {
@@ -20654,27 +21451,36 @@ impl AstNode for JsMethodObjectMember {
 }
 impl std::fmt::Debug for JsMethodObjectMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsMethodObjectMember")
-            .field(
-                "async_token",
-                &support::DebugOptionalElement(self.async_token()),
-            )
-            .field(
-                "star_token",
-                &support::DebugOptionalElement(self.star_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field(
-                "return_type_annotation",
-                &support::DebugOptionalElement(self.return_type_annotation()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsMethodObjectMember")
+                .field(
+                    "async_token",
+                    &support::DebugOptionalElement(self.async_token()),
+                )
+                .field(
+                    "star_token",
+                    &support::DebugOptionalElement(self.star_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field(
+                    "return_type_annotation",
+                    &support::DebugOptionalElement(self.return_type_annotation()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsMethodObjectMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsMethodObjectMember> for SyntaxNode {
@@ -20710,19 +21516,28 @@ impl AstNode for JsModule {
 }
 impl std::fmt::Debug for JsModule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsModule")
-            .field(
-                "bom_token",
-                &support::DebugOptionalElement(self.bom_token()),
-            )
-            .field(
-                "interpreter_token",
-                &support::DebugOptionalElement(self.interpreter_token()),
-            )
-            .field("directives", &self.directives())
-            .field("items", &self.items())
-            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsModule")
+                .field(
+                    "bom_token",
+                    &support::DebugOptionalElement(self.bom_token()),
+                )
+                .field(
+                    "interpreter_token",
+                    &support::DebugOptionalElement(self.interpreter_token()),
+                )
+                .field("directives", &self.directives())
+                .field("items", &self.items())
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("JsModule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsModule> for SyntaxNode {
@@ -20758,12 +21573,21 @@ impl AstNode for JsModuleSource {
 }
 impl std::fmt::Debug for JsModuleSource {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsModuleSource")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsModuleSource")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsModuleSource").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsModuleSource> for SyntaxNode {
@@ -20799,12 +21623,21 @@ impl AstNode for JsName {
 }
 impl std::fmt::Debug for JsName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsName")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsName")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsName> for SyntaxNode {
@@ -20840,15 +21673,24 @@ impl AstNode for JsNamedImportSpecifier {
 }
 impl std::fmt::Debug for JsNamedImportSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsNamedImportSpecifier")
-            .field(
-                "type_token",
-                &support::DebugOptionalElement(self.type_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("as_token", &support::DebugSyntaxResult(self.as_token()))
-            .field("local_name", &support::DebugSyntaxResult(self.local_name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsNamedImportSpecifier")
+                .field(
+                    "type_token",
+                    &support::DebugOptionalElement(self.type_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("as_token", &support::DebugSyntaxResult(self.as_token()))
+                .field("local_name", &support::DebugSyntaxResult(self.local_name()))
+                .finish()
+        } else {
+            f.debug_struct("JsNamedImportSpecifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsNamedImportSpecifier> for SyntaxNode {
@@ -20884,17 +21726,26 @@ impl AstNode for JsNamedImportSpecifiers {
 }
 impl std::fmt::Debug for JsNamedImportSpecifiers {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsNamedImportSpecifiers")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("specifiers", &self.specifiers())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsNamedImportSpecifiers")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("specifiers", &self.specifiers())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsNamedImportSpecifiers").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsNamedImportSpecifiers> for SyntaxNode {
@@ -20930,11 +21781,20 @@ impl AstNode for JsNamespaceImportSpecifier {
 }
 impl std::fmt::Debug for JsNamespaceImportSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsNamespaceImportSpecifier")
-            .field("star_token", &support::DebugSyntaxResult(self.star_token()))
-            .field("as_token", &support::DebugSyntaxResult(self.as_token()))
-            .field("local_name", &support::DebugSyntaxResult(self.local_name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsNamespaceImportSpecifier")
+                .field("star_token", &support::DebugSyntaxResult(self.star_token()))
+                .field("as_token", &support::DebugSyntaxResult(self.as_token()))
+                .field("local_name", &support::DebugSyntaxResult(self.local_name()))
+                .finish()
+        } else {
+            f.debug_struct("JsNamespaceImportSpecifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsNamespaceImportSpecifier> for SyntaxNode {
@@ -20970,18 +21830,27 @@ impl AstNode for JsNewExpression {
 }
 impl std::fmt::Debug for JsNewExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsNewExpression")
-            .field("new_token", &support::DebugSyntaxResult(self.new_token()))
-            .field("callee", &support::DebugSyntaxResult(self.callee()))
-            .field(
-                "type_arguments",
-                &support::DebugOptionalElement(self.type_arguments()),
-            )
-            .field(
-                "arguments",
-                &support::DebugOptionalElement(self.arguments()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsNewExpression")
+                .field("new_token", &support::DebugSyntaxResult(self.new_token()))
+                .field("callee", &support::DebugSyntaxResult(self.callee()))
+                .field(
+                    "type_arguments",
+                    &support::DebugOptionalElement(self.type_arguments()),
+                )
+                .field(
+                    "arguments",
+                    &support::DebugOptionalElement(self.arguments()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsNewExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsNewExpression> for SyntaxNode {
@@ -21017,14 +21886,23 @@ impl AstNode for JsNewTargetExpression {
 }
 impl std::fmt::Debug for JsNewTargetExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsNewTargetExpression")
-            .field("new_token", &support::DebugSyntaxResult(self.new_token()))
-            .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-            .field(
-                "target_token",
-                &support::DebugSyntaxResult(self.target_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsNewTargetExpression")
+                .field("new_token", &support::DebugSyntaxResult(self.new_token()))
+                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
+                .field(
+                    "target_token",
+                    &support::DebugSyntaxResult(self.target_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsNewTargetExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsNewTargetExpression> for SyntaxNode {
@@ -21060,12 +21938,21 @@ impl AstNode for JsNullLiteralExpression {
 }
 impl std::fmt::Debug for JsNullLiteralExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsNullLiteralExpression")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsNullLiteralExpression")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsNullLiteralExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsNullLiteralExpression> for SyntaxNode {
@@ -21101,12 +21988,21 @@ impl AstNode for JsNumberLiteralExpression {
 }
 impl std::fmt::Debug for JsNumberLiteralExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsNumberLiteralExpression")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsNumberLiteralExpression")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsNumberLiteralExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsNumberLiteralExpression> for SyntaxNode {
@@ -21142,17 +22038,26 @@ impl AstNode for JsObjectAssignmentPattern {
 }
 impl std::fmt::Debug for JsObjectAssignmentPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsObjectAssignmentPattern")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("properties", &self.properties())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsObjectAssignmentPattern")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("properties", &self.properties())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsObjectAssignmentPattern").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsObjectAssignmentPattern> for SyntaxNode {
@@ -21188,15 +22093,24 @@ impl AstNode for JsObjectAssignmentPatternProperty {
 }
 impl std::fmt::Debug for JsObjectAssignmentPatternProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsObjectAssignmentPatternProperty")
-            .field("member", &support::DebugSyntaxResult(self.member()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .field("init", &support::DebugOptionalElement(self.init()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsObjectAssignmentPatternProperty")
+                .field("member", &support::DebugSyntaxResult(self.member()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .field("init", &support::DebugOptionalElement(self.init()))
+                .finish()
+        } else {
+            f.debug_struct("JsObjectAssignmentPatternProperty").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsObjectAssignmentPatternProperty> for SyntaxNode {
@@ -21232,13 +22146,22 @@ impl AstNode for JsObjectAssignmentPatternRest {
 }
 impl std::fmt::Debug for JsObjectAssignmentPatternRest {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsObjectAssignmentPatternRest")
-            .field(
-                "dotdotdot_token",
-                &support::DebugSyntaxResult(self.dotdotdot_token()),
-            )
-            .field("target", &support::DebugSyntaxResult(self.target()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsObjectAssignmentPatternRest")
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugSyntaxResult(self.dotdotdot_token()),
+                )
+                .field("target", &support::DebugSyntaxResult(self.target()))
+                .finish()
+        } else {
+            f.debug_struct("JsObjectAssignmentPatternRest").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsObjectAssignmentPatternRest> for SyntaxNode {
@@ -21275,10 +22198,20 @@ impl AstNode for JsObjectAssignmentPatternShorthandProperty {
 }
 impl std::fmt::Debug for JsObjectAssignmentPatternShorthandProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsObjectAssignmentPatternShorthandProperty")
-            .field("identifier", &support::DebugSyntaxResult(self.identifier()))
-            .field("init", &support::DebugOptionalElement(self.init()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsObjectAssignmentPatternShorthandProperty")
+                .field("identifier", &support::DebugSyntaxResult(self.identifier()))
+                .field("init", &support::DebugOptionalElement(self.init()))
+                .finish()
+        } else {
+            f.debug_struct("JsObjectAssignmentPatternShorthandProperty")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsObjectAssignmentPatternShorthandProperty> for SyntaxNode {
@@ -21314,17 +22247,26 @@ impl AstNode for JsObjectBindingPattern {
 }
 impl std::fmt::Debug for JsObjectBindingPattern {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsObjectBindingPattern")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("properties", &self.properties())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsObjectBindingPattern")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("properties", &self.properties())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsObjectBindingPattern").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsObjectBindingPattern> for SyntaxNode {
@@ -21360,15 +22302,24 @@ impl AstNode for JsObjectBindingPatternProperty {
 }
 impl std::fmt::Debug for JsObjectBindingPatternProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsObjectBindingPatternProperty")
-            .field("member", &support::DebugSyntaxResult(self.member()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("pattern", &support::DebugSyntaxResult(self.pattern()))
-            .field("init", &support::DebugOptionalElement(self.init()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsObjectBindingPatternProperty")
+                .field("member", &support::DebugSyntaxResult(self.member()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+                .field("init", &support::DebugOptionalElement(self.init()))
+                .finish()
+        } else {
+            f.debug_struct("JsObjectBindingPatternProperty").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsObjectBindingPatternProperty> for SyntaxNode {
@@ -21404,13 +22355,22 @@ impl AstNode for JsObjectBindingPatternRest {
 }
 impl std::fmt::Debug for JsObjectBindingPatternRest {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsObjectBindingPatternRest")
-            .field(
-                "dotdotdot_token",
-                &support::DebugSyntaxResult(self.dotdotdot_token()),
-            )
-            .field("binding", &support::DebugSyntaxResult(self.binding()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsObjectBindingPatternRest")
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugSyntaxResult(self.dotdotdot_token()),
+                )
+                .field("binding", &support::DebugSyntaxResult(self.binding()))
+                .finish()
+        } else {
+            f.debug_struct("JsObjectBindingPatternRest").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsObjectBindingPatternRest> for SyntaxNode {
@@ -21447,10 +22407,20 @@ impl AstNode for JsObjectBindingPatternShorthandProperty {
 }
 impl std::fmt::Debug for JsObjectBindingPatternShorthandProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsObjectBindingPatternShorthandProperty")
-            .field("identifier", &support::DebugSyntaxResult(self.identifier()))
-            .field("init", &support::DebugOptionalElement(self.init()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsObjectBindingPatternShorthandProperty")
+                .field("identifier", &support::DebugSyntaxResult(self.identifier()))
+                .field("init", &support::DebugOptionalElement(self.init()))
+                .finish()
+        } else {
+            f.debug_struct("JsObjectBindingPatternShorthandProperty")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsObjectBindingPatternShorthandProperty> for SyntaxNode {
@@ -21486,17 +22456,26 @@ impl AstNode for JsObjectExpression {
 }
 impl std::fmt::Debug for JsObjectExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsObjectExpression")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("members", &self.members())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsObjectExpression")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("members", &self.members())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsObjectExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsObjectExpression> for SyntaxNode {
@@ -21532,17 +22511,26 @@ impl AstNode for JsParameters {
 }
 impl std::fmt::Debug for JsParameters {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsParameters")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("items", &self.items())
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsParameters")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("items", &self.items())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsParameters").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsParameters> for SyntaxNode {
@@ -21578,17 +22566,26 @@ impl AstNode for JsParenthesizedAssignment {
 }
 impl std::fmt::Debug for JsParenthesizedAssignment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsParenthesizedAssignment")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("assignment", &support::DebugSyntaxResult(self.assignment()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsParenthesizedAssignment")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("assignment", &support::DebugSyntaxResult(self.assignment()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsParenthesizedAssignment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsParenthesizedAssignment> for SyntaxNode {
@@ -21624,17 +22621,26 @@ impl AstNode for JsParenthesizedExpression {
 }
 impl std::fmt::Debug for JsParenthesizedExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsParenthesizedExpression")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsParenthesizedExpression")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsParenthesizedExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsParenthesizedExpression> for SyntaxNode {
@@ -21670,13 +22676,22 @@ impl AstNode for JsPostUpdateExpression {
 }
 impl std::fmt::Debug for JsPostUpdateExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsPostUpdateExpression")
-            .field("operand", &support::DebugSyntaxResult(self.operand()))
-            .field(
-                "operator_token",
-                &support::DebugSyntaxResult(self.operator_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsPostUpdateExpression")
+                .field("operand", &support::DebugSyntaxResult(self.operand()))
+                .field(
+                    "operator_token",
+                    &support::DebugSyntaxResult(self.operator_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsPostUpdateExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsPostUpdateExpression> for SyntaxNode {
@@ -21712,13 +22727,22 @@ impl AstNode for JsPreUpdateExpression {
 }
 impl std::fmt::Debug for JsPreUpdateExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsPreUpdateExpression")
-            .field(
-                "operator_token",
-                &support::DebugSyntaxResult(self.operator_token()),
-            )
-            .field("operand", &support::DebugSyntaxResult(self.operand()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsPreUpdateExpression")
+                .field(
+                    "operator_token",
+                    &support::DebugSyntaxResult(self.operator_token()),
+                )
+                .field("operand", &support::DebugSyntaxResult(self.operand()))
+                .finish()
+        } else {
+            f.debug_struct("JsPreUpdateExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsPreUpdateExpression> for SyntaxNode {
@@ -21754,10 +22778,19 @@ impl AstNode for JsPrivateClassMemberName {
 }
 impl std::fmt::Debug for JsPrivateClassMemberName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsPrivateClassMemberName")
-            .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
-            .field("id_token", &support::DebugSyntaxResult(self.id_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsPrivateClassMemberName")
+                .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
+                .field("id_token", &support::DebugSyntaxResult(self.id_token()))
+                .finish()
+        } else {
+            f.debug_struct("JsPrivateClassMemberName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsPrivateClassMemberName> for SyntaxNode {
@@ -21793,13 +22826,22 @@ impl AstNode for JsPrivateName {
 }
 impl std::fmt::Debug for JsPrivateName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsPrivateName")
-            .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsPrivateName")
+                .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsPrivateName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsPrivateName> for SyntaxNode {
@@ -21835,19 +22877,28 @@ impl AstNode for JsPropertyClassMember {
 }
 impl std::fmt::Debug for JsPropertyClassMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsPropertyClassMember")
-            .field("modifiers", &self.modifiers())
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "property_annotation",
-                &support::DebugOptionalElement(self.property_annotation()),
-            )
-            .field("value", &support::DebugOptionalElement(self.value()))
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsPropertyClassMember")
+                .field("modifiers", &self.modifiers())
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "property_annotation",
+                    &support::DebugOptionalElement(self.property_annotation()),
+                )
+                .field("value", &support::DebugOptionalElement(self.value()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsPropertyClassMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsPropertyClassMember> for SyntaxNode {
@@ -21883,14 +22934,23 @@ impl AstNode for JsPropertyObjectMember {
 }
 impl std::fmt::Debug for JsPropertyObjectMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsPropertyObjectMember")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsPropertyObjectMember")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("JsPropertyObjectMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsPropertyObjectMember> for SyntaxNode {
@@ -21926,12 +22986,21 @@ impl AstNode for JsReferenceIdentifier {
 }
 impl std::fmt::Debug for JsReferenceIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsReferenceIdentifier")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsReferenceIdentifier")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsReferenceIdentifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsReferenceIdentifier> for SyntaxNode {
@@ -21967,12 +23036,21 @@ impl AstNode for JsRegexLiteralExpression {
 }
 impl std::fmt::Debug for JsRegexLiteralExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsRegexLiteralExpression")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsRegexLiteralExpression")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsRegexLiteralExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsRegexLiteralExpression> for SyntaxNode {
@@ -22008,18 +23086,27 @@ impl AstNode for JsRestParameter {
 }
 impl std::fmt::Debug for JsRestParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsRestParameter")
-            .field("decorators", &self.decorators())
-            .field(
-                "dotdotdot_token",
-                &support::DebugSyntaxResult(self.dotdotdot_token()),
-            )
-            .field("binding", &support::DebugSyntaxResult(self.binding()))
-            .field(
-                "type_annotation",
-                &support::DebugOptionalElement(self.type_annotation()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsRestParameter")
+                .field("decorators", &self.decorators())
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugSyntaxResult(self.dotdotdot_token()),
+                )
+                .field("binding", &support::DebugSyntaxResult(self.binding()))
+                .field(
+                    "type_annotation",
+                    &support::DebugOptionalElement(self.type_annotation()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsRestParameter").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsRestParameter> for SyntaxNode {
@@ -22055,17 +23142,26 @@ impl AstNode for JsReturnStatement {
 }
 impl std::fmt::Debug for JsReturnStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsReturnStatement")
-            .field(
-                "return_token",
-                &support::DebugSyntaxResult(self.return_token()),
-            )
-            .field("argument", &support::DebugOptionalElement(self.argument()))
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsReturnStatement")
+                .field(
+                    "return_token",
+                    &support::DebugSyntaxResult(self.return_token()),
+                )
+                .field("argument", &support::DebugOptionalElement(self.argument()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsReturnStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsReturnStatement> for SyntaxNode {
@@ -22101,19 +23197,28 @@ impl AstNode for JsScript {
 }
 impl std::fmt::Debug for JsScript {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsScript")
-            .field(
-                "bom_token",
-                &support::DebugOptionalElement(self.bom_token()),
-            )
-            .field(
-                "interpreter_token",
-                &support::DebugOptionalElement(self.interpreter_token()),
-            )
-            .field("directives", &self.directives())
-            .field("statements", &self.statements())
-            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsScript")
+                .field(
+                    "bom_token",
+                    &support::DebugOptionalElement(self.bom_token()),
+                )
+                .field(
+                    "interpreter_token",
+                    &support::DebugOptionalElement(self.interpreter_token()),
+                )
+                .field("directives", &self.directives())
+                .field("statements", &self.statements())
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("JsScript").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsScript> for SyntaxNode {
@@ -22149,14 +23254,23 @@ impl AstNode for JsSequenceExpression {
 }
 impl std::fmt::Debug for JsSequenceExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsSequenceExpression")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "comma_token",
-                &support::DebugSyntaxResult(self.comma_token()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsSequenceExpression")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field(
+                    "comma_token",
+                    &support::DebugSyntaxResult(self.comma_token()),
+                )
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("JsSequenceExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsSequenceExpression> for SyntaxNode {
@@ -22192,25 +23306,34 @@ impl AstNode for JsSetterClassMember {
 }
 impl std::fmt::Debug for JsSetterClassMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsSetterClassMember")
-            .field("modifiers", &self.modifiers())
-            .field("set_token", &support::DebugSyntaxResult(self.set_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("parameter", &support::DebugSyntaxResult(self.parameter()))
-            .field(
-                "comma_token",
-                &support::DebugOptionalElement(self.comma_token()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsSetterClassMember")
+                .field("modifiers", &self.modifiers())
+                .field("set_token", &support::DebugSyntaxResult(self.set_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("parameter", &support::DebugSyntaxResult(self.parameter()))
+                .field(
+                    "comma_token",
+                    &support::DebugOptionalElement(self.comma_token()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsSetterClassMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsSetterClassMember> for SyntaxNode {
@@ -22246,24 +23369,33 @@ impl AstNode for JsSetterObjectMember {
 }
 impl std::fmt::Debug for JsSetterObjectMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsSetterObjectMember")
-            .field("set_token", &support::DebugSyntaxResult(self.set_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("parameter", &support::DebugSyntaxResult(self.parameter()))
-            .field(
-                "comma_token",
-                &support::DebugOptionalElement(self.comma_token()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsSetterObjectMember")
+                .field("set_token", &support::DebugSyntaxResult(self.set_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("parameter", &support::DebugSyntaxResult(self.parameter()))
+                .field(
+                    "comma_token",
+                    &support::DebugOptionalElement(self.comma_token()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsSetterObjectMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsSetterObjectMember> for SyntaxNode {
@@ -22299,13 +23431,22 @@ impl AstNode for JsShorthandNamedImportSpecifier {
 }
 impl std::fmt::Debug for JsShorthandNamedImportSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsShorthandNamedImportSpecifier")
-            .field(
-                "type_token",
-                &support::DebugOptionalElement(self.type_token()),
-            )
-            .field("local_name", &support::DebugSyntaxResult(self.local_name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsShorthandNamedImportSpecifier")
+                .field(
+                    "type_token",
+                    &support::DebugOptionalElement(self.type_token()),
+                )
+                .field("local_name", &support::DebugSyntaxResult(self.local_name()))
+                .finish()
+        } else {
+            f.debug_struct("JsShorthandNamedImportSpecifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsShorthandNamedImportSpecifier> for SyntaxNode {
@@ -22341,9 +23482,18 @@ impl AstNode for JsShorthandPropertyObjectMember {
 }
 impl std::fmt::Debug for JsShorthandPropertyObjectMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsShorthandPropertyObjectMember")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsShorthandPropertyObjectMember")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("JsShorthandPropertyObjectMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsShorthandPropertyObjectMember> for SyntaxNode {
@@ -22379,13 +23529,22 @@ impl AstNode for JsSpread {
 }
 impl std::fmt::Debug for JsSpread {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsSpread")
-            .field(
-                "dotdotdot_token",
-                &support::DebugSyntaxResult(self.dotdotdot_token()),
-            )
-            .field("argument", &support::DebugSyntaxResult(self.argument()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsSpread")
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugSyntaxResult(self.dotdotdot_token()),
+                )
+                .field("argument", &support::DebugSyntaxResult(self.argument()))
+                .finish()
+        } else {
+            f.debug_struct("JsSpread").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsSpread> for SyntaxNode {
@@ -22422,21 +23581,31 @@ impl AstNode for JsStaticInitializationBlockClassMember {
 }
 impl std::fmt::Debug for JsStaticInitializationBlockClassMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsStaticInitializationBlockClassMember")
-            .field(
-                "static_token",
-                &support::DebugSyntaxResult(self.static_token()),
-            )
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("statements", &self.statements())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsStaticInitializationBlockClassMember")
+                .field(
+                    "static_token",
+                    &support::DebugSyntaxResult(self.static_token()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("statements", &self.statements())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsStaticInitializationBlockClassMember")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsStaticInitializationBlockClassMember> for SyntaxNode {
@@ -22472,11 +23641,20 @@ impl AstNode for JsStaticMemberAssignment {
 }
 impl std::fmt::Debug for JsStaticMemberAssignment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsStaticMemberAssignment")
-            .field("object", &support::DebugSyntaxResult(self.object()))
-            .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-            .field("member", &support::DebugSyntaxResult(self.member()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsStaticMemberAssignment")
+                .field("object", &support::DebugSyntaxResult(self.object()))
+                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
+                .field("member", &support::DebugSyntaxResult(self.member()))
+                .finish()
+        } else {
+            f.debug_struct("JsStaticMemberAssignment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsStaticMemberAssignment> for SyntaxNode {
@@ -22512,14 +23690,23 @@ impl AstNode for JsStaticMemberExpression {
 }
 impl std::fmt::Debug for JsStaticMemberExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsStaticMemberExpression")
-            .field("object", &support::DebugSyntaxResult(self.object()))
-            .field(
-                "operator_token",
-                &support::DebugSyntaxResult(self.operator_token()),
-            )
-            .field("member", &support::DebugSyntaxResult(self.member()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsStaticMemberExpression")
+                .field("object", &support::DebugSyntaxResult(self.object()))
+                .field(
+                    "operator_token",
+                    &support::DebugSyntaxResult(self.operator_token()),
+                )
+                .field("member", &support::DebugSyntaxResult(self.member()))
+                .finish()
+        } else {
+            f.debug_struct("JsStaticMemberExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsStaticMemberExpression> for SyntaxNode {
@@ -22555,12 +23742,21 @@ impl AstNode for JsStaticModifier {
 }
 impl std::fmt::Debug for JsStaticModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsStaticModifier")
-            .field(
-                "modifier_token",
-                &support::DebugSyntaxResult(self.modifier_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsStaticModifier")
+                .field(
+                    "modifier_token",
+                    &support::DebugSyntaxResult(self.modifier_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsStaticModifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsStaticModifier> for SyntaxNode {
@@ -22596,12 +23792,21 @@ impl AstNode for JsStringLiteralExpression {
 }
 impl std::fmt::Debug for JsStringLiteralExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsStringLiteralExpression")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsStringLiteralExpression")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsStringLiteralExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsStringLiteralExpression> for SyntaxNode {
@@ -22637,12 +23842,21 @@ impl AstNode for JsSuperExpression {
 }
 impl std::fmt::Debug for JsSuperExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsSuperExpression")
-            .field(
-                "super_token",
-                &support::DebugSyntaxResult(self.super_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsSuperExpression")
+                .field(
+                    "super_token",
+                    &support::DebugSyntaxResult(self.super_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsSuperExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsSuperExpression> for SyntaxNode {
@@ -22678,33 +23892,42 @@ impl AstNode for JsSwitchStatement {
 }
 impl std::fmt::Debug for JsSwitchStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsSwitchStatement")
-            .field(
-                "switch_token",
-                &support::DebugSyntaxResult(self.switch_token()),
-            )
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field(
-                "discriminant",
-                &support::DebugSyntaxResult(self.discriminant()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("cases", &self.cases())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsSwitchStatement")
+                .field(
+                    "switch_token",
+                    &support::DebugSyntaxResult(self.switch_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field(
+                    "discriminant",
+                    &support::DebugSyntaxResult(self.discriminant()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("cases", &self.cases())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsSwitchStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsSwitchStatement> for SyntaxNode {
@@ -22740,12 +23963,21 @@ impl AstNode for JsTemplateChunkElement {
 }
 impl std::fmt::Debug for JsTemplateChunkElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsTemplateChunkElement")
-            .field(
-                "template_chunk_token",
-                &support::DebugSyntaxResult(self.template_chunk_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsTemplateChunkElement")
+                .field(
+                    "template_chunk_token",
+                    &support::DebugSyntaxResult(self.template_chunk_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsTemplateChunkElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsTemplateChunkElement> for SyntaxNode {
@@ -22781,17 +24013,26 @@ impl AstNode for JsTemplateElement {
 }
 impl std::fmt::Debug for JsTemplateElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsTemplateElement")
-            .field(
-                "dollar_curly_token",
-                &support::DebugSyntaxResult(self.dollar_curly_token()),
-            )
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsTemplateElement")
+                .field(
+                    "dollar_curly_token",
+                    &support::DebugSyntaxResult(self.dollar_curly_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsTemplateElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsTemplateElement> for SyntaxNode {
@@ -22827,22 +24068,31 @@ impl AstNode for JsTemplateExpression {
 }
 impl std::fmt::Debug for JsTemplateExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsTemplateExpression")
-            .field("tag", &support::DebugOptionalElement(self.tag()))
-            .field(
-                "type_arguments",
-                &support::DebugOptionalElement(self.type_arguments()),
-            )
-            .field(
-                "l_tick_token",
-                &support::DebugSyntaxResult(self.l_tick_token()),
-            )
-            .field("elements", &self.elements())
-            .field(
-                "r_tick_token",
-                &support::DebugSyntaxResult(self.r_tick_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsTemplateExpression")
+                .field("tag", &support::DebugOptionalElement(self.tag()))
+                .field(
+                    "type_arguments",
+                    &support::DebugOptionalElement(self.type_arguments()),
+                )
+                .field(
+                    "l_tick_token",
+                    &support::DebugSyntaxResult(self.l_tick_token()),
+                )
+                .field("elements", &self.elements())
+                .field(
+                    "r_tick_token",
+                    &support::DebugSyntaxResult(self.r_tick_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsTemplateExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsTemplateExpression> for SyntaxNode {
@@ -22878,9 +24128,18 @@ impl AstNode for JsThisExpression {
 }
 impl std::fmt::Debug for JsThisExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsThisExpression")
-            .field("this_token", &support::DebugSyntaxResult(self.this_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsThisExpression")
+                .field("this_token", &support::DebugSyntaxResult(self.this_token()))
+                .finish()
+        } else {
+            f.debug_struct("JsThisExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsThisExpression> for SyntaxNode {
@@ -22916,17 +24175,26 @@ impl AstNode for JsThrowStatement {
 }
 impl std::fmt::Debug for JsThrowStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsThrowStatement")
-            .field(
-                "throw_token",
-                &support::DebugSyntaxResult(self.throw_token()),
-            )
-            .field("argument", &support::DebugSyntaxResult(self.argument()))
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsThrowStatement")
+                .field(
+                    "throw_token",
+                    &support::DebugSyntaxResult(self.throw_token()),
+                )
+                .field("argument", &support::DebugSyntaxResult(self.argument()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsThrowStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsThrowStatement> for SyntaxNode {
@@ -22962,18 +24230,27 @@ impl AstNode for JsTryFinallyStatement {
 }
 impl std::fmt::Debug for JsTryFinallyStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsTryFinallyStatement")
-            .field("try_token", &support::DebugSyntaxResult(self.try_token()))
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .field(
-                "catch_clause",
-                &support::DebugOptionalElement(self.catch_clause()),
-            )
-            .field(
-                "finally_clause",
-                &support::DebugSyntaxResult(self.finally_clause()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsTryFinallyStatement")
+                .field("try_token", &support::DebugSyntaxResult(self.try_token()))
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .field(
+                    "catch_clause",
+                    &support::DebugOptionalElement(self.catch_clause()),
+                )
+                .field(
+                    "finally_clause",
+                    &support::DebugSyntaxResult(self.finally_clause()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsTryFinallyStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsTryFinallyStatement> for SyntaxNode {
@@ -23009,14 +24286,23 @@ impl AstNode for JsTryStatement {
 }
 impl std::fmt::Debug for JsTryStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsTryStatement")
-            .field("try_token", &support::DebugSyntaxResult(self.try_token()))
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .field(
-                "catch_clause",
-                &support::DebugSyntaxResult(self.catch_clause()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsTryStatement")
+                .field("try_token", &support::DebugSyntaxResult(self.try_token()))
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .field(
+                    "catch_clause",
+                    &support::DebugSyntaxResult(self.catch_clause()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsTryStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsTryStatement> for SyntaxNode {
@@ -23052,13 +24338,22 @@ impl AstNode for JsUnaryExpression {
 }
 impl std::fmt::Debug for JsUnaryExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsUnaryExpression")
-            .field(
-                "operator_token",
-                &support::DebugSyntaxResult(self.operator_token()),
-            )
-            .field("argument", &support::DebugSyntaxResult(self.argument()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsUnaryExpression")
+                .field(
+                    "operator_token",
+                    &support::DebugSyntaxResult(self.operator_token()),
+                )
+                .field("argument", &support::DebugSyntaxResult(self.argument()))
+                .finish()
+        } else {
+            f.debug_struct("JsUnaryExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsUnaryExpression> for SyntaxNode {
@@ -23094,14 +24389,23 @@ impl AstNode for JsVariableDeclaration {
 }
 impl std::fmt::Debug for JsVariableDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsVariableDeclaration")
-            .field(
-                "await_token",
-                &support::DebugOptionalElement(self.await_token()),
-            )
-            .field("kind", &support::DebugSyntaxResult(self.kind()))
-            .field("declarators", &self.declarators())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsVariableDeclaration")
+                .field(
+                    "await_token",
+                    &support::DebugOptionalElement(self.await_token()),
+                )
+                .field("kind", &support::DebugSyntaxResult(self.kind()))
+                .field("declarators", &self.declarators())
+                .finish()
+        } else {
+            f.debug_struct("JsVariableDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsVariableDeclaration> for SyntaxNode {
@@ -23137,16 +24441,25 @@ impl AstNode for JsVariableDeclarationClause {
 }
 impl std::fmt::Debug for JsVariableDeclarationClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsVariableDeclarationClause")
-            .field(
-                "declaration",
-                &support::DebugSyntaxResult(self.declaration()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsVariableDeclarationClause")
+                .field(
+                    "declaration",
+                    &support::DebugSyntaxResult(self.declaration()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsVariableDeclarationClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsVariableDeclarationClause> for SyntaxNode {
@@ -23182,17 +24495,26 @@ impl AstNode for JsVariableDeclarator {
 }
 impl std::fmt::Debug for JsVariableDeclarator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsVariableDeclarator")
-            .field("id", &support::DebugSyntaxResult(self.id()))
-            .field(
-                "variable_annotation",
-                &support::DebugOptionalElement(self.variable_annotation()),
-            )
-            .field(
-                "initializer",
-                &support::DebugOptionalElement(self.initializer()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsVariableDeclarator")
+                .field("id", &support::DebugSyntaxResult(self.id()))
+                .field(
+                    "variable_annotation",
+                    &support::DebugOptionalElement(self.variable_annotation()),
+                )
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsVariableDeclarator").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsVariableDeclarator> for SyntaxNode {
@@ -23228,16 +24550,25 @@ impl AstNode for JsVariableStatement {
 }
 impl std::fmt::Debug for JsVariableStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsVariableStatement")
-            .field(
-                "declaration",
-                &support::DebugSyntaxResult(self.declaration()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsVariableStatement")
+                .field(
+                    "declaration",
+                    &support::DebugSyntaxResult(self.declaration()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsVariableStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsVariableStatement> for SyntaxNode {
@@ -23273,22 +24604,31 @@ impl AstNode for JsWhileStatement {
 }
 impl std::fmt::Debug for JsWhileStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsWhileStatement")
-            .field(
-                "while_token",
-                &support::DebugSyntaxResult(self.while_token()),
-            )
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("test", &support::DebugSyntaxResult(self.test()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsWhileStatement")
+                .field(
+                    "while_token",
+                    &support::DebugSyntaxResult(self.while_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("test", &support::DebugSyntaxResult(self.test()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsWhileStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsWhileStatement> for SyntaxNode {
@@ -23324,19 +24664,28 @@ impl AstNode for JsWithStatement {
 }
 impl std::fmt::Debug for JsWithStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsWithStatement")
-            .field("with_token", &support::DebugSyntaxResult(self.with_token()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("object", &support::DebugSyntaxResult(self.object()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsWithStatement")
+                .field("with_token", &support::DebugSyntaxResult(self.with_token()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("object", &support::DebugSyntaxResult(self.object()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("JsWithStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsWithStatement> for SyntaxNode {
@@ -23372,13 +24721,22 @@ impl AstNode for JsYieldArgument {
 }
 impl std::fmt::Debug for JsYieldArgument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsYieldArgument")
-            .field(
-                "star_token",
-                &support::DebugOptionalElement(self.star_token()),
-            )
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsYieldArgument")
+                .field(
+                    "star_token",
+                    &support::DebugOptionalElement(self.star_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("JsYieldArgument").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsYieldArgument> for SyntaxNode {
@@ -23414,13 +24772,22 @@ impl AstNode for JsYieldExpression {
 }
 impl std::fmt::Debug for JsYieldExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsYieldExpression")
-            .field(
-                "yield_token",
-                &support::DebugSyntaxResult(self.yield_token()),
-            )
-            .field("argument", &support::DebugOptionalElement(self.argument()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsYieldExpression")
+                .field(
+                    "yield_token",
+                    &support::DebugSyntaxResult(self.yield_token()),
+                )
+                .field("argument", &support::DebugOptionalElement(self.argument()))
+                .finish()
+        } else {
+            f.debug_struct("JsYieldExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsYieldExpression> for SyntaxNode {
@@ -23456,13 +24823,22 @@ impl AstNode for JsxAttribute {
 }
 impl std::fmt::Debug for JsxAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxAttribute")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "initializer",
-                &support::DebugOptionalElement(self.initializer()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxAttribute")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxAttribute").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxAttribute> for SyntaxNode {
@@ -23498,10 +24874,19 @@ impl AstNode for JsxAttributeInitializerClause {
 }
 impl std::fmt::Debug for JsxAttributeInitializerClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxAttributeInitializerClause")
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxAttributeInitializerClause")
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("JsxAttributeInitializerClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxAttributeInitializerClause> for SyntaxNode {
@@ -23537,21 +24922,30 @@ impl AstNode for JsxClosingElement {
 }
 impl std::fmt::Debug for JsxClosingElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxClosingElement")
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field(
-                "slash_token",
-                &support::DebugSyntaxResult(self.slash_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxClosingElement")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field(
+                    "slash_token",
+                    &support::DebugSyntaxResult(self.slash_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxClosingElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxClosingElement> for SyntaxNode {
@@ -23587,20 +24981,29 @@ impl AstNode for JsxClosingFragment {
 }
 impl std::fmt::Debug for JsxClosingFragment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxClosingFragment")
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field(
-                "slash_token",
-                &support::DebugSyntaxResult(self.slash_token()),
-            )
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxClosingFragment")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field(
+                    "slash_token",
+                    &support::DebugSyntaxResult(self.slash_token()),
+                )
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxClosingFragment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxClosingFragment> for SyntaxNode {
@@ -23636,17 +25039,26 @@ impl AstNode for JsxElement {
 }
 impl std::fmt::Debug for JsxElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxElement")
-            .field(
-                "opening_element",
-                &support::DebugSyntaxResult(self.opening_element()),
-            )
-            .field("children", &self.children())
-            .field(
-                "closing_element",
-                &support::DebugSyntaxResult(self.closing_element()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxElement")
+                .field(
+                    "opening_element",
+                    &support::DebugSyntaxResult(self.opening_element()),
+                )
+                .field("children", &self.children())
+                .field(
+                    "closing_element",
+                    &support::DebugSyntaxResult(self.closing_element()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxElement> for SyntaxNode {
@@ -23682,17 +25094,26 @@ impl AstNode for JsxExpressionAttributeValue {
 }
 impl std::fmt::Debug for JsxExpressionAttributeValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxExpressionAttributeValue")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxExpressionAttributeValue")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxExpressionAttributeValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxExpressionAttributeValue> for SyntaxNode {
@@ -23728,20 +25149,29 @@ impl AstNode for JsxExpressionChild {
 }
 impl std::fmt::Debug for JsxExpressionChild {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxExpressionChild")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field(
-                "expression",
-                &support::DebugOptionalElement(self.expression()),
-            )
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxExpressionChild")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field(
+                    "expression",
+                    &support::DebugOptionalElement(self.expression()),
+                )
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxExpressionChild").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxExpressionChild> for SyntaxNode {
@@ -23777,17 +25207,26 @@ impl AstNode for JsxFragment {
 }
 impl std::fmt::Debug for JsxFragment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxFragment")
-            .field(
-                "opening_fragment",
-                &support::DebugSyntaxResult(self.opening_fragment()),
-            )
-            .field("children", &self.children())
-            .field(
-                "closing_fragment",
-                &support::DebugSyntaxResult(self.closing_fragment()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxFragment")
+                .field(
+                    "opening_fragment",
+                    &support::DebugSyntaxResult(self.opening_fragment()),
+                )
+                .field("children", &self.children())
+                .field(
+                    "closing_fragment",
+                    &support::DebugSyntaxResult(self.closing_fragment()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxFragment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxFragment> for SyntaxNode {
@@ -23823,11 +25262,20 @@ impl AstNode for JsxMemberName {
 }
 impl std::fmt::Debug for JsxMemberName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxMemberName")
-            .field("object", &support::DebugSyntaxResult(self.object()))
-            .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-            .field("member", &support::DebugSyntaxResult(self.member()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxMemberName")
+                .field("object", &support::DebugSyntaxResult(self.object()))
+                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
+                .field("member", &support::DebugSyntaxResult(self.member()))
+                .finish()
+        } else {
+            f.debug_struct("JsxMemberName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxMemberName> for SyntaxNode {
@@ -23863,12 +25311,21 @@ impl AstNode for JsxName {
 }
 impl std::fmt::Debug for JsxName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxName")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxName")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxName> for SyntaxNode {
@@ -23904,14 +25361,23 @@ impl AstNode for JsxNamespaceName {
 }
 impl std::fmt::Debug for JsxNamespaceName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxNamespaceName")
-            .field("namespace", &support::DebugSyntaxResult(self.namespace()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxNamespaceName")
+                .field("namespace", &support::DebugSyntaxResult(self.namespace()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .finish()
+        } else {
+            f.debug_struct("JsxNamespaceName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxNamespaceName> for SyntaxNode {
@@ -23947,22 +25413,31 @@ impl AstNode for JsxOpeningElement {
 }
 impl std::fmt::Debug for JsxOpeningElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxOpeningElement")
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "type_arguments",
-                &support::DebugOptionalElement(self.type_arguments()),
-            )
-            .field("attributes", &self.attributes())
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxOpeningElement")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "type_arguments",
+                    &support::DebugOptionalElement(self.type_arguments()),
+                )
+                .field("attributes", &self.attributes())
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxOpeningElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxOpeningElement> for SyntaxNode {
@@ -23998,16 +25473,25 @@ impl AstNode for JsxOpeningFragment {
 }
 impl std::fmt::Debug for JsxOpeningFragment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxOpeningFragment")
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxOpeningFragment")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxOpeningFragment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxOpeningFragment> for SyntaxNode {
@@ -24043,12 +25527,21 @@ impl AstNode for JsxReferenceIdentifier {
 }
 impl std::fmt::Debug for JsxReferenceIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxReferenceIdentifier")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxReferenceIdentifier")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxReferenceIdentifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxReferenceIdentifier> for SyntaxNode {
@@ -24084,26 +25577,35 @@ impl AstNode for JsxSelfClosingElement {
 }
 impl std::fmt::Debug for JsxSelfClosingElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxSelfClosingElement")
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "type_arguments",
-                &support::DebugOptionalElement(self.type_arguments()),
-            )
-            .field("attributes", &self.attributes())
-            .field(
-                "slash_token",
-                &support::DebugSyntaxResult(self.slash_token()),
-            )
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxSelfClosingElement")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "type_arguments",
+                    &support::DebugOptionalElement(self.type_arguments()),
+                )
+                .field("attributes", &self.attributes())
+                .field(
+                    "slash_token",
+                    &support::DebugSyntaxResult(self.slash_token()),
+                )
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxSelfClosingElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxSelfClosingElement> for SyntaxNode {
@@ -24139,21 +25641,30 @@ impl AstNode for JsxSpreadAttribute {
 }
 impl std::fmt::Debug for JsxSpreadAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxSpreadAttribute")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field(
-                "dotdotdot_token",
-                &support::DebugSyntaxResult(self.dotdotdot_token()),
-            )
-            .field("argument", &support::DebugSyntaxResult(self.argument()))
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxSpreadAttribute")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugSyntaxResult(self.dotdotdot_token()),
+                )
+                .field("argument", &support::DebugSyntaxResult(self.argument()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxSpreadAttribute").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxSpreadAttribute> for SyntaxNode {
@@ -24189,21 +25700,30 @@ impl AstNode for JsxSpreadChild {
 }
 impl std::fmt::Debug for JsxSpreadChild {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxSpreadChild")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field(
-                "dotdotdot_token",
-                &support::DebugSyntaxResult(self.dotdotdot_token()),
-            )
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxSpreadChild")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugSyntaxResult(self.dotdotdot_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxSpreadChild").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxSpreadChild> for SyntaxNode {
@@ -24239,12 +25759,21 @@ impl AstNode for JsxString {
 }
 impl std::fmt::Debug for JsxString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxString")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxString")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxString").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxString> for SyntaxNode {
@@ -24280,9 +25809,18 @@ impl AstNode for JsxTagExpression {
 }
 impl std::fmt::Debug for JsxTagExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxTagExpression")
-            .field("tag", &support::DebugSyntaxResult(self.tag()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxTagExpression")
+                .field("tag", &support::DebugSyntaxResult(self.tag()))
+                .finish()
+        } else {
+            f.debug_struct("JsxTagExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxTagExpression> for SyntaxNode {
@@ -24318,12 +25856,21 @@ impl AstNode for JsxText {
 }
 impl std::fmt::Debug for JsxText {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("JsxText")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsxText")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("JsxText").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<JsxText> for SyntaxNode {
@@ -24359,12 +25906,21 @@ impl AstNode for TsAbstractModifier {
 }
 impl std::fmt::Debug for TsAbstractModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsAbstractModifier")
-            .field(
-                "modifier_token",
-                &support::DebugSyntaxResult(self.modifier_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsAbstractModifier")
+                .field(
+                    "modifier_token",
+                    &support::DebugSyntaxResult(self.modifier_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsAbstractModifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsAbstractModifier> for SyntaxNode {
@@ -24400,12 +25956,21 @@ impl AstNode for TsAccessibilityModifier {
 }
 impl std::fmt::Debug for TsAccessibilityModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsAccessibilityModifier")
-            .field(
-                "modifier_token",
-                &support::DebugSyntaxResult(self.modifier_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsAccessibilityModifier")
+                .field(
+                    "modifier_token",
+                    &support::DebugSyntaxResult(self.modifier_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsAccessibilityModifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsAccessibilityModifier> for SyntaxNode {
@@ -24441,9 +26006,18 @@ impl AstNode for TsAnyType {
 }
 impl std::fmt::Debug for TsAnyType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsAnyType")
-            .field("any_token", &support::DebugSyntaxResult(self.any_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsAnyType")
+                .field("any_token", &support::DebugSyntaxResult(self.any_token()))
+                .finish()
+        } else {
+            f.debug_struct("TsAnyType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsAnyType> for SyntaxNode {
@@ -24479,20 +26053,29 @@ impl AstNode for TsArrayType {
 }
 impl std::fmt::Debug for TsArrayType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsArrayType")
-            .field(
-                "element_type",
-                &support::DebugSyntaxResult(self.element_type()),
-            )
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsArrayType")
+                .field(
+                    "element_type",
+                    &support::DebugSyntaxResult(self.element_type()),
+                )
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsArrayType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsArrayType> for SyntaxNode {
@@ -24528,11 +26111,20 @@ impl AstNode for TsAsAssignment {
 }
 impl std::fmt::Debug for TsAsAssignment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsAsAssignment")
-            .field("assignment", &support::DebugSyntaxResult(self.assignment()))
-            .field("as_token", &support::DebugSyntaxResult(self.as_token()))
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsAsAssignment")
+                .field("assignment", &support::DebugSyntaxResult(self.assignment()))
+                .field("as_token", &support::DebugSyntaxResult(self.as_token()))
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("TsAsAssignment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsAsAssignment> for SyntaxNode {
@@ -24568,11 +26160,20 @@ impl AstNode for TsAsExpression {
 }
 impl std::fmt::Debug for TsAsExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsAsExpression")
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .field("as_token", &support::DebugSyntaxResult(self.as_token()))
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsAsExpression")
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field("as_token", &support::DebugSyntaxResult(self.as_token()))
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("TsAsExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsAsExpression> for SyntaxNode {
@@ -24608,10 +26209,19 @@ impl AstNode for TsAssertsCondition {
 }
 impl std::fmt::Debug for TsAssertsCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsAssertsCondition")
-            .field("is_token", &support::DebugSyntaxResult(self.is_token()))
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsAssertsCondition")
+                .field("is_token", &support::DebugSyntaxResult(self.is_token()))
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("TsAssertsCondition").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsAssertsCondition> for SyntaxNode {
@@ -24647,20 +26257,29 @@ impl AstNode for TsAssertsReturnType {
 }
 impl std::fmt::Debug for TsAssertsReturnType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsAssertsReturnType")
-            .field(
-                "asserts_token",
-                &support::DebugSyntaxResult(self.asserts_token()),
-            )
-            .field(
-                "parameter_name",
-                &support::DebugSyntaxResult(self.parameter_name()),
-            )
-            .field(
-                "predicate",
-                &support::DebugOptionalElement(self.predicate()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsAssertsReturnType")
+                .field(
+                    "asserts_token",
+                    &support::DebugSyntaxResult(self.asserts_token()),
+                )
+                .field(
+                    "parameter_name",
+                    &support::DebugSyntaxResult(self.parameter_name()),
+                )
+                .field(
+                    "predicate",
+                    &support::DebugOptionalElement(self.predicate()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsAssertsReturnType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsAssertsReturnType> for SyntaxNode {
@@ -24696,16 +26315,25 @@ impl AstNode for TsBigintLiteralType {
 }
 impl std::fmt::Debug for TsBigintLiteralType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsBigintLiteralType")
-            .field(
-                "minus_token",
-                &support::DebugOptionalElement(self.minus_token()),
-            )
-            .field(
-                "literal_token",
-                &support::DebugSyntaxResult(self.literal_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsBigintLiteralType")
+                .field(
+                    "minus_token",
+                    &support::DebugOptionalElement(self.minus_token()),
+                )
+                .field(
+                    "literal_token",
+                    &support::DebugSyntaxResult(self.literal_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsBigintLiteralType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsBigintLiteralType> for SyntaxNode {
@@ -24741,12 +26369,21 @@ impl AstNode for TsBigintType {
 }
 impl std::fmt::Debug for TsBigintType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsBigintType")
-            .field(
-                "bigint_token",
-                &support::DebugSyntaxResult(self.bigint_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsBigintType")
+                .field(
+                    "bigint_token",
+                    &support::DebugSyntaxResult(self.bigint_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsBigintType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsBigintType> for SyntaxNode {
@@ -24782,9 +26419,18 @@ impl AstNode for TsBooleanLiteralType {
 }
 impl std::fmt::Debug for TsBooleanLiteralType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsBooleanLiteralType")
-            .field("literal", &support::DebugSyntaxResult(self.literal()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsBooleanLiteralType")
+                .field("literal", &support::DebugSyntaxResult(self.literal()))
+                .finish()
+        } else {
+            f.debug_struct("TsBooleanLiteralType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsBooleanLiteralType> for SyntaxNode {
@@ -24820,12 +26466,21 @@ impl AstNode for TsBooleanType {
 }
 impl std::fmt::Debug for TsBooleanType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsBooleanType")
-            .field(
-                "boolean_token",
-                &support::DebugSyntaxResult(self.boolean_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsBooleanType")
+                .field(
+                    "boolean_token",
+                    &support::DebugSyntaxResult(self.boolean_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsBooleanType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsBooleanType> for SyntaxNode {
@@ -24861,21 +26516,30 @@ impl AstNode for TsCallSignatureTypeMember {
 }
 impl std::fmt::Debug for TsCallSignatureTypeMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsCallSignatureTypeMember")
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field(
-                "return_type_annotation",
-                &support::DebugOptionalElement(self.return_type_annotation()),
-            )
-            .field(
-                "separator_token",
-                &support::DebugOptionalElement(self.separator_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsCallSignatureTypeMember")
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field(
+                    "return_type_annotation",
+                    &support::DebugOptionalElement(self.return_type_annotation()),
+                )
+                .field(
+                    "separator_token",
+                    &support::DebugOptionalElement(self.separator_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsCallSignatureTypeMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsCallSignatureTypeMember> for SyntaxNode {
@@ -24911,27 +26575,36 @@ impl AstNode for TsConditionalType {
 }
 impl std::fmt::Debug for TsConditionalType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsConditionalType")
-            .field("check_type", &support::DebugSyntaxResult(self.check_type()))
-            .field(
-                "extends_token",
-                &support::DebugSyntaxResult(self.extends_token()),
-            )
-            .field(
-                "extends_type",
-                &support::DebugSyntaxResult(self.extends_type()),
-            )
-            .field(
-                "question_mark_token",
-                &support::DebugSyntaxResult(self.question_mark_token()),
-            )
-            .field("true_type", &support::DebugSyntaxResult(self.true_type()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("false_type", &support::DebugSyntaxResult(self.false_type()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsConditionalType")
+                .field("check_type", &support::DebugSyntaxResult(self.check_type()))
+                .field(
+                    "extends_token",
+                    &support::DebugSyntaxResult(self.extends_token()),
+                )
+                .field(
+                    "extends_type",
+                    &support::DebugSyntaxResult(self.extends_type()),
+                )
+                .field(
+                    "question_mark_token",
+                    &support::DebugSyntaxResult(self.question_mark_token()),
+                )
+                .field("true_type", &support::DebugSyntaxResult(self.true_type()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("false_type", &support::DebugSyntaxResult(self.false_type()))
+                .finish()
+        } else {
+            f.debug_struct("TsConditionalType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsConditionalType> for SyntaxNode {
@@ -24967,12 +26640,21 @@ impl AstNode for TsConstModifier {
 }
 impl std::fmt::Debug for TsConstModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsConstModifier")
-            .field(
-                "modifier_token",
-                &support::DebugSyntaxResult(self.modifier_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsConstModifier")
+                .field(
+                    "modifier_token",
+                    &support::DebugSyntaxResult(self.modifier_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsConstModifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsConstModifier> for SyntaxNode {
@@ -25008,22 +26690,31 @@ impl AstNode for TsConstructSignatureTypeMember {
 }
 impl std::fmt::Debug for TsConstructSignatureTypeMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsConstructSignatureTypeMember")
-            .field("new_token", &support::DebugSyntaxResult(self.new_token()))
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field(
-                "type_annotation",
-                &support::DebugOptionalElement(self.type_annotation()),
-            )
-            .field(
-                "separator_token",
-                &support::DebugOptionalElement(self.separator_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsConstructSignatureTypeMember")
+                .field("new_token", &support::DebugSyntaxResult(self.new_token()))
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field(
+                    "type_annotation",
+                    &support::DebugOptionalElement(self.type_annotation()),
+                )
+                .field(
+                    "separator_token",
+                    &support::DebugOptionalElement(self.separator_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsConstructSignatureTypeMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsConstructSignatureTypeMember> for SyntaxNode {
@@ -25059,15 +26750,24 @@ impl AstNode for TsConstructorSignatureClassMember {
 }
 impl std::fmt::Debug for TsConstructorSignatureClassMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsConstructorSignatureClassMember")
-            .field("modifiers", &self.modifiers())
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsConstructorSignatureClassMember")
+                .field("modifiers", &self.modifiers())
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsConstructorSignatureClassMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsConstructorSignatureClassMember> for SyntaxNode {
@@ -25103,26 +26803,35 @@ impl AstNode for TsConstructorType {
 }
 impl std::fmt::Debug for TsConstructorType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsConstructorType")
-            .field(
-                "abstract_token",
-                &support::DebugOptionalElement(self.abstract_token()),
-            )
-            .field("new_token", &support::DebugSyntaxResult(self.new_token()))
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field(
-                "fat_arrow_token",
-                &support::DebugSyntaxResult(self.fat_arrow_token()),
-            )
-            .field(
-                "return_type",
-                &support::DebugSyntaxResult(self.return_type()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsConstructorType")
+                .field(
+                    "abstract_token",
+                    &support::DebugOptionalElement(self.abstract_token()),
+                )
+                .field("new_token", &support::DebugSyntaxResult(self.new_token()))
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field(
+                    "fat_arrow_token",
+                    &support::DebugSyntaxResult(self.fat_arrow_token()),
+                )
+                .field(
+                    "return_type",
+                    &support::DebugSyntaxResult(self.return_type()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsConstructorType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsConstructorType> for SyntaxNode {
@@ -25158,19 +26867,28 @@ impl AstNode for TsDeclarationModule {
 }
 impl std::fmt::Debug for TsDeclarationModule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsDeclarationModule")
-            .field(
-                "bom_token",
-                &support::DebugOptionalElement(self.bom_token()),
-            )
-            .field(
-                "interpreter_token",
-                &support::DebugOptionalElement(self.interpreter_token()),
-            )
-            .field("directives", &self.directives())
-            .field("items", &self.items())
-            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsDeclarationModule")
+                .field(
+                    "bom_token",
+                    &support::DebugOptionalElement(self.bom_token()),
+                )
+                .field(
+                    "interpreter_token",
+                    &support::DebugOptionalElement(self.interpreter_token()),
+                )
+                .field("directives", &self.directives())
+                .field("items", &self.items())
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("TsDeclarationModule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsDeclarationModule> for SyntaxNode {
@@ -25206,30 +26924,39 @@ impl AstNode for TsDeclareFunctionDeclaration {
 }
 impl std::fmt::Debug for TsDeclareFunctionDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsDeclareFunctionDeclaration")
-            .field(
-                "async_token",
-                &support::DebugOptionalElement(self.async_token()),
-            )
-            .field(
-                "function_token",
-                &support::DebugSyntaxResult(self.function_token()),
-            )
-            .field("id", &support::DebugSyntaxResult(self.id()))
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field(
-                "return_type_annotation",
-                &support::DebugOptionalElement(self.return_type_annotation()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsDeclareFunctionDeclaration")
+                .field(
+                    "async_token",
+                    &support::DebugOptionalElement(self.async_token()),
+                )
+                .field(
+                    "function_token",
+                    &support::DebugSyntaxResult(self.function_token()),
+                )
+                .field("id", &support::DebugSyntaxResult(self.id()))
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field(
+                    "return_type_annotation",
+                    &support::DebugOptionalElement(self.return_type_annotation()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsDeclareFunctionDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsDeclareFunctionDeclaration> for SyntaxNode {
@@ -25266,30 +26993,40 @@ impl AstNode for TsDeclareFunctionExportDefaultDeclaration {
 }
 impl std::fmt::Debug for TsDeclareFunctionExportDefaultDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsDeclareFunctionExportDefaultDeclaration")
-            .field(
-                "async_token",
-                &support::DebugOptionalElement(self.async_token()),
-            )
-            .field(
-                "function_token",
-                &support::DebugSyntaxResult(self.function_token()),
-            )
-            .field("id", &support::DebugOptionalElement(self.id()))
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field(
-                "return_type_annotation",
-                &support::DebugOptionalElement(self.return_type_annotation()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsDeclareFunctionExportDefaultDeclaration")
+                .field(
+                    "async_token",
+                    &support::DebugOptionalElement(self.async_token()),
+                )
+                .field(
+                    "function_token",
+                    &support::DebugSyntaxResult(self.function_token()),
+                )
+                .field("id", &support::DebugOptionalElement(self.id()))
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field(
+                    "return_type_annotation",
+                    &support::DebugOptionalElement(self.return_type_annotation()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsDeclareFunctionExportDefaultDeclaration")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsDeclareFunctionExportDefaultDeclaration> for SyntaxNode {
@@ -25325,12 +27062,21 @@ impl AstNode for TsDeclareModifier {
 }
 impl std::fmt::Debug for TsDeclareModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsDeclareModifier")
-            .field(
-                "modifier_token",
-                &support::DebugSyntaxResult(self.modifier_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsDeclareModifier")
+                .field(
+                    "modifier_token",
+                    &support::DebugSyntaxResult(self.modifier_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsDeclareModifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsDeclareModifier> for SyntaxNode {
@@ -25366,16 +27112,25 @@ impl AstNode for TsDeclareStatement {
 }
 impl std::fmt::Debug for TsDeclareStatement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsDeclareStatement")
-            .field(
-                "declare_token",
-                &support::DebugSyntaxResult(self.declare_token()),
-            )
-            .field(
-                "declaration",
-                &support::DebugSyntaxResult(self.declaration()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsDeclareStatement")
+                .field(
+                    "declare_token",
+                    &support::DebugSyntaxResult(self.declare_token()),
+                )
+                .field(
+                    "declaration",
+                    &support::DebugSyntaxResult(self.declaration()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsDeclareStatement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsDeclareStatement> for SyntaxNode {
@@ -25411,10 +27166,19 @@ impl AstNode for TsDefaultTypeClause {
 }
 impl std::fmt::Debug for TsDefaultTypeClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsDefaultTypeClause")
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsDefaultTypeClause")
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("TsDefaultTypeClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsDefaultTypeClause> for SyntaxNode {
@@ -25450,13 +27214,22 @@ impl AstNode for TsDefinitePropertyAnnotation {
 }
 impl std::fmt::Debug for TsDefinitePropertyAnnotation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsDefinitePropertyAnnotation")
-            .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
-            .field(
-                "type_annotation",
-                &support::DebugSyntaxResult(self.type_annotation()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsDefinitePropertyAnnotation")
+                .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
+                .field(
+                    "type_annotation",
+                    &support::DebugSyntaxResult(self.type_annotation()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsDefinitePropertyAnnotation").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsDefinitePropertyAnnotation> for SyntaxNode {
@@ -25492,13 +27265,22 @@ impl AstNode for TsDefiniteVariableAnnotation {
 }
 impl std::fmt::Debug for TsDefiniteVariableAnnotation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsDefiniteVariableAnnotation")
-            .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
-            .field(
-                "type_annotation",
-                &support::DebugSyntaxResult(self.type_annotation()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsDefiniteVariableAnnotation")
+                .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
+                .field(
+                    "type_annotation",
+                    &support::DebugSyntaxResult(self.type_annotation()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsDefiniteVariableAnnotation").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsDefiniteVariableAnnotation> for SyntaxNode {
@@ -25535,12 +27317,22 @@ impl AstNode for TsEmptyExternalModuleDeclarationBody {
 }
 impl std::fmt::Debug for TsEmptyExternalModuleDeclarationBody {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsEmptyExternalModuleDeclarationBody")
-            .field(
-                "semicolon_token",
-                &support::DebugSyntaxResult(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsEmptyExternalModuleDeclarationBody")
+                .field(
+                    "semicolon_token",
+                    &support::DebugSyntaxResult(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsEmptyExternalModuleDeclarationBody")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsEmptyExternalModuleDeclarationBody> for SyntaxNode {
@@ -25576,23 +27368,32 @@ impl AstNode for TsEnumDeclaration {
 }
 impl std::fmt::Debug for TsEnumDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsEnumDeclaration")
-            .field(
-                "const_token",
-                &support::DebugOptionalElement(self.const_token()),
-            )
-            .field("enum_token", &support::DebugSyntaxResult(self.enum_token()))
-            .field("id", &support::DebugSyntaxResult(self.id()))
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("members", &self.members())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsEnumDeclaration")
+                .field(
+                    "const_token",
+                    &support::DebugOptionalElement(self.const_token()),
+                )
+                .field("enum_token", &support::DebugSyntaxResult(self.enum_token()))
+                .field("id", &support::DebugSyntaxResult(self.id()))
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("members", &self.members())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsEnumDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsEnumDeclaration> for SyntaxNode {
@@ -25628,13 +27429,22 @@ impl AstNode for TsEnumMember {
 }
 impl std::fmt::Debug for TsEnumMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsEnumMember")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "initializer",
-                &support::DebugOptionalElement(self.initializer()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsEnumMember")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "initializer",
+                    &support::DebugOptionalElement(self.initializer()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsEnumMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsEnumMember> for SyntaxNode {
@@ -25670,18 +27480,27 @@ impl AstNode for TsExportAsNamespaceClause {
 }
 impl std::fmt::Debug for TsExportAsNamespaceClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsExportAsNamespaceClause")
-            .field("as_token", &support::DebugSyntaxResult(self.as_token()))
-            .field(
-                "namespace_token",
-                &support::DebugSyntaxResult(self.namespace_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsExportAsNamespaceClause")
+                .field("as_token", &support::DebugSyntaxResult(self.as_token()))
+                .field(
+                    "namespace_token",
+                    &support::DebugSyntaxResult(self.namespace_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsExportAsNamespaceClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsExportAsNamespaceClause> for SyntaxNode {
@@ -25717,14 +27536,23 @@ impl AstNode for TsExportAssignmentClause {
 }
 impl std::fmt::Debug for TsExportAssignmentClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsExportAssignmentClause")
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsExportAssignmentClause")
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsExportAssignmentClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsExportAssignmentClause> for SyntaxNode {
@@ -25760,16 +27588,25 @@ impl AstNode for TsExportDeclareClause {
 }
 impl std::fmt::Debug for TsExportDeclareClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsExportDeclareClause")
-            .field(
-                "declare_token",
-                &support::DebugSyntaxResult(self.declare_token()),
-            )
-            .field(
-                "declaration",
-                &support::DebugSyntaxResult(self.declaration()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsExportDeclareClause")
+                .field(
+                    "declare_token",
+                    &support::DebugSyntaxResult(self.declare_token()),
+                )
+                .field(
+                    "declaration",
+                    &support::DebugSyntaxResult(self.declaration()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsExportDeclareClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsExportDeclareClause> for SyntaxNode {
@@ -25805,13 +27642,22 @@ impl AstNode for TsExtendsClause {
 }
 impl std::fmt::Debug for TsExtendsClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsExtendsClause")
-            .field(
-                "extends_token",
-                &support::DebugSyntaxResult(self.extends_token()),
-            )
-            .field("types", &self.types())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsExtendsClause")
+                .field(
+                    "extends_token",
+                    &support::DebugSyntaxResult(self.extends_token()),
+                )
+                .field("types", &self.types())
+                .finish()
+        } else {
+            f.debug_struct("TsExtendsClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsExtendsClause> for SyntaxNode {
@@ -25847,14 +27693,23 @@ impl AstNode for TsExternalModuleDeclaration {
 }
 impl std::fmt::Debug for TsExternalModuleDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsExternalModuleDeclaration")
-            .field(
-                "module_token",
-                &support::DebugSyntaxResult(self.module_token()),
-            )
-            .field("source", &support::DebugSyntaxResult(self.source()))
-            .field("body", &support::DebugOptionalElement(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsExternalModuleDeclaration")
+                .field(
+                    "module_token",
+                    &support::DebugSyntaxResult(self.module_token()),
+                )
+                .field("source", &support::DebugSyntaxResult(self.source()))
+                .field("body", &support::DebugOptionalElement(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("TsExternalModuleDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsExternalModuleDeclaration> for SyntaxNode {
@@ -25890,21 +27745,30 @@ impl AstNode for TsExternalModuleReference {
 }
 impl std::fmt::Debug for TsExternalModuleReference {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsExternalModuleReference")
-            .field(
-                "require_token",
-                &support::DebugSyntaxResult(self.require_token()),
-            )
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("source", &support::DebugSyntaxResult(self.source()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsExternalModuleReference")
+                .field(
+                    "require_token",
+                    &support::DebugSyntaxResult(self.require_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("source", &support::DebugSyntaxResult(self.source()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsExternalModuleReference").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsExternalModuleReference> for SyntaxNode {
@@ -25940,21 +27804,30 @@ impl AstNode for TsFunctionType {
 }
 impl std::fmt::Debug for TsFunctionType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsFunctionType")
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field(
-                "fat_arrow_token",
-                &support::DebugSyntaxResult(self.fat_arrow_token()),
-            )
-            .field(
-                "return_type",
-                &support::DebugSyntaxResult(self.return_type()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsFunctionType")
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field(
+                    "fat_arrow_token",
+                    &support::DebugSyntaxResult(self.fat_arrow_token()),
+                )
+                .field(
+                    "return_type",
+                    &support::DebugSyntaxResult(self.return_type()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsFunctionType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsFunctionType> for SyntaxNode {
@@ -25990,27 +27863,36 @@ impl AstNode for TsGetterSignatureClassMember {
 }
 impl std::fmt::Debug for TsGetterSignatureClassMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsGetterSignatureClassMember")
-            .field("modifiers", &self.modifiers())
-            .field("get_token", &support::DebugSyntaxResult(self.get_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field(
-                "return_type",
-                &support::DebugOptionalElement(self.return_type()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsGetterSignatureClassMember")
+                .field("modifiers", &self.modifiers())
+                .field("get_token", &support::DebugSyntaxResult(self.get_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field(
+                    "return_type",
+                    &support::DebugOptionalElement(self.return_type()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsGetterSignatureClassMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsGetterSignatureClassMember> for SyntaxNode {
@@ -26046,26 +27928,35 @@ impl AstNode for TsGetterSignatureTypeMember {
 }
 impl std::fmt::Debug for TsGetterSignatureTypeMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsGetterSignatureTypeMember")
-            .field("get_token", &support::DebugSyntaxResult(self.get_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field(
-                "type_annotation",
-                &support::DebugOptionalElement(self.type_annotation()),
-            )
-            .field(
-                "separator_token",
-                &support::DebugOptionalElement(self.separator_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsGetterSignatureTypeMember")
+                .field("get_token", &support::DebugSyntaxResult(self.get_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field(
+                    "type_annotation",
+                    &support::DebugOptionalElement(self.type_annotation()),
+                )
+                .field(
+                    "separator_token",
+                    &support::DebugOptionalElement(self.separator_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsGetterSignatureTypeMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsGetterSignatureTypeMember> for SyntaxNode {
@@ -26101,13 +27992,22 @@ impl AstNode for TsGlobalDeclaration {
 }
 impl std::fmt::Debug for TsGlobalDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsGlobalDeclaration")
-            .field(
-                "global_token",
-                &support::DebugSyntaxResult(self.global_token()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsGlobalDeclaration")
+                .field(
+                    "global_token",
+                    &support::DebugSyntaxResult(self.global_token()),
+                )
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("TsGlobalDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsGlobalDeclaration> for SyntaxNode {
@@ -26143,9 +28043,18 @@ impl AstNode for TsIdentifierBinding {
 }
 impl std::fmt::Debug for TsIdentifierBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsIdentifierBinding")
-            .field("name_token", &support::DebugSyntaxResult(self.name_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsIdentifierBinding")
+                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .finish()
+        } else {
+            f.debug_struct("TsIdentifierBinding").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsIdentifierBinding> for SyntaxNode {
@@ -26181,13 +28090,22 @@ impl AstNode for TsImplementsClause {
 }
 impl std::fmt::Debug for TsImplementsClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsImplementsClause")
-            .field(
-                "implements_token",
-                &support::DebugSyntaxResult(self.implements_token()),
-            )
-            .field("types", &self.types())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsImplementsClause")
+                .field(
+                    "implements_token",
+                    &support::DebugSyntaxResult(self.implements_token()),
+                )
+                .field("types", &self.types())
+                .finish()
+        } else {
+            f.debug_struct("TsImplementsClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsImplementsClause> for SyntaxNode {
@@ -26223,26 +28141,35 @@ impl AstNode for TsImportEqualsDeclaration {
 }
 impl std::fmt::Debug for TsImportEqualsDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsImportEqualsDeclaration")
-            .field(
-                "import_token",
-                &support::DebugSyntaxResult(self.import_token()),
-            )
-            .field(
-                "type_token",
-                &support::DebugOptionalElement(self.type_token()),
-            )
-            .field("id", &support::DebugSyntaxResult(self.id()))
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field(
-                "module_reference",
-                &support::DebugSyntaxResult(self.module_reference()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsImportEqualsDeclaration")
+                .field(
+                    "import_token",
+                    &support::DebugSyntaxResult(self.import_token()),
+                )
+                .field(
+                    "type_token",
+                    &support::DebugOptionalElement(self.type_token()),
+                )
+                .field("id", &support::DebugSyntaxResult(self.id()))
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field(
+                    "module_reference",
+                    &support::DebugSyntaxResult(self.module_reference()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsImportEqualsDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsImportEqualsDeclaration> for SyntaxNode {
@@ -26278,25 +28205,34 @@ impl AstNode for TsImportType {
 }
 impl std::fmt::Debug for TsImportType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsImportType")
-            .field(
-                "typeof_token",
-                &support::DebugOptionalElement(self.typeof_token()),
-            )
-            .field(
-                "import_token",
-                &support::DebugSyntaxResult(self.import_token()),
-            )
-            .field("arguments", &support::DebugSyntaxResult(self.arguments()))
-            .field(
-                "qualifier_clause",
-                &support::DebugOptionalElement(self.qualifier_clause()),
-            )
-            .field(
-                "type_arguments",
-                &support::DebugOptionalElement(self.type_arguments()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsImportType")
+                .field(
+                    "typeof_token",
+                    &support::DebugOptionalElement(self.typeof_token()),
+                )
+                .field(
+                    "import_token",
+                    &support::DebugSyntaxResult(self.import_token()),
+                )
+                .field("arguments", &support::DebugSyntaxResult(self.arguments()))
+                .field(
+                    "qualifier_clause",
+                    &support::DebugOptionalElement(self.qualifier_clause()),
+                )
+                .field(
+                    "type_arguments",
+                    &support::DebugOptionalElement(self.type_arguments()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsImportType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsImportType> for SyntaxNode {
@@ -26332,25 +28268,34 @@ impl AstNode for TsImportTypeArguments {
 }
 impl std::fmt::Debug for TsImportTypeArguments {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsImportTypeArguments")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("argument", &support::DebugSyntaxResult(self.argument()))
-            .field(
-                "comma_token",
-                &support::DebugOptionalElement(self.comma_token()),
-            )
-            .field(
-                "ts_import_type_assertion_block",
-                &support::DebugOptionalElement(self.ts_import_type_assertion_block()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsImportTypeArguments")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("argument", &support::DebugSyntaxResult(self.argument()))
+                .field(
+                    "comma_token",
+                    &support::DebugOptionalElement(self.comma_token()),
+                )
+                .field(
+                    "ts_import_type_assertion_block",
+                    &support::DebugOptionalElement(self.ts_import_type_assertion_block()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsImportTypeArguments").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsImportTypeArguments> for SyntaxNode {
@@ -26386,25 +28331,31 @@ impl AstNode for TsImportTypeAssertion {
 }
 impl std::fmt::Debug for TsImportTypeAssertion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsImportTypeAssertion")
-            .field(
-                "assertion_kind",
-                &support::DebugSyntaxResult(self.assertion_kind()),
-            )
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("assertions", &self.assertions())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsImportTypeAssertion")
+                .field("with_token", &support::DebugSyntaxResult(self.with_token()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("assertions", &self.assertions())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsImportTypeAssertion").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsImportTypeAssertion> for SyntaxNode {
@@ -26440,20 +28391,29 @@ impl AstNode for TsImportTypeAssertionBlock {
 }
 impl std::fmt::Debug for TsImportTypeAssertionBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsImportTypeAssertionBlock")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field(
-                "type_assertion",
-                &support::DebugSyntaxResult(self.type_assertion()),
-            )
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsImportTypeAssertionBlock")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field(
+                    "type_assertion",
+                    &support::DebugSyntaxResult(self.type_assertion()),
+                )
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsImportTypeAssertionBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsImportTypeAssertionBlock> for SyntaxNode {
@@ -26489,10 +28449,19 @@ impl AstNode for TsImportTypeQualifier {
 }
 impl std::fmt::Debug for TsImportTypeQualifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsImportTypeQualifier")
-            .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsImportTypeQualifier")
+                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("TsImportTypeQualifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsImportTypeQualifier> for SyntaxNode {
@@ -26528,12 +28497,21 @@ impl AstNode for TsInModifier {
 }
 impl std::fmt::Debug for TsInModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsInModifier")
-            .field(
-                "modifier_token",
-                &support::DebugSyntaxResult(self.modifier_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsInModifier")
+                .field(
+                    "modifier_token",
+                    &support::DebugSyntaxResult(self.modifier_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsInModifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsInModifier> for SyntaxNode {
@@ -26569,26 +28547,35 @@ impl AstNode for TsIndexSignatureClassMember {
 }
 impl std::fmt::Debug for TsIndexSignatureClassMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsIndexSignatureClassMember")
-            .field("modifiers", &self.modifiers())
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("parameter", &support::DebugSyntaxResult(self.parameter()))
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .field(
-                "type_annotation",
-                &support::DebugSyntaxResult(self.type_annotation()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsIndexSignatureClassMember")
+                .field("modifiers", &self.modifiers())
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("parameter", &support::DebugSyntaxResult(self.parameter()))
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .field(
+                    "type_annotation",
+                    &support::DebugSyntaxResult(self.type_annotation()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsIndexSignatureClassMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsIndexSignatureClassMember> for SyntaxNode {
@@ -26624,13 +28611,22 @@ impl AstNode for TsIndexSignatureParameter {
 }
 impl std::fmt::Debug for TsIndexSignatureParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsIndexSignatureParameter")
-            .field("binding", &support::DebugSyntaxResult(self.binding()))
-            .field(
-                "type_annotation",
-                &support::DebugSyntaxResult(self.type_annotation()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsIndexSignatureParameter")
+                .field("binding", &support::DebugSyntaxResult(self.binding()))
+                .field(
+                    "type_annotation",
+                    &support::DebugSyntaxResult(self.type_annotation()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsIndexSignatureParameter").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsIndexSignatureParameter> for SyntaxNode {
@@ -26666,29 +28662,38 @@ impl AstNode for TsIndexSignatureTypeMember {
 }
 impl std::fmt::Debug for TsIndexSignatureTypeMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsIndexSignatureTypeMember")
-            .field(
-                "readonly_token",
-                &support::DebugOptionalElement(self.readonly_token()),
-            )
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("parameter", &support::DebugSyntaxResult(self.parameter()))
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .field(
-                "type_annotation",
-                &support::DebugSyntaxResult(self.type_annotation()),
-            )
-            .field(
-                "separator_token",
-                &support::DebugOptionalElement(self.separator_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsIndexSignatureTypeMember")
+                .field(
+                    "readonly_token",
+                    &support::DebugOptionalElement(self.readonly_token()),
+                )
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("parameter", &support::DebugSyntaxResult(self.parameter()))
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .field(
+                    "type_annotation",
+                    &support::DebugSyntaxResult(self.type_annotation()),
+                )
+                .field(
+                    "separator_token",
+                    &support::DebugOptionalElement(self.separator_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsIndexSignatureTypeMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsIndexSignatureTypeMember> for SyntaxNode {
@@ -26724,21 +28729,30 @@ impl AstNode for TsIndexedAccessType {
 }
 impl std::fmt::Debug for TsIndexedAccessType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsIndexedAccessType")
-            .field(
-                "object_type",
-                &support::DebugSyntaxResult(self.object_type()),
-            )
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("index_type", &support::DebugSyntaxResult(self.index_type()))
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsIndexedAccessType")
+                .field(
+                    "object_type",
+                    &support::DebugSyntaxResult(self.object_type()),
+                )
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("index_type", &support::DebugSyntaxResult(self.index_type()))
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsIndexedAccessType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsIndexedAccessType> for SyntaxNode {
@@ -26774,17 +28788,26 @@ impl AstNode for TsInferType {
 }
 impl std::fmt::Debug for TsInferType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsInferType")
-            .field(
-                "infer_token",
-                &support::DebugSyntaxResult(self.infer_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "constraint",
-                &support::DebugOptionalElement(self.constraint()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsInferType")
+                .field(
+                    "infer_token",
+                    &support::DebugSyntaxResult(self.infer_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "constraint",
+                    &support::DebugOptionalElement(self.constraint()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsInferType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsInferType> for SyntaxNode {
@@ -26821,19 +28844,29 @@ impl AstNode for TsInitializedPropertySignatureClassMember {
 }
 impl std::fmt::Debug for TsInitializedPropertySignatureClassMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsInitializedPropertySignatureClassMember")
-            .field("modifiers", &self.modifiers())
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "question_mark_token",
-                &support::DebugOptionalElement(self.question_mark_token()),
-            )
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsInitializedPropertySignatureClassMember")
+                .field("modifiers", &self.modifiers())
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "question_mark_token",
+                    &support::DebugOptionalElement(self.question_mark_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsInitializedPropertySignatureClassMember")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsInitializedPropertySignatureClassMember> for SyntaxNode {
@@ -26869,10 +28902,19 @@ impl AstNode for TsInstantiationExpression {
 }
 impl std::fmt::Debug for TsInstantiationExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsInstantiationExpression")
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .field("arguments", &support::DebugSyntaxResult(self.arguments()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsInstantiationExpression")
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field("arguments", &support::DebugSyntaxResult(self.arguments()))
+                .finish()
+        } else {
+            f.debug_struct("TsInstantiationExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsInstantiationExpression> for SyntaxNode {
@@ -26908,30 +28950,39 @@ impl AstNode for TsInterfaceDeclaration {
 }
 impl std::fmt::Debug for TsInterfaceDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsInterfaceDeclaration")
-            .field(
-                "interface_token",
-                &support::DebugSyntaxResult(self.interface_token()),
-            )
-            .field("id", &support::DebugSyntaxResult(self.id()))
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field(
-                "extends_clause",
-                &support::DebugOptionalElement(self.extends_clause()),
-            )
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("members", &self.members())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsInterfaceDeclaration")
+                .field(
+                    "interface_token",
+                    &support::DebugSyntaxResult(self.interface_token()),
+                )
+                .field("id", &support::DebugSyntaxResult(self.id()))
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field(
+                    "extends_clause",
+                    &support::DebugOptionalElement(self.extends_clause()),
+                )
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("members", &self.members())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsInterfaceDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsInterfaceDeclaration> for SyntaxNode {
@@ -26967,13 +29018,22 @@ impl AstNode for TsIntersectionType {
 }
 impl std::fmt::Debug for TsIntersectionType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsIntersectionType")
-            .field(
-                "leading_separator_token",
-                &support::DebugOptionalElement(self.leading_separator_token()),
-            )
-            .field("types", &self.types())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsIntersectionType")
+                .field(
+                    "leading_separator_token",
+                    &support::DebugOptionalElement(self.leading_separator_token()),
+                )
+                .field("types", &self.types())
+                .finish()
+        } else {
+            f.debug_struct("TsIntersectionType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsIntersectionType> for SyntaxNode {
@@ -27009,9 +29069,18 @@ impl AstNode for TsLiteralEnumMemberName {
 }
 impl std::fmt::Debug for TsLiteralEnumMemberName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsLiteralEnumMemberName")
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsLiteralEnumMemberName")
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .finish()
+        } else {
+            f.debug_struct("TsLiteralEnumMemberName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsLiteralEnumMemberName> for SyntaxNode {
@@ -27047,50 +29116,59 @@ impl AstNode for TsMappedType {
 }
 impl std::fmt::Debug for TsMappedType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsMappedType")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field(
-                "readonly_modifier",
-                &support::DebugOptionalElement(self.readonly_modifier()),
-            )
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field(
-                "property_name",
-                &support::DebugSyntaxResult(self.property_name()),
-            )
-            .field("in_token", &support::DebugSyntaxResult(self.in_token()))
-            .field("keys_type", &support::DebugSyntaxResult(self.keys_type()))
-            .field(
-                "as_clause",
-                &support::DebugOptionalElement(self.as_clause()),
-            )
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .field(
-                "optional_modifier",
-                &support::DebugOptionalElement(self.optional_modifier()),
-            )
-            .field(
-                "mapped_type",
-                &support::DebugOptionalElement(self.mapped_type()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsMappedType")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field(
+                    "readonly_modifier",
+                    &support::DebugOptionalElement(self.readonly_modifier()),
+                )
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field(
+                    "property_name",
+                    &support::DebugSyntaxResult(self.property_name()),
+                )
+                .field("in_token", &support::DebugSyntaxResult(self.in_token()))
+                .field("keys_type", &support::DebugSyntaxResult(self.keys_type()))
+                .field(
+                    "as_clause",
+                    &support::DebugOptionalElement(self.as_clause()),
+                )
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .field(
+                    "optional_modifier",
+                    &support::DebugOptionalElement(self.optional_modifier()),
+                )
+                .field(
+                    "mapped_type",
+                    &support::DebugOptionalElement(self.mapped_type()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsMappedType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsMappedType> for SyntaxNode {
@@ -27126,10 +29204,19 @@ impl AstNode for TsMappedTypeAsClause {
 }
 impl std::fmt::Debug for TsMappedTypeAsClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsMappedTypeAsClause")
-            .field("as_token", &support::DebugSyntaxResult(self.as_token()))
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsMappedTypeAsClause")
+                .field("as_token", &support::DebugSyntaxResult(self.as_token()))
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("TsMappedTypeAsClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsMappedTypeAsClause> for SyntaxNode {
@@ -27166,16 +29253,26 @@ impl AstNode for TsMappedTypeOptionalModifierClause {
 }
 impl std::fmt::Debug for TsMappedTypeOptionalModifierClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsMappedTypeOptionalModifierClause")
-            .field(
-                "operator_token",
-                &support::DebugOptionalElement(self.operator_token()),
-            )
-            .field(
-                "question_mark_token",
-                &support::DebugSyntaxResult(self.question_mark_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsMappedTypeOptionalModifierClause")
+                .field(
+                    "operator_token",
+                    &support::DebugOptionalElement(self.operator_token()),
+                )
+                .field(
+                    "question_mark_token",
+                    &support::DebugSyntaxResult(self.question_mark_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsMappedTypeOptionalModifierClause")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsMappedTypeOptionalModifierClause> for SyntaxNode {
@@ -27212,16 +29309,26 @@ impl AstNode for TsMappedTypeReadonlyModifierClause {
 }
 impl std::fmt::Debug for TsMappedTypeReadonlyModifierClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsMappedTypeReadonlyModifierClause")
-            .field(
-                "operator_token",
-                &support::DebugOptionalElement(self.operator_token()),
-            )
-            .field(
-                "readonly_token",
-                &support::DebugSyntaxResult(self.readonly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsMappedTypeReadonlyModifierClause")
+                .field(
+                    "operator_token",
+                    &support::DebugOptionalElement(self.operator_token()),
+                )
+                .field(
+                    "readonly_token",
+                    &support::DebugSyntaxResult(self.readonly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsMappedTypeReadonlyModifierClause")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsMappedTypeReadonlyModifierClause> for SyntaxNode {
@@ -27257,31 +29364,40 @@ impl AstNode for TsMethodSignatureClassMember {
 }
 impl std::fmt::Debug for TsMethodSignatureClassMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsMethodSignatureClassMember")
-            .field("modifiers", &self.modifiers())
-            .field(
-                "async_token",
-                &support::DebugOptionalElement(self.async_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "question_mark_token",
-                &support::DebugOptionalElement(self.question_mark_token()),
-            )
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field(
-                "return_type_annotation",
-                &support::DebugOptionalElement(self.return_type_annotation()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsMethodSignatureClassMember")
+                .field("modifiers", &self.modifiers())
+                .field(
+                    "async_token",
+                    &support::DebugOptionalElement(self.async_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "question_mark_token",
+                    &support::DebugOptionalElement(self.question_mark_token()),
+                )
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field(
+                    "return_type_annotation",
+                    &support::DebugOptionalElement(self.return_type_annotation()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsMethodSignatureClassMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsMethodSignatureClassMember> for SyntaxNode {
@@ -27317,26 +29433,35 @@ impl AstNode for TsMethodSignatureTypeMember {
 }
 impl std::fmt::Debug for TsMethodSignatureTypeMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsMethodSignatureTypeMember")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "optional_token",
-                &support::DebugOptionalElement(self.optional_token()),
-            )
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field("parameters", &support::DebugSyntaxResult(self.parameters()))
-            .field(
-                "return_type_annotation",
-                &support::DebugOptionalElement(self.return_type_annotation()),
-            )
-            .field(
-                "separator_token",
-                &support::DebugOptionalElement(self.separator_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsMethodSignatureTypeMember")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "optional_token",
+                    &support::DebugOptionalElement(self.optional_token()),
+                )
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field("parameters", &support::DebugSyntaxResult(self.parameters()))
+                .field(
+                    "return_type_annotation",
+                    &support::DebugOptionalElement(self.return_type_annotation()),
+                )
+                .field(
+                    "separator_token",
+                    &support::DebugOptionalElement(self.separator_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsMethodSignatureTypeMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsMethodSignatureTypeMember> for SyntaxNode {
@@ -27372,17 +29497,26 @@ impl AstNode for TsModuleBlock {
 }
 impl std::fmt::Debug for TsModuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsModuleBlock")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("items", &self.items())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsModuleBlock")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("items", &self.items())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsModuleBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsModuleBlock> for SyntaxNode {
@@ -27418,14 +29552,23 @@ impl AstNode for TsModuleDeclaration {
 }
 impl std::fmt::Debug for TsModuleDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsModuleDeclaration")
-            .field(
-                "module_or_namespace",
-                &support::DebugSyntaxResult(self.module_or_namespace()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsModuleDeclaration")
+                .field(
+                    "module_or_namespace",
+                    &support::DebugSyntaxResult(self.module_or_namespace()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("body", &support::DebugSyntaxResult(self.body()))
+                .finish()
+        } else {
+            f.debug_struct("TsModuleDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsModuleDeclaration> for SyntaxNode {
@@ -27461,22 +29604,31 @@ impl AstNode for TsNamedTupleTypeElement {
 }
 impl std::fmt::Debug for TsNamedTupleTypeElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsNamedTupleTypeElement")
-            .field(
-                "dotdotdot_token",
-                &support::DebugOptionalElement(self.dotdotdot_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "question_mark_token",
-                &support::DebugOptionalElement(self.question_mark_token()),
-            )
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsNamedTupleTypeElement")
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugOptionalElement(self.dotdotdot_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "question_mark_token",
+                    &support::DebugOptionalElement(self.question_mark_token()),
+                )
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("TsNamedTupleTypeElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsNamedTupleTypeElement> for SyntaxNode {
@@ -27512,12 +29664,21 @@ impl AstNode for TsNeverType {
 }
 impl std::fmt::Debug for TsNeverType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsNeverType")
-            .field(
-                "never_token",
-                &support::DebugSyntaxResult(self.never_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsNeverType")
+                .field(
+                    "never_token",
+                    &support::DebugSyntaxResult(self.never_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsNeverType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsNeverType> for SyntaxNode {
@@ -27553,10 +29714,19 @@ impl AstNode for TsNonNullAssertionAssignment {
 }
 impl std::fmt::Debug for TsNonNullAssertionAssignment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsNonNullAssertionAssignment")
-            .field("assignment", &support::DebugSyntaxResult(self.assignment()))
-            .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsNonNullAssertionAssignment")
+                .field("assignment", &support::DebugSyntaxResult(self.assignment()))
+                .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
+                .finish()
+        } else {
+            f.debug_struct("TsNonNullAssertionAssignment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsNonNullAssertionAssignment> for SyntaxNode {
@@ -27592,10 +29762,19 @@ impl AstNode for TsNonNullAssertionExpression {
 }
 impl std::fmt::Debug for TsNonNullAssertionExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsNonNullAssertionExpression")
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsNonNullAssertionExpression")
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field("excl_token", &support::DebugSyntaxResult(self.excl_token()))
+                .finish()
+        } else {
+            f.debug_struct("TsNonNullAssertionExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsNonNullAssertionExpression> for SyntaxNode {
@@ -27631,12 +29810,21 @@ impl AstNode for TsNonPrimitiveType {
 }
 impl std::fmt::Debug for TsNonPrimitiveType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsNonPrimitiveType")
-            .field(
-                "object_token",
-                &support::DebugSyntaxResult(self.object_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsNonPrimitiveType")
+                .field(
+                    "object_token",
+                    &support::DebugSyntaxResult(self.object_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsNonPrimitiveType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsNonPrimitiveType> for SyntaxNode {
@@ -27672,12 +29860,21 @@ impl AstNode for TsNullLiteralType {
 }
 impl std::fmt::Debug for TsNullLiteralType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsNullLiteralType")
-            .field(
-                "literal_token",
-                &support::DebugSyntaxResult(self.literal_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsNullLiteralType")
+                .field(
+                    "literal_token",
+                    &support::DebugSyntaxResult(self.literal_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsNullLiteralType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsNullLiteralType> for SyntaxNode {
@@ -27713,16 +29910,25 @@ impl AstNode for TsNumberLiteralType {
 }
 impl std::fmt::Debug for TsNumberLiteralType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsNumberLiteralType")
-            .field(
-                "minus_token",
-                &support::DebugOptionalElement(self.minus_token()),
-            )
-            .field(
-                "literal_token",
-                &support::DebugSyntaxResult(self.literal_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsNumberLiteralType")
+                .field(
+                    "minus_token",
+                    &support::DebugOptionalElement(self.minus_token()),
+                )
+                .field(
+                    "literal_token",
+                    &support::DebugSyntaxResult(self.literal_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsNumberLiteralType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsNumberLiteralType> for SyntaxNode {
@@ -27758,12 +29964,21 @@ impl AstNode for TsNumberType {
 }
 impl std::fmt::Debug for TsNumberType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsNumberType")
-            .field(
-                "number_token",
-                &support::DebugSyntaxResult(self.number_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsNumberType")
+                .field(
+                    "number_token",
+                    &support::DebugSyntaxResult(self.number_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsNumberType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsNumberType> for SyntaxNode {
@@ -27799,17 +30014,26 @@ impl AstNode for TsObjectType {
 }
 impl std::fmt::Debug for TsObjectType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsObjectType")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("members", &self.members())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsObjectType")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("members", &self.members())
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsObjectType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsObjectType> for SyntaxNode {
@@ -27845,16 +30069,25 @@ impl AstNode for TsOptionalPropertyAnnotation {
 }
 impl std::fmt::Debug for TsOptionalPropertyAnnotation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsOptionalPropertyAnnotation")
-            .field(
-                "question_mark_token",
-                &support::DebugSyntaxResult(self.question_mark_token()),
-            )
-            .field(
-                "type_annotation",
-                &support::DebugOptionalElement(self.type_annotation()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsOptionalPropertyAnnotation")
+                .field(
+                    "question_mark_token",
+                    &support::DebugSyntaxResult(self.question_mark_token()),
+                )
+                .field(
+                    "type_annotation",
+                    &support::DebugOptionalElement(self.type_annotation()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsOptionalPropertyAnnotation").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsOptionalPropertyAnnotation> for SyntaxNode {
@@ -27890,13 +30123,22 @@ impl AstNode for TsOptionalTupleTypeElement {
 }
 impl std::fmt::Debug for TsOptionalTupleTypeElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsOptionalTupleTypeElement")
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .field(
-                "question_mark_token",
-                &support::DebugSyntaxResult(self.question_mark_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsOptionalTupleTypeElement")
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .field(
+                    "question_mark_token",
+                    &support::DebugSyntaxResult(self.question_mark_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsOptionalTupleTypeElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsOptionalTupleTypeElement> for SyntaxNode {
@@ -27932,12 +30174,21 @@ impl AstNode for TsOutModifier {
 }
 impl std::fmt::Debug for TsOutModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsOutModifier")
-            .field(
-                "modifier_token",
-                &support::DebugSyntaxResult(self.modifier_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsOutModifier")
+                .field(
+                    "modifier_token",
+                    &support::DebugSyntaxResult(self.modifier_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsOutModifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsOutModifier> for SyntaxNode {
@@ -27973,12 +30224,21 @@ impl AstNode for TsOverrideModifier {
 }
 impl std::fmt::Debug for TsOverrideModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsOverrideModifier")
-            .field(
-                "modifier_token",
-                &support::DebugSyntaxResult(self.modifier_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsOverrideModifier")
+                .field(
+                    "modifier_token",
+                    &support::DebugSyntaxResult(self.modifier_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsOverrideModifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsOverrideModifier> for SyntaxNode {
@@ -28014,17 +30274,26 @@ impl AstNode for TsParenthesizedType {
 }
 impl std::fmt::Debug for TsParenthesizedType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsParenthesizedType")
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsParenthesizedType")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsParenthesizedType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsParenthesizedType> for SyntaxNode {
@@ -28060,14 +30329,23 @@ impl AstNode for TsPredicateReturnType {
 }
 impl std::fmt::Debug for TsPredicateReturnType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsPredicateReturnType")
-            .field(
-                "parameter_name",
-                &support::DebugSyntaxResult(self.parameter_name()),
-            )
-            .field("is_token", &support::DebugSyntaxResult(self.is_token()))
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsPredicateReturnType")
+                .field(
+                    "parameter_name",
+                    &support::DebugSyntaxResult(self.parameter_name()),
+                )
+                .field("is_token", &support::DebugSyntaxResult(self.is_token()))
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("TsPredicateReturnType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsPredicateReturnType> for SyntaxNode {
@@ -28103,14 +30381,23 @@ impl AstNode for TsPropertyParameter {
 }
 impl std::fmt::Debug for TsPropertyParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsPropertyParameter")
-            .field("decorators", &self.decorators())
-            .field("modifiers", &self.modifiers())
-            .field(
-                "formal_parameter",
-                &support::DebugSyntaxResult(self.formal_parameter()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsPropertyParameter")
+                .field("decorators", &self.decorators())
+                .field("modifiers", &self.modifiers())
+                .field(
+                    "formal_parameter",
+                    &support::DebugSyntaxResult(self.formal_parameter()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsPropertyParameter").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsPropertyParameter> for SyntaxNode {
@@ -28146,18 +30433,27 @@ impl AstNode for TsPropertySignatureClassMember {
 }
 impl std::fmt::Debug for TsPropertySignatureClassMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsPropertySignatureClassMember")
-            .field("modifiers", &self.modifiers())
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "property_annotation",
-                &support::DebugOptionalElement(self.property_annotation()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsPropertySignatureClassMember")
+                .field("modifiers", &self.modifiers())
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "property_annotation",
+                    &support::DebugOptionalElement(self.property_annotation()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsPropertySignatureClassMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsPropertySignatureClassMember> for SyntaxNode {
@@ -28193,25 +30489,34 @@ impl AstNode for TsPropertySignatureTypeMember {
 }
 impl std::fmt::Debug for TsPropertySignatureTypeMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsPropertySignatureTypeMember")
-            .field(
-                "readonly_token",
-                &support::DebugOptionalElement(self.readonly_token()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "optional_token",
-                &support::DebugOptionalElement(self.optional_token()),
-            )
-            .field(
-                "type_annotation",
-                &support::DebugOptionalElement(self.type_annotation()),
-            )
-            .field(
-                "separator_token",
-                &support::DebugOptionalElement(self.separator_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsPropertySignatureTypeMember")
+                .field(
+                    "readonly_token",
+                    &support::DebugOptionalElement(self.readonly_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "optional_token",
+                    &support::DebugOptionalElement(self.optional_token()),
+                )
+                .field(
+                    "type_annotation",
+                    &support::DebugOptionalElement(self.type_annotation()),
+                )
+                .field(
+                    "separator_token",
+                    &support::DebugOptionalElement(self.separator_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsPropertySignatureTypeMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsPropertySignatureTypeMember> for SyntaxNode {
@@ -28247,11 +30552,20 @@ impl AstNode for TsQualifiedModuleName {
 }
 impl std::fmt::Debug for TsQualifiedModuleName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsQualifiedModuleName")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsQualifiedModuleName")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("TsQualifiedModuleName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsQualifiedModuleName> for SyntaxNode {
@@ -28287,11 +30601,20 @@ impl AstNode for TsQualifiedName {
 }
 impl std::fmt::Debug for TsQualifiedName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsQualifiedName")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsQualifiedName")
+                .field("left", &support::DebugSyntaxResult(self.left()))
+                .field("dot_token", &support::DebugSyntaxResult(self.dot_token()))
+                .field("right", &support::DebugSyntaxResult(self.right()))
+                .finish()
+        } else {
+            f.debug_struct("TsQualifiedName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsQualifiedName> for SyntaxNode {
@@ -28327,12 +30650,21 @@ impl AstNode for TsReadonlyModifier {
 }
 impl std::fmt::Debug for TsReadonlyModifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsReadonlyModifier")
-            .field(
-                "modifier_token",
-                &support::DebugSyntaxResult(self.modifier_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsReadonlyModifier")
+                .field(
+                    "modifier_token",
+                    &support::DebugSyntaxResult(self.modifier_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsReadonlyModifier").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsReadonlyModifier> for SyntaxNode {
@@ -28368,13 +30700,22 @@ impl AstNode for TsReferenceType {
 }
 impl std::fmt::Debug for TsReferenceType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsReferenceType")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "type_arguments",
-                &support::DebugOptionalElement(self.type_arguments()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsReferenceType")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "type_arguments",
+                    &support::DebugOptionalElement(self.type_arguments()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsReferenceType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsReferenceType> for SyntaxNode {
@@ -28410,13 +30751,22 @@ impl AstNode for TsRestTupleTypeElement {
 }
 impl std::fmt::Debug for TsRestTupleTypeElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsRestTupleTypeElement")
-            .field(
-                "dotdotdot_token",
-                &support::DebugSyntaxResult(self.dotdotdot_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsRestTupleTypeElement")
+                .field(
+                    "dotdotdot_token",
+                    &support::DebugSyntaxResult(self.dotdotdot_token()),
+                )
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("TsRestTupleTypeElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsRestTupleTypeElement> for SyntaxNode {
@@ -28452,13 +30802,22 @@ impl AstNode for TsReturnTypeAnnotation {
 }
 impl std::fmt::Debug for TsReturnTypeAnnotation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsReturnTypeAnnotation")
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsReturnTypeAnnotation")
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("TsReturnTypeAnnotation").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsReturnTypeAnnotation> for SyntaxNode {
@@ -28494,14 +30853,23 @@ impl AstNode for TsSatisfiesAssignment {
 }
 impl std::fmt::Debug for TsSatisfiesAssignment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsSatisfiesAssignment")
-            .field("assignment", &support::DebugSyntaxResult(self.assignment()))
-            .field(
-                "satisfies_token",
-                &support::DebugSyntaxResult(self.satisfies_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsSatisfiesAssignment")
+                .field("assignment", &support::DebugSyntaxResult(self.assignment()))
+                .field(
+                    "satisfies_token",
+                    &support::DebugSyntaxResult(self.satisfies_token()),
+                )
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("TsSatisfiesAssignment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsSatisfiesAssignment> for SyntaxNode {
@@ -28537,14 +30905,23 @@ impl AstNode for TsSatisfiesExpression {
 }
 impl std::fmt::Debug for TsSatisfiesExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsSatisfiesExpression")
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .field(
-                "satisfies_token",
-                &support::DebugSyntaxResult(self.satisfies_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsSatisfiesExpression")
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "satisfies_token",
+                    &support::DebugSyntaxResult(self.satisfies_token()),
+                )
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("TsSatisfiesExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsSatisfiesExpression> for SyntaxNode {
@@ -28580,28 +30957,37 @@ impl AstNode for TsSetterSignatureClassMember {
 }
 impl std::fmt::Debug for TsSetterSignatureClassMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsSetterSignatureClassMember")
-            .field("modifiers", &self.modifiers())
-            .field("set_token", &support::DebugSyntaxResult(self.set_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("parameter", &support::DebugSyntaxResult(self.parameter()))
-            .field(
-                "comma_token",
-                &support::DebugOptionalElement(self.comma_token()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsSetterSignatureClassMember")
+                .field("modifiers", &self.modifiers())
+                .field("set_token", &support::DebugSyntaxResult(self.set_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("parameter", &support::DebugSyntaxResult(self.parameter()))
+                .field(
+                    "comma_token",
+                    &support::DebugOptionalElement(self.comma_token()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsSetterSignatureClassMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsSetterSignatureClassMember> for SyntaxNode {
@@ -28637,27 +31023,36 @@ impl AstNode for TsSetterSignatureTypeMember {
 }
 impl std::fmt::Debug for TsSetterSignatureTypeMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsSetterSignatureTypeMember")
-            .field("set_token", &support::DebugSyntaxResult(self.set_token()))
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field("parameter", &support::DebugSyntaxResult(self.parameter()))
-            .field(
-                "comma_token",
-                &support::DebugOptionalElement(self.comma_token()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
-            .field(
-                "separator_token",
-                &support::DebugOptionalElement(self.separator_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsSetterSignatureTypeMember")
+                .field("set_token", &support::DebugSyntaxResult(self.set_token()))
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("parameter", &support::DebugSyntaxResult(self.parameter()))
+                .field(
+                    "comma_token",
+                    &support::DebugOptionalElement(self.comma_token()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .field(
+                    "separator_token",
+                    &support::DebugOptionalElement(self.separator_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsSetterSignatureTypeMember").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsSetterSignatureTypeMember> for SyntaxNode {
@@ -28693,12 +31088,21 @@ impl AstNode for TsStringLiteralType {
 }
 impl std::fmt::Debug for TsStringLiteralType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsStringLiteralType")
-            .field(
-                "literal_token",
-                &support::DebugSyntaxResult(self.literal_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsStringLiteralType")
+                .field(
+                    "literal_token",
+                    &support::DebugSyntaxResult(self.literal_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsStringLiteralType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsStringLiteralType> for SyntaxNode {
@@ -28734,12 +31138,21 @@ impl AstNode for TsStringType {
 }
 impl std::fmt::Debug for TsStringType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsStringType")
-            .field(
-                "string_token",
-                &support::DebugSyntaxResult(self.string_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsStringType")
+                .field(
+                    "string_token",
+                    &support::DebugSyntaxResult(self.string_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsStringType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsStringType> for SyntaxNode {
@@ -28775,12 +31188,21 @@ impl AstNode for TsSymbolType {
 }
 impl std::fmt::Debug for TsSymbolType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsSymbolType")
-            .field(
-                "symbol_token",
-                &support::DebugSyntaxResult(self.symbol_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsSymbolType")
+                .field(
+                    "symbol_token",
+                    &support::DebugSyntaxResult(self.symbol_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsSymbolType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsSymbolType> for SyntaxNode {
@@ -28816,12 +31238,21 @@ impl AstNode for TsTemplateChunkElement {
 }
 impl std::fmt::Debug for TsTemplateChunkElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTemplateChunkElement")
-            .field(
-                "template_chunk_token",
-                &support::DebugSyntaxResult(self.template_chunk_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsTemplateChunkElement")
+                .field(
+                    "template_chunk_token",
+                    &support::DebugSyntaxResult(self.template_chunk_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsTemplateChunkElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsTemplateChunkElement> for SyntaxNode {
@@ -28857,17 +31288,26 @@ impl AstNode for TsTemplateElement {
 }
 impl std::fmt::Debug for TsTemplateElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTemplateElement")
-            .field(
-                "dollar_curly_token",
-                &support::DebugSyntaxResult(self.dollar_curly_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsTemplateElement")
+                .field(
+                    "dollar_curly_token",
+                    &support::DebugSyntaxResult(self.dollar_curly_token()),
+                )
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsTemplateElement").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsTemplateElement> for SyntaxNode {
@@ -28903,17 +31343,26 @@ impl AstNode for TsTemplateLiteralType {
 }
 impl std::fmt::Debug for TsTemplateLiteralType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTemplateLiteralType")
-            .field(
-                "l_tick_token",
-                &support::DebugSyntaxResult(self.l_tick_token()),
-            )
-            .field("elements", &self.elements())
-            .field(
-                "r_tick_token",
-                &support::DebugSyntaxResult(self.r_tick_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsTemplateLiteralType")
+                .field(
+                    "l_tick_token",
+                    &support::DebugSyntaxResult(self.l_tick_token()),
+                )
+                .field("elements", &self.elements())
+                .field(
+                    "r_tick_token",
+                    &support::DebugSyntaxResult(self.r_tick_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsTemplateLiteralType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsTemplateLiteralType> for SyntaxNode {
@@ -28949,13 +31398,22 @@ impl AstNode for TsThisParameter {
 }
 impl std::fmt::Debug for TsThisParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsThisParameter")
-            .field("this_token", &support::DebugSyntaxResult(self.this_token()))
-            .field(
-                "type_annotation",
-                &support::DebugOptionalElement(self.type_annotation()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsThisParameter")
+                .field("this_token", &support::DebugSyntaxResult(self.this_token()))
+                .field(
+                    "type_annotation",
+                    &support::DebugOptionalElement(self.type_annotation()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsThisParameter").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsThisParameter> for SyntaxNode {
@@ -28991,9 +31449,18 @@ impl AstNode for TsThisType {
 }
 impl std::fmt::Debug for TsThisType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsThisType")
-            .field("this_token", &support::DebugSyntaxResult(self.this_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsThisType")
+                .field("this_token", &support::DebugSyntaxResult(self.this_token()))
+                .finish()
+        } else {
+            f.debug_struct("TsThisType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsThisType> for SyntaxNode {
@@ -29029,17 +31496,26 @@ impl AstNode for TsTupleType {
 }
 impl std::fmt::Debug for TsTupleType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTupleType")
-            .field(
-                "l_brack_token",
-                &support::DebugSyntaxResult(self.l_brack_token()),
-            )
-            .field("elements", &self.elements())
-            .field(
-                "r_brack_token",
-                &support::DebugSyntaxResult(self.r_brack_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsTupleType")
+                .field(
+                    "l_brack_token",
+                    &support::DebugSyntaxResult(self.l_brack_token()),
+                )
+                .field("elements", &self.elements())
+                .field(
+                    "r_brack_token",
+                    &support::DebugSyntaxResult(self.r_brack_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsTupleType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsTupleType> for SyntaxNode {
@@ -29075,23 +31551,32 @@ impl AstNode for TsTypeAliasDeclaration {
 }
 impl std::fmt::Debug for TsTypeAliasDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTypeAliasDeclaration")
-            .field("type_token", &support::DebugSyntaxResult(self.type_token()))
-            .field(
-                "binding_identifier",
-                &support::DebugSyntaxResult(self.binding_identifier()),
-            )
-            .field(
-                "type_parameters",
-                &support::DebugOptionalElement(self.type_parameters()),
-            )
-            .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .field(
-                "semicolon_token",
-                &support::DebugOptionalElement(self.semicolon_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsTypeAliasDeclaration")
+                .field("type_token", &support::DebugSyntaxResult(self.type_token()))
+                .field(
+                    "binding_identifier",
+                    &support::DebugSyntaxResult(self.binding_identifier()),
+                )
+                .field(
+                    "type_parameters",
+                    &support::DebugOptionalElement(self.type_parameters()),
+                )
+                .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsTypeAliasDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsTypeAliasDeclaration> for SyntaxNode {
@@ -29127,13 +31612,22 @@ impl AstNode for TsTypeAnnotation {
 }
 impl std::fmt::Debug for TsTypeAnnotation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTypeAnnotation")
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsTypeAnnotation")
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("TsTypeAnnotation").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsTypeAnnotation> for SyntaxNode {
@@ -29169,17 +31663,26 @@ impl AstNode for TsTypeArguments {
 }
 impl std::fmt::Debug for TsTypeArguments {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTypeArguments")
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field("ts_type_argument_list", &self.ts_type_argument_list())
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsTypeArguments")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field("ts_type_argument_list", &self.ts_type_argument_list())
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsTypeArguments").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsTypeArguments> for SyntaxNode {
@@ -29215,18 +31718,27 @@ impl AstNode for TsTypeAssertionAssignment {
 }
 impl std::fmt::Debug for TsTypeAssertionAssignment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTypeAssertionAssignment")
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .field("assignment", &support::DebugSyntaxResult(self.assignment()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsTypeAssertionAssignment")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .field("assignment", &support::DebugSyntaxResult(self.assignment()))
+                .finish()
+        } else {
+            f.debug_struct("TsTypeAssertionAssignment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsTypeAssertionAssignment> for SyntaxNode {
@@ -29262,18 +31774,27 @@ impl AstNode for TsTypeAssertionExpression {
 }
 impl std::fmt::Debug for TsTypeAssertionExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTypeAssertionExpression")
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .field("expression", &support::DebugSyntaxResult(self.expression()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsTypeAssertionExpression")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .finish()
+        } else {
+            f.debug_struct("TsTypeAssertionExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsTypeAssertionExpression> for SyntaxNode {
@@ -29309,13 +31830,22 @@ impl AstNode for TsTypeConstraintClause {
 }
 impl std::fmt::Debug for TsTypeConstraintClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTypeConstraintClause")
-            .field(
-                "extends_token",
-                &support::DebugSyntaxResult(self.extends_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsTypeConstraintClause")
+                .field(
+                    "extends_token",
+                    &support::DebugSyntaxResult(self.extends_token()),
+                )
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("TsTypeConstraintClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsTypeConstraintClause> for SyntaxNode {
@@ -29351,13 +31881,22 @@ impl AstNode for TsTypeOperatorType {
 }
 impl std::fmt::Debug for TsTypeOperatorType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTypeOperatorType")
-            .field(
-                "operator_token",
-                &support::DebugSyntaxResult(self.operator_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsTypeOperatorType")
+                .field(
+                    "operator_token",
+                    &support::DebugSyntaxResult(self.operator_token()),
+                )
+                .field("ty", &support::DebugSyntaxResult(self.ty()))
+                .finish()
+        } else {
+            f.debug_struct("TsTypeOperatorType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsTypeOperatorType> for SyntaxNode {
@@ -29393,15 +31932,24 @@ impl AstNode for TsTypeParameter {
 }
 impl std::fmt::Debug for TsTypeParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTypeParameter")
-            .field("modifiers", &self.modifiers())
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "constraint",
-                &support::DebugOptionalElement(self.constraint()),
-            )
-            .field("default", &support::DebugOptionalElement(self.default()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsTypeParameter")
+                .field("modifiers", &self.modifiers())
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "constraint",
+                    &support::DebugOptionalElement(self.constraint()),
+                )
+                .field("default", &support::DebugOptionalElement(self.default()))
+                .finish()
+        } else {
+            f.debug_struct("TsTypeParameter").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsTypeParameter> for SyntaxNode {
@@ -29437,12 +31985,21 @@ impl AstNode for TsTypeParameterName {
 }
 impl std::fmt::Debug for TsTypeParameterName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTypeParameterName")
-            .field(
-                "ident_token",
-                &support::DebugSyntaxResult(self.ident_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsTypeParameterName")
+                .field(
+                    "ident_token",
+                    &support::DebugSyntaxResult(self.ident_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsTypeParameterName").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsTypeParameterName> for SyntaxNode {
@@ -29478,17 +32035,26 @@ impl AstNode for TsTypeParameters {
 }
 impl std::fmt::Debug for TsTypeParameters {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTypeParameters")
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field("items", &self.items())
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsTypeParameters")
+                .field(
+                    "l_angle_token",
+                    &support::DebugSyntaxResult(self.l_angle_token()),
+                )
+                .field("items", &self.items())
+                .field(
+                    "r_angle_token",
+                    &support::DebugSyntaxResult(self.r_angle_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsTypeParameters").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsTypeParameters> for SyntaxNode {
@@ -29524,20 +32090,29 @@ impl AstNode for TsTypeofType {
 }
 impl std::fmt::Debug for TsTypeofType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTypeofType")
-            .field(
-                "typeof_token",
-                &support::DebugSyntaxResult(self.typeof_token()),
-            )
-            .field(
-                "expression_name",
-                &support::DebugSyntaxResult(self.expression_name()),
-            )
-            .field(
-                "type_arguments",
-                &support::DebugOptionalElement(self.type_arguments()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsTypeofType")
+                .field(
+                    "typeof_token",
+                    &support::DebugSyntaxResult(self.typeof_token()),
+                )
+                .field(
+                    "expression_name",
+                    &support::DebugSyntaxResult(self.expression_name()),
+                )
+                .field(
+                    "type_arguments",
+                    &support::DebugOptionalElement(self.type_arguments()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsTypeofType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsTypeofType> for SyntaxNode {
@@ -29573,12 +32148,21 @@ impl AstNode for TsUndefinedType {
 }
 impl std::fmt::Debug for TsUndefinedType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsUndefinedType")
-            .field(
-                "undefined_token",
-                &support::DebugSyntaxResult(self.undefined_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsUndefinedType")
+                .field(
+                    "undefined_token",
+                    &support::DebugSyntaxResult(self.undefined_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsUndefinedType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsUndefinedType> for SyntaxNode {
@@ -29614,13 +32198,22 @@ impl AstNode for TsUnionType {
 }
 impl std::fmt::Debug for TsUnionType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsUnionType")
-            .field(
-                "leading_separator_token",
-                &support::DebugOptionalElement(self.leading_separator_token()),
-            )
-            .field("types", &self.types())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsUnionType")
+                .field(
+                    "leading_separator_token",
+                    &support::DebugOptionalElement(self.leading_separator_token()),
+                )
+                .field("types", &self.types())
+                .finish()
+        } else {
+            f.debug_struct("TsUnionType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsUnionType> for SyntaxNode {
@@ -29656,12 +32249,21 @@ impl AstNode for TsUnknownType {
 }
 impl std::fmt::Debug for TsUnknownType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsUnknownType")
-            .field(
-                "unknown_token",
-                &support::DebugSyntaxResult(self.unknown_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsUnknownType")
+                .field(
+                    "unknown_token",
+                    &support::DebugSyntaxResult(self.unknown_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TsUnknownType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsUnknownType> for SyntaxNode {
@@ -29697,9 +32299,18 @@ impl AstNode for TsVoidType {
 }
 impl std::fmt::Debug for TsVoidType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsVoidType")
-            .field("void_token", &support::DebugSyntaxResult(self.void_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TsVoidType")
+                .field("void_token", &support::DebugSyntaxResult(self.void_token()))
+                .finish()
+        } else {
+            f.debug_struct("TsVoidType").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<TsVoidType> for SyntaxNode {
@@ -40021,6 +42632,7 @@ impl From<TsBogusType> for SyntaxElement {
         n.syntax.into()
     }
 }
+biome_rowan::declare_node_union! { pub AnyJsBogusNode = JsBogus | JsBogusAssignment | JsBogusBinding | JsBogusExpression | JsBogusImportAssertionEntry | JsBogusMember | JsBogusNamedImportSpecifier | JsBogusParameter | JsBogusStatement | TsBogusType }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct JsArrayAssignmentPatternElementList {
     syntax_list: SyntaxList,

@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/attributes/smart-quotes.html
+---
+# Input
+
+```html
+<div 
+    smart-quotes='123 " 456'
+    smart-quotes="123 ' 456"
+    smart-quotes='123 &apos;&quot; 456'
+></div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+ <div
+   smart-quotes='123 " 456'
+   smart-quotes="123 ' 456"
+-  smart-quotes="123 '&quot; 456"
++  smart-quotes="123 &apos;&quot; 456"
+ ></div>
+```
+
+# Output
+
+```html
+<div
+  smart-quotes='123 " 456'
+  smart-quotes="123 ' 456"
+  smart-quotes="123 &apos;&quot; 456"
+></div>
+```

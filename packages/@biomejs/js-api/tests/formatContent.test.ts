@@ -1,12 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import type { ProjectKey } from "../../backend-jsonrpc/dist";
 import { Biome, Distribution } from "../dist";
 
 describe("Biome WebAssembly formatContent", () => {
 	let biome: Biome;
+	let projectKey: ProjectKey;
 	beforeEach(async () => {
 		biome = await Biome.create({
 			distribution: Distribution.NODE,
 		});
+		projectKey = await biome.openProject();
 	});
 
 	afterEach(() => {
@@ -14,7 +17,7 @@ describe("Biome WebAssembly formatContent", () => {
 	});
 
 	it("should format JavaScript content", () => {
-		const result = biome.formatContent("function f   () {  }", {
+		const result = biome.formatContent(projectKey, "function f   () {  }", {
 			filePath: "example.js",
 		});
 
@@ -24,10 +27,9 @@ describe("Biome WebAssembly formatContent", () => {
 
 	it("should format JSON content", () => {
 		const result = biome.formatContent(
+			projectKey,
 			'{ "lorem": "ipsum", "foo": false, "bar": 23, "lorem": "ipsum", "foo": false, "bar": 23 }',
-			{
-				filePath: "example.json",
-			},
+			{ filePath: "example.json" },
 		);
 
 		expect(result.content).toEqual(
@@ -38,7 +40,7 @@ describe("Biome WebAssembly formatContent", () => {
 
 	it("should not format and have diagnostics", () => {
 		const content = "function   () {  }";
-		const result = biome.formatContent(content, {
+		const result = biome.formatContent(projectKey, content, {
 			filePath: "example.js",
 		});
 
@@ -51,7 +53,7 @@ describe("Biome WebAssembly formatContent", () => {
 	});
 
 	it("should format content in debug mode", () => {
-		const result = biome.formatContent("function f() {}", {
+		const result = biome.formatContent(projectKey, "function f() {}", {
 			filePath: "example.js",
 			debug: true,
 		});
@@ -64,21 +66,26 @@ describe("Biome WebAssembly formatContent", () => {
 	});
 
 	it("should not format content with range", () => {
-		const result = biome.formatContent("let a   ; function g () {  }", {
-			filePath: "file.js",
-			range: [20, 25],
-		});
+		const result = biome.formatContent(
+			projectKey,
+			"let a   ; function g () {  }",
+			{ filePath: "file.js", range: [20, 25] },
+		);
 
 		expect(result.content).toEqual("function g() {}");
 		expect(result.diagnostics).toEqual([]);
 	});
 
 	it("should not format content with range in debug mode", () => {
-		const result = biome.formatContent("let a   ; function g () {  }", {
-			filePath: "file.js",
-			range: [20, 25],
-			debug: true,
-		});
+		const result = biome.formatContent(
+			projectKey,
+			"let a   ; function g () {  }",
+			{
+				filePath: "file.js",
+				range: [20, 25],
+				debug: true,
+			},
+		);
 
 		expect(result.content).toEqual("function g() {}");
 		expect(result.diagnostics).toEqual([]);
@@ -104,7 +111,7 @@ describe("Biome WebAssembly formatContent", () => {
 }
 `;
 
-		biome.applyConfiguration({
+		biome.applyConfiguration(projectKey, {
 			formatter: {
 				indentStyle: "space",
 				indentWidth: 8,
@@ -117,7 +124,7 @@ describe("Biome WebAssembly formatContent", () => {
 			},
 		});
 
-		const result = biome.formatContent(content, {
+		const result = biome.formatContent(projectKey, content, {
 			filePath: "example.js",
 		});
 
@@ -129,7 +136,7 @@ describe("Biome WebAssembly formatContent", () => {
 		const formatted = `<div bar='foo' baz={"foo"} />;
 `;
 
-		biome.applyConfiguration({
+		biome.applyConfiguration(projectKey, {
 			formatter: {
 				indentStyle: "space",
 				indentWidth: 8,
@@ -142,7 +149,7 @@ describe("Biome WebAssembly formatContent", () => {
 			},
 		});
 
-		const result = biome.formatContent(content, {
+		const result = biome.formatContent(projectKey, content, {
 			filePath: "example.js",
 		});
 

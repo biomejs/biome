@@ -1,7 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 #![allow(clippy::redundant_closure)]
-#![allow(clippy::too_many_arguments)]
 use biome_html_syntax::{
     HtmlSyntaxElement as SyntaxElement, HtmlSyntaxNode as SyntaxNode,
     HtmlSyntaxToken as SyntaxToken, *,
@@ -42,6 +41,20 @@ pub fn html_attribute_initializer_clause(
         [
             Some(SyntaxElement::Token(eq_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn html_cdata_section(
+    cdata_start_token: SyntaxToken,
+    content_token: SyntaxToken,
+    cdata_end_token: SyntaxToken,
+) -> HtmlCdataSection {
+    HtmlCdataSection::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_CDATA_SECTION,
+        [
+            Some(SyntaxElement::Token(cdata_start_token)),
+            Some(SyntaxElement::Token(content_token)),
+            Some(SyntaxElement::Token(cdata_end_token)),
         ],
     ))
 }

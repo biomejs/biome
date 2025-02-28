@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-with-directive.cjs
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -12,7 +13,7 @@ expression: invalid-with-directive.cjs
 ```
 invalid-with-directive.cjs:1:1 lint/nursery/useStrictMode  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected absence of the directive "use strict".
+  × Unexpected absence of the directive "use strict".
   
   > 1 │ "use server";
       │ ^^^^^^^^^^^^^
@@ -20,11 +21,13 @@ invalid-with-directive.cjs:1:1 lint/nursery/useStrictMode  FIXABLE  ━━━━
   
   i Strict mode allows to opt-in some optimisations of the runtime engines, and it eliminates some JavaScript silent errors by changing them to throw errors.
   
-  i Check the for more information regarding strict mode.
+  i Check the MDN web docs for more information regarding strict mode.
   
-  i Safe fix: Insert a top level"use strict" .
+  i Safe fix: Insert a top level "use strict".
   
-    1 │ "use·server";"use·strict";
-      │              +++++++++++++
+    1 1 │   "use server";
+      2 │ + "use·strict";
+    2 3 │   
+  
 
 ```

@@ -409,7 +409,7 @@ impl AnyJsParameterList {
     ///
     pub fn has_any_decorated_parameter(&self) -> bool {
         self.iter().any(|parameter| {
-            parameter.map_or(false, |parameter| match parameter {
+            parameter.is_ok_and(|parameter| match parameter {
                 AnyParameter::AnyJsConstructorParameter(parameter) => parameter.has_any_decorator(),
                 AnyParameter::AnyJsParameter(parameter) => parameter.has_any_decorator(),
             })
@@ -499,7 +499,7 @@ impl AnyJsConstructorParameter {
     /// Returns `true` if any parameter in the given list is decorated.
     pub fn has_any_decorator(&self) -> bool {
         self.decorators()
-            .map_or(false, |decorators| !decorators.is_empty())
+            .is_some_and(|decorators| !decorators.is_empty())
     }
 
     /// Returns the type annotation of the parameter if any.
@@ -529,7 +529,7 @@ impl AnyJsParameter {
     /// Returns `true` if any parameter in the given list is decorated.
     pub fn has_any_decorator(&self) -> bool {
         self.decorators()
-            .map_or(false, |decorators| !decorators.is_empty())
+            .is_some_and(|decorators| !decorators.is_empty())
     }
 }
 

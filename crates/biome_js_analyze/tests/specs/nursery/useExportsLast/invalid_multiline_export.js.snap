@@ -4,7 +4,7 @@ expression: invalid_multiline_export.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 export const greet = (name) => {
 	return `Hello, ${name}!`;
 };
@@ -17,7 +17,7 @@ const foo = 1;
 ```
 invalid_multiline_export.js:1:1 lint/nursery/useExportsLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All exports should be declared after all non-export statements.
+  i All exports should be declared after all non-export statements.
   
   > 1 │ export const greet = (name) => {
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

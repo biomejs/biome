@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
+snapshot_kind: text
 ---
 # Input
 ```cjs
@@ -16,7 +17,7 @@ const r = true && boolExp;
 ```
 invalid.jsonc:1:11 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Logical expression contains unnecessary complexity.
+  i Logical expression contains unnecessary complexity.
   
   > 1 │ const r = true && boolExp;
       │           ^^^^^^^^^^^^^^^
@@ -42,7 +43,7 @@ const r2 = boolExp || true;
 ```
 invalid.jsonc:1:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Logical expression contains unnecessary complexity.
+  i Logical expression contains unnecessary complexity.
   
   > 1 │ const r2 = boolExp || true;
       │            ^^^^^^^^^^^^^^^
@@ -68,7 +69,7 @@ const r3 = null ?? nonNullExp;
 ```
 invalid.jsonc:1:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Logical expression contains unnecessary complexity.
+  i Logical expression contains unnecessary complexity.
   
   > 1 │ const r3 = null ?? nonNullExp;
       │            ^^^^^^^^^^^^^^^^^^
@@ -99,7 +100,7 @@ const r4 = !boolExpr1 || !boolExpr2;
 ```
 invalid.jsonc:1:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Logical expression contains unnecessary complexity.
+  i Logical expression contains unnecessary complexity.
   
   > 1 │ const r4 = !boolExpr1 || !boolExpr2;
       │            ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -111,5 +112,3 @@ invalid.jsonc:1:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━
   
 
 ```
-
-

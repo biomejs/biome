@@ -152,11 +152,15 @@ impl AnyJsxOpeningElement {
     fn compute_layout(&self, comments: &JsComments) -> SyntaxResult<OpeningElementLayout> {
         let attributes = self.attributes();
         let name = self.name()?;
+        let last_attribute_has_comments = self
+            .attributes()
+            .last()
+            .is_some_and(|attribute| comments.has_trailing_comments(attribute.syntax()));
 
         let name_has_comments = comments.has_comments(name.syntax())
             || self
                 .type_arguments()
-                .map_or(false, |arguments| comments.has_comments(arguments.syntax()));
+                .is_some_and(|arguments| comments.has_comments(arguments.syntax()));
 
         let layout = if self.is_self_closing() && attributes.is_empty() && !name_has_comments {
             OpeningElementLayout::Inline
@@ -171,7 +175,7 @@ impl AnyJsxOpeningElement {
         } else {
             OpeningElementLayout::IndentAttributes {
                 name_has_comments,
-                last_attribute_has_comments: has_last_attribute_comments(self, comments),
+                last_attribute_has_comments,
             }
         };
 
@@ -214,19 +218,19 @@ enum OpeningElementLayout {
 
 /// Returns `true` if this is an attribute with a [JsxString] initializer that does not contain any new line characters.
 fn is_single_line_string_literal_attribute(attribute: &AnyJsxAttribute) -> bool {
-    as_string_literal_attribute_value(attribute).map_or(false, |string| {
+    as_string_literal_attribute_value(attribute).is_some_and(|string| {
         string
             .value_token()
-            .map_or(false, |text| !text.text_trimmed().contains('\n'))
+            .is_ok_and(|text| !text.text_trimmed().contains('\n'))
     })
 }
 
 /// Returns `true` if this is an attribute with a [JsxString] initializer that contains at least one new line character.
 fn is_multiline_string_literal_attribute(attribute: &AnyJsxAttribute) -> bool {
-    as_string_literal_attribute_value(attribute).map_or(false, |string| {
+    as_string_literal_attribute_value(attribute).is_some_and(|string| {
         string
             .value_token()
-            .map_or(false, |text| text.text_trimmed().contains('\n'))
+            .is_ok_and(|text| text.text_trimmed().contains('\n'))
     })
 }
 
@@ -248,19 +252,4 @@ fn as_string_literal_attribute_value(attribute: &AnyJsxAttribute) -> Option<JsxS
         }
         JsxSpreadAttribute(_) => None,
     }
-}
-
-fn has_last_attribute_comments(element: &AnyJsxOpeningElement, comments: &JsComments) -> bool {
-    let has_comments_on_last_attribute = element
-        .attributes()
-        .last()
-        .map_or(false, |attribute| comments.has_comments(attribute.syntax()));
-
-    let last_attribute_has_comments = element
-        .syntax()
-        .tokens()
-        .map(|token| token.text().contains('>') && token.has_leading_comments())
-        .any(|has_comment| has_comment);
-
-    has_comments_on_last_attribute || last_attribute_has_comments
 }

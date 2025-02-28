@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsTryStatement, JsStatementList, TextRange};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
@@ -69,6 +70,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-useless-catch")],
         recommended: true,
+        severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -106,7 +108,7 @@ impl Rule for NoUselessCatch {
             .argument()
             .ok()?
             .as_js_identifier_expression()?
-            .text();
+            .to_trimmed_string();
 
         if throw_ident.eq(catch_err_name) {
             Some(js_throw_statement.syntax().text_trimmed_range())

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 describe("a test", () => { expect(1).toBe(1); })
 export const myThing = "invalid";
 export default function () { }
@@ -13,7 +14,7 @@ export default function () { }
 ```
 invalid.js:2:1 lint/suspicious/noExportsInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not export from a test file.
+  × Do not export from a test file.
   
     1 │ describe("a test", () => { expect(1).toBe(1); })
   > 2 │ export const myThing = "invalid";
@@ -26,7 +27,7 @@ invalid.js:2:1 lint/suspicious/noExportsInTest ━━━━━━━━━━━
 ```
 invalid.js:3:1 lint/suspicious/noExportsInTest ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not export from a test file.
+  × Do not export from a test file.
   
     1 │ describe("a test", () => { expect(1).toBe(1); })
     2 │ export const myThing = "invalid";

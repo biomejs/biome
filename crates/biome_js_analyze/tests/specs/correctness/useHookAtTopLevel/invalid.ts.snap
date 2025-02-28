@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -20,7 +21,7 @@ const Component2 = () => {
 ```
 invalid.ts:2:3 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook is being called indirectly and conditionally, but all hooks must be called in the exact same order in every component render.
+  × This hook is being called indirectly and conditionally, but all hooks must be called in the exact same order in every component render.
   
     1 │ const Component1 = () => {
   > 2 │   useEffect() as [];
@@ -44,5 +45,3 @@ invalid.ts:2:3 lint/correctness/useHookAtTopLevel ━━━━━━━━━━
   
 
 ```
-
-

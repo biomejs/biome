@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: thisBeforeSuper.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // valid
 class B extends A {
     constructor() {
@@ -82,7 +83,7 @@ class G extends A {
 ```
 thisBeforeSuper.js:23:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths accessing `this` without calling `super()` first.
+  × This constructor has code paths accessing `this` without calling `super()` first.
   
     21 │ // invalid
     22 │ class D extends A {
@@ -112,7 +113,7 @@ thisBeforeSuper.js:23:5 lint/correctness/noUnreachableSuper ━━━━━━�
 ```
 thisBeforeSuper.js:31:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths accessing `this` without calling `super()` first.
+  × This constructor has code paths accessing `this` without calling `super()` first.
   
     29 │ // invalid
     30 │ class E extends A {
@@ -143,7 +144,7 @@ thisBeforeSuper.js:31:5 lint/correctness/noUnreachableSuper ━━━━━━�
 ```
 thisBeforeSuper.js:43:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths accessing `this` without calling `super()` first.
+  × This constructor has code paths accessing `this` without calling `super()` first.
   
     41 │ // invalid
     42 │ class F extends A {
@@ -175,7 +176,7 @@ thisBeforeSuper.js:43:5 lint/correctness/noUnreachableSuper ━━━━━━�
 ```
 thisBeforeSuper.js:53:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths accessing `this` without calling `super()` first.
+  × This constructor has code paths accessing `this` without calling `super()` first.
   
     51 │ // invalid
     52 │ class G extends A {
@@ -206,7 +207,7 @@ thisBeforeSuper.js:53:5 lint/correctness/noUnreachableSuper ━━━━━━�
 ```
 thisBeforeSuper.js:64:5 lint/correctness/noUnreachableSuper ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This constructor has code paths accessing `this` without calling `super()` first.
+  × This constructor has code paths accessing `this` without calling `super()` first.
   
     62 │ // invalid
     63 │ class G extends A {
@@ -233,5 +234,3 @@ thisBeforeSuper.js:64:5 lint/correctness/noUnreachableSuper ━━━━━━�
   
 
 ```
-
-

@@ -4,7 +4,7 @@ expression: valid.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 Array(500);
 
 Array(someOtherArray.length);

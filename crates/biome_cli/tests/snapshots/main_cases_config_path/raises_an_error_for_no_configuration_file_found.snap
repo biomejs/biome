@@ -1,0 +1,21 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `file.js`
+
+```js
+function name() { return "lorem" }
+```
+
+# Termination Message
+
+```block
+config configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome couldn't find a configuration in the directory config.
+  
+
+
+```

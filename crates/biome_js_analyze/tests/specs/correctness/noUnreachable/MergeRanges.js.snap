@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: MergeRanges.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function MergeRanges1() {
     return;
 
@@ -119,7 +120,7 @@ function MergeRanges2() {
 ```
 MergeRanges.js:4:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
      2 │     return;
      3 │ 
@@ -147,7 +148,7 @@ MergeRanges.js:4:5 lint/correctness/noUnreachable ━━━━━━━━━━
 ```
 MergeRanges.js:83:13 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     81 │         if (expr) {
     82 │             return;
@@ -171,7 +172,7 @@ MergeRanges.js:83:13 lint/correctness/noUnreachable ━━━━━━━━━�
 ```
 MergeRanges.js:86:13 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     84 │         } else {
     85 │             continue;
@@ -195,7 +196,7 @@ MergeRanges.js:86:13 lint/correctness/noUnreachable ━━━━━━━━━�
 ```
 MergeRanges.js:89:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
      87 │         }
      88 │         
@@ -229,5 +230,3 @@ MergeRanges.js:89:9 lint/correctness/noUnreachable ━━━━━━━━━�
   
 
 ```
-
-

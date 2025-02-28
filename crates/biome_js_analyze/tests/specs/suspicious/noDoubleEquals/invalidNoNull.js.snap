@@ -1,10 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 86
 expression: invalidNoNull.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 const foo1 = `
 text
 ${a == b}
@@ -68,7 +68,7 @@ let a3 = `Output of "biome rage":
 ```
 invalidNoNull.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     1 │ const foo1 = `
     2 │ text
@@ -89,7 +89,7 @@ invalidNoNull.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━
 ```
 invalidNoNull.js:8:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
      6 │ const foo2 = `
      7 │ text
@@ -110,7 +110,7 @@ invalidNoNull.js:8:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━
 ```
 invalidNoNull.js:13:8 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     11 │ const foo3 = `
     12 │ text
@@ -131,7 +131,7 @@ invalidNoNull.js:13:8 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:17:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     16 │ // existing comment
   > 17 │ a == b;
@@ -151,7 +151,7 @@ invalidNoNull.js:17:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:20:6 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     19 │ // existing comment
   > 20 │ null == a;
@@ -171,7 +171,7 @@ invalidNoNull.js:20:6 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:23:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     22 │ // existing comment
   > 23 │ a == null;
@@ -190,7 +190,7 @@ invalidNoNull.js:23:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:26:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
   > 26 │ if (a == b) {
        │       ^^
@@ -209,7 +209,7 @@ invalidNoNull.js:26:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:30:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     28 │ }
     29 │ 
@@ -230,7 +230,7 @@ invalidNoNull.js:30:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:34:10 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     32 │ }
     33 │ 
@@ -251,7 +251,7 @@ invalidNoNull.js:34:10 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:39:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     38 │ if (/** some weird comment
   > 39 │     **/ a == b) {
@@ -271,7 +271,7 @@ invalidNoNull.js:39:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:44:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     43 │ let a1 = `Output of "biome rage":
   > 44 │   formatter enabled: ${formatter == true}
@@ -291,7 +291,7 @@ invalidNoNull.js:44:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:49:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     48 │ let a2 = `Output of "biome rage":
   > 49 │   formatter enabled: ${formatter == null}
@@ -311,7 +311,7 @@ invalidNoNull.js:49:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
 ```
 invalidNoNull.js:54:29 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use === instead of ==
+  × Use === instead of ==
   
     53 │ let a3 = `Output of "biome rage":
   > 54 │   formatter enabled: ${null == formatter}

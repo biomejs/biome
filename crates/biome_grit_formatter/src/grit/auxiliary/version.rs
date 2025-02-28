@@ -7,7 +7,7 @@ impl FormatNodeRule<GritVersion> for FormatGritVersion {
     fn fmt_fields(&self, node: &GritVersion, f: &mut GritFormatter) -> FormatResult<()> {
         let GritVersionFields {
             engine_token,
-            biome_token,
+            engine_name,
             l_paren_token,
             version,
             r_paren_token,
@@ -18,10 +18,10 @@ impl FormatNodeRule<GritVersion> for FormatGritVersion {
             [
                 engine_token.format(),
                 space(),
-                biome_token.format(),
+                engine_name.format(),
                 l_paren_token.format(),
                 version.format(),
-                r_paren_token.format()
+                r_paren_token.format(),
             ]
         )
     }

@@ -1,5 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxTag, JsxChildList};
 use biome_rowan::{AstNodeList, TextRange};
 
@@ -45,8 +46,9 @@ declare_lint_rule! {
     pub NoSuspiciousSemicolonInJsx {
         version: "1.6.0",
         name: "noSuspiciousSemicolonInJsx",
-        language: "js",
+        language: "jsx",
         recommended: true,
+        severity: Severity::Warning,
     }
 }
 

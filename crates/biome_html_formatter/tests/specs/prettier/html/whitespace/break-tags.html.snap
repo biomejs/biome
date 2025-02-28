@@ -1,0 +1,46 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/whitespace/break-tags.html
+---
+# Input
+
+```html
+<a>Lorem</a>, ispum dolor sit <strong>amet</strong>.
+<div><a>Lorem</a>, ispum dolor sit <strong>amet</strong>.</div>
+<div><div><a>Lorem</a>, ispum dolor sit <strong>amet</strong>.</div></div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,9 @@
+ <a>Lorem</a>, ispum dolor sit <strong>amet</strong>.
+-<div><a>Lorem</a>, ispum dolor sit <strong>amet</strong>.</div>
+ <div>
+-  <div><a>Lorem</a>, ispum dolor sit <strong>amet</strong>.</div>
++  <a>Lorem</a>, ispum dolor sit <strong>amet</strong>.
++</div>
++<div>
++  <div>
++    <a>Lorem</a>, ispum dolor sit <strong>amet</strong>.
++  </div>
+ </div>
+```
+
+# Output
+
+```html
+<a>Lorem</a>, ispum dolor sit <strong>amet</strong>.
+<div>
+  <a>Lorem</a>, ispum dolor sit <strong>amet</strong>.
+</div>
+<div>
+  <div>
+    <a>Lorem</a>, ispum dolor sit <strong>amet</strong>.
+  </div>
+</div>
+```

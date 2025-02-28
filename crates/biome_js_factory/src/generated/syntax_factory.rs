@@ -1,5 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
+#![allow(unused_mut)]
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxKind::*, T, *};
 use biome_rowan::{
     AstNode, ParsedChildren, RawNodeSlots, RawSyntaxNode, SyntaxFactory, SyntaxKind,
@@ -8,7 +9,6 @@ use biome_rowan::{
 pub struct JsSyntaxFactory;
 impl SyntaxFactory for JsSyntaxFactory {
     type Kind = JsSyntaxKind;
-    #[allow(unused_mut)]
     fn make_syntax(
         kind: Self::Kind,
         children: ParsedChildren<Self::Kind>,
@@ -2804,7 +2804,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if matches!(element.kind(), T![assert] | T![with]) {
+                    if element.kind() == T![with] {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -7665,7 +7665,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if matches!(element.kind(), T![assert] | T![with]) {
+                    if element.kind() == T![with] {
                         slots.mark_present();
                         current_element = elements.next();
                     }

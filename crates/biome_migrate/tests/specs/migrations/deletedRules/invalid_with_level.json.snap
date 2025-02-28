@@ -1,0 +1,139 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: invalid_with_level.json
+snapshot_kind: text
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noConsoleLog": {
+          "level": "warn"
+        },
+        "useSingleCaseStatement": {
+          "level": "error"
+        },
+        "useShorthandArrayType": {
+          "level": "error"
+        },
+        "noNewSymbol": {
+          "level": "error"
+        },
+        "noInvalidNewBuiltin": {
+          "level": "error"
+        }
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid_with_level.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rule noConsoleLog has been removed.
+  
+    3 │     "rules": {
+    4 │       "suspicious": {
+  > 5 │         "noConsoleLog": {
+      │         ^^^^^^^^^^^^^^
+    6 │           "level": "warn"
+    7 │         },
+  
+  i Safe fix: Use the rule noConsoleLog instead.
+  
+     3  3 │       "rules": {
+     4  4 │         "suspicious": {
+     5    │ - ········"noConsoleLog":·{
+     6    │ - ··········"level":·"warn"
+        5 │ + ········"noConsole":·{
+        6 │ + ··········"level":·"warn",
+        7 │ + ··········"options":·{
+        8 │ + ············"allow":·["log"]
+        9 │ + ··········}
+     7 10 │           },
+     8 11 │           "useSingleCaseStatement": {
+  
+
+```
+
+```
+invalid_with_level.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rule noConsoleLog has been removed.
+  
+     6 │           "level": "warn"
+     7 │         },
+   > 8 │         "useSingleCaseStatement": {
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │           "level": "error"
+    10 │         },
+  
+  i Safe fix: Use the rule useSingleCaseStatement instead.
+  
+     6  6 │             "level": "warn"
+     7  7 │           },
+     8    │ - ········"useSingleCaseStatement":·{
+        8 │ + ········"noSwitchDeclarations":·{
+     9  9 │             "level": "error"
+    10 10 │           },
+  
+
+```
+
+```
+invalid_with_level.json:11:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rule noConsoleLog has been removed.
+  
+     9 │           "level": "error"
+    10 │         },
+  > 11 │         "useShorthandArrayType": {
+       │         ^^^^^^^^^^^^^^^^^^^^^^^
+    12 │           "level": "error"
+    13 │         },
+  
+  i Safe fix: Use the rule useShorthandArrayType instead.
+  
+     9  9 │             "level": "error"
+    10 10 │           },
+    11    │ - ········"useShorthandArrayType":·{
+    12    │ - ··········"level":·"error"
+       11 │ + ········"useConsistentArrayType":·{
+       12 │ + ··········"level":·"error",
+       13 │ + ··········"options":·{
+       14 │ + ············"syntax":·"shorthand"
+       15 │ + ··········}
+    13 16 │           },
+    14 17 │           "noNewSymbol": {
+  
+
+```
+
+```
+invalid_with_level.json:14:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rule noConsoleLog has been removed.
+  
+    12 │           "level": "error"
+    13 │         },
+  > 14 │         "noNewSymbol": {
+       │         ^^^^^^^^^^^^^
+    15 │           "level": "error"
+    16 │         },
+  
+  i Safe fix: Use the rule noNewSymbol instead.
+  
+    12 12 │             "level": "error"
+    13 13 │           },
+    14    │ - ········"noNewSymbol":·{
+       14 │ + ········"noInvalidBuiltinInstantiation":·{
+    15 15 │             "level": "error"
+    16 16 │           },
+  
+
+```

@@ -15,7 +15,10 @@ where
         if "{}[]()`".contains(token) {
             let c = token.chars().next().unwrap();
             quote! { #c }
-        } else if matches!(*token, "$=" | "$_") {
+        } else if matches!(
+            *token,
+            "$=" | "$_" | "<![CDATA[" | "]]>" | "U+" | "   " | "_"
+        ) {
             let token = Literal::string(token);
             quote! { #token }
         } else {
@@ -108,8 +111,8 @@ where
     };
 
     let ast = quote! {
-        #![allow(clippy::all)]
-        #![allow(bad_style, missing_docs, unreachable_pub)]
+        #![expect(clippy::all)]
+        #![expect(bad_style, missing_docs, unreachable_pub)]
         /// The kind of syntax node, e.g. `IDENT`, `FUNCTION_KW`, or `FOR_STMT`.
         #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
         #[repr(u16)]

@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsExpression, JsAssignmentExpression, JsAssignmentOperator, JsBinaryExpression,
 };
@@ -53,6 +54,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Clippy("misrefactored_assign_op")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -94,7 +96,7 @@ impl Rule for NoMisrefactoredShorthandAssign {
 
         let left = node.left().ok()?;
         let left = left.as_any_js_assignment()?;
-        let left_text = left.text();
+        let left_text = left.to_trimmed_string();
 
         let variable_position_in_expression =
             find_variable_position(&binary_expression, &left_text)?;

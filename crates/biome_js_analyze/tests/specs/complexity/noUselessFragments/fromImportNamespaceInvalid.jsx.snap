@@ -1,7 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 84
 expression: fromImportNamespaceInvalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -17,7 +17,7 @@ import * as AwesomeReact from "react";
 ```
 fromImportNamespaceInvalid.jsx:3:1 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     1 │ import * as AwesomeReact from "react";
     2 │ 
@@ -46,7 +46,7 @@ fromImportNamespaceInvalid.jsx:3:1 lint/complexity/noUselessFragments  FIXABLE  
 ```
 fromImportNamespaceInvalid.jsx:4:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     3 │ <>
   > 4 │     <AwesomeReact.Fragment>foo</AwesomeReact.Fragment>

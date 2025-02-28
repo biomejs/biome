@@ -1,5 +1,4 @@
 #![cfg(test)]
-#![allow(unused_mut, unused_variables, unused_assignments)]
 
 use super::{HtmlLexer, TextSize};
 use crate::token_source::HtmlLexContext;
@@ -265,6 +264,30 @@ fn long_text() {
 }
 
 #[test]
+fn text_trailing_whitespace() {
+    assert_lex! {
+        HtmlLexContext::OutsideTag,
+        "Lorem ipsum dolor <a",
+        HTML_LITERAL: 17,
+        WHITESPACE: 1,
+        L_ANGLE: 1,
+        HTML_LITERAL: 1,
+    }
+}
+
+#[test]
+fn text_trailing_whitespace_multiple() {
+    assert_lex! {
+        HtmlLexContext::OutsideTag,
+        "Lorem ipsum dolor  <a",
+        HTML_LITERAL: 17,
+        WHITESPACE: 2,
+        L_ANGLE: 1,
+        HTML_LITERAL: 1,
+    }
+}
+
+#[test]
 fn unquoted_attribute_value_1() {
     assert_lex! {
         HtmlLexContext::AttributeValue,
@@ -324,5 +347,16 @@ fn comment_full() {
         COMMENT_START: 4,
         HTML_LITERAL: 5,
         COMMENT_END: 3,
+    }
+}
+
+#[test]
+fn cdata_full() {
+    assert_lex! {
+        HtmlLexContext::CdataSection,
+        "<![CDATA[1]]>",
+        CDATA_START: 9,
+        HTML_LITERAL: 1,
+        CDATA_END: 3,
     }
 }

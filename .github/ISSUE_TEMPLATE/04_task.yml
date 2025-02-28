@@ -1,7 +1,7 @@
 name: 📎 Task
-description: Specific actionable task. Typically opened by existing contributors. If you aren't sure, then create a discussion.
+description: Specific, actionable task. Typically opened by existing contributors. If you aren't sure, then create a discussion.
 title: "📎 <TITLE> "
-labels: ["task"]
+type: Task
 body:
   - type: textarea
     id: description

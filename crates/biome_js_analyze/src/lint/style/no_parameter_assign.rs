@@ -1,6 +1,7 @@
 use crate::services::semantic::Semantic;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::{AllBindingWriteReferencesIter, Reference, ReferencesExtensions};
 use biome_js_syntax::{AnyJsBinding, AnyJsBindingPattern, AnyJsFormalParameter, AnyJsParameter};
 use biome_rowan::AstNode;
@@ -58,7 +59,8 @@ declare_lint_rule! {
         name: "noParameterAssign",
         language: "js",
         sources: &[RuleSource::Eslint("no-param-reassign")],
-        recommended: true,
+        recommended: false,
+        severity: Severity::Warning,
     }
 }
 

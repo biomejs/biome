@@ -1,4 +1,0 @@
-{
-	"overrides": [
-		{ "ignore": ["special/**"], "formatter": { "lineWidth": 30 } }]
-}

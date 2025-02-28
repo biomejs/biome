@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: customHook.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function MyComponent() {
     // This is valid
     const { a } = useCustomHook();
@@ -24,7 +25,7 @@ function MyComponent() {
 ```
 customHook.js:7:23 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
   
     5 │     // This is invalid
     6 │     if (a) {
@@ -43,7 +44,7 @@ customHook.js:7:23 lint/correctness/useHookAtTopLevel ━━━━━━━━�
 ```
 customHook.js:12:23 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  × This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
   
     10 │     // This is invalid
     11 │     if (a) {

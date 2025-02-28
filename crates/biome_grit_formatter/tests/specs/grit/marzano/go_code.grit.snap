@@ -1,0 +1,174 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: grit/marzano/go_code.grit
+---
+# Input
+
+```grit
+language go
+
+pattern before_each_file_prep_imports() {
+    $_ where {
+        // Array of global imports. Each import is a tuple of (source, as)
+        $GLOBAL_NEW_IMPORTS = [],
+    }
+}
+
+// Handle inserting imports if we accumulated any
+pattern after_each_file_handle_imports() {
+    $_ where {
+        if ($GLOBAL_NEW_IMPORTS <: not []) {
+            $program <: or {
+                contains import_declaration(imports=$list) as $outer where {
+                    $list <: or {
+                        import_spec_list(imports=$imports) where {
+                            $GLOBAL_NEW_IMPORTS <: some bubble($imports) $import where {
+                                $imports += `"$import"`,
+                            }
+                        },
+                        import_spec() where {
+                            $GLOBAL_NEW_IMPORTS <: some bubble($outer) $import where {
+                                $outer += `\nimport "$import"`,
+                            }
+                        }
+                    },
+                },
+                contains package_clause() as $anchor where {
+                    $GLOBAL_NEW_IMPORTS <: some bubble($anchor) $import where {
+                        $anchor += `\nimport "$import"`,
+                    }
+                }
+            }
+        }
+    }
+}
+
+function require_import($source, $as) {
+    // Default condition
+    $split_source = split($source, "/"),
+    if ($as <: undefined) {
+        $name_to_use = $split_source[-1],
+    } else {
+        $name_to_use = $as,
+    },
+    or {
+        $program <: contains bubble($source, $name_to_use) import_spec($name, path=$path) where {
+            $path <: contains $source,
+            if ($name <: not .) {
+                $name_to_use=$name,
+            }
+        },
+        // $GLOBAL_NEW_IMPORTS <: some bubble($source) `$import` where $import <: $source,
+        $GLOBAL_NEW_IMPORTS += $source
+    },
+    return $name_to_use
+}
+
+pattern import_of($source) {
+    import_declaration(imports=import_spec_list(imports=$mod)) where {
+        $mod <: not contains $source,
+        $mod += $source
+    }
+}
+
+
+pattern ensure_import($source) {
+    import_declaration(imports=import_spec_list(imports=$mod)) where {
+        $mod <: not contains $source,
+        $mod += $source
+    }
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+-----
+
+```grit
+language go
+
+pattern before_each_file_prep_imports() {
+	$_ where {
+		// Array of global imports. Each import is a tuple of (source, as)
+		$GLOBAL_NEW_IMPORTS = []
+	}
+}
+
+// Handle inserting imports if we accumulated any
+pattern after_each_file_handle_imports() {
+	$_ where {
+		if ($GLOBAL_NEW_IMPORTS <: not []) {
+			$program <: or {
+				contains import_declaration(imports=$list) as $outer where {
+					$list <: or {
+						import_spec_list(imports=$imports) where {
+							$GLOBAL_NEW_IMPORTS <: some bubble($imports) $import where {
+								$imports += `"$import"`
+							}
+						},
+						import_spec() where {
+							$GLOBAL_NEW_IMPORTS <: some bubble($outer) $import where {
+								$outer += `\nimport "$import"`
+							}
+						}
+					}
+				},
+				contains package_clause() as $anchor where {
+					$GLOBAL_NEW_IMPORTS <: some bubble($anchor) $import where {
+						$anchor += `\nimport "$import"`
+					}
+				}
+			}
+		}
+	}
+}
+
+function require_import($source, $as) {
+	// Default condition
+	$split_source = split($source, "/"),
+	if ($as <: undefined) { $name_to_use = $split_source[-1] } else {
+		$name_to_use = $as
+	},
+	or {
+		$program <: contains bubble($source, $name_to_use) import_spec($name, path=$path) where {
+			$path <: contains $source,
+			if ($name <: not .) { $name_to_use = $name }
+		},
+		// $GLOBAL_NEW_IMPORTS <: some bubble($source) `$import` where $import <: $source,
+		$GLOBAL_NEW_IMPORTS += $source
+	},
+	return $name_to_use
+}
+
+pattern import_of($source) {
+	import_declaration(imports=import_spec_list(imports=$mod)) where {
+		$mod <: not contains $source,
+		$mod += $source
+	}
+}
+
+pattern ensure_import($source) {
+	import_declaration(imports=import_spec_list(imports=$mod)) where {
+		$mod <: not contains $source,
+		$mod += $source
+	}
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+   46: 		$program <: contains bubble($source, $name_to_use) import_spec($name, path=$path) where {
+   50: 		// $GLOBAL_NEW_IMPORTS <: some bubble($source) `$import` where $import <: $source,
+```

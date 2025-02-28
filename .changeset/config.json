@@ -1,0 +1,21 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.5/schema.json",
+  "changelog": ["@changesets/changelog-github", { "repo": "biomejs/biome" }],
+  "commit": false,
+  "fixed": [
+    [
+      "@biomejs/biome",
+      "@biomejs/cli-*",
+      "@biomejs/wasm-*"
+    ]
+  ],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "@biomejs/benchmark",
+    "@biomejs/aria-data",
+    "tailwindcss-config-analyzer"
+  ]
+}

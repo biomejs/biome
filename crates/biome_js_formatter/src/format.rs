@@ -827,7 +827,7 @@ impl Format for biome_js_syntax::JsModuleSource {
         self.format_node(formatter)
     }
 }
-impl Format for biome_js_syntax::JsImportAssertion {
+impl Format for biome_js_syntax::JsImportAttribute {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }
@@ -862,7 +862,7 @@ impl Format for biome_js_syntax::JsLiteralExportName {
         self.format_node(formatter)
     }
 }
-impl Format for biome_js_syntax::JsImportAssertionEntry {
+impl Format for biome_js_syntax::JsImportAttributeEntry {
     fn format(&self, formatter: &Formatter) -> FormatResult<FormatElement> {
         self.format_node(formatter)
     }

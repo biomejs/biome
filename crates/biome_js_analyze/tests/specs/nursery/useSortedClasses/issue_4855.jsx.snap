@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_4855.jsx
+snapshot_kind: text
+---
+# Input
+```jsx
+<div class="content-[''] absolute">Hello</div>;
+<div class='top-0 absolute'>Hello</div>;
+
+```
+
+# Diagnostics
+```
+issue_4855.jsx:1:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+  > 1 │ <div class="content-[''] absolute">Hello</div>;
+      │            ^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ <div class='top-0 absolute'>Hello</div>;
+    3 │ 
+  
+  i Unsafe fix: Sort the classes.
+  
+    1   │ - <div·class="content-['']·absolute">Hello</div>;
+      1 │ + <div·class="absolute·content-['']">Hello</div>;
+    2 2 │   <div class='top-0 absolute'>Hello</div>;
+    3 3 │   
+  
+
+```
+
+```
+issue_4855.jsx:2:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    1 │ <div class="content-[''] absolute">Hello</div>;
+  > 2 │ <div class='top-0 absolute'>Hello</div>;
+      │            ^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Unsafe fix: Sort the classes.
+  
+    1 1 │   <div class="content-[''] absolute">Hello</div>;
+    2   │ - <div·class='top-0·absolute'>Hello</div>;
+      2 │ + <div·class="absolute·top-0">Hello</div>;
+    3 3 │   
+  
+
+```

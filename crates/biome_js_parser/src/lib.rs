@@ -78,14 +78,13 @@ pub use crate::{
     parse::*,
 };
 use biome_js_factory::JsSyntaxFactory;
-use biome_js_syntax::{JsLanguage, JsSyntaxKind, LanguageVariant};
+use biome_js_syntax::{JsSyntaxKind, LanguageVariant};
 use biome_parser::tree_sink::LosslessTreeSink;
 pub(crate) use parser::{JsParser, ParseRecoveryTokenSet};
 pub(crate) use state::{JsParserState, StrictMode};
 use std::fmt::Debug;
 
 pub enum JsSyntaxFeature {
-    #[allow(unused)]
     #[doc(alias = "LooseMode")]
     SloppyMode,
     StrictMode,

@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_5053.js
+snapshot_kind: text
+---
+# Input
+```js
+const x = () => console.log("test");
+[].forEach(() => console.log("test"));
+
+```
+
+# Diagnostics
+```
+issue_5053.js:1:17 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use console.
+  
+  > 1 │ const x = () => console.log("test");
+      │                 ^^^^^^^^^^^^^^^^^^^
+    2 │ [].forEach(() => console.log("test"));
+    3 │ 
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    1   │ - const·x·=·()·=>·console.log("test");
+      1 │ + const·x·=·()·=>·{};
+    2 2 │   [].forEach(() => console.log("test"));
+    3 3 │   
+  
+
+```
+
+```
+issue_5053.js:2:18 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use console.
+  
+    1 │ const x = () => console.log("test");
+  > 2 │ [].forEach(() => console.log("test"));
+      │                  ^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    1 1 │   const x = () => console.log("test");
+    2   │ - [].forEach(()·=>·console.log("test"));
+      2 │ + [].forEach(()·=>·{});
+    3 3 │   
+  
+
+```

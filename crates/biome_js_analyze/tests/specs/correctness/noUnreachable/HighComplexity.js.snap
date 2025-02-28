@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: HighComplexity.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function HighComplexity1() {
     if (a) { func() } else { func() };
     if (a) { func() } else { func() };
@@ -252,7 +253,7 @@ function HighComplexity2() {
 ```
 HighComplexity.js:29:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code is unreachable
+  × This code is unreachable
   
     28 │     return;
   > 29 │     afterReturn();
@@ -266,7 +267,7 @@ HighComplexity.js:29:5 lint/correctness/noUnreachable ━━━━━━━━�
 ```
 HighComplexity.js:240:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code is unreachable
+  × This code is unreachable
   
     239 │     return;
   > 240 │     afterReturn();
@@ -276,5 +277,3 @@ HighComplexity.js:240:5 lint/correctness/noUnreachable ━━━━━━━━�
   
 
 ```
-
-

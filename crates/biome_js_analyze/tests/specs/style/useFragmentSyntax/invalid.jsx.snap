@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -29,7 +30,7 @@ import React, {Fragment} from "react";
 ```
 invalid.jsx:5:5 lint/style/useFragmentSyntax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand syntax for Fragment elements instead of standard syntax.
+  i Use shorthand syntax for Fragment elements instead of standard syntax.
   
      3 │ <div>
      4 │     {/* invalid */}
@@ -63,7 +64,7 @@ invalid.jsx:5:5 lint/style/useFragmentSyntax  FIXABLE  ━━━━━━━━�
 ```
 invalid.jsx:10:5 lint/style/useFragmentSyntax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand syntax for Fragment elements instead of standard syntax.
+  i Use shorthand syntax for Fragment elements instead of standard syntax.
   
      8 │     </Fragment>
      9 │ 
@@ -97,7 +98,7 @@ invalid.jsx:10:5 lint/style/useFragmentSyntax  FIXABLE  ━━━━━━━━
 ```
 invalid.jsx:15:5 lint/style/useFragmentSyntax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use shorthand syntax for Fragment elements instead of standard syntax.
+  i Use shorthand syntax for Fragment elements instead of standard syntax.
   
     13 │     </React.Fragment>
     14 │ 
@@ -125,5 +126,3 @@ invalid.jsx:15:5 lint/style/useFragmentSyntax  FIXABLE  ━━━━━━━━
   
 
 ```
-
-

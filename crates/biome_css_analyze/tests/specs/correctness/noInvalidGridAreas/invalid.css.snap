@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: invalid.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -39,7 +40,7 @@ a { grid-template-areas: "a a a"
 ```
 invalid.css:1:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty grid areas are not allowed.
+  × Empty grid areas are not allowed.
   
   > 1 │ a { grid-template-areas: "" }
       │                          ^^^
@@ -54,7 +55,7 @@ invalid.css:1:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━
 ```
 invalid.css:2:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Inconsistent cell count in grid areas are not allowed.
+  × Inconsistent cell count in grid areas are not allowed.
   
     1 │ a { grid-template-areas: "" }
   > 2 │ a { grid-template-areas: "a a"
@@ -70,7 +71,7 @@ invalid.css:2:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━
 ```
 invalid.css:4:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty grid areas are not allowed.
+  × Empty grid areas are not allowed.
   
     2 │ a { grid-template-areas: "a a"
     3 │                          "b b b"; }
@@ -89,7 +90,7 @@ invalid.css:4:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━
 ```
 invalid.css:6:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate filled in rectangle are not allowed.
+  × Duplicate filled in rectangle are not allowed.
   
     4 │ a { grid-template-areas: "b b b"
     5 │                          ""; }
@@ -108,7 +109,7 @@ invalid.css:6:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━
 ```
 invalid.css:11:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate filled in rectangle are not allowed.
+  × Duplicate filled in rectangle are not allowed.
   
      9 │                          "b b b"
     10 │                          "c c c"
@@ -127,7 +128,7 @@ invalid.css:11:33 lint/correctness/noInvalidGridAreas ━━━━━━━━�
 ```
 invalid.css:15:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate filled in rectangle are not allowed.
+  × Duplicate filled in rectangle are not allowed.
   
     13 │ a { grid-template-areas: "a a a"
     14 │                          "b b b"; }
@@ -146,7 +147,7 @@ invalid.css:15:33 lint/correctness/noInvalidGridAreas ━━━━━━━━�
 ```
 invalid.css:17:35 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate filled in rectangle are not allowed.
+  × Duplicate filled in rectangle are not allowed.
   
     15 │ a { grid-template-areas: "a a a"
     16 │                          "a . a"; }
@@ -165,7 +166,7 @@ invalid.css:17:35 lint/correctness/noInvalidGridAreas ━━━━━━━━�
 ```
 invalid.css:21:35 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Inconsistent cell count in grid areas are not allowed.
+  × Inconsistent cell count in grid areas are not allowed.
   
     19 │                          "q q , q"; }
     20 │ a { grid-template-areas: "s s t t"
@@ -184,7 +185,7 @@ invalid.css:21:35 lint/correctness/noInvalidGridAreas ━━━━━━━━�
 ```
 invalid.css:24:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate filled in rectangle are not allowed.
+  × Duplicate filled in rectangle are not allowed.
   
     22 │                          "u v v"
     23 │                          "u u v v"; }
@@ -203,7 +204,7 @@ invalid.css:24:33 lint/correctness/noInvalidGridAreas ━━━━━━━━�
 ```
 invalid.css:27:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate filled in rectangle are not allowed.
+  × Duplicate filled in rectangle are not allowed.
   
     25 │                          "b z a"; }
     26 │ a { grid-template-areas: "a a a"

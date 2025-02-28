@@ -586,7 +586,6 @@ impl ParseRecovery for BracketedValueListRecovery {
 /// preserved. If parsing fails, this function rewinds the parser back to
 /// where it was before attempting the parse and the `Err` value is returned.
 #[must_use = "The result of try_parse contains information about whether the parse succeeded and should not be ignored"]
-#[allow(dead_code)]
 pub(crate) fn try_parse<T, E>(
     p: &mut CssParser,
     func: impl FnOnce(&mut CssParser) -> Result<T, E>,

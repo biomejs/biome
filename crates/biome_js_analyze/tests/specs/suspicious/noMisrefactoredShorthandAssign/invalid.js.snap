@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 a += (a + b)
 
 object.a += object.a + b;
@@ -45,7 +46,7 @@ a ^= b ^ a
 ```
 invalid.js:1:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
   > 1 │ a += (a + b)
       │ ^^^^^^^^^^^^
@@ -64,7 +65,7 @@ invalid.js:1:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:3:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
     1 │ a += (a + b)
     2 │ 
@@ -85,7 +86,7 @@ invalid.js:3:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:5:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
     3 │ object.a += object.a + b;
     4 │ 
@@ -106,7 +107,7 @@ invalid.js:5:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:7:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
     5 │ a -= a - b
     6 │ 
@@ -127,7 +128,7 @@ invalid.js:7:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:9:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
      7 │ a *= a * b
      8 │ 
@@ -148,7 +149,7 @@ invalid.js:9:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:11:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
      9 │ a *= b * a
     10 │ 
@@ -169,7 +170,7 @@ invalid.js:11:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:13:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
     11 │ a /= a / b
     12 │ 
@@ -190,7 +191,7 @@ invalid.js:13:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:15:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
     13 │ a %= a % b
     14 │ 
@@ -211,7 +212,7 @@ invalid.js:15:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:17:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
     15 │ a **= a ** b
     16 │ 
@@ -232,7 +233,7 @@ invalid.js:17:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:19:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
     17 │ a >>= a >> b
     18 │ 
@@ -253,7 +254,7 @@ invalid.js:19:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:21:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
     19 │ a <<= a << b
     20 │ 
@@ -274,7 +275,7 @@ invalid.js:21:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:23:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
     21 │ a >>>= a >>> b
     22 │ 
@@ -295,7 +296,7 @@ invalid.js:23:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:25:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
     23 │ a &= a & b
     24 │ 
@@ -316,7 +317,7 @@ invalid.js:25:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:27:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
     25 │ a &= b & a
     26 │ 
@@ -337,7 +338,7 @@ invalid.js:27:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:29:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
     27 │ a |= a | b
     28 │ 
@@ -358,7 +359,7 @@ invalid.js:29:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:31:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
     29 │ a |= b | a
     30 │ 
@@ -379,7 +380,7 @@ invalid.js:31:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
 ```
 invalid.js:33:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable appears on both sides of an assignment operation.
+  × Variable appears on both sides of an assignment operation.
   
     31 │ a ^= a ^ b
     32 │ 
@@ -395,5 +396,3 @@ invalid.js:33:1 lint/suspicious/noMisrefactoredShorthandAssign  FIXABLE  ━━�
        │       ----
 
 ```
-
-

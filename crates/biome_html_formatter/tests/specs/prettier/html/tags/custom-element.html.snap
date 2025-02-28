@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/tags/custom-element.html
+---
+# Input
+
+```html
+<app-foo></app-foo>
+<app-bar></app-bar>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,2 +1,2 @@
+-<app-foo></app-foo>
+-<app-bar></app-bar>
++<app -foo></app-foo>
++<app -bar></app-bar>
+```
+
+# Output
+
+```html
+<app -foo></app-foo>
+<app -bar></app-bar>
+```

@@ -1,0 +1,9 @@
+{
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "all": true
+      }
+    }
+  }
+}

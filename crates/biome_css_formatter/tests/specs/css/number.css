@@ -18,3 +18,7 @@ sup {
 	margin-right: calc(var(--bs-gutter-x) * -.5);
 	margin-left: calc(var(--bs-gutter-x) * -.5);
 }
+
+.bar {
+	opacity: 1.0;
+}

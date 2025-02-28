@@ -1,11 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 86
 expression: invalid.js
 snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // head
 /**
  * head comment
@@ -29,7 +28,7 @@ function main() {
 ```
 invalid.js:5:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Usage of the `process` global is discouraged.
+  i Usage of the `process` global is discouraged.
   
     3 │  * head comment
     4 │  */
@@ -54,7 +53,7 @@ invalid.js:5:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:7:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Usage of the `process` global is discouraged.
+  i Usage of the `process` global is discouraged.
   
     5 │ const c = process.env;
     6 │ 
@@ -79,7 +78,7 @@ invalid.js:7:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:9:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Usage of the `process` global is discouraged.
+  i Usage of the `process` global is discouraged.
   
      7 │ const d = process;
      8 │ 
@@ -104,7 +103,7 @@ invalid.js:9:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:12:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Usage of the `process` global is discouraged.
+  i Usage of the `process` global is discouraged.
   
     11 │ // A copyright notice
   > 12 │ const f = process.env;
@@ -128,7 +127,7 @@ invalid.js:12:11 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━
 ```
 invalid.js:15:19 lint/nursery/noProcessGlobal  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Usage of the `process` global is discouraged.
+  i Usage of the `process` global is discouraged.
   
     14 │ function main() {
   > 15 │     const local = process.env;

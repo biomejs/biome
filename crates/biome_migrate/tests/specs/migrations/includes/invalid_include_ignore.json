@@ -1,0 +1,27 @@
+{
+  "files": {
+    "include": ["./src", "*.js"],
+    "ignore": ["tests", "*.test.js"]
+  },
+  "formatter": {
+    "include": ["src/**/*.js"],
+    "ignore": ["*.gen.js"]
+  },
+  "assist": {
+    "include": ["src/**/*.js"],
+    "ignore": ["*.gen.js"]
+  },
+  "linter": {
+    "include": ["src/**/*.js"],
+    "ignore": ["*.gen.js"]
+  },
+  "overrides": [
+    {
+      "include": ["*.json"],
+      "ignore": ["*.gen.json"],
+      "linter": {
+        "rules": {}
+      }
+    }
+  ]
+}

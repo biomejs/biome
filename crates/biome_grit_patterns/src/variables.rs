@@ -16,7 +16,7 @@ impl VariableLocations {
         Self(locations)
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub(crate) fn compiled_vars(&self) -> Vec<VariableBinding> {
         let mut variables = Vec::new();
         for (i, scope) in self.0.iter().enumerate() {
@@ -45,7 +45,7 @@ impl VariableLocations {
 /// the variable contents.
 pub(crate) struct VarRegistry<'a>(VarRegistryVector<'a>);
 
-impl<'a> VarRegistry<'a> {
+impl VarRegistry<'_> {
     pub(crate) fn from_locations(locations: &VariableLocations) -> Self {
         let vector = locations
             .0

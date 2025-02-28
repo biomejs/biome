@@ -1,6 +1,7 @@
 ---
 source: crates/biome_graphql_analyze/tests/spec_tests.rs
 expression: invalid.graphql
+snapshot_kind: text
 ---
 # Input
 ```graphql
@@ -38,7 +39,7 @@ query test {
 ```
 invalid.graphql:1:36 lint/nursery/noDuplicatedFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Variable `v` defined multiple times.
+  i Variable `v` defined multiple times.
   
   > 1 │ query test($v: String, $t: String, $v: String) {
       │                                    ^^^^^^^^^^
@@ -53,7 +54,7 @@ invalid.graphql:1:36 lint/nursery/noDuplicatedFields ━━━━━━━━━
 ```
 invalid.graphql:6:48 lint/nursery/noDuplicatedFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Argument `first` defined multiple times.
+  i Argument `first` defined multiple times.
   
     5 │ query test {
   > 6 │   users(first: 100, after: 10, filter: "test", first: 50) {
@@ -69,7 +70,7 @@ invalid.graphql:6:48 lint/nursery/noDuplicatedFields ━━━━━━━━━
 ```
 invalid.graphql:16:5 lint/nursery/noDuplicatedFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Field `name` defined multiple times.
+  i Field `name` defined multiple times.
   
     14 │     name
     15 │     email
@@ -86,7 +87,7 @@ invalid.graphql:16:5 lint/nursery/noDuplicatedFields ━━━━━━━━━
 ```
 invalid.graphql:25:5 lint/nursery/noDuplicatedFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Field `email` defined multiple times.
+  i Field `email` defined multiple times.
   
     23 │     name
     24 │     email

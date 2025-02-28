@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidFunctionParameter.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function f(_snake_case, CONSTANT_CASE) {}
 ```
 
@@ -11,7 +12,7 @@ function f(_snake_case, CONSTANT_CASE) {}
 ```
 invalidFunctionParameter.js:1:13 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function parameter name part should be in camelCase or PascalCase.
+  i This function parameter name part should be in camelCase or PascalCase.
   
   > 1 │ function f(_snake_case, CONSTANT_CASE) {}
       │             ^^^^^^^^^^
@@ -27,15 +28,15 @@ invalidFunctionParameter.js:1:13 lint/style/useNamingConvention  FIXABLE  ━━
 ```
 invalidFunctionParameter.js:1:25 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function parameter name should be in camelCase or PascalCase.
+  i This function parameter name should be in camelCase or PascalCase.
   
   > 1 │ function f(_snake_case, CONSTANT_CASE) {}
       │                         ^^^^^^^^^^^^^
   
-  i Safe fix: Rename this symbol in camelCase.
+  i Safe fix: Rename this symbol in PascalCase.
   
   - function·f(_snake_case,·CONSTANT_CASE)·{}
-  + function·f(_snake_case,·constantCase)·{}
+  + function·f(_snake_case,·ConstantCase)·{}
   
 
 ```

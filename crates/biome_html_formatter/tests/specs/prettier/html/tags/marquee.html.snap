@@ -1,0 +1,57 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/tags/marquee.html
+---
+# Input
+
+```html
+<marquee>This text will scroll from right to left</marquee>
+
+<marquee direction="up">This text will scroll from bottom to top</marquee>
+
+<marquee
+  direction="down"
+  width="250"
+  height="200"
+  behavior="alternate"
+  style="border:solid">
+  <marquee behavior="alternate"> This text will bounce </marquee>
+</marquee>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -7,7 +7,7 @@
+   width="250"
+   height="200"
+   behavior="alternate"
+-  style="border: solid"
++  style="border:solid"
+ >
+-  <marquee behavior="alternate">This text will bounce</marquee>
++  <marquee behavior="alternate">This text will bounce </marquee>
+ </marquee>
+```
+
+# Output
+
+```html
+<marquee>This text will scroll from right to left</marquee>
+
+<marquee direction="up">This text will scroll from bottom to top</marquee>
+
+<marquee
+  direction="down"
+  width="250"
+  height="200"
+  behavior="alternate"
+  style="border:solid"
+>
+  <marquee behavior="alternate">This text will bounce </marquee>
+</marquee>
+```

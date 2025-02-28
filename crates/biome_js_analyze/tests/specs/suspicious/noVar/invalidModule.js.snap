@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidModule.js
+snapshot_kind: text
+---
+# Input
+```js
+var x = 1;
+export const y = x;
+```
+
+# Diagnostics
+```
+invalidModule.js:1:1 lint/suspicious/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use let or const instead of var.
+  
+  > 1 │ var x = 1;
+      │ ^^^^^^^^^
+    2 │ export const y = x;
+  
+  i A variable declared with var is accessible in the whole module. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
+  
+  i See MDN web docs for more details.
+  
+  i Unsafe fix: Use 'const' instead.
+  
+    1   │ - var·x·=·1;
+      1 │ + const·x·=·1;
+    2 2 │   export const y = x;
+  
+
+```

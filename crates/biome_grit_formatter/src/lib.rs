@@ -119,7 +119,6 @@ where
     }
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, Default)]
 pub struct GritFormatLanguage {
     options: GritFormatOptions,
@@ -186,7 +185,10 @@ impl<T, C> AsFormat<C> for &T
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = T::Format<'a> where Self: 'a;
+    type Format<'a>
+        = T::Format<'a>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         AsFormat::format(&**self)
@@ -200,7 +202,10 @@ impl<T, C> AsFormat<C> for biome_rowan::SyntaxResult<T>
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = biome_rowan::SyntaxResult<T::Format<'a>> where Self: 'a;
+    type Format<'a>
+        = biome_rowan::SyntaxResult<T::Format<'a>>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         match self {
@@ -217,7 +222,10 @@ impl<T, C> AsFormat<C> for Option<T>
 where
     T: AsFormat<C>,
 {
-    type Format<'a> = Option<T::Format<'a>> where Self: 'a;
+    type Format<'a>
+        = Option<T::Format<'a>>
+    where
+        Self: 'a;
 
     fn format(&self) -> Self::Format<'_> {
         self.as_ref().map(|value| value.format())
@@ -227,7 +235,6 @@ where
 /// Used to convert this object into an object that can be formatted.
 ///
 /// The difference to [AsFormat] is that this trait takes ownership of `self`.
-#[allow(dead_code)]
 pub(crate) trait IntoFormat<Context> {
     type Format: biome_formatter::Format<Context>;
 
@@ -260,7 +267,7 @@ where
 }
 
 /// Formatting specific [Iterator] extensions
-#[allow(dead_code)]
+#[expect(dead_code)]
 pub(crate) trait FormattedIterExt {
     /// Converts every item to an object that knows how to format it.
     fn formatted<Context>(self) -> FormattedIter<Self, Self::Item, Context>
@@ -277,7 +284,6 @@ pub(crate) trait FormattedIterExt {
 
 impl<I> FormattedIterExt for I where I: std::iter::Iterator {}
 
-#[allow(dead_code)]
 pub(crate) struct FormattedIter<Iter, Item, Context>
 where
     Iter: Iterator<Item = Item>,

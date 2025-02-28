@@ -16,7 +16,7 @@ impl Reporter for GithubReporter {
 }
 pub(crate) struct GithubReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
 
-impl<'a> ReporterVisitor for GithubReporterVisitor<'a> {
+impl ReporterVisitor for GithubReporterVisitor<'_> {
     fn report_summary(
         &mut self,
         _execution: &Execution,

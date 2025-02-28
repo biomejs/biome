@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-block-scoped-func-decl.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 // ensure we are in esm
 export {}
 
@@ -12,5 +13,3 @@ export {}
 }
 
 ```
-
-

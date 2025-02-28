@@ -1,7 +1,7 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-#![allow(clippy::enum_variant_names)]
-#![allow(clippy::match_like_matches_macro)]
+#![allow(dead_code)]
+#![allow(unused)]
 use crate::{
     macros::map_syntax_node,
     MarkdownLanguage as Language, MarkdownSyntaxElement as SyntaxElement,
@@ -10,18 +10,15 @@ use crate::{
     MarkdownSyntaxList as SyntaxList, MarkdownSyntaxNode as SyntaxNode,
     MarkdownSyntaxToken as SyntaxToken,
 };
-use biome_rowan::{support, AstNode, RawSyntaxKind, SyntaxKindSet, SyntaxResult};
-#[allow(unused)]
 use biome_rowan::{
-    AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
-    AstSeparatedListNodesIterator,
+    support, AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
+    AstSeparatedListNodesIterator, RawSyntaxKind, SyntaxKindSet, SyntaxResult,
 };
 use serde::ser::SerializeSeq;
 use serde::{Serialize, Serializer};
 use std::fmt::{Debug, Formatter};
 #[doc = r" Sentinel value indicating a missing element in a dynamic node, where"]
 #[doc = r" the slots are not statically known."]
-#[allow(dead_code)]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdBulletListItem {
@@ -1010,9 +1007,18 @@ impl AstNode for MdBulletListItem {
 }
 impl std::fmt::Debug for MdBulletListItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdBulletListItem")
-            .field("md_bullet_list", &self.md_bullet_list())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdBulletListItem")
+                .field("md_bullet_list", &self.md_bullet_list())
+                .finish()
+        } else {
+            f.debug_struct("MdBulletListItem").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdBulletListItem> for SyntaxNode {
@@ -1048,14 +1054,23 @@ impl AstNode for MdDocument {
 }
 impl std::fmt::Debug for MdDocument {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdDocument")
-            .field(
-                "bom_token",
-                &support::DebugOptionalElement(self.bom_token()),
-            )
-            .field("value", &self.value())
-            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdDocument")
+                .field(
+                    "bom_token",
+                    &support::DebugOptionalElement(self.bom_token()),
+                )
+                .field("value", &self.value())
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("MdDocument").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdDocument> for SyntaxNode {
@@ -1091,9 +1106,18 @@ impl AstNode for MdFencedCodeBlock {
 }
 impl std::fmt::Debug for MdFencedCodeBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdFencedCodeBlock")
-            .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdFencedCodeBlock")
+                .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
+                .finish()
+        } else {
+            f.debug_struct("MdFencedCodeBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdFencedCodeBlock> for SyntaxNode {
@@ -1129,12 +1153,21 @@ impl AstNode for MdHardLine {
 }
 impl std::fmt::Debug for MdHardLine {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdHardLine")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdHardLine")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdHardLine").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdHardLine> for SyntaxNode {
@@ -1170,9 +1203,18 @@ impl AstNode for MdHash {
 }
 impl std::fmt::Debug for MdHash {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdHash")
-            .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdHash")
+                .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
+                .finish()
+        } else {
+            f.debug_struct("MdHash").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdHash> for SyntaxNode {
@@ -1208,14 +1250,23 @@ impl AstNode for MdHeader {
 }
 impl std::fmt::Debug for MdHeader {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdHeader")
-            .field("before", &self.before())
-            .field(
-                "md_paragraph",
-                &support::DebugOptionalElement(self.md_paragraph()),
-            )
-            .field("after", &self.after())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdHeader")
+                .field("before", &self.before())
+                .field(
+                    "md_paragraph",
+                    &support::DebugOptionalElement(self.md_paragraph()),
+                )
+                .field("after", &self.after())
+                .finish()
+        } else {
+            f.debug_struct("MdHeader").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdHeader> for SyntaxNode {
@@ -1251,9 +1302,18 @@ impl AstNode for MdHtmlBlock {
 }
 impl std::fmt::Debug for MdHtmlBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdHtmlBlock")
-            .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdHtmlBlock")
+                .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
+                .finish()
+        } else {
+            f.debug_struct("MdHtmlBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdHtmlBlock> for SyntaxNode {
@@ -1289,12 +1349,21 @@ impl AstNode for MdIndent {
 }
 impl std::fmt::Debug for MdIndent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdIndent")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdIndent")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdIndent").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdIndent> for SyntaxNode {
@@ -1330,9 +1399,18 @@ impl AstNode for MdIndentCodeBlock {
 }
 impl std::fmt::Debug for MdIndentCodeBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdIndentCodeBlock")
-            .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdIndentCodeBlock")
+                .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
+                .finish()
+        } else {
+            f.debug_struct("MdIndentCodeBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdIndentCodeBlock> for SyntaxNode {
@@ -1368,9 +1446,18 @@ impl AstNode for MdInlineCode {
 }
 impl std::fmt::Debug for MdInlineCode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdInlineCode")
-            .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdInlineCode")
+                .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
+                .finish()
+        } else {
+            f.debug_struct("MdInlineCode").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdInlineCode> for SyntaxNode {
@@ -1406,9 +1493,18 @@ impl AstNode for MdInlineEmphasis {
 }
 impl std::fmt::Debug for MdInlineEmphasis {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdInlineEmphasis")
-            .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdInlineEmphasis")
+                .field("md_textual", &support::DebugSyntaxResult(self.md_textual()))
+                .finish()
+        } else {
+            f.debug_struct("MdInlineEmphasis").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdInlineEmphasis> for SyntaxNode {
@@ -1444,11 +1540,20 @@ impl AstNode for MdInlineImage {
 }
 impl std::fmt::Debug for MdInlineImage {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdInlineImage")
-            .field("alt", &support::DebugSyntaxResult(self.alt()))
-            .field("src", &support::DebugSyntaxResult(self.src()))
-            .field("title", &support::DebugOptionalElement(self.title()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdInlineImage")
+                .field("alt", &support::DebugSyntaxResult(self.alt()))
+                .field("src", &support::DebugSyntaxResult(self.src()))
+                .field("title", &support::DebugOptionalElement(self.title()))
+                .finish()
+        } else {
+            f.debug_struct("MdInlineImage").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdInlineImage> for SyntaxNode {
@@ -1484,11 +1589,20 @@ impl AstNode for MdInlineLink {
 }
 impl std::fmt::Debug for MdInlineLink {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdInlineLink")
-            .field("label", &support::DebugSyntaxResult(self.label()))
-            .field("url", &support::DebugSyntaxResult(self.url()))
-            .field("title", &support::DebugOptionalElement(self.title()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdInlineLink")
+                .field("label", &support::DebugSyntaxResult(self.label()))
+                .field("url", &support::DebugSyntaxResult(self.url()))
+                .field("title", &support::DebugOptionalElement(self.title()))
+                .finish()
+        } else {
+            f.debug_struct("MdInlineLink").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdInlineLink> for SyntaxNode {
@@ -1524,11 +1638,20 @@ impl AstNode for MdLinkBlock {
 }
 impl std::fmt::Debug for MdLinkBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdLinkBlock")
-            .field("label", &support::DebugSyntaxResult(self.label()))
-            .field("url", &support::DebugSyntaxResult(self.url()))
-            .field("title", &support::DebugOptionalElement(self.title()))
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdLinkBlock")
+                .field("label", &support::DebugSyntaxResult(self.label()))
+                .field("url", &support::DebugSyntaxResult(self.url()))
+                .field("title", &support::DebugOptionalElement(self.title()))
+                .finish()
+        } else {
+            f.debug_struct("MdLinkBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdLinkBlock> for SyntaxNode {
@@ -1564,9 +1687,18 @@ impl AstNode for MdOrderListItem {
 }
 impl std::fmt::Debug for MdOrderListItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdOrderListItem")
-            .field("md_bullet_list", &self.md_bullet_list())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdOrderListItem")
+                .field("md_bullet_list", &self.md_bullet_list())
+                .finish()
+        } else {
+            f.debug_struct("MdOrderListItem").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdOrderListItem> for SyntaxNode {
@@ -1602,9 +1734,18 @@ impl AstNode for MdParagraph {
 }
 impl std::fmt::Debug for MdParagraph {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdParagraph")
-            .field("md_paragraph_item_list", &self.md_paragraph_item_list())
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdParagraph")
+                .field("md_paragraph_item_list", &self.md_paragraph_item_list())
+                .finish()
+        } else {
+            f.debug_struct("MdParagraph").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdParagraph> for SyntaxNode {
@@ -1640,12 +1781,21 @@ impl AstNode for MdQuote {
 }
 impl std::fmt::Debug for MdQuote {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdQuote")
-            .field(
-                "any_md_block",
-                &support::DebugSyntaxResult(self.any_md_block()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdQuote")
+                .field(
+                    "any_md_block",
+                    &support::DebugSyntaxResult(self.any_md_block()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdQuote").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdQuote> for SyntaxNode {
@@ -1681,12 +1831,21 @@ impl AstNode for MdSetextHeader {
 }
 impl std::fmt::Debug for MdSetextHeader {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdSetextHeader")
-            .field(
-                "md_paragraph",
-                &support::DebugSyntaxResult(self.md_paragraph()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdSetextHeader")
+                .field(
+                    "md_paragraph",
+                    &support::DebugSyntaxResult(self.md_paragraph()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdSetextHeader").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdSetextHeader> for SyntaxNode {
@@ -1722,12 +1881,21 @@ impl AstNode for MdSoftBreak {
 }
 impl std::fmt::Debug for MdSoftBreak {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdSoftBreak")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdSoftBreak")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdSoftBreak").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdSoftBreak> for SyntaxNode {
@@ -1763,12 +1931,21 @@ impl AstNode for MdTextual {
 }
 impl std::fmt::Debug for MdTextual {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdTextual")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdTextual")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdTextual").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdTextual> for SyntaxNode {
@@ -1804,12 +1981,21 @@ impl AstNode for MdThematicBreakBlock {
 }
 impl std::fmt::Debug for MdThematicBreakBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdThematicBreakBlock")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdThematicBreakBlock")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdThematicBreakBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
     }
 }
 impl From<MdThematicBreakBlock> for SyntaxNode {
@@ -2458,6 +2644,7 @@ impl From<MdBogus> for SyntaxElement {
         n.syntax.into()
     }
 }
+biome_rowan::declare_node_union! { pub AnyMdBogusNode = MdBogus }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct MdBlockList {
     syntax_list: SyntaxList,

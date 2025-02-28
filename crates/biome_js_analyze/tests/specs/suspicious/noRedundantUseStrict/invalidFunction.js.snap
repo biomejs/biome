@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidFunction.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function test() {
 	"use strict";
 	"use strict";
@@ -15,7 +16,7 @@ function test() {
 ```
 invalidFunction.js:2:2 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Redundant use strict directive.
+  × Redundant use strict directive.
   
     1 │ function test() {
   > 2 │ 	"use strict";
@@ -38,7 +39,7 @@ invalidFunction.js:2:2 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━�
 ```
 invalidFunction.js:3:2 lint/suspicious/noRedundantUseStrict  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Redundant use strict directive.
+  × Redundant use strict directive.
   
     1 │ function test() {
     2 │ 	"use strict";

@@ -1,0 +1,16 @@
+---
+source: crates/biome_package/tests/manifest_spec_tests.rs
+expression: license_not_string.json
+---
+license_not_string.json:2:13 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × license has an incorrect type, expected a string, but received a boolean.
+  
+    1 │ {
+  > 2 │ 	"license": false
+      │ 	           ^^^^^
+    3 │ }
+    4 │ 
+  
+
+

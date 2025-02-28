@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 import x from "y";
 x = 1;
 
@@ -44,7 +45,7 @@ yyy = 4;
 ```
 invalid.js:2:1 lint/suspicious/noImportAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The imported variable x is read-only
+  × The imported variable x is read-only
   
     1 │ import x from "y";
   > 2 │ x = 1;
@@ -67,7 +68,7 @@ invalid.js:2:1 lint/suspicious/noImportAssign ━━━━━━━━━━━�
 ```
 invalid.js:5:2 lint/suspicious/noImportAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The imported variable y is read-only
+  × The imported variable y is read-only
   
     4 │ import y from "y";
   > 5 │ [y] = 1;
@@ -92,7 +93,7 @@ invalid.js:5:2 lint/suspicious/noImportAssign ━━━━━━━━━━━�
 ```
 invalid.js:8:4 lint/suspicious/noImportAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The imported variable z is read-only
+  × The imported variable z is read-only
   
      7 │ import z from "y";
    > 8 │ ({ z } = 1);
@@ -117,7 +118,7 @@ invalid.js:8:4 lint/suspicious/noImportAssign ━━━━━━━━━━━�
 ```
 invalid.js:11:5 lint/suspicious/noImportAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The imported variable a is read-only
+  × The imported variable a is read-only
   
     10 │ import a from "y";
   > 11 │ [...a] = 1;
@@ -142,7 +143,7 @@ invalid.js:11:5 lint/suspicious/noImportAssign ━━━━━━━━━━━
 ```
 invalid.js:14:7 lint/suspicious/noImportAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The imported variable b is read-only
+  × The imported variable b is read-only
   
     13 │ import b from "y";
   > 14 │ ({ ...b } = 1);
@@ -167,7 +168,7 @@ invalid.js:14:7 lint/suspicious/noImportAssign ━━━━━━━━━━━
 ```
 invalid.js:17:6 lint/suspicious/noImportAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The imported variable c is read-only
+  × The imported variable c is read-only
   
     16 │ import c from "y";
   > 17 │ for (c in y) {};
@@ -192,7 +193,7 @@ invalid.js:17:6 lint/suspicious/noImportAssign ━━━━━━━━━━━
 ```
 invalid.js:20:1 lint/suspicious/noImportAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The imported variable d is read-only
+  × The imported variable d is read-only
   
     19 │ import d from "y";
   > 20 │ d += 1;
@@ -217,7 +218,7 @@ invalid.js:20:1 lint/suspicious/noImportAssign ━━━━━━━━━━━
 ```
 invalid.js:23:1 lint/suspicious/noImportAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The imported variable e is read-only
+  × The imported variable e is read-only
   
     22 │ import * as e from "y";
   > 23 │ e = 1;
@@ -242,7 +243,7 @@ invalid.js:23:1 lint/suspicious/noImportAssign ━━━━━━━━━━━
 ```
 invalid.js:26:1 lint/suspicious/noImportAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The imported variable f is read-only
+  × The imported variable f is read-only
   
     25 │ import { f } from "y";
   > 26 │ f = 1;
@@ -267,7 +268,7 @@ invalid.js:26:1 lint/suspicious/noImportAssign ━━━━━━━━━━━
 ```
 invalid.js:27:1 lint/suspicious/noImportAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The imported variable f is read-only
+  × The imported variable f is read-only
   
     25 │ import { f } from "y";
     26 │ f = 1;
@@ -293,7 +294,7 @@ invalid.js:27:1 lint/suspicious/noImportAssign ━━━━━━━━━━━
 ```
 invalid.js:30:1 lint/suspicious/noImportAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The imported variable xx is read-only
+  × The imported variable xx is read-only
   
     29 │ import {xx} from 'y';
   > 30 │ xx=1;
@@ -318,7 +319,7 @@ invalid.js:30:1 lint/suspicious/noImportAssign ━━━━━━━━━━━
 ```
 invalid.js:33:1 lint/suspicious/noImportAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The imported variable xxx is read-only
+  × The imported variable xxx is read-only
   
     32 │ import xxx, * as yyy from "d"
   > 33 │ xxx = 4;
@@ -342,7 +343,7 @@ invalid.js:33:1 lint/suspicious/noImportAssign ━━━━━━━━━━━
 ```
 invalid.js:34:1 lint/suspicious/noImportAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The imported variable yyy is read-only
+  × The imported variable yyy is read-only
   
     32 │ import xxx, * as yyy from "d"
     33 │ xxx = 4;
@@ -362,5 +363,3 @@ invalid.js:34:1 lint/suspicious/noImportAssign ━━━━━━━━━━━
   
 
 ```
-
-

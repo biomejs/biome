@@ -21,7 +21,7 @@ snapshot_kind: text
 ```
 issue_4553.jsx:3:9 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid using unnecessary Fragment.
+  i This fragment is unnecessary.
   
     1 │ <Suspense
     2 │     fallback={

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: excessiveNesting.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function excessiveNesting() {
     function nested1() {
         function nested2() {
@@ -38,7 +39,7 @@ function excessiveNesting() {
 ```
 excessiveNesting.js:10:46 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Excessive complexity of 255 detected (max: 15).
+  i Excessive complexity of 255 detected (max: 15).
   
      8 │                             function nested7() {
      9 │                                 function nested8() {
@@ -51,5 +52,3 @@ excessiveNesting.js:10:46 lint/complexity/noExcessiveCognitiveComplexity ━━�
   
 
 ```
-
-

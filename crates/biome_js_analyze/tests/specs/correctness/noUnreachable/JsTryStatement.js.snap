@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsTryStatement.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 function JsTryStatement1() {
     try {
         tryBlock();
@@ -50,7 +51,7 @@ function JsTryStatement4() {
 ```
 JsTryStatement.js:10:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
      8 │     }
      9 │ 
@@ -83,7 +84,7 @@ JsTryStatement.js:10:5 lint/correctness/noUnreachable ━━━━━━━━�
 ```
 JsTryStatement.js:27:5 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code will never be reached ...
+  × This code will never be reached ...
   
     25 │     return;
     26 │ 
@@ -111,7 +112,7 @@ JsTryStatement.js:27:5 lint/correctness/noUnreachable ━━━━━━━━�
 ```
 JsTryStatement.js:36:19 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This code is unreachable
+  × This code is unreachable
   
     34 │ function JsTryStatement4() {
     35 │     try {
@@ -125,5 +126,3 @@ JsTryStatement.js:36:19 lint/correctness/noUnreachable ━━━━━━━━�
   
 
 ```
-
-

@@ -1,9 +1,10 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
+snapshot_kind: text
 ---
 # Input
-```jsx
+```js
 var a = 1;
 switch (a) {
 	case 1:
@@ -198,7 +199,7 @@ switch (a) {
 ```
 invalid.js:5:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     3 │ 	case 1:
     4 │ 		break;
@@ -222,7 +223,7 @@ invalid.js:5:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━
 ```
 invalid.js:16:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     14 │ 	case "1":
     15 │ 		break;
@@ -246,7 +247,7 @@ invalid.js:16:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:28:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     26 │ 	case one:
     27 │ 		break;
@@ -270,7 +271,7 @@ invalid.js:28:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:40:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     38 │ 	case p.p.p1:
     39 │ 		break;
@@ -294,7 +295,7 @@ invalid.js:40:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:52:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     50 │ 	case f(true).p1:
     51 │ 		break;
@@ -318,7 +319,7 @@ invalid.js:52:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:64:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     62 │ 	case f(a + 1).p1:
     63 │ 		break;
@@ -342,7 +343,7 @@ invalid.js:64:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:76:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     74 │ 	case f(a === 1 ? 2 : 3).p1:
     75 │ 		break;
@@ -366,7 +367,7 @@ invalid.js:76:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:88:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     86 │ 	case f1().p1:
     87 │ 		break;
@@ -390,7 +391,7 @@ invalid.js:88:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:97:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     95 │ 	case [1, 2].toString():
     96 │ 		break;
@@ -414,7 +415,7 @@ invalid.js:97:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:104:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     102 │ switch (a) {
     103 │ 	case a:
@@ -438,7 +439,7 @@ invalid.js:104:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:111:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     109 │ 	case b:
     110 │ 		break;
@@ -462,7 +463,7 @@ invalid.js:111:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:115:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     113 │ 	case c:
     114 │ 		break;
@@ -486,7 +487,7 @@ invalid.js:115:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:123:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     121 │ 	case p.p.p1:
     122 │ 		break;
@@ -510,7 +511,7 @@ invalid.js:123:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:134:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     132 │ 	p.p.p1:
     133 │ 		break;
@@ -534,7 +535,7 @@ invalid.js:134:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:144:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     142 │ 	case p.p /* comment */.p1:
     143 │ 		break;
@@ -558,7 +559,7 @@ invalid.js:144:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:154:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     152 │ 	case p.p.p1:
     153 │ 		break;
@@ -582,7 +583,7 @@ invalid.js:154:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:157:2 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     155 │ 		break;
     156 │ 	case /* comment */
@@ -606,7 +607,7 @@ invalid.js:157:2 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:169:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     167 │ 	case f(a + 1).p1:
     168 │ 		break;
@@ -630,7 +631,7 @@ invalid.js:169:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
 ```
 invalid.js:183:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate case label.
+  × Duplicate case label.
   
     181 │ 	).p1:
     182 │ 		break;
@@ -653,5 +654,3 @@ invalid.js:183:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
   
 
 ```
-
-

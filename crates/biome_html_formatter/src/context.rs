@@ -1,7 +1,8 @@
-use std::{fmt, rc::Rc};
+use std::{fmt, rc::Rc, str::FromStr};
 
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    printer::PrinterOptions, AttributePosition, BracketSpacing, CstFormatContext, FormatContext,
+    printer::PrinterOptions, AttributePosition, BracketSameLine, CstFormatContext, FormatContext,
     FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, TransformSourceMap,
 };
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
@@ -24,6 +25,22 @@ pub struct HtmlFormatOptions {
 
     /// Attribute position style. By default auto.
     attribute_position: AttributePosition,
+
+    /// Put the `>` of a multi-line HTML or JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+    ///
+    /// See: <https://prettier.io/docs/en/options.html#bracket-line>
+    bracket_same_line: BracketSameLine,
+
+    /// Whether to consider whitespace as significant. Default is `css`.
+    ///
+    /// Whitespace inside HTML elements can sometimes affect the rendering of the page.
+    /// See:
+    /// - <https://prettier.io/docs/en/options.html#html-whitespace-sensitivity>
+    /// - <https://prettier.io/blog/2018/11/07/1.15.0#whitespace-sensitive-formatting>
+    whitespace_sensitivity: WhitespaceSensitivity,
+
+    /// Whether to indent the content of `<script>` and `<style>` tags. Default is `false`.
+    indent_script_and_style: IndentScriptAndStyle,
 }
 
 impl HtmlFormatOptions {
@@ -58,6 +75,27 @@ impl HtmlFormatOptions {
         self
     }
 
+    pub fn with_bracket_same_line(mut self, bracket_same_line: BracketSameLine) -> Self {
+        self.bracket_same_line = bracket_same_line;
+        self
+    }
+
+    pub fn with_whitespace_sensitivity(
+        mut self,
+        whitespace_sensitivity: WhitespaceSensitivity,
+    ) -> Self {
+        self.whitespace_sensitivity = whitespace_sensitivity;
+        self
+    }
+
+    pub fn with_indent_script_and_style(
+        mut self,
+        indent_script_and_style: IndentScriptAndStyle,
+    ) -> Self {
+        self.indent_script_and_style = indent_script_and_style;
+        self
+    }
+
     pub fn indent_style(&self) -> IndentStyle {
         self.indent_style
     }
@@ -76,6 +114,18 @@ impl HtmlFormatOptions {
 
     pub fn attribute_position(&self) -> AttributePosition {
         self.attribute_position
+    }
+
+    pub fn bracket_same_line(&self) -> BracketSameLine {
+        self.bracket_same_line
+    }
+
+    pub fn whitespace_sensitivity(&self) -> WhitespaceSensitivity {
+        self.whitespace_sensitivity
+    }
+
+    pub fn indent_script_and_style(&self) -> IndentScriptAndStyle {
+        self.indent_script_and_style
     }
 
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
@@ -97,6 +147,18 @@ impl HtmlFormatOptions {
     pub fn set_attribute_position(&mut self, attribute_position: AttributePosition) {
         self.attribute_position = attribute_position;
     }
+
+    pub fn set_bracket_same_line(&mut self, bracket_same_line: BracketSameLine) {
+        self.bracket_same_line = bracket_same_line;
+    }
+
+    pub fn set_whitespace_sensitivity(&mut self, whitespace_sensitivity: WhitespaceSensitivity) {
+        self.whitespace_sensitivity = whitespace_sensitivity;
+    }
+
+    pub fn set_indent_script_and_style(&mut self, indent_script_and_style: IndentScriptAndStyle) {
+        self.indent_script_and_style = indent_script_and_style;
+    }
 }
 
 impl fmt::Display for HtmlFormatOptions {
@@ -105,7 +167,15 @@ impl fmt::Display for HtmlFormatOptions {
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
-        writeln!(f, "Attribute Position: {}", self.attribute_position)
+        writeln!(f, "Attribute Position: {}", self.attribute_position)?;
+        writeln!(f, "Bracket same line: {}", self.bracket_same_line)?;
+        writeln!(f, "Whitespace sensitivity: {}", self.whitespace_sensitivity)?;
+        writeln!(
+            f,
+            "Indent script and style: {}",
+            self.indent_script_and_style.value()
+        )?;
+        Ok(())
     }
 }
 
@@ -126,16 +196,133 @@ impl FormatOptions for HtmlFormatOptions {
         self.line_width
     }
 
-    fn attribute_position(&self) -> AttributePosition {
-        self.attribute_position
-    }
-
-    fn bracket_spacing(&self) -> biome_formatter::BracketSpacing {
-        BracketSpacing::default()
-    }
-
     fn as_print_options(&self) -> biome_formatter::prelude::PrinterOptions {
         PrinterOptions::from(self)
+    }
+}
+
+/// Whitespace sensitivity for HTML formatting.
+///
+/// The following two cases won't produce the same output:
+///
+/// |                |      html      |    output    |
+/// | -------------- | :------------: | :----------: |
+/// | with spaces    | `1<b> 2 </b>3` | 1<b> 2 </b>3 |
+/// | without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |
+///
+/// This happens because whitespace is significant in inline elements.
+///
+/// As a consequence of this, the formatter must format blocks that look like this (assume a small line width, <20):
+/// ```html
+/// <span>really long content</span>
+/// ```
+/// as this, where the content hugs the tags:
+/// ```html
+/// <span
+///    >really long content</span
+/// >
+/// ```
+///
+/// Note that this is only necessary for inline elements. Block elements do not have this restriction.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserializable, Merge)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum WhitespaceSensitivity {
+    /// The formatter considers whitespace significant for elements that have an "inline" display style by default in
+    /// browser's user agent style sheets.
+    #[default]
+    Css,
+    /// Leading and trailing whitespace in content is considered significant for all elements.
+    ///
+    /// The formatter should leave at least one whitespace character if whitespace is present.
+    /// Otherwise, if there is no whitespace, it should not add any after `>` or before `<`. In other words, if there's no whitespace, the text content should hug the tags.
+    ///
+    /// Example of text hugging the tags:
+    /// ```html
+    /// <b
+    ///     >content</b
+    /// >
+    /// ```
+    Strict,
+    /// Whitespace is considered insignificant. The formatter is free to remove or add whitespace as it sees fit.
+    Ignore,
+}
+
+impl fmt::Display for WhitespaceSensitivity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Css => std::write!(f, "css"),
+            Self::Strict => std::write!(f, "strict"),
+            Self::Ignore => std::write!(f, "ignore"),
+        }
+    }
+}
+
+impl FromStr for WhitespaceSensitivity {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "css" => Ok(Self::Css),
+            "strict" => Ok(Self::Strict),
+            "ignore" => Ok(Self::Ignore),
+            _ => Err("Value not supported for WhitespaceSensitivity. Supported values are 'css', 'strict' and 'ignore'."),
+        }
+    }
+}
+
+impl WhitespaceSensitivity {
+    pub const fn is_css(&self) -> bool {
+        matches!(self, Self::Css)
+    }
+
+    pub const fn is_strict(&self) -> bool {
+        matches!(self, Self::Strict)
+    }
+}
+
+/// Whether to indent the content of `<script>` and `<style>` tags for HTML-ish templating languages (Vue, Svelte, etc.).
+///
+/// When true, the content of `<script>` and `<style>` tags will be indented one level.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserializable, Merge)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct IndentScriptAndStyle(bool);
+
+impl IndentScriptAndStyle {
+    pub fn new(value: bool) -> Self {
+        Self(value)
+    }
+
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl From<bool> for IndentScriptAndStyle {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
+impl FromStr for IndentScriptAndStyle {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match bool::from_str(s) {
+            Ok(value) => Ok(Self(value)),
+            Err(_) => Err(
+                "Value not supported for IndentScriptAndStyle. Supported values are 'true' and 'false'.",
+            ),
+        }
     }
 }
 

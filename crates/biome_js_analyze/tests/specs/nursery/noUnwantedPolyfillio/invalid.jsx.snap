@@ -1,0 +1,100 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+import {Head} from 'next/document';
+
+export class Blah extends Head {
+    render() {
+      return (
+        <div>
+          <h1>Hello title</h1>
+          <script src='https://polyfill.io/v3/polyfill.min.js?features=WeakSet%2CPromise%2CPromise.prototype.finally%2Ces2015%2Ces5%2Ces6'></script>
+          <script src='https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.copyWithin'></script>
+          <script src='https://polyfill.io/v3/polyfill.min.js?features=Object.fromEntries'></script>
+          <script src='https://polyfill.io/v3/polyfill.min.js?features=AbortController,Object.fromEntries'></script>
+        </div>
+      );
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:8:23 lint/nursery/noUnwantedPolyfillio ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prevent duplicate polyfills from Polyfill.io
+  
+     6 │         <div>
+     7 │           <h1>Hello title</h1>
+   > 8 │           <script src='https://polyfill.io/v3/polyfill.min.js?features=WeakSet%2CPromise%2CPromise.prototype.finally%2Ces2015%2Ces5%2Ces6'></script>
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │           <script src='https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.copyWithin'></script>
+    10 │           <script src='https://polyfill.io/v3/polyfill.min.js?features=Object.fromEntries'></script>
+  
+  i WeakSet, Promise, Promise.prototype.finally, es2015, es5, es6 are already shipped with Next.js.
+  
+  i This unnecessarily increases page weight which can affect loading performance.
+  
+
+```
+
+```
+invalid.jsx:9:23 lint/nursery/noUnwantedPolyfillio ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prevent duplicate polyfills from Polyfill.io
+  
+     7 │           <h1>Hello title</h1>
+     8 │           <script src='https://polyfill.io/v3/polyfill.min.js?features=WeakSet%2CPromise%2CPromise.prototype.finally%2Ces2015%2Ces5%2Ces6'></script>
+   > 9 │           <script src='https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.copyWithin'></script>
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │           <script src='https://polyfill.io/v3/polyfill.min.js?features=Object.fromEntries'></script>
+    11 │           <script src='https://polyfill.io/v3/polyfill.min.js?features=AbortController,Object.fromEntries'></script>
+  
+  i Array.prototype.copyWithin is already shipped with Next.js.
+  
+  i This unnecessarily increases page weight which can affect loading performance.
+  
+
+```
+
+```
+invalid.jsx:10:23 lint/nursery/noUnwantedPolyfillio ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prevent duplicate polyfills from Polyfill.io
+  
+     8 │           <script src='https://polyfill.io/v3/polyfill.min.js?features=WeakSet%2CPromise%2CPromise.prototype.finally%2Ces2015%2Ces5%2Ces6'></script>
+     9 │           <script src='https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.copyWithin'></script>
+  > 10 │           <script src='https://polyfill.io/v3/polyfill.min.js?features=Object.fromEntries'></script>
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │           <script src='https://polyfill.io/v3/polyfill.min.js?features=AbortController,Object.fromEntries'></script>
+    12 │         </div>
+  
+  i Object.fromEntries is already shipped with Next.js.
+  
+  i This unnecessarily increases page weight which can affect loading performance.
+  
+
+```
+
+```
+invalid.jsx:11:23 lint/nursery/noUnwantedPolyfillio ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prevent duplicate polyfills from Polyfill.io
+  
+     9 │           <script src='https://polyfill.io/v3/polyfill.min.js?features=Array.prototype.copyWithin'></script>
+    10 │           <script src='https://polyfill.io/v3/polyfill.min.js?features=Object.fromEntries'></script>
+  > 11 │           <script src='https://polyfill.io/v3/polyfill.min.js?features=AbortController,Object.fromEntries'></script>
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │         </div>
+    13 │       );
+  
+  i Object.fromEntries is already shipped with Next.js.
+  
+  i This unnecessarily increases page weight which can affect loading performance.
+  
+
+```

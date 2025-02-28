@@ -3,6 +3,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, AnyJsxAttributeValue, AnyNumberLikeExpression};
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -51,6 +52,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("no-aria-hidden-on-focusable")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -77,7 +79,7 @@ impl Rule for NoAriaHiddenOnFocusable {
 
                 match tabindex_val {
                     AnyJsxAttributeValue::AnyJsxTag(jsx_tag) => {
-                        let value = jsx_tag.text().parse::<i32>();
+                        let value = jsx_tag.to_trimmed_string().parse::<i32>();
                         if let Ok(num) = value {
                             return (num >= 0).then_some(());
                         }

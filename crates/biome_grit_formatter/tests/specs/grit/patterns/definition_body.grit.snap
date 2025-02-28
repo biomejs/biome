@@ -1,7 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: grit/patterns/definition_body.grit
-snapshot_kind: text
 ---
 # Input
 
@@ -27,5 +26,6 @@ Attribute Position: Auto
 
 ```grit
 pattern console_method_to_info($method) {
-	`console.$method($message)` => `console.info($message)`}
+	`console.$method($message)` => `console.info($message)`
+}
 ```

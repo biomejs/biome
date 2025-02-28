@@ -1,6 +1,5 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-#![allow(clippy::all)]
 #![allow(bad_style, missing_docs, unreachable_pub)]
 #[doc = r" The kind of syntax node, e.g. `IDENT`, `FUNCTION_KW`, or `FOR_STMT`."]
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -160,37 +159,48 @@ pub enum GraphqlSyntaxKind {
 use self::GraphqlSyntaxKind::*;
 impl GraphqlSyntaxKind {
     pub const fn is_punct(self) -> bool {
-        match self {
-            BANG | DOLLAR | AMP | L_PAREN | R_PAREN | DOT3 | COLON | EQ | AT | L_BRACK
-            | R_BRACK | L_CURLY | PIPE | R_CURLY => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            BANG | DOLLAR
+                | AMP
+                | L_PAREN
+                | R_PAREN
+                | DOT3
+                | COLON
+                | EQ
+                | AT
+                | L_BRACK
+                | R_BRACK
+                | L_CURLY
+                | PIPE
+                | R_CURLY
+        )
     }
     pub const fn is_literal(self) -> bool {
-        match self {
-            GRAPHQL_STRING_LITERAL | GRAPHQL_FLOAT_LITERAL | GRAPHQL_INT_LITERAL => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            GRAPHQL_STRING_LITERAL | GRAPHQL_FLOAT_LITERAL | GRAPHQL_INT_LITERAL
+        )
     }
     pub const fn is_list(self) -> bool {
-        match self {
+        matches!(
+            self,
             GRAPHQL_DEFINITION_LIST
-            | GRAPHQL_SELECTION_LIST
-            | GRAPHQL_ARGUMENT_LIST
-            | GRAPHQL_LIST_VALUE_ELEMENT_LIST
-            | GRAPHQL_OBJECT_VALUE_MEMBER_LIST
-            | GRAPHQL_VARIABLE_DEFINITION_LIST
-            | GRAPHQL_DIRECTIVE_LIST
-            | GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION_LIST
-            | GRAPHQL_IMPLEMENTS_INTERFACE_LIST
-            | GRAPHQL_FIELD_DEFINITION_LIST
-            | GRAPHQL_ARGUMENT_DEFINITION_LIST
-            | GRAPHQL_UNION_MEMBER_TYPE_LIST
-            | GRAPHQL_ENUM_VALUE_LIST
-            | GRAPHQL_INPUT_FIELD_LIST
-            | GRAPHQL_DIRECTIVE_LOCATION_LIST => true,
-            _ => false,
-        }
+                | GRAPHQL_SELECTION_LIST
+                | GRAPHQL_ARGUMENT_LIST
+                | GRAPHQL_LIST_VALUE_ELEMENT_LIST
+                | GRAPHQL_OBJECT_VALUE_MEMBER_LIST
+                | GRAPHQL_VARIABLE_DEFINITION_LIST
+                | GRAPHQL_DIRECTIVE_LIST
+                | GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION_LIST
+                | GRAPHQL_IMPLEMENTS_INTERFACE_LIST
+                | GRAPHQL_FIELD_DEFINITION_LIST
+                | GRAPHQL_ARGUMENT_DEFINITION_LIST
+                | GRAPHQL_UNION_MEMBER_TYPE_LIST
+                | GRAPHQL_ENUM_VALUE_LIST
+                | GRAPHQL_INPUT_FIELD_LIST
+                | GRAPHQL_DIRECTIVE_LOCATION_LIST
+        )
     }
     pub fn from_keyword(ident: &str) -> Option<GraphqlSyntaxKind> {
         let kw = match ident {

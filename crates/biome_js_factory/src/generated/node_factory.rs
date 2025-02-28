@@ -1,7 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
 #![allow(clippy::redundant_closure)]
-#![allow(clippy::too_many_arguments)]
 use biome_js_syntax::{
     JsSyntaxElement as SyntaxElement, JsSyntaxNode as SyntaxNode, JsSyntaxToken as SyntaxToken, *,
 };
@@ -1988,7 +1987,7 @@ impl JsImportBuilder {
     }
 }
 pub fn js_import_assertion(
-    assertion_kind_token: SyntaxToken,
+    with_token: SyntaxToken,
     l_curly_token: SyntaxToken,
     assertions: JsImportAssertionEntryList,
     r_curly_token: SyntaxToken,
@@ -1996,7 +1995,7 @@ pub fn js_import_assertion(
     JsImportAssertion::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JS_IMPORT_ASSERTION,
         [
-            Some(SyntaxElement::Token(assertion_kind_token)),
+            Some(SyntaxElement::Token(with_token)),
             Some(SyntaxElement::Token(l_curly_token)),
             Some(SyntaxElement::Node(assertions.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
@@ -5155,7 +5154,7 @@ impl TsImportTypeArgumentsBuilder {
     }
 }
 pub fn ts_import_type_assertion(
-    assertion_kind_token: SyntaxToken,
+    with_token: SyntaxToken,
     colon_token: SyntaxToken,
     l_curly_token: SyntaxToken,
     assertions: JsImportAssertionEntryList,
@@ -5164,7 +5163,7 @@ pub fn ts_import_type_assertion(
     TsImportTypeAssertion::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION,
         [
-            Some(SyntaxElement::Token(assertion_kind_token)),
+            Some(SyntaxElement::Token(with_token)),
             Some(SyntaxElement::Token(colon_token)),
             Some(SyntaxElement::Token(l_curly_token)),
             Some(SyntaxElement::Node(assertions.into_syntax())),
