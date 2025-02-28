@@ -222,4 +222,34 @@ async function testValidObejctMethodCalls(): Promise<string> {
   validTestObject.returnsPromiseMethod().then(() => { }, () => { }).finally(() => { });
   return validTestObject['returnsPromiseMethod']();
 }
+
+type Props = {
+  a: string;
+  returnsPromise: () => Promise<void>;
+};
+async function testCallingReturnsPromise(props: Props) {
+  props.returnsPromise().then(() => { }, () => {});
+}
+const testDestructuringAndCallingReturnsPromise = async ({
+  returnsPromise,
+}: Props) => {
+  await returnsPromise();
+}
+async function testPassingReturnsPromiseDirectly(
+	returnsPromise: () => Promise<void>
+) {
+	returnsPromise().catch(() => {});
+}
+async function testCallingReturnsPromiseFromObject(props: {
+  returnsPromise: () => Promise<void>;
+}) {
+  await props.returnsPromise();
+}
+async function testDestructuringAndCallingReturnsPromiseFromRest({
+  a,
+  ...rest
+}: Props) {
+  rest.returnsPromise().catch(() => {}).finally(() => {});
+}
+
 ```
