@@ -383,14 +383,14 @@ fn is_binding_a_promise(
         AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(js_obj_binding) => {
             // function foo({ bar }: Type)
             let value_token = reference.value_token().ok()?;
-            let js_formal_param = find_js_format_parameter(js_obj_binding.syntax())?;
+            let js_formal_param = find_js_formal_parameter(js_obj_binding.syntax())?;
             let type_annotation = js_formal_param.type_annotation()?;
             let any_ts_type = type_annotation.ty().ok()?;
             is_ts_type_a_promise(&any_ts_type, model, Some(value_token.text_trimmed()))
         }
         AnyJsBindingDeclaration::JsObjectBindingPatternRest(js_obj_binding) => {
             // function foo({ bar, ...rest }: Type)
-            let js_formal_param = find_js_format_parameter(js_obj_binding.syntax())?;
+            let js_formal_param = find_js_formal_parameter(js_obj_binding.syntax())?;
             let type_annotation = js_formal_param.type_annotation()?;
             let any_ts_type = type_annotation.ty().ok()?;
             is_ts_type_a_promise(&any_ts_type, model, target_method_name)
@@ -1069,7 +1069,7 @@ fn find_and_check_object_member(
 /// This function traverses up the syntax tree from the given `SyntaxNode` to find the nearest
 /// `JsFormalParameter`. It returns `Some(JsFormalParameter)` if a `JsFormalParameter` is found,
 /// otherwise it returns `None`.
-fn find_js_format_parameter(node: &SyntaxNode<JsLanguage>) -> Option<JsFormalParameter> {
+fn find_js_formal_parameter(node: &SyntaxNode<JsLanguage>) -> Option<JsFormalParameter> {
     node.ancestors()
         .skip(1)
         .find_map(|ancestor| match ancestor.kind() {
