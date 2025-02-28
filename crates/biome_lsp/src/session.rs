@@ -491,6 +491,20 @@ impl Session {
             let base_path = ConfigurationPathHint::FromUser(config_path.clone());
             let status = self.load_biome_configuration_file(base_path).await;
             self.set_configuration_status(status);
+        } else if let Some(config_path) = self
+            .extension_settings
+            .read()
+            .ok()
+            .and_then(|s| s.configuration_path())
+        {
+            info!("Detected configuration path in the workspace settings.");
+            self.set_configuration_status(ConfigurationStatus::Loading);
+
+            let status = self
+                .load_biome_configuration_file(ConfigurationPathHint::FromWorkspace(config_path))
+                .await;
+
+            self.set_configuration_status(status);
         } else if let Some(folders) = self.get_workspace_folders() {
             info!("Detected workspace folder.");
             self.set_configuration_status(ConfigurationStatus::Loading);
@@ -674,7 +688,8 @@ impl Session {
         }
     }
 
-    /// Requests "workspace/configuration" from client and updates Session config
+    /// Requests "workspace/configuration" from client and updates Session config.
+    /// It must be done before loading workspace settings in [`Self::load_workspace_settings`].
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_extension_settings(&self) {
         let item = lsp_types::ConfigurationItem {

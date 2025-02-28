@@ -275,10 +275,8 @@ impl LanguageServer for LSPServer {
 
         info!("Attempting to load the configuration from 'biome.json' file");
 
-        futures::join!(
-            self.session.load_extension_settings(),
-            self.session.load_workspace_settings(),
-        );
+        self.session.load_extension_settings().await;
+        self.session.load_workspace_settings().await;
 
         let msg = format!("Server initialized with PID: {}", std::process::id());
         self.session
@@ -299,8 +297,8 @@ impl LanguageServer for LSPServer {
     #[tracing::instrument(level = "debug", skip(self))]
     async fn did_change_configuration(&self, params: DidChangeConfigurationParams) {
         let _ = params;
-        self.session.load_workspace_settings().await;
         self.session.load_extension_settings().await;
+        self.session.load_workspace_settings().await;
         self.setup_capabilities().await;
         self.session.update_all_diagnostics().await;
     }
