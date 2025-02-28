@@ -28,6 +28,11 @@ use crate::{Workspace, WorkspaceError};
 
 use super::server::WorkspaceServer;
 
+/// Entries that should be ignored even by the scanner.
+///
+/// These cannot (yet) be configured.
+pub const IGNORE_ENTRIES: &[&str] = &[".git", ".DS_Store"];
+
 pub(crate) struct ScanResult {
     /// Diagnostics reported while scanning the project.
     pub diagnostics: Vec<Diagnostic>,
@@ -101,6 +106,13 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
     let mut ignore_paths = Vec::new();
     for path in evaluated_paths {
+        if path
+            .file_name()
+            .is_some_and(|file_name| IGNORE_ENTRIES.contains(&file_name))
+        {
+            continue;
+        }
+
         if path.is_config() {
             configs.push(path);
         } else if path.is_manifest() {

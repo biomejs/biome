@@ -10,9 +10,17 @@ use tracing::{debug, warn};
 use crate::{diagnostics::WatchError, WorkspaceError, WorkspaceServer};
 
 /// Instructions to let the watcher either watch or unwatch a given folder.
+#[derive(Debug, Eq, PartialEq)]
 pub enum WatcherInstruction {
     WatchFolder(Utf8PathBuf),
     UnwatchFolder(Utf8PathBuf),
+
+    /// Resyncs a file after a file was closed by a client.
+    ///
+    /// This is done through an instruction instead of calling
+    /// [WorkspaceServer::open_file_by_scanner()] directly to ensure it is only
+    /// done if the watcher is active.
+    ResyncFile(Utf8PathBuf),
 
     /// Stops the watcher entirely.
     Stop,
@@ -170,6 +178,13 @@ impl WorkspaceWatcher {
                         if let Err(error) = self.watcher.unwatch(path.as_std_path()) {
                             // TODO: Improve error propagation.
                             warn!("Error unwatching path {path}: {error}");
+                        }
+                    }
+                    Ok(WatcherInstruction::ResyncFile(path)) => {
+                        debug!(%path, "resync_file");
+                        if let Err(error) = workspace.open_path_through_watcher(&path) {
+                            // TODO: Improve error propagation.
+                            warn!("Error resyncing file {path}: {error}");
                         }
                     }
                     Ok(WatcherInstruction::Stop) | Err(_) => {

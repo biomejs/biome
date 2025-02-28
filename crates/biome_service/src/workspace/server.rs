@@ -45,7 +45,7 @@ use biome_project_layout::ProjectLayout;
 use biome_rowan::NodeCache;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
-use papaya::HashMap;
+use papaya::{Compute, HashMap, Operation};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -115,8 +115,15 @@ impl RefUnwindSafe for WorkspaceServer {}
 
 #[derive(Clone, Debug)]
 pub(crate) struct Document {
+    /// Document content.
     pub(crate) content: String,
-    pub(crate) version: i32,
+
+    /// The version of the document.
+    ///
+    /// A version is only specified when the document is opened by a client,
+    /// typically through the LSP. Documents that are only opened by the scanner
+    /// do not have a version.
+    pub(crate) version: Option<i32>,
 
     /// The index of where the original file source is saved.
     /// Use `WorkspaceServer#file_sources` to retrieve the file source that belongs to the document.
@@ -132,9 +139,10 @@ pub(crate) struct Document {
     /// If `true`, this indicates the document has been opened by the scanner,
     /// and should be unloaded only when the project is unregistered.
     ///
-    /// Note it doesn't matter if the file is *also* opened explicitly through
-    /// the LSP Proxy, for instance. In such a case, the scanner's "claim" on
-    /// the file should be considered leading.
+    /// Note the file can still *also* be opened explicitly by a client such as
+    /// the LSP Proxy. In that case `version` will be `Some` and
+    /// `opened_by_scanner` will be `true`, and the document will only be
+    /// unloaded when both are unset.
     pub(super) opened_by_scanner: bool,
 }
 
@@ -323,121 +331,95 @@ impl WorkspaceServer {
         }
 
         let (content, version) = match content {
-            FileContent::FromClient { content, version } => (content, version),
-            FileContent::FromServer => (self.fs.read_file_from_path(&path)?, 0),
+            FileContent::FromClient { content, version } => (content, Some(version)),
+            FileContent::FromServer => (self.fs.read_file_from_path(&path)?, None),
         };
 
         let mut index = self.insert_source(source);
 
         let size = content.len();
         let limit = self.projects.get_max_file_size(project_key);
-        if size > limit {
-            self.documents.pin().insert(
-                path,
-                Document {
-                    content,
-                    version,
-                    file_source_index: index,
-                    syntax: Some(Err(FileTooLarge { size, limit })),
-                    opened_by_scanner,
-                },
-            );
-            return Ok(());
-        }
 
-        if document_file_source.is_none() && !DocumentFileSource::can_parse(path.as_path()) {
-            self.documents.pin().insert(
-                path,
-                Document {
-                    content,
-                    version,
-                    file_source_index: index,
-                    syntax: None,
-                    opened_by_scanner,
-                },
-            );
-            return Ok(());
-        }
+        let syntax = if size > limit {
+            Some(Err(FileTooLarge { size, limit }))
+        } else if document_file_source.is_none() && !DocumentFileSource::can_parse(path.as_path()) {
+            None
+        } else {
+            let mut node_cache = NodeCache::default();
+            let parsed = self.parse(project_key, &path, &content, index, &mut node_cache)?;
 
-        let mut node_cache = NodeCache::default();
-        let parsed = self.parse(project_key, &path, &content, index, &mut node_cache)?;
-
-        if let Some(language) = parsed.language {
-            index = self.insert_source(language);
-        }
-
-        if persist_node_cache {
-            self.node_cache
-                .lock()
-                .unwrap()
-                .insert(path.clone(), node_cache);
-        }
-
-        {
-            let mut document = Document {
-                content,
-                version,
-                file_source_index: index,
-                syntax: Some(Ok(parsed.any_parse)),
-                opened_by_scanner,
-            };
-
-            let documents = self.documents.pin();
-
-            // This isn't handled atomically, so in theory two calls to
-            // `open_file()` could happen concurrently and one would overwrite
-            // the other's entry without considering the merging we do here.
-            // This would mostly be problematic if someone opens and closes a
-            // file in their IDE at just the right moment while scanning is
-            // still in progress. In such a case, the file could be gone from
-            // the workspace by the time we get to the service data extraction.
-            // This is why we check again on insertion below, and worst-case we
-            // may end up needing to do another update. That still leaves a tiny
-            // theoretical window during which another `close_file()` could have
-            // caused undesirable side-effects, but:
-            // - This window is already _very_ unlikely to occur, due to the
-            //   first check we do.
-            // - This window is also _very_ small, so the `open_file()` and
-            //   `close_file()` calls would need to arrive effectively
-            //   simultaneously.
-            //
-            // To prevent this with a 100% guarantee would require us to use
-            // `update_or_insert()`, which is atomic, but that requires cloning
-            // the document, which seems hardly worth it.
-            // That said, I don't think this code is particularly pretty either
-            // :sweat_smile:
-            if let Some(existing) = documents.get(path.as_path()) {
-                if existing.opened_by_scanner {
-                    document.opened_by_scanner = true;
-                }
-
-                if existing.version > version {
-                    document.version = existing.version;
-                }
+            if let Some(language) = parsed.language {
+                index = self.insert_source(language);
             }
 
-            let opened_by_scanner = document.opened_by_scanner;
-            let version = document.version;
-
-            if let Some(existing) = documents.insert(path.clone(), document) {
-                if (existing.opened_by_scanner && !opened_by_scanner)
-                    || (existing.version > version)
-                {
-                    documents.update(path, |document| {
-                        let mut document = document.clone();
-                        if existing.opened_by_scanner && !opened_by_scanner {
-                            document.opened_by_scanner = true;
-                        }
-                        if existing.version > version {
-                            document.version = version;
-                        }
-                        document
-                    });
-                }
+            if persist_node_cache {
+                self.node_cache
+                    .lock()
+                    .unwrap()
+                    .insert(path.clone(), node_cache);
             }
-        }
 
-        Ok(())
+            Some(Ok(parsed.any_parse))
+        };
+
+        let documents = self.documents.pin();
+        documents.compute(path.clone(), |current| {
+            match current {
+                Some((_path, document)) => {
+                    let version = match (document.version, version) {
+                        (Some(current_version), Some(new_version)) => {
+                            // This is awkward. It most likely means we have two
+                            // clients independently specifying their own version,
+                            // with no way for us to distinguish them. Or it is a
+                            // bug.
+                            // The safest thing to do seems to use the _minimum_ of
+                            // the versions specified, so that updates coming from
+                            // either will be accepted.
+                            Some(current_version.min(new_version))
+                        }
+                        (Some(current_version), None) => {
+                            // It appears the document is open in a client, and the
+                            // scanner also wants to open/update the document. We
+                            // stick with the version from the client, and ignore
+                            // this request.
+                            Some(current_version)
+                        }
+                        (None, new_version) => {
+                            // The document was only opened by the scanner, so
+                            // whatever's the new version will do.
+                            new_version
+                        }
+                    };
+
+                    // If the document already had a version, but the new
+                    // content is coming from the scanner, we keep the same
+                    // content that was already in the document. This means,
+                    // active clients are leading over the filesystem.
+                    let content = if document.version.is_some() && opened_by_scanner {
+                        document.content.clone()
+                    } else {
+                        content.clone()
+                    };
+
+                    Operation::Insert::<Document, ()>(Document {
+                        content,
+                        version,
+                        file_source_index: index,
+                        syntax: syntax.clone(),
+                        opened_by_scanner: opened_by_scanner || document.opened_by_scanner,
+                    })
+                }
+                None => Operation::Insert(Document {
+                    content: content.clone(),
+                    version,
+                    file_source_index: index,
+                    syntax: syntax.clone(),
+                    opened_by_scanner,
+                }),
+            }
+        });
+
+        self.update_service_data(WatcherSignalKind::AddedOrChanged, &path)
     }
 
     /// Retrieves the parser result for a given file.
@@ -971,13 +953,21 @@ impl Workspace for WorkspaceServer {
         }: ChangeFileParams,
     ) -> Result<(), WorkspaceError> {
         let documents = self.documents.pin();
-        let (index, opened_by_scanner) = documents
+        let (index, opened_by_scanner, existing_version) = documents
             .get(path.as_path())
             .map(|document| {
-                debug_assert!(version > document.version);
-                (document.file_source_index, document.opened_by_scanner)
+                (
+                    document.file_source_index,
+                    document.opened_by_scanner,
+                    document.version,
+                )
             })
             .ok_or_else(WorkspaceError::not_found)?;
+
+        if existing_version.is_some_and(|existing_version| existing_version >= version) {
+            warn!(%version, %path, "outdated_file_change");
+            return Ok(()); // Safely ignore older versions.
+        }
 
         // We remove the node cache for the document, if it exists.
         // This is done so that we need to hold the lock as short as possible
@@ -995,7 +985,7 @@ impl Workspace for WorkspaceServer {
 
         let document = Document {
             content,
-            version,
+            version: Some(version),
             file_source_index: index,
             syntax: Some(Ok(parsed.any_parse)),
             opened_by_scanner,
@@ -1009,9 +999,10 @@ impl Workspace for WorkspaceServer {
         }
 
         documents
-            .insert(path.into(), document)
+            .insert(path.clone().into(), document)
             .ok_or_else(WorkspaceError::not_found)?;
-        Ok(())
+
+        self.update_service_data(WatcherSignalKind::AddedOrChanged, &path)
     }
 
     /// Closes a file that is opened in the workspace.
@@ -1022,21 +1013,42 @@ impl Workspace for WorkspaceServer {
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
         let path = params.path.as_path();
 
-        let result = {
-            let documents = self.documents.pin();
-            let document = documents.get(path).ok_or_else(WorkspaceError::not_found)?;
-            if document.opened_by_scanner {
-                Ok(()) // We may need the file for multi-file analysis still.
-            } else {
-                documents.remove(path);
-
-                self.update_service_data(WatcherSignalKind::Removed, path)
+        let documents = self.documents.pin();
+        let result = documents.compute(path.to_path_buf(), |current| {
+            match current {
+                Some((_path, document)) if document.opened_by_scanner => {
+                    // If the scanner is still interested in the document, we
+                    // only unset the version and re-sync the content below.
+                    Operation::Insert(Document {
+                        version: None,
+                        ..document.clone()
+                    })
+                }
+                Some(_) => Operation::Remove,
+                None => Operation::Abort(()),
             }
-        };
+        });
 
+        // The node cache can be cleared in any case.
         self.node_cache.lock().unwrap().remove(path);
 
-        result
+        match result {
+            Compute::Inserted(_, _) => unreachable!(),
+            Compute::Updated { .. } => {
+                // This may look counter-intuitive, but we need to consider
+                // that the file may have gone out-of-sync between the client
+                // and the file system. So when the client closes it, and the
+                // scanner still wants it, we need to resync it to make sure
+                // they're back in sync.
+                let _ = self
+                    .watcher_tx
+                    .send(WatcherInstruction::ResyncFile(path.to_path_buf()));
+
+                Ok(())
+            }
+            Compute::Removed(_, _) => self.update_service_data(WatcherSignalKind::Removed, path),
+            Compute::Aborted(_) => Err(WorkspaceError::not_found()),
+        }
     }
 
     /// Retrieves the list of diagnostics associated with a file

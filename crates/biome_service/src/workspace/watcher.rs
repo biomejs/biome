@@ -13,12 +13,13 @@ use std::path::{Path, PathBuf};
 
 use biome_fs::{FileSystemDiagnostic, PathKind};
 use camino::Utf8Path;
+use papaya::{Compute, Operation};
 
 use crate::{workspace_watcher::WatcherSignalKind, WorkspaceError};
 
 use super::{
-    server::Document, FileContent, OpenFileParams, ScanProjectFolderParams, Workspace,
-    WorkspaceServer,
+    scanner::IGNORE_ENTRIES, server::Document, FileContent, OpenFileParams,
+    ScanProjectFolderParams, Workspace, WorkspaceServer,
 };
 
 impl WorkspaceServer {
@@ -55,9 +56,16 @@ impl WorkspaceServer {
     ///
     /// If you already know the path is a folder, use
     /// [Self::open_folder_through_watcher()] instead.
-    fn open_path_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    pub fn open_path_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
         if let PathKind::Directory { .. } = self.fs.path_kind(path)? {
             return self.open_folder_through_watcher(path);
+        }
+
+        if path
+            .components()
+            .any(|component| IGNORE_ENTRIES.contains(&component.as_str()))
+        {
+            return Ok(());
         }
 
         let Some(project_key) = self.projects.find_project_for_path(path) else {
@@ -120,33 +128,26 @@ impl WorkspaceServer {
 
     /// Used indirectly by the watcher to close an individual file.
     fn close_file_through_watcher(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
-        // Assign to a variable outside the `if` condition to release the lock ASAP.
-        let has_node_cache = self.node_cache.lock().unwrap().contains_key(path);
-
-        // This one is a bit tricky: If the user has the path open in an editor,
-        // we don't want to unload the document even though it was removed from
-        // the file system. But otherwise we do.
-        //
-        // Fortunately we have a great hueristic to determine whether a document
-        // is opened by an editor: the node cache. Node caches are only kept for
-        // editor documents. So if one is present for this path, we only unflag
-        // the document as being opened by the scanner.
         let documents = self.documents.pin();
-        if has_node_cache {
-            documents.update(path.to_path_buf(), |document| Document {
-                content: document.content.clone(),
-                file_source_index: document.file_source_index,
-                syntax: document.syntax.clone(),
-                version: document.version,
-                opened_by_scanner: false,
-            });
-        } else {
-            documents.remove(path);
-
-            self.update_service_data(WatcherSignalKind::Removed, path)?;
+        let result = documents.compute(path.to_path_buf(), |current| {
+            match current {
+                Some((_path, document)) if document.version.is_some() => {
+                    // If the document has a version, some client is also
+                    // working with it, so we only unflag it as being opened by
+                    // the scanner.
+                    Operation::Insert(Document {
+                        opened_by_scanner: false,
+                        ..document.clone()
+                    })
+                }
+                Some(_) => Operation::Remove,
+                None => Operation::Abort(()),
+            }
+        });
+        match result {
+            Compute::Removed(_, _) => self.update_service_data(WatcherSignalKind::Removed, path),
+            _ => Ok(()),
         }
-
-        Ok(())
     }
 
     /// Used indirectly by the watcher to close an individual file or folder.
@@ -191,3 +192,7 @@ impl WorkspaceServer {
         Ok(())
     }
 }
+
+#[cfg(test)]
+#[path = "watcher.tests.rs"]
+mod tests;

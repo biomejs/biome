@@ -40,5 +40,6 @@ in the project layout and the dependency graph.
 
 ### Tests
 
-Tests for the watcher are inside the
-[LSP tests](../biome_lsp/src/server.tests.rs).
+The watcher has tests related to its workspace methods in
+[`watcher.tests.rs`](src/workspace/watcher.tests.rs), but there are also more
+end-to-end tests inside the [LSP tests](../biome_lsp/src/server.tests.rs).
