@@ -27,7 +27,7 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 ```block
 biome.json:2:16 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The configuration schema version does not match the CLI version.
+  ! The configuration schema version does not match the CLI version 0.0.0
   
     1 │ {
   > 2 │     "$schema": "https://biomejs.dev/schemas/0.0.1/schema.json"
@@ -38,6 +38,8 @@ biome.json:2:16 deserialize ━━━━━━━━━━━━━━━━━�
   i   Expected:                     0.0.0
       Found:                        0.0.1
   
+  
+  i Run the command biome migrate to migrate the configuration file.
   
 
 ```

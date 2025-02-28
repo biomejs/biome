@@ -6,7 +6,7 @@
 	"properties": {
 		"$schema": {
 			"description": "A field for the [JSON schema](https://json-schema.org/) specification",
-			"type": ["string", "null"]
+			"anyOf": [{ "$ref": "#/definitions/Schema" }, { "type": "null" }]
 		},
 		"assist": {
 			"description": "Specific configuration for assists",
@@ -3828,6 +3828,7 @@
 			},
 			"additionalProperties": false
 		},
+		"Schema": { "type": "string" },
 		"Scope": { "type": "string", "enum": ["any", "global"] },
 		"Security": {
 			"description": "A list of rules that belong to this group",

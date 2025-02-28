@@ -334,7 +334,6 @@ impl Configuration {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Merge)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, default, rename_all = "camelCase")]
 pub struct Schema(String);
 
@@ -355,6 +354,17 @@ impl From<String> for Schema {
 impl From<&str> for Schema {
     fn from(value: &str) -> Self {
         Self(value.into())
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for Schema {
+    fn schema_name() -> String {
+        "Schema".into()
+    }
+
+    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        String::json_schema(gen)
     }
 }
 

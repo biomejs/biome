@@ -24,7 +24,7 @@ export interface Configuration {
 	/**
 	 * A field for the [JSON schema](https://json-schema.org/) specification
 	 */
-	$schema?: string;
+	$schema?: Schema;
 	/**
 	 * Specific configuration for assists
 	 */
@@ -86,6 +86,7 @@ export interface Configuration {
 	 */
 	vcs?: VcsConfiguration;
 }
+export type Schema = string;
 export interface AssistConfiguration {
 	/**
 	 * Whether Biome should fail in CLI if the assist were not applied to the code.
