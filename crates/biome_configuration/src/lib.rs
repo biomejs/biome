@@ -383,25 +383,24 @@ impl Deserializable for Schema {
                     if let Some(config_version_match) = captures.get(1) {
                         let cli_version = Version::new(VERSION);
                         let config_version_str = Version::new(config_version_match.as_str());
-                        let diagnostic = match config_version_str.cmp(&cli_version) {
-                            Ordering::Less => Some(DeserializationDiagnostic::new(
-                                markup!(<Warn>"The configuration schema version does not match the CLI version"</Warn>),
-                            )),
-                            Ordering::Greater => Some(DeserializationDiagnostic::new(markup!(
-                                <Warn>"The configuration schema version does not match the CLI version."</Warn>
-                            ))),
-                            _ => None,
-                        };
-                        if let Some(diagnostic) = diagnostic {
-                            ctx.report(
-                                diagnostic
-                                    .with_range(range)
-                                    .with_custom_severity(Severity::Warning)
-                                    .with_note(markup!(
+                        match config_version_str.cmp(&cli_version) {
+                            Ordering::Less | Ordering::Greater => {
+                                ctx.report(
+                                    DeserializationDiagnostic::new(
+                                        markup!(<Warn>"The configuration schema version does not match the CLI version " {VERSION}</Warn>),
+                                    )
+                                        .with_range(range)
+                                        .with_custom_severity(Severity::Warning)
+                                        .with_note(markup!(
                                         {KeyValuePair("Expected", markup!({VERSION}))}
                                         {KeyValuePair("Found", markup!({config_version_str}))}
-                                    )),
-                            )
+                                    ))
+                                        .with_note(markup!("Run the command "<Emphasis>"biome migrate"</Emphasis>" to migrate the configuration file."))
+                                )
+
+
+                            }
+                            _ => {},
                         }
                     }
                 }
