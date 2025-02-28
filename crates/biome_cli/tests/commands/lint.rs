@@ -3903,3 +3903,28 @@ fn linter_doesnt_crash_on_malformed_code_from_issue_4723() {
         result,
     ));
 }
+
+#[test]
+fn should_report_when_schema_version_mismatch() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    let biome_json = Utf8Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+    "$schema": "https://biomejs.dev/schemas/0.0.1/schema.json"
+}
+        "#,
+    );
+    let (fs, result) = run_cli(fs, &mut console, Args::from([("check")].as_slice()));
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_report_when_schema_version_mismatch",
+        fs,
+        console,
+        result,
+    ));
+}
