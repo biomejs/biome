@@ -2017,7 +2017,7 @@ export interface Suspicious {
 	 */
 	noConstEnum?: RuleFixConfiguration_for_Null;
 	/**
-	 * Prevents from having control characters and some escape sequences that match control characters in regular expressions.
+	 * Prevents from having control characters and some escape sequences that match control characters in regular expression literals.
 	 */
 	noControlCharactersInRegex?: RuleConfiguration_for_Null;
 	/**

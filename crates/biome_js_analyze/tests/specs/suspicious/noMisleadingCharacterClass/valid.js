@@ -34,24 +34,12 @@ var r = /[🇵]/u;
 var r = /[\u200D]/;
 var r = /[\u200D]/u;
 
-// don't report and don't crash on invalid regex
-// FIXME: need to ecma regex parser to handle this case
-// var r = new RegExp('[Á] [ ');
-// var r = RegExp('{ [Á]', 'u');
-// var r = new globalThis.RegExp('[Á] [ ');
-// var r = globalThis.RegExp('{ [Á]', 'u');
-
 // v flag
 var r = /[👍]/v;
 var r = /^[\q{👶🏻}]$/v;
 var r = /[🇯\q{abc}🇵]/v;
 var r = /[🇯[A]🇵]/v;
 var r = /[🇯[A--B]🇵]/v;
-
-var r = new window.RegExp(/[👍]/u);
-var r = new global.RegExp(/[👍]/u);
-var r = new globalThis.RegExp(/[👍]/u);
-var r = new globalThis.globalThis.globalThis.RegExp(/[👍]/u);
 
 // Issue: https://github.com/biomejs/biome/issues/1522
 var cyrillicChars = /[\u200E\u2066-\u2069]/gu;

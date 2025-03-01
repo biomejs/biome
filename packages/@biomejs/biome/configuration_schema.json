@@ -4439,7 +4439,7 @@
 					]
 				},
 				"noControlCharactersInRegex": {
-					"description": "Prevents from having control characters and some escape sequences that match control characters in regular expressions.",
+					"description": "Prevents from having control characters and some escape sequences that match control characters in regular expression literals.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
