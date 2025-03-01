@@ -265,8 +265,9 @@ impl Rule for NoUselessFragments {
                     AnyJsxElementName::JsxReferenceIdentifier(identifier) => {
                         jsx_reference_identifier_is_fragment(&identifier, model)?
                     }
-                    AnyJsxElementName::JsxName(_) | AnyJsxElementName::JsxNamespaceName(_) => false,
-                    AnyJsxElementName::JsMetavariable(_) => todo!(),
+                    AnyJsxElementName::JsxName(_)
+                    | AnyJsxElementName::JsxNamespaceName(_)
+                    | AnyJsxElementName::JsMetavariable(_) => false,
                 };
 
                 if is_valid_react_fragment {
@@ -414,8 +415,7 @@ impl Rule for NoUselessFragments {
                     // can't apply a code action because it will create invalid syntax
                     // for example `<>{...foo}</>` would become `{...foo}` which would produce
                     // a syntax error
-                    AnyJsxChild::JsxSpreadChild(_) => return None,
-                    AnyJsxChild::JsMetavariable(_) => todo!(),
+                    AnyJsxChild::JsxSpreadChild(_) | AnyJsxChild::JsMetavariable(_) => return None,
                 };
                 if let Some(new_node) = new_node {
                     mutation.replace_element(parent.into(), new_node.into());

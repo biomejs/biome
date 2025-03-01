@@ -62,7 +62,7 @@ impl Rule for UseSortedAttributes {
                     prop_groups.push(current_prop_group);
                     current_prop_group = PropGroup::default();
                 }
-                AnyJsxAttribute::JsMetavariable(_) => todo!(),
+                AnyJsxAttribute::JsMetavariable(_) => {}
             }
         }
         prop_groups.push(current_prop_group);

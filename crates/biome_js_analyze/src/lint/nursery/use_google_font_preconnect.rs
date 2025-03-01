@@ -110,7 +110,7 @@ impl Rule for UseGoogleFontPreconnect {
         let last_attr_token = match attributes.last()? {
             AnyJsxAttribute::JsxAttribute(a) => a.name_value_token().ok()?,
             AnyJsxAttribute::JsxSpreadAttribute(a) => a.l_curly_token().ok()?,
-            AnyJsxAttribute::JsMetavariable(_) => todo!(),
+            AnyJsxAttribute::JsMetavariable(a) => a.value_token().ok()?,
         };
 
         let rel = if last_attr_token.has_leading_whitespace_or_newline() {
