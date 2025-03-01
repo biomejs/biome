@@ -513,6 +513,12 @@ impl TemporaryFs {
             fs::remove_dir_all(path.as_path()).unwrap();
         }
         fs::create_dir(&path).unwrap();
+
+        // On macOS, the temporary directory is in `/var`, which is a symlink to `/private/var`.
+        // We need to get the actual path here, or we will get path inconsistency.
+        #[cfg(target_os = "macos")]
+        let path = fs::canonicalize(path).unwrap();
+
         Self {
             working_directory: Utf8PathBuf::from_path_buf(path).unwrap(),
             files: Vec::new(),
