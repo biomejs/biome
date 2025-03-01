@@ -198,13 +198,13 @@ impl Env {
     }
     fn pushenv(&mut self, var: OsString, value: OsString) {
         self.pushenv_stack.push((var.clone(), env::var_os(&var)));
-        env::set_var(var, value)
+        unsafe { env::set_var(var, value) }
     }
     fn popenv(&mut self) {
         let (var, value) = self.pushenv_stack.pop().unwrap();
         match value {
-            None => env::remove_var(var),
-            Some(value) => env::set_var(var, value),
+            None => unsafe { env::remove_var(var) },
+            Some(value) => unsafe { env::set_var(var, value) },
         }
     }
     fn cwd(&self) -> &Path {
