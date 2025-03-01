@@ -93,7 +93,7 @@ verbose_file_reads                = "warn"
 [workspace.package]
 authors    = ["Biome Developers and Contributors"]
 categories = ["development-tools", "web-programming"]
-edition    = "2021"
+edition    = "2024"
 homepage   = "https://biomejs.dev/"
 keywords   = ["parser", "linter", "formatter"]
 license    = "MIT OR Apache-2.0"
