@@ -479,7 +479,7 @@ impl AnyJsxElement {
             .is_some_and(|attribute| {
                 attribute
                     .as_static_value()
-                    .map_or(true, |value| !(value.is_falsy() || value.text() == "false"))
+                    .is_none_or(|value| !(value.is_falsy() || value.text() == "false"))
                     && !self.has_trailing_spread_prop(&attribute)
             })
     }
@@ -590,7 +590,7 @@ impl AnyJsxChild {
                 let expression = expression.expression()?;
                 expression
                     .as_static_value()
-                    .map_or(true, |value| !value.is_falsy())
+                    .is_none_or(|value| !value.is_falsy())
             }
             AnyJsxChild::JsxElement(element) => {
                 let opening_element = element.opening_element().ok()?;

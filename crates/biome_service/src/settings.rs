@@ -284,7 +284,7 @@ impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
         Self {
             enabled: conf.enabled,
             format_with_errors: conf.format_with_errors,
-            indent_style: conf.indent_style.map(Into::into),
+            indent_style: conf.indent_style,
             indent_width: conf.indent_width,
             line_ending: conf.line_ending,
             line_width: conf.line_width,
@@ -1624,7 +1624,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             Some(IndentStyle::Space) => IndentStyle::Space,
             None => IndentStyle::default(),
         };
-        let indent_width = conf.indent_width.map(Into::into).unwrap_or_default();
+        let indent_width = conf.indent_width.unwrap_or_default();
 
         Ok(Self {
             enabled: conf.enabled,

@@ -183,7 +183,7 @@ pub(super) fn node_to_args_pairs(
                 let name = name
                     .strip_prefix(lang.metavariable_prefix())
                     .filter(|stripped| {
-                        expected_params.as_ref().map_or(true, |expected| {
+                        expected_params.as_ref().is_none_or(|expected| {
                             expected.iter().any(|exp| exp == &name || exp == stripped)
                         })
                     })

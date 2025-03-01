@@ -516,7 +516,7 @@ fn capture_needs_to_be_in_the_dependency_list(
             // ... they are declared outside of the component function
             if component_function_range
                 .intersect(declaration_range)
-                .map_or(true, TextRange::is_empty)
+                .is_none_or(TextRange::is_empty)
             {
                 return false;
             }
@@ -552,7 +552,7 @@ fn capture_needs_to_be_in_the_dependency_list(
             // ... they are declared outside of the component function
             if component_function_range
                 .intersect(declaration_range)
-                .map_or(true, TextRange::is_empty)
+                .is_none_or(TextRange::is_empty)
             {
                 return false;
             }
@@ -562,7 +562,7 @@ fn capture_needs_to_be_in_the_dependency_list(
                 if declarator
                     .initializer()
                     .and_then(|initializer| initializer.expression().ok())
-                    .map_or(true, |expr| model.is_constant(&expr))
+                    .is_none_or(|expr| model.is_constant(&expr))
                 {
                     return false;
                 }

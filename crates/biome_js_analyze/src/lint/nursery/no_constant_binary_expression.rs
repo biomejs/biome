@@ -599,5 +599,5 @@ fn is_undefined(model: &SemanticModel, node: &JsIdentifierExpression) -> SyntaxR
 /// Check the referenced variable is in the global scope.
 fn is_global_reference(model: &SemanticModel, node: &JsReferenceIdentifier) -> bool {
     node.binding(model)
-        .map_or(true, |b| b.scope().is_global_scope())
+        .is_none_or(|b| b.scope().is_global_scope())
 }
