@@ -327,7 +327,7 @@ fn length_fn<'a>(
                 None => {
                     return Err(GritPatternError::new(
                         "length() requires a list or string as the first argument",
-                    ))
+                    ));
                 }
             }
         }
@@ -443,7 +443,7 @@ fn random_fn<'a>(
             Ok(ResolvedPattern::from_constant(Constant::Integer(value)))
         }
         [None, None] => {
-            let value = state.get_rng().gen::<f64>();
+            let value = state.get_rng().r#gen::<f64>();
             Ok(ResolvedPattern::from_constant(Constant::Float(value)))
         }
         _ => Err(GritPatternError::new(

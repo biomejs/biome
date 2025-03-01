@@ -491,8 +491,8 @@ impl schemars::JsonSchema for FilenameCases {
     fn schema_name() -> String {
         "FilenameCases".to_string()
     }
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <std::collections::HashSet<FilenameCase>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <std::collections::HashSet<FilenameCase>>::json_schema(generator)
     }
 }
 impl Default for FilenameCases {

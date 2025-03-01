@@ -124,7 +124,7 @@ impl schemars::JsonSchema for DependencyAvailability {
         "DependencyAvailability".to_owned()
     }
 
-    fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(_generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
         use schemars::schema::*;
 
         Schema::Object(SchemaObject {
