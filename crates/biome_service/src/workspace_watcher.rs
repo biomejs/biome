@@ -129,7 +129,9 @@ impl WorkspaceWatcher {
                                 _ => workspace.open_paths_through_watcher(event.paths),
                             },
                             EventKind::Modify(modify_kind) => match modify_kind {
-                                ModifyKind::Data(_) => {
+                                // `ModifyKind::Any` needs to be included as a catch-all.
+                                // Without it, we'll miss events on Windows.
+                                ModifyKind::Data(_) | ModifyKind::Any => {
                                     workspace.open_paths_through_watcher(event.paths)
                                 },
                                 ModifyKind::Name(RenameMode::From) => {
