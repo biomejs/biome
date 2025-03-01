@@ -52,7 +52,7 @@ impl SyntaxElement {
     }
 
     #[inline]
-    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode> {
+    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode> + use<> {
         let first = match self {
             NodeOrToken::Node(it) => Some(it.clone()),
             NodeOrToken::Token(it) => it.parent(),

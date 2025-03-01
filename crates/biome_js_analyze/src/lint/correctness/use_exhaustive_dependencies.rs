@@ -685,7 +685,7 @@ fn determine_unstable_dependency(
     }
 }
 
-fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> {
+fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> + use<> {
     let mut vec = vec![];
     let mut next = Some(node.clone());
 

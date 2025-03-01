@@ -892,7 +892,7 @@ impl<L: Language> Comments<L> {
     pub fn leading_trailing_comments(
         &self,
         node: &SyntaxNode<L>,
-    ) -> impl Iterator<Item = &SourceComment<L>> {
+    ) -> impl Iterator<Item = &SourceComment<L>> + use<'_, L> {
         self.leading_comments(node)
             .iter()
             .chain(self.trailing_comments(node).iter())
