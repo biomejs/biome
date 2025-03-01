@@ -852,7 +852,7 @@ impl Rule for UseNamingConvention {
                         "This "<Emphasis>{format_args!("{convention_selector}")}</Emphasis>" name"{trimmed_info}" should be in "<Emphasis>{expected_case_names}</Emphasis>"."
                     },
                 ))
-            },
+            }
         }
     }
 
@@ -919,7 +919,7 @@ impl Rule for UseNamingConvention {
                 return Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
-                     markup! { "Rename this symbol in "<Emphasis>{preferred_case.to_string()}</Emphasis>"." }.to_owned(),
+                    markup! { "Rename this symbol in "<Emphasis>{preferred_case.to_string()}</Emphasis>"." }.to_owned(),
                     mutation,
                 ));
             }
@@ -1374,7 +1374,7 @@ impl Selector {
                 } else {
                     Some(Kind::IndexParameter.into())
                 }
-            },
+            }
             AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => Some(Selector::with_scope(Kind::ImportNamespace, Scope::Global)),
             AnyJsBindingDeclaration::JsFunctionDeclaration(_)
             | AnyJsBindingDeclaration::JsFunctionExpression(_)
@@ -1854,8 +1854,8 @@ impl JsonSchema for Modifiers {
         "Modifiers".to_string()
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <std::collections::HashSet<RestrictedModifier>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <std::collections::HashSet<RestrictedModifier>>::json_schema(generator)
     }
 }
 impl From<JsMethodModifierList> for Modifiers {
@@ -2049,8 +2049,8 @@ impl JsonSchema for Formats {
     fn schema_name() -> String {
         "Formats".to_string()
     }
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <std::collections::HashSet<Format>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <std::collections::HashSet<Format>>::json_schema(generator)
     }
 }
 

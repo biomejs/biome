@@ -319,7 +319,11 @@ impl<'token> LiteralStringNormaliser<'token> {
 
     fn normalise_string_literal(&self, string_information: StringInformation) -> Cow<'token, str> {
         let preferred_quote = string_information.preferred_quote;
-        let polished_raw_content = self.normalize_string(&string_information);
+        let polished_raw_content = normalize_string(
+            self.raw_content(),
+            string_information.preferred_quote.into(),
+            true,
+        );
 
         match polished_raw_content {
             Cow::Borrowed(raw_content) => self.swap_quotes(raw_content, &string_information),
@@ -331,15 +335,6 @@ impl<'token> LiteralStringNormaliser<'token> {
                 Cow::Owned(s)
             }
         }
-    }
-
-    fn normalize_string(&self, string_information: &StringInformation) -> Cow<'token, str> {
-        let is_escape_preserved = self.token.token.kind() == JSX_STRING_LITERAL;
-        normalize_string(
-            self.raw_content(),
-            string_information.preferred_quote.into(),
-            is_escape_preserved,
-        )
     }
 
     /// Returns the string without its quotes.

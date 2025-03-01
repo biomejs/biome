@@ -12,14 +12,15 @@ use crate::diagnostics::FileTooLarge;
 use crate::file_handlers::{
     Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
 };
-use crate::is_dir;
 use crate::projects::Projects;
 use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{
     FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, RageEntry, RageParams,
     RageResult, ServerInfo,
 };
+use crate::workspace_watcher::WatcherSignalKind;
 use crate::{file_handlers::Features, Workspace, WorkspaceError};
+use crate::{is_dir, WatcherInstruction};
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::AnalyzerPluginVec;
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
@@ -43,21 +44,21 @@ use biome_plugin_loader::{BiomePlugin, PluginCache, PluginDiagnostic};
 use biome_project_layout::ProjectLayout;
 use biome_rowan::NodeCache;
 use camino::{Utf8Path, Utf8PathBuf};
-use papaya::HashMap;
-use rayon::ThreadPoolBuilder;
+use crossbeam::channel::Sender;
+use papaya::{Compute, HashMap, Operation};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex, Once};
-use tracing::{info, instrument, warn};
+use std::sync::{Arc, Mutex};
+use tracing::{error, info, instrument, warn};
 
-pub(super) struct WorkspaceServer {
+pub struct WorkspaceServer {
     /// features available throughout the application
     features: Features,
 
     /// Open projects, including their settings, nested packages, and other
     /// metadata.
-    projects: Projects,
+    pub(super) projects: Projects,
 
     /// The layout of projects and their internal packages.
     project_layout: Arc<ProjectLayout>,
@@ -69,7 +70,7 @@ pub(super) struct WorkspaceServer {
     plugin_caches: Arc<HashMap<ProjectKey, PluginCache>>,
 
     /// Stores the document (text content + version number) associated with a URL
-    documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
+    pub(super) documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
 
     /// Stores the document sources used across the workspace
     file_sources: AppendOnlyVec<DocumentFileSource>,
@@ -95,10 +96,13 @@ pub(super) struct WorkspaceServer {
     /// anticipated. For other documents, the performance degradation due to
     /// lock contention would not be worth the potential of faster reparsing
     /// that may never actually happen.
-    node_cache: Mutex<FxHashMap<Utf8PathBuf, NodeCache>>,
+    pub(super) node_cache: Mutex<FxHashMap<Utf8PathBuf, NodeCache>>,
 
     /// File system implementation.
-    fs: Box<dyn FileSystem>,
+    pub(super) fs: Box<dyn FileSystem>,
+
+    /// Channel sender for instructions to the [crate::WorkspaceWatcher].
+    watcher_tx: Sender<WatcherInstruction>,
 }
 
 /// The `Workspace` object is long-lived, so we want it to be able to cross
@@ -111,32 +115,40 @@ impl RefUnwindSafe for WorkspaceServer {}
 
 #[derive(Clone, Debug)]
 pub(crate) struct Document {
+    /// Document content.
     pub(crate) content: String,
-    pub(crate) version: i32,
+
+    /// The version of the document.
+    ///
+    /// A version is only specified when the document is opened by a client,
+    /// typically through the LSP. Documents that are only opened by the scanner
+    /// do not have a version.
+    pub(crate) version: Option<i32>,
 
     /// The index of where the original file source is saved.
     /// Use `WorkspaceServer#file_sources` to retrieve the file source that belongs to the document.
     pub(crate) file_source_index: usize,
 
     /// The result of the parser (syntax tree + diagnostics).
-    pub(crate) syntax: Result<AnyParse, FileTooLarge>,
+    /// Types explained:
+    /// - `Option`: if the file can be read
+    /// - `Result`: if the file is read, but the  file is too large
+    /// - `AnyParse`: the result of the parsed file
+    pub(crate) syntax: Option<Result<AnyParse, FileTooLarge>>,
 
     /// If `true`, this indicates the document has been opened by the scanner,
     /// and should be unloaded only when the project is unregistered.
     ///
-    /// Note it doesn't matter if the file is *also* opened explicitly through
-    /// the LSP Proxy, for instance. In such a case, the scanner's "claim" on
-    /// the file should be considered leading.
-    opened_by_scanner: bool,
+    /// Note the file can still *also* be opened explicitly by a client such as
+    /// the LSP Proxy. In that case `version` will be `Some` and
+    /// `opened_by_scanner` will be `true`, and the document will only be
+    /// unloaded when both are unset.
+    pub(super) opened_by_scanner: bool,
 }
 
 impl WorkspaceServer {
     /// Creates a new [Workspace].
-    ///
-    /// This is implemented as a crate-private method instead of using
-    /// [Default] to disallow instances of [Workspace] from being created
-    /// outside a [crate::App]
-    pub(crate) fn new(fs: Box<dyn FileSystem>) -> Self {
+    pub fn new(fs: Box<dyn FileSystem>, watcher_tx: Sender<WatcherInstruction>) -> Self {
         init_thread_pool();
 
         Self {
@@ -150,6 +162,7 @@ impl WorkspaceServer {
             patterns: Default::default(),
             node_cache: Default::default(),
             fs,
+            watcher_tx,
         }
     }
 
@@ -222,7 +235,7 @@ impl WorkspaceServer {
     ))]
     fn get_file_capabilities(&self, path: &BiomePath) -> Capabilities {
         let language = self.get_file_source(path);
-        self.features.get_capabilities(path, language)
+        self.features.get_capabilities(language)
     }
 
     /// Retrieves the supported language of a file.
@@ -240,7 +253,6 @@ impl WorkspaceServer {
     fn build_capability_error<'a>(
         &'a self,
         path: &'a Utf8Path,
-        // feature_name: &'a str,
     ) -> impl FnOnce() -> WorkspaceError + 'a {
         move || {
             let file_source = self.get_file_source(path);
@@ -257,7 +269,6 @@ impl WorkspaceServer {
     /// Returns a previously inserted file source by index.
     ///
     /// File sources can be inserted using `insert_source()`.
-    #[tracing::instrument(level = "debug", skip_all)]
     fn get_source(&self, index: usize) -> Option<DocumentFileSource> {
         if index < self.file_sources.len() {
             Some(self.file_sources[index])
@@ -289,7 +300,6 @@ impl WorkspaceServer {
     #[tracing::instrument(level = "debug", skip(self, params), fields(
         project_key = display(params.project_key),
         path = display(params.path.as_path()),
-        version = display(params.version),
     ))]
     fn open_file_internal(
         &self,
@@ -300,11 +310,15 @@ impl WorkspaceServer {
             project_key,
             path,
             content,
-            version,
             document_file_source,
             persist_node_cache,
         } = params;
         let path: Utf8PathBuf = path.into();
+
+        if document_file_source.is_none() && !DocumentFileSource::can_read(path.as_path()) {
+            return Ok(());
+        }
+
         let mut source = document_file_source.unwrap_or(DocumentFileSource::from_path(&path));
 
         if let DocumentFileSource::Js(js) = &mut source {
@@ -316,108 +330,96 @@ impl WorkspaceServer {
             }
         }
 
-        let content = match content {
-            FileContent::FromClient(content) => content,
-            FileContent::FromServer => self.fs.read_file_from_path(&path)?,
+        let (content, version) = match content {
+            FileContent::FromClient { content, version } => (content, Some(version)),
+            FileContent::FromServer => (self.fs.read_file_from_path(&path)?, None),
         };
 
         let mut index = self.insert_source(source);
 
         let size = content.len();
         let limit = self.projects.get_max_file_size(project_key);
-        if size > limit {
-            self.documents.pin().insert(
-                path,
-                Document {
-                    content,
+
+        let syntax = if size > limit {
+            Some(Err(FileTooLarge { size, limit }))
+        } else if document_file_source.is_none() && !DocumentFileSource::can_parse(path.as_path()) {
+            None
+        } else {
+            let mut node_cache = NodeCache::default();
+            let parsed = self.parse(project_key, &path, &content, index, &mut node_cache)?;
+
+            if let Some(language) = parsed.language {
+                index = self.insert_source(language);
+            }
+
+            if persist_node_cache {
+                self.node_cache
+                    .lock()
+                    .unwrap()
+                    .insert(path.clone(), node_cache);
+            }
+
+            Some(Ok(parsed.any_parse))
+        };
+
+        let documents = self.documents.pin();
+        documents.compute(path.clone(), |current| {
+            match current {
+                Some((_path, document)) => {
+                    let version = match (document.version, version) {
+                        (Some(current_version), Some(new_version)) => {
+                            // This is awkward. It most likely means we have two
+                            // clients independently specifying their own version,
+                            // with no way for us to distinguish them. Or it is a
+                            // bug.
+                            // The safest thing to do seems to use the _minimum_ of
+                            // the versions specified, so that updates coming from
+                            // either will be accepted.
+                            Some(current_version.min(new_version))
+                        }
+                        (Some(current_version), None) => {
+                            // It appears the document is open in a client, and the
+                            // scanner also wants to open/update the document. We
+                            // stick with the version from the client, and ignore
+                            // this request.
+                            Some(current_version)
+                        }
+                        (None, new_version) => {
+                            // The document was only opened by the scanner, so
+                            // whatever's the new version will do.
+                            new_version
+                        }
+                    };
+
+                    // If the document already had a version, but the new
+                    // content is coming from the scanner, we keep the same
+                    // content that was already in the document. This means,
+                    // active clients are leading over the filesystem.
+                    let content = if document.version.is_some() && opened_by_scanner {
+                        document.content.clone()
+                    } else {
+                        content.clone()
+                    };
+
+                    Operation::Insert::<Document, ()>(Document {
+                        content,
+                        version,
+                        file_source_index: index,
+                        syntax: syntax.clone(),
+                        opened_by_scanner: opened_by_scanner || document.opened_by_scanner,
+                    })
+                }
+                None => Operation::Insert(Document {
+                    content: content.clone(),
                     version,
                     file_source_index: index,
-                    syntax: Err(FileTooLarge { size, limit }),
+                    syntax: syntax.clone(),
                     opened_by_scanner,
-                },
-            );
-            return Ok(());
-        }
-
-        let mut node_cache = NodeCache::default();
-        let parsed = self.parse(project_key, &path, &content, index, &mut node_cache)?;
-
-        if let Some(language) = parsed.language {
-            index = self.insert_source(language);
-        }
-
-        if persist_node_cache {
-            self.node_cache
-                .lock()
-                .unwrap()
-                .insert(path.clone(), node_cache);
-        }
-
-        {
-            let mut document = Document {
-                content,
-                version,
-                file_source_index: index,
-                syntax: Ok(parsed.any_parse),
-                opened_by_scanner,
-            };
-
-            let documents = self.documents.pin();
-
-            // This isn't handled atomically, so in theory two calls to
-            // `open_file()` could happen concurrently and one would overwrite
-            // the other's entry without considering the merging we do here.
-            // This would mostly be problematic if someone opens and closes a
-            // file in their IDE at just the right moment while scanning is
-            // still in progress. In such a case, the file could be gone from
-            // the workspace by the time we get to the service data extraction.
-            // This is why we check again on insertion below, and worst-case we
-            // may end up needing to do another update. That still leaves a tiny
-            // theoretical window during which another `close_file()` could have
-            // caused undesirable side-effects, but:
-            // - This window is already _very_ unlikely to occur, due to the
-            //   first check we do.
-            // - This window is also _very_ small, so the `open_file()` and
-            //   `close_file()` calls would need to arrive effectively
-            //   simultaneously.
-            //
-            // To prevent this with a 100% guarantee would require us to use
-            // `update_or_insert()`, which is atomic, but that requires cloning
-            // the document, which seems hardly worth it.
-            // That said, I don't think this code is particularly pretty either
-            // :sweat_smile:
-            if let Some(existing) = documents.get(path.as_path()) {
-                if existing.opened_by_scanner {
-                    document.opened_by_scanner = true;
-                }
-
-                if existing.version > version {
-                    document.version = existing.version;
-                }
+                }),
             }
+        });
 
-            let opened_by_scanner = document.opened_by_scanner;
-            let version = document.version;
-
-            if let Some(existing) = documents.insert(path.clone(), document) {
-                if (existing.opened_by_scanner && !opened_by_scanner)
-                    || (existing.version > version)
-                {
-                    documents.update(path, |document| {
-                        let mut document = document.clone();
-                        if existing.opened_by_scanner && !opened_by_scanner {
-                            document.opened_by_scanner = true;
-                        }
-                        if existing.version > version {
-                            document.version = version;
-                        }
-                        document
-                    });
-                }
-            }
-        }
-
-        Ok(())
+        self.update_service_data(WatcherSignalKind::AddedOrChanged, &path)
     }
 
     /// Retrieves the parser result for a given file.
@@ -427,11 +429,14 @@ impl WorkspaceServer {
         let documents = self.documents.pin();
         let syntax = documents
             .get(path)
-            .map(|document| document.syntax.as_ref())
-            .ok_or_else(WorkspaceError::not_found)?;
+            .and_then(|doc| doc.syntax.clone())
+            .transpose();
 
         match syntax {
-            Ok(syntax) => Ok(syntax.clone()),
+            Ok(syntax) => match syntax {
+                None => Err(WorkspaceError::not_found()),
+                Some(syntax) => Ok(syntax.clone()),
+            },
             Err(FileTooLarge { .. }) => Err(WorkspaceError::file_ignored(path.to_string())),
         }
     }
@@ -447,7 +452,7 @@ impl WorkspaceServer {
         let file_source = self
             .get_source(file_source_index)
             .ok_or_else(WorkspaceError::not_found)?;
-        let capabilities = self.features.get_capabilities(path, file_source);
+        let capabilities = self.features.get_capabilities(file_source);
 
         let parse = capabilities
             .parser
@@ -470,6 +475,7 @@ impl WorkspaceServer {
 
     /// Checks whether a file is ignored in the top-level config's
     /// `files.ignore`/`files.include` or in the feature's `ignore`/`include`.
+    #[instrument(level = "debug", skip(self), fields(ignored))]
     fn is_ignored(&self, project_key: ProjectKey, path: &Utf8Path, features: FeatureName) -> bool {
         let file_name = path.file_name();
         let ignored_by_features = {
@@ -484,11 +490,15 @@ impl WorkspaceServer {
             ignored
         };
         // Never ignore Biome's config file regardless `include`/`ignore`
-        (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
+        let ignored = (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
             // Apply top-level `include`/`ignore`
             (self.is_ignored_by_top_level_config(project_key, path) ||
                 // Apply feature-level `include`/`ignore`
-                ignored_by_features)
+                ignored_by_features);
+
+        tracing::Span::current().record("ignored", ignored);
+
+        ignored
     }
 
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
@@ -507,20 +517,12 @@ impl WorkspaceServer {
             };
         }
 
+        let ignore_matches = self.projects.get_vcs_ignored_matches(project_key);
+
         !is_included
-            || files_settings.git_ignore.as_ref().is_some_and(|ignore| {
-                // `matched_path_or_any_parents` panics if `source` is not under the gitignore root.
-                // This checks excludes absolute paths that are not a prefix of the base root.
-                if !path.has_root() || path.starts_with(ignore.path()) {
-                    // Because Biome passes a list of paths,
-                    // we use `matched_path_or_any_parents` instead of `matched`.
-                    ignore
-                        .matched_path_or_any_parents(path, path.is_dir())
-                        .is_ignore()
-                } else {
-                    false
-                }
-            })
+            || ignore_matches
+                .as_ref()
+                .is_some_and(|ignored_matches| ignored_matches.is_ignored(path, is_dir(path)))
     }
 
     fn load_plugins(
@@ -558,15 +560,65 @@ impl WorkspaceServer {
             .unwrap_or_default()
     }
 
-    pub(super) fn update_project_layout_for_paths(&self, paths: &[BiomePath]) {
+    /// Updates the [ProjectLayout] for multiple `paths` at once.
+    pub(super) fn update_project_layout_for_paths(
+        &self,
+        signal_kind: WatcherSignalKind,
+        paths: &[BiomePath],
+    ) {
         for path in paths {
-            if let Err(error) = self.update_project_layout_for_path(path) {
-                warn!("Error while updating project layout: {error}");
+            if let Err(error) = self.update_project_layout(signal_kind, path) {
+                error!("Error while updating project layout: {error}");
             }
         }
     }
 
-    fn update_project_layout_for_path(&self, path: &Utf8Path) -> Result<(), WorkspaceError> {
+    /// It accepts a list of ignore files. If the VCS integration is enabled, the files
+    /// are read and the [Settings] are updated.
+    ///
+    /// ## Errors
+    ///
+    /// - If the project doesn't exist
+    /// - If it's not possible to read the ignore file
+    /// - If the ignore file contains lines that contain incorrect globs
+    pub(super) fn update_project_ignore_files(
+        &self,
+        project_key: ProjectKey,
+        paths: &[BiomePath],
+    ) -> Result<(), WorkspaceError> {
+        let project_path = self.projects.get_project_path(project_key);
+        let mut settings = self
+            .projects
+            .get_settings(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+
+        let vcs_settings = &mut settings.vcs_settings;
+        if !vcs_settings.is_enabled() {
+            return Ok(());
+        }
+        for path in paths.iter().filter(|path| path.is_ignore()) {
+            let is_in_project_path = project_path
+                .as_ref()
+                .is_some_and(|project_path| path.starts_with(project_path));
+
+            if vcs_settings.is_ignore_file(path) && is_in_project_path {
+                let content = self.fs.read_file_from_path(path)?;
+                let patterns = content.lines().collect::<Vec<_>>();
+                vcs_settings.store_ignore_patterns(path.as_path(), patterns.as_slice())?;
+            }
+        }
+
+        self.projects.set_settings(project_key, settings);
+
+        Ok(())
+    }
+
+    /// Updates the [ProjectLayout] for the given `path`.
+    pub(super) fn update_project_layout(
+        &self,
+        signal_kind: WatcherSignalKind,
+        path: &Utf8Path,
+    ) -> Result<(), WorkspaceError> {
         if path
             .file_name()
             .is_some_and(|filename| filename == "package.json")
@@ -575,30 +627,69 @@ impl WorkspaceServer {
                 .parent()
                 .map(|parent| parent.to_path_buf())
                 .ok_or_else(WorkspaceError::not_found)?;
-            let parsed = self.get_parse(path)?;
-            self.project_layout
-                .insert_serialized_node_manifest(package_path, parsed);
+
+            match signal_kind {
+                WatcherSignalKind::AddedOrChanged => {
+                    let parsed = self.get_parse(path)?;
+                    self.project_layout
+                        .insert_serialized_node_manifest(package_path, parsed);
+                }
+                WatcherSignalKind::Removed => {
+                    self.project_layout.remove_package(&package_path);
+                }
+            }
         }
 
         Ok(())
     }
 
-    pub(super) fn update_dependency_graph_for_paths(&self, paths: &[BiomePath]) {
+    /// Updates the [DependencyGraph] for the given `paths`.
+    pub(super) fn update_dependency_graph(
+        &self,
+        signal_kind: WatcherSignalKind,
+        paths: &[BiomePath],
+    ) {
+        let no_paths: &[BiomePath] = &[];
+        let (added_or_changed_paths, removed_paths) = match signal_kind {
+            WatcherSignalKind::AddedOrChanged => (paths, no_paths),
+            WatcherSignalKind::Removed => (no_paths, paths),
+        };
+
         self.dependency_graph.update_imports_for_js_paths(
             self.fs.as_ref(),
             &self.project_layout,
-            paths,
-            &[],
+            added_or_changed_paths,
+            removed_paths,
             |path| {
                 let documents = self.documents.pin();
                 let doc = documents.get(path)?;
                 let file_source = self.file_sources[doc.file_source_index];
                 match file_source {
-                    DocumentFileSource::Js(_) => doc.syntax.as_ref().map(AnyParse::tree).ok(),
+                    DocumentFileSource::Js(_) => doc
+                        .syntax
+                        .as_ref()
+                        .and_then(|syntax| syntax.as_ref().ok())
+                        .map(AnyParse::tree),
                     _ => None,
                 }
             },
         );
+    }
+
+    /// Updates the state of any services relevant to the given `path`.
+    pub(super) fn update_service_data(
+        &self,
+        signal_kind: WatcherSignalKind,
+        path: &Utf8Path,
+    ) -> Result<(), WorkspaceError> {
+        let path = BiomePath::from(path);
+        if path.is_manifest() {
+            self.update_project_layout(signal_kind, &path)?;
+        }
+
+        self.update_dependency_graph(signal_kind, &[path]);
+
+        Ok(())
     }
 }
 
@@ -627,15 +718,14 @@ impl Workspace for WorkspaceServer {
     ) -> Result<FileFeaturesResult, WorkspaceError> {
         let project_key = params.project_key;
         let path = params.path.as_path();
-        let capabilities = self.get_file_capabilities(&params.path);
-
+        let language = self.get_file_source(path);
+        let capabilities = self.features.get_capabilities(language);
         let handle = WorkspaceSettingsHandle::from(
             self.projects
                 .get_settings(project_key)
                 .ok_or_else(WorkspaceError::no_project)?,
         );
         let mut file_features = FileFeaturesResult::new();
-        let language = DocumentFileSource::from_path(path);
         let file_name = path.file_name();
         file_features = file_features.with_capabilities(&capabilities);
         file_features = file_features.with_settings_and_language(&handle, path, &capabilities);
@@ -695,12 +785,7 @@ impl Workspace for WorkspaceServer {
 
         let workspace_directory = params.workspace_directory.map(|p| p.to_path_buf());
 
-        settings.merge_with_configuration(
-            params.configuration,
-            workspace_directory.clone(),
-            params.vcs_base_path.map(|p| p.to_path_buf()),
-            params.gitignore_matches.as_slice(),
-        )?;
+        settings.merge_with_configuration(params.configuration, workspace_directory.clone())?;
 
         let diagnostics = self.load_plugins(
             params.project_key,
@@ -750,6 +835,12 @@ impl Workspace for WorkspaceServer {
             .or_else(|| self.projects.get_project_path(params.project_key))
             .ok_or_else(WorkspaceError::no_project)?;
 
+        if params.watch {
+            let _ = self
+                .watcher_tx
+                .try_send(WatcherInstruction::WatchFolder(path.clone()));
+        }
+
         let result = self.scan(params.project_key, &path)?;
 
         Ok(ScanProjectFolderResult {
@@ -763,6 +854,10 @@ impl Workspace for WorkspaceServer {
             .projects
             .get_project_path(params.project_key)
             .ok_or_else(WorkspaceError::no_project)?;
+
+        let _ = self
+            .watcher_tx
+            .try_send(WatcherInstruction::UnwatchFolder(project_path.clone()));
 
         // Limit the scope of the pin and the lock inside.
         {
@@ -858,13 +953,21 @@ impl Workspace for WorkspaceServer {
         }: ChangeFileParams,
     ) -> Result<(), WorkspaceError> {
         let documents = self.documents.pin();
-        let (index, opened_by_scanner) = documents
+        let (index, opened_by_scanner, existing_version) = documents
             .get(path.as_path())
             .map(|document| {
-                debug_assert!(version > document.version);
-                (document.file_source_index, document.opened_by_scanner)
+                (
+                    document.file_source_index,
+                    document.opened_by_scanner,
+                    document.version,
+                )
             })
             .ok_or_else(WorkspaceError::not_found)?;
+
+        if existing_version.is_some_and(|existing_version| existing_version >= version) {
+            warn!(%version, %path, "outdated_file_change");
+            return Ok(()); // Safely ignore older versions.
+        }
 
         // We remove the node cache for the document, if it exists.
         // This is done so that we need to hold the lock as short as possible
@@ -882,9 +985,9 @@ impl Workspace for WorkspaceServer {
 
         let document = Document {
             content,
-            version,
+            version: Some(version),
             file_source_index: index,
-            syntax: Ok(parsed.any_parse),
+            syntax: Some(Ok(parsed.any_parse)),
             opened_by_scanner,
         };
 
@@ -896,9 +999,10 @@ impl Workspace for WorkspaceServer {
         }
 
         documents
-            .insert(path.into(), document)
+            .insert(path.clone().into(), document)
             .ok_or_else(WorkspaceError::not_found)?;
-        Ok(())
+
+        self.update_service_data(WatcherSignalKind::AddedOrChanged, &path)
     }
 
     /// Closes a file that is opened in the workspace.
@@ -907,22 +1011,44 @@ impl Workspace for WorkspaceServer {
     /// opened by the scanner as well. If the scanner has opened the file, it
     /// may still be required for multi-file analysis.
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
-        {
-            let documents = self.documents.pin();
-            let document = documents
-                .get(params.path.as_path())
-                .ok_or_else(WorkspaceError::not_found)?;
-            if !document.opened_by_scanner {
-                documents.remove(params.path.as_path());
+        let path = params.path.as_path();
+
+        let documents = self.documents.pin();
+        let result = documents.compute(path.to_path_buf(), |current| {
+            match current {
+                Some((_path, document)) if document.opened_by_scanner => {
+                    // If the scanner is still interested in the document, we
+                    // only unset the version and re-sync the content below.
+                    Operation::Insert(Document {
+                        version: None,
+                        ..document.clone()
+                    })
+                }
+                Some(_) => Operation::Remove,
+                None => Operation::Abort(()),
             }
+        });
+
+        // The node cache can be cleared in any case.
+        self.node_cache.lock().unwrap().remove(path);
+
+        match result {
+            Compute::Inserted(_, _) => unreachable!(),
+            Compute::Updated { .. } => {
+                // This may look counter-intuitive, but we need to consider
+                // that the file may have gone out-of-sync between the client
+                // and the file system. So when the client closes it, and the
+                // scanner still wants it, we need to resync it to make sure
+                // they're back in sync.
+                let _ = self
+                    .watcher_tx
+                    .send(WatcherInstruction::ResyncFile(path.to_path_buf()));
+
+                Ok(())
+            }
+            Compute::Removed(_, _) => self.update_service_data(WatcherSignalKind::Removed, path),
+            Compute::Aborted(_) => Err(WorkspaceError::not_found()),
         }
-
-        self.node_cache
-            .lock()
-            .unwrap()
-            .remove(params.path.as_path());
-
-        Ok(())
     }
 
     /// Retrieves the list of diagnostics associated with a file
@@ -952,8 +1078,10 @@ impl Workspace for WorkspaceServer {
             enabled_rules,
         } = params;
         let parse = self.get_parse(&path)?;
+        let language = self.get_file_source(&path);
+        let capabilities = self.features.get_capabilities(language);
         let (diagnostics, errors, skipped_diagnostics) =
-            if let Some(lint) = self.get_file_capabilities(&path).analyzer.lint {
+            if let Some(lint) = capabilities.analyzer.lint {
                 let settings = self
                     .projects
                     .get_settings(project_key)
@@ -965,7 +1093,7 @@ impl Workspace for WorkspaceServer {
                     path: &path,
                     only,
                     skip,
-                    language: self.get_file_source(&path),
+                    language,
                     categories,
                     dependency_graph: self.dependency_graph.clone(),
                     project_layout: self.project_layout.clone(),
@@ -1067,6 +1195,7 @@ impl Workspace for WorkspaceServer {
     )]
     fn format_file(&self, params: FormatFileParams) -> Result<Printed, WorkspaceError> {
         let capabilities = self.get_file_capabilities(&params.path);
+
         let format = capabilities
             .formatter
             .format
@@ -1076,6 +1205,7 @@ impl Workspace for WorkspaceServer {
                 .get_settings(params.project_key)
                 .ok_or_else(WorkspaceError::no_project)?,
         );
+
         let parse = self.get_parse(&params.path)?;
 
         if !handle.format_with_errors_enabled_for_this_file_path(&params.path) && parse.has_errors()
@@ -1277,9 +1407,9 @@ impl Workspace for WorkspaceServer {
 fn init_thread_pool() {
     #[cfg(not(target_family = "wasm"))]
     {
-        static INIT_ONCE: Once = Once::new();
+        static INIT_ONCE: std::sync::Once = std::sync::Once::new();
         INIT_ONCE.call_once(|| {
-            ThreadPoolBuilder::new()
+            rayon::ThreadPoolBuilder::new()
                 .thread_name(|index| format!("biome::workspace_worker_{index}"))
                 .build_global()
                 .expect("failed to initialize the global thread pool");

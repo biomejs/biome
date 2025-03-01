@@ -304,6 +304,38 @@ async function testInvalidObejctMethodCalls(): Promise<void> {
 	invalidTestObject["returnsPromiseMethod"]();
 }
 
+type Props = {
+	a: string;
+	returnsPromise: () => Promise<void>;
+};
+async function testCallingReturnsPromise(props: Props) {
+	props.returnsPromise().then(() => {});
+}
+const testDestructuringAndCallingReturnsPromise = async ({
+	returnsPromise,
+}: Props) => {
+	returnsPromise();
+};
+async function testPassingReturnsPromiseDirectly(
+	returnsPromise: () => Promise<void>
+) {
+	returnsPromise();
+}
+async function testCallingReturnsPromiseFromObject(props: {
+	returnsPromise: () => Promise<void>;
+}) {
+	props.returnsPromise();
+}
+async function testDestructuringAndCallingReturnsPromiseFromRest({
+	a,
+	...rest
+}: Props) {
+	rest
+		.returnsPromise()
+		.then(() => {})
+		.finally(() => {});
+}
+
 ```
 
 # Diagnostics
@@ -1427,5 +1459,114 @@ invalid.ts:298:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━
   
     298 │ → await·invalidTestObject["returnsPromiseMethod"]();
         │   ++++++                                            
+
+```
+
+```
+invalid.ts:306:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    304 │ };
+    305 │ async function testCallingReturnsPromise(props: Props) {
+  > 306 │ 	props.returnsPromise().then(() => {});
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    307 │ }
+    308 │ const testDestructuringAndCallingReturnsPromise = async ({
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    306 │ → await·props.returnsPromise().then(()·=>·{});
+        │   ++++++                                      
+
+```
+
+```
+invalid.ts:311:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    309 │ 	returnsPromise,
+    310 │ }: Props) => {
+  > 311 │ 	returnsPromise();
+        │ 	^^^^^^^^^^^^^^^^^
+    312 │ };
+    313 │ async function testPassingReturnsPromiseDirectly(
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    311 │ → await·returnsPromise();
+        │   ++++++                 
+
+```
+
+```
+invalid.ts:316:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    314 │ 	returnsPromise: () => Promise<void>
+    315 │ ) {
+  > 316 │ 	returnsPromise();
+        │ 	^^^^^^^^^^^^^^^^^
+    317 │ }
+    318 │ async function testCallingReturnsPromiseFromObject(props: {
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    316 │ → await·returnsPromise();
+        │   ++++++                 
+
+```
+
+```
+invalid.ts:321:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    319 │ 	returnsPromise: () => Promise<void>;
+    320 │ }) {
+  > 321 │ 	props.returnsPromise();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    322 │ }
+    323 │ async function testDestructuringAndCallingReturnsPromiseFromRest({
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    321 │ → await·props.returnsPromise();
+        │   ++++++                       
+
+```
+
+```
+invalid.ts:327:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    325 │ 	...rest
+    326 │ }: Props) {
+  > 327 │ 	rest
+        │ 	^^^^
+  > 328 │ 		.returnsPromise()
+  > 329 │ 		.then(() => {})
+  > 330 │ 		.finally(() => {});
+        │ 		^^^^^^^^^^^^^^^^^^^
+    331 │ }
+    332 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i Unsafe fix: Add await operator.
+  
+    327 │ → await·rest
+        │   ++++++    
 
 ```

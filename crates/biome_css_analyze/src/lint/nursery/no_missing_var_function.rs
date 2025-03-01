@@ -10,7 +10,7 @@ declare_lint_rule! {
     /// Disallow missing var function for css variables.
     ///
     /// This rule has the following limitations:
-    /// - It only reports custom properties that are defined and accesible within the same source.
+    /// - It only reports custom properties that are defined and accessible within the same source.
     /// - It does not check properties that can contain author-defined identifiers.
     /// - It ignores the following properties:
     ///   - `animation`
@@ -167,24 +167,26 @@ impl Rule for NoMissingVarFunction {
         let rule = model.get_rule_by_range(node.range())?;
 
         if rule
-            .declarations
+            .declarations()
             .iter()
-            .any(|decl| decl.property.name == custom_variable_name)
+            .flat_map(|decl| decl.property().value())
+            .any(|value| value.text() == custom_variable_name)
         {
             return Some(node.clone());
         }
 
-        let mut parent_id = rule.parent_id;
+        let mut parent_id = rule.parent_id();
         while let Some(id) = parent_id {
             let parent_rule = model.get_rule_by_id(id)?;
             if parent_rule
-                .declarations
+                .declarations()
                 .iter()
-                .any(|decl| decl.property.name == custom_variable_name)
+                .flat_map(|decl| decl.property().value())
+                .any(|value| value.text() == custom_variable_name)
             {
                 return Some(node.clone());
             }
-            parent_id = parent_rule.parent_id;
+            parent_id = parent_rule.parent_id();
         }
 
         if model

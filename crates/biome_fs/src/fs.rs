@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::fmt::{Debug, Display, Formatter};
 use std::panic::RefUnwindSafe;
+use std::path::Path;
 use std::sync::Arc;
 use std::{fmt, io};
 use tracing::{error, info};
@@ -447,6 +448,17 @@ pub struct FileSystemDiagnostic {
 impl Display for FileSystemDiagnostic {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         Diagnostic::description(self, f)
+    }
+}
+
+impl FileSystemDiagnostic {
+    pub fn non_utf8_path(path: &Path) -> Self {
+        Self {
+            severity: Severity::Error,
+            path: path.display().to_string(),
+            error_kind: FsErrorKind::NonUtf8Path,
+            source: None,
+        }
     }
 }
 

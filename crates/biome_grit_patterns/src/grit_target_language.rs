@@ -80,7 +80,7 @@ macro_rules! generate_target_language {
                 "GritTargetLanguage".to_owned()
             }
 
-            fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+            fn json_schema(_generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
                 schemars::schema::Schema::Object(schemars::schema::SchemaObject {
                     enum_values: Some(vec![
                         $(serde_json::json!($name)),+

@@ -212,7 +212,7 @@ fn is_global_object(semantic: &SemanticModel) -> bool {
     semantic
         .scopes()
         .find(|s| s.get_binding("Object").is_some())
-        .map_or(true, |s| s.is_global_scope())
+        .is_none_or(|s| s.is_global_scope())
 }
 
 /// Checks if the given node is considered to be an access to a property of `Object.prototype`.

@@ -8,7 +8,7 @@ use biome_rowan::{TextRange, TextSize};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FormatFileParams, FormatOnTypeParams,
-    FormatRangeParams, GetFileContentParams, SupportsFeatureParams,
+    FormatRangeParams, GetFileContentParams, IsPathIgnoredParams, SupportsFeatureParams,
 };
 use biome_service::{extension_error, WorkspaceError};
 use std::ops::Sub;
@@ -22,14 +22,20 @@ pub(crate) fn format(
     let url = params.text_document.uri;
     let path = session.file_path(&url)?;
     let doc = session.document(&url)?;
-
+    let features = FeaturesBuilder::new().with_formatter().build();
     let file_features = session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
-        features: FeaturesBuilder::new().with_formatter().build(),
+        features,
     })?;
 
-    if file_features.supports_format() {
+    if file_features.supports_format()
+        && !session.workspace.is_path_ignored(IsPathIgnoredParams {
+            path: path.clone(),
+            project_key: doc.project_key,
+            features,
+        })?
+    {
         let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
             project_key: doc.project_key,
             path: path.clone(),
@@ -83,13 +89,20 @@ pub(crate) fn format_range(
     let path = session.file_path(&url)?;
     let doc = session.document(&url)?;
 
+    let features = FeaturesBuilder::new().with_formatter().build();
     let file_features = session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
-        features: FeaturesBuilder::new().with_formatter().build(),
+        features,
     })?;
 
-    if file_features.supports_format() {
+    if file_features.supports_format()
+        && !session.workspace.is_path_ignored(IsPathIgnoredParams {
+            path: path.clone(),
+            project_key: doc.project_key,
+            features,
+        })?
+    {
         let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
             project_key: doc.project_key,
             path: path.clone(),
@@ -161,13 +174,20 @@ pub(crate) fn format_on_type(
     let path = session.file_path(&url)?;
     let doc = session.document(&url)?;
 
+    let features = FeaturesBuilder::new().with_formatter().build();
     let file_features = session.workspace.file_features(SupportsFeatureParams {
         project_key: doc.project_key,
         path: path.clone(),
-        features: FeaturesBuilder::new().with_formatter().build(),
+        features,
     })?;
 
-    if file_features.supports_format() {
+    if file_features.supports_format()
+        && !session.workspace.is_path_ignored(IsPathIgnoredParams {
+            path: path.clone(),
+            project_key: doc.project_key,
+            features,
+        })?
+    {
         let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
             project_key: doc.project_key,
             path: path.clone(),

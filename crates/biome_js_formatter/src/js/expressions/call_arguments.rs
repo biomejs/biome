@@ -1073,29 +1073,28 @@ fn can_group_expression_argument(
             //     (type: ObjectType): Provider<Opts> => {}
             //   );
             // }
-            let can_group_type =
-                return_type_annotation
-                    .and_then(|rty| rty.ty().ok())
-                    .map_or(true, |any_type| match any_type {
-                        AnyTsReturnType::AnyTsType(AnyTsType::TsReferenceType(_)) => match &body {
-                            AnyJsFunctionBody::JsFunctionBody(body) => {
-                                body.statements().iter().any(|statement| match statement {
-                                    AnyJsStatement::JsEmptyStatement(s) => {
-                                        // When the body contains an empty statement, comments in
-                                        // the body will get attached to that statement rather than
-                                        // the body itself, so they need to be checked for comments
-                                        // as well to ensure that the body is still considered
-                                        // groupable when those empty statements are removed by the
-                                        // printer.
-                                        comments.has_comments(s.syntax())
-                                    }
-                                    _ => true,
-                                }) || comments.has_dangling_comments(body.syntax())
-                            }
-                            _ => false,
-                        },
-                        _ => true,
-                    });
+            let can_group_type = return_type_annotation
+                .and_then(|rty| rty.ty().ok())
+                .is_none_or(|any_type| match any_type {
+                    AnyTsReturnType::AnyTsType(AnyTsType::TsReferenceType(_)) => match &body {
+                        AnyJsFunctionBody::JsFunctionBody(body) => {
+                            body.statements().iter().any(|statement| match statement {
+                                AnyJsStatement::JsEmptyStatement(s) => {
+                                    // When the body contains an empty statement, comments in
+                                    // the body will get attached to that statement rather than
+                                    // the body itself, so they need to be checked for comments
+                                    // as well to ensure that the body is still considered
+                                    // groupable when those empty statements are removed by the
+                                    // printer.
+                                    comments.has_comments(s.syntax())
+                                }
+                                _ => true,
+                            }) || comments.has_dangling_comments(body.syntax())
+                        }
+                        _ => false,
+                    },
+                    _ => true,
+                });
 
             let can_group_body = match &body {
                 AnyJsFunctionBody::JsFunctionBody(_)

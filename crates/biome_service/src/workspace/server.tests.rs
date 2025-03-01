@@ -1,4 +1,5 @@
 use biome_fs::MemoryFileSystem;
+use crossbeam::channel::bounded;
 
 use super::*;
 
@@ -11,7 +12,8 @@ fn commonjs_file_rejects_import_statement() {
     fs.insert(Utf8PathBuf::from("/project/a.js"), FILE_CONTENT);
     fs.insert(Utf8PathBuf::from("/project/package.json"), MANIFEST_CONTENT);
 
-    let workspace = WorkspaceServer::new(Box::new(fs));
+    let (tx, _) = bounded(0);
+    let workspace = WorkspaceServer::new(Box::new(fs), tx);
     let project_key = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/"),
@@ -23,6 +25,7 @@ fn commonjs_file_rejects_import_statement() {
         .scan_project_folder(ScanProjectFolderParams {
             project_key,
             path: Some(BiomePath::new("/")),
+            watch: false,
         })
         .unwrap();
 

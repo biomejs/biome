@@ -386,7 +386,7 @@ impl TestLogDir {
         let guard = RAGE_GUARD.lock().unwrap();
         let path = env::temp_dir().join(name);
 
-        env::set_var("BIOME_LOG_PATH", &path);
+        unsafe { env::set_var("BIOME_LOG_PATH", &path) };
 
         Self {
             path: Utf8PathBuf::from_path_buf(path).unwrap(),
@@ -398,6 +398,6 @@ impl TestLogDir {
 impl Drop for TestLogDir {
     fn drop(&mut self) {
         fs::remove_dir_all(&self.path).ok();
-        env::remove_var("BIOME_LOG_PATH");
+        unsafe { env::remove_var("BIOME_LOG_PATH") };
     }
 }

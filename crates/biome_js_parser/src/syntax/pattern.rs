@@ -156,7 +156,11 @@ pub(crate) trait ParseObjectPattern {
         let mut progress = ParserProgress::default();
 
         while !p.at(T!['}']) {
-            progress.assert_progressing(p);
+            if !progress.has_progressed(p) {
+                let diagnostic = Self::expected_property_pattern_error(p, p.cur_range());
+                p.error(diagnostic);
+                break;
+            }
 
             if p.at(T![,]) {
                 // missing element

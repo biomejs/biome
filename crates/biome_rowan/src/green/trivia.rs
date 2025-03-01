@@ -132,12 +132,15 @@ impl GreenTrivia {
     }
 
     pub(crate) unsafe fn from_raw(ptr: *mut GreenTriviaData) -> Self {
-        if let Some(ptr) = ptr.as_ref() {
-            let arc = Arc::from_raw(&ptr.data as *const ReprThin);
-            let arc = mem::transmute::<Arc<ReprThin>, ThinArc<GreenTriviaHead, TriviaPiece>>(arc);
-            Self { ptr: Some(arc) }
-        } else {
-            Self { ptr: None }
+        unsafe {
+            if let Some(ptr) = ptr.as_ref() {
+                let arc = Arc::from_raw(&ptr.data as *const ReprThin);
+                let arc =
+                    mem::transmute::<Arc<ReprThin>, ThinArc<GreenTriviaHead, TriviaPiece>>(arc);
+                Self { ptr: Some(arc) }
+            } else {
+                Self { ptr: None }
+            }
         }
     }
 }

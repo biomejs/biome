@@ -162,7 +162,7 @@ impl Rule for UseValidAnchor {
                     }
 
                     let static_value = anchor_attribute.as_static_value()?;
-                    if static_value.as_string_constant().map_or(true, |const_str| {
+                    if static_value.as_string_constant().is_none_or(|const_str| {
                         const_str.is_empty()
                             || const_str.contains('#')
                             || const_str.contains("javascript:")
@@ -176,7 +176,7 @@ impl Rule for UseValidAnchor {
                     }
 
                     let static_value = anchor_attribute.as_static_value()?;
-                    if static_value.as_string_constant().map_or(true, |const_str| {
+                    if static_value.as_string_constant().is_none_or(|const_str| {
                         const_str.is_empty()
                             || const_str == "#"
                             || const_str.contains("javascript:")

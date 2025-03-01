@@ -23,7 +23,7 @@ pub struct SvelteFileHandler;
 
 // https://regex101.com/r/E4n4hh/6
 pub static SVELTE_FENCE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n(?<script>(?U:.*))</script>"#).unwrap()
+    Regex::new(r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n?(?<script>(?U:.*))</script>"#).unwrap()
 });
 
 impl SvelteFileHandler {

@@ -167,7 +167,7 @@ fn has_valid_anchor_content(node: &AnyJsxElement) -> bool {
                 }
                 attribute
                     .as_static_value()
-                    .map_or(true, |attribute| !attribute.is_falsy())
+                    .is_none_or(|attribute| !attribute.is_falsy())
             })
         || node.has_spread_prop()
 }

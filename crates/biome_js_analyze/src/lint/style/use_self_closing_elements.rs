@@ -151,7 +151,7 @@ impl Rule for UseSelfClosingElements {
         let prev_token = r_angle_token.prev_token();
         let need_extra_whitespace = prev_token
             .as_ref()
-            .map_or(true, |token| !token.trailing_trivia().text().ends_with(' '));
+            .is_none_or(|token| !token.trailing_trivia().text().ends_with(' '));
 
         // drop the leading trivia of `r_angle_token`
         r_angle_token = r_angle_token.with_leading_trivia([]);

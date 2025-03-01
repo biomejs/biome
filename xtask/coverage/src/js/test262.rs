@@ -196,7 +196,7 @@ impl TestSuite for Test262TestSuite {
         if !meta
             .negative
             .as_ref()
-            .map_or(true, |negative| negative.phase == Phase::Parse)
+            .is_none_or(|negative| negative.phase == Phase::Parse)
         {
             None
         } else {

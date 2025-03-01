@@ -179,7 +179,7 @@ impl Arguments {
         })
     }
 
-    pub fn gen(&self) -> Result<TokenStream, &str> {
+    pub fn generate(&self) -> Result<TokenStream, &str> {
         let files = self.get_all_files()?;
         let mut modules = Modules::default();
 
@@ -247,7 +247,7 @@ impl syn::parse::Parse for Arguments {
 pub fn gen_tests(input: TokenStream) -> TokenStream {
     let args = syn::parse_macro_input!(input as Arguments);
 
-    match args.gen() {
+    match args.generate() {
         Ok(tokens) => tokens,
         Err(e) => abort!(e, "{}", e),
     }

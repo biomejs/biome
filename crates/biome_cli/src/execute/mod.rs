@@ -598,9 +598,8 @@ pub fn execute_mode(
                 let report_file = BiomePath::new("_report_output.json");
                 session.app.workspace.open_file(OpenFileParams {
                     project_key,
-                    content: FileContent::FromClient(content),
+                    content: FileContent::from_client(content),
                     path: report_file.clone(),
-                    version: 0,
                     document_file_source: None,
                     persist_node_cache: false,
                 })?;

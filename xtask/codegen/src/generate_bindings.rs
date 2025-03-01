@@ -10,7 +10,7 @@ use biome_js_syntax::{
 use biome_rowan::AstNode;
 use biome_service::workspace_types::{generate_type, methods, ModuleQueue};
 use biome_string_case::Case;
-use schemars::gen::{SchemaGenerator, SchemaSettings};
+use schemars::r#gen::{SchemaGenerator, SchemaSettings};
 use xtask::{project_root, Mode, Result};
 use xtask_codegen::update;
 

@@ -59,6 +59,8 @@ pub enum WorkspaceError {
     ProtectedFile(ProtectedFile),
     /// Error when searching for a pattern
     SearchError(SearchError),
+    /// Error in the workspace watcher.
+    WatchError(WatchError),
 }
 
 impl WorkspaceError {
@@ -587,6 +589,19 @@ impl Advices for ProtectedFileAdvice {
     fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
         visitor.record_log(LogCategory::Info, &markup! { "You can hide this diagnostic by using "<Emphasis>"--diagnostic-level=warn"</Emphasis>" to increase the diagnostic level shown by CLI." })
     }
+}
+
+#[derive(Debug, Deserialize, Diagnostic, Serialize)]
+#[diagnostic(
+    category = "project",
+    severity = Error,
+    message(
+        message("Biome cannot watch files on disk: "<Info>{self.reason}</Info>),
+        description = "Biome cannot watch files on disk: {reason}",
+    ),
+)]
+pub struct WatchError {
+    pub reason: String,
 }
 
 #[cfg(test)]

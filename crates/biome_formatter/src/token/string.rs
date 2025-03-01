@@ -88,7 +88,7 @@ pub fn normalize_string(
                             false
                         }
                         0xE2 => {
-                            // Prserve escaping of Unicode characters U+2028 and U+2029
+                            // Preserve escaping of Unicode characters U+2028 and U+2029
                             !(matches!(bytes.next(), Some((_, 0x80)))
                                 && matches!(bytes.next(), Some((_, 0xA8 | 0xA9))))
                         }
@@ -98,7 +98,7 @@ pub fn normalize_string(
                             // So we ignore the current slash and we continue
                             // to the next iteration
                             //
-                            // We always unescape alternate quots regardless of `is_escape_preserved`.
+                            // We always unescape alternate quotes regardless of `is_escape_preserved`.
                             escaped == alternate_quote
                                 || (escaped != preferred_quote && !is_escape_preserved)
                         }
