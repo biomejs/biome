@@ -4,16 +4,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_factory::make;
-use biome_js_syntax::{
-    global_identifier, static_value::StaticValue, AnyJsCallArgument, AnyJsExpression,
-    AnyJsLiteralExpression, AnyJsTemplateElement, JsCallArguments, JsSyntaxKind, JsSyntaxToken, T,
-};
-use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange, TriviaPieceKind,
-};
-
-use super::no_control_characters_in_regex::AnyRegexExpression;
+use biome_js_syntax::{JsRegexLiteralExpression, JsSyntaxKind, JsSyntaxToken};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 
 declare_lint_rule! {
     /// Disallow characters made with multiple code points in character class syntax.
@@ -22,7 +14,7 @@ declare_lint_rule! {
     /// A RegExp character class `/[abc]/` cannot handle characters with multiple code points.
     /// For example, the character `❇️` consists of two code points: `❇` (U+2747) and `VARIATION SELECTOR-16` (U+FE0F).
     /// If this character is in a RegExp character class, it will match to either `❇` or `VARIATION SELECTOR-16` rather than `❇️`.
-    /// This rule reports the regular expressions which include multiple code point characters in character class syntax.
+    /// This rule reports the regular expression literals which include multiple code point characters in character class syntax.
     ///
     /// ## Examples
     ///
@@ -114,52 +106,20 @@ pub struct RuleState {
 }
 
 impl Rule for NoMisleadingCharacterClass {
-    type Query = Ast<AnyRegexExpression>;
+    type Query = Ast<JsRegexLiteralExpression>;
     type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let regex = ctx.query();
-        let (callee, arguments) = match regex {
-            AnyRegexExpression::JsRegexLiteralExpression(expr) => {
-                let (pattern, flags) = expr.decompose().ok()?;
-                let RuleState { range, message } =
-                    diagnostic_regex_pattern(pattern.text(), flags.text(), false)?;
-                return Some(RuleState {
-                    range: range.checked_add(expr.range().start().checked_add(1.into())?)?,
-                    message,
-                });
-            }
-            AnyRegexExpression::JsNewExpression(expr) => (expr.callee().ok()?, expr.arguments()?),
-            AnyRegexExpression::JsCallExpression(expr) => {
-                (expr.callee().ok()?, expr.arguments().ok()?)
-            }
-        };
-        if is_regex_expr(callee)? {
-            let mut args = arguments.args().iter();
-            let pattern = args
-                .next()?
-                .ok()?
-                .as_any_js_expression()?
-                .as_static_value()?;
-            let pattern_range = pattern.range();
-            let pattern = pattern.as_string_constant()?;
-            let flags = args
-                .next()
-                .and_then(|arg| arg.ok()?.as_any_js_expression()?.as_static_value());
-            let flags = if let Some(StaticValue::String(flags)) = &flags {
-                flags.text()
-            } else {
-                ""
-            };
-            let RuleState { range, message } = diagnostic_regex_pattern(pattern, flags, true)?;
-            return Some(RuleState {
-                range: range.checked_add(pattern_range.start().checked_add(1.into())?)?,
-                message,
-            });
-        }
-        None
+        let node = ctx.query();
+        let (pattern, flags) = node.decompose().ok()?;
+        let RuleState { range, message } =
+            diagnostic_regex_pattern(pattern.text(), flags.text(), false)?;
+        Some(RuleState {
+            range: range.checked_add(node.range().start().checked_add(1.into())?)?,
+            message,
+        })
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -170,90 +130,27 @@ impl Rule for NoMisleadingCharacterClass {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let node = ctx.query();
         let is_fixable = matches!(state.message, Message::SurrogatePairWithoutUFlag);
-        if is_fixable {
-            match node {
-                AnyRegexExpression::JsRegexLiteralExpression(expr) => {
-                    let prev_token = expr.value_token().ok()?;
-                    let text = prev_token.text();
-                    let next_token = JsSyntaxToken::new_detached(
-                        JsSyntaxKind::JS_REGEX_LITERAL,
-                        &format!("{text}u"),
-                        [],
-                        [],
-                    );
-                    let mut mutation = ctx.root().begin();
-                    mutation.replace_token(prev_token, next_token);
-                    Some(JsRuleAction::new(
-                        ctx.metadata().action_category(ctx.category(), ctx.group()),
-                        ctx.metadata().applicability(),
-                        markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
-                            .to_owned(),
-                        mutation,
-                    ))
-                }
-                AnyRegexExpression::JsNewExpression(expr) => {
-                    let prev_node = expr.arguments()?;
-                    let mut prev_args = prev_node.args().iter();
-                    let regex_pattern = prev_args.next().and_then(|a| a.ok())?;
-                    let flag = prev_args.next().and_then(|a| a.ok());
-                    match make_suggestion(regex_pattern, flag) {
-                        Some(suggest) => {
-                            let mut mutation = ctx.root().begin();
-                            mutation.replace_node(prev_node, suggest);
-                            Some(JsRuleAction::new(
-                                ctx.metadata().action_category(ctx.category(), ctx.group()),
-                                ctx.metadata().applicability(),
-                                markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
-                                    .to_owned(),
-                                mutation,
-                            ))
-                        }
-                        None => None,
-                    }
-                }
-                AnyRegexExpression::JsCallExpression(expr) => {
-                    let prev_node = expr.arguments().ok()?;
-                    let mut prev_args = expr.arguments().ok()?.args().iter();
-                    let regex_pattern = prev_args.next().and_then(|a| a.ok())?;
-                    let flag = prev_args.next().and_then(|a| a.ok());
-                    match make_suggestion(regex_pattern, flag) {
-                        Some(suggest) => {
-                            let mut mutation = ctx.root().begin();
-                            mutation.replace_node(prev_node, suggest);
-                            Some(JsRuleAction::new(
-                                ctx.metadata().action_category(ctx.category(), ctx.group()),
-                                ctx.metadata().applicability(),
-                                markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
-                                    .to_owned(),
-                                mutation,
-                            ))
-                        }
-                        None => None,
-                    }
-                }
-            }
-        } else {
-            None
+        if !is_fixable {
+            return None;
         }
-    }
-}
-
-fn is_regex_expr(expr: AnyJsExpression) -> Option<bool> {
-    match expr {
-        AnyJsExpression::JsIdentifierExpression(callee) => {
-            Some(callee.name().ok()?.has_name("RegExp"))
-        }
-        AnyJsExpression::JsStaticMemberExpression(callee) => {
-            let is_member_regexp = callee.member().ok()?.value_token().ok()?.text() == "RegExp";
-            let callee = callee.object().ok()?;
-            let (_, name) = global_identifier(&callee)?;
-            let is_global_obj =
-                name.text() == "globalThis" || name.text() == "global" || name.text() == "window";
-            Some(is_global_obj && is_member_regexp)
-        }
-        _ => Some(false),
+        let node = ctx.query();
+        let prev_token = node.value_token().ok()?;
+        let text = prev_token.text();
+        let next_token = JsSyntaxToken::new_detached(
+            JsSyntaxKind::JS_REGEX_LITERAL,
+            &format!("{text}u"),
+            [],
+            [],
+        );
+        let mut mutation = ctx.root().begin();
+        mutation.replace_token(prev_token, next_token);
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }.to_owned(),
+            mutation,
+        ))
     }
 }
 
@@ -523,83 +420,6 @@ fn decode_unicode_escape_sequence(s: &str, is_in_string: bool) -> Option<Unicode
             len: offset + 6,
         })
     }
-}
-
-fn make_suggestion(
-    literal: AnyJsCallArgument,
-    flag: Option<AnyJsCallArgument>,
-) -> Option<JsCallArguments> {
-    let suggestion = match flag {
-        None => Some(AnyJsCallArgument::AnyJsExpression(
-            AnyJsExpression::AnyJsLiteralExpression(
-                AnyJsLiteralExpression::JsStringLiteralExpression(
-                    make::js_string_literal_expression(make::js_string_literal("u")),
-                ),
-            ),
-        )),
-        Some(f) => match f {
-            AnyJsCallArgument::AnyJsExpression(expr) => match expr {
-                AnyJsExpression::AnyJsLiteralExpression(e) => {
-                    let text = e.to_trimmed_string();
-                    if text.starts_with('\'') {
-                        Some(AnyJsCallArgument::AnyJsExpression(
-                            AnyJsExpression::AnyJsLiteralExpression(
-                                AnyJsLiteralExpression::JsStringLiteralExpression(
-                                    make::js_string_literal_expression(make::js_string_literal(
-                                        &format!("'{text}u'"),
-                                    )),
-                                ),
-                            ),
-                        ))
-                    } else {
-                        Some(AnyJsCallArgument::AnyJsExpression(
-                            AnyJsExpression::AnyJsLiteralExpression(
-                                AnyJsLiteralExpression::JsStringLiteralExpression(
-                                    make::js_string_literal_expression(make::js_string_literal(
-                                        &format!("{}u", text.replace('"', "")),
-                                    )),
-                                ),
-                            ),
-                        ))
-                    }
-                }
-                AnyJsExpression::JsTemplateExpression(expr) => {
-                    let mut elements = expr
-                        .elements()
-                        .iter()
-                        .collect::<Vec<AnyJsTemplateElement>>();
-
-                    let uflag = AnyJsTemplateElement::from(make::js_template_chunk_element(
-                        make::js_template_chunk("u"),
-                    ));
-                    elements.push(uflag);
-                    Some(AnyJsCallArgument::AnyJsExpression(
-                        AnyJsExpression::JsTemplateExpression(
-                            make::js_template_expression(
-                                make::token(T!['`']),
-                                make::js_template_element_list(elements),
-                                make::token(T!['`']),
-                            )
-                            .build(),
-                        ),
-                    ))
-                }
-                AnyJsExpression::JsIdentifierExpression(_) => None,
-                _ => None,
-            },
-            AnyJsCallArgument::JsSpread(_) => None,
-        },
-    };
-    suggestion.map(|s| {
-        make::js_call_arguments(
-            make::token(T!['(']),
-            make::js_call_argument_list(
-                [literal, s],
-                Some(make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])),
-            ),
-            make::token(T![')']),
-        )
-    })
 }
 
 #[cfg(test)]

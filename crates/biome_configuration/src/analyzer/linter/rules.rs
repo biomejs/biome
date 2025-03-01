@@ -5743,7 +5743,7 @@ pub struct Suspicious {
     #[doc = "Disallow TypeScript const enum"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_const_enum: Option<RuleFixConfiguration<biome_js_analyze::options::NoConstEnum>>,
-    #[doc = "Prevents from having control characters and some escape sequences that match control characters in regular expressions."]
+    #[doc = "Prevents from having control characters and some escape sequences that match control characters in regular expression literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_control_characters_in_regex:
         Option<RuleConfiguration<biome_js_analyze::options::NoControlCharactersInRegex>>,
