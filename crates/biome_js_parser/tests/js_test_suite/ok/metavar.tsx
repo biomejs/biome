@@ -18,4 +18,4 @@ function µfunctionName() {}
 
 type µType = µOtherType;
 
-<µtag>µ_</µtag>
+<µtag µ_>µ_</µtag>

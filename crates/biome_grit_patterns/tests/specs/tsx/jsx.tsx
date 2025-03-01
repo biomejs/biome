@@ -1,2 +1,2 @@
-<div style={{}}></div>;
-<div style={{}}/>
+<div style={{}}>{children}</div>;
+<div style={{}} />
