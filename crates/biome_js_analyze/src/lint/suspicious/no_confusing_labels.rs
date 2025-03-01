@@ -58,6 +58,24 @@ declare_lint_rule! {
     /// $: { /* reactive block */ }
     /// </script>
     /// ```
+    /// ## Options
+    ///
+    /// Use the options to specify specific labels that you want to allow.
+    /// Labels can be used to mark code that should be removed in certain conditions,
+    /// for example in production builds.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "allowedLabels": ["DEV"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options
+    /// DEV: assertSomeCondition();
+    /// ```
+    ///
     pub NoConfusingLabels {
         version: "1.0.0",
         name: "noConfusingLabels",
