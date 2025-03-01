@@ -13,6 +13,7 @@ unused_lifetimes                       = "warn"
 unused_macro_rules                     = "warn"
 
 # Rust 2024 upgrade
+deprecated_safe_2024       = "warn"
 missing_unsafe_on_extern   = "warn"
 unsafe_attr_outside_unsafe = "warn"
 
