@@ -114,7 +114,7 @@ impl Rule for NoStaticElementInteractions {
                     if let Some(value) = node.find_attribute_by_name(handler) {
                         value
                             .as_static_value()
-                            .map_or(true, |value| value.text() != "null")
+                            .is_none_or(|value| value.text() != "null")
                     } else {
                         false
                     }
@@ -153,7 +153,7 @@ fn is_hidden_from_screen_reader(node: &AnyJsxElement, element_name: &str) -> boo
     node.find_attribute_by_name("aria-hidden")
         .is_some_and(|attr| {
             attr.as_static_value()
-                .map_or(true, |val| val.text() == "true")
+                .is_none_or(|val| val.text() == "true")
         })// <div aria-hidden />
         || (element_name == "input"
             && node.find_attribute_by_name("type").is_some_and(|attr| {

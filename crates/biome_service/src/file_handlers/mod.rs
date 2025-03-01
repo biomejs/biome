@@ -1110,7 +1110,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     }
 
     fn finish(mut self) -> (FxHashSet<RuleFilter<'a>>, FxHashSet<RuleFilter<'a>>) {
-        let has_only_filter = self.only.map_or(true, |only| !only.is_empty());
+        let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
         let rules = self
             .settings
             .and_then(|settings| settings.as_linter_rules(self.path.expect("Path to be set")))
@@ -1310,7 +1310,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
     }
 
     fn finish(mut self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
-        let has_only_filter = self.only.map_or(true, |only| !only.is_empty());
+        let has_only_filter = self.only.is_none_or(|only| !only.is_empty());
         let rules = self
             .settings
             .and_then(|settings| settings.as_assist_actions(self.path.expect("Path to be set")))
