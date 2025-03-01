@@ -254,15 +254,15 @@ fn markup_to_string(markup: biome_console::Markup) -> String {
 }
 
 // Check that all red / green nodes have correctly been released on exit
-extern "C" fn check_leaks() {
+unsafe extern "C" fn check_leaks() {
     if let Some(report) = biome_rowan::check_live() {
         panic!("\n{report}")
     }
 }
 pub fn register_leak_checker() {
     // Import the atexit function from libc
-    extern "C" {
-        fn atexit(f: extern "C" fn()) -> c_int;
+    unsafe extern "C" {
+        fn atexit(f: unsafe extern "C" fn()) -> c_int;
     }
 
     // Use an atomic Once to register the check_leaks function to be called
