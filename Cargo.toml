@@ -12,6 +12,10 @@ unused_import_braces                   = "warn"
 unused_lifetimes                       = "warn"
 unused_macro_rules                     = "warn"
 
+# Rust 2024 upgrade
+missing_unsafe_on_extern   = "warn"
+unsafe_attr_outside_unsafe = "warn"
+
 [workspace.lints.clippy]
 allow_attributes        = "deny"
 cargo_common_metadata   = "allow"
