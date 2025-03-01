@@ -365,8 +365,8 @@ impl schemars::JsonSchema for DiagnosticTags {
         String::from("DiagnosticTags")
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <Vec<DiagnosticTag>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <Vec<DiagnosticTag>>::json_schema(generator)
     }
 }
 

@@ -138,8 +138,8 @@ impl schemars::JsonSchema for BiomePath {
         "BiomePath".to_string()
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        String::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        String::json_schema(generator)
     }
 }
 
@@ -260,8 +260,8 @@ impl schemars::JsonSchema for FileKinds {
         String::from("FileKind")
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <Vec<FileKind>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <Vec<FileKind>>::json_schema(generator)
     }
 }
 

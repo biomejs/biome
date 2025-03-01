@@ -106,7 +106,7 @@ impl<const D: bool> schemars::JsonSchema for Bool<D> {
         "Bool".to_string()
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        bool::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        bool::json_schema(generator)
     }
 }

@@ -76,7 +76,7 @@ use core::str;
 use crossbeam::channel::bounded;
 use enumflags2::{bitflags, BitFlags};
 #[cfg(feature = "schema")]
-use schemars::{gen::SchemaGenerator, schema::Schema};
+use schemars::{r#gen::SchemaGenerator, schema::Schema};
 use smallvec::SmallVec;
 use std::collections::HashMap;
 use std::time::Duration;
@@ -496,8 +496,8 @@ impl schemars::JsonSchema for FeatureName {
         String::from("FeatureName")
     }
 
-    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
-        <Vec<FeatureKind>>::json_schema(gen)
+    fn json_schema(generator: &mut SchemaGenerator) -> Schema {
+        <Vec<FeatureKind>>::json_schema(generator)
     }
 }
 

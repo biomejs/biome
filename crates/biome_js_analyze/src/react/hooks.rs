@@ -275,7 +275,7 @@ impl JsonSchema for StableHookResult {
         "StableHookResult".to_owned()
     }
 
-    fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(_generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
         use schemars::schema::*;
         Schema::Object(SchemaObject {
             subschemas: Some(Box::new(SubschemaValidation {

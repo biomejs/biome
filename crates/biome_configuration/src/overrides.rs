@@ -96,8 +96,8 @@ impl schemars::JsonSchema for OverrideGlobs {
     fn schema_name() -> String {
         "OverrideGlobs".to_string()
     }
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        Vec::<biome_glob::Glob>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        Vec::<biome_glob::Glob>::json_schema(generator)
     }
 }
 
