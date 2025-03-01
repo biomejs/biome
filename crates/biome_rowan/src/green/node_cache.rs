@@ -113,7 +113,7 @@ impl IntoRawPointer for GreenToken {
     }
 
     unsafe fn from_raw(ptr: *mut Self::Pointee) -> Self {
-        GreenToken::from_raw(NonNull::new(ptr).unwrap())
+        unsafe { GreenToken::from_raw(NonNull::new(ptr).unwrap()) }
     }
 }
 
@@ -140,7 +140,7 @@ impl IntoRawPointer for GreenNode {
     }
 
     unsafe fn from_raw(ptr: *mut Self::Pointee) -> Self {
-        GreenNode::from_raw(NonNull::new(ptr).unwrap())
+        unsafe { GreenNode::from_raw(NonNull::new(ptr).unwrap()) }
     }
 }
 
@@ -434,7 +434,7 @@ impl IntoRawPointer for GreenTrivia {
     }
 
     unsafe fn from_raw(ptr: *mut Self::Pointee) -> Self {
-        GreenTrivia::from_raw(ptr)
+        unsafe { GreenTrivia::from_raw(ptr) }
     }
 }
 

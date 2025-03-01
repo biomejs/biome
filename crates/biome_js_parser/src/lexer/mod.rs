@@ -511,7 +511,7 @@ impl<'src> JsLexer<'src> {
     #[inline]
     unsafe fn current_unchecked(&self) -> u8 {
         self.assert_current_char_boundary();
-        *self.source.as_bytes().get_unchecked(self.position)
+        unsafe { *self.source.as_bytes().get_unchecked(self.position) }
     }
 
     /// Advances the position by one and returns the next byte value
