@@ -1,3 +1,13 @@
+//! Scanner for crawling the file system and loading documents into projects.
+//!
+//! Conceptually, the scanner is more than just the scanning logic in this
+//! module. Rather, we also consider the [watcher](crate::WorkspaceWatcher)
+//! (which is partly implemented outside the workspace because of its
+//! threading requirements) to be a part of the scanner.
+//!
+//! In other words, the scanner is both the scanning logic in this module as
+//! well as the watcher to allow continuous scanning.
+
 use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, TraversalContext, TraversalScope};
@@ -13,9 +23,15 @@ use tracing::instrument;
 use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
 use crate::workspace::{DocumentFileSource, FileContent, OpenFileParams};
+use crate::workspace_watcher::WatcherSignalKind;
 use crate::{Workspace, WorkspaceError};
 
 use super::server::WorkspaceServer;
+
+/// Entries that should be ignored even by the scanner.
+///
+/// These cannot (yet) be configured.
+pub const IGNORE_ENTRIES: &[&str] = &[".git", ".DS_Store"];
 
 pub(crate) struct ScanResult {
     /// Diagnostics reported while scanning the project.
@@ -26,6 +42,8 @@ pub(crate) struct ScanResult {
 }
 
 impl WorkspaceServer {
+    /// Performs a file system scan and loads all supported documents into the
+    /// project.
     #[instrument(level = "debug", skip(self))]
     pub(super) fn scan(
         &self,
@@ -88,6 +106,13 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     let mut handleable_paths = Vec::with_capacity(evaluated_paths.len());
     let mut ignore_paths = Vec::new();
     for path in evaluated_paths {
+        if path
+            .file_name()
+            .is_some_and(|file_name| IGNORE_ENTRIES.contains(&file_name))
+        {
+            continue;
+        }
+
         if path.is_config() {
             configs.push(path);
         } else if path.is_manifest() {
@@ -112,7 +137,8 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
 
     let mut paths = configs;
     paths.append(&mut manifests);
-    ctx.workspace.update_project_layout_for_paths(&paths);
+    ctx.workspace
+        .update_project_layout_for_paths(WatcherSignalKind::AddedOrChanged, &paths);
     let result = ctx
         .workspace
         .update_project_ignore_files(ctx.project_key, &ignore_paths);
@@ -128,7 +154,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     }));
 
     ctx.workspace
-        .update_dependency_graph_for_paths(&handleable_paths);
+        .update_dependency_graph(WatcherSignalKind::AddedOrChanged, &handleable_paths);
 
     start.elapsed()
 }
@@ -234,7 +260,6 @@ fn open_file(ctx: &ScanContext, path: &BiomePath) {
             path: path.clone(),
             content: FileContent::FromServer,
             document_file_source: None,
-            version: 0,
             persist_node_cache: false,
         })
     }) {

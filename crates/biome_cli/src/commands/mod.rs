@@ -811,6 +811,7 @@ pub(crate) trait CommandRunner: Sized {
             let result = workspace.scan_project_folder(ScanProjectFolderParams {
                 project_key,
                 path: Some(project_path),
+                watch: cli_options.use_server,
             })?;
             for diagnostic in result.diagnostics {
                 if diagnostic.severity() >= Severity::Error {

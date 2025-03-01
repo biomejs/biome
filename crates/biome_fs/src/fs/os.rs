@@ -501,7 +501,7 @@ impl From<FileType> for FsErrorKind {
 pub struct TemporaryFs {
     /// The current working directory. It's the OS temporary folder joined with a file
     /// name passed in the [TemporaryFs::new] function
-    working_directory: Utf8PathBuf,
+    pub working_directory: Utf8PathBuf,
     files: Vec<(Utf8PathBuf, String)>,
 }
 
