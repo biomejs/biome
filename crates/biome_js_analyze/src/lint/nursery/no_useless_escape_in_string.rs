@@ -72,7 +72,7 @@ impl Rule for NoUselessEscapeInString {
         match node {
             AnyString::JsStringLiteralExpression(literal) => {
                 let token = literal.value_token().ok()?;
-                let text = token.text();
+                let text = token.text_trimmed();
                 next_useless_escape(text, text.bytes().next()?).map(|index| (token, index))
             }
             AnyString::JsTemplateExpression(template) => {
@@ -85,7 +85,7 @@ impl Rule for NoUselessEscapeInString {
                             let Ok(chunk) = chunk.template_chunk_token() else {
                                 continue;
                             };
-                            if let Some(index) = next_useless_escape(chunk.text(), b'`') {
+                            if let Some(index) = next_useless_escape(chunk.text_trimmed(), b'`') {
                                 return Some((chunk, index));
                             }
                         }
@@ -113,7 +113,7 @@ impl Rule for NoUselessEscapeInString {
             .text_trimmed_range()
             .start()
             .checked_add((*index as u32 + 1).into())?;
-        let escaped_char = token.text()[(1 + index)..].chars().next()?;
+        let escaped_char = token.text_trimmed()[(1 + index)..].chars().next()?;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),

@@ -1,5 +1,5 @@
 .a::after {
-    content: "useless \a"
+    content: /*before*/ "useless \a" /*after*/
 }
 .b::after {
     content: "useless \'"
