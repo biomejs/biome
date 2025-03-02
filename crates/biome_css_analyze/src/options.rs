@@ -37,6 +37,7 @@ pub type NoUnknownTypeSelector = < lint :: nursery :: no_unknown_type_selector :
 pub type NoUnknownUnit =
     <lint::correctness::no_unknown_unit::NoUnknownUnit as biome_analyze::Rule>::Options;
 pub type NoUnmatchableAnbSelector = < lint :: correctness :: no_unmatchable_anb_selector :: NoUnmatchableAnbSelector as biome_analyze :: Rule > :: Options ;
+pub type NoUselessEscapeInString = < lint :: nursery :: no_useless_escape_in_string :: NoUselessEscapeInString as biome_analyze :: Rule > :: Options ;
 pub type NoValueAtRule =
     <lint::nursery::no_value_at_rule::NoValueAtRule as biome_analyze::Rule>::Options;
 pub type UseGenericFontNames =
