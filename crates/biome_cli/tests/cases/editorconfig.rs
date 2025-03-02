@@ -300,7 +300,7 @@ indent_size = 8
         r#"
 {
     "formatter": {
-        "lineWidth": 90
+        "lineWidth": 60
     }
 }
 "#,
@@ -310,7 +310,7 @@ indent_size = 8
         test_file.into(),
         r#"
     if (foo) {
-        console.log("this should not be indented with spaces");
+        console.log("this is a very long console file, and it should not be indented with spaces");
     }
     "#,
     );
@@ -318,14 +318,14 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", test_file.as_str()].as_slice()),
+        Args::from(["format", "--write", "--config-path=foo",test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "should_have_biome_override_editorconfig",
+        "should_not_use_higher_editorconfig_when_find_biome_conf",
         fs,
         console,
         result,

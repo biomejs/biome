@@ -65,7 +65,6 @@ impl CommandRunner for FormatCommandPayload {
             fs_configuration.merge_with(biome_configuration);
             configuration = fs_configuration;
         } else {
-            // when don't find `.editorconfig`, we use `biome_configuration`.
             configuration = biome_configuration;
         }
 

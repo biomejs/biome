@@ -48,12 +48,20 @@ impl CommandRunner for CiCommandPayload {
             ..
         } = loaded_configuration;
 
-        let mut fs_configuration =
-            self.load_editor_config(configuration_path, &biome_configuration, fs, console)?;
-        // this makes biome configuration take precedence over editorconfig configuration
-        fs_configuration.merge_with(biome_configuration);
+        let mut configuration;
 
-        let formatter = fs_configuration
+        if let Some(mut fs_configuration) =
+            self.load_editor_config(configuration_path, &biome_configuration, fs, console)?
+        {
+            // If both `biome.json` and `.editorconfig` exist, formatter settings from the biome.json take precedence.
+            // this makes biome configuration take precedence over editorconfig configuration
+            fs_configuration.merge_with(biome_configuration);
+            configuration = fs_configuration;
+        } else {
+            configuration = biome_configuration
+        }
+
+        let formatter = configuration
             .formatter
             .get_or_insert_with(FormatterConfiguration::default);
 
@@ -61,7 +69,7 @@ impl CommandRunner for CiCommandPayload {
             formatter.enabled = self.formatter_enabled;
         }
 
-        let linter = fs_configuration
+        let linter = configuration
             .linter
             .get_or_insert_with(LinterConfiguration::default);
 
@@ -69,7 +77,7 @@ impl CommandRunner for CiCommandPayload {
             linter.enabled = self.linter_enabled;
         }
 
-        let assist = fs_configuration
+        let assist = configuration
             .assist
             .get_or_insert_with(AssistConfiguration::default);
 
@@ -77,18 +85,18 @@ impl CommandRunner for CiCommandPayload {
             assist.enabled = self.assist_enabled;
         }
 
-        if let Some(mut configuration) = self.configuration.clone() {
-            if let Some(linter) = configuration.linter.as_mut() {
+        if let Some(mut conf) = self.configuration.clone() {
+            if let Some(linter) = conf.linter.as_mut() {
                 // Don't overwrite rules from the CLI configuration.
                 // Otherwise, rules that are disabled in the config file might
                 // become re-enabled due to the defaults included in the CLI
                 // configuration.
                 linter.rules = None;
             }
-            fs_configuration.merge_with(configuration);
+            configuration.merge_with(conf);
         }
 
-        Ok(fs_configuration)
+        Ok(configuration)
     }
 
     fn get_files_to_process(
