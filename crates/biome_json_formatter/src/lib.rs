@@ -1,7 +1,6 @@
 mod comments;
 pub mod context;
 mod cst;
-mod format_string;
 mod generated;
 mod json;
 mod prelude;

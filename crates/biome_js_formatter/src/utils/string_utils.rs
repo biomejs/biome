@@ -255,13 +255,12 @@ impl<'token> LiteralStringNormaliser<'token> {
         &mut self,
         string_information: StringInformation,
     ) -> Cow<'token, str> {
-        let normalised = self.normalise_string_literal(string_information);
-        let quoteless = &normalised[1..normalised.len() - 1];
+        let quoteless = self.raw_content();
         let can_remove_quotes = !self.is_preserve_quote_properties() && is_js_ident(quoteless);
         if can_remove_quotes {
             Cow::Owned(quoteless.to_string())
         } else {
-            normalised
+            self.normalise_string_literal(string_information)
         }
     }
 
@@ -315,14 +314,13 @@ impl<'token> LiteralStringNormaliser<'token> {
         string_information: StringInformation,
         file_source: SourceFileKind,
     ) -> Cow<'token, str> {
-        let normalised = self.normalise_string_literal(string_information);
-        let quoteless = &normalised[1..normalised.len() - 1];
+        let quoteless = self.raw_content();
         let can_remove_quotes = !self.is_preserve_quote_properties()
             && (self.can_remove_number_quotes_by_file_type(file_source) || is_js_ident(quoteless));
         if can_remove_quotes {
             Cow::Owned(quoteless.to_string())
         } else {
-            normalised
+            self.normalise_string_literal(string_information)
         }
     }
 
@@ -330,9 +328,8 @@ impl<'token> LiteralStringNormaliser<'token> {
         let preferred_quote = string_information.preferred_quote;
         let polished_raw_content = normalize_string(
             self.raw_content(),
-            Some(string_information.current_quote.into()),
             string_information.preferred_quote.into(),
-            true,
+            string_information.current_quote != string_information.preferred_quote,
         );
 
         match polished_raw_content {

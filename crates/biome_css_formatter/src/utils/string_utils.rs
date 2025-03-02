@@ -224,20 +224,9 @@ impl<'token> LiteralStringNormaliser<'token> {
     fn normalise_text(&mut self) -> Cow<'token, str> {
         match self.token.parent_kind {
             StringLiteralParentKind::CharsetAtRule => {
-                let current_quote = self
-                    .token
-                    .token
-                    .text_trimmed()
-                    .bytes()
-                    .next()
-                    .and_then(QuoteStyle::from_byte);
-                let string_information = StringInformation {
-                    current_quote,
-                    // `@charset` should use double quotes.
-                    // However, Prettier preserve single quotes.
-                    preferred_quote: current_quote.unwrap_or(QuoteStyle::Double),
-                };
-                self.normalise_tokens(string_information)
+                // `@charset` should use double quotes.
+                // However, Prettier preserve single quotes.
+                Cow::Borrowed(self.get_token().text_trimmed())
             }
             StringLiteralParentKind::Others => {
                 let string_information = self
@@ -262,7 +251,11 @@ impl<'token> LiteralStringNormaliser<'token> {
 
     fn normalise_tokens(&self, string_information: StringInformation) -> Cow<'token, str> {
         let preferred_quote = string_information.preferred_quote;
-        let polished_raw_content = self.normalize_string(&string_information);
+        let polished_raw_content = normalize_string(
+            self.raw_content(),
+            string_information.preferred_quote.into(),
+            string_information.current_quote != Some(string_information.preferred_quote),
+        );
 
         match polished_raw_content {
             Cow::Borrowed(raw_content) => self.swap_quotes(raw_content, &string_information),
@@ -274,17 +267,6 @@ impl<'token> LiteralStringNormaliser<'token> {
                 Cow::Owned(s)
             }
         }
-    }
-
-    fn normalize_string(&self, string_information: &StringInformation) -> Cow<'token, str> {
-        let raw_content = self.raw_content();
-
-        normalize_string(
-            raw_content,
-            string_information.current_quote.map(|quote| quote.into()),
-            string_information.preferred_quote.into(),
-            true,
-        )
     }
 
     fn raw_content(&self) -> &'token str {
