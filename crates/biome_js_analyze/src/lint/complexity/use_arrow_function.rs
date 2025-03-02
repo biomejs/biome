@@ -1,7 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, AddVisitor, FixKind, Phases, QueryMatch, Queryable,
-    Rule, RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor, VisitorContext,
+    AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind, ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -14,8 +14,8 @@ use biome_js_syntax::{
     JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsSyntaxKind, T,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Language,
-    SyntaxNode, TextRange, TriviaPieceKind, WalkEvent,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Language, SyntaxNode, TextRange,
+    TriviaPieceKind, WalkEvent, declare_node_union,
 };
 
 declare_lint_rule! {

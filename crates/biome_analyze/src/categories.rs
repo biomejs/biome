@@ -1,4 +1,4 @@
-use enumflags2::{bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags};
 use std::borrow::Cow;
 use std::fmt::{Display, Formatter};
 

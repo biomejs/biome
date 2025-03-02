@@ -1,5 +1,5 @@
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
-use biome_console::{markup, Console, ConsoleExt};
+use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::PrintGitHubDiagnostic;
 use std::io;
 

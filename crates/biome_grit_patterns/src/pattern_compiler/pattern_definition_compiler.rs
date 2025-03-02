@@ -1,5 +1,5 @@
 use super::{and_compiler::AndCompiler, compilation_context::NodeCompilationContext};
-use crate::{grit_context::GritQueryContext, CompileError};
+use crate::{CompileError, grit_context::GritQueryContext};
 use biome_grit_syntax::GritPatternDefinition;
 use biome_rowan::AstNode;
 use grit_pattern_matcher::pattern::{Pattern, PatternDefinition};

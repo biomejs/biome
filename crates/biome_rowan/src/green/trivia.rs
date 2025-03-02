@@ -1,5 +1,5 @@
-use crate::arc::{Arc, HeaderSlice, ThinArc};
 use crate::TriviaPiece;
+use crate::arc::{Arc, HeaderSlice, ThinArc};
 use biome_text_size::TextSize;
 use countme::Count;
 use std::fmt::Formatter;
@@ -147,9 +147,9 @@ impl GreenTrivia {
 
 #[cfg(test)]
 mod tests {
+    use crate::TriviaPiece;
     use crate::green::trivia::{GreenTrivia, GreenTriviaHead};
     use crate::syntax::TriviaPieceKind;
-    use crate::TriviaPiece;
     use biome_text_size::TextSize;
 
     impl GreenTrivia {

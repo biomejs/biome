@@ -15,7 +15,7 @@ use crate::reporters::{
     DefaultReporter, JsonReporter, MulticastTestReporter, OutputTarget, SummaryReporter,
     TestReporter,
 };
-use crate::runner::{run_test_suite, TestRunContext, TestSuite};
+use crate::runner::{TestRunContext, TestSuite, run_test_suite};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_string_case::StrOnlyExtension;
 use jsx::jsx_babel::BabelJsxTestSuite;

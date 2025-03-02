@@ -1,10 +1,10 @@
 use biome_configuration::Configuration;
 use biome_json_formatter::context::JsonFormatOptions;
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{JsonParserOptions, parse_json};
 use schemars::schema::{RootSchema, Schema, SchemaObject};
 use schemars::schema_for;
 use serde_json::to_string;
-use xtask::{project_root, Mode, Result};
+use xtask::{Mode, Result, project_root};
 use xtask_codegen::update;
 
 pub(crate) fn generate_configuration_schema(mode: Mode) -> Result<()> {

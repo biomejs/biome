@@ -1,6 +1,6 @@
 use biome_console::fmt::MarkupElements;
 use biome_console::{
-    fmt, markup, HorizontalLine, Markup, MarkupBuf, MarkupElement, MarkupNode, Padding,
+    HorizontalLine, Markup, MarkupBuf, MarkupElement, MarkupNode, Padding, fmt, markup,
 };
 use biome_text_edit::TextEdit;
 use std::path::Path;
@@ -15,11 +15,11 @@ mod message;
 
 pub use crate::display::frame::{SourceFile, SourceLocation};
 use crate::{
-    diagnostic::internal::AsDiagnostic, Advices, Diagnostic, DiagnosticTags, Location, LogCategory,
-    Resource, Severity, Visit,
+    Advices, Diagnostic, DiagnosticTags, Location, LogCategory, Resource, Severity, Visit,
+    diagnostic::internal::AsDiagnostic,
 };
 
-pub use self::backtrace::{set_bottom_frame, Backtrace};
+pub use self::backtrace::{Backtrace, set_bottom_frame};
 pub use self::message::MessageAndDescription;
 
 /// Helper struct from printing the description of a diagnostic into any
@@ -693,7 +693,7 @@ mod tests {
 
     use biome_console::{fmt, markup};
     use biome_diagnostics::{DiagnosticTags, Severity};
-    use biome_diagnostics_categories::{category, Category};
+    use biome_diagnostics_categories::{Category, category};
     use biome_text_edit::TextEdit;
     use biome_text_size::{TextRange, TextSize};
     use serde_json::{from_value, json};

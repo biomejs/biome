@@ -4,7 +4,7 @@ use std::{
     cmp::Ordering,
     hash::{Hash, Hasher},
     marker::PhantomData,
-    mem::{self, offset_of, ManuallyDrop},
+    mem::{self, ManuallyDrop, offset_of},
     ops::Deref,
     ptr::{self, NonNull},
     sync::atomic::{

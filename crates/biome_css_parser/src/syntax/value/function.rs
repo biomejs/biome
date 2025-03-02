@@ -3,7 +3,7 @@ use super::url::{is_at_url_function, parse_url_function};
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_declaration_item;
 use crate::syntax::{
-    is_at_any_value, is_nth_at_identifier, parse_regular_identifier, CssComponentValueList,
+    CssComponentValueList, is_at_any_value, is_nth_at_identifier, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -11,7 +11,7 @@ use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser, TokenSet};
+use biome_parser::{Parser, TokenSet, token_set};
 
 /// Checks if the current position in the `CssParser` is at the start of any recognized CSS function.
 ///

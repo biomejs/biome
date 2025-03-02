@@ -7,7 +7,7 @@ use grit_pattern_matcher::{
     constant::Constant,
     pattern::{File, FilePtr, FileRegistry, ResolvedFile, ResolvedPattern},
 };
-use grit_util::{error::GritResult, Ast};
+use grit_util::{Ast, error::GritResult};
 use path_absolutize::Absolutize;
 
 #[derive(Clone, Debug, PartialEq)]

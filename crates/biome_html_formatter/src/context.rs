@@ -2,8 +2,8 @@ use std::{fmt, rc::Rc, str::FromStr};
 
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    printer::PrinterOptions, AttributePosition, BracketSameLine, CstFormatContext, FormatContext,
-    FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, TransformSourceMap,
+    AttributePosition, BracketSameLine, CstFormatContext, FormatContext, FormatOptions,
+    IndentStyle, IndentWidth, LineEnding, LineWidth, TransformSourceMap, printer::PrinterOptions,
 };
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 
@@ -270,7 +270,9 @@ impl FromStr for WhitespaceSensitivity {
             "css" => Ok(Self::Css),
             "strict" => Ok(Self::Strict),
             "ignore" => Ok(Self::Ignore),
-            _ => Err("Value not supported for WhitespaceSensitivity. Supported values are 'css', 'strict' and 'ignore'."),
+            _ => Err(
+                "Value not supported for WhitespaceSensitivity. Supported values are 'css', 'strict' and 'ignore'.",
+            ),
         }
     }
 }

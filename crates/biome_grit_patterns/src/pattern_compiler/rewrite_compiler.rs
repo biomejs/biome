@@ -1,10 +1,10 @@
 use super::{
-    compilation_context::NodeCompilationContext, variable_compiler::VariableCompiler,
-    PatternCompiler,
+    PatternCompiler, compilation_context::NodeCompilationContext,
+    variable_compiler::VariableCompiler,
 };
 use crate::{
-    diagnostics::CompilerDiagnostic, grit_code_snippet::GritCodeSnippet,
-    grit_context::GritQueryContext, CompileError,
+    CompileError, diagnostics::CompilerDiagnostic, grit_code_snippet::GritCodeSnippet,
+    grit_context::GritQueryContext,
 };
 use biome_grit_syntax::{GritPredicateRewrite, GritRewrite, GritSyntaxKind};
 use biome_rowan::AstNode;

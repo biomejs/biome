@@ -5,10 +5,10 @@ mod lint;
 mod search;
 pub(crate) mod workspace_file;
 
+use crate::execute::TraversalMode;
 use crate::execute::diagnostics::{ResultExt, UnhandledDiagnostic};
 use crate::execute::traverse::TraversalOptions;
-use crate::execute::TraversalMode;
-use biome_diagnostics::{category, DiagnosticExt, DiagnosticTags, Error};
+use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Error, category};
 use biome_fs::BiomePath;
 use biome_service::workspace::{
     DocumentFileSource, FeatureKind, SupportKind, SupportsFeatureParams,

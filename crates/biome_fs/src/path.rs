@@ -5,7 +5,7 @@
 //! - shortcuts to open/write to the file
 use crate::ConfigName;
 use camino::{Utf8Path, Utf8PathBuf};
-use enumflags2::{bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags};
 use smallvec::SmallVec;
 use std::cmp::Ordering;
 use std::fmt::Formatter;

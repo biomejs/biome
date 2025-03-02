@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::separated::FormatAstSeparatedListExtension;
 use biome_formatter::separated::TrailingSeparator;
-use biome_formatter::{write, FormatContext};
+use biome_formatter::{FormatContext, write};
 use biome_json_syntax::{AnyJsonValue, JsonArrayElementList, JsonFileVariant};
 use biome_rowan::{AstNode, AstSeparatedList};
 

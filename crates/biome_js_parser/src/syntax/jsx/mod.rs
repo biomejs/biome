@@ -6,9 +6,10 @@ use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_rowan::TextRange;
 
+use crate::JsSyntaxFeature::TypeScript;
 use crate::lexer::{JsLexContext, JsReLexContext, JsSyntaxKind, T};
 use crate::syntax::expr::{
-    is_nth_at_identifier_or_keyword, parse_expression, parse_name, ExpressionContext,
+    ExpressionContext, is_nth_at_identifier_or_keyword, parse_expression, parse_name,
 };
 use crate::syntax::js_parse_error::{expected_expression, expected_identifier};
 use crate::syntax::jsx::jsx_parse_errors::{
@@ -16,9 +17,8 @@ use crate::syntax::jsx::jsx_parse_errors::{
     jsx_expected_closing_tag,
 };
 use crate::syntax::typescript::TypeContext;
-use crate::JsSyntaxFeature::TypeScript;
-use crate::{parser::RecoveryResult, JsParser, ParseRecoveryTokenSet, ParsedSyntax};
 use crate::{Absent, Present};
+use crate::{JsParser, ParseRecoveryTokenSet, ParsedSyntax, parser::RecoveryResult};
 
 use super::typescript::parse_ts_type_arguments;
 

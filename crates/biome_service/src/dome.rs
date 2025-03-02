@@ -1,6 +1,6 @@
 use biome_fs::BiomePath;
-use std::collections::btree_set::Iter;
 use std::collections::BTreeSet;
+use std::collections::btree_set::Iter;
 use std::iter::{FusedIterator, Peekable};
 
 /// A type that holds the evaluated paths, and provides an iterator to extract

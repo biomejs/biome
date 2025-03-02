@@ -1,24 +1,24 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, global_identifier, AnyJsClassMember, AnyJsExpression,
-    AnyJsObjectMember, AnyTsType, JsArrowFunctionExpression, JsCallExpression, JsClassDeclaration,
-    JsClassExpression, JsClassMemberList, JsExpressionStatement, JsExtendsClause,
-    JsFormalParameter, JsFunctionDeclaration, JsIdentifierExpression, JsInitializerClause,
-    JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsObjectMemberList,
-    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxToken, JsThisExpression, JsVariableDeclarator,
-    TsReturnTypeAnnotation,
+    AnyJsClassMember, AnyJsExpression, AnyJsObjectMember, AnyTsType, JsArrowFunctionExpression,
+    JsCallExpression, JsClassDeclaration, JsClassExpression, JsClassMemberList,
+    JsExpressionStatement, JsExtendsClause, JsFormalParameter, JsFunctionDeclaration,
+    JsIdentifierExpression, JsInitializerClause, JsLanguage, JsMethodClassMember,
+    JsMethodObjectMember, JsObjectMemberList, JsStaticMemberExpression, JsSyntaxKind,
+    JsSyntaxToken, JsThisExpression, JsVariableDeclarator, TsReturnTypeAnnotation,
+    binding_ext::AnyJsBindingDeclaration, global_identifier,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNode, SyntaxNodeCast,
     TokenText, TriviaPieceKind,
 };
 
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic};
 
 declare_lint_rule! {
     /// Require Promise-like statements to be handled appropriately.

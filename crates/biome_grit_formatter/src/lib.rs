@@ -7,10 +7,11 @@ mod prelude;
 pub(crate) mod separated;
 
 use biome_formatter::{
+    CstFormatContext, Format, FormatLanguage, FormatResult, Formatted, Printed,
     comments::Comments,
     prelude::*,
     trivia::{format_dangling_comments, format_leading_comments, format_trailing_comments},
-    write, CstFormatContext, Format, FormatLanguage, FormatResult, Formatted, Printed,
+    write,
 };
 use biome_grit_syntax::{GritLanguage, GritSyntaxNode};
 use comments::GritCommentStyle;

@@ -1,6 +1,6 @@
 use biome_rowan::{SyntaxResult, TokenText};
 
-use crate::{inner_string_text, JsDirective};
+use crate::{JsDirective, inner_string_text};
 
 impl JsDirective {
     /// Get the inner text of a string not including the quotes
@@ -27,8 +27,8 @@ impl JsDirective {
 
 #[cfg(test)]
 mod tests {
-    use biome_js_factory::syntax::{JsDirective, JsSyntaxKind::*};
     use biome_js_factory::JsSyntaxTreeBuilder;
+    use biome_js_factory::syntax::{JsDirective, JsSyntaxKind::*};
     use biome_rowan::AstNode;
 
     #[test]

@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_source_rule, Ast, FixKind, Rule};
+use biome_analyze::{Ast, FixKind, Rule, context::RuleContext, declare_source_rule};
 use biome_console::markup;
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssDeclarationOrRule, AnyCssProperty, AnyCssRule,
@@ -14,10 +14,10 @@ use std::{
 };
 
 use crate::{
+    CssRuleAction,
     keywords::VENDOR_PREFIXES,
     order::PROPERTY_ORDER_MAP,
     utils::{get_longhand_sub_properties, get_reset_to_initial_properties, vender_prefix},
-    CssRuleAction,
 };
 
 declare_source_rule! {

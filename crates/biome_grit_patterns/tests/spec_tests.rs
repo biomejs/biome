@@ -29,7 +29,9 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     }
 
     let Some(target_lang) = GritTargetLanguage::from_extension(target_lang_ext) else {
-        panic!("the test file must be placed in the specs/<target-lang-ext>/ directory, unrecognized extension: {target_lang_ext}");
+        panic!(
+            "the test file must be placed in the specs/<target-lang-ext>/ directory, unrecognized extension: {target_lang_ext}"
+        );
     };
 
     let query = {

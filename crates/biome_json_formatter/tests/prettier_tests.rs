@@ -1,6 +1,6 @@
 use biome_formatter::{IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
-use biome_json_formatter::{context::JsonFormatOptions, JsonFormatLanguage};
+use biome_json_formatter::{JsonFormatLanguage, context::JsonFormatOptions};
 use camino::Utf8Path;
 use std::env;
 

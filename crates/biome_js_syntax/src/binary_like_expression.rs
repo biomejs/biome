@@ -11,7 +11,7 @@ use crate::{
     JsSyntaxNode, JsSyntaxToken, JsWhileStatement, OperatorPrecedence,
 };
 
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, SyntaxResult};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, declare_node_union};
 use std::fmt::Debug;
 use std::hash::Hash;
 

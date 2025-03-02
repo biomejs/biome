@@ -1,9 +1,9 @@
 use crate::rule_mover::AnalyzerMover;
-use crate::{declare_migration, MigrationAction};
+use crate::{MigrationAction, declare_migration};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
-use biome_diagnostics::{category, Applicability};
+use biome_diagnostics::{Applicability, category};
 use biome_json_syntax::JsonMember;
 use biome_rowan::{AstNode, TextRange};
 

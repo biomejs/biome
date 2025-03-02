@@ -1,7 +1,7 @@
 use super::*;
 use crate::{HasDeclarationAstNode, SemanticModel};
 use biome_js_syntax::{
-    binding_ext::AnyJsIdentifierBinding, JsIdentifierBinding, JsLanguage, JsSyntaxKind,
+    JsIdentifierBinding, JsLanguage, JsSyntaxKind, binding_ext::AnyJsIdentifierBinding,
 };
 use biome_rowan::AstNode;
 

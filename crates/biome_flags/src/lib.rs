@@ -1,7 +1,7 @@
 //! A simple implementation of feature flags.
 
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{markup, DebugDisplay, KeyValuePair};
+use biome_console::{DebugDisplay, KeyValuePair, markup};
 use std::env;
 use std::ops::Deref;
 use std::sync::{LazyLock, OnceLock};

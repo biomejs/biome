@@ -80,8 +80,8 @@ mod map;
 
 use self::{builder::CommentsBuilderVisitor, map::CommentsMap};
 use crate::formatter::Formatter;
-use crate::{buffer::Buffer, write};
 use crate::{CstFormatContext, FormatResult, FormatRule, TextSize, TransformSourceMap};
+use crate::{buffer::Buffer, write};
 use biome_rowan::syntax::SyntaxElementKey;
 use biome_rowan::{Language, SyntaxNode, SyntaxToken, SyntaxTriviaPieceComments};
 use rustc_hash::FxHashSet;

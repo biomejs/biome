@@ -2,7 +2,7 @@ use biome_grit_parser::parse_grit;
 use biome_grit_patterns::{
     GritQuery, GritQueryResult, GritTargetFile, GritTargetLanguage, JsTargetLanguage,
 };
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
 
 // Use this test to quickly execute a Grit query against a source snippet.

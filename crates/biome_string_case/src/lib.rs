@@ -141,7 +141,7 @@ impl Case {
                     has_consecutive_uppercase |= previous_char.is_uppercase();
                     match result {
                         Case::Camel | Case::Pascal if strict && has_consecutive_uppercase => {
-                            return Case::Unknown
+                            return Case::Unknown;
                         }
                         Case::Camel | Case::Constant | Case::Pascal => result,
                         Case::Lower | Case::Number => Case::Camel,

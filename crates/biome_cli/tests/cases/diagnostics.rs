@@ -1,5 +1,5 @@
-use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
-use crate::{run_cli, UNFORMATTED};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::{UNFORMATTED, run_cli};
 use biome_console::{BufferConsole, LogLevel};
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
@@ -44,14 +44,16 @@ fn logs_the_appropriate_messages_according_to_set_diagnostics_level() {
 
     let messages = &console.out_buffer;
 
-    assert!(messages
-        .iter()
-        .filter(|m| m.level == LogLevel::Log)
-        .any(|m| {
-            let content = format!("{:?}", m.content);
+    assert!(
+        messages
+            .iter()
+            .filter(|m| m.level == LogLevel::Log)
+            .any(|m| {
+                let content = format!("{:?}", m.content);
 
-            !content.contains("noDebugger")
-        }));
+                !content.contains("noDebugger")
+            })
+    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -170,13 +172,15 @@ import { FC, memo, useCallback } from "react";
 
     let messages = &console.out_buffer;
 
-    assert!(messages
-        .iter()
-        .filter(|m| m.level == LogLevel::Error)
-        .any(|m| {
-            let content = format!("{:?}", m.content);
-            content.contains("assist")
-        }));
+    assert!(
+        messages
+            .iter()
+            .filter(|m| m.level == LogLevel::Error)
+            .any(|m| {
+                let content = format!("{:?}", m.content);
+                content.contains("assist")
+            })
+    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -220,12 +224,14 @@ fn max_diagnostics_are_lifted() {
 
     let errors = format!("{}", u8::MAX as usize * 2 + 1);
 
-    assert!(messages
-        .iter()
-        .filter(|m| m.level == LogLevel::Log)
-        .any(|m| {
-            let content = format!("{:?}", m.content);
+    assert!(
+        messages
+            .iter()
+            .filter(|m| m.level == LogLevel::Log)
+            .any(|m| {
+                let content = format!("{:?}", m.content);
 
-            content.contains(&errors)
-        }));
+                content.contains(&errors)
+            })
+    );
 }

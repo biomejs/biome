@@ -1,4 +1,4 @@
-use super::process_file::{process_file, DiffKind, FileStatus, Message};
+use super::process_file::{DiffKind, FileStatus, Message, process_file};
 use super::{Execution, TraversalMode};
 use crate::cli_options::CliOptions;
 use crate::execute::diagnostics::{
@@ -8,19 +8,19 @@ use crate::execute::diagnostics::{
 use crate::reporter::TraversalSummary;
 use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::DiagnosticTags;
-use biome_diagnostics::{category, DiagnosticExt, Error, Resource, Severity};
+use biome_diagnostics::{DiagnosticExt, Error, Resource, Severity, category};
 use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::dome::Dome;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{DocumentFileSource, DropPatternParams, IsPathIgnoredParams};
-use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
+use biome_service::{Workspace, WorkspaceError, extension_error, workspace::SupportsFeatureParams};
 use camino::{Utf8Path, Utf8PathBuf};
-use crossbeam::channel::{unbounded, Receiver, Sender};
+use crossbeam::channel::{Receiver, Sender, unbounded};
 use rustc_hash::FxHashSet;
 use std::collections::BTreeSet;
-use std::sync::atomic::AtomicU32;
 use std::sync::RwLock;
+use std::sync::atomic::AtomicU32;
 use std::{
     env::current_dir,
     ffi::OsString,
@@ -29,7 +29,7 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
-use tracing::{instrument, Span};
+use tracing::{Span, instrument};
 
 pub(crate) struct TraverseResult {
     pub(crate) summary: TraversalSummary,

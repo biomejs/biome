@@ -25,11 +25,11 @@ use biome_parser::lexer::{
 };
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{
-    is_js_id_continue, is_js_id_start, lookup_byte,
     Dispatch::{self, *},
+    is_js_id_continue, is_js_id_start, lookup_byte,
 };
 
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 
 use crate::JsParserOptions;
 
@@ -568,8 +568,10 @@ impl<'src> JsLexer<'src> {
             // We should not yield diagnostics on a unicode char boundary. That wont make codespan panic
             // but it may cause a panic for other crates which just consume the diagnostics
             let invalid = self.current_char_unchecked();
-            let err = ParseDiagnostic::new("expected hex digits for a unicode code point escape, but encountered an invalid character",
-                                           self.position..self.position + invalid.len_utf8());
+            let err = ParseDiagnostic::new(
+                "expected hex digits for a unicode code point escape, but encountered an invalid character",
+                self.position..self.position + invalid.len_utf8(),
+            );
             self.push_diagnostic(err);
             self.position -= 1;
             return Err(());
@@ -582,10 +584,10 @@ impl<'src> JsLexer<'src> {
         // and because input to the lexer must be valid utf8
         let digits_str = unsafe {
             debug_assert!(self.source.as_bytes().get(start..self.position).is_some());
-            debug_assert!(std::str::from_utf8(
-                self.source.as_bytes().get_unchecked(start..self.position)
-            )
-            .is_ok());
+            debug_assert!(
+                std::str::from_utf8(self.source.as_bytes().get_unchecked(start..self.position))
+                    .is_ok()
+            );
 
             std::str::from_utf8_unchecked(
                 self.source.as_bytes().get_unchecked(start..self.position),

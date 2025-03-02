@@ -1,4 +1,4 @@
-use similar::{utils::diff_lines, Algorithm, ChangeTag};
+use similar::{Algorithm, ChangeTag, utils::diff_lines};
 use std::sync::Mutex;
 use std::{env, fmt::Write, fs::write, os::raw::c_int, str::FromStr, sync::Once};
 

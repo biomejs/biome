@@ -41,11 +41,11 @@ pub use crate::{
     file_source::FileSourceError,
     green::{NodeCache, RawSyntaxKind},
     syntax::{
-        chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,
         ChainTriviaPiecesIterator, Language, SendNode, SyntaxElement, SyntaxElementChildren,
         SyntaxKind, SyntaxList, SyntaxNode, SyntaxNodeChildren, SyntaxNodeOptionExt,
         SyntaxRewriter, SyntaxSlot, SyntaxSlots, SyntaxToken, SyntaxTriviaPiece,
         SyntaxTriviaPieceComments, TriviaPiece, TriviaPieceKind, VisitNodeSignal,
+        chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,
     },
     syntax_factory::*,
     syntax_node_text::SyntaxNodeText,

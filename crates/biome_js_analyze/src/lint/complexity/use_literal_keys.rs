@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -9,7 +9,7 @@ use biome_js_syntax::{
     AnyJsAssignment, AnyJsComputedMember, AnyJsMemberExpression, AnyJsName, AnyJsObjectMemberName,
     AnyTsEnumMemberName, JsComputedMemberName, JsSyntaxKind, T,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, SyntaxNodeOptionExt, TextRange};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeOptionExt, TextRange, declare_node_union};
 use biome_unicode_table::is_js_ident;
 
 declare_lint_rule! {

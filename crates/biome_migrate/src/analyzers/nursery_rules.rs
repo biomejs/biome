@@ -1,4 +1,4 @@
-use crate::{declare_migration, MigrationAction};
+use crate::{MigrationAction, declare_migration};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;

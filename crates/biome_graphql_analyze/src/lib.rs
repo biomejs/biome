@@ -6,13 +6,14 @@ mod suppression_action;
 pub use crate::registry::visit_registry;
 use crate::suppression_action::GraphqlSuppressionAction;
 use biome_analyze::{
-    to_analyzer_suppressions, AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression,
-    ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
+    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression, ControlFlow,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
+    to_analyzer_suppressions,
 };
 use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
 use biome_graphql_syntax::GraphqlLanguage;
-use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
+use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::sync::LazyLock;
 
@@ -122,7 +123,7 @@ mod tests {
     use crate::analyze;
     use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter};
     use biome_console::fmt::{Formatter, Termcolor};
-    use biome_console::{markup, Markup};
+    use biome_console::{Markup, markup};
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
     use biome_graphql_parser::parse_graphql;

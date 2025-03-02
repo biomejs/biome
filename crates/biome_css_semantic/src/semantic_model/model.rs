@@ -3,7 +3,7 @@ use biome_css_syntax::{
     CssRoot, CssSyntaxNode,
 };
 use biome_rowan::{
-    declare_node_union, SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText,
+    SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText, declare_node_union,
 };
 use rustc_hash::FxHashMap;
 use std::hash::Hash;

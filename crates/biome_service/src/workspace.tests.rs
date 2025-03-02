@@ -14,9 +14,9 @@ use crate::projects::ProjectKey;
 use crate::{Workspace, WorkspaceError};
 
 use super::{
-    server, CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
+    CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
     GetFileContentParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
-    PullDiagnosticsParams, ScanProjectFolderParams, UpdateSettingsParams,
+    PullDiagnosticsParams, ScanProjectFolderParams, UpdateSettingsParams, server,
 };
 
 fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
@@ -189,9 +189,11 @@ fn correctly_handle_json_files() {
         },
     )
     .unwrap();
-    assert!(well_known_json_with_comments_file_with_trailing_commas
-        .format_file()
-        .is_err());
+    assert!(
+        well_known_json_with_comments_file_with_trailing_commas
+            .format_file()
+            .is_err()
+    );
 
     // well-known json-with-comments-and-trailing-commas file allows comments and trailing commas
     let well_known_json_with_comments_and_trailing_commas_file = FileGuard::open(
@@ -205,9 +207,11 @@ fn correctly_handle_json_files() {
         },
     )
     .unwrap();
-    assert!(well_known_json_with_comments_and_trailing_commas_file
-        .format_file()
-        .is_ok());
+    assert!(
+        well_known_json_with_comments_and_trailing_commas_file
+            .format_file()
+            .is_ok()
+    );
 }
 
 #[test]
@@ -366,12 +370,14 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
         .close_project(CloseProjectParams { project_key })
         .unwrap();
 
-    assert!(workspace
-        .get_file_content(GetFileContentParams {
-            project_key,
-            path: BiomePath::new("/project/a.ts"),
-        })
-        .is_err_and(|error| matches!(error, WorkspaceError::NotFound(_))));
+    assert!(
+        workspace
+            .get_file_content(GetFileContentParams {
+                project_key,
+                path: BiomePath::new("/project/a.ts"),
+            })
+            .is_err_and(|error| matches!(error, WorkspaceError::NotFound(_)))
+    );
 }
 
 #[test]
@@ -411,12 +417,14 @@ fn too_large_files_are_tracked_but_not_parsed() {
         })
         .unwrap();
 
-    assert!(workspace
-        .get_syntax_tree(GetSyntaxTreeParams {
-            project_key,
-            path: BiomePath::new("/project/a.ts"),
-        })
-        .is_err_and(|error| matches!(error, WorkspaceError::FileIgnored(_))));
+    assert!(
+        workspace
+            .get_syntax_tree(GetSyntaxTreeParams {
+                project_key,
+                path: BiomePath::new("/project/a.ts"),
+            })
+            .is_err_and(|error| matches!(error, WorkspaceError::FileIgnored(_)))
+    );
 }
 
 #[test]

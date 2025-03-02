@@ -1,7 +1,7 @@
+use crate::TestFormatLanguage;
 use crate::check_reformat::CheckReformat;
 use crate::snapshot_builder::{SnapshotBuilder, SnapshotOutput};
 use crate::utils::strip_rome_placeholders;
-use crate::TestFormatLanguage;
 use biome_configuration::Configuration;
 use biome_console::EnvConsole;
 use biome_deserialize::json::deserialize_from_str;
@@ -10,13 +10,13 @@ use biome_formatter::{FormatLanguage, FormatOptions, Printed};
 use biome_fs::BiomePath;
 use biome_parser::AnyParse;
 use biome_rowan::{TextRange, TextSize};
+use biome_service::App;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::Settings;
 use biome_service::workspace::{
     DocumentFileSource, FeaturesBuilder, OpenProjectParams, SupportsFeatureParams,
     UpdateSettingsParams,
 };
-use biome_service::App;
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ops::Range;
 

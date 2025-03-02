@@ -54,8 +54,8 @@ use crate::cursor::node::Siblings;
 pub(crate) use crate::cursor::token::SyntaxToken;
 use crate::green::{self, GreenElement, GreenNodeData, GreenTokenData};
 use crate::{
-    green::{GreenElementRef, RawSyntaxKind},
     NodeOrToken, TextRange, TextSize,
+    green::{GreenElementRef, RawSyntaxKind},
 };
 pub(crate) use element::SyntaxElement;
 pub(crate) use node::{

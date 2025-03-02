@@ -7,7 +7,7 @@ use termcolor::{Color, ColorSpec, WriteColor};
 use unicode_segmentation::UnicodeSegmentation;
 use unicode_width::UnicodeWidthStr;
 
-use crate::{fmt::MarkupElements, MarkupElement};
+use crate::{MarkupElement, fmt::MarkupElements};
 
 use super::Write;
 

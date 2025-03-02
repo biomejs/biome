@@ -5,12 +5,12 @@ use biome_html_syntax::HtmlSyntaxKind::{
     DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE, TOMBSTONE,
     UNICODE_BOM, WHITESPACE,
 };
-use biome_html_syntax::{HtmlSyntaxKind, TextLen, TextSize, T};
+use biome_html_syntax::{HtmlSyntaxKind, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, TokenFlags};
 use biome_rowan::SyntaxKind;
-use biome_unicode_table::lookup_byte;
 use biome_unicode_table::Dispatch::{BSL, QOT, UNI};
+use biome_unicode_table::lookup_byte;
 use std::ops::Add;
 
 pub(crate) struct HtmlLexer<'src> {

@@ -1,12 +1,12 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    global_identifier, numbers::parse_js_number, AnyJsCallArgument, AnyJsExpression,
-    AnyJsLiteralExpression, JsCallArgumentList, JsCallExpression, T,
+    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsCallArgumentList,
+    JsCallExpression, T, global_identifier, numbers::parse_js_number,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 

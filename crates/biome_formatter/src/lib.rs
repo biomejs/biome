@@ -72,7 +72,7 @@ pub use buffer::{
     VecBuffer,
 };
 pub use builders::BestFitting;
-pub use format_element::{normalize_newlines, FormatElement, LINE_TERMINATORS};
+pub use format_element::{FormatElement, LINE_TERMINATORS, normalize_newlines};
 pub use group_id::GroupId;
 pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
 use std::marker::PhantomData;
@@ -642,7 +642,9 @@ impl FromStr for AttributePosition {
         match s {
             "multiline" => Ok(Self::Multiline),
             "auto" => Ok(Self::Auto),
-            _ => Err("Value not supported for attribute_position. Supported values are 'auto' and 'multiline'."),
+            _ => Err(
+                "Value not supported for attribute_position. Supported values are 'auto' and 'multiline'.",
+            ),
         }
     }
 }
@@ -717,9 +719,11 @@ impl FromStr for ObjectWrap {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "preserve"  => Ok(Self::Preserve),
-            "contains"  => Ok(Self::Collapse),
-            _ => Err("Value not supported for objectWrap. Supported values are 'preserve' and 'collapse'."),
+            "preserve" => Ok(Self::Preserve),
+            "contains" => Ok(Self::Collapse),
+            _ => Err(
+                "Value not supported for objectWrap. Supported values are 'preserve' and 'collapse'.",
+            ),
         }
     }
 }

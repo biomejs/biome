@@ -1,11 +1,11 @@
 use std::borrow::Cow;
 
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{jsx_ext::AnyJsxElement, AnyJsxAttribute, AnyJsxElementName};
+use biome_js_syntax::{AnyJsxAttribute, AnyJsxElementName, jsx_ext::AnyJsxElement};
 use biome_rowan::AstNode;
 use biome_string_case::StrLikeExtension;
 

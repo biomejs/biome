@@ -1,18 +1,18 @@
 use crate::parser::{
-    directive::{is_at_directive, DirectiveList},
+    GraphqlParser,
+    directive::{DirectiveList, is_at_directive},
     is_nth_at_name, is_nth_at_non_kw_name, parse_binding, parse_description,
     parse_error::{expected_enum_extension, expected_name},
     parse_literal_name, parse_reference,
     value::is_at_string,
-    GraphqlParser,
 };
 use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
     T,
 };
 use biome_parser::{
-    parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
-    prelude::ParsedSyntax::*, Parser,
+    Parser, parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
+    prelude::ParsedSyntax::*,
 };
 
 #[inline]

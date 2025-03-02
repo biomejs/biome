@@ -11,13 +11,13 @@ mod utils;
 pub use crate::registry::visit_registry;
 use crate::suppression_action::CssSuppressionAction;
 use biome_analyze::{
-    to_analyzer_suppressions, AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal,
-    AnalyzerSuppression, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction,
-    RuleRegistry,
+    AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, AnalyzerSuppression,
+    ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
+    to_analyzer_suppressions,
 };
 use biome_css_syntax::{CssLanguage, TextRange};
 use biome_diagnostics::Error;
-use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
+use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::sync::LazyLock;
 
@@ -134,16 +134,16 @@ where
 mod tests {
     use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
     use biome_console::fmt::{Formatter, Termcolor};
-    use biome_console::{markup, Markup};
-    use biome_css_parser::{parse_css, CssParserOptions};
+    use biome_console::{Markup, markup};
+    use biome_css_parser::{CssParserOptions, parse_css};
     use biome_css_syntax::TextRange;
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{
-        category, print_diagnostic_to_string, Diagnostic, DiagnosticExt, PrintDiagnostic, Severity,
+        Diagnostic, DiagnosticExt, PrintDiagnostic, Severity, category, print_diagnostic_to_string,
     };
     use std::slice;
 
-    use crate::{analyze, AnalysisFilter, ControlFlow};
+    use crate::{AnalysisFilter, ControlFlow, analyze};
 
     #[ignore]
     #[test]

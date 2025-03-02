@@ -1,5 +1,5 @@
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
-use biome_console::{markup, Console, ConsoleExt};
+use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::display::SourceFile;
 use biome_diagnostics::{Error, Resource};
 use quick_junit::{NonSuccessKind, Report, TestCase, TestCaseStatus, TestSuite};

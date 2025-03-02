@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{write, CstFormatContext, FormatRuleWithOptions, GroupId};
+use biome_formatter::{CstFormatContext, FormatRuleWithOptions, GroupId, write};
 
 use crate::utils::array::write_array_node;
 

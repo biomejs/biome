@@ -19,25 +19,25 @@ mod overrides;
 pub mod plugins;
 pub mod vcs;
 
-use crate::analyzer::assist::{assist_configuration, Actions, AssistConfiguration, Source};
 use crate::analyzer::RuleAssistConfiguration;
+use crate::analyzer::assist::{Actions, AssistConfiguration, Source, assist_configuration};
 use crate::bool::Bool;
 use crate::css::{CssFormatterConfiguration, CssLinterConfiguration, CssParserConfiguration};
 pub use crate::diagnostics::BiomeDiagnostic;
 pub use crate::diagnostics::CantLoadExtendFile;
 pub use crate::generated::{push_to_analyzer_assist, push_to_analyzer_rules};
 use crate::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
-pub use crate::grit::{grit_configuration, GritConfiguration};
+pub use crate::grit::{GritConfiguration, grit_configuration};
 use crate::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use crate::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
 use crate::max_size::MaxSize;
-use crate::vcs::{vcs_configuration, VcsConfiguration};
+use crate::vcs::{VcsConfiguration, vcs_configuration};
 pub use analyzer::{
-    linter_configuration, LinterConfiguration, RuleConfiguration, RuleFixConfiguration,
-    RulePlainConfiguration, RuleWithFixOptions, RuleWithOptions, Rules,
+    LinterConfiguration, RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration,
+    RuleWithFixOptions, RuleWithOptions, Rules, linter_configuration,
 };
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{markup, KeyValuePair};
+use biome_console::{KeyValuePair, markup};
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
     DeserializationDiagnostic, DeserializationVisitor, Deserialized, Text, TextRange,
@@ -47,12 +47,12 @@ use biome_diagnostics::Severity;
 use biome_formatter::{IndentStyle, QuoteStyle};
 use bpaf::Bpaf;
 use camino::Utf8PathBuf;
-pub use css::{css_configuration, CssConfiguration};
-pub use formatter::{formatter_configuration, FormatterConfiguration};
-pub use graphql::{graphql_configuration, GraphqlConfiguration};
-pub use html::{html_configuration, HtmlConfiguration};
-pub use javascript::{js_configuration, JsConfiguration};
-pub use json::{json_configuration, JsonConfiguration};
+pub use css::{CssConfiguration, css_configuration};
+pub use formatter::{FormatterConfiguration, formatter_configuration};
+pub use graphql::{GraphqlConfiguration, graphql_configuration};
+pub use html::{HtmlConfiguration, html_configuration};
+pub use javascript::{JsConfiguration, js_configuration};
+pub use json::{JsonConfiguration, json_configuration};
 pub use overrides::{
     OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
     OverrideLinterConfiguration, OverridePattern, Overrides,

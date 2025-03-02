@@ -1,9 +1,9 @@
 use crate::parser::CssParser;
-use crate::syntax::{is_at_rule_list_element, RuleList};
+use crate::syntax::{RuleList, is_at_rule_list_element};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::CompletedMarker;
+use biome_parser::parse_lists::ParseNodeList;
 
 use crate::syntax::block::ParseBlockBody;
 

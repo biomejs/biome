@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use biome_console::{fmt::Formatter, markup};
 use biome_diagnostics::Location;
-use biome_diagnostics::{category, Category, Diagnostic, LogCategory, Severity};
+use biome_diagnostics::{Category, Diagnostic, LogCategory, Severity, category};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::SyntaxError;
 use grit_util::ByteRange;

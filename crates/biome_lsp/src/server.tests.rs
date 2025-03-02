@@ -4,25 +4,26 @@ use std::fmt::Display;
 use std::slice;
 use std::time::Duration;
 
-use anyhow::{bail, Context, Error, Result};
+use anyhow::{Context, Error, Result, bail};
 use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::RuleSelector;
 use biome_diagnostics::PrintDescription;
 use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
+use biome_service::WorkspaceWatcher;
 use biome_service::workspace::{
     GetFileContentParams, GetSyntaxTreeParams, GetSyntaxTreeResult, OpenProjectParams,
     PullDiagnosticsParams, PullDiagnosticsResult, ScanProjectFolderParams, ScanProjectFolderResult,
 };
-use biome_service::WorkspaceWatcher;
 use camino::Utf8PathBuf;
-use futures::channel::mpsc::{channel, Sender};
+use futures::channel::mpsc::{Sender, channel};
 use futures::{Sink, SinkExt, Stream, StreamExt};
-use serde::de::DeserializeOwned;
 use serde::Serialize;
+use serde::de::DeserializeOwned;
 use serde_json::{from_value, to_value};
 use tokio::time::sleep;
 use tower::timeout::Timeout;
 use tower::{Service, ServiceExt};
+use tower_lsp::LspService;
 use tower_lsp::jsonrpc::{self, Request, Response};
 use tower_lsp::lsp_types::{
     self as lsp, ClientCapabilities, CodeDescription, DidChangeConfigurationParams,
@@ -32,7 +33,6 @@ use tower_lsp::lsp_types::{
     TextDocumentIdentifier, TextDocumentItem, TextEdit, Url, VersionedTextDocumentIdentifier,
     WorkDoneProgressParams, WorkspaceFolder,
 };
-use tower_lsp::LspService;
 
 use crate::WorkspaceSettings;
 

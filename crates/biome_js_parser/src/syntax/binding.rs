@@ -1,15 +1,15 @@
 use super::metavariable::{is_at_metavariable, is_nth_at_metavariable, parse_metavariable};
+use crate::JsSyntaxFeature::StrictMode;
+use crate::ParsedSyntax::{Absent, Present};
 use crate::prelude::*;
 use crate::span::Span;
 use crate::syntax::class::parse_initializer_clause;
-use crate::syntax::expr::{is_nth_at_identifier, parse_identifier, ExpressionContext};
+use crate::syntax::expr::{ExpressionContext, is_nth_at_identifier, parse_identifier};
 use crate::syntax::js_parse_error::{
     expected_binding, expected_identifier, expected_object_member_name,
 };
 use crate::syntax::object::{is_at_object_member_name, parse_object_member_name};
 use crate::syntax::pattern::{ParseArrayPattern, ParseObjectPattern, ParseWithDefaultPattern};
-use crate::JsSyntaxFeature::StrictMode;
-use crate::ParsedSyntax::{Absent, Present};
 use crate::{JsParser, ParsedSyntax};
 use biome_js_syntax::{JsSyntaxKind::*, *};
 use biome_parser::diagnostic::expected_any;

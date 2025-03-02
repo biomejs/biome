@@ -1,8 +1,8 @@
-use crate::{declare_migration, MigrationAction};
+use crate::{MigrationAction, declare_migration};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleAction, RuleDiagnostic};
 use biome_console::markup;
-use biome_diagnostics::{category, Applicability};
+use biome_diagnostics::{Applicability, category};
 use biome_json_factory::make;
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonMemberList, T};
 use biome_rowan::{AstNode, AstSeparatedList, AstSeparatedListExt, BatchMutationExt, TokenText};

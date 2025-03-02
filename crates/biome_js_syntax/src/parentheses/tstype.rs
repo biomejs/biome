@@ -1,10 +1,10 @@
 use biome_rowan::{AstNode, AstSeparatedList};
 
 use crate::{
-    parentheses::NeedsParentheses, type_ext::AnyTsFunctionType, AnyTsReturnType, AnyTsType,
-    JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsConstructorType, TsFunctionType,
-    TsIndexedAccessType, TsInferType, TsIntersectionType, TsIntersectionTypeElementList,
-    TsTypeOperatorType, TsTypeofType, TsUnionType, TsUnionTypeVariantList,
+    AnyTsReturnType, AnyTsType, JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsConstructorType,
+    TsFunctionType, TsIndexedAccessType, TsInferType, TsIntersectionType,
+    TsIntersectionTypeElementList, TsTypeOperatorType, TsTypeofType, TsUnionType,
+    TsUnionTypeVariantList, parentheses::NeedsParentheses, type_ext::AnyTsFunctionType,
 };
 
 impl NeedsParentheses for TsConditionalType {

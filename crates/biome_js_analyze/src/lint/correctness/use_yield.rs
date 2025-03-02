@@ -1,7 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
-    declare_lint_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource,
-    ServiceBag, Visitor, VisitorContext,
+    AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, ServiceBag,
+    Visitor, VisitorContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;

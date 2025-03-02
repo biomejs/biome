@@ -1,6 +1,6 @@
 use crate::display::frame::SourceFile;
-use crate::{diagnostic::internal::AsDiagnostic, Diagnostic, Resource, Severity};
-use biome_console::{fmt, markup, MarkupBuf};
+use crate::{Diagnostic, Resource, Severity, diagnostic::internal::AsDiagnostic};
+use biome_console::{MarkupBuf, fmt, markup};
 use biome_text_size::{TextRange, TextSize};
 use std::io;
 

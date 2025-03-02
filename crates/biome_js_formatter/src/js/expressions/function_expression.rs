@@ -2,8 +2,8 @@ use crate::js::declarations::function_declaration::{FormatFunction, FormatFuncti
 use crate::prelude::*;
 
 use biome_formatter::FormatRuleWithOptions;
-use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsFunctionExpression;
+use biome_js_syntax::parentheses::NeedsParentheses;
 
 #[derive(Debug, Copy, Clone, Default)]
 pub(crate) struct FormatJsFunctionExpression {

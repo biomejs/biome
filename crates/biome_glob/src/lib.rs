@@ -623,10 +623,12 @@ mod tests {
         assert!(!"*.rs".parse::<Glob>().unwrap().is_match("src/lib.rs"));
         assert!("**/*.rs".parse::<Glob>().unwrap().is_match("src/lib.rs"));
         assert!("file.{js,jsx}".parse::<Glob>().unwrap().is_match("file.js"));
-        assert!("file.{js,jsx}"
-            .parse::<Glob>()
-            .unwrap()
-            .is_match("file.jsx"));
+        assert!(
+            "file.{js,jsx}"
+                .parse::<Glob>()
+                .unwrap()
+                .is_match("file.jsx")
+        );
     }
 
     #[test]

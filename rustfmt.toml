@@ -1,4 +1,1 @@
 newline_style = "Unix"
-
-# TODO(siketyan): Re-format all files and upgrade to 2024 in a separated PR.
-style_edition = "2021"

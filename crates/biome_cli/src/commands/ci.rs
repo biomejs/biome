@@ -2,8 +2,8 @@ use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
 use crate::commands::{CommandRunner, LoadEditorConfig};
 use crate::{CliDiagnostic, Execution};
-use biome_configuration::analyzer::assist::{AssistConfiguration, AssistEnabled};
 use biome_configuration::analyzer::LinterEnabled;
+use biome_configuration::analyzer::assist::{AssistConfiguration, AssistEnabled};
 use biome_configuration::formatter::FormatterEnabled;
 use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
 use biome_console::Console;
@@ -126,7 +126,9 @@ impl CommandRunner for CiCommandPayload {
             && self.linter_enabled.is_some_and(|v| !v.value())
             && self.assist_enabled.is_some_and(|v| !v.value())
         {
-            return Err(CliDiagnostic::incompatible_end_configuration("Formatter, linter and assist are disabled, can't perform the command. At least one feature needs to be enabled. This is probably and error."));
+            return Err(CliDiagnostic::incompatible_end_configuration(
+                "Formatter, linter and assist are disabled, can't perform the command. At least one feature needs to be enabled. This is probably and error.",
+            ));
         }
         if self.since.is_some() && !self.changed {
             return Err(CliDiagnostic::incompatible_arguments("since", "changed"));

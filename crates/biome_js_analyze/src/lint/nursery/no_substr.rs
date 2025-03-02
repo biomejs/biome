@@ -1,12 +1,12 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsName, JsCallArguments, JsExpressionStatement, JsSyntaxToken, JsVariableStatement,
 };
-use biome_rowan::{declare_node_union, AstSeparatedList, BatchMutationExt, TextRange, TokenText};
+use biome_rowan::{AstSeparatedList, BatchMutationExt, TextRange, TokenText, declare_node_union};
 
 use crate::JsRuleAction;
 

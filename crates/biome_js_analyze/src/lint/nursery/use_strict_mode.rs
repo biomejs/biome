@@ -1,7 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, options::PreferredQuote, Ast, FixKind, Rule,
-    RuleDiagnostic,
+    Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule,
+    options::PreferredQuote,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;

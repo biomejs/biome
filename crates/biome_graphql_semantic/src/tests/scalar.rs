@@ -2,8 +2,8 @@ use biome_graphql_parser::parse_graphql;
 use biome_graphql_syntax::GraphqlScalarTypeDefinition;
 use biome_graphql_syntax::GraphqlScalarTypeExtension;
 
-use crate::semantic_model;
 use crate::HasDeclarationAstNode;
+use crate::semantic_model;
 
 use super::assert_nodes_eq;
 use super::extract_node;

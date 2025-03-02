@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -182,11 +182,7 @@ impl Rule for NoStaticOnlyClass {
             })
             .all(|is_static| is_static);
 
-        if all_members_static {
-            Some(())
-        } else {
-            None
-        }
+        if all_members_static { Some(()) } else { None }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {

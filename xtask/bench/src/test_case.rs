@@ -1,5 +1,5 @@
 use crate::err_to_string;
-use ansi_rgb::{red, Foreground};
+use ansi_rgb::{Foreground, red};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::env;
 use std::hash::{DefaultHasher, Hash, Hasher};

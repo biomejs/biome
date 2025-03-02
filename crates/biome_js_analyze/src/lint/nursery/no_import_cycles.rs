@@ -1,10 +1,10 @@
 use std::collections::HashSet;
 
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_dependency_graph::ModuleImports;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{inner_string_text, AnyJsImportLike};
+use biome_js_syntax::{AnyJsImportLike, inner_string_text};
 use biome_rowan::AstNode;
 use camino::{Utf8Path, Utf8PathBuf};
 

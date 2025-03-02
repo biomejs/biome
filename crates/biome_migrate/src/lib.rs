@@ -125,10 +125,10 @@ mod test {
     use crate::migrate_configuration;
     use biome_analyze::{AnalysisFilter, ControlFlow, Never};
     use biome_console::fmt::{Formatter, Termcolor};
-    use biome_console::{markup, Markup};
+    use biome_console::{Markup, markup};
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, Severity};
-    use biome_json_parser::{parse_json, JsonParserOptions};
+    use biome_json_parser::{JsonParserOptions, parse_json};
     use camino::Utf8Path;
 
     fn markup_to_string(markup: Markup) -> String {

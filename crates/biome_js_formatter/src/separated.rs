@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::{AsFormat, FormatJsSyntaxToken};
-use biome_formatter::separated::{FormatSeparatedElementRule, FormatSeparatedIter};
 use biome_formatter::FormatRefWithRule;
+use biome_formatter::separated::{FormatSeparatedElementRule, FormatSeparatedIter};
 use biome_js_syntax::{JsLanguage, JsSyntaxToken};
 use biome_rowan::{AstNode, AstSeparatedList, AstSeparatedListElementsIterator};
 use std::marker::PhantomData;

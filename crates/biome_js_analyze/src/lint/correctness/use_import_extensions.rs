@@ -2,11 +2,11 @@ use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::path::{Component, Path};
 
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
-use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsSyntaxToken};
+use biome_js_syntax::{AnyJsImportLike, JsSyntaxToken, inner_string_text};
 use biome_rowan::BatchMutationExt;
 
 use crate::JsRuleAction;

@@ -5,9 +5,9 @@ use biome_graphql_syntax::GraphqlVariableBinding;
 use biome_graphql_syntax::GraphqlVariableDefinition;
 use biome_graphql_syntax::GraphqlVariableReference;
 
+use crate::HasDeclarationAstNodes;
 use crate::semantic_model;
 use crate::tests::extract_nodes;
-use crate::HasDeclarationAstNodes;
 
 use super::assert_nodes_eq;
 use super::extract_node;

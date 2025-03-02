@@ -1,10 +1,10 @@
 use crate::green::{GreenToken, GreenTrivia};
-use crate::syntax::element::SyntaxElementKey;
 use crate::syntax::SyntaxTrivia;
+use crate::syntax::element::SyntaxElementKey;
 use crate::token_text::TokenText;
 use crate::{
-    chain_trivia_pieces, cursor, Direction, Language, NodeOrToken, SyntaxElement, SyntaxKind,
-    SyntaxNode, SyntaxTriviaPiece, TriviaPiece, TriviaPieceKind,
+    Direction, Language, NodeOrToken, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxTriviaPiece,
+    TriviaPiece, TriviaPieceKind, chain_trivia_pieces, cursor,
 };
 use biome_text_size::{TextLen, TextRange, TextSize};
 use std::fmt;

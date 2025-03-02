@@ -4,7 +4,7 @@ use crate::{
     html::lists::element_list::{FormatChildrenResult, FormatHtmlElementList},
     prelude::*,
 };
-use biome_formatter::{format_args, write, FormatRuleWithOptions};
+use biome_formatter::{FormatRuleWithOptions, format_args, write};
 use biome_html_syntax::{HtmlElement, HtmlElementFields};
 
 use super::{

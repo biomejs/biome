@@ -10,7 +10,7 @@ use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FormatFileParams, FormatOnTypeParams,
     FormatRangeParams, GetFileContentParams, IsPathIgnoredParams, SupportsFeatureParams,
 };
-use biome_service::{extension_error, WorkspaceError};
+use biome_service::{WorkspaceError, extension_error};
 use std::ops::Sub;
 use tower_lsp::lsp_types::*;
 

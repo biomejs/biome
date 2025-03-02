@@ -3,7 +3,7 @@ use crate::util::TextRangeGritExt;
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxNode, CssSyntaxToken};
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
 use biome_rowan::{NodeOrToken, SyntaxKind, SyntaxSlot, TextRange};
-use grit_util::{error::GritResult, AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
+use grit_util::{AstCursor, AstNode as GritAstNode, ByteRange, CodeRange, error::GritResult};
 use std::{borrow::Cow, fmt::Debug, ops::Deref};
 
 use NodeOrToken::*;

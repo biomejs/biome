@@ -1,7 +1,7 @@
 use super::rename::*;
 use crate::utils::batch::JsBatchMutation;
 use biome_js_parser::JsParserOptions;
-use biome_js_semantic::{semantic_model, SemanticModelOptions};
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
     AnyJsObjectMember, JsFileSource, JsFormalParameter, JsIdentifierBinding, JsLanguage,
     JsVariableDeclarator,

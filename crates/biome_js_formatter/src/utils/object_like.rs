@@ -1,11 +1,11 @@
-use crate::prelude::*;
 use crate::JsFormatContext;
+use crate::prelude::*;
 use biome_formatter::write;
 use biome_formatter::{Format, FormatResult};
 use biome_js_syntax::{
     JsFormalParameter, JsObjectExpression, JsSyntaxToken, TsObjectType, TsTypeAnnotation,
 };
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, AstSeparatedList, SyntaxResult};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, declare_node_union};
 
 declare_node_union! {
     pub (crate) JsObjectLike = JsObjectExpression | TsObjectType

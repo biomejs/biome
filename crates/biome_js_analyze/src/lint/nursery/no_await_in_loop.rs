@@ -1,6 +1,6 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, QueryMatch, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    Ast, QueryMatch, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{
@@ -8,7 +8,7 @@ use biome_js_syntax::{
     JsForVariableDeclaration, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, JsWhileStatement,
     JsWithStatement,
 };
-use biome_rowan::{declare_node_union, AstNode, WalkEvent};
+use biome_rowan::{AstNode, WalkEvent, declare_node_union};
 
 declare_lint_rule! {
     /// Disallow `await` inside loops.

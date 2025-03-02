@@ -4,7 +4,7 @@ use crate::syntax::binding::{
     is_nth_at_identifier_binding, parse_binding, parse_identifier_binding,
 };
 use crate::syntax::class::parse_initializer_clause;
-use crate::syntax::expr::{is_nth_at_identifier, parse_name, ExpressionContext};
+use crate::syntax::expr::{ExpressionContext, is_nth_at_identifier, parse_name};
 
 use super::ts_parse_error::expected_ts_enum_member;
 use crate::state::EnterAmbientContext;
@@ -12,14 +12,14 @@ use crate::syntax::auxiliary::{is_nth_at_declaration_clause, parse_declaration_c
 use crate::syntax::js_parse_error::{
     expected_declare_statement, expected_identifier, expected_module_source,
 };
-use crate::syntax::module::{parse_module_item_list, parse_module_source, ModuleItemListParent};
-use crate::syntax::stmt::{semi, STMT_RECOVERY_SET};
+use crate::syntax::module::{ModuleItemListParent, parse_module_item_list, parse_module_source};
+use crate::syntax::stmt::{STMT_RECOVERY_SET, semi};
 use crate::syntax::typescript::ts_parse_error::expected_ts_type;
 use crate::syntax::typescript::{
-    expect_ts_type_list, parse_ts_identifier_binding, parse_ts_implements_clause, parse_ts_name,
-    parse_ts_type, parse_ts_type_parameters, TypeContext, TypeMembers,
+    TypeContext, TypeMembers, expect_ts_type_list, parse_ts_identifier_binding,
+    parse_ts_implements_clause, parse_ts_name, parse_ts_type, parse_ts_type_parameters,
 };
-use crate::{syntax, Absent, JsParser, ParseRecoveryTokenSet, ParsedSyntax, Present};
+use crate::{Absent, JsParser, ParseRecoveryTokenSet, ParsedSyntax, Present, syntax};
 use biome_js_syntax::{JsSyntaxKind::*, *};
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};

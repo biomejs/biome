@@ -1,6 +1,6 @@
 use crate::cursor::{NodeData, SyntaxElement, SyntaxNode, SyntaxTrivia};
 use crate::green::GreenElementRef;
-use crate::{green, Direction, GreenToken, GreenTokenData, RawSyntaxKind, TokenText, WalkEvent};
+use crate::{Direction, GreenToken, GreenTokenData, RawSyntaxKind, TokenText, WalkEvent, green};
 use biome_text_size::{TextRange, TextSize};
 use std::hash::{Hash, Hasher};
 use std::ptr::NonNull;

@@ -1,7 +1,7 @@
 use biome_formatter_test::TestFormatLanguage;
 use biome_fs::BiomePath;
-use biome_html_formatter::context::HtmlFormatContext;
 use biome_html_formatter::HtmlFormatLanguage;
+use biome_html_formatter::context::HtmlFormatContext;
 use biome_html_parser::parse_html;
 use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 use biome_parser::AnyParse;

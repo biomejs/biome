@@ -1,9 +1,9 @@
 use crate::green::GreenElement;
-use crate::syntax::element::{SyntaxElement, SyntaxElementKey};
 use crate::syntax::SyntaxTrivia;
+use crate::syntax::element::{SyntaxElement, SyntaxElementKey};
 use crate::{
-    cursor, Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxList, SyntaxNodeText,
-    SyntaxToken, SyntaxTriviaPiece, TokenAtOffset, WalkEvent,
+    Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxList, SyntaxNodeText,
+    SyntaxToken, SyntaxTriviaPiece, TokenAtOffset, WalkEvent, cursor,
 };
 use biome_text_size::{TextRange, TextSize};
 #[cfg(feature = "serde")]

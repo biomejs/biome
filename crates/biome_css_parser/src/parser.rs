@@ -2,11 +2,11 @@ use crate::lexer::CssReLexContext;
 use crate::state::CssParserState;
 use crate::token_source::{CssTokenSource, CssTokenSourceCheckpoint};
 use biome_css_syntax::CssSyntaxKind;
+use biome_parser::ParserContext;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
 use biome_parser::token_source::Trivia;
-use biome_parser::ParserContext;
-use biome_parser::{prelude::*, ParserContextCheckpoint};
+use biome_parser::{ParserContextCheckpoint, prelude::*};
 
 pub(crate) struct CssParser<'source> {
     context: ParserContext<CssSyntaxKind>,

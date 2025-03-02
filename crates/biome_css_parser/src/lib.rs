@@ -6,7 +6,7 @@ use crate::syntax::parse_root;
 use biome_css_factory::CssSyntaxFactory;
 use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
 pub use biome_parser::prelude::*;
-use biome_parser::{tree_sink::LosslessTreeSink, AnyParse};
+use biome_parser::{AnyParse, tree_sink::LosslessTreeSink};
 use biome_rowan::{AstNode, NodeCache};
 pub use parser::CssParserOptions;
 
@@ -121,7 +121,7 @@ impl From<CssParse> for AnyParse {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parse_css, CssParserOptions};
+    use crate::{CssParserOptions, parse_css};
 
     #[test]
     fn parser_smoke_test() {

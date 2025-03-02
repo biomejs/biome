@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 use biome_formatter::write;
-use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsPostUpdateExpression;
 use biome_js_syntax::JsPostUpdateExpressionFields;
+use biome_js_syntax::parentheses::NeedsParentheses;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsPostUpdateExpression;

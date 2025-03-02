@@ -4,8 +4,8 @@ use crate::syntax::function::parse_function_declaration;
 use crate::syntax::js_parse_error::decorators_not_allowed;
 use crate::syntax::module::parse_import_or_import_equals_declaration;
 use crate::syntax::stmt::{
-    is_nth_at_variable_declarations, parse_variable_declaration, semi, StatementContext,
-    VariableDeclarationParent,
+    StatementContext, VariableDeclarationParent, is_nth_at_variable_declarations,
+    parse_variable_declaration, semi,
 };
 use crate::syntax::typescript::{
     is_nth_at_any_ts_namespace_declaration, is_nth_at_ts_interface_declaration,

@@ -1,12 +1,12 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
-    export_ext::{AnyJsExported, ExportedItem},
     AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression, AnyJsModuleItem, AnyJsStatement,
     JsModule,
+    export_ext::{AnyJsExported, ExportedItem},
 };
 use biome_rowan::{AstNode, TextRange};
 use biome_string_case::Case;

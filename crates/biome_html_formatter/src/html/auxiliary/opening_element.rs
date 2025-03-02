@@ -1,5 +1,5 @@
 use crate::{prelude::*, utils::metadata::is_element_whitespace_sensitive};
-use biome_formatter::{write, FormatRuleWithOptions, GroupId};
+use biome_formatter::{FormatRuleWithOptions, GroupId, write};
 use biome_html_syntax::{HtmlOpeningElement, HtmlOpeningElementFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlOpeningElement {

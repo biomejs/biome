@@ -2,10 +2,10 @@ use crate::configs::{
     CONFIG_DISABLED_FORMATTER, CONFIG_DISABLED_FORMATTER_JSONC, CONFIG_FILE_SIZE_LIMIT,
     CONFIG_LINTER_DISABLED,
 };
-use crate::snap_test::{assert_file_contents, SnapshotPayload};
+use crate::snap_test::{SnapshotPayload, assert_file_contents};
 use crate::{
-    assert_cli_snapshot, run_cli, CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, PARSE_ERROR,
-    UNFORMATTED,
+    CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, PARSE_ERROR, UNFORMATTED, assert_cli_snapshot,
+    run_cli,
 };
 use biome_console::{BufferConsole, MarkupBuf};
 use biome_fs::MemoryFileSystem;

@@ -7,7 +7,7 @@ use super::{
     predicate_call_compiler::PrCallCompiler, predicate_return_compiler::PrReturnCompiler,
     rewrite_compiler::PrRewriteCompiler,
 };
-use crate::{grit_context::GritQueryContext, CompileError};
+use crate::{CompileError, grit_context::GritQueryContext};
 use biome_grit_syntax::{AnyGritPredicate, GritSyntaxKind};
 use biome_rowan::AstNode;
 use grit_pattern_matcher::pattern::Predicate;

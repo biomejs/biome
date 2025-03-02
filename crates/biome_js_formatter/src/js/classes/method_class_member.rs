@@ -9,7 +9,7 @@ use biome_js_syntax::{
     TsReturnTypeAnnotation, TsTypeParameters,
 };
 use biome_js_syntax::{JsMethodClassMember, JsMethodObjectMember, JsSyntaxToken};
-use biome_rowan::{declare_node_union, SyntaxResult};
+use biome_rowan::{SyntaxResult, declare_node_union};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsMethodClassMember;

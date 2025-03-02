@@ -15,10 +15,10 @@ use std::fmt;
 use std::fmt::Debug;
 pub use token::SyntaxToken;
 pub use trivia::{
-    chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,
     ChainTriviaPiecesIterator, SyntaxTrivia, SyntaxTriviaPiece, SyntaxTriviaPieceComments,
     SyntaxTriviaPieceNewline, SyntaxTriviaPieceSkipped, SyntaxTriviaPieceWhitespace,
-    SyntaxTriviaPiecesIterator, TriviaPiece, TriviaPieceKind,
+    SyntaxTriviaPiecesIterator, TriviaPiece, TriviaPieceKind, chain_trivia_pieces,
+    trim_leading_trivia_pieces, trim_trailing_trivia_pieces,
 };
 
 /// Type tag for each node or token of a language
@@ -121,9 +121,9 @@ impl<L: Language> IntoIterator for SyntaxList<L> {
 mod tests {
     use biome_text_size::TextRange;
 
+    use crate::Direction;
     use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
     use crate::syntax::TriviaPiece;
-    use crate::Direction;
 
     #[test]
     fn empty_list() {

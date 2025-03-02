@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::token::string::{normalize_string, Quote};
+use biome_formatter::token::string::{Quote, normalize_string};
 use biome_json_syntax::JsonSyntaxToken;
 use std::borrow::Cow;
 

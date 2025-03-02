@@ -16,9 +16,9 @@ use biome_formatter::{IndentStyle, IndentWidth, LineEnding};
 use serde::{Deserialize, Deserializer};
 
 use crate::{
-    diagnostics::{EditorConfigDiagnostic, ParseFailedDiagnostic},
     Configuration, FormatterConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
     OverridePattern, Overrides,
+    diagnostics::{EditorConfigDiagnostic, ParseFailedDiagnostic},
 };
 
 pub fn parse_str(s: &str) -> Result<EditorConfig, EditorConfigDiagnostic> {

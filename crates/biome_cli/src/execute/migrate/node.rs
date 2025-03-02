@@ -1,6 +1,6 @@
 use std::process::Command;
 
-use crate::{diagnostics::MigrationDiagnostic, CliDiagnostic};
+use crate::{CliDiagnostic, diagnostics::MigrationDiagnostic};
 
 /// Imports `specifier` using Node's `import()` or node's `require()` and
 /// returns the JSONified content of its default export.

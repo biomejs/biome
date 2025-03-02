@@ -1,7 +1,7 @@
 use biome_diagnostics::{Error, Severity};
 use camino::{Utf8Path, Utf8PathBuf};
 use oxc_resolver::{FsResolution, ResolveError};
-use parking_lot::{lock_api::ArcMutexGuard, Mutex, RawMutex, RwLock};
+use parking_lot::{Mutex, RawMutex, RwLock, lock_api::ArcMutexGuard};
 use rustc_hash::FxHashMap;
 use std::collections::hash_map::Entry;
 use std::io;
@@ -357,8 +357,8 @@ mod tests {
     use std::collections::BTreeSet;
     use std::{io, mem::swap};
 
-    use crate::{fs::FileSystemExt, OpenOptions};
     use crate::{BiomePath, FileSystem, MemoryFileSystem, PathInterner, TraversalContext};
+    use crate::{OpenOptions, fs::FileSystemExt};
 
     #[test]
     fn fs_read_only() {
@@ -384,7 +384,9 @@ mod tests {
         }
 
         match fs.open_with_options(path, OpenOptions::default().read(true).write(true)) {
-            Ok(_) => panic!("fs.open_with_options(read + write) for a read-only filesystem should return an error"),
+            Ok(_) => panic!(
+                "fs.open_with_options(read + write) for a read-only filesystem should return an error"
+            ),
             Err(error) => {
                 assert_eq!(error.kind(), io::ErrorKind::PermissionDenied);
             }

@@ -1,16 +1,16 @@
-use super::{determine_fix_file_mode, FixFileModeOptions, LoadEditorConfig};
+use super::{FixFileModeOptions, LoadEditorConfig, determine_fix_file_mode};
 use crate::cli_options::CliOptions;
-use crate::commands::{get_files_to_process_with_cli_options, CommandRunner};
+use crate::commands::{CommandRunner, get_files_to_process_with_cli_options};
 use crate::{CliDiagnostic, Execution, TraversalMode};
-use biome_configuration::analyzer::assist::{AssistConfiguration, AssistEnabled};
 use biome_configuration::analyzer::LinterEnabled;
+use biome_configuration::analyzer::assist::{AssistConfiguration, AssistEnabled};
 use biome_configuration::formatter::FormatterEnabled;
 use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
 use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
 use biome_service::projects::ProjectKey;
-use biome_service::{configuration::LoadedConfiguration, Workspace, WorkspaceError};
+use biome_service::{Workspace, WorkspaceError, configuration::LoadedConfiguration};
 use std::ffi::OsString;
 
 pub(crate) struct CheckCommandPayload {

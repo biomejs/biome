@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod test {
     use crate::{
-        semantic_model, BindingExtensions, CanBeImportedExported, SemanticModelOptions,
-        SemanticScopeExtensions,
+        BindingExtensions, CanBeImportedExported, SemanticModelOptions, SemanticScopeExtensions,
+        semantic_model,
     };
     use biome_js_parser::JsParserOptions;
     use biome_js_syntax::{

@@ -1,11 +1,11 @@
-use crate::settings::Settings;
 use crate::WorkspaceError;
+use crate::settings::Settings;
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::{CantLoadExtendFile, EditorConfigDiagnostic};
-use biome_configuration::{push_to_analyzer_assist, Configuration, VERSION};
 use biome_configuration::{
-    push_to_analyzer_rules, BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload,
+    BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload, push_to_analyzer_rules,
 };
+use biome_configuration::{Configuration, VERSION, push_to_analyzer_assist};
 use biome_console::markup;
 use biome_css_analyze::METADATA as css_lint_metadata;
 use biome_deserialize::json::deserialize_from_json_str;
@@ -19,7 +19,7 @@ use biome_graphql_analyze::METADATA as graphql_lint_metadata;
 use biome_js_analyze::METADATA as js_lint_metadata;
 use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{JsonParserOptions, parse_json};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsStr;
 use std::fmt::Debug;
