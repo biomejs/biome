@@ -3,4 +3,4 @@
 "@biomejs/biome": minor
 ---
 
-Added options to `suspicious/noConfusingLabels` to allow specific labels.
+Add options to `suspicious/noConfusingLabels` to allow specific labels.
