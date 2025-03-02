@@ -15433,10 +15433,17 @@ impl AnyJsTemplateElement {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxAttribute {
+    JsMetavariable(JsMetavariable),
     JsxAttribute(JsxAttribute),
     JsxSpreadAttribute(JsxSpreadAttribute),
 }
 impl AnyJsxAttribute {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsxAttribute::JsMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_jsx_attribute(&self) -> Option<&JsxAttribute> {
         match &self {
             AnyJsxAttribute::JsxAttribute(item) => Some(item),
@@ -15497,6 +15504,7 @@ impl AnyJsxAttributeValue {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxChild {
+    JsMetavariable(JsMetavariable),
     JsxElement(JsxElement),
     JsxExpressionChild(JsxExpressionChild),
     JsxFragment(JsxFragment),
@@ -15505,6 +15513,12 @@ pub enum AnyJsxChild {
     JsxText(JsxText),
 }
 impl AnyJsxChild {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsxChild::JsMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_jsx_element(&self) -> Option<&JsxElement> {
         match &self {
             AnyJsxChild::JsxElement(item) => Some(item),
@@ -15544,12 +15558,19 @@ impl AnyJsxChild {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxElementName {
+    JsMetavariable(JsMetavariable),
     JsxMemberName(JsxMemberName),
     JsxName(JsxName),
     JsxNamespaceName(JsxNamespaceName),
     JsxReferenceIdentifier(JsxReferenceIdentifier),
 }
 impl AnyJsxElementName {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsxElementName::JsMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_jsx_member_name(&self) -> Option<&JsxMemberName> {
         match &self {
             AnyJsxElementName::JsxMemberName(item) => Some(item),
@@ -37591,6 +37612,11 @@ impl From<AnyJsTemplateElement> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsMetavariable> for AnyJsxAttribute {
+    fn from(node: JsMetavariable) -> AnyJsxAttribute {
+        AnyJsxAttribute::JsMetavariable(node)
+    }
+}
 impl From<JsxAttribute> for AnyJsxAttribute {
     fn from(node: JsxAttribute) -> AnyJsxAttribute {
         AnyJsxAttribute::JsxAttribute(node)
@@ -37603,13 +37629,15 @@ impl From<JsxSpreadAttribute> for AnyJsxAttribute {
 }
 impl AstNode for AnyJsxAttribute {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        JsxAttribute::KIND_SET.union(JsxSpreadAttribute::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = JsMetavariable::KIND_SET
+        .union(JsxAttribute::KIND_SET)
+        .union(JsxSpreadAttribute::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, JSX_ATTRIBUTE | JSX_SPREAD_ATTRIBUTE)
+        matches!(kind, JS_METAVARIABLE | JSX_ATTRIBUTE | JSX_SPREAD_ATTRIBUTE)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            JS_METAVARIABLE => AnyJsxAttribute::JsMetavariable(JsMetavariable { syntax }),
             JSX_ATTRIBUTE => AnyJsxAttribute::JsxAttribute(JsxAttribute { syntax }),
             JSX_SPREAD_ATTRIBUTE => {
                 AnyJsxAttribute::JsxSpreadAttribute(JsxSpreadAttribute { syntax })
@@ -37620,12 +37648,14 @@ impl AstNode for AnyJsxAttribute {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyJsxAttribute::JsMetavariable(it) => &it.syntax,
             AnyJsxAttribute::JsxAttribute(it) => &it.syntax,
             AnyJsxAttribute::JsxSpreadAttribute(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyJsxAttribute::JsMetavariable(it) => it.syntax,
             AnyJsxAttribute::JsxAttribute(it) => it.syntax,
             AnyJsxAttribute::JsxSpreadAttribute(it) => it.syntax,
         }
@@ -37634,6 +37664,7 @@ impl AstNode for AnyJsxAttribute {
 impl std::fmt::Debug for AnyJsxAttribute {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AnyJsxAttribute::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsxAttribute::JsxAttribute(it) => std::fmt::Debug::fmt(it, f),
             AnyJsxAttribute::JsxSpreadAttribute(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -37642,6 +37673,7 @@ impl std::fmt::Debug for AnyJsxAttribute {
 impl From<AnyJsxAttribute> for SyntaxNode {
     fn from(n: AnyJsxAttribute) -> SyntaxNode {
         match n {
+            AnyJsxAttribute::JsMetavariable(it) => it.into(),
             AnyJsxAttribute::JsxAttribute(it) => it.into(),
             AnyJsxAttribute::JsxSpreadAttribute(it) => it.into(),
         }
@@ -37792,6 +37824,11 @@ impl From<AnyJsxAttributeValue> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsMetavariable> for AnyJsxChild {
+    fn from(node: JsMetavariable) -> AnyJsxChild {
+        AnyJsxChild::JsMetavariable(node)
+    }
+}
 impl From<JsxElement> for AnyJsxChild {
     fn from(node: JsxElement) -> AnyJsxChild {
         AnyJsxChild::JsxElement(node)
@@ -37824,7 +37861,8 @@ impl From<JsxText> for AnyJsxChild {
 }
 impl AstNode for AnyJsxChild {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = JsxElement::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = JsMetavariable::KIND_SET
+        .union(JsxElement::KIND_SET)
         .union(JsxExpressionChild::KIND_SET)
         .union(JsxFragment::KIND_SET)
         .union(JsxSelfClosingElement::KIND_SET)
@@ -37833,7 +37871,8 @@ impl AstNode for AnyJsxChild {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            JSX_ELEMENT
+            JS_METAVARIABLE
+                | JSX_ELEMENT
                 | JSX_EXPRESSION_CHILD
                 | JSX_FRAGMENT
                 | JSX_SELF_CLOSING_ELEMENT
@@ -37843,6 +37882,7 @@ impl AstNode for AnyJsxChild {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            JS_METAVARIABLE => AnyJsxChild::JsMetavariable(JsMetavariable { syntax }),
             JSX_ELEMENT => AnyJsxChild::JsxElement(JsxElement { syntax }),
             JSX_EXPRESSION_CHILD => AnyJsxChild::JsxExpressionChild(JsxExpressionChild { syntax }),
             JSX_FRAGMENT => AnyJsxChild::JsxFragment(JsxFragment { syntax }),
@@ -37857,6 +37897,7 @@ impl AstNode for AnyJsxChild {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyJsxChild::JsMetavariable(it) => &it.syntax,
             AnyJsxChild::JsxElement(it) => &it.syntax,
             AnyJsxChild::JsxExpressionChild(it) => &it.syntax,
             AnyJsxChild::JsxFragment(it) => &it.syntax,
@@ -37867,6 +37908,7 @@ impl AstNode for AnyJsxChild {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyJsxChild::JsMetavariable(it) => it.syntax,
             AnyJsxChild::JsxElement(it) => it.syntax,
             AnyJsxChild::JsxExpressionChild(it) => it.syntax,
             AnyJsxChild::JsxFragment(it) => it.syntax,
@@ -37879,6 +37921,7 @@ impl AstNode for AnyJsxChild {
 impl std::fmt::Debug for AnyJsxChild {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AnyJsxChild::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsxChild::JsxElement(it) => std::fmt::Debug::fmt(it, f),
             AnyJsxChild::JsxExpressionChild(it) => std::fmt::Debug::fmt(it, f),
             AnyJsxChild::JsxFragment(it) => std::fmt::Debug::fmt(it, f),
@@ -37891,6 +37934,7 @@ impl std::fmt::Debug for AnyJsxChild {
 impl From<AnyJsxChild> for SyntaxNode {
     fn from(n: AnyJsxChild) -> SyntaxNode {
         match n {
+            AnyJsxChild::JsMetavariable(it) => it.into(),
             AnyJsxChild::JsxElement(it) => it.into(),
             AnyJsxChild::JsxExpressionChild(it) => it.into(),
             AnyJsxChild::JsxFragment(it) => it.into(),
@@ -37904,6 +37948,11 @@ impl From<AnyJsxChild> for SyntaxElement {
     fn from(n: AnyJsxChild) -> SyntaxElement {
         let node: SyntaxNode = n.into();
         node.into()
+    }
+}
+impl From<JsMetavariable> for AnyJsxElementName {
+    fn from(node: JsMetavariable) -> AnyJsxElementName {
+        AnyJsxElementName::JsMetavariable(node)
     }
 }
 impl From<JsxMemberName> for AnyJsxElementName {
@@ -37928,18 +37977,24 @@ impl From<JsxReferenceIdentifier> for AnyJsxElementName {
 }
 impl AstNode for AnyJsxElementName {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = JsxMemberName::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = JsMetavariable::KIND_SET
+        .union(JsxMemberName::KIND_SET)
         .union(JsxName::KIND_SET)
         .union(JsxNamespaceName::KIND_SET)
         .union(JsxReferenceIdentifier::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            JSX_MEMBER_NAME | JSX_NAME | JSX_NAMESPACE_NAME | JSX_REFERENCE_IDENTIFIER
+            JS_METAVARIABLE
+                | JSX_MEMBER_NAME
+                | JSX_NAME
+                | JSX_NAMESPACE_NAME
+                | JSX_REFERENCE_IDENTIFIER
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            JS_METAVARIABLE => AnyJsxElementName::JsMetavariable(JsMetavariable { syntax }),
             JSX_MEMBER_NAME => AnyJsxElementName::JsxMemberName(JsxMemberName { syntax }),
             JSX_NAME => AnyJsxElementName::JsxName(JsxName { syntax }),
             JSX_NAMESPACE_NAME => AnyJsxElementName::JsxNamespaceName(JsxNamespaceName { syntax }),
@@ -37952,6 +38007,7 @@ impl AstNode for AnyJsxElementName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyJsxElementName::JsMetavariable(it) => &it.syntax,
             AnyJsxElementName::JsxMemberName(it) => &it.syntax,
             AnyJsxElementName::JsxName(it) => &it.syntax,
             AnyJsxElementName::JsxNamespaceName(it) => &it.syntax,
@@ -37960,6 +38016,7 @@ impl AstNode for AnyJsxElementName {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyJsxElementName::JsMetavariable(it) => it.syntax,
             AnyJsxElementName::JsxMemberName(it) => it.syntax,
             AnyJsxElementName::JsxName(it) => it.syntax,
             AnyJsxElementName::JsxNamespaceName(it) => it.syntax,
@@ -37970,6 +38027,7 @@ impl AstNode for AnyJsxElementName {
 impl std::fmt::Debug for AnyJsxElementName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AnyJsxElementName::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsxElementName::JsxMemberName(it) => std::fmt::Debug::fmt(it, f),
             AnyJsxElementName::JsxName(it) => std::fmt::Debug::fmt(it, f),
             AnyJsxElementName::JsxNamespaceName(it) => std::fmt::Debug::fmt(it, f),
@@ -37980,6 +38038,7 @@ impl std::fmt::Debug for AnyJsxElementName {
 impl From<AnyJsxElementName> for SyntaxNode {
     fn from(n: AnyJsxElementName) -> SyntaxNode {
         match n {
+            AnyJsxElementName::JsMetavariable(it) => it.into(),
             AnyJsxElementName::JsxMemberName(it) => it.into(),
             AnyJsxElementName::JsxName(it) => it.into(),
             AnyJsxElementName::JsxNamespaceName(it) => it.into(),

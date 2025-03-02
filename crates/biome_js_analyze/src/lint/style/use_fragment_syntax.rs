@@ -56,6 +56,7 @@ impl Rule for UseFragmentSyntax {
                 jsx_reference_identifier_is_fragment(&identifier, model)?
             }
             AnyJsxElementName::JsxName(_) | AnyJsxElementName::JsxNamespaceName(_) => false,
+            AnyJsxElementName::JsMetavariable(_) => todo!(),
         };
 
         if maybe_invalid && opening_element.attributes().is_empty() {
