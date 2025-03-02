@@ -2917,6 +2917,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSymbolDescription": {
+					"description": "Require a description parameter for the Symbol().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useTrimStartEnd": {
 					"description": "Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().",
 					"anyOf": [
