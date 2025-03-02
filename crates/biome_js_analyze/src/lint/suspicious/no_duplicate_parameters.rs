@@ -1,5 +1,5 @@
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::parameter_ext::{AnyJsParameterList, AnyJsParameters, AnyParameter};
@@ -135,7 +135,7 @@ fn traverse_binding(
                         traverse_binding(pattern, tracked_bindings)
                     }
                 }
-            })
+            });
         }
 
         AnyJsBindingPattern::JsObjectBindingPattern(pattern) => {
@@ -168,7 +168,7 @@ fn traverse_binding(
                     AnyJsObjectBindingPatternMember::JsBogusBinding(_)
                     | AnyJsObjectBindingPatternMember::JsMetavariable(_) => None,
                 }
-            })
+            });
         }
     }
     None

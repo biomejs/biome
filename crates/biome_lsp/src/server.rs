@@ -1,6 +1,6 @@
 use crate::capabilities::server_capabilities;
-use crate::diagnostics::{handle_lsp_error, LspError};
-use crate::requests::syntax_tree::{SyntaxTreePayload, SYNTAX_TREE_REQUEST};
+use crate::diagnostics::{LspError, handle_lsp_error};
+use crate::requests::syntax_tree::{SYNTAX_TREE_REQUEST, SyntaxTreePayload};
 use crate::session::{
     CapabilitySet, CapabilityStatus, ClientInformation, Session, SessionHandle, SessionKey,
 };
@@ -14,9 +14,9 @@ use biome_service::workspace::{
 };
 use biome_service::{WatcherInstruction, WorkspaceServer};
 use camino::Utf8PathBuf;
-use crossbeam::channel::{bounded, Sender};
-use futures::future::ready;
+use crossbeam::channel::{Sender, bounded};
 use futures::FutureExt;
+use futures::future::ready;
 use rustc_hash::FxHashMap;
 use serde_json::json;
 use std::panic::RefUnwindSafe;
@@ -26,7 +26,7 @@ use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::sync::Notify;
 use tokio::task::spawn_blocking;
 use tower_lsp::jsonrpc::Result as LspResult;
-use tower_lsp::{lsp_types::*, ClientSocket};
+use tower_lsp::{ClientSocket, lsp_types::*};
 use tower_lsp::{LanguageServer, LspService, Server};
 use tracing::{error, info, warn};
 
@@ -245,7 +245,9 @@ impl LanguageServer for LSPServer {
 
         let server_capabilities = server_capabilities(&params.capabilities);
         if params.root_path.is_some() {
-            warn!("The Biome Server was initialized with the deprecated `root_path` parameter: this is not supported, use `root_uri` instead");
+            warn!(
+                "The Biome Server was initialized with the deprecated `root_path` parameter: this is not supported, use `root_uri` instead"
+            );
         }
 
         self.session.initialize(
@@ -332,7 +334,9 @@ impl LanguageServer for LSPServer {
                     }
                 }
                 Err(_) => {
-                    error!("The Workspace root URI {file_path:?} could not be parsed as a filesystem path");
+                    error!(
+                        "The Workspace root URI {file_path:?} could not be parsed as a filesystem path"
+                    );
                     continue;
                 }
             }

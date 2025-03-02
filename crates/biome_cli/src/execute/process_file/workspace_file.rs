@@ -1,6 +1,6 @@
 use crate::execute::diagnostics::{ResultExt, ResultIoExt};
 use crate::execute::process_file::SharedTraversalOptions;
-use biome_diagnostics::{category, Error};
+use biome_diagnostics::{Error, category};
 use biome_fs::{BiomePath, File, OpenOptions};
 use biome_service::workspace::{FileContent, FileGuard, OpenFileParams};
 use biome_service::{Workspace, WorkspaceError};

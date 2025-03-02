@@ -180,11 +180,11 @@ mod syntax_rewriter;
 
 use biome_formatter::format_element::tag::Label;
 use biome_formatter::prelude::*;
-use biome_formatter::{
-    comments::Comments, write, CstFormatContext, Format, FormatLanguage, FormatToken,
-    TransformSourceMap,
-};
 use biome_formatter::{Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed};
+use biome_formatter::{
+    CstFormatContext, Format, FormatLanguage, FormatToken, TransformSourceMap, comments::Comments,
+    write,
+};
 use biome_js_syntax::{
     AnyJsDeclaration, AnyJsStatement, JsLanguage, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
 };
@@ -570,7 +570,7 @@ mod tests {
 
     use crate::context::JsFormatOptions;
     use biome_formatter::IndentStyle;
-    use biome_js_parser::{parse, parse_script, JsParserOptions};
+    use biome_js_parser::{JsParserOptions, parse, parse_script};
     use biome_js_syntax::JsFileSource;
     use biome_rowan::{TextRange, TextSize};
 

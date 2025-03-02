@@ -2,8 +2,8 @@ use crate::prelude::*;
 use crate::utils::format_class::FormatClass;
 
 use biome_formatter::{format_args, write};
-use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsClassExpression;
+use biome_js_syntax::parentheses::NeedsParentheses;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsClassExpression;

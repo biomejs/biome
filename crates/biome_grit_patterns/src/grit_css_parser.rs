@@ -2,7 +2,7 @@ use crate::{
     grit_analysis_ext::GritAnalysisExt, grit_target_language::GritTargetParser,
     grit_tree::GritTargetTree,
 };
-use biome_css_parser::{parse_css, CssParserOptions};
+use biome_css_parser::{CssParserOptions, parse_css};
 use biome_css_syntax::CssLanguage;
 use biome_parser::AnyParse;
 use camino::Utf8Path;

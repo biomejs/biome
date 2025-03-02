@@ -176,11 +176,7 @@ impl Console for EnvConsole {
         let mut buffer = String::new();
         let result = handle.read_to_string(&mut buffer);
         // Skipping the error for now
-        if result.is_ok() {
-            Some(buffer)
-        } else {
-            None
-        }
+        if result.is_ok() { Some(buffer) } else { None }
     }
 }
 

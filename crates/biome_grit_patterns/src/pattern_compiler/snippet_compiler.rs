@@ -1,20 +1,20 @@
 use super::compilation_context::NodeCompilationContext;
 use crate::{
+    CompileError, GritTargetLanguage,
     grit_code_snippet::GritCodeSnippet,
     grit_context::GritQueryContext,
     grit_node_patterns::{GritLeafNodePattern, GritNodePattern, GritNodePatternArg},
     grit_target_node::{GritSyntaxSlot, GritTargetNode, GritTargetSyntaxKind},
     grit_tree::GritTargetTree,
-    CompileError, GritTargetLanguage,
 };
 use grit_pattern_matcher::{
     constants::GLOBAL_VARS_SCOPE_INDEX,
     pattern::{
-        is_reserved_metavariable, DynamicPattern, DynamicSnippet, DynamicSnippetPart, List,
-        Pattern, RegexLike, RegexPattern, Variable, VariableSource,
+        DynamicPattern, DynamicSnippet, DynamicSnippetPart, List, Pattern, RegexLike, RegexPattern,
+        Variable, VariableSource, is_reserved_metavariable,
     },
 };
-use grit_util::{traverse, Ast, AstNode, ByteRange, GritMetaValue, Language, Order, SnippetTree};
+use grit_util::{Ast, AstNode, ByteRange, GritMetaValue, Language, Order, SnippetTree, traverse};
 use std::{borrow::Cow, collections::BTreeMap};
 
 pub(crate) fn parse_snippet_content(
@@ -488,8 +488,8 @@ fn unescape(raw_string: &str) -> String {
 mod tests {
     use super::*;
     use crate::{
-        grit_built_in_functions::BuiltIns, grit_js_parser::GritJsParser,
-        pattern_compiler::compilation_context::CompilationContext, JsTargetLanguage,
+        JsTargetLanguage, grit_built_in_functions::BuiltIns, grit_js_parser::GritJsParser,
+        pattern_compiler::compilation_context::CompilationContext,
     };
     use grit_util::Parser;
     use regex::Regex;

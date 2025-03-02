@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
-use biome_formatter::{write, FormatRuleWithOptions};
-use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_formatter::{FormatRuleWithOptions, write};
 use biome_js_syntax::JsArrayExpression;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsExpression, JsArrayElementList, JsArrayExpressionFields,
 };

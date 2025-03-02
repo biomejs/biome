@@ -1,7 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
-    declare_lint_rule, AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic,
-    RuleSource, ServiceBag, Visitor, VisitorContext,
+    AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource,
+    ServiceBag, Visitor, VisitorContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -13,8 +13,8 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, BatchMutationExt, Language, SyntaxNode, SyntaxResult, TokenText};
 use rustc_hash::FxHashSet;
 
-use crate::services::control_flow::AnyJsControlFlowRoot;
 use crate::JsRuleAction;
+use crate::services::control_flow::AnyJsControlFlowRoot;
 
 declare_lint_rule! {
     /// Disallow unused labels.

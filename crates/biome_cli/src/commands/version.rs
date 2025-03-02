@@ -1,5 +1,5 @@
 use biome_console::fmt::Formatter;
-use biome_console::{fmt, markup, ConsoleExt};
+use biome_console::{ConsoleExt, fmt, markup};
 use biome_service::workspace::ServerInfo;
 
 use crate::{CliDiagnostic, CliSession, VERSION};

@@ -1,11 +1,10 @@
 //! Implementation of [DeserializableValue] for the JSON data format.
 use crate::{
-    diagnostics::DeserializableType, DefaultDeserializationContext, Deserializable,
-    DeserializableValue, DeserializationContext, DeserializationVisitor, Deserialized, Text,
-    TextNumber,
+    DefaultDeserializationContext, Deserializable, DeserializableValue, DeserializationContext,
+    DeserializationVisitor, Deserialized, Text, TextNumber, diagnostics::DeserializableType,
 };
 use biome_diagnostics::{DiagnosticExt, Error};
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{AnyJsonValue, JsonMemberName, JsonRoot, T};
 use biome_rowan::{AstNode, AstSeparatedList, TokenText};
 
@@ -334,7 +333,7 @@ pub fn unescape_json_string(text: TokenText) -> Text {
 mod tests {
     use std::{
         collections::{BTreeMap, HashMap, HashSet},
-        num::{NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8, NonZeroUsize},
+        num::{NonZeroU8, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroUsize},
     };
 
     use super::*;

@@ -1,9 +1,9 @@
+use super::VariableList;
 use super::literals::*;
 use super::parse_error::*;
 use super::predicates::parse_expected_predicate;
-use super::VariableList;
+use super::{GritParser, parse_name, parse_not, parse_variable};
 use super::{parse_maybe_named_arg, parse_variable_list};
-use super::{parse_name, parse_not, parse_variable, GritParser};
 use crate::constants::*;
 use biome_grit_syntax::GritSyntaxKind;
 use biome_grit_syntax::GritSyntaxKind::*;

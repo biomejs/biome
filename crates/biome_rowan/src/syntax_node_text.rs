@@ -1,6 +1,6 @@
 use crate::{
-    cursor::{SyntaxNode, SyntaxToken},
     TextRange, TextSize, TokenAtOffset,
+    cursor::{SyntaxNode, SyntaxToken},
 };
 use biome_text_size::TextLen;
 use std::iter::FusedIterator;
@@ -397,8 +397,8 @@ mod private {
 
 #[cfg(test)]
 mod tests {
-    use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
     use crate::SyntaxNode;
+    use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
 
     fn build_tree(chunks: &[&str]) -> SyntaxNode<RawLanguage> {
         let mut builder = RawSyntaxTreeBuilder::new();

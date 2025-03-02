@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use biome_formatter::{
-    write, CstFormatContext, FormatContext, FormatOptions, FormatOwnedWithRule, FormatRefWithRule,
-    FormatRuleWithOptions,
+    CstFormatContext, FormatContext, FormatOptions, FormatOwnedWithRule, FormatRefWithRule,
+    FormatRuleWithOptions, write,
 };
 
 use crate::{AsFormat, IntoFormat};
@@ -10,7 +10,7 @@ use biome_js_syntax::{
     JsInitializerClause, JsReturnStatement, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
     JsSyntaxToken, JsThrowStatement, JsUnaryExpression, JsYieldArgument, TsConditionalType,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 
 declare_node_union! {
     pub AnyJsConditional = JsConditionalExpression | TsConditionalType

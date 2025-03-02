@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
 use biome_console::fmt::{Display, Formatter};
 use biome_console::markup;
@@ -10,7 +10,7 @@ use biome_js_syntax::{
     JsCallExpression, JsIdentifierExpression, JsLogicalExpression, JsLogicalOperator,
     JsReferenceIdentifier, JsUnaryOperator,
 };
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, AstSeparatedList, SyntaxResult};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, declare_node_union};
 
 use crate::ast_utils::is_constant_condition;
 use crate::globals::is_js_language_global;

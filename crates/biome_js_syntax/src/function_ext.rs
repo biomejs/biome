@@ -2,7 +2,7 @@ use crate::{
     AnyJsCallArgument, AnyJsFunction, AnyJsFunctionBody, JsCallArguments, JsMethodClassMember,
     JsMethodObjectMember, JsStatementList, JsSyntaxToken,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult, TextRange};
+use biome_rowan::{AstNode, SyntaxResult, TextRange, declare_node_union};
 
 declare_node_union! {
     pub AnyFunctionLike = AnyJsFunction | JsMethodObjectMember | JsMethodClassMember

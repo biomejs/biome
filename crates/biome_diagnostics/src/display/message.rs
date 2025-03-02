@@ -1,5 +1,5 @@
 use biome_console::fmt::{Formatter, Termcolor};
-use biome_console::{markup, MarkupBuf};
+use biome_console::{MarkupBuf, markup};
 use serde::{Deserialize, Serialize};
 use termcolor::NoColor;
 

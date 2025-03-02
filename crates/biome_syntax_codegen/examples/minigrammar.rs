@@ -1,4 +1,4 @@
-use biome_syntax_codegen::{generate_grammar, GrammarOptions, LanguageSrc};
+use biome_syntax_codegen::{GrammarOptions, LanguageSrc, generate_grammar};
 use std::env::current_dir;
 
 struct Source;

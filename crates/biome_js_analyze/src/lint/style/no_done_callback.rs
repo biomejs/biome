@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{
@@ -98,7 +98,7 @@ impl Rule for NoDoneCallback {
                         return Some(text_range);
                     }
                     AnyJsArrowFunctionParameters::JsParameters(js_parameters) => {
-                        return analyze_js_parameters(&js_parameters, is_test_each)
+                        return analyze_js_parameters(&js_parameters, is_test_each);
                     }
                 }
             }

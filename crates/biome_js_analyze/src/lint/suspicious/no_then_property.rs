@@ -1,6 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_analyze::{Ast, RuleSource};
-use biome_console::{markup, MarkupBuf};
+use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsCallArgument,
@@ -11,7 +11,7 @@ use biome_js_syntax::{
     AnyJsClassMember, AnyJsObjectMember, JsAssignmentExpression, JsCallExpression,
     JsComputedMemberName, JsExport,
 };
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
 
 declare_lint_rule! {
     /// Disallow `then` property.
@@ -177,7 +177,7 @@ fn process_js_object_member(node: &AnyJsObjectMember) -> Option<RuleState> {
             }
         }
         AnyJsObjectMember::JsMethodObjectMember(node) => {
-            return process_js_method_object_member(node)
+            return process_js_method_object_member(node);
         }
         _ => return None,
     };

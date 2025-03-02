@@ -9,9 +9,9 @@ use countme::Count;
 
 use crate::green::trivia::GreenTrivia;
 use crate::{
+    TextSize,
     arc::{Arc, HeaderSlice, ThinArc},
     green::RawSyntaxKind,
-    TextSize,
 };
 
 #[derive(PartialEq, Eq, Hash)]

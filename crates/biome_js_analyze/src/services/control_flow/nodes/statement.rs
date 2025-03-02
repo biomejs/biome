@@ -1,9 +1,9 @@
 use biome_js_syntax::{JsDebuggerStatement, JsEmptyStatement, JsExpressionStatement};
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 
 use crate::services::control_flow::{
-    visitor::{NodeVisitor, StatementStack},
     FunctionBuilder,
+    visitor::{NodeVisitor, StatementStack},
 };
 
 declare_node_union! {

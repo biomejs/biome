@@ -2,14 +2,14 @@
 use super::{BoxedTraversal, File, FileSystemDiagnostic, FsErrorKind, PathKind};
 use crate::fs::OpenOptions;
 use crate::{
-    fs::{TraversalContext, TraversalScope},
     BiomePath, FileSystem, MemoryFileSystem,
+    fs::{TraversalContext, TraversalScope},
 };
 use biome_diagnostics::{DiagnosticExt, Error, IoError, Severity};
 use camino::{Utf8DirEntry, Utf8Path, Utf8PathBuf};
 use oxc_resolver::{FsResolution, ResolveError, ResolveOptions, Resolver};
 use path_absolutize::Absolutize;
-use rayon::{scope, Scope};
+use rayon::{Scope, scope};
 use std::env::temp_dir;
 use std::fs::FileType;
 use std::panic::AssertUnwindSafe;

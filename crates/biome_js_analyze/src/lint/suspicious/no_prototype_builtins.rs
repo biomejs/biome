@@ -1,14 +1,14 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make::{self};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsCallExpression, JsSyntaxKind,
-    TextRange, T,
+    AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsCallExpression, JsSyntaxKind, T,
+    TextRange,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
 

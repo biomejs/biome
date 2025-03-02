@@ -126,7 +126,7 @@ fn normalize_path(path: &Utf8Path) -> Utf8PathBuf {
 
 #[cfg(test)]
 mod test {
-    use biome_diagnostics::{print_diagnostic_to_string, Error};
+    use biome_diagnostics::{Error, print_diagnostic_to_string};
     use biome_fs::MemoryFileSystem;
 
     use super::*;

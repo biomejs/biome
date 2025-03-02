@@ -1,20 +1,20 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
 use biome_js_syntax::{
-    inner_string_text, AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier,
-    AnyJsExpression, AnyJsImportLike, AnyJsNamedImportSpecifier, AnyJsObjectBindingPatternMember,
-    JsCallExpression, JsDefaultImportSpecifier, JsExportFromClause, JsExportNamedFromClause,
+    AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsExpression,
+    AnyJsImportLike, AnyJsNamedImportSpecifier, AnyJsObjectBindingPatternMember, JsCallExpression,
+    JsDefaultImportSpecifier, JsExportFromClause, JsExportNamedFromClause,
     JsExportNamedFromSpecifier, JsExportNamedFromSpecifierList, JsIdentifierBinding,
     JsImportBareClause, JsImportCallExpression, JsImportCombinedClause, JsImportDefaultClause,
     JsImportNamedClause, JsImportNamespaceClause, JsLanguage, JsModuleSource,
     JsNamedImportSpecifier, JsNamedImportSpecifiers, JsNamespaceImportSpecifier,
     JsObjectBindingPattern, JsObjectBindingPatternProperty,
     JsObjectBindingPatternShorthandProperty, JsShorthandNamedImportSpecifier,
-    JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator,
+    JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator, inner_string_text,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange};
 use rustc_hash::FxHashMap;

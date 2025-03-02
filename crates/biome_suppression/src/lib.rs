@@ -365,7 +365,7 @@ fn offset_from(base: &str, substr: &str) -> TextSize {
 
 #[cfg(test)]
 mod tests_suppression_kinds {
-    use crate::{parse_suppression_comment, Suppression, SuppressionKind};
+    use crate::{Suppression, SuppressionKind, parse_suppression_comment};
     use biome_diagnostics::category;
     use biome_rowan::{TextRange, TextSize};
 
@@ -444,11 +444,11 @@ mod tests_biome_ignore_inline {
     use biome_rowan::{TextRange, TextSize};
 
     use crate::{
-        offset_from, parse_category, SuppressionDiagnostic, SuppressionDiagnosticKind,
-        SuppressionKind,
+        SuppressionDiagnostic, SuppressionDiagnosticKind, SuppressionKind, offset_from,
+        parse_category,
     };
 
-    use super::{parse_suppression_comment, Suppression};
+    use super::{Suppression, parse_suppression_comment};
 
     #[test]
     fn parse_simple_suppression() {
@@ -735,9 +735,9 @@ mod tests_biome_ignore_toplevel {
     use biome_diagnostics::category;
     use biome_rowan::{TextRange, TextSize};
 
-    use crate::{offset_from, SuppressionDiagnostic, SuppressionDiagnosticKind, SuppressionKind};
+    use crate::{SuppressionDiagnostic, SuppressionDiagnosticKind, SuppressionKind, offset_from};
 
-    use super::{parse_suppression_comment, Suppression};
+    use super::{Suppression, parse_suppression_comment};
 
     #[test]
     fn parse_simple_suppression() {

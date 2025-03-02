@@ -1,14 +1,14 @@
 use crate::format_element::tag::{Condition, Tag};
 use crate::prelude::tag::{DedentMode, GroupMode, LabelId};
 use crate::prelude::*;
-use crate::{format_element, write, Argument, Arguments, GroupId, TextRange, TextSize};
+use crate::{Argument, Arguments, GroupId, TextRange, TextSize, format_element, write};
 use crate::{Buffer, VecBuffer};
+use Tag::*;
 use biome_rowan::{Language, SyntaxNode, SyntaxToken, TextLen, TokenText};
 use std::borrow::Cow;
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::num::NonZeroU8;
-use Tag::*;
 
 /// A line break that only gets printed if the enclosing `Group` doesn't fit on a single line.
 /// It's omitted if the enclosing `Group` fits on a single line.
@@ -391,7 +391,10 @@ impl std::fmt::Debug for LocatedTokenText {
 }
 
 fn debug_assert_no_newlines(text: &str) {
-    debug_assert!(!text.contains('\r'), "The content '{text}' contains an unsupported '\\r' line terminator character but text must only use line feeds '\\n' as line separator. Use '\\n' instead of '\\r' and '\\r\\n' to insert a line break in strings.");
+    debug_assert!(
+        !text.contains('\r'),
+        "The content '{text}' contains an unsupported '\\r' line terminator character but text must only use line feeds '\\n' as line separator. Use '\\n' instead of '\\r' and '\\r\\n' to insert a line break in strings."
+    );
 }
 
 /// Pushes some content to the end of the current line
@@ -685,11 +688,7 @@ pub const fn hard_space() -> HardSpace {
 /// ```
 #[inline]
 pub fn maybe_space(should_insert: bool) -> Option<Space> {
-    if should_insert {
-        Some(Space)
-    } else {
-        None
-    }
+    if should_insert { Some(Space) } else { None }
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]

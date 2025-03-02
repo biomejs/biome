@@ -1,7 +1,7 @@
 use crate::format_element::tag::VerbatimKind;
 use crate::prelude::*;
 use crate::trivia::{FormatLeadingComments, FormatTrailingComments};
-use crate::{write, CstFormatContext, FormatWithRule};
+use crate::{CstFormatContext, FormatWithRule, write};
 use biome_rowan::{AstNode, Direction, Language, SyntaxElement, SyntaxNode, TextRange};
 
 /// "Formats" a node according to its original formatting in the source text. Being able to format

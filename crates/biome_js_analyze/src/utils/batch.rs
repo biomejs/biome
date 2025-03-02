@@ -6,7 +6,7 @@ use biome_js_syntax::{
     JsSyntaxNode, JsVariableDeclaration, JsVariableDeclarator, JsVariableDeclaratorList,
     JsVariableStatement, JsxChildList, T,
 };
-use biome_rowan::{chain_trivia_pieces, AstNode, AstSeparatedList, BatchMutation};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutation, chain_trivia_pieces};
 
 pub trait JsBatchMutation {
     /// Removes the declarator, and:

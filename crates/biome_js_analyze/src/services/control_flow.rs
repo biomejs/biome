@@ -10,8 +10,8 @@ pub(crate) type FunctionBuilder = biome_control_flow::builder::FunctionBuilder<J
 mod nodes;
 mod visitor;
 
-pub(crate) use self::visitor::make_visitor;
 pub(crate) use self::visitor::AnyJsControlFlowRoot;
+pub(crate) use self::visitor::make_visitor;
 
 pub struct ControlFlowGraph {
     pub graph: JsControlFlowGraph,

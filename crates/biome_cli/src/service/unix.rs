@@ -9,13 +9,13 @@ use std::{
 use tokio::{
     io::Interest,
     net::{
-        unix::{OwnedReadHalf, OwnedWriteHalf},
         UnixListener, UnixStream,
+        unix::{OwnedReadHalf, OwnedWriteHalf},
     },
     process::{Child, Command},
     time,
 };
-use tracing::{debug, info, Instrument};
+use tracing::{Instrument, debug, info};
 
 /// Returns the filesystem path of the global socket used to communicate with
 /// the server daemon

@@ -3,7 +3,7 @@ use crate::execute::process_file::format::format_with_guard;
 use crate::execute::process_file::lint::lint_with_guard;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
-use biome_diagnostics::{category, DiagnosticExt};
+use biome_diagnostics::{DiagnosticExt, category};
 use biome_fs::{BiomePath, TraversalContext};
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::workspace::FileFeaturesResult;

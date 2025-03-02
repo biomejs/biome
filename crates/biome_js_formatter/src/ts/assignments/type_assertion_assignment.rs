@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 use biome_formatter::write;
-use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::TsTypeAssertionAssignmentFields;
+use biome_js_syntax::parentheses::NeedsParentheses;
 
 use biome_js_syntax::TsTypeAssertionAssignment;
 

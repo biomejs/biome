@@ -1,13 +1,14 @@
 use camino::Utf8PathBuf;
-use crossbeam::channel::{bounded, unbounded, Receiver, Sender};
+use crossbeam::channel::{Receiver, Sender, bounded, unbounded};
 use notify::{
+    Error as NotifyError, Event as NotifyEvent, EventKind, RecursiveMode, Result as NotifyResult,
+    Watcher,
     event::{CreateKind, ModifyKind, RemoveKind, RenameMode},
-    recommended_watcher, Error as NotifyError, Event as NotifyEvent, EventKind, RecursiveMode,
-    Result as NotifyResult, Watcher,
+    recommended_watcher,
 };
 use tracing::{debug, warn};
 
-use crate::{diagnostics::WatchError, WorkspaceError, WorkspaceServer};
+use crate::{WorkspaceError, WorkspaceServer, diagnostics::WatchError};
 
 /// Instructions to let the watcher either watch or unwatch a given folder.
 #[derive(Debug, Eq, PartialEq)]

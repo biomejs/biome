@@ -54,7 +54,7 @@
 //! and right side of each Right side.
 
 use crate::prelude::*;
-use biome_formatter::{format_args, write, Buffer, CstFormatContext};
+use biome_formatter::{Buffer, CstFormatContext, format_args, write};
 use biome_js_syntax::binary_like_expression::{
     AnyJsBinaryLikeExpression, AnyJsBinaryLikeLeftExpression,
 };
@@ -518,9 +518,9 @@ impl FusedIterator for BinaryLikePreorder {}
 #[cfg(test)]
 mod tests {
     use crate::utils::format_binary_like_expression::{BinaryLikePreorder, VisitEvent};
-    use biome_js_parser::{parse_module, JsParserOptions};
-    use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
+    use biome_js_parser::{JsParserOptions, parse_module};
     use biome_js_syntax::JsLogicalExpression;
+    use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
     use biome_rowan::AstNode;
 
     #[test]

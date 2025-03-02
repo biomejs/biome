@@ -1,11 +1,11 @@
 use crate::comments::CssComments;
 use biome_css_syntax::{CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind};
-use biome_formatter::{write, CstFormatContext};
+use biome_formatter::{CstFormatContext, write};
 use biome_formatter::{FormatOptions, FormatResult};
 use biome_string_case::StrLikeExtension;
 
-use crate::prelude::*;
 use crate::CssFormatter;
+use crate::prelude::*;
 use biome_rowan::{AstNode, AstNodeList, TextSize};
 
 pub(crate) fn write_component_value_list<N, I>(node: &N, f: &mut CssFormatter) -> FormatResult<()>

@@ -1,10 +1,10 @@
-use biome_control_flow::{builder::BlockId, ExceptionHandlerKind};
+use biome_control_flow::{ExceptionHandlerKind, builder::BlockId};
 use biome_js_syntax::{AnyJsTryStatement, JsCatchClause, JsFinallyClause};
 use biome_rowan::SyntaxResult;
 
 use crate::services::control_flow::{
-    visitor::{NodeVisitor, StatementStack},
     FunctionBuilder,
+    visitor::{NodeVisitor, StatementStack},
 };
 
 pub(in crate::services::control_flow) struct TryVisitor {

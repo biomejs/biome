@@ -1,4 +1,4 @@
-use crate::react::{is_react_call_api, ReactLibrary};
+use crate::react::{ReactLibrary, is_react_call_api};
 
 use biome_console::markup;
 use biome_deserialize::{
@@ -9,9 +9,9 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{
-    binding_ext::AnyJsIdentifierBinding, static_value::StaticValue, AnyJsExpression,
-    AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression, JsFunctionExpression,
-    TextRange,
+    AnyJsExpression, AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression,
+    JsFunctionExpression, TextRange, binding_ext::AnyJsIdentifierBinding,
+    static_value::StaticValue,
 };
 use biome_js_syntax::{JsArrayBindingPatternElement, JsSyntaxToken};
 use biome_rowan::AstNode;
@@ -505,7 +505,7 @@ mod test {
     use super::*;
     use crate::react::hooks::is_react_hook_call;
     use biome_js_parser::JsParserOptions;
-    use biome_js_semantic::{semantic_model, SemanticModelOptions};
+    use biome_js_semantic::{SemanticModelOptions, semantic_model};
     use biome_js_syntax::JsFileSource;
 
     #[test]

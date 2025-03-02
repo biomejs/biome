@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-use biome_formatter::{format_args, write, CstFormatContext};
+use biome_formatter::{CstFormatContext, format_args, write};
 use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{
     AnyJsExpression, JsParenthesizedExpression, JsParenthesizedExpressionFields,

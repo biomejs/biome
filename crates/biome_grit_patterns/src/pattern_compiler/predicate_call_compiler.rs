@@ -1,9 +1,9 @@
 use std::collections::BTreeMap;
 
 use super::compilation_context::NodeCompilationContext;
-use super::{call_compiler::*, PatternCompiler};
+use super::{PatternCompiler, call_compiler::*};
 use crate::NodeLikeArgumentError;
-use crate::{grit_context::GritQueryContext, CompileError};
+use crate::{CompileError, grit_context::GritQueryContext};
 use biome_grit_syntax::GritPredicateCall;
 use biome_rowan::AstNode;
 use grit_pattern_matcher::pattern::{CallBuiltIn, PrCall, Predicate};

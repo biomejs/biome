@@ -1,5 +1,5 @@
-use biome_diagnostics::{print_diagnostic_to_string, DiagnosticExt};
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
+use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_package::{NodeJsPackage, Package};
 use std::ffi::OsStr;
 use std::fs::read_to_string;

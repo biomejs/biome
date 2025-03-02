@@ -4,8 +4,8 @@ use biome_graphql_syntax::GraphqlObjectTypeExtension;
 use biome_graphql_syntax::GraphqlTypeCondition;
 use biome_rowan::AstNode;
 
-use crate::semantic_model;
 use crate::HasDeclarationAstNode;
+use crate::semantic_model;
 
 use super::assert_nodes_eq;
 use super::extract_node;

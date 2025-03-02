@@ -1,4 +1,4 @@
-use biome_diagnostics::{display::SourceFile, Diagnostic, PrintDescription, Severity};
+use biome_diagnostics::{Diagnostic, PrintDescription, Severity, display::SourceFile};
 use grit_util::AnalysisLog;
 use std::path::{Path, PathBuf};
 

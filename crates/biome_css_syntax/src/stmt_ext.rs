@@ -1,9 +1,9 @@
+use crate::CssSyntaxToken;
 use crate::generated::{
     CssDeclarationBlock, CssDeclarationOrAtRuleBlock, CssDeclarationOrRuleBlock,
     CssFontFeatureValuesBlock, CssKeyframesBlock, CssPageAtRuleBlock, CssRuleBlock,
 };
-use crate::CssSyntaxToken;
-use biome_rowan::{declare_node_union, AstNodeList, SyntaxResult};
+use biome_rowan::{AstNodeList, SyntaxResult, declare_node_union};
 
 declare_node_union! {
     pub CssBlockLike = CssKeyframesBlock | CssDeclarationOrAtRuleBlock | CssDeclarationBlock | CssRuleBlock | CssFontFeatureValuesBlock | CssPageAtRuleBlock | CssDeclarationOrRuleBlock

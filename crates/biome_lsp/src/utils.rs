@@ -1,14 +1,14 @@
-use anyhow::{ensure, Context, Result};
+use anyhow::{Context, Result, ensure};
 use biome_analyze::ActionCategory;
+use biome_console::MarkupBuf;
 use biome_console::fmt::Termcolor;
 use biome_console::fmt::{self, Formatter};
-use biome_console::MarkupBuf;
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{
     Applicability, {Diagnostic, DiagnosticTags, Location, PrintDescription, Severity, Visit},
 };
 use biome_lsp_converters::line_index::LineIndex;
-use biome_lsp_converters::{from_proto, to_proto, PositionEncoding};
+use biome_lsp_converters::{PositionEncoding, from_proto, to_proto};
 use biome_rowan::{TextRange, TextSize};
 use biome_service::workspace::CodeAction;
 use biome_text_edit::{CompressedOp, DiffOp, TextEdit};

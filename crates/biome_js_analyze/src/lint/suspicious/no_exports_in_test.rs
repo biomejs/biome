@@ -1,14 +1,14 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
-    RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, ServiceBag, Visitor,
+    AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
+    RuleSourceKind, ServiceBag, Visitor, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    assign_ext::AnyJsMemberAssignment, AnyJsExpression, AnyJsRoot, JsAssignmentExpression,
-    JsCallExpression, JsExport, JsLanguage,
+    AnyJsExpression, AnyJsRoot, JsAssignmentExpression, JsCallExpression, JsExport, JsLanguage,
+    assign_ext::AnyJsMemberAssignment,
 };
-use biome_rowan::{declare_node_union, AstNode, Language, TextRange, WalkEvent};
+use biome_rowan::{AstNode, Language, TextRange, WalkEvent, declare_node_union};
 
 declare_lint_rule! {
     /// Disallow using `export` or `module.exports` in files containing tests

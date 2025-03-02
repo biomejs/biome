@@ -652,20 +652,22 @@ impl<L: Language, N: AstNode<Language = L>> Iterator for AstSeparatedListElement
 
         let node = match slot {
             // The node for this element is missing if the next child is a token instead of a node.
-            SyntaxSlot::Token(token) => panic!("Malformed list, node expected but found token {token:?} instead. You must add missing markers for missing elements."),
+            SyntaxSlot::Token(token) => panic!(
+                "Malformed list, node expected but found token {token:?} instead. You must add missing markers for missing elements."
+            ),
             // Missing element
             SyntaxSlot::Empty { .. } => Err(SyntaxError::MissingRequiredChild),
-            SyntaxSlot::Node(node) => Ok(N::unwrap_cast(node))
+            SyntaxSlot::Node(node) => Ok(N::unwrap_cast(node)),
         };
 
         let separator = match self.slots.next() {
-            Some(SyntaxSlot::Empty { .. }) => Err(
-                SyntaxError::MissingRequiredChild,
-            ),
+            Some(SyntaxSlot::Empty { .. }) => Err(SyntaxError::MissingRequiredChild),
             Some(SyntaxSlot::Token(token)) => Ok(Some(token)),
             // End of list, no trailing separator
             None => Ok(None),
-            Some(SyntaxSlot::Node(node)) => panic!("Malformed separated list, separator expected but found node {node:?} instead. You must add missing markers for missing separators."),
+            Some(SyntaxSlot::Node(node)) => panic!(
+                "Malformed separated list, separator expected but found node {node:?} instead. You must add missing markers for missing separators."
+            ),
         };
 
         Some(AstSeparatedElement {
@@ -702,11 +704,11 @@ impl<L: Language, N: AstNode<Language = L>> DoubleEndedIterator
 
         let node = match self.slots.next_back() {
             None => panic!("Malformed separated list, expected a node but found none"),
-            Some(SyntaxSlot::Empty{ .. }) => Err(SyntaxError::MissingRequiredChild),
-            Some(SyntaxSlot::Token(token)) => panic!("Malformed list, node expected but found token {token:?} instead. You must add missing markers for missing elements."),
-            Some(SyntaxSlot::Node(node)) => {
-                Ok(N::unwrap_cast(node))
-            }
+            Some(SyntaxSlot::Empty { .. }) => Err(SyntaxError::MissingRequiredChild),
+            Some(SyntaxSlot::Token(token)) => panic!(
+                "Malformed list, node expected but found token {token:?} instead. You must add missing markers for missing elements."
+            ),
+            Some(SyntaxSlot::Node(node)) => Ok(N::unwrap_cast(node)),
         };
 
         Some(AstSeparatedElement {
@@ -770,8 +772,8 @@ pub mod support {
     use super::{AstNode, SyntaxNode, SyntaxToken};
 
     use super::{Language, SyntaxError, SyntaxResult};
-    use crate::syntax::SyntaxSlot;
     use crate::SyntaxElementChildren;
+    use crate::syntax::SyntaxSlot;
     use std::fmt::{Debug, Formatter};
 
     pub fn node<L: Language, N: AstNode<Language = L>>(

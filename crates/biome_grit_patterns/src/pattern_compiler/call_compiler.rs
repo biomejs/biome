@@ -1,5 +1,5 @@
-use super::{compilation_context::NodeCompilationContext, PatternCompiler};
-use crate::{grit_context::GritQueryContext, CompileError, NodeLikeArgumentError};
+use super::{PatternCompiler, compilation_context::NodeCompilationContext};
+use crate::{CompileError, NodeLikeArgumentError, grit_context::GritQueryContext};
 use biome_grit_syntax::{
     AnyGritMaybeNamedArg, AnyGritPattern, GritNamedArgList, GritNodeLike, GritSyntaxKind,
 };

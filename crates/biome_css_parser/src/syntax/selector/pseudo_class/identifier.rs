@@ -3,9 +3,9 @@ use crate::syntax::is_at_identifier;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::selector::parse_selector_identifier;
 use biome_css_syntax::CssSyntaxKind::*;
+use biome_parser::Parser;
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::Parser;
 
 #[inline]
 pub(crate) fn parse_pseudo_class_identifier(p: &mut CssParser) -> ParsedSyntax {

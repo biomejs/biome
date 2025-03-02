@@ -1,11 +1,11 @@
 use crate::Applicability;
 use crate::{
+    Location,
     display::Backtrace,
     location::{AsResource, AsSourceCode, AsSpan},
-    Location,
 };
 use biome_console::fmt::{self, Display};
-use biome_console::{markup, MarkupBuf};
+use biome_console::{MarkupBuf, markup};
 use biome_text_edit::TextEdit;
 use serde::{Deserialize, Serialize};
 use std::io;

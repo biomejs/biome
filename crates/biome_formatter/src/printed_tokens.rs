@@ -67,15 +67,20 @@ impl PrintedTokens {
 
         for token in root.descendants_tokens(Direction::Next) {
             if !offsets.shift_remove(&token.text_trimmed_range().start()) {
-                panic!("token has not been seen by the formatter: {token:#?}.\
+                panic!(
+                    "token has not been seen by the formatter: {token:#?}.\
                         \nUse `format_replaced` if you want to replace a token from the formatted output.\
                         \nUse `format_removed` if you want to remove a token from the formatted output.\n\
-                        parent: {:#?}", token.parent())
+                        parent: {:#?}",
+                    token.parent()
+                )
             }
         }
 
         if let Some(offset) = offsets.into_iter().next() {
-            panic!("tracked offset {offset:?} doesn't match any token of {root:#?}. Have you passed a token from another tree?");
+            panic!(
+                "tracked offset {offset:?} doesn't match any token of {root:#?}. Have you passed a token from another tree?"
+            );
         }
     }
 }

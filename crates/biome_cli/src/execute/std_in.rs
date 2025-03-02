@@ -3,17 +3,17 @@
 use crate::execute::Execution;
 use crate::{CliDiagnostic, CliSession, TraversalMode};
 use biome_analyze::RuleCategoriesBuilder;
-use biome_console::{markup, ConsoleExt};
+use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::BiomePath;
+use biome_service::WorkspaceError;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
     ChangeFileParams, DropPatternParams, FeaturesBuilder, FileContent, FixFileParams,
     FormatFileParams, OpenFileParams, SupportsFeatureParams,
 };
-use biome_service::WorkspaceError;
 use std::borrow::Cow;
 
 pub(crate) fn run<'a>(

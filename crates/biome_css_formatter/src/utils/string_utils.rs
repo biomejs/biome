@@ -5,17 +5,17 @@ use crate::prelude::*;
 use biome_css_syntax::CssLanguage;
 use biome_css_syntax::CssSyntaxKind::{CSS_STRING_LITERAL, CSS_URL_VALUE_RAW_LITERAL, IDENT};
 use biome_css_syntax::CssSyntaxToken;
-use biome_formatter::token::string::normalize_string;
 use biome_formatter::QuoteStyle;
+use biome_formatter::token::string::normalize_string;
 use biome_formatter::{
+    Format, FormatResult,
     prelude::{dynamic_text, write},
     trivia::format_replaced,
-    Format, FormatResult,
 };
 use biome_rowan::SyntaxToken;
 use biome_string_case::StrLikeExtension;
 
-use crate::{prelude::CssFormatContext, AsFormat, CssFormatter};
+use crate::{AsFormat, CssFormatter, prelude::CssFormatContext};
 
 pub(crate) struct FormatTokenAsLowercase {
     token: SyntaxToken<CssLanguage>,

@@ -2,7 +2,7 @@ use biome_analyze::{AnalysisFilter, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_js_analyze::JsAnalyzerServices;
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
 use biome_test_utils::{
     code_fix_to_string, create_analyzer_options, dependency_graph_for_test_file,

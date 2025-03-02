@@ -1,16 +1,16 @@
 use std::ops::{Deref, Range};
 
 use crate::{
+    JsRuleAction,
     services::{control_flow::AnyJsControlFlowRoot, semantic::Semantic},
     utils::{
         rename::{AnyJsRenamableDeclaration, RenameSymbolExtensions},
         restricted_regex::RestrictedRegex,
     },
-    JsRuleAction,
 };
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize::{
@@ -19,16 +19,16 @@ use biome_deserialize::{
 use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, AnyJsClassMember, AnyJsObjectMember,
-    AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource, JsIdentifierBinding,
-    JsLiteralExportName, JsLiteralMemberName, JsMethodModifierList, JsModuleItemList,
-    JsPrivateClassMemberName, JsPropertyModifierList, JsSyntaxKind, JsSyntaxToken,
-    JsVariableDeclarator, JsVariableKind, Modifier, TsDeclarationModule, TsIdentifierBinding,
-    TsIndexSignatureModifierList, TsLiteralEnumMemberName, TsMethodSignatureModifierList,
-    TsPropertySignatureModifierList, TsTypeParameterName,
+    AnyJsClassMember, AnyJsObjectMember, AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource,
+    JsIdentifierBinding, JsLiteralExportName, JsLiteralMemberName, JsMethodModifierList,
+    JsModuleItemList, JsPrivateClassMemberName, JsPropertyModifierList, JsSyntaxKind,
+    JsSyntaxToken, JsVariableDeclarator, JsVariableKind, Modifier, TsDeclarationModule,
+    TsIdentifierBinding, TsIndexSignatureModifierList, TsLiteralEnumMemberName,
+    TsMethodSignatureModifierList, TsPropertySignatureModifierList, TsTypeParameterName,
+    binding_ext::AnyJsBindingDeclaration,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, BatchMutationExt, SyntaxResult, TextRange, TextSize,
+    AstNode, BatchMutationExt, SyntaxResult, TextRange, TextSize, declare_node_union,
 };
 use biome_string_case::{Case, Cases};
 use biome_unicode_table::is_js_ident;

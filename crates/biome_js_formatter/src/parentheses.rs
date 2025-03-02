@@ -39,7 +39,10 @@ pub(crate) mod tests {
                 }
                 1 => matching_nodes.first().unwrap(),
                 _ => {
-                    panic!("Expected to find a single node matching '{}' in '{input}' but found multiple ones:\n {matching_nodes:#?}", core::any::type_name::<T>());
+                    panic!(
+                        "Expected to find a single node matching '{}' in '{input}' but found multiple ones:\n {matching_nodes:#?}",
+                        core::any::type_name::<T>()
+                    );
                 }
             }
         };
@@ -80,7 +83,10 @@ pub(crate) mod tests {
                 }
                 1 => matching_nodes.first().unwrap(),
                 _ => {
-                    panic!("Expected to find a single node matching '{}' in '{input}' but found multiple ones:\n {matching_nodes:#?}", core::any::type_name::<T>());
+                    panic!(
+                        "Expected to find a single node matching '{}' in '{input}' but found multiple ones:\n {matching_nodes:#?}",
+                        core::any::type_name::<T>()
+                    );
                 }
             }
         };
@@ -112,9 +118,7 @@ pub(crate) mod tests {
     /// Asserts that [NeedsParentheses.needs_parentheses()] returns true for the second (in pre-order) [JsStaticMemberExpression] in the program.
     #[macro_export]
     macro_rules! assert_needs_parentheses {
-        ($input:expr, $Node:ident) => {{
-            $crate::assert_needs_parentheses!($input, $Node, biome_js_syntax::JsFileSource::ts())
-        }};
+        ($input:expr, $Node:ident) => {{ $crate::assert_needs_parentheses!($input, $Node, biome_js_syntax::JsFileSource::ts()) }};
 
         ($input:expr, $Node:ident[$index:expr]) => {{
             $crate::assert_needs_parentheses!(

@@ -1,10 +1,10 @@
 use crate::token_source::JsonTokenSource;
 use biome_json_syntax::{JsonFileSource, JsonSyntaxKind};
+use biome_parser::ParserContext;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
 use biome_parser::prelude::*;
 use biome_parser::token_source::Trivia;
-use biome_parser::ParserContext;
 
 pub(crate) struct JsonParser<'source> {
     context: ParserContext<JsonSyntaxKind>,

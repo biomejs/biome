@@ -1,17 +1,18 @@
 use super::{
-    search, AnalyzerCapabilities, AnalyzerVisitorBuilder, CodeActionsParams, DebugCapabilities,
+    AnalyzerCapabilities, AnalyzerVisitorBuilder, CodeActionsParams, DebugCapabilities,
     EnabledForPath, ExtensionHandler, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, ProcessLint, SearchCapabilities,
+    ParserCapabilities, ProcessLint, SearchCapabilities, search,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
-use crate::file_handlers::{is_diagnostic_error, FixAllParams};
+use crate::file_handlers::{FixAllParams, is_diagnostic_error};
 use crate::settings::{
-    check_feature_activity, check_override_feature_activity, LinterSettings, OverrideSettings,
-    Settings,
+    LinterSettings, OverrideSettings, Settings, check_feature_activity,
+    check_override_feature_activity,
 };
 use crate::workspace::DocumentFileSource;
 use crate::{
+    WorkspaceError,
     settings::{
         FormatSettings, LanguageListSettings, LanguageSettings, ServiceLanguage,
         WorkspaceSettingsHandle,
@@ -20,7 +21,6 @@ use crate::{
         CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
         RenameResult,
     },
-    WorkspaceError,
 };
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
@@ -40,13 +40,13 @@ use biome_formatter::{
 use biome_fs::BiomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
-    analyze, analyze_with_inspect_matcher, ControlFlowGraph, JsAnalyzerServices,
+    ControlFlowGraph, JsAnalyzerServices, analyze, analyze_with_inspect_matcher,
 };
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, QuoteProperties, Semicolons};
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
-use biome_js_semantic::{semantic_model, SemanticModelOptions};
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
     AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, LanguageVariant, TextRange, TextSize,
     TokenAtOffset,

@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use crate::JsParser;
+use crate::prelude::*;
 use biome_diagnostics::location::AsSpan;
 use biome_parser::diagnostic::{expected_any, expected_node};
 use biome_rowan::TextRange;

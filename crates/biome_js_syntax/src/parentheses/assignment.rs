@@ -1,10 +1,10 @@
 use biome_rowan::AstNode;
 
 use crate::{
-    parentheses::NeedsParentheses, AnyJsAssignment, AnyJsAssignmentPattern,
-    JsArrayAssignmentPattern, JsComputedMemberAssignment, JsForOfStatement, JsIdentifierAssignment,
-    JsObjectAssignmentPattern, JsStaticMemberAssignment, JsSyntaxKind, JsSyntaxNode,
-    TsAsAssignment, TsNonNullAssertionAssignment, TsSatisfiesAssignment, TsTypeAssertionAssignment,
+    AnyJsAssignment, AnyJsAssignmentPattern, JsArrayAssignmentPattern, JsComputedMemberAssignment,
+    JsForOfStatement, JsIdentifierAssignment, JsObjectAssignmentPattern, JsStaticMemberAssignment,
+    JsSyntaxKind, JsSyntaxNode, TsAsAssignment, TsNonNullAssertionAssignment,
+    TsSatisfiesAssignment, TsTypeAssertionAssignment, parentheses::NeedsParentheses,
 };
 
 impl NeedsParentheses for AnyJsAssignment {

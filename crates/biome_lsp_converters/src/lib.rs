@@ -86,10 +86,10 @@ impl WideChar {
 
 #[cfg(test)]
 mod tests {
+    use crate::WideEncoding::{Utf16, Utf32};
     use crate::from_proto::offset;
     use crate::line_index::LineIndex;
     use crate::to_proto::position;
-    use crate::WideEncoding::{Utf16, Utf32};
     use crate::{LineCol, PositionEncoding, WideEncoding};
     use biome_rowan::TextSize;
     use tower_lsp::lsp_types::Position;

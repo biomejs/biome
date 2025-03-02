@@ -2,8 +2,8 @@ use crate::prelude::*;
 use crate::utils::JsObjectPatternLike;
 
 use biome_formatter::write;
-use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsObjectAssignmentPattern;
+use biome_js_syntax::parentheses::NeedsParentheses;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsObjectAssignmentPattern;

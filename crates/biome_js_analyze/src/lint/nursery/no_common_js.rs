@@ -1,9 +1,9 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::{
-    global_identifier, JsCallExpression, JsReferenceIdentifier, JsStaticMemberAssignment,
+    JsCallExpression, JsReferenceIdentifier, JsStaticMemberAssignment, global_identifier,
 };
-use biome_rowan::{declare_node_union, AstNode};
+use biome_rowan::{AstNode, declare_node_union};
 
 use crate::services::semantic::Semantic;
 

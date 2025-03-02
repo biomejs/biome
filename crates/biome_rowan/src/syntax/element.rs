@@ -1,5 +1,5 @@
 use crate::syntax::SyntaxTrivia;
-use crate::{cursor, Language, NodeOrToken, SyntaxNode, SyntaxToken};
+use crate::{Language, NodeOrToken, SyntaxNode, SyntaxToken, cursor};
 use biome_text_size::{TextRange, TextSize};
 use std::iter;
 use std::ptr::NonNull;

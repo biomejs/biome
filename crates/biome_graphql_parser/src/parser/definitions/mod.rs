@@ -10,24 +10,24 @@ mod scalar;
 mod schema;
 mod union;
 
-use crate::parser::{parse_error::expected_any_definition, GraphqlParser};
+use crate::parser::{GraphqlParser, parse_error::expected_any_definition};
 use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
     T,
 };
 use biome_parser::{
-    parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
-    prelude::ParsedSyntax::*, Parser,
+    Parser, parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
+    prelude::ParsedSyntax::*,
 };
 
 use self::{
     directive::parse_directive_definition,
+    r#enum::{parse_enum_type_definition, parse_enum_type_extension},
     fragment::parse_fragment_definition,
     input_object::{parse_input_object_type_definition, parse_input_object_type_extension},
     interface::{parse_interface_type_definition, parse_interface_type_extension},
     object::{parse_object_type_definition, parse_object_type_extension},
     operation::{parse_operation_definition, parse_selection_set},
-    r#enum::{parse_enum_type_definition, parse_enum_type_extension},
     scalar::{parse_scalar_type_definition, parse_scalar_type_extension},
     schema::{parse_schema_definition, parse_schema_extension},
     union::{parse_union_type_definition, parse_union_type_extension},

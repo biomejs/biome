@@ -39,7 +39,7 @@ pub use termcolor;
 pub use biome_console as console;
 
 // Re-export macros from utility crates
-pub use biome_diagnostics_categories::{category, category_concat, Category};
+pub use biome_diagnostics_categories::{Category, category, category_concat};
 pub use biome_diagnostics_macros::Diagnostic;
 
 pub use crate::advice::{
@@ -48,7 +48,7 @@ pub use crate::advice::{
 pub use crate::context::{Context, DiagnosticExt};
 pub use crate::diagnostic::{Diagnostic, DiagnosticTags, Severity};
 pub use crate::display::{
-    set_bottom_frame, Backtrace, MessageAndDescription, PrintDescription, PrintDiagnostic,
+    Backtrace, MessageAndDescription, PrintDescription, PrintDiagnostic, set_bottom_frame,
 };
 pub use crate::display_github::PrintGitHubDiagnostic;
 pub use crate::error::{Error, Result};

@@ -2,18 +2,18 @@ use crate::context::trailing_commas::FormatTrailingCommas;
 use crate::js::bindings::parameters::has_only_simple_parameters;
 use crate::js::expressions::call_arguments::GroupedCallArgumentLayout;
 use crate::prelude::*;
-use crate::utils::function_body::{FormatMaybeCachedFunctionBody, FunctionBodyCacheMode};
 use crate::utils::AssignmentLikeLayout;
+use crate::utils::function_body::{FormatMaybeCachedFunctionBody, FunctionBodyCacheMode};
 
 use biome_formatter::{
-    format_args, write, CstFormatContext, FormatRuleWithOptions, RemoveSoftLinesBuffer,
+    CstFormatContext, FormatRuleWithOptions, RemoveSoftLinesBuffer, format_args, write,
 };
 use biome_js_syntax::expression_left_side::AnyJsExpressionLeftSide;
 use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{
-    is_test_call_argument, AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsExpression,
-    AnyJsFormalParameter, AnyJsFunctionBody, AnyJsParameter, AnyJsTemplateElement,
-    JsArrowFunctionExpression, JsFormalParameter, JsSyntaxKind, JsTemplateExpression,
+    AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsExpression, AnyJsFormalParameter,
+    AnyJsFunctionBody, AnyJsParameter, AnyJsTemplateElement, JsArrowFunctionExpression,
+    JsFormalParameter, JsSyntaxKind, JsTemplateExpression, is_test_call_argument,
 };
 use biome_rowan::{SyntaxNodeOptionExt, SyntaxResult};
 use std::iter::once;
@@ -814,7 +814,7 @@ impl ArrowFunctionLayout {
                             expand_signatures: should_break,
                             options: *options,
                         }),
-                    }
+                    };
                 }
             }
         };

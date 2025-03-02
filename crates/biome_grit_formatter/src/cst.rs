@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult, FormatToken};
-use biome_grit_syntax::{map_syntax_node, GritSyntaxNode, GritSyntaxToken};
+use biome_grit_syntax::{GritSyntaxNode, GritSyntaxToken, map_syntax_node};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct FormatGritSyntaxNode;

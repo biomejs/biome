@@ -1,5 +1,5 @@
-use crate::workspace::DocumentFileSource;
 use crate::WorkspaceError;
+use crate::workspace::DocumentFileSource;
 use biome_analyze::{AnalyzerOptions, AnalyzerRules, RuleDomain};
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration, AssistEnabled};
 use biome_configuration::analyzer::{LinterEnabled, RuleDomainValue};
@@ -12,11 +12,11 @@ use biome_configuration::max_size::MaxSize;
 use biome_configuration::plugins::Plugins;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
 use biome_configuration::{
-    push_to_analyzer_assist, push_to_analyzer_rules, BiomeDiagnostic, Configuration,
-    CssConfiguration, FilesConfiguration, FilesIgnoreUnknownEnabled, FormatterConfiguration,
-    GraphqlConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration,
-    LinterConfiguration, OverrideAssistConfiguration, OverrideFormatterConfiguration,
-    OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
+    BiomeDiagnostic, Configuration, CssConfiguration, FilesConfiguration,
+    FilesIgnoreUnknownEnabled, FormatterConfiguration, GraphqlConfiguration, GritConfiguration,
+    JsConfiguration, JsonConfiguration, LinterConfiguration, OverrideAssistConfiguration,
+    OverrideFormatterConfiguration, OverrideGlobs, OverrideLinterConfiguration, Overrides, Rules,
+    push_to_analyzer_assist, push_to_analyzer_rules,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;

@@ -5,13 +5,13 @@ use std::collections::VecDeque;
 use biome_js_syntax::{AnyJsDeclaration, AnyTsTupleTypeElement};
 use rustc_hash::FxHashSet;
 use schemars::{
+    JsonSchema,
     r#gen::{SchemaGenerator, SchemaSettings},
     schema::{InstanceType, RootSchema, Schema, SchemaObject, SingleOrVec},
-    JsonSchema,
 };
 use serde_json::Value;
 
-use crate::{workspace::*, WorkspaceError};
+use crate::{WorkspaceError, workspace::*};
 use biome_js_factory::{
     make,
     syntax::{AnyJsObjectMemberName, AnyTsName, AnyTsType, AnyTsTypeMember, T},

@@ -8,12 +8,12 @@ mod variable;
 use crate::token_source::GraphqlTokenSource;
 use biome_graphql_syntax::GraphqlSyntaxKind::{self, *};
 use biome_graphql_syntax::T;
+use biome_parser::ParserContext;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::prelude::{ParsedSyntax::*, *};
 use biome_parser::token_source::Trivia;
-use biome_parser::ParserContext;
 use definitions::DefinitionList;
 
 use self::value::{is_at_string, parse_string};

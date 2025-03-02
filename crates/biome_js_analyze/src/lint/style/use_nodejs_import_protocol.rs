@@ -1,13 +1,13 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsSyntaxKind, JsSyntaxToken};
+use biome_js_syntax::{AnyJsImportLike, JsSyntaxKind, JsSyntaxToken, inner_string_text};
 use biome_rowan::BatchMutationExt;
 
 use crate::services::manifest::Manifest;
-use crate::{globals::is_node_builtin_module, JsRuleAction};
+use crate::{JsRuleAction, globals::is_node_builtin_module};
 
 declare_lint_rule! {
     /// Enforces using the `node:` protocol for Node.js builtin modules.

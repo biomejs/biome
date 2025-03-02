@@ -1,5 +1,5 @@
 use crate::run_cli;
-use crate::snap_test::{assert_cli_snapshot, CliSnapshot, SnapshotPayload};
+use crate::snap_test::{CliSnapshot, SnapshotPayload, assert_cli_snapshot};
 use biome_cli::CliDiagnostic;
 use biome_console::{BufferConsole, Console};
 use biome_fs::MemoryFileSystem;

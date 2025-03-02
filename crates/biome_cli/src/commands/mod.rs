@@ -1,9 +1,9 @@
 use crate::changed::{get_changed_files, get_staged_files};
-use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
+use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
 use crate::execute::{ReportMode, Stdin};
 use crate::logging::LoggingKind;
 use crate::{
-    execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, LoggingLevel, VERSION,
+    CliDiagnostic, CliSession, Execution, LoggingLevel, VERSION, execute_mode, setup_cli_subscriber,
 };
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::analyzer::{LinterEnabled, RuleSelector};
@@ -13,20 +13,20 @@ use biome_configuration::graphql::{GraphqlFormatterConfiguration, GraphqlLinterC
 use biome_configuration::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use biome_configuration::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
 use biome_configuration::vcs::VcsConfiguration;
+use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_configuration::{
-    configuration, css::css_formatter_configuration, css::css_linter_configuration,
-    files_configuration, formatter_configuration, graphql::graphql_formatter_configuration,
+    FilesConfiguration, FormatterConfiguration, LinterConfiguration, configuration,
+    css::css_formatter_configuration, css::css_linter_configuration, files_configuration,
+    formatter_configuration, graphql::graphql_formatter_configuration,
     graphql::graphql_linter_configuration, javascript::js_formatter_configuration,
     javascript::js_linter_configuration, json::json_formatter_configuration,
     json::json_linter_configuration, linter_configuration, vcs::vcs_configuration,
-    FilesConfiguration, FormatterConfiguration, LinterConfiguration,
 };
-use biome_configuration::{BiomeDiagnostic, Configuration};
-use biome_console::{markup, Console, ConsoleExt};
+use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
-use biome_service::configuration::{load_configuration, load_editorconfig, LoadedConfiguration};
+use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
 use biome_service::documentation::Doc;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
@@ -936,14 +936,16 @@ mod tests {
 
     #[test]
     fn incompatible_arguments() {
-        assert!(check_fix_incompatible_arguments(FixFileModeOptions {
-            write: true,
-            fix: true,
-            unsafe_: false,
-            suppress: false,
-            suppression_reason: None
-        })
-        .is_err());
+        assert!(
+            check_fix_incompatible_arguments(FixFileModeOptions {
+                write: true,
+                fix: true,
+                unsafe_: false,
+                suppress: false,
+                suppression_reason: None
+            })
+            .is_err()
+        );
     }
 
     #[test]

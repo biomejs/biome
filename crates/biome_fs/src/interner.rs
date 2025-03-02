@@ -1,5 +1,5 @@
 use camino::Utf8PathBuf;
-use crossbeam::channel::{unbounded, Receiver, Sender};
+use crossbeam::channel::{Receiver, Sender, unbounded};
 use papaya::HashSet;
 use rustc_hash::FxBuildHasher;
 

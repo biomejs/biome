@@ -1,4 +1,4 @@
-use biome_js_syntax::{inner_string_text, AnyJsExpression, JsBinaryExpression, JsSyntaxNode};
+use biome_js_syntax::{AnyJsExpression, JsBinaryExpression, JsSyntaxNode, inner_string_text};
 use biome_rowan::{AstNode, Direction, WalkEvent};
 use std::iter;
 
@@ -82,8 +82,8 @@ pub(crate) fn find_variable_position(
 
 #[cfg(test)]
 mod test {
-    use crate::utils::{find_variable_position, VariablePosition};
-    use biome_js_parser::{parse, JsParserOptions};
+    use crate::utils::{VariablePosition, find_variable_position};
+    use biome_js_parser::{JsParserOptions, parse};
     use biome_js_syntax::{JsBinaryExpression, JsFileSource};
     use biome_rowan::AstNode;
 

@@ -1,4 +1,4 @@
-use crate::{inner_string_text, JsonStringValue};
+use crate::{JsonStringValue, inner_string_text};
 use biome_rowan::{SyntaxResult, TokenText};
 
 impl JsonStringValue {

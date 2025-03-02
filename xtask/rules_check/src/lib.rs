@@ -7,7 +7,7 @@ use biome_analyze::{
     RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
 };
 use biome_configuration::Configuration;
-use biome_console::{markup, Console};
+use biome_console::{Console, markup};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::json::deserialize_from_json_ast;
@@ -36,7 +36,10 @@ struct NoStyleRuleError(String);
 
 impl NoStyleRuleError {
     fn new(rule_name: impl Display) -> Self {
-        Self(format!("The rule '{}' that belongs to the group 'style' can't have Severity::Error. Lower down the severity or change the group.",rule_name))
+        Self(format!(
+            "The rule '{}' that belongs to the group 'style' can't have Severity::Error. Lower down the severity or change the group.",
+            rule_name
+        ))
     }
 }
 
@@ -276,13 +279,17 @@ impl<'a> DiagnosticWriter<'a> {
             if self.all_diagnostics.len() > 1 {
                 self.print_all_diagnostics();
                 self.has_error = true;
-                bail!("Analysis of '{group}/{rule}' on the following code block returned multiple diagnostics.\n\n{code}");
+                bail!(
+                    "Analysis of '{group}/{rule}' on the following code block returned multiple diagnostics.\n\n{code}"
+                );
             }
         } else {
             // ...or if the analysis returns a diagnostic when it is expected to not report one.
             self.print_all_diagnostics();
             self.has_error = true;
-            bail!("Analysis of '{group}/{rule}' on the following code block returned an unexpected diagnostic.\n\n{code}");
+            bail!(
+                "Analysis of '{group}/{rule}' on the following code block returned an unexpected diagnostic.\n\n{code}"
+            );
         }
         self.diagnostic_count += 1;
         Ok(())
@@ -376,7 +383,9 @@ fn assert_lint(
     // Load settings from the preceding `json,options` block if requested
     if test.use_options {
         let Some(partial_config) = config else {
-            bail!("Code blocks tagged with 'use_options' must be preceded by a valid 'json,options' code block.");
+            bail!(
+                "Code blocks tagged with 'use_options' must be preceded by a valid 'json,options' code block."
+            );
         };
 
         if let Some(mut settings) = workspace_settings.get_settings(project_key) {
@@ -606,7 +615,9 @@ fn assert_lint(
     }
 
     if diagnostics.has_error {
-        bail!("A code snippet must emit one single diagnostic, but it seems multiple diagnostics were emitted. Make sure that all the snippets inside the code block 'expect_diagnostic' emit only one diagnostic.")
+        bail!(
+            "A code snippet must emit one single diagnostic, but it seems multiple diagnostics were emitted. Make sure that all the snippets inside the code block 'expect_diagnostic' emit only one diagnostic."
+        )
     }
 
     Ok(())
@@ -777,14 +788,18 @@ fn parse_rule_options(
             }
 
             let Some(result) = partial_configuration else {
-                bail!("Failed to deserialize configuration options for '{group}/{rule}' from the following code block due to unknown error.\n\n{code}");
+                bail!(
+                    "Failed to deserialize configuration options for '{group}/{rule}' from the following code block due to unknown error.\n\n{code}"
+                );
             };
 
             Ok(Some(result))
         }
         _ => {
             // Only JSON code blocks can contain configuration options
-            bail!("The following non-JSON code block for '{group}/{rule}' was marked as containing configuration options. Only JSON code blocks can used to provide configuration options.\n\n{code}");
+            bail!(
+                "The following non-JSON code block for '{group}/{rule}' was marked as containing configuration options. Only JSON code blocks can used to provide configuration options.\n\n{code}"
+            );
         }
     }
 }

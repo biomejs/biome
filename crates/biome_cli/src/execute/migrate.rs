@@ -4,18 +4,18 @@ use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
 use biome_analyze::AnalysisFilter;
 use biome_configuration::Configuration;
-use biome_console::{markup, ConsoleExt};
-use biome_deserialize::json::deserialize_from_json_ast;
+use biome_console::{ConsoleExt, markup};
 use biome_deserialize::Merge;
+use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::Diagnostic;
-use biome_diagnostics::{category, PrintDiagnostic};
+use biome_diagnostics::{PrintDiagnostic, category};
 use biome_formatter::ParseFormatNumberError;
 use biome_fs::{BiomePath, OpenOptions};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
-use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
+use biome_json_parser::{JsonParserOptions, parse_json_with_cache};
 use biome_json_syntax::{JsonFileSource, JsonRoot};
-use biome_migrate::{migrate_configuration, ControlFlow};
+use biome_migrate::{ControlFlow, migrate_configuration};
 use biome_rowan::{AstNode, NodeCache};
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
@@ -270,7 +270,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                             tree = match JsonRoot::cast(root) {
                                 Some(tree) => tree,
                                 None => {
-                                    return Err(CliDiagnostic::check_error(category!("migrate")))
+                                    return Err(CliDiagnostic::check_error(category!("migrate")));
                                 }
                             };
                             actions.push(FixAction {

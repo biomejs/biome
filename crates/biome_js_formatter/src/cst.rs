@@ -2,7 +2,7 @@ use crate::prelude::*;
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule};
 
 use crate::{AsFormat, IntoFormat, JsFormatContext};
-use biome_js_syntax::{map_syntax_node, JsSyntaxNode};
+use biome_js_syntax::{JsSyntaxNode, map_syntax_node};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct FormatJsSyntaxNode;

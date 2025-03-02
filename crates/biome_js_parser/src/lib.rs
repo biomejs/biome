@@ -70,8 +70,8 @@ mod state;
 pub mod syntax;
 mod token_source;
 
-use crate::prelude::*;
 pub(crate) use crate::ParsedSyntax::{Absent, Present};
+use crate::prelude::*;
 pub use crate::{
     lexer::{JsLexContext, JsReLexContext},
     options::JsParserOptions,

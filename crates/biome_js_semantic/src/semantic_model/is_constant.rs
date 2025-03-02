@@ -15,7 +15,7 @@ mod tests {
     use biome_js_parser::JsParserOptions;
     use biome_js_syntax::{JsFileSource, JsIdentifierBinding, JsVariableDeclarator};
 
-    use crate::{semantic_model, SemanticModelOptions};
+    use crate::{SemanticModelOptions, semantic_model};
 
     fn assert_is_const(code: &str, is_const: bool) {
         use biome_rowan::AstNode;

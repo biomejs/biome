@@ -1,5 +1,5 @@
-use crate::lexer::{CssLexContext, CssLexer, CssReLexContext};
 use crate::CssParserOptions;
+use crate::lexer::{CssLexContext, CssLexer, CssReLexContext};
 use biome_css_syntax::CssSyntaxKind::EOF;
 use biome_css_syntax::{CssSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;

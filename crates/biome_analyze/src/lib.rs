@@ -30,8 +30,8 @@ pub use biome_diagnostics::category_concat;
 pub use crate::analyzer_plugin::{AnalyzerPlugin, AnalyzerPluginSlice, AnalyzerPluginVec};
 pub use crate::categories::{
     ActionCategory, OtherActionCategory, RefactorKind, RuleCategories, RuleCategoriesBuilder,
-    RuleCategory, SourceActionKind, SUPPRESSION_INLINE_ACTION_CATEGORY,
-    SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
+    RuleCategory, SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
+    SourceActionKind,
 };
 pub use crate::diagnostics::{AnalyzerDiagnostic, AnalyzerSuppressionDiagnostic, RuleError};
 pub use crate::matcher::{InspectMatcher, MatchQueryParams, QueryMatcher, RuleKey, SignalEntry};
@@ -52,7 +52,7 @@ pub use crate::signals::{
 use crate::suppressions::Suppressions;
 pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
-use biome_diagnostics::{category, Diagnostic, DiagnosticExt};
+use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
     AstNode, BatchMutation, Direction, Language, SyntaxElement, SyntaxToken, TextRange, TextSize,
     TokenAtOffset, TriviaPieceKind, WalkEvent,
@@ -280,9 +280,9 @@ where
                     )
                 } else {
                     AnalyzerSuppressionDiagnostic::new(
-                    category!("suppressions/unused"),
-                    suppression.comment_span,
-                    "Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.",
+                        category!("suppressions/unused"),
+                        suppression.comment_span,
+                        "Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.",
                     )
                 }
             });

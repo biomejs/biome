@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
+use biome_js_syntax::JsInstanceofExpression;
 use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
 use biome_js_syntax::parentheses::NeedsParentheses;
-use biome_js_syntax::JsInstanceofExpression;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsInstanceofExpression;

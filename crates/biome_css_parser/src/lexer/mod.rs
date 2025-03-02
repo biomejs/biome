@@ -3,15 +3,15 @@
 mod tests;
 
 use crate::CssParserOptions;
-use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, TextLen, TextSize, T};
+use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
 };
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{
-    is_css_non_ascii, lookup_byte,
     Dispatch::{self, *},
+    is_css_non_ascii, lookup_byte,
 };
 use std::char::REPLACEMENT_CHARACTER;
 

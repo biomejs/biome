@@ -1,6 +1,6 @@
 use std::{
     fmt::Write,
-    panic::{set_hook, PanicHookInfo},
+    panic::{PanicHookInfo, set_hook},
     thread,
 };
 

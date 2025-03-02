@@ -1,5 +1,5 @@
 use crate::cli_options::CliOptions;
-use crate::commands::{get_files_to_process_with_cli_options, CommandRunner, LoadEditorConfig};
+use crate::commands::{CommandRunner, LoadEditorConfig, get_files_to_process_with_cli_options};
 use crate::{CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::css::CssFormatterConfiguration;
 use biome_configuration::graphql::GraphqlFormatterConfiguration;

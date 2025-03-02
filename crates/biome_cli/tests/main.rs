@@ -7,8 +7,8 @@ mod snap_test;
 #[cfg(test)]
 use snap_test::assert_cli_snapshot;
 
-use biome_cli::{biome_command, CliDiagnostic, CliSession};
-use biome_console::{markup, BufferConsole, Console, ConsoleExt};
+use biome_cli::{CliDiagnostic, CliSession, biome_command};
+use biome_console::{BufferConsole, Console, ConsoleExt, markup};
 use biome_fs::{FileSystem, MemoryFileSystem, OsFileSystem};
 use biome_service::App;
 use bpaf::ParseFailure;
@@ -353,7 +353,7 @@ pub(crate) fn run_cli_with_dyn_fs(
 ) -> Result<(), CliDiagnostic> {
     use biome_cli::SocketTransport;
     use biome_lsp::ServerFactory;
-    use biome_service::{workspace, WorkspaceRef};
+    use biome_service::{WorkspaceRef, workspace};
     use tokio::{
         io::{duplex, split},
         runtime::Runtime,
@@ -397,7 +397,7 @@ pub(crate) fn run_cli_with_server_workspace(
     console: &mut dyn Console,
     args: bpaf::Args,
 ) -> (MemoryFileSystem, Result<(), CliDiagnostic>) {
-    use biome_service::{workspace, WorkspaceRef};
+    use biome_service::{WorkspaceRef, workspace};
 
     let files = fs.files.clone();
 
