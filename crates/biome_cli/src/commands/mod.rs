@@ -910,7 +910,7 @@ pub trait LoadEditorConfig: CommandRunner {
         fs_configuration: &Configuration,
         fs: &dyn FileSystem,
         console: &mut dyn Console,
-    ) -> Result<Configuration, WorkspaceError> {
+    ) -> Result<Option<Configuration>, WorkspaceError> {
         Ok(if self.should_load_editor_config(fs_configuration) {
             let (editorconfig, editorconfig_diagnostics) = {
                 let search_path = configuration_path
@@ -923,7 +923,7 @@ pub trait LoadEditorConfig: CommandRunner {
                     {PrintDiagnostic::simple(&diagnostic)}
                 })
             }
-            editorconfig.unwrap_or_default()
+            editorconfig
         } else {
             Default::default()
         })

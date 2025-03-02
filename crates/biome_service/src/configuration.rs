@@ -295,10 +295,11 @@ pub fn load_editorconfig(
     fs: &dyn FileSystem,
     workspace_root: Utf8PathBuf,
 ) -> Result<(Option<Configuration>, Vec<EditorConfigDiagnostic>), WorkspaceError> {
-    // How .editorconfig is supposed to be resolved: https://editorconfig.org/#file-location
-    // We currently don't support the `root` property, so we just search for the file like we do for biome.json
-    if let Some(auto_search_result) = fs.auto_search_file(&workspace_root, ".editorconfig") {
-        let AutoSearchResult { content, .. } = auto_search_result;
+    let file_path = workspace_root.join(".editorconfig");
+
+    // We only need to search `.editorconfig` in the `workspace_root` the same as the `biome.json`,
+    // because now `.editorconfig` is enable by default, so we don't need to search upwards to avoid conflict with `biome.json`.
+    if let Ok(content) = fs.read_file_from_path(&file_path) {
         let editorconfig = biome_configuration::editorconfig::parse_str(&content)?;
         Ok(editorconfig.to_biome())
     } else {
