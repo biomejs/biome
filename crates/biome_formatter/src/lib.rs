@@ -495,6 +495,14 @@ pub enum QuoteStyle {
 }
 
 impl QuoteStyle {
+    pub fn from_byte(byte: u8) -> Option<QuoteStyle> {
+        match byte {
+            b'"' => Some(QuoteStyle::Double),
+            b'\'' => Some(QuoteStyle::Single),
+            _ => None,
+        }
+    }
+
     pub fn as_char(&self) -> char {
         match self {
             QuoteStyle::Double => '"',
