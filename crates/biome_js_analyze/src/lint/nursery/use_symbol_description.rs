@@ -1,6 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::{global_identifier, JsCallExpression};
+use biome_js_syntax::{JsCallExpression, global_identifier};
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 
 use crate::services::semantic::Semantic;
