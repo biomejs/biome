@@ -280,6 +280,59 @@ indent_style = tab
 }
 
 #[test]
+fn should_not_use_higher_editorconfig_when_find_biome_conf() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+[*]
+indent_style = space
+indent_size = 8
+"#,
+    );
+
+    let biome_config_path = Utf8Path::new("foo/biome.json");
+    fs.insert(
+        biome_config_path.into(),
+        r#"
+{
+    "formatter": {
+        "lineWidth": 90
+    }
+}
+"#,
+    );
+    let test_file = Utf8Path::new("foo/test.js");
+    fs.insert(
+        test_file.into(),
+        r#"
+    if (foo) {
+        console.log("this should not be indented with spaces");
+    }
+    "#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_have_biome_override_editorconfig",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_have_cli_override_editorconfig() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
