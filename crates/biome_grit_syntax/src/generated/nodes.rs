@@ -3,15 +3,15 @@
 #![allow(dead_code)]
 #![allow(unused)]
 use crate::{
-    macros::map_syntax_node,
     GritLanguage as Language, GritSyntaxElement as SyntaxElement,
     GritSyntaxElementChildren as SyntaxElementChildren,
     GritSyntaxKind::{self as SyntaxKind, *},
     GritSyntaxList as SyntaxList, GritSyntaxNode as SyntaxNode, GritSyntaxToken as SyntaxToken,
+    macros::map_syntax_node,
 };
 use biome_rowan::{
-    support, AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
-    AstSeparatedListNodesIterator, RawSyntaxKind, SyntaxKindSet, SyntaxResult,
+    AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
+    AstSeparatedListNodesIterator, RawSyntaxKind, SyntaxKindSet, SyntaxResult, support,
 };
 use serde::ser::SerializeSeq;
 use serde::{Serialize, Serializer};

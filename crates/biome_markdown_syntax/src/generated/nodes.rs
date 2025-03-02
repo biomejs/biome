@@ -3,16 +3,16 @@
 #![allow(dead_code)]
 #![allow(unused)]
 use crate::{
-    macros::map_syntax_node,
     MarkdownLanguage as Language, MarkdownSyntaxElement as SyntaxElement,
     MarkdownSyntaxElementChildren as SyntaxElementChildren,
     MarkdownSyntaxKind::{self as SyntaxKind, *},
     MarkdownSyntaxList as SyntaxList, MarkdownSyntaxNode as SyntaxNode,
     MarkdownSyntaxToken as SyntaxToken,
+    macros::map_syntax_node,
 };
 use biome_rowan::{
-    support, AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
-    AstSeparatedListNodesIterator, RawSyntaxKind, SyntaxKindSet, SyntaxResult,
+    AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
+    AstSeparatedListNodesIterator, RawSyntaxKind, SyntaxKindSet, SyntaxResult, support,
 };
 use serde::ser::SerializeSeq;
 use serde::{Serialize, Serializer};

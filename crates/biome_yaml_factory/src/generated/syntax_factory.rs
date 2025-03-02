@@ -4,7 +4,7 @@
 use biome_rowan::{
     AstNode, ParsedChildren, RawNodeSlots, RawSyntaxNode, SyntaxFactory, SyntaxKind,
 };
-use biome_yaml_syntax::{YamlSyntaxKind, YamlSyntaxKind::*, T, *};
+use biome_yaml_syntax::{T, YamlSyntaxKind, YamlSyntaxKind::*, *};
 #[derive(Debug)]
 pub struct YamlSyntaxFactory;
 impl SyntaxFactory for YamlSyntaxFactory {

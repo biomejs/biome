@@ -3,15 +3,15 @@
 #![allow(dead_code)]
 #![allow(unused)]
 use crate::{
-    macros::map_syntax_node,
     HtmlLanguage as Language, HtmlSyntaxElement as SyntaxElement,
     HtmlSyntaxElementChildren as SyntaxElementChildren,
     HtmlSyntaxKind::{self as SyntaxKind, *},
     HtmlSyntaxList as SyntaxList, HtmlSyntaxNode as SyntaxNode, HtmlSyntaxToken as SyntaxToken,
+    macros::map_syntax_node,
 };
 use biome_rowan::{
-    support, AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
-    AstSeparatedListNodesIterator, RawSyntaxKind, SyntaxKindSet, SyntaxResult,
+    AstNode, AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
+    AstSeparatedListNodesIterator, RawSyntaxKind, SyntaxKindSet, SyntaxResult, support,
 };
 use serde::ser::SerializeSeq;
 use serde::{Serialize, Serializer};
