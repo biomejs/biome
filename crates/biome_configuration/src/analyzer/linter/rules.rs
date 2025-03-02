@@ -3111,7 +3111,7 @@ pub struct Nursery {
         Option<RuleConfiguration<biome_js_analyze::options::NoNoninteractiveElementInteractions>>,
     #[doc = "Disallow octal escape sequences in string literals"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_octal_escape: Option<RuleConfiguration<biome_js_analyze::options::NoOctalEscape>>,
+    pub no_octal_escape: Option<RuleFixConfiguration<biome_js_analyze::options::NoOctalEscape>>,
     #[doc = "Restricts imports of \"package private\" exports."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_package_private_imports:
@@ -3345,6 +3345,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),

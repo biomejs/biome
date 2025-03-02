@@ -1,9 +1,12 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::JsStringLiteralExpression;
-use biome_rowan::AstNode;
+use biome_diagnostics::Severity;
+use biome_js_syntax::{JsLiteralMemberName, JsStringLiteralExpression, JsSyntaxToken};
+use biome_rowan::{BatchMutationExt, SyntaxResult, TextRange, declare_node_union};
+
+use crate::JsRuleAction;
 
 declare_lint_rule! {
     /// Disallow octal escape sequences in string literals
@@ -16,15 +19,14 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var foo = "Copyright \251";
+    /// const foo = "Copyright \251";
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// var foo = "Copyright \u00A9";   // unicode
-    ///
-    /// var foo = "Copyright \xA9";     // hexadecimal
+    /// const foo = "Copyright \u00A9"; // unicode escape
+    /// const bar = "Copyright \xA9"; // hexadecimal escape
     /// ```
     ///
     pub NoOctalEscape {
@@ -32,28 +34,34 @@ declare_lint_rule! {
         name: "noOctalEscape",
         language: "js",
         sources: &[RuleSource::Eslint("no-octal-escape")],
-        recommended: false,
+        recommended: true,
+        severity: Severity::Warning,
+        fix_kind: FixKind::Safe,
     }
 }
 
 impl Rule for NoOctalEscape {
-    type Query = Ast<JsStringLiteralExpression>;
-    type State = ();
+    type Query = Ast<AnyJsStringLiteral>;
+    type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        let token = node.value_token().ok()?;
-        let text = token.text();
-
-        let bytes = text.as_bytes();
-        let mut byte_it = bytes.iter();
-        while let Some(&byte) = byte_it.next() {
+        let token = ctx.query().value_token().ok()?;
+        let mut it = token.text_trimmed().bytes().enumerate();
+        while let Some((index, byte)) = it.next() {
             if byte == b'\\' {
-                if let Some(&next_byte) = byte_it.next() {
-                    if (b'0'..=b'7').contains(&next_byte) {
-                        return Some(());
+                if let Some((_, byte)) = it.next() {
+                    if matches!(byte, b'0'..=b'7') {
+                        let len = 2 + it
+                            .clone()
+                            .take(5)
+                            .take_while(|(_, byte)| matches!(byte, b'0'..=b'7'))
+                            .count();
+                        // Ignore the non-deprecated `\0`
+                        if byte != b'0' || len > 2 {
+                            return Some(RuleState { index, len });
+                        }
                     }
                 }
             }
@@ -61,24 +69,73 @@ impl Rule for NoOctalEscape {
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
-        let token = node.value_token().ok()?;
-        let text = token.text();
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup! {
-                    "Don't use "<Emphasis>"octal"</Emphasis>
-                },
-            )
-            .note(markup! {
-                "Don't use octal escape sequences: " {text}
-            })
-            .note(markup! {
-                "Use unicode or hexidecimal escape sequences instead."
-            }),
-        )
+    fn diagnostic(
+        ctx: &RuleContext<Self>,
+        RuleState { index, len }: &Self::State,
+    ) -> Option<RuleDiagnostic> {
+        let token = ctx.query().value_token().ok()?;
+        let escape_start = token
+            .text_trimmed_range()
+            .start()
+            .checked_add((*index as u32).into())?;
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            TextRange::at(escape_start, (*len as u32).into()),
+            markup! {
+                "Don't use deprecated "<Emphasis>"octal escape sequences"</Emphasis>"."
+            },
+        ))
     }
+
+    fn action(
+        ctx: &RuleContext<Self>,
+        RuleState { index, len }: &Self::State,
+    ) -> Option<JsRuleAction> {
+        let token = ctx.query().value_token().ok()?;
+        let text = token.text_trimmed();
+        let octal = &text[(index + 1)..(index + len)];
+        let codepoint = u32::from_str_radix(octal, 8).ok()?;
+        let before_octal = &text[..(index + 1)];
+        let after_octal = &text[(index + len)..];
+        let (new_text, unicode_or_hexa) = if codepoint <= 0xff {
+            (
+                format!("{before_octal}x{codepoint:02x}{after_octal}"),
+                "hexadecimal",
+            )
+        } else {
+            (
+                format!("{before_octal}u{codepoint:04x}{after_octal}"),
+                "unicode",
+            )
+        };
+        let new_token = JsSyntaxToken::new_detached(token.kind(), &new_text, [], []);
+        let mut mutation = ctx.root().begin();
+        mutation.replace_token_transfer_trivia(token.clone(), new_token);
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! { "Use "{unicode_or_hexa}" escape sequences instead." }.to_owned(),
+            mutation,
+        ))
+    }
+}
+
+declare_node_union! {
+    /// Any string literal excluding JsxString.
+    pub AnyJsStringLiteral = JsStringLiteralExpression | JsLiteralMemberName
+}
+impl AnyJsStringLiteral {
+    pub fn value_token(&self) -> SyntaxResult<JsSyntaxToken> {
+        match self {
+            AnyJsStringLiteral::JsStringLiteralExpression(node) => node.value_token(),
+            AnyJsStringLiteral::JsLiteralMemberName(node) => node.value(),
+        }
+    }
+}
+
+pub struct RuleState {
+    // Index of the escape sequence (starts with `\`)
+    index: usize,
+    // Length of the escape sequence
+    len: usize,
 }
