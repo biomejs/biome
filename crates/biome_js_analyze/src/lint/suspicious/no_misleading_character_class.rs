@@ -146,7 +146,7 @@ impl Rule for NoMisleadingCharacterClass {
         }
         let node = ctx.query();
         let prev_token = node.value_token().ok()?;
-        let text = prev_token.text();
+        let text = prev_token.text_trimmed();
         let next_token = JsSyntaxToken::new_detached(
             JsSyntaxKind::JS_REGEX_LITERAL,
             &format!("{text}u"),

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -187,9 +186,8 @@ invalid.js:26:7 lint/style/noShoutyConstants  FIXABLE  ━━━━━━━━�
     26    │ - const·D·="D";
     27 25 │   export const e = {
     28    │ - → D
-       26 │ + → 
-       27 │ + → D:"D"
-    29 28 │   };
+       26 │ + → D:"D"
+    29 27 │   };
   
 
 ```

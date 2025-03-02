@@ -56,7 +56,7 @@ impl Rule for NoTemplateCurlyInString {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let token = node.value_token().ok()?;
-        let text = token.text();
+        let text = token.text_trimmed();
 
         let mut byte_iter = text.bytes().enumerate();
         while let Some((i, byte)) = byte_iter.next() {

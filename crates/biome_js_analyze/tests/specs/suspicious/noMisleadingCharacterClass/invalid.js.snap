@@ -543,12 +543,7 @@ invalid.js:29:5 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    27 27 │   var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
-    28 28 │   
-    29    │ - /[\]👍]/;
-       29 │ + 
-       30 │ + 
-       31 │ + /[\]👍]/u;
-  
+    29 │ /[\]👍]/u;
+       │         + 
 
 ```
