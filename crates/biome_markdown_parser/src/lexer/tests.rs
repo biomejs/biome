@@ -25,6 +25,7 @@ macro_rules! assert_lex {
             tokens.push((lexer.current(), lexer.current_range()));
         }
 
+
         $(
             assert_eq!(
                 tokens[idx].0,
@@ -137,6 +138,90 @@ fn whitespace() {
     assert_lex! {
         " ",
         WHITESPACE:1,
+    }
+}
+
+#[test]
+fn heading_level_1() {
+    assert_lex! {
+        "# Heading 1",
+        MD_HEADER1:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+fn heading_level_1_with_newline() {
+    assert_lex! {
+        "# Heading 1\n",
+        MD_HEADER1:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+        NEWLINE:1,
+    }
+}
+
+#[test]
+fn heading_level_2() {
+    assert_lex! {
+        "## Heading 2",
+        MD_HEADER2:2,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+fn heading_level_3() {
+    assert_lex! {
+        "### Heading 3",
+        MD_HEADER3:3,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+fn heading_level_4() {
+    assert_lex! {
+        "#### Heading 4",
+        MD_HEADER4:4,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+fn heading_level_5() {
+    assert_lex! {
+        "##### Heading 5",
+        MD_HEADER5:5,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+fn heading_level_6() {
+    assert_lex! {
+        "###### Heading 6",
+        MD_HEADER6:6,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:9,
+    }
+}
+
+#[test]
+// todo: this should be a MD_TEXTUAL_LITERAL token
+fn not_a_heading() {
+    assert_lex! {
+        "############## not-heading",
+        ERROR_TOKEN:14,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:3,
+        ERROR_TOKEN:1,
+        MD_TEXTUAL_LITERAL:7,
     }
 }
 
