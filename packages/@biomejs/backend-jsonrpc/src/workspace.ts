@@ -1705,6 +1705,10 @@ export interface Nursery {
 	 */
 	useStrictMode?: RuleFixConfiguration_for_Null;
 	/**
+	 * Require a description parameter for the Symbol().
+	 */
+	useSymbolDescription?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().
 	 */
 	useTrimStartEnd?: RuleFixConfiguration_for_Null;
@@ -3235,6 +3239,7 @@ export type Category =
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useExportsLast"
+	| "lint/nursery/useForComponent"
 	| "lint/nursery/useGoogleFontDisplay"
 	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useGuardForIn"
@@ -3243,10 +3248,10 @@ export type Category =
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useParseIntRadix"
-	| "lint/nursery/useForComponent"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useStrictMode"
+	| "lint/nursery/useSymbolDescription"
 	| "lint/nursery/useTrimStartEnd"
 	| "lint/nursery/useValidAutocomplete"
 	| "lint/performance/noAccumulatingSpread"
