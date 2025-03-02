@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -62,6 +61,15 @@ const binary = false + function () {};
 const withDirective = function () {
 	"use server";
 	return 0;
+}
+
+// https://github.com/biomejs/biome/issues/4967
+const needsParentheses1 = function () {
+	return { foo: "bar" }["foo"];
+}
+
+const needsParentheses2 = function () {
+	return { foo: "bar" }.foo;
 }
 
 ```
@@ -583,6 +591,7 @@ invalid.ts:55:23 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   > 58 │ }
        │ ^
     59 │ 
+    60 │ // https://github.com/biomejs/biome/issues/4967
   
   i Function expressions that don't use this can be turned into arrow functions.
   
@@ -594,6 +603,65 @@ invalid.ts:55:23 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
        55 │ + const·withDirective·=·()·=>·{
     56 56 │   	"use server";
     57 57 │   	return 0;
+  
+
+```
+
+```
+invalid.ts:61:27 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    60 │ // https://github.com/biomejs/biome/issues/4967
+  > 61 │ const needsParentheses1 = function () {
+       │                           ^^^^^^^^^^^^^
+  > 62 │ 	return { foo: "bar" }["foo"];
+  > 63 │ }
+       │ ^
+    64 │ 
+    65 │ const needsParentheses2 = function () {
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    59 59 │   
+    60 60 │   // https://github.com/biomejs/biome/issues/4967
+    61    │ - const·needsParentheses1·=·function·()·{
+    62    │ - → return·{·foo:·"bar"·}["foo"];
+    63    │ - }
+       61 │ + const·needsParentheses1·=·()·=>·({·foo:·"bar"·}["foo"])
+    64 62 │   
+    65 63 │   const needsParentheses2 = function () {
+  
+
+```
+
+```
+invalid.ts:65:27 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    63 │ }
+    64 │ 
+  > 65 │ const needsParentheses2 = function () {
+       │                           ^^^^^^^^^^^^^
+  > 66 │ 	return { foo: "bar" }.foo;
+  > 67 │ }
+       │ ^
+    68 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    63 63 │   }
+    64 64 │   
+    65    │ - const·needsParentheses2·=·function·()·{
+    66    │ - → return·{·foo:·"bar"·}.foo;
+    67    │ - }
+       65 │ + const·needsParentheses2·=·()·=>·({·foo:·"bar"·}.foo)
+    68 66 │   
   
 
 ```
