@@ -3173,7 +3173,7 @@ pub struct Nursery {
     #[doc = "Disallow unnecessary escapes in string literals."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_escape_in_string:
-        Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessEscapeInString>>,
+        Option<RuleFixConfiguration<biome_css_analyze::options::NoUselessEscapeInString>>,
     #[doc = "Disallow unnecessary String.raw function in template string literals without any escape sequence."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_string_raw:

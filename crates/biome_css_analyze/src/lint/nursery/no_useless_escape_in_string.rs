@@ -1,13 +1,10 @@
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
+use biome_css_syntax::{CssString, CssSyntaxToken};
 use biome_diagnostics::Severity;
-use biome_js_syntax::{
-    AnyJsTemplateElement, JsLiteralMemberName, JsStringLiteralExpression, JsSyntaxKind,
-    JsSyntaxToken, JsTemplateExpression,
-};
-use biome_rowan::{BatchMutationExt, TextRange, declare_node_union};
+use biome_rowan::{BatchMutationExt, TextRange};
 
-use crate::JsRuleAction;
+use crate::CssRuleAction;
 
 declare_lint_rule! {
     /// Disallow unnecessary escapes in string literals.
@@ -19,42 +16,36 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
-    /// const s = "\a";
+    /// ```css,expect_diagnostic
+    /// a::after {
+    ///   content: "\a"
+    /// }
     /// ```
     ///
-    /// ```js,expect_diagnostic
-    /// const o = {
-    ///     "\a": 0,
-    /// };
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// const s = `${0}\a`;
+    /// ```css,expect_diagnostic
+    /// a::after {
+    ///   content: "\'"
+    /// }
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
-    /// const s = "\n";
+    /// ```css
+    /// a::after {
+    ///   content: "\""
+    /// }
     /// ```
     ///
-    /// Tagged string template are ignored:
-    ///
-    /// ```js
-    /// const s = tagged`\a`;
-    /// ```
-    ///
-    /// JSX strings are ignored:
-    ///
-    /// ```jsx
-    /// <div attr="str\a"/>;
+    /// ```css
+    /// a::after {
+    ///   content: "\n"
+    /// }
     /// ```
     ///
     pub NoUselessEscapeInString {
         version: "next",
         name: "noUselessEscapeInString",
-        language: "js",
+        language: "css",
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,
@@ -62,50 +53,16 @@ declare_lint_rule! {
 }
 
 impl Rule for NoUselessEscapeInString {
-    type Query = Ast<AnyString>;
-    type State = (JsSyntaxToken, usize);
+    type Query = Ast<CssString>;
+    type State = (CssSyntaxToken, usize);
     type Signals = Option<Self::State>;
     type Options = ();
 
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        match node {
-            AnyString::JsStringLiteralExpression(literal) => {
-                let token = literal.value_token().ok()?;
-                let text = token.text();
-                next_useless_escape(text, text.bytes().next()?).map(|index| (token, index))
-            }
-            AnyString::JsTemplateExpression(template) => {
-                if template.tag().is_some() {
-                    return None;
-                }
-                for element in template.elements() {
-                    match element {
-                        AnyJsTemplateElement::JsTemplateChunkElement(chunk) => {
-                            let Ok(chunk) = chunk.template_chunk_token() else {
-                                continue;
-                            };
-                            if let Some(index) = next_useless_escape(chunk.text(), b'`') {
-                                return Some((chunk, index));
-                            }
-                        }
-                        AnyJsTemplateElement::JsTemplateElement(_) => {}
-                    }
-                }
-                None
-            }
-            AnyString::JsLiteralMemberName(member_name) => {
-                let Ok(token) = member_name.value() else {
-                    return None;
-                };
-                if token.kind() == JsSyntaxKind::JS_STRING_LITERAL {
-                    let text = token.text_trimmed();
-                    next_useless_escape(text, text.bytes().next()?).map(|index| (token, index))
-                } else {
-                    None
-                }
-            }
-        }
+        let token = node.value_token().ok()?;
+        let text = token.text();
+        next_useless_escape(text, text.bytes().next()?).map(|index| (token, index))
     }
 
     fn diagnostic(_: &RuleContext<Self>, (token, index): &Self::State) -> Option<RuleDiagnostic> {
@@ -124,24 +81,19 @@ impl Rule for NoUselessEscapeInString {
         )
     }
 
-    fn action(ctx: &RuleContext<Self>, (token, index): &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, (token, index): &Self::State) -> Option<CssRuleAction> {
         let mut new_text = token.text_trimmed().to_string();
         new_text.remove(*index);
-        let new_token = JsSyntaxToken::new_detached(token.kind(), &new_text, [], []);
+        let new_token = CssSyntaxToken::new_detached(token.kind(), &new_text, [], []);
         let mut mutation = ctx.root().begin();
         mutation.replace_token_transfer_trivia(token.clone(), new_token);
-        Some(JsRuleAction::new(
+        Some(CssRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Unescape the character." }.to_owned(),
             mutation,
         ))
     }
-}
-
-declare_node_union! {
-    /// Any string literal excluding JsxString.
-    pub AnyString = JsStringLiteralExpression | JsTemplateExpression | JsLiteralMemberName
 }
 
 /// Returns the index in `str` of the first useless escape.
@@ -184,20 +136,4 @@ fn next_useless_escape(str: &str, quote: u8) -> Option<usize> {
         }
     }
     None
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_next_useless_escape() {
-        assert_eq!(next_useless_escape(r"\n", b'"'), None);
-        assert_eq!(next_useless_escape(r"\'", b'"'), Some(0));
-
-        assert_eq!(next_useless_escape("\\\u{2027}", b'"'), Some(0));
-        assert_eq!(next_useless_escape("\\\u{2028}", b'"'), None);
-        assert_eq!(next_useless_escape("\\\u{2029}", b'"'), None);
-        assert_eq!(next_useless_escape("\\\u{2030}", b'"'), Some(0));
-    }
 }
