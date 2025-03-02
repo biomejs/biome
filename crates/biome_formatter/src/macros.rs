@@ -329,21 +329,8 @@ macro_rules! format {
 #[macro_export]
 macro_rules! best_fitting {
     ($least_expanded:expr, $($tail:expr),+ $(,)?) => {
-        // FIXME: Using any block in this macro causes a "temporary value dropped while borrowed"
-        //        (E0716) error since Rust 2024 edition. It seems temporary lifetime extension is
-        //        not working correctly, so it is a compiler bug?
-        $crate::macros::__macro_helper::best_fitting($crate::format_args!($least_expanded, $($tail),+))
+        BestFitting::from_arguments_unchecked($crate::format_args!($least_expanded, $($tail),+))
     };
-}
-
-#[doc(hidden)]
-pub mod __macro_helper {
-    #[inline(always)]
-    pub fn best_fitting<Context>(
-        arguments: crate::Arguments<Context>,
-    ) -> crate::BestFitting<Context> {
-        unsafe { crate::BestFitting::from_arguments_unchecked(arguments) }
-    }
 }
 
 #[cfg(test)]
