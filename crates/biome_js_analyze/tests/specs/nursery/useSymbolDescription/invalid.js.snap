@@ -5,7 +5,9 @@ expression: invalid.js
 # Input
 ```js
 Symbol()
-
+Symbol('')
+Symbol("")
+Symbol(``)
 ```
 
 # Diagnostics
@@ -16,7 +18,55 @@ invalid.js:1:7 lint/nursery/useSymbolDescription ━━━━━━━━━━�
   
   > 1 │ Symbol()
       │       ^^
-    2 │ 
+    2 │ Symbol('')
+    3 │ Symbol("")
+  
+  i Add explicit description which can be useful in debugging and making the purpose of the symbol clearer.
+  
+
+```
+
+```
+invalid.js:2:7 lint/nursery/useSymbolDescription ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Symbol() is missing a description parameter.
+  
+    1 │ Symbol()
+  > 2 │ Symbol('')
+      │       ^^^^
+    3 │ Symbol("")
+    4 │ Symbol(``)
+  
+  i Add explicit description which can be useful in debugging and making the purpose of the symbol clearer.
+  
+
+```
+
+```
+invalid.js:3:7 lint/nursery/useSymbolDescription ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Symbol() is missing a description parameter.
+  
+    1 │ Symbol()
+    2 │ Symbol('')
+  > 3 │ Symbol("")
+      │       ^^^^
+    4 │ Symbol(``)
+  
+  i Add explicit description which can be useful in debugging and making the purpose of the symbol clearer.
+  
+
+```
+
+```
+invalid.js:4:7 lint/nursery/useSymbolDescription ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Symbol() is missing a description parameter.
+  
+    2 │ Symbol('')
+    3 │ Symbol("")
+  > 4 │ Symbol(``)
+      │       ^^^^
   
   i Add explicit description which can be useful in debugging and making the purpose of the symbol clearer.
   

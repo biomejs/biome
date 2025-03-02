@@ -1,6 +1,6 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_js_syntax::{JsCallExpression, global_identifier};
+use biome_js_syntax::{AnyJsExpression, JsCallExpression, global_identifier};
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 
 use crate::services::semantic::Semantic;
@@ -17,6 +17,12 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// Symbol();
+    /// ```
+    /// ```js,expect_diagnostic
+    /// Symbol('');
+    /// ```
+    ///```js,expect_diagnostic
+    /// Symbol(``);
     /// ```
     ///
     /// ### Valid
@@ -52,12 +58,26 @@ impl Rule for UseSymbolDescription {
             return None;
         }
 
-        let call_args = call_expression.arguments().ok()?;
-        if call_args.args().len() > 0 {
-            return None;
+        let arguments = call_expression.arguments().ok()?;
+        let args = arguments.args();
+
+        let is_missing_description = match args.len() {
+            0 => true,
+            1 => {
+                let first_arg = args.into_iter().next()?.ok()?;
+                let first_arg = first_arg.as_any_js_expression()?;
+
+                is_expr_empty_string(&first_arg)
+            }
+            // native Symbol() can accept only one argument.
+            _ => false,
+        };
+
+        if is_missing_description {
+            return Some(arguments.range());
         }
 
-        Some(call_args.range())
+        None
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -73,5 +93,22 @@ impl Rule for UseSymbolDescription {
                 "Add explicit description which can be useful in debugging and making the purpose of the symbol clearer."
             }),
         )
+    }
+}
+
+fn is_expr_empty_string(expr: &AnyJsExpression) -> bool {
+    match expr {
+        AnyJsExpression::AnyJsLiteralExpression(literal) => literal
+            .as_js_string_literal_expression()
+            .and_then(|str_literal| {
+                let is_empty = str_literal.inner_string_text().ok()?.text() == "";
+
+                if is_empty { Some(true) } else { None }
+            })
+            .is_some(),
+        AnyJsExpression::JsTemplateExpression(template) => {
+            template.tag().is_none() && template.elements().into_iter().next().is_none()
+        }
+        _ => false,
     }
 }

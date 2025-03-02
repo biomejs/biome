@@ -1,1 +1,4 @@
 Symbol()
+Symbol('')
+Symbol("")
+Symbol(``)
