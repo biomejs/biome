@@ -58,7 +58,7 @@ pub fn reformat_without_preamble(text: impl Display) -> Result<String> {
     let _e = pushenv("RUSTUP_TOOLCHAIN", "stable");
     ensure_rustfmt()?;
     let output = run!(
-        "rustfmt --config newline_style=Unix";
+        "rustfmt --config newline_style=Unix --config style_edition=2024";
         <text.to_string().as_bytes()
     )?;
 
