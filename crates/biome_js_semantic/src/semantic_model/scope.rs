@@ -47,13 +47,13 @@ impl Scope {
 
     /// Returns all parents of this scope. Starting with the current
     /// [Scope].
-    pub fn ancestors(&self) -> impl Iterator<Item = Scope> {
+    pub fn ancestors(&self) -> impl Iterator<Item = Scope> + use<> {
         std::iter::successors(Some(self.clone()), |scope| scope.parent())
     }
 
     /// Returns all descendents of this scope in breadth-first order. Starting with the current
     /// [Scope].
-    pub fn descendents(&self) -> impl Iterator<Item = Scope> {
+    pub fn descendents(&self) -> impl Iterator<Item = Scope> + use<> {
         let mut q = VecDeque::new();
         q.push_back(self.id);
 

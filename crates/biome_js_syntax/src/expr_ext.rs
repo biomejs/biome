@@ -673,7 +673,7 @@ impl JsTemplateExpression {
     /// The string chunks of the template. aka:
     /// `foo ${bar} foo` breaks down into:
     /// `QUASIS ELEMENT{EXPR} QUASIS`
-    pub fn quasis(&self) -> impl Iterator<Item = JsSyntaxToken> {
+    pub fn quasis(&self) -> impl Iterator<Item = JsSyntaxToken> + use<> {
         self.syntax()
             .children_with_tokens()
             .filter_map(NodeOrToken::into_token)

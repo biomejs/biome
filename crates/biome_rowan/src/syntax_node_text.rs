@@ -140,11 +140,11 @@ impl SyntaxNodeText {
         }
     }
 
-    fn tokens_with_ranges(&self) -> impl FusedIterator<Item = (SyntaxToken, TextRange)> {
+    fn tokens_with_ranges(&self) -> impl FusedIterator<Item = (SyntaxToken, TextRange)> + use<> {
         SyntaxNodeTokenWithRanges::new(self)
     }
 
-    pub fn chars(&self) -> impl FusedIterator<Item = char> {
+    pub fn chars(&self) -> impl FusedIterator<Item = char> + use<> {
         SyntaxNodeTextChars::new(self)
     }
 }

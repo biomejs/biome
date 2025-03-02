@@ -162,7 +162,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode> {
+    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode> + use<> {
         iter::successors(Some(self.clone()), SyntaxNode::parent)
     }
 
@@ -266,7 +266,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn siblings(&self, direction: Direction) -> impl Iterator<Item = SyntaxNode> {
+    pub fn siblings(&self, direction: Direction) -> impl Iterator<Item = SyntaxNode> + use<> {
         iter::successors(Some(self.clone()), move |node| match direction {
             Direction::Next => node.next_sibling(),
             Direction::Prev => node.prev_sibling(),
@@ -277,7 +277,7 @@ impl SyntaxNode {
     pub fn siblings_with_tokens(
         &self,
         direction: Direction,
-    ) -> impl Iterator<Item = SyntaxElement> {
+    ) -> impl Iterator<Item = SyntaxElement> + use<> {
         let me: SyntaxElement = self.clone().into();
         iter::successors(Some(me), move |el| match direction {
             Direction::Next => el.next_sibling_or_token(),
@@ -286,7 +286,7 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn descendants(&self) -> impl Iterator<Item = SyntaxNode> {
+    pub fn descendants(&self) -> impl Iterator<Item = SyntaxNode> + use<> {
         self.preorder().filter_map(|event| match event {
             WalkEvent::Enter(node) => Some(node),
             WalkEvent::Leave(_) => None,
@@ -297,7 +297,7 @@ impl SyntaxNode {
     pub fn descendants_with_tokens(
         &self,
         direction: Direction,
-    ) -> impl Iterator<Item = SyntaxElement> {
+    ) -> impl Iterator<Item = SyntaxElement> + use<> {
         self.preorder_with_tokens(direction)
             .filter_map(|event| match event {
                 WalkEvent::Enter(it) => Some(it),
@@ -897,7 +897,7 @@ impl<'a> Siblings<'a> {
     /// For example, the preceding siblings of the if statement's condition are:
     /// * opening parentheses: (
     /// * if keyword: if
-    pub fn previous(&self) -> impl Iterator<Item = Child<'a>> {
+    pub fn previous(&self) -> impl Iterator<Item = Child<'a>> + use<'a> {
         let mut slots = self.parent.slots().enumerate();
 
         // Navigate to the start slot from the back so that calling `next_back` (or rev().next()) returns

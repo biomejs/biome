@@ -62,7 +62,7 @@ impl TryFrom<AnyJsExpression> for AnyJsFunctionExpression {
 impl ReactCallWithDependencyResult {
     /// Returns all [Reference] captured by the closure argument of the React hook.
     /// See [react_hook_with_dependency].
-    pub fn all_captures(&self, model: &SemanticModel) -> impl Iterator<Item = Capture> {
+    pub fn all_captures(&self, model: &SemanticModel) -> impl Iterator<Item = Capture> + use<> {
         self.closure_node
             .as_ref()
             .and_then(|node| AnyJsFunctionExpression::try_from(node.clone()).ok())
@@ -80,7 +80,7 @@ impl ReactCallWithDependencyResult {
 
     /// Returns all dependencies of a React hook.
     /// See [react_hook_with_dependency]
-    pub fn all_dependencies(&self) -> impl Iterator<Item = AnyJsExpression> {
+    pub fn all_dependencies(&self) -> impl Iterator<Item = AnyJsExpression> + use<> {
         self.dependencies_node
             .as_ref()
             .and_then(|x| Some(x.as_js_array_expression()?.elements().into_iter()))

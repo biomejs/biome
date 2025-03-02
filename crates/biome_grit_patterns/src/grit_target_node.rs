@@ -210,7 +210,7 @@ impl<'a> GritTargetNode<'a> {
         DescendantsIterator::new(self)
     }
 
-    pub fn named_children(&self) -> impl Iterator<Item = Self> + Clone {
+    pub fn named_children(&self) -> impl Iterator<Item = Self> + Clone + use<'a> {
         NamedChildrenIterator::new(self)
     }
 
@@ -237,7 +237,7 @@ impl<'a> GritTargetNode<'a> {
     }
 
     #[inline]
-    pub fn slots(&self) -> Option<impl Iterator<Item = GritSyntaxSlot<'a>>> {
+    pub fn slots(&self) -> Option<impl Iterator<Item = GritSyntaxSlot<'a>> + use<'a>> {
         SlotIterator::new(self)
     }
 

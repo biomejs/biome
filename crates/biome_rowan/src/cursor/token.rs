@@ -126,7 +126,7 @@ impl SyntaxToken {
     }
 
     #[inline]
-    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode> {
+    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode> + use<> {
         std::iter::successors(self.parent(), SyntaxNode::parent)
     }
 
@@ -141,7 +141,7 @@ impl SyntaxToken {
     pub fn siblings_with_tokens(
         &self,
         direction: Direction,
-    ) -> impl Iterator<Item = SyntaxElement> {
+    ) -> impl Iterator<Item = SyntaxElement> + use<> {
         let next = move |el: &SyntaxElement| match direction {
             Direction::Next => el.next_sibling_or_token(),
             Direction::Prev => el.prev_sibling_or_token(),
