@@ -295,7 +295,7 @@ fn is_less_than_length_expression(binary_expression: &JsBinaryExpression) -> Opt
 
     Some(
         matches!(operator, JsBinaryOperator::LessThan)
-            && member.value_token().ok()?.text() == "length"
+            && member.value_token().ok()?.text_trimmed() == "length"
             && !matches!(object.syntax().kind(), JsSyntaxKind::JS_THIS_EXPRESSION),
     )
 }

@@ -100,7 +100,7 @@ impl Rule for NoUselessCatch {
             .as_js_identifier_binding()?
             .name_token()
             .ok()?;
-        let catch_err_name = catch_binding_err.text();
+        let catch_err_name = catch_binding_err.text_trimmed();
 
         let first_statement = catch_body_statements.first()?;
         let js_throw_statement = first_statement.as_js_throw_statement()?;
