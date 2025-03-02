@@ -202,14 +202,20 @@ mod tests {
     #[test]
     fn quick_test() {
         const SOURCE: &str = r#"
-let Component = (props) => <ol>{props.data.map(d => <li>{d.text}</li>)}</ol>;
+// With character class
+'test \u0300 this'.replace(/[\u0300-\u0302]/g, 'XXX');
+// 'test \u0302 this'.replace(/[-\u0302]/g, 'XXX');
+// 'test \u0302 this'.replace(/[\u0302-]/g, 'XXX');
+
+// Without character class
+// 'test \u0300-\u0302 this'.replace(/\u0300-\u0302/g, 'XXX');
         "#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let options = AnalyzerOptions::default();
-        let rule_filter = RuleFilter::Rule("nursery", "useForComponent");
+        let rule_filter = RuleFilter::Rule("suspicious", "noMisleadingCharacterClass");
 
         let mut dependencies = Dependencies::default();
         dependencies.add("buffer", "latest");

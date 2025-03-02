@@ -224,10 +224,24 @@ fn diagnostic_regex_class(
 ) -> Option<RuleState> {
     let mut prev_char_index = 0;
     let mut prev_char_type = CharType::None;
+    let mut prev_code_point = None;
+    let mut is_range_operator = false;
     let mut iter = char_class.char_indices();
+
     while let Some((i, c)) = iter.next() {
+        // Check if the current character is a potential range operator
+        // A hyphen("-") is considered a range operator when:
+        // 1. There is a previous code point (not at the start of a character class)
+        // 2. It is neither the first nor the last character in the character class.
+        if c == '-' && prev_code_point.is_some() && i > 0 && i + 1 < char_class.len() {
+            // Mark this as a range operator for later processing
+            is_range_operator = true;
+            prev_char_index = i;
+            continue;
+        }
+
         let (codepoint, end) = if c == '\\' {
-            // Maybe  unicode esccapes \u{XXX} \uXXXX
+            // Maybe unicode escapes \u{XXX} \uXXXX
             let Some((codepoint, len)) = decode_next_codepoint(&char_class[i..], is_in_string)
             else {
                 prev_char_index = i;
@@ -240,6 +254,29 @@ fn diagnostic_regex_class(
         } else {
             (c as u32, i + c.len_utf8())
         };
+
+        // Handle range operators in character classes, e.g., [a-z], [\u0300-\u0302]
+        if is_range_operator {
+            // Reset the flag after processing
+            is_range_operator = false;
+
+            // Check if we have a valid previous code point to form a range
+            if let Some(prev_cp) = prev_code_point {
+                // Ensure the range is valid (start <= end)
+                // If the range is invalid (start > end), continue with normal processing
+                if prev_cp <= codepoint {
+                    // Update tracking variables for the end of range character
+                    prev_code_point = Some(codepoint);
+                    prev_char_index = i;
+                    // Skip further processing for this character
+                    continue;
+                }
+            }
+        }
+
+        // Store the current code point for future range operations
+        prev_code_point = Some(codepoint);
+
         match codepoint {
             // Non-BMP characters are encoded as surrogate pairs in UTF-16 / UCS-2
             0x10000.. if !has_u_flag => {
@@ -264,7 +301,7 @@ fn diagnostic_regex_class(
             | 0xFE20..=0xFE2F
             // Variation Selectors Supplement (VS17 to VS256)
             | 0xE0100..=0xE01EF => {
-                if prev_char_type == CharType::Regular {
+                if prev_char_type == CharType::Regular && !is_range_operator {
                     return Some(RuleState {
                         range: TextRange::new((prev_char_index as u32).into(), (end as u32).into()),
                         message: Message::CombiningClassOrVs16,

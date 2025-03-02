@@ -47,3 +47,15 @@ var cyrillicChars = /[\u200E\u2066-\u2069]/gu;
 // Unicode char outside the class
 /[a-z]👍/;
 /\[👍]/;
+
+// Issue: https://github.com/biomejs/biome/issues/4950
+// 1. The hyphen is treated as a range operator in the character class
+/[\u0300-\u0302]/;
+
+// 2.The hyphen is treated as literal character in the character class
+// This regex is valid, it will match either '\u0300' or a literal hyphen '-'
+/[\u0300-]/;
+
+// 3. The hyphen is treated as a literal character outside a character class
+// This regex will match a literal "\u0300-\u0302"
+/\u0300-\u0302/;
