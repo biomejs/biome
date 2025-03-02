@@ -12,13 +12,6 @@ unused_import_braces                   = "warn"
 unused_lifetimes                       = "warn"
 unused_macro_rules                     = "warn"
 
-# Rust 2024 upgrade
-deprecated_safe_2024       = "warn"
-impl_trait_overcaptures    = "warn"
-keyword_idents_2024        = "warn"
-missing_unsafe_on_extern   = "warn"
-unsafe_attr_outside_unsafe = "warn"
-
 [workspace.lints.clippy]
 allow_attributes        = "deny"
 cargo_common_metadata   = "allow"
@@ -93,7 +86,7 @@ verbose_file_reads                = "warn"
 [workspace.package]
 authors    = ["Biome Developers and Contributors"]
 categories = ["development-tools", "web-programming"]
-edition    = "2021"
+edition    = "2024"
 homepage   = "https://biomejs.dev/"
 keywords   = ["parser", "linter", "formatter"]
 license    = "MIT OR Apache-2.0"

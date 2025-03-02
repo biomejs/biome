@@ -53,14 +53,14 @@ impl SemanticModel {
                 .range_to_rule
                 .iter()
                 .rev()
-                .find(|(&range, _)| range.contains_range(target_range))
+                .find(|&(&range, _)| range.contains_range(target_range))
                 .map(|(_, rule)| rule)
         } else {
             self.data
                 .range_to_rule
                 .range(..=target_range)
                 .rev()
-                .find(|(&range, _)| range.contains_range(target_range))
+                .find(|&(&range, _)| range.contains_range(target_range))
                 .map(|(_, rule)| rule)
         }
     }
