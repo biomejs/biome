@@ -12,13 +12,13 @@ Symbol()
 ```
 invalid.js:1:7 lint/nursery/useSymbolDescription ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Provide a description for the symbol.
+  i Symbol() is missing a description parameter.
   
   > 1 │ Symbol()
       │       ^^
     2 │ 
   
-  i Explicit description can be useful in debugging and making purpose of the symbol clearer.
+  i Add explicit description which can be useful in debugging and making the purpose of the symbol clearer.
   
 
 ```

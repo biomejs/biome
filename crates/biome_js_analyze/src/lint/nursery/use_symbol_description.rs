@@ -8,8 +8,8 @@ use crate::services::semantic::Semantic;
 declare_lint_rule! {
     /// Require a description parameter for the `Symbol()`.
     ///
-    /// Symbol can have optional description parameter which can be useful for
-    /// debugging and making purpose of the symbol clearer.
+    /// `Symbol` can have an optional description parameter which can be useful for
+    /// debugging and making the purpose of the symbol clearer.
     ///
     /// ## Examples
     ///
@@ -66,11 +66,11 @@ impl Rule for UseSymbolDescription {
                 rule_category!(),
                 state,
                 markup! {
-                    "Provide a description for the symbol."
+                    <Emphasis>"Symbol()"</Emphasis>" is missing a description parameter."
                 },
             )
             .note(markup! {
-                "Explicit description can be useful in debugging and making purpose of the symbol clearer."
+                "Add explicit description which can be useful in debugging and making the purpose of the symbol clearer."
             }),
         )
     }
