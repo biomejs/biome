@@ -27,3 +27,7 @@ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
 var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
 
 /[\]👍]/;
+
+// range operator as a normal character in character class
+// Issue: https://github.com/biomejs/biome/issues/4950
+/[-\u0300]/;

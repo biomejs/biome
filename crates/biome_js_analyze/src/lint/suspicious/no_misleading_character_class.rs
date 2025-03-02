@@ -224,10 +224,19 @@ fn diagnostic_regex_class(
 ) -> Option<RuleState> {
     let mut prev_char_index = 0;
     let mut prev_char_type = CharType::None;
+    let mut prev_code_point = None;
+    let mut is_range_operator = false;
     let mut iter = char_class.char_indices();
+
     while let Some((i, c)) = iter.next() {
+        if c == '-' && prev_code_point.is_some() && i > 0 && i + 1 < char_class.len() {
+            is_range_operator = true;
+            prev_char_index = i;
+            continue;
+        }
+
         let (codepoint, end) = if c == '\\' {
-            // Maybe  unicode esccapes \u{XXX} \uXXXX
+            // Maybe  unicode escapes \u{XXX} \uXXXX
             let Some((codepoint, len)) = decode_next_codepoint(&char_class[i..], is_in_string)
             else {
                 prev_char_index = i;
@@ -240,6 +249,21 @@ fn diagnostic_regex_class(
         } else {
             (c as u32, i + c.len_utf8())
         };
+
+        if is_range_operator {
+            is_range_operator = false;
+
+            if let Some(prev_cp) = prev_code_point {
+                if prev_cp <= codepoint {
+                    prev_code_point = Some(codepoint);
+                    prev_char_index = i;
+                    continue;
+                }
+            }
+        }
+
+        prev_code_point = Some(codepoint);
+
         match codepoint {
             // Non-BMP characters are encoded as surrogate pairs in UTF-16 / UCS-2
             0x10000.. if !has_u_flag => {
@@ -264,7 +288,7 @@ fn diagnostic_regex_class(
             | 0xFE20..=0xFE2F
             // Variation Selectors Supplement (VS17 to VS256)
             | 0xE0100..=0xE01EF => {
-                if prev_char_type == CharType::Regular {
+                if prev_char_type == CharType::Regular && !is_range_operator {
                     return Some(RuleState {
                         range: TextRange::new((prev_char_index as u32).into(), (end as u32).into()),
                         message: Message::CombiningClassOrVs16,
