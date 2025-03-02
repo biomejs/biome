@@ -1,0 +1,69 @@
+/*
+  ERROR CASE 1: Missing closing parenthesis
+  - Missing ")" after (--b: blue)
+*/
+@container name style((--b: red) or (--b: blue {
+}
+
+/*
+  ERROR CASE 2: Extra closing parenthesis
+  - The double ")) )" leads to unbalanced parentheses
+*/
+@container name style((--b: red) or ((--b: red) and (--b: red)) ) ) {
+}
+
+/*
+  ERROR CASE 3: Incomplete logical operator
+  - There's an "or" but nothing follows
+*/
+@container name style((--b: red) or ) {
+}
+
+/*
+  ERROR CASE 4: Empty parentheses
+  - "()": no valid declaration inside
+*/
+@container name style( () ) {
+}
+
+/*
+  ERROR CASE 5: Missing parentheses after "style"
+  - "style" must be followed by "("
+*/
+@container name style --b: red {
+}
+
+/*
+  ERROR CASE 6: Invalid property value
+  - "#red" isn't a recognized color token in standard CSS
+*/
+@container name style((color: #red)) {
+}
+
+/*
+  ERROR CASE 7: Unexpected tokens
+  - "???" doesn't fit valid CSS property or logical operator syntax
+*/
+@container name style((--b: red) ??? (--b: blue)) {
+}
+
+/*
+  ERROR CASE 8: Missing colon in a declaration
+  - "(--b red)" should be "(--b: red)"
+*/
+@container name style((--b red)) {
+}
+
+/*
+  ERROR CASE 9: Incorrect nesting of logical operators
+  - "and or" in direct sequence is invalid
+*/
+@container name style((--b: red) and or (--c: red)) {
+}
+
+/*
+  ERROR CASE 10: Extraneous characters after closing parenthesis
+  - "??" is unexpected after "((--b: red))"
+*/
+@container name style((--b: red))?? {
+}

@@ -39,6 +39,9 @@ expression: snapshot
 @container ( 150px <= WIDTH ) {  }
 
 @container --dashed-name not (width <= 500px) {  }
+
+@container name not style(color: red) {}
+
 ```
 
 
@@ -645,17 +648,53 @@ CssRoot {
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@805..808 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                container_token: CONTAINER_KW@808..818 "container" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@818..823 "name" [] [Whitespace(" ")],
+                },
+                query: CssContainerNotQuery {
+                    not_token: NOT_KW@823..827 "not" [] [Whitespace(" ")],
+                    query: CssContainerStyleQueryInParens {
+                        style_token: STYLE_KW@827..832 "style" [] [],
+                        l_paren_token: L_PAREN@832..833 "(" [] [],
+                        query: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@833..838 "color" [] [],
+                                },
+                                colon_token: COLON@838..840 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@840..843 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        r_paren_token: R_PAREN@843..845 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@845..846 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@846..847 "}" [] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@805..805 "" [] [],
+    eof_token: EOF@847..848 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..805
+0: CSS_ROOT@0..848
   0: (empty)
-  1: CSS_RULE_LIST@0..805
+  1: CSS_RULE_LIST@0..847
     0: CSS_AT_RULE@0..41
       0: AT@0..1 "@" [] []
       1: CSS_CONTAINER_AT_RULE@1..41
@@ -1076,6 +1115,31 @@ CssRoot {
           0: L_CURLY@801..804 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@804..804
           2: R_CURLY@804..805 "}" [] []
-  2: EOF@805..805 "" [] []
+    18: CSS_AT_RULE@805..847
+      0: AT@805..808 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@808..847
+        0: CONTAINER_KW@808..818 "container" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@818..823
+          0: IDENT@818..823 "name" [] [Whitespace(" ")]
+        2: CSS_CONTAINER_NOT_QUERY@823..845
+          0: NOT_KW@823..827 "not" [] [Whitespace(" ")]
+          1: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@827..845
+            0: STYLE_KW@827..832 "style" [] []
+            1: L_PAREN@832..833 "(" [] []
+            2: CSS_DECLARATION@833..843
+              0: CSS_GENERIC_PROPERTY@833..843
+                0: CSS_IDENTIFIER@833..838
+                  0: IDENT@833..838 "color" [] []
+                1: COLON@838..840 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@840..843
+                  0: CSS_IDENTIFIER@840..843
+                    0: IDENT@840..843 "red" [] []
+              1: (empty)
+            3: R_PAREN@843..845 ")" [] [Whitespace(" ")]
+        3: CSS_RULE_BLOCK@845..847
+          0: L_CURLY@845..846 "{" [] []
+          1: CSS_RULE_LIST@846..846
+          2: R_CURLY@846..847 "}" [] []
+  2: EOF@847..848 "" [Newline("\n")] []
 
 ```
