@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+Symbol()
+
+```
+
+# Diagnostics
+```
+invalid.js:1:7 lint/nursery/useSymbolDescription ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Provide a description for the symbol.
+  
+  > 1 │ Symbol()
+      │       ^^
+    2 │ 
+  
+  i Explicit description can be useful in debugging and making purpose of the symbol clearer.
+  
+
+```
