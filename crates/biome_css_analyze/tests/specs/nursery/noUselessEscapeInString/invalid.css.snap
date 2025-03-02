@@ -5,7 +5,7 @@ expression: invalid.css
 # Input
 ```css
 .a::after {
-    content: "useless \a"
+    content: /*before*/ "useless \a" /*after*/
 }
 .b::after {
     content: "useless \'"
@@ -14,13 +14,13 @@ expression: invalid.css
 
 # Diagnostics
 ```
-invalid.css:2:24 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:35 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The character doesn't need to be escaped.
   
     1 │ .a::after {
-  > 2 │     content: "useless \a"
-      │                        ^
+  > 2 │     content: /*before*/ "useless \a" /*after*/
+      │                                   ^
     3 │ }
     4 │ .b::after {
   
@@ -28,8 +28,8 @@ invalid.css:2:24 lint/nursery/noUselessEscapeInString  FIXABLE  ━━━━━�
   
   i Safe fix: Unescape the character.
   
-    2 │ ····content:·"useless·\a"
-      │                       -  
+    2 │ ····content:·/*before*/·"useless·\a"·/*after*/
+      │                                  -            
 
 ```
 

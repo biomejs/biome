@@ -61,7 +61,7 @@ impl Rule for NoUselessEscapeInString {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let token = node.value_token().ok()?;
-        let text = token.text();
+        let text = token.text_trimmed();
         next_useless_escape(text, text.bytes().next()?).map(|index| (token, index))
     }
 
@@ -70,7 +70,7 @@ impl Rule for NoUselessEscapeInString {
             .text_trimmed_range()
             .start()
             .checked_add((*index as u32 + 1).into())?;
-        let escaped_char = token.text()[(1 + index)..].chars().next()?;
+        let escaped_char = token.text_trimmed()[(1 + index)..].chars().next()?;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
