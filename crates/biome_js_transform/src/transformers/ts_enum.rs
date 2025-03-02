@@ -1,4 +1,4 @@
-use crate::{declare_transformation, JsBatchMutation};
+use crate::{JsBatchMutation, declare_transformation};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule};
 use biome_js_factory::make::{
@@ -16,7 +16,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsFormalParameter, AnyJsLiteralExpression, AnyJsModuleItem, AnyJsParameter,
     AnyJsStatement, JsAssignmentExpression, JsComputedMemberAssignment, JsExpressionStatement,
     JsFunctionExpression, JsInitializerClause, JsLogicalExpression, JsModuleItemList,
-    JsStatementList, JsVariableStatement, TsEnumDeclaration, T,
+    JsStatementList, JsVariableStatement, T, TsEnumDeclaration,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
 

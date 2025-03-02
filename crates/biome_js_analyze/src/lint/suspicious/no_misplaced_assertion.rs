@@ -1,6 +1,6 @@
 use crate::services::semantic::Semantic;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;

@@ -1,5 +1,5 @@
-use crate::ast::AstSrc;
 use crate::LanguageSrc;
+use crate::ast::AstSrc;
 use anyhow::Result;
 use biome_string_case::Case;
 use quote::{format_ident, quote};

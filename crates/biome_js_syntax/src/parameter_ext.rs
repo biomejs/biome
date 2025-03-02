@@ -4,7 +4,7 @@ use crate::{
     JsParameterList, JsParameters, TsTypeAnnotation,
 };
 use biome_rowan::{
-    declare_node_union, AstNodeList, AstSeparatedList, AstSeparatedListNodesIterator, SyntaxResult,
+    AstNodeList, AstSeparatedList, AstSeparatedListNodesIterator, SyntaxResult, declare_node_union,
 };
 
 /// An enumeration representing different types of JavaScript/TypeScript parameter lists.

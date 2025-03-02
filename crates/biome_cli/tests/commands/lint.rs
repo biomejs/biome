@@ -5,18 +5,18 @@ use crate::configs::{
     CONFIG_LINTER_UPGRADE_DIAGNOSTIC, CONFIG_RECOMMENDED_GROUP,
 };
 use crate::snap_test::{
-    assert_cli_snapshot_with_redactor, assert_file_contents, markup_to_string, SnapshotPayload,
+    SnapshotPayload, assert_cli_snapshot_with_redactor, assert_file_contents, markup_to_string,
 };
 use crate::{
-    assert_cli_snapshot, run_cli, run_cli_with_dyn_fs, run_cli_with_server_workspace, FORMATTED,
-    LINT_ERROR, PARSE_ERROR,
+    FORMATTED, LINT_ERROR, PARSE_ERROR, assert_cli_snapshot, run_cli, run_cli_with_dyn_fs,
+    run_cli_with_server_workspace,
 };
-use biome_console::{markup, BufferConsole, LogLevel, MarkupBuf};
+use biome_console::{BufferConsole, LogLevel, MarkupBuf, markup};
 use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
 use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 use std::env::temp_dir;
-use std::fs::{create_dir, create_dir_all, remove_dir_all, File};
+use std::fs::{File, create_dir, create_dir_all, remove_dir_all};
 use std::io::Write;
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::symlink;
@@ -155,15 +155,17 @@ fn maximum_diagnostics() {
         20_usize
     );
 
-    assert!(messages
-        .iter()
-        .filter(|m| m.level == LogLevel::Log)
-        .any(|m| {
-            let content = format!("{:?}", m.content);
-            content.contains("The number of diagnostics exceeds the limit allowed")
-                && content.contains("Diagnostics not shown")
-                && content.contains("28")
-        }));
+    assert!(
+        messages
+            .iter()
+            .filter(|m| m.level == LogLevel::Log)
+            .any(|m| {
+                let content = format!("{:?}", m.content);
+                content.contains("The number of diagnostics exceeds the limit allowed")
+                    && content.contains("Diagnostics not shown")
+                    && content.contains("28")
+            })
+    );
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -911,21 +913,27 @@ fn fs_error_infinite_symlink_expansion_to_files() {
 
     // Don't use a snapshot here, since the diagnostics can be reported in
     // arbitrary order:
-    assert!(console
-        .out_buffer
-        .iter()
-        .flat_map(|msg| msg.content.0.iter())
-        .any(|node| node.content.contains("Deeply nested symlink expansion")));
-    assert!(console
-        .out_buffer
-        .iter()
-        .flat_map(|msg| msg.content.0.iter())
-        .any(|node| node.content.contains(&symlink1_path.to_string())));
-    assert!(console
-        .out_buffer
-        .iter()
-        .flat_map(|msg| msg.content.0.iter())
-        .any(|node| node.content.contains(&symlink2_path.to_string())));
+    assert!(
+        console
+            .out_buffer
+            .iter()
+            .flat_map(|msg| msg.content.0.iter())
+            .any(|node| node.content.contains("Deeply nested symlink expansion"))
+    );
+    assert!(
+        console
+            .out_buffer
+            .iter()
+            .flat_map(|msg| msg.content.0.iter())
+            .any(|node| node.content.contains(&symlink1_path.to_string()))
+    );
+    assert!(
+        console
+            .out_buffer
+            .iter()
+            .flat_map(|msg| msg.content.0.iter())
+            .any(|node| node.content.contains(&symlink2_path.to_string()))
+    );
 }
 
 #[test]

@@ -1,11 +1,11 @@
 use std::collections::HashSet;
 
 use crate::{
-    inner_string_text, static_value::StaticValue, AnyJsxAttribute, AnyJsxAttributeName,
-    AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsSyntaxToken, JsxAttribute,
-    JsxAttributeList, JsxElement, JsxOpeningElement, JsxSelfClosingElement, JsxString,
+    AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName,
+    AnyJsxTag, JsSyntaxToken, JsxAttribute, JsxAttributeList, JsxElement, JsxOpeningElement,
+    JsxSelfClosingElement, JsxString, inner_string_text, static_value::StaticValue,
 };
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, SyntaxResult, TokenText};
+use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TokenText, declare_node_union};
 
 impl JsxString {
     /// Returns the inner text of a string not including the quotes.

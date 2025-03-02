@@ -21,8 +21,8 @@ use std::{
 };
 
 use biome_deserialize::{
-    json::unescape_json_string, DeserializableType, DeserializableValue, DeserializationContext,
-    Text,
+    DeserializableType, DeserializableValue, DeserializationContext, Text,
+    json::unescape_json_string,
 };
 use biome_deserialize_macros::Deserializable;
 use biome_json_syntax::{AnyJsonValue, JsonArrayValue, JsonObjectValue, JsonStringValue};

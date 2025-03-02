@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{format_args, write, CstFormatContext};
+use biome_formatter::{CstFormatContext, format_args, write};
 
 use crate::utils::FormatStatementBody;
 use biome_js_syntax::JsForStatement;

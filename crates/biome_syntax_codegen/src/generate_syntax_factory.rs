@@ -1,6 +1,6 @@
+use crate::LanguageSrc;
 use crate::ast::AstSrc;
 use crate::generate_nodes::{get_field_predicate, group_fields_for_ordering, token_kind_to_code};
-use crate::LanguageSrc;
 use anyhow::Result;
 use biome_string_case::Case;
 use proc_macro2::{Ident, Span, TokenStream};

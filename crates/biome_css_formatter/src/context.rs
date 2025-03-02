@@ -1,9 +1,9 @@
 use crate::CssCommentStyle;
-use biome_formatter::{prelude::*, IndentWidth, QuoteStyle};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TransformSourceMap,
 };
+use biome_formatter::{IndentWidth, QuoteStyle, prelude::*};
 
 use crate::comments::{CssComments, FormatCssLeadingComment};
 use biome_css_syntax::{CssFileSource, CssLanguage};

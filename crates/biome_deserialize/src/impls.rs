@@ -2,15 +2,15 @@
 //!
 //! Tests of these implementations are available in [biome_deserialize::json::tests] module.
 use crate::{
-    diagnostics::DeserializableTypes, Deserializable, DeserializableValue, DeserializationContext,
-    DeserializationDiagnostic, DeserializationVisitor,
+    Deserializable, DeserializableValue, DeserializationContext, DeserializationDiagnostic,
+    DeserializationVisitor, diagnostics::DeserializableTypes,
 };
 use biome_rowan::{TextRange, TokenText};
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap, HashSet},
     hash::{BuildHasher, Hash, Hasher},
     marker::PhantomData,
-    num::{NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8, NonZeroUsize},
+    num::{NonZeroU8, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroUsize},
     ops::Deref,
     path::PathBuf,
 };

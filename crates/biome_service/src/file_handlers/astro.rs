@@ -1,14 +1,14 @@
+use crate::WorkspaceError;
 use crate::file_handlers::{
-    javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
-    EnabledForPath, ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults,
-    ParseResult, ParserCapabilities,
+    AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
+    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
+    ParserCapabilities, javascript,
 };
 use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
-use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_parser::{parse_js_with_cache, JsParserOptions};
+use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;

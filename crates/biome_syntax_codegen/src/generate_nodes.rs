@@ -1,5 +1,5 @@
-use crate::ast::{AstNodeSrc, AstSrc, Field, TokenKind};
 use crate::LanguageSrc;
+use crate::ast::{AstNodeSrc, AstSrc, Field, TokenKind};
 use anyhow::Result;
 use biome_string_case::Case;
 use proc_macro2::{Literal, TokenStream};

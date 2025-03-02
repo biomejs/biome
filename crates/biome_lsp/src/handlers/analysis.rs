@@ -3,7 +3,7 @@ use crate::session::Session;
 use crate::utils;
 use anyhow::{Context, Result};
 use biome_analyze::{
-    ActionCategory, RuleCategoriesBuilder, SourceActionKind, SUPPRESSION_INLINE_ACTION_CATEGORY,
+    ActionCategory, RuleCategoriesBuilder, SUPPRESSION_INLINE_ACTION_CATEGORY, SourceActionKind,
 };
 use biome_configuration::analyzer::RuleSelector;
 use biome_diagnostics::{Applicability, Error};
@@ -11,12 +11,12 @@ use biome_fs::BiomePath;
 use biome_lsp_converters::from_proto;
 use biome_lsp_converters::line_index::LineIndex;
 use biome_rowan::{TextRange, TextSize};
+use biome_service::WorkspaceError;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FixFileMode, FixFileParams, GetFileContentParams,
     IsPathIgnoredParams, PullActionsParams, SupportsFeatureParams,
 };
-use biome_service::WorkspaceError;
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::ops::Sub;

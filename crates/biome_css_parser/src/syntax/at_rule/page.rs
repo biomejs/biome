@@ -4,7 +4,7 @@ use crate::syntax::at_rule::parse_error::{
     expected_any_page_at_rule_item, expected_page_selector, expected_page_selector_pseudo,
 };
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
-use crate::syntax::block::{parse_declaration_or_at_rule_list_block, ParseBlockBody};
+use crate::syntax::block::{ParseBlockBody, parse_declaration_or_at_rule_list_block};
 use crate::syntax::{
     is_at_declaration, is_at_identifier, parse_custom_identifier_with_keywords,
     parse_declaration_with_semicolon,

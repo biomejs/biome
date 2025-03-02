@@ -15,11 +15,11 @@ use biome_parser::AnyParse;
 use biome_rowan::SyntaxKind;
 use biome_string_case::StrOnlyExtension;
 
+use crate::CompileError;
 use crate::grit_css_parser::GritCssParser;
 use crate::grit_js_parser::GritJsParser;
 use crate::grit_target_node::{GritTargetNode, GritTargetSyntaxKind};
 use crate::grit_tree::GritTargetTree;
-use crate::CompileError;
 
 /// Generates the `GritTargetLanguage` enum.
 ///

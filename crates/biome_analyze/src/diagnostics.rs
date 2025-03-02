@@ -1,7 +1,7 @@
-use biome_console::{markup, MarkupBuf};
+use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::{
-    advice::CodeSuggestionAdvice, category, Advices, Category, Diagnostic, DiagnosticExt,
-    DiagnosticTags, Error, Location, LogCategory, MessageAndDescription, Severity, Visit,
+    Advices, Category, Diagnostic, DiagnosticExt, DiagnosticTags, Error, Location, LogCategory,
+    MessageAndDescription, Severity, Visit, advice::CodeSuggestionAdvice, category,
 };
 use biome_rowan::TextRange;
 use std::borrow::Cow;

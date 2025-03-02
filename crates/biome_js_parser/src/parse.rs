@@ -5,7 +5,7 @@ pub use biome_js_syntax::{
     AnyJsRoot, JsFileSource, JsLanguage, JsModule, JsScript, JsSyntaxNode, ModuleKind,
 };
 use biome_parser::token_source::Trivia;
-use biome_parser::{event::Event, AnyParse};
+use biome_parser::{AnyParse, event::Event};
 use biome_rowan::{AstNode, NodeCache};
 use std::marker::PhantomData;
 

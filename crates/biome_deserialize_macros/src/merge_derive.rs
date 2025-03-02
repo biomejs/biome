@@ -1,5 +1,5 @@
-use proc_macro2::{Ident, TokenStream};
 use proc_macro_error2::*;
+use proc_macro2::{Ident, TokenStream};
 use quote::quote;
 use syn::{Data, Fields};
 

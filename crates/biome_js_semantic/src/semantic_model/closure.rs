@@ -262,7 +262,7 @@ impl Closure {
     /// }";
     /// assert!(model.closure(function_f).all_captures(), &["a"]);
     /// ```
-    pub fn all_captures(&self) -> impl Iterator<Item = Capture> {
+    pub fn all_captures(&self) -> impl Iterator<Item = Capture> + use<> {
         let scope = &self.data.scopes[self.scope_id.index()];
 
         let scopes = scope.children.clone();
@@ -292,7 +292,7 @@ impl Closure {
     /// }";
     /// assert!(model.closure(function_f).children(), &["g"]);
     /// ```
-    pub fn children(&self) -> impl Iterator<Item = Closure> {
+    pub fn children(&self) -> impl Iterator<Item = Closure> + use<> {
         let scope = &self.data.scopes[self.scope_id.index()];
         ChildrenIter {
             data: self.data.clone(),
@@ -315,7 +315,7 @@ impl Closure {
     /// }";
     /// assert!(model.closure(function_f).descendents(), &["f", "g", "h"]);
     /// ```
-    pub fn descendents(&self) -> impl Iterator<Item = Closure> {
+    pub fn descendents(&self) -> impl Iterator<Item = Closure> + use<> {
         let scopes = vec![self.scope_id];
         DescendentsIter {
             data: self.data.clone(),

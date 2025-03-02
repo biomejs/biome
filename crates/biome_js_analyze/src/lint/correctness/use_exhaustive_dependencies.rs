@@ -1,18 +1,18 @@
 use crate::react::hooks::*;
 use crate::services::semantic::Semantic;
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleDomain};
+use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_deserialize::{
-    non_empty, DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
+    DeserializableValidator, DeserializationContext, DeserializationDiagnostic, non_empty,
 };
 use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::{Capture, SemanticModel};
-use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsSyntaxKind, JsSyntaxNode,
-    JsVariableDeclaration, TextRange,
-};
 use biome_js_syntax::{AnyJsExpression, AnyJsMemberExpression, TsTypeofType};
+use biome_js_syntax::{
+    JsCallExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, TextRange,
+    binding_ext::AnyJsBindingDeclaration,
+};
 use biome_rowan::{AstNode, SyntaxNodeCast};
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
@@ -685,7 +685,7 @@ fn determine_unstable_dependency(
     }
 }
 
-fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> {
+fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> + use<> {
     let mut vec = vec![];
     let mut next = Some(node.clone());
 

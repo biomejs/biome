@@ -61,11 +61,11 @@ pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 pub use server::WorkspaceServer;
 
 use biome_analyze::{ActionCategory, RuleCategories};
-use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::Configuration;
-use biome_console::{markup, Markup, MarkupBuf};
-use biome_diagnostics::serde::Diagnostic;
+use biome_configuration::analyzer::RuleSelector;
+use biome_console::{Markup, MarkupBuf, markup};
 use biome_diagnostics::CodeSuggestion;
+use biome_diagnostics::serde::Diagnostic;
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
@@ -74,7 +74,7 @@ use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use core::str;
 use crossbeam::channel::bounded;
-use enumflags2::{bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags};
 #[cfg(feature = "schema")]
 use schemars::{r#gen::SchemaGenerator, schema::Schema};
 use smallvec::SmallVec;

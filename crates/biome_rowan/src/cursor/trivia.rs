@@ -1,6 +1,6 @@
+use crate::TriviaPiece;
 use crate::cursor::SyntaxToken;
 use crate::green::GreenTrivia;
-use crate::TriviaPiece;
 use biome_text_size::{TextRange, TextSize};
 use std::fmt;
 use std::iter::FusedIterator;

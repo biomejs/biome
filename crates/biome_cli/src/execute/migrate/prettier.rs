@@ -1,8 +1,8 @@
 use super::{eslint_eslint::ShorthandVec, node};
-use crate::diagnostics::MigrationDiagnostic;
 use crate::CliDiagnostic;
+use crate::diagnostics::MigrationDiagnostic;
 use biome_configuration::javascript::JsFormatterConfiguration;
-use biome_console::{markup, Console, ConsoleExt};
+use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
@@ -479,7 +479,7 @@ fn load_config(
                 reason: format!(
                     "Prettier configuration ending with the extension `{ext}` are not supported."
                 ),
-            }))
+            }));
         }
     };
     let path_str = path.to_string();

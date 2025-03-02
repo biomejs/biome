@@ -3,15 +3,15 @@ use biome_console::markup;
 use biome_diagnostics::category;
 use biome_fs::FileSystem;
 use biome_grit_patterns::{
-    compile_pattern_with_options, BuiltInFunction, CompilePatternOptions, GritBinding,
-    GritExecContext, GritPattern, GritQuery, GritQueryContext, GritQueryState, GritResolvedPattern,
-    GritTargetFile,
+    BuiltInFunction, CompilePatternOptions, GritBinding, GritExecContext, GritPattern, GritQuery,
+    GritQueryContext, GritQueryState, GritResolvedPattern, GritTargetFile,
+    compile_pattern_with_options,
 };
 use biome_parser::AnyParse;
 use biome_rowan::TextRange;
 use camino::{Utf8Path, Utf8PathBuf};
 use grit_pattern_matcher::{binding::Binding, pattern::ResolvedPattern};
-use grit_util::{error::GritPatternError, AnalysisLogs};
+use grit_util::{AnalysisLogs, error::GritPatternError};
 use std::{borrow::Cow, fmt::Debug};
 
 use crate::{AnalyzerPlugin, PluginDiagnostic};
@@ -26,18 +26,20 @@ impl AnalyzerGritPlugin {
     pub fn load(fs: &dyn FileSystem, path: &Utf8Path) -> Result<Self, PluginDiagnostic> {
         let source = fs.read_file_from_path(path)?;
         let options = CompilePatternOptions::default()
-            .with_extra_built_ins(vec![BuiltInFunction::new(
-                "register_diagnostic",
-                &[
-                    "span",
-                    "message",
-                    "fixer_description",
-                    "category",
-                    "applicability",
-                ],
-                Box::new(register_diagnostic),
-            )
-            .as_predicate()])
+            .with_extra_built_ins(vec![
+                BuiltInFunction::new(
+                    "register_diagnostic",
+                    &[
+                        "span",
+                        "message",
+                        "fixer_description",
+                        "category",
+                        "applicability",
+                    ],
+                    Box::new(register_diagnostic),
+                )
+                .as_predicate(),
+            ])
             .with_path(path);
         let grit_query = compile_pattern_with_options(&source, options)?;
 
@@ -94,13 +96,28 @@ fn register_diagnostic<'a>(
 ) -> Result<GritResolvedPattern<'a>, GritPatternError> {
     let args = GritResolvedPattern::from_patterns(args, state, context, logs)?;
 
-    let (span_node, message, _fixer_description, _category, _applicability) = match args.as_slice() {
+    let (span_node, message, _fixer_description, _category, _applicability) = match args.as_slice()
+    {
         [Some(span), Some(message), None, None, None] => (span, message, None, None, None),
-        [Some(span), Some(message), Some(fixer_description), Some(category), Some(applicability)] => (span, message, Some(fixer_description), Some(category), Some(applicability)),
+        [
+            Some(span),
+            Some(message),
+            Some(fixer_description),
+            Some(category),
+            Some(applicability),
+        ] => (
+            span,
+            message,
+            Some(fixer_description),
+            Some(category),
+            Some(applicability),
+        ),
         // TODO: Do we want to make `category` and `applicability` optional, even for rules with a fixer?
-        _ => return Err(GritPatternError::new(
-            "register_diagnostic() takes 2 or 5 arguments: span and message, and optional fixer_description, category and applicability",
-        )),
+        _ => {
+            return Err(GritPatternError::new(
+                "register_diagnostic() takes 2 or 5 arguments: span and message, and optional fixer_description, category and applicability",
+            ));
+        }
     };
 
     let span = span_node

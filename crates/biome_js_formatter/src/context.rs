@@ -480,7 +480,9 @@ impl FromStr for Semicolons {
         match s {
             "as-needed" => Ok(Self::AsNeeded),
             "always" => Ok(Self::Always),
-            _ => Err("Value not supported for Semicolons. Supported values are 'as-needed' and 'always'."),
+            _ => Err(
+                "Value not supported for Semicolons. Supported values are 'as-needed' and 'always'.",
+            ),
         }
     }
 }
@@ -523,9 +525,11 @@ impl FromStr for ArrowParentheses {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "as-needed"  => Ok(Self::AsNeeded),
-            "always"  => Ok(Self::Always),
-            _ => Err("Value not supported for Arrow parentheses. Supported values are 'as-needed' and 'always'."),
+            "as-needed" => Ok(Self::AsNeeded),
+            "always" => Ok(Self::Always),
+            _ => Err(
+                "Value not supported for Arrow parentheses. Supported values are 'as-needed' and 'always'.",
+            ),
         }
     }
 }

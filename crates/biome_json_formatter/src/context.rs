@@ -1,8 +1,8 @@
-use crate::comments::{FormatJsonLeadingComment, JsonComments};
 use crate::JsonCommentStyle;
+use crate::comments::{FormatJsonLeadingComment, JsonComments};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::separated::TrailingSeparator;
-use biome_formatter::{prelude::*, BracketSpacing, IndentWidth, ObjectWrap};
+use biome_formatter::{BracketSpacing, IndentWidth, ObjectWrap, prelude::*};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TransformSourceMap,

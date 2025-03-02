@@ -1,9 +1,9 @@
 use crate::green::GreenElement;
-use crate::syntax::element::{SyntaxElement, SyntaxElementKey};
 use crate::syntax::SyntaxTrivia;
+use crate::syntax::element::{SyntaxElement, SyntaxElementKey};
 use crate::{
-    cursor, Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxList, SyntaxNodeText,
-    SyntaxToken, SyntaxTriviaPiece, TokenAtOffset, WalkEvent,
+    Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxList, SyntaxNodeText,
+    SyntaxToken, SyntaxTriviaPiece, TokenAtOffset, WalkEvent, cursor,
 };
 use biome_text_size::{TextRange, TextSize};
 #[cfg(feature = "serde")]
@@ -261,7 +261,7 @@ impl<L: Language> SyntaxNode<L> {
         self.raw.index()
     }
 
-    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode<L>> {
+    pub fn ancestors(&self) -> impl Iterator<Item = SyntaxNode<L>> + use<L> {
         self.raw.ancestors().map(SyntaxNode::from)
     }
 
@@ -328,24 +328,27 @@ impl<L: Language> SyntaxNode<L> {
         self.raw.last_token().map(SyntaxToken::from)
     }
 
-    pub fn siblings(&self, direction: Direction) -> impl Iterator<Item = SyntaxNode<L>> {
+    pub fn siblings(&self, direction: Direction) -> impl Iterator<Item = SyntaxNode<L>> + use<L> {
         self.raw.siblings(direction).map(SyntaxNode::from)
     }
 
     pub fn siblings_with_tokens(
         &self,
         direction: Direction,
-    ) -> impl Iterator<Item = SyntaxElement<L>> {
+    ) -> impl Iterator<Item = SyntaxElement<L>> + use<L> {
         self.raw
             .siblings_with_tokens(direction)
             .map(SyntaxElement::from)
     }
 
-    pub fn descendants(&self) -> impl Iterator<Item = SyntaxNode<L>> {
+    pub fn descendants(&self) -> impl Iterator<Item = SyntaxNode<L>> + use<L> {
         self.raw.descendants().map(SyntaxNode::from)
     }
 
-    pub fn descendants_tokens(&self, direction: Direction) -> impl Iterator<Item = SyntaxToken<L>> {
+    pub fn descendants_tokens(
+        &self,
+        direction: Direction,
+    ) -> impl Iterator<Item = SyntaxToken<L>> + use<L> {
         self.descendants_with_tokens(direction)
             .filter_map(|x| x.as_token().cloned())
     }
@@ -353,7 +356,7 @@ impl<L: Language> SyntaxNode<L> {
     pub fn descendants_with_tokens(
         &self,
         direction: Direction,
-    ) -> impl Iterator<Item = SyntaxElement<L>> {
+    ) -> impl Iterator<Item = SyntaxElement<L>> + use<L> {
         self.raw
             .descendants_with_tokens(direction)
             .map(NodeOrToken::from)

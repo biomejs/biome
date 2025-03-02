@@ -1,6 +1,6 @@
 use crate::{
-    green::{GreenNode, GreenToken, RawSyntaxKind},
     GreenNodeData, NodeOrToken, TextSize,
+    green::{GreenNode, GreenToken, RawSyntaxKind},
 };
 use std::borrow::Cow;
 

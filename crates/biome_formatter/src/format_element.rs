@@ -5,9 +5,9 @@ use crate::format_element::tag::{LabelId, Tag};
 use std::borrow::Cow;
 
 use crate::{TagKind, TextSize};
+use biome_rowan::TokenText;
 #[cfg(target_pointer_width = "64")]
 use biome_rowan::static_assert;
-use biome_rowan::TokenText;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 use std::rc::Rc;
@@ -377,7 +377,7 @@ pub trait FormatElements {
 #[cfg(test)]
 mod tests {
 
-    use crate::format_element::{normalize_newlines, LINE_TERMINATORS};
+    use crate::format_element::{LINE_TERMINATORS, normalize_newlines};
 
     #[test]
     fn test_normalize_newlines() {

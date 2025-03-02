@@ -1,17 +1,17 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    global_identifier, AnyJsExpression, AnyJsName, AnyJsObjectMember, JsFileSource,
-    JsObjectExpression, JsPropertyObjectMember, JsStaticMemberExpression, JsSyntaxKind,
-    JsSyntaxToken, JsVariableDeclarator,
+    AnyJsExpression, AnyJsName, AnyJsObjectMember, JsFileSource, JsObjectExpression,
+    JsPropertyObjectMember, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxToken,
+    JsVariableDeclarator, global_identifier,
 };
-use biome_rowan::{declare_node_union, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstSeparatedList, BatchMutationExt, TriviaPieceKind, declare_node_union};
 
 declare_lint_rule! {
     /// Disallow the use of `__dirname` and `__filename` in the global scope.

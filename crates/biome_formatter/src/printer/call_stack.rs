@@ -1,7 +1,7 @@
-use crate::format_element::tag::TagKind;
 use crate::format_element::PrintMode;
-use crate::printer::stack::{Stack, StackedStack};
+use crate::format_element::tag::TagKind;
 use crate::printer::Indention;
+use crate::printer::stack::{Stack, StackedStack};
 use crate::{IndentStyle, InvalidDocumentError, PrintError, PrintResult};
 use std::fmt::Debug;
 use std::num::NonZeroU8;

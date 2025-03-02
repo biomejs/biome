@@ -1,8 +1,8 @@
 use std::sync::LazyLock;
 
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleDomain, RuleSource,
-    RuleSourceKind,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -11,7 +11,7 @@ use biome_rowan::{AstNode, TextRange};
 use regex::Regex;
 
 use crate::{
-    nextjs::{is_next_import, NextUtility},
+    nextjs::{NextUtility, is_next_import},
     services::semantic::Semantic,
 };
 
@@ -221,11 +221,7 @@ fn check_unwanted_polyfill<'a>(
     let query_string = &src[query_start + 1..];
     let features_param = query_string.split('&').find_map(|param| {
         let (key, value) = param.split_once('=')?;
-        if key == "features" {
-            Some(value)
-        } else {
-            None
-        }
+        if key == "features" { Some(value) } else { None }
     })?;
 
     // Use regex to split by ',' or '%2C'

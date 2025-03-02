@@ -1,5 +1,5 @@
 use crate::parser::CssParser;
-use biome_parser::diagnostic::{expect_one_of, expected_node, ToDiagnostic};
+use biome_parser::diagnostic::{ToDiagnostic, expect_one_of, expected_node};
 use biome_parser::prelude::ParseDiagnostic;
 use biome_rowan::TextRange;
 

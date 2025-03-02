@@ -7,14 +7,14 @@ use crate::{
     prelude::*,
     utils::{
         children::{
-            html_split_children, is_meaningful_html_text, HtmlChild, HtmlChildrenIterator,
-            HtmlSpace,
+            HtmlChild, HtmlChildrenIterator, HtmlSpace, html_split_children,
+            is_meaningful_html_text,
         },
         metadata::is_element_whitespace_sensitive_from_element,
     },
 };
-use biome_formatter::{best_fitting, prelude::*, CstFormatContext, FormatRuleWithOptions};
-use biome_formatter::{format_args, write, VecBuffer};
+use biome_formatter::{CstFormatContext, FormatRuleWithOptions, best_fitting, prelude::*};
+use biome_formatter::{VecBuffer, format_args, write};
 use biome_html_syntax::{
     AnyHtmlElement, HtmlClosingElement, HtmlClosingElementFields, HtmlElementList, HtmlRoot,
     HtmlSyntaxToken,
@@ -430,8 +430,8 @@ impl FormatHtmlElementList {
     /// [HtmlContent] and instead, formats the nodes itself.
     #[cfg(debug_assertions)]
     fn disarm_debug_assertions(&self, node: &HtmlElementList, f: &mut HtmlFormatter) {
-        use biome_formatter::CstFormatContext;
         use AnyHtmlElement::*;
+        use biome_formatter::CstFormatContext;
 
         for child in node {
             match child {
@@ -832,7 +832,10 @@ impl FlatBuilder {
     }
 
     fn finish(self) -> FormatResult<FormatFlatChildren> {
-        assert!(!self.disabled, "The flat builder has been disabled and thus, does no longer store any elements. Make sure you don't call disable if you later intend to format the flat content.");
+        assert!(
+            !self.disabled,
+            "The flat builder has been disabled and thus, does no longer store any elements. Make sure you don't call disable if you later intend to format the flat content."
+        );
 
         Ok(FormatFlatChildren {
             elements: RefCell::new(self.result?),

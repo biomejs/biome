@@ -6,7 +6,7 @@ use std::{
     str::FromStr,
 };
 
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 use serde::{Deserialize, Serialize};
 
 use biome_console::{fmt, markup};

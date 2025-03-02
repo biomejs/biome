@@ -1,11 +1,12 @@
 use biome_diagnostics_categories::category;
 use biome_formatter::{
+    FormatRule,
     comments::{
-        is_alignable_comment, CommentKind, CommentPlacement, CommentStyle, Comments,
-        DecoratedComment, SourceComment,
+        CommentKind, CommentPlacement, CommentStyle, Comments, DecoratedComment, SourceComment,
+        is_alignable_comment,
     },
     prelude::*,
-    write, FormatRule,
+    write,
 };
 use biome_html_syntax::HtmlLanguage;
 use biome_rowan::{SyntaxTriviaPieceComments, TextLen};

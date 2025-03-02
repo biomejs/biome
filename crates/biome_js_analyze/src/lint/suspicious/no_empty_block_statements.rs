@@ -1,12 +1,12 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsConstructorParameter, JsBlockStatement, JsConstructorClassMember, JsFunctionBody,
     JsStaticInitializationBlockClassMember, JsSwitchStatement,
 };
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, SyntaxNodeCast};
+use biome_rowan::{AstNode, AstNodeList, SyntaxNodeCast, declare_node_union};
 
 declare_lint_rule! {
     /// Disallow empty block statements and static blocks.

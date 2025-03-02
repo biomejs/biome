@@ -1,6 +1,6 @@
 use crate::parser::HtmlParser;
 use biome_html_syntax::TextRange;
-use biome_parser::diagnostic::{expect_one_of, expected_node, ParseDiagnostic};
+use biome_parser::diagnostic::{ParseDiagnostic, expect_one_of, expected_node};
 use biome_parser::prelude::ToDiagnostic;
 
 pub(crate) fn expected_attribute(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {

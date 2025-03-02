@@ -1,9 +1,9 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, global_identifier, static_value::StaticValue,
     AnyJsAssignment, AnyJsExpression, JsAssignmentExpression, JsReferenceIdentifier,
+    binding_ext::AnyJsBindingDeclaration, global_identifier, static_value::StaticValue,
 };
 use biome_rowan::AstNode;
 

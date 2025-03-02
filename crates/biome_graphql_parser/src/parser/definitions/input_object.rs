@@ -1,16 +1,17 @@
 use crate::parser::{
+    GraphqlParser,
     directive::DirectiveList,
     parse_binding, parse_description,
     parse_error::{expected_input_object_extension, expected_name},
-    parse_reference, GraphqlParser,
+    parse_reference,
 };
 use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
     T,
 };
 use biome_parser::{
-    parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
-    prelude::ParsedSyntax::*, Parser,
+    Parser, parse_lists::ParseNodeList, parse_recovery::ParseRecovery, parsed_syntax::ParsedSyntax,
+    prelude::ParsedSyntax::*,
 };
 
 use super::field::{is_at_input_value_definition, parse_input_value_definition};

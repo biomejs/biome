@@ -1,6 +1,6 @@
 use super::{
-    is_diagnostic_error, AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource,
-    EnabledForPath, ExtensionHandler, ParseResult, ProcessLint, SearchCapabilities,
+    AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource, EnabledForPath,
+    ExtensionHandler, ParseResult, ProcessLint, SearchCapabilities, is_diagnostic_error,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -9,25 +9,25 @@ use crate::file_handlers::{
     LintResults, ParserCapabilities,
 };
 use crate::settings::{
-    check_feature_activity, check_override_feature_activity, FormatSettings, LanguageListSettings,
-    LanguageSettings, LinterSettings, OverrideSettings, ServiceLanguage, Settings,
-    WorkspaceSettingsHandle,
+    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
+    ServiceLanguage, Settings, WorkspaceSettingsHandle, check_feature_activity,
+    check_override_feature_activity,
 };
 use crate::workspace::{
     CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
 };
-use crate::{extension_error, WorkspaceError};
+use crate::{WorkspaceError, extension_error};
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleCategoriesBuilder, RuleError,
 };
+use biome_configuration::Configuration;
 use biome_configuration::json::{
     JsonAllowCommentsEnabled, JsonAllowTrailingCommasEnabled, JsonAssistConfiguration,
     JsonAssistEnabled, JsonFormatterConfiguration, JsonFormatterEnabled, JsonLinterConfiguration,
     JsonLinterEnabled, JsonParserConfiguration,
 };
-use biome_configuration::Configuration;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::Applicability;
 use biome_formatter::{

@@ -9,7 +9,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 
 pub mod fs2 {
     use std::{fs, path::Path};

@@ -3,8 +3,8 @@ use camino::Utf8PathBuf;
 use crossbeam::channel::unbounded;
 
 use crate::{
-    workspace::{ChangeFileParams, CloseFileParams, GetFileContentParams, OpenProjectParams},
     WatcherInstruction,
+    workspace::{ChangeFileParams, CloseFileParams, GetFileContentParams, OpenProjectParams},
 };
 
 use super::*;

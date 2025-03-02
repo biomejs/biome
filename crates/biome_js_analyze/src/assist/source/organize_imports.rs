@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_source_rule, ActionCategory, Ast, FixKind, Rule, SourceActionKind,
+    ActionCategory, Ast, FixKind, Rule, SourceActionKind, context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
 use biome_deserialize::{Deserializable, DeserializableValue, DeserializationContext};

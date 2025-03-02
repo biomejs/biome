@@ -1,23 +1,23 @@
 use crate::{
-    open_transport,
+    CliDiagnostic, CliSession, open_transport,
     service::{self, ensure_daemon, open_socket, run_daemon},
-    CliDiagnostic, CliSession,
 };
-use biome_console::{markup, ConsoleExt};
+use biome_console::{ConsoleExt, markup};
 use biome_fs::OsFileSystem;
 use biome_lsp::ServerFactory;
-use biome_service::{workspace::WorkspaceClient, TransportError, WorkspaceError, WorkspaceWatcher};
+use biome_service::{TransportError, WorkspaceError, WorkspaceWatcher, workspace::WorkspaceClient};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::{env, fs};
 use tokio::io;
 use tokio::runtime::Runtime;
 use tracing::subscriber::Interest;
-use tracing::{debug_span, metadata::LevelFilter, Instrument, Metadata};
+use tracing::{Instrument, Metadata, debug_span, metadata::LevelFilter};
 use tracing_appender::rolling::Rotation;
 use tracing_subscriber::{
+    Layer,
     layer::{Context, Filter},
     prelude::*,
-    registry, Layer,
+    registry,
 };
 use tracing_tree::HierarchicalLayer;
 

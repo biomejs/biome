@@ -1,7 +1,7 @@
 use crate::parser::GraphqlParser;
 use biome_parser::{
-    diagnostic::{expected_any, expected_node, ParseDiagnostic},
     Parser,
+    diagnostic::{ParseDiagnostic, expected_any, expected_node},
 };
 use biome_rowan::TextRange;
 

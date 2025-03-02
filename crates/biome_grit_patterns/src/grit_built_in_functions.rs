@@ -8,16 +8,16 @@ use grit_pattern_matcher::{
     constant::Constant,
     context::ExecContext,
     pattern::{
-        get_absolute_file_name, get_file_name, CallBuiltIn, CallbackPattern, JoinFn, LazyBuiltIn,
-        Pattern, ResolvedPattern, ResolvedSnippet, State,
+        CallBuiltIn, CallbackPattern, JoinFn, LazyBuiltIn, Pattern, ResolvedPattern,
+        ResolvedSnippet, State, get_absolute_file_name, get_file_name,
     },
 };
 use grit_util::{
-    error::{GritPatternError, GritResult},
     AnalysisLogBuilder, AnalysisLogs,
+    error::{GritPatternError, GritResult},
 };
 use path_absolutize::Absolutize;
-use rand::{seq::SliceRandom, Rng};
+use rand::{Rng, seq::SliceRandom};
 use std::path::Path;
 use std::{borrow::Cow, fmt::Debug, num::TryFromIntError};
 
@@ -141,10 +141,11 @@ impl Default for BuiltIns {
 
 impl BuiltIns {
     pub(crate) fn add(&mut self, built_in: BuiltInFunction) {
-        debug_assert!(self
-            .built_ins
-            .iter()
-            .all(|existing| existing.name != built_in.name));
+        debug_assert!(
+            self.built_ins
+                .iter()
+                .all(|existing| existing.name != built_in.name)
+        );
 
         self.built_ins.push(built_in);
     }

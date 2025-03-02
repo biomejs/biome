@@ -6,3 +6,6 @@
 
 # chore: switch from tabs to spaces (https://github.com/rome/tools/pull/1941)
 409979ff132efdcb1e9fec3526d641966fd3f2bf
+
+# chore: switch to Rustfmt 2024 style edition (https://github.com/biomejs/biome/pull/5236)
+9b2d5db56ebe3abc1306707e355b3a832295a494

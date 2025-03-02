@@ -15,11 +15,11 @@ use biome_fs::{FileSystemDiagnostic, PathKind};
 use camino::Utf8Path;
 use papaya::{Compute, Operation};
 
-use crate::{workspace_watcher::WatcherSignalKind, WorkspaceError};
+use crate::{WorkspaceError, workspace_watcher::WatcherSignalKind};
 
 use super::{
-    scanner::IGNORE_ENTRIES, server::Document, FileContent, OpenFileParams,
-    ScanProjectFolderParams, Workspace, WorkspaceServer,
+    FileContent, OpenFileParams, ScanProjectFolderParams, Workspace, WorkspaceServer,
+    scanner::IGNORE_ENTRIES, server::Document,
 };
 
 impl WorkspaceServer {

@@ -1,7 +1,6 @@
 mod comments;
 pub mod context;
 mod cst;
-mod format_string;
 mod generated;
 mod json;
 mod prelude;
@@ -14,8 +13,8 @@ use crate::cst::FormatJsonSyntaxNode;
 use biome_formatter::comments::Comments;
 use biome_formatter::prelude::*;
 use biome_formatter::{
-    write, CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
-    FormatToken, TransformSourceMap,
+    CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
+    FormatToken, TransformSourceMap, write,
 };
 use biome_formatter::{Formatted, Printed};
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonSyntaxNode, JsonSyntaxToken};
@@ -336,7 +335,7 @@ mod tests {
 
     use crate::context::JsonFormatOptions;
     use crate::format_node;
-    use biome_json_parser::{parse_json, JsonParserOptions};
+    use biome_json_parser::{JsonParserOptions, parse_json};
 
     #[test]
     fn smoke_test() {

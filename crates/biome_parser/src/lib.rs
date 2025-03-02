@@ -1,7 +1,7 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 #![doc = include_str!("../CONTRIBUTING.md")]
 
-use crate::diagnostic::{expected_token, ParseDiagnostic, ToDiagnostic};
+use crate::diagnostic::{ParseDiagnostic, ToDiagnostic, expected_token};
 use crate::event::Event;
 use crate::event::Event::Token;
 use crate::token_source::{BumpWithContext, NthToken, TokenSource, TokenSourceWithBufferedLexer};

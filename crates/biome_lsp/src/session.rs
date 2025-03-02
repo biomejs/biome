@@ -1,7 +1,7 @@
 use crate::diagnostics::LspError;
 use crate::documents::Document;
-use crate::extension_settings::ExtensionSettings;
 use crate::extension_settings::CONFIGURATION_SECTION;
+use crate::extension_settings::ExtensionSettings;
 use crate::utils;
 use anyhow::Result;
 use biome_analyze::RuleCategoriesBuilder;
@@ -10,8 +10,10 @@ use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDescription};
 use biome_fs::BiomePath;
-use biome_lsp_converters::{negotiated_encoding, PositionEncoding, WideEncoding};
-use biome_service::configuration::{load_configuration, load_editorconfig, LoadedConfiguration};
+use biome_lsp_converters::{PositionEncoding, WideEncoding, negotiated_encoding};
+use biome_service::Workspace;
+use biome_service::WorkspaceError;
+use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::ScanProjectFolderParams;
@@ -20,20 +22,18 @@ use biome_service::workspace::{
     SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
-use biome_service::Workspace;
-use biome_service::WorkspaceError;
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
-use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
+use futures::stream::futures_unordered::FuturesUnordered;
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
 use rustc_hash::FxHashMap;
 use serde_json::Value;
-use std::sync::atomic::Ordering;
-use std::sync::atomic::{AtomicBool, AtomicU8};
 use std::sync::Arc;
 use std::sync::RwLock;
+use std::sync::atomic::Ordering;
+use std::sync::atomic::{AtomicBool, AtomicU8};
 use tokio::sync::Notify;
 use tokio::sync::OnceCell;
 use tokio::task::spawn_blocking;
@@ -610,7 +610,9 @@ impl Session {
         }
 
         if loaded_configuration.double_configuration_found {
-            warn!("Both biome.json and biome.jsonc files were found in the same folder. Biome will use the biome.json file.");
+            warn!(
+                "Both biome.json and biome.jsonc files were found in the same folder. Biome will use the biome.json file."
+            );
             self.client.log_message(MessageType::WARNING, "Both biome.json and biome.jsonc files were found in the same folder. Biome will use the biome.json file.").await;
         }
 

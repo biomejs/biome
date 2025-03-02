@@ -19,7 +19,7 @@ use std::ops::Deref;
 use biome_console::Console;
 use biome_fs::{FileSystem, OsFileSystem};
 
-pub use diagnostics::{extension_error, TransportError, WorkspaceError};
+pub use diagnostics::{TransportError, WorkspaceError, extension_error};
 pub use file_handlers::JsFormatterSettings;
 pub use workspace::{Workspace, WorkspaceServer};
 pub use workspace_watcher::{WatcherInstruction, WorkspaceWatcher};

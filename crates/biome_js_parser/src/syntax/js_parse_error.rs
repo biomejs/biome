@@ -1,9 +1,9 @@
 //! Provides factory function to create common diagnostics for the JavaScript syntax
 
-use crate::prelude::*;
-use crate::span::Span;
 use crate::JsParser;
 use crate::JsSyntaxFeature::TypeScript;
+use crate::prelude::*;
+use crate::span::Span;
 use biome_js_syntax::TextRange;
 use biome_parser::diagnostic::{expected_any, expected_node};
 

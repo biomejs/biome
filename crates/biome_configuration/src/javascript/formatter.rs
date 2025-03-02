@@ -5,7 +5,7 @@ use biome_formatter::{
     LineWidth, ObjectWrap, QuoteStyle,
 };
 use biome_js_formatter::context::{
-    trailing_commas::TrailingCommas, ArrowParentheses, QuoteProperties, Semicolons,
+    ArrowParentheses, QuoteProperties, Semicolons, trailing_commas::TrailingCommas,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};

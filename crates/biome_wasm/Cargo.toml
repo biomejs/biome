@@ -2,7 +2,7 @@
 authors     = ["Biome Developers and Contributors"]
 categories  = ["development-tools", "web-programming"]
 description = "WebAssembly bindings to the Biome workspace API"
-edition     = "2021"
+edition     = "2024"
 homepage    = "https://biomejs.dev/"
 keywords    = ["parser", "linter", "formatter", "wasm"]
 license     = "MIT OR Apache-2.0"

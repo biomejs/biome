@@ -6,8 +6,8 @@ use crate::generate_nodes_mut::generate_nodes_mut;
 use crate::generate_syntax_factory::generate_syntax_factory;
 use crate::language_src::LanguageSrc;
 use crate::{
-    generate_macros::generate_macros, generate_nodes::generate_nodes,
-    generate_syntax_kinds::generate_syntax_kinds, GrammarOptions,
+    GrammarOptions, generate_macros::generate_macros, generate_nodes::generate_nodes,
+    generate_syntax_kinds::generate_syntax_kinds,
 };
 use anyhow::{Context, Result};
 use biome_string_case::Case;
@@ -422,9 +422,11 @@ struct CommaList<'a> {
 fn handle_comma_list<'a>(grammar: &'a Grammar, rules: &[Rule]) -> Option<CommaList<'a>> {
     // Does it match (T * ',')?
     let (node, repeat, trailing_separator) = match rules {
-        [Rule::Node(node), Rule::Rep(repeat), Rule::Opt(trailing_separator)] => {
-            (node, repeat, Some(trailing_separator))
-        }
+        [
+            Rule::Node(node),
+            Rule::Rep(repeat),
+            Rule::Opt(trailing_separator),
+        ] => (node, repeat, Some(trailing_separator)),
         [Rule::Node(node), Rule::Rep(repeat)] => (node, repeat, None),
         _ => return None,
     };

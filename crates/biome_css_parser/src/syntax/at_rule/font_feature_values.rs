@@ -2,7 +2,7 @@ use super::parse_error::{
     expected_any_font_family_name, expected_any_font_feature_value_item,
     expected_font_feature_values_item,
 };
-use crate::syntax::block::{parse_declaration_block, ParseBlockBody};
+use crate::syntax::block::{ParseBlockBody, parse_declaration_block};
 use crate::syntax::is_at_string;
 use crate::{
     lexer::CssLexContext,
@@ -19,11 +19,11 @@ use biome_css_syntax::{
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::ParseRecovery;
 use biome_parser::{
+    Parser, TokenSet,
     parse_lists::ParseNodeList,
     parse_recovery::{ParseRecoveryTokenSet, RecoveryResult},
     parsed_syntax::ParsedSyntax::{self, Absent, Present},
     prelude::*,
-    Parser, TokenSet,
 };
 
 /// Checks if the current token in the parser is a `@font-feature-values` at-rule.

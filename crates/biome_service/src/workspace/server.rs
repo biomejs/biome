@@ -19,22 +19,22 @@ use crate::workspace::{
     RageResult, ServerInfo,
 };
 use crate::workspace_watcher::WatcherSignalKind;
-use crate::{file_handlers::Features, Workspace, WorkspaceError};
-use crate::{is_dir, WatcherInstruction};
+use crate::{WatcherInstruction, is_dir};
+use crate::{Workspace, WorkspaceError, file_handlers::Features};
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::AnalyzerPluginVec;
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
 use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_dependency_graph::DependencyGraph;
-use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::Deserialized;
+use biome_deserialize::json::deserialize_from_json_str;
 use biome_diagnostics::print_diagnostic_to_string;
 use biome_diagnostics::{
-    serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
+    Diagnostic, DiagnosticExt, Severity, serde::Diagnostic as SerdeDiagnostic,
 };
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName, FileSystem};
-use biome_grit_patterns::{compile_pattern_with_options, CompilePatternOptions, GritQuery};
+use biome_grit_patterns::{CompilePatternOptions, GritQuery, compile_pattern_with_options};
 use biome_js_syntax::ModuleKind;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonFileSource;

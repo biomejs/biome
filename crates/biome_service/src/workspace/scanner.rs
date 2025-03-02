@@ -12,7 +12,7 @@ use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, TraversalContext, TraversalScope};
 use camino::Utf8Path;
-use crossbeam::channel::{unbounded, Receiver, Sender};
+use crossbeam::channel::{Receiver, Sender, unbounded};
 use std::collections::BTreeSet;
 use std::panic::catch_unwind;
 use std::sync::RwLock;

@@ -1,4 +1,4 @@
-use biome_console::{markup, ConsoleExt, EnvConsole};
+use biome_console::{ConsoleExt, EnvConsole, markup};
 use biome_diagnostics::{Diagnostic, LineIndexBuf, PrintDiagnostic, Resource, Result, SourceCode};
 use biome_rowan::{TextRange, TextSize};
 use serde_json::Error;

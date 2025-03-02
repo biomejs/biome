@@ -3,9 +3,9 @@
 use biome_graphql_factory::GraphqlSyntaxFactory;
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode};
 pub use biome_parser::prelude::*;
-use biome_parser::{tree_sink::LosslessTreeSink, AnyParse};
+use biome_parser::{AnyParse, tree_sink::LosslessTreeSink};
 use biome_rowan::{AstNode, NodeCache};
-use parser::{parse_root, GraphqlParser};
+use parser::{GraphqlParser, parse_root};
 
 mod lexer;
 mod parser;

@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 use biome_formatter::{format_args, write};
-use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::AnyJsExpression;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{TsTypeAssertionExpression, TsTypeAssertionExpressionFields};
 
 #[derive(Debug, Clone, Default)]

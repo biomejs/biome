@@ -1,6 +1,6 @@
 use biome_formatter::{IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
-use biome_graphql_formatter::{context::GraphqlFormatOptions, GraphqlFormatLanguage};
+use biome_graphql_formatter::{GraphqlFormatLanguage, context::GraphqlFormatOptions};
 use camino::Utf8Path;
 use std::env;
 

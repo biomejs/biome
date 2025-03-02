@@ -1,10 +1,10 @@
 use crate::prelude::*;
 
-use biome_formatter::token::number::format_number_token;
 use biome_formatter::token::number::NumberFormatOptions;
-use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_formatter::token::number::format_number_token;
 use biome_js_syntax::JsNumberLiteralExpression;
 use biome_js_syntax::JsNumberLiteralExpressionFields;
+use biome_js_syntax::parentheses::NeedsParentheses;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsNumberLiteralExpression;

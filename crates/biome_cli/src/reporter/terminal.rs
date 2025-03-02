@@ -1,8 +1,8 @@
+use crate::Reporter;
 use crate::execute::{Execution, TraversalMode};
 use crate::reporter::{DiagnosticsPayload, ReporterVisitor, TraversalSummary};
-use crate::Reporter;
 use biome_console::fmt::Formatter;
-use biome_console::{fmt, markup, Console, ConsoleExt};
+use biome_console::{Console, ConsoleExt, fmt, markup};
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
 use biome_fs::BiomePath;

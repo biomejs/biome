@@ -5,9 +5,9 @@ use biome_console::fmt::Display;
 use biome_diagnostics::location::AsSpan;
 use biome_js_syntax::{JsSyntaxKind, TextRange};
 use biome_parser::{
+    CompletedMarker, Marker,
     diagnostic::{ParseDiagnostic, ToDiagnostic},
     event::Event,
-    CompletedMarker, Marker,
 };
 use biome_rowan::TextSize;
 

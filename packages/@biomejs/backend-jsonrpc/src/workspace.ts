@@ -1609,6 +1609,10 @@ export interface Nursery {
 	 */
 	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow unnecessary escapes in string literals.
+	 */
+	noUselessEscapeInString?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow unnecessary String.raw function in template string literals without any escape sequence.
 	 */
 	noUselessStringRaw?: RuleConfiguration_for_Null;
@@ -3241,6 +3245,7 @@ export type Category =
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessEscapeInRegex"
+	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessStringRaw"
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noValueAtRule"
@@ -3257,6 +3262,7 @@ export type Category =
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useExportsLast"
+	| "lint/nursery/useForComponent"
 	| "lint/nursery/useGoogleFontDisplay"
 	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useGuardForIn"
@@ -3265,7 +3271,6 @@ export type Category =
 	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useNamingConvention"
 	| "lint/nursery/useParseIntRadix"
-	| "lint/nursery/useForComponent"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useStrictMode"

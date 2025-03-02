@@ -8,7 +8,7 @@ use crate::cli_options::{CliOptions, CliReporter};
 use crate::commands::MigrateSubCommand;
 use crate::diagnostics::ReportDiagnostic;
 use crate::execute::migrate::MigratePayload;
-use crate::execute::traverse::{traverse, TraverseResult};
+use crate::execute::traverse::{TraverseResult, traverse};
 use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
 use crate::reporter::gitlab::{GitLabReporter, GitLabReporterVisitor};
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
@@ -17,9 +17,9 @@ use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{CliDiagnostic, CliSession, DiagnosticsPayload, Reporter};
 use biome_configuration::analyzer::RuleSelector;
-use biome_console::{markup, ConsoleExt};
+use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::SerdeJsonError;
-use biome_diagnostics::{category, Category};
+use biome_diagnostics::{Category, category};
 use biome_fs::BiomePath;
 use biome_grit_patterns::GritTargetLanguage;
 use biome_service::projects::ProjectKey;
@@ -498,7 +498,10 @@ pub fn execute_mode(
     execution.max_diagnostics = if cli_options.reporter.is_default() {
         cli_options.max_diagnostics.into()
     } else {
-        info!("Removing the limit of --max-diagnostics, because of a reporter different from the default one: {}", cli_options.reporter);
+        info!(
+            "Removing the limit of --max-diagnostics, because of a reporter different from the default one: {}",
+            cli_options.reporter
+        );
         u32::MAX
     };
 

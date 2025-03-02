@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult};
-use biome_graphql_syntax::{map_syntax_node, GraphqlSyntaxNode};
+use biome_graphql_syntax::{GraphqlSyntaxNode, map_syntax_node};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct FormatGraphqlSyntaxNode;

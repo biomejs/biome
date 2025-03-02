@@ -1,8 +1,8 @@
 use super::{
-    compilation_context::NodeCompilationContext, predicate_compiler::PredicateCompiler,
-    PatternCompiler,
+    PatternCompiler, compilation_context::NodeCompilationContext,
+    predicate_compiler::PredicateCompiler,
 };
-use crate::{grit_context::GritQueryContext, CompileError};
+use crate::{CompileError, grit_context::GritQueryContext};
 use biome_grit_syntax::{GritPatternOr, GritPredicateOr};
 use grit_pattern_matcher::pattern::{Or, PrOr};
 

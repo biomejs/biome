@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::io;
 use ureq::get;
 use xtask::*;
-use xtask::{project_root, Mode};
+use xtask::{Mode, project_root};
 use xtask_codegen::update;
 
 #[derive(Debug, Deserialize, Serialize)]

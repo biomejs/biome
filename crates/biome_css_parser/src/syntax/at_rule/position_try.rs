@@ -6,10 +6,11 @@ use biome_css_syntax::{
     T,
 };
 use biome_parser::{
+    Parser, TokenSet,
     parse_recovery::ParseRecoveryTokenSet,
     parsed_syntax::ParsedSyntax::{self, Present},
     prelude::ParsedSyntax::Absent,
-    token_set, Parser, TokenSet,
+    token_set,
 };
 
 #[inline]

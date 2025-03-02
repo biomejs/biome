@@ -2,29 +2,29 @@ use self::{
     css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
     unknown::UnknownFileHandler,
 };
+use crate::WorkspaceError;
 use crate::diagnostics::{QueryDiagnostic, SearchError};
-pub use crate::file_handlers::astro::{AstroFileHandler, ASTRO_FENCE};
+pub use crate::file_handlers::astro::{ASTRO_FENCE, AstroFileHandler};
 use crate::file_handlers::graphql::GraphqlFileHandler;
-pub use crate::file_handlers::svelte::{SvelteFileHandler, SVELTE_FENCE};
-pub use crate::file_handlers::vue::{VueFileHandler, VUE_FENCE};
+pub use crate::file_handlers::svelte::{SVELTE_FENCE, SvelteFileHandler};
+pub use crate::file_handlers::vue::{VUE_FENCE, VueFileHandler};
 use crate::settings::{Settings, WorkspaceSettingsHandle};
 use crate::workspace::{
     FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult, RenameResult,
 };
-use crate::WorkspaceError;
 use biome_analyze::{
     AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec, AnalyzerSignal, ControlFlow,
     GroupCategory, Never, Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory,
     RuleFilter, RuleGroup,
 };
-use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
 use biome_configuration::Rules;
+use biome_configuration::analyzer::{RuleDomainValue, RuleSelector};
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_css_analyze::METADATA as css_metadata;
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_dependency_graph::DependencyGraph;
-use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
+use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, category};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_graphql_analyze::METADATA as graphql_metadata;
@@ -33,7 +33,7 @@ use biome_grit_patterns::{GritQuery, GritQueryEffect, GritTargetFile};
 use biome_grit_syntax::file_source::GritFileSource;
 use biome_html_syntax::HtmlFileSource;
 use biome_js_analyze::METADATA as js_metadata;
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
     EmbeddingKind, JsFileSource, JsLanguage, Language, LanguageVariant, TextRange, TextSize,
 };

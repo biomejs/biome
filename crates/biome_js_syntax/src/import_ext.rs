@@ -1,11 +1,11 @@
 use crate::{
-    inner_string_text, AnyJsBinding, AnyJsImportClause, AnyJsModuleSource,
-    AnyJsNamedImportSpecifier, JsCallExpression, JsDefaultImportSpecifier, JsImport,
-    JsImportAssertion, JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier,
-    JsNamespaceImportSpecifier, JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxToken,
+    AnyJsBinding, AnyJsImportClause, AnyJsModuleSource, AnyJsNamedImportSpecifier,
+    JsCallExpression, JsDefaultImportSpecifier, JsImport, JsImportAssertion,
+    JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier, JsNamespaceImportSpecifier,
+    JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxToken, inner_string_text,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText,
+    AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText, declare_node_union,
 };
 
 impl JsImport {

@@ -1,6 +1,6 @@
 use super::{
-    map::CommentsMap, CommentPlacement, CommentStyle, CommentTextPosition, DecoratedComment,
-    SourceComment, TransformSourceMap,
+    CommentPlacement, CommentStyle, CommentTextPosition, DecoratedComment, SourceComment,
+    TransformSourceMap, map::CommentsMap,
 };
 use crate::source_map::{DeletedRangeEntry, DeletedRanges};
 use crate::{TextRange, TextSize};
@@ -643,7 +643,7 @@ mod tests {
         DecoratedComment, SourceComment,
     };
     use crate::{TextSize, TransformSourceMap, TransformSourceMapBuilder};
-    use biome_js_parser::{parse_module, JsParserOptions};
+    use biome_js_parser::{JsParserOptions, parse_module};
     use biome_js_syntax::{
         JsIdentifierExpression, JsLanguage, JsParameters, JsParenthesizedExpression,
         JsPropertyObjectMember, JsReferenceIdentifier, JsSequenceExpression,
@@ -651,8 +651,8 @@ mod tests {
     };
     use biome_rowan::syntax::SyntaxElementKey;
     use biome_rowan::{
-        chain_trivia_pieces, AstNode, BatchMutation, SyntaxNode, SyntaxNodeOptionExt,
-        SyntaxTriviaPieceComments, TextRange,
+        AstNode, BatchMutation, SyntaxNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments,
+        TextRange, chain_trivia_pieces,
     };
     use std::cell::RefCell;
 
@@ -952,9 +952,11 @@ b;"#;
             .descendants()
             .find_map(JsUnaryExpression::cast)
             .unwrap();
-        assert!(!comments
-            .trailing(&unary.argument().unwrap().syntax().key())
-            .is_empty());
+        assert!(
+            !comments
+                .trailing(&unary.argument().unwrap().syntax().key())
+                .is_empty()
+        );
     }
 
     #[test]

@@ -22,19 +22,19 @@ mod reporter;
 mod service;
 
 use crate::cli_options::{CliOptions, ColorsArg};
+use crate::commands::CommandRunner;
 use crate::commands::check::CheckCommandPayload;
 use crate::commands::ci::CiCommandPayload;
 use crate::commands::format::FormatCommandPayload;
 use crate::commands::lint::LintCommandPayload;
 use crate::commands::migrate::MigrateCommandPayload;
-use crate::commands::CommandRunner;
-pub use crate::commands::{biome_command, BiomeCommand};
-pub use crate::logging::{setup_cli_subscriber, LoggingLevel};
+pub use crate::commands::{BiomeCommand, biome_command};
+pub use crate::logging::{LoggingLevel, setup_cli_subscriber};
 pub use diagnostics::CliDiagnostic;
-pub use execute::{execute_mode, Execution, TraversalMode, VcsTargeted};
+pub use execute::{Execution, TraversalMode, VcsTargeted, execute_mode};
 pub use panic::setup_panic_handler;
 pub use reporter::{DiagnosticsPayload, Reporter, ReporterVisitor, TraversalSummary};
-pub use service::{open_transport, SocketTransport};
+pub use service::{SocketTransport, open_transport};
 
 pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {
     Some(version) => version,

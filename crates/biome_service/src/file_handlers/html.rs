@@ -5,8 +5,9 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_html_formatter::{
+    HtmlFormatOptions,
     context::{IndentScriptAndStyle, WhitespaceSensitivity},
-    format_node, HtmlFormatOptions,
+    format_node,
 };
 use biome_html_parser::parse_html_with_cache;
 use biome_html_syntax::{HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
@@ -20,9 +21,9 @@ use super::{
 };
 use crate::settings::{check_feature_activity, check_override_feature_activity};
 use crate::{
+    WorkspaceError,
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
     workspace::GetSyntaxTreeResult,
-    WorkspaceError,
 };
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]

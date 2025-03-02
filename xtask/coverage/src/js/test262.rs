@@ -1,10 +1,10 @@
 use crate::runner::{
-    create_bogus_node_in_tree_diagnostic, TestCase, TestCaseFiles, TestRunOutcome, TestSuite,
+    TestCase, TestCaseFiles, TestRunOutcome, TestSuite, create_bogus_node_in_tree_diagnostic,
 };
-use biome_js_parser::{parse, JsParserOptions};
+use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsFileSource;
-use biome_rowan::syntax::SyntaxKind;
 use biome_rowan::AstNode;
+use biome_rowan::syntax::SyntaxKind;
 use regex::Regex;
 use serde::Deserialize;
 use std::io;
@@ -221,9 +221,5 @@ fn read_metadata(code: &str) -> io::Result<MetaData> {
 }
 
 fn merge_outcomes(l: TestRunOutcome, r: TestRunOutcome) -> TestRunOutcome {
-    if l.is_failed() {
-        l
-    } else {
-        r
-    }
+    if l.is_failed() { l } else { r }
 }

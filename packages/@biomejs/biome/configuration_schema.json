@@ -2757,6 +2757,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessEscapeInString": {
+					"description": "Disallow unnecessary escapes in string literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessStringRaw": {
 					"description": "Disallow unnecessary String.raw function in template string literals without any escape sequence.",
 					"anyOf": [

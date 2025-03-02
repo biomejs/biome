@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::block_like::FormatCssBlockLike;
-use biome_css_syntax::stmt_ext::CssBlockLike;
 use biome_css_syntax::CssPageAtRuleBlock;
+use biome_css_syntax::stmt_ext::CssBlockLike;
 use biome_formatter::write;
 
 #[derive(Debug, Clone, Default)]

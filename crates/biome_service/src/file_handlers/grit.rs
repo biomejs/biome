@@ -6,8 +6,8 @@ use super::{
 use crate::settings::{check_feature_activity, check_override_feature_activity};
 use crate::workspace::GetSyntaxTreeResult;
 use crate::{
-    settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
     WorkspaceError,
+    settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
 };
 use biome_analyze::{AnalyzerOptions, QueryMatch};
 use biome_configuration::grit::{

@@ -1,6 +1,6 @@
 use crate::ast_utils::is_constant_condition;
 use crate::services::semantic::Semantic;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
@@ -8,7 +8,7 @@ use biome_js_syntax::{
     JsFunctionDeclaration, JsFunctionExpression, JsIfStatement, JsStatementList, JsSyntaxKind,
     JsWhileStatement, JsYieldExpression, TextRange,
 };
-use biome_rowan::{declare_node_union, AstNode};
+use biome_rowan::{AstNode, declare_node_union};
 
 declare_lint_rule! {
     /// Disallow constant expressions in conditions

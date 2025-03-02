@@ -1,11 +1,11 @@
 use super::*;
 use crate::reporters::TestReporter;
+use biome_diagnostics::Error;
+use biome_diagnostics::PrintDiagnostic;
 use biome_diagnostics::console::fmt::{Formatter, Termcolor};
 use biome_diagnostics::console::markup;
 use biome_diagnostics::termcolor::Buffer;
-use biome_diagnostics::Error;
-use biome_diagnostics::PrintDiagnostic;
-use biome_js_parser::{parse, JsParserOptions, Parse};
+use biome_js_parser::{JsParserOptions, Parse, parse};
 use biome_js_syntax::{AnyJsRoot, JsFileSource, JsSyntaxNode};
 use biome_rowan::SyntaxKind;
 use std::fmt::Debug;

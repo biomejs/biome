@@ -1,16 +1,16 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
-use biome_console::{markup, MarkupBuf};
+use biome_console::{MarkupBuf, markup};
 use biome_js_factory::make::{self};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression,
     JsCallExpression, JsComputedMemberExpression, JsParenthesizedExpression,
     JsStaticMemberExpression, JsUnaryExpression, T,
 };
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationExt};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, declare_node_union};
 
 declare_lint_rule! {
     /// Use `at()` instead of integer index access.

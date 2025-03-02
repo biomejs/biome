@@ -1,5 +1,5 @@
 use crate::{BiomePath, PathInterner};
-use biome_diagnostics::{console, Advices, Diagnostic, IoError, LogCategory, Visit};
+use biome_diagnostics::{Advices, Diagnostic, IoError, LogCategory, Visit, console};
 use biome_diagnostics::{Error, Severity};
 use camino::{Utf8Path, Utf8PathBuf};
 pub use memory::{ErrorEntry, MemoryFileSystem};
@@ -75,7 +75,7 @@ impl From<PathKind> for oxc_resolver::FileMetadata {
 pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// It opens a file with the given set of options
     fn open_with_options(&self, path: &Utf8Path, options: OpenOptions)
-        -> io::Result<Box<dyn File>>;
+    -> io::Result<Box<dyn File>>;
 
     /// Initiate a traversal of the filesystem
     ///
@@ -136,9 +136,9 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                 Ok(content) => {
                     if is_searching_in_parent_dir {
                         info!(
-                                "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
-                                current_search_dir
-                            );
+                            "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
+                            current_search_dir
+                        );
                     }
                     return Some(AutoSearchResult {
                         content,

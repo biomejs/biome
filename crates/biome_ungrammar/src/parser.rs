@@ -2,9 +2,9 @@
 use std::collections::HashMap;
 
 use crate::{
-    error::{bail, format_err, Result},
-    lexer::{self, CombinatorKind, TokenKind},
     Grammar, Node, NodeData, Rule, Token, TokenData,
+    error::{Result, bail, format_err},
+    lexer::{self, CombinatorKind, TokenKind},
 };
 
 macro_rules! bail {
@@ -140,7 +140,10 @@ fn rule(p: &mut Parser) -> Result<Rule> {
 
         match combinator_kind {
             Some(kind) if kind != token_combinator => {
-                bail!(token.loc, "Cannot mix combinators at the same level in a Rule. Use parentheses to specify precedence");
+                bail!(
+                    token.loc,
+                    "Cannot mix combinators at the same level in a Rule. Use parentheses to specify precedence"
+                );
             }
             None => combinator_kind = Some(token_combinator),
             _ => (),

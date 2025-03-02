@@ -10,7 +10,7 @@ use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
 };
 use biome_rowan::{SyntaxKind, TextSize};
-use biome_unicode_table::{lookup_byte, Dispatch::*};
+use biome_unicode_table::{Dispatch::*, lookup_byte};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum MarkdownLexContext {

@@ -10,7 +10,7 @@ use std::{
 
 pub use crate::glue::{pushd, pushenv};
 
-pub use anyhow::{anyhow, bail, ensure, Context as _, Error, Result};
+pub use anyhow::{Context as _, Error, Result, anyhow, bail, ensure};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Mode {
@@ -58,7 +58,7 @@ pub fn reformat_without_preamble(text: impl Display) -> Result<String> {
     let _e = pushenv("RUSTUP_TOOLCHAIN", "stable");
     ensure_rustfmt()?;
     let output = run!(
-        "rustfmt --config newline_style=Unix";
+        "rustfmt --config newline_style=Unix --config style_edition=2024";
         <text.to_string().as_bytes()
     )?;
 

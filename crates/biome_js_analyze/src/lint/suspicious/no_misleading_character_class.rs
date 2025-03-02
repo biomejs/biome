@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -73,21 +73,29 @@ pub enum Message {
 impl Message {
     fn diagnostic(&self) -> &str {
         match self {
-            Self::CombiningClassOrVs16 => "A character class cannot match a character and a combining character.",
+            Self::CombiningClassOrVs16 => {
+                "A character class cannot match a character and a combining character."
+            }
             Self::SurrogatePairWithoutUFlag => {
                 "A character class cannot match a surrogate pair. Add the 'u' unicode flag to match against them."
             }
-            Self::EmojiModifier => "A character class cannot match an emoji with a skin tone modifier.",
+            Self::EmojiModifier => {
+                "A character class cannot match an emoji with a skin tone modifier."
+            }
             Self::RegionalIndicatorSymbol => {
                 "A character class cannot match a pair of regional indicator symbols."
             }
-            Self::JoinedCharSequence => "A character class cannot match a joined character sequence.",
+            Self::JoinedCharSequence => {
+                "A character class cannot match a joined character sequence."
+            }
         }
     }
 
     fn note(&self) -> &str {
         match self {
-            Self::CombiningClassOrVs16 => "A character and a combining character forms a new character. Replace the character class with an alternation.",
+            Self::CombiningClassOrVs16 => {
+                "A character and a combining character forms a new character. Replace the character class with an alternation."
+            }
             Self::SurrogatePairWithoutUFlag => {
                 "A surrogate pair forms a single codepoint, but is encoded as a pair of two characters. Without the unicode flag, the regex matches a single surrogate character."
             }
@@ -95,7 +103,9 @@ impl Message {
             Self::RegionalIndicatorSymbol => {
                 "A pair of regional indicator symbols encodes a country code. Replace the character class with an alternation."
             }
-            Self::JoinedCharSequence => "A zero width joiner composes several emojis into a new one. Replace the character class with an alternation.",
+            Self::JoinedCharSequence => {
+                "A zero width joiner composes several emojis into a new one. Replace the character class with an alternation."
+            }
         }
     }
 }
@@ -397,7 +407,7 @@ fn decode_unicode_escape_sequence(s: &str, is_in_string: bool) -> Option<Unicode
             .iter()
             .enumerate()
             .skip(offset + 3)
-            .find(|(_, &c)| c == b'}')?;
+            .find(|&(_, &c)| c == b'}')?;
         Some(UnicodeEscape {
             // SAFETY: slicing is safe because `{` is at `offset + 2` and `}` is at `end`.
             codepoint: u32::from_str_radix(&s[offset + 3..end], 16).ok()?,

@@ -1,8 +1,8 @@
 use super::{
-    compilation_context::NodeCompilationContext, variable_compiler::VariableCompiler,
-    PatternCompiler,
+    PatternCompiler, compilation_context::NodeCompilationContext,
+    variable_compiler::VariableCompiler,
 };
-use crate::{grit_code_snippet::GritCodeSnippet, grit_context::GritQueryContext, CompileError};
+use crate::{CompileError, grit_code_snippet::GritCodeSnippet, grit_context::GritQueryContext};
 use biome_grit_syntax::{GritPatternAccumulate, GritPredicateAccumulate};
 use grit_pattern_matcher::pattern::{Accumulate, DynamicPattern, Pattern};
 

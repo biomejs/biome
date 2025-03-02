@@ -1,9 +1,9 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::{fmt::Display, fmt::Formatter, markup};
 use biome_diagnostics::Severity;
-use biome_js_syntax::{jsx_ext::AnyJsxElement, static_value::StaticValue, TextRange};
+use biome_js_syntax::{TextRange, jsx_ext::AnyJsxElement, static_value::StaticValue};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {

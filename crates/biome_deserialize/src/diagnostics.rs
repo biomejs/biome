@@ -1,11 +1,11 @@
 use biome_console::fmt::Display;
-use biome_console::{markup, MarkupBuf};
+use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{
     Advices, Diagnostic, DiagnosticTags, LogCategory, MessageAndDescription, Severity, Visit,
 };
 use biome_rowan::{SyntaxError, TextRange};
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[bitflags]
