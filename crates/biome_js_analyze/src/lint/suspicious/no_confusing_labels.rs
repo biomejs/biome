@@ -60,9 +60,11 @@ declare_lint_rule! {
     /// ```
     /// ## Options
     ///
-    /// Use the options to specify specific labels that you want to allow.
-    /// Labels can be used to mark code that should be removed in certain conditions,
-    /// for example in production builds.
+    /// Use the options to allow specific labels in your code.
+    /// Labels can be used to mark code that should be removed under certain conditions,
+    /// such as in production builds.
+    /// Some bundlers, such as [esbuild](https://esbuild.github.io/api/#drop-labels) and Vite,
+    /// can be configured to remove labeled statements.
     ///
     /// ```json,options
     /// {
