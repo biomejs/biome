@@ -32,3 +32,5 @@
 @container ( 150px <= WIDTH ) {  }
 
 @container --dashed-name not (width <= 500px) {  }
+
+@container name not style(color: red) {}
