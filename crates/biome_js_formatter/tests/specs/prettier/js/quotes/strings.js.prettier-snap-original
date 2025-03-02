@@ -33,8 +33,8 @@
 ("'");
 
 // Unnecessary escapes.
-("'");
-('"');
+("\'");
+('\"');
 ("\a");
 ("\a");
 ("hol\a");
@@ -68,7 +68,7 @@
 ("\"'");
 
 // One of each with unnecessary escapes.
-("\"'");
+("\"\'");
 ("\"'");
 
 // More double quotes than single quotes.
@@ -88,8 +88,8 @@
 ("\\");
 
 // Backslases.
-("\"\\\"\\\\\" ''\\'\\'\\\\'");
-('\'\\\'\\\\\' ""\\"\\"\\\\"');
+("\"\\\"\\\\\" '\'\\'\\\'\\\\'");
+('\'\\\'\\\\\' "\"\\"\\\"\\\\"');
 
 // Somewhat more real-word example.
 ("He's sayin': \"How's it goin'?\" Don't ask me why.");

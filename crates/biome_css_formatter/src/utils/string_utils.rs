@@ -125,6 +125,8 @@ impl Format<CssFormatContext> for FormatLiteralStringToken<'_> {
 /// Data structure of convenience to store some information about the
 /// string that has been processed
 struct StringInformation {
+    /// Currently used quote or `None` if it is not a string
+    current_quote: Option<QuoteStyle>,
     /// This is the quote that the is calculated and eventually used inside the string.
     /// It could be different from the one inside the formatter options
     preferred_quote: QuoteStyle,
@@ -162,6 +164,7 @@ impl FormatLiteralStringToken<'_> {
         // preferred quote style without having to check the content.
         if !matches!(self.token().kind(), CSS_STRING_LITERAL) {
             return StringInformation {
+                current_quote: None,
                 preferred_quote: chosen_quote,
             };
         }
@@ -185,7 +188,10 @@ impl FormatLiteralStringToken<'_> {
             },
         );
 
+        let current_quote = literal.bytes().next().and_then(QuoteStyle::from_byte);
+
         StringInformation {
+            current_quote,
             preferred_quote: if chosen_quote_count > alternate_quote_count {
                 alternate_quote
             } else {
@@ -218,8 +224,18 @@ impl<'token> LiteralStringNormaliser<'token> {
     fn normalise_text(&mut self) -> Cow<'token, str> {
         match self.token.parent_kind {
             StringLiteralParentKind::CharsetAtRule => {
+                let current_quote = self
+                    .token
+                    .token
+                    .text_trimmed()
+                    .bytes()
+                    .next()
+                    .and_then(QuoteStyle::from_byte);
                 let string_information = StringInformation {
-                    preferred_quote: QuoteStyle::Double,
+                    current_quote,
+                    // `@charset` should use double quotes.
+                    // However, Prettier preserve single quotes.
+                    preferred_quote: current_quote.unwrap_or(QuoteStyle::Double),
                 };
                 self.normalise_tokens(string_information)
             }
@@ -263,7 +279,12 @@ impl<'token> LiteralStringNormaliser<'token> {
     fn normalize_string(&self, string_information: &StringInformation) -> Cow<'token, str> {
         let raw_content = self.raw_content();
 
-        normalize_string(raw_content, string_information.preferred_quote.into(), true)
+        normalize_string(
+            raw_content,
+            string_information.current_quote.map(|quote| quote.into()),
+            string_information.preferred_quote.into(),
+            true,
+        )
     }
 
     fn raw_content(&self) -> &'token str {

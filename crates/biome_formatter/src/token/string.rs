@@ -41,15 +41,18 @@ impl Quote {
 /// ```
 /// use biome_formatter::token::string::{normalize_string, Quote};
 /// assert_eq!(
-///     normalize_string(" \"He\\llo\\tworld\" \\' \\' \r\n ", Quote::Double, false),
+///     normalize_string(" \"He\\llo\\tworld\" \\' \\' \r\n ", None, Quote::Double, false),
 ///     " \\\"Hello\\tworld\\\" ' ' \n ",
 /// );
 /// ```
 pub fn normalize_string(
     raw_content: &str,
+    current_quote: Option<Quote>,
     preferred_quote: Quote,
     is_escape_preserved: bool,
 ) -> Cow<str> {
+    let preferred_is_not_current =
+        current_quote.is_some_and(|current_quote| current_quote != preferred_quote);
     let alternate_quote = preferred_quote.other().as_byte();
     let preferred_quote = preferred_quote.as_byte();
     let mut reduced_string = String::new();
@@ -99,7 +102,8 @@ pub fn normalize_string(
                             // to the next iteration
                             //
                             // We always unescape alternate quotes regardless of `is_escape_preserved`.
-                            escaped == alternate_quote
+                            // We don't unescape if the quote style doesn't change.s
+                            (escaped == alternate_quote && preferred_is_not_current)
                                 || (escaped != preferred_quote && !is_escape_preserved)
                         }
                     };
@@ -144,47 +148,59 @@ mod tests {
 
     #[test]
     fn normalize_newline() {
-        assert_eq!(normalize_string("a\nb", Quote::Double, true), "a\nb");
-        assert_eq!(normalize_string("a\r\nb", Quote::Double, false), "a\nb");
-        assert_eq!(normalize_string("a\\\r\nb", Quote::Double, false), "a\\\nb");
+        assert_eq!(normalize_string("a\nb", None, Quote::Double, true), "a\nb");
+        assert_eq!(
+            normalize_string("a\r\nb", None, Quote::Double, false),
+            "a\nb"
+        );
+        assert_eq!(
+            normalize_string("a\\\r\nb", None, Quote::Double, false),
+            "a\\\nb"
+        );
     }
 
     #[test]
     fn normalize_escapes() {
-        assert_eq!(normalize_string("\\", Quote::Double, false), "\\");
-        assert_eq!(normalize_string("\\t", Quote::Double, false), "\\t");
+        assert_eq!(normalize_string("\\", None, Quote::Double, false), "\\");
+        assert_eq!(normalize_string("\\t", None, Quote::Double, false), "\\t");
         assert_eq!(
-            normalize_string("\\\u{2028}", Quote::Double, false),
+            normalize_string("\\\u{2028}", None, Quote::Double, false),
             "\\\u{2028}"
         );
         assert_eq!(
-            normalize_string("\\\u{2029}", Quote::Double, false),
+            normalize_string("\\\u{2029}", None, Quote::Double, false),
             "\\\u{2029}"
         );
 
-        assert_eq!(normalize_string("a\\a", Quote::Double, false), "aa");
-        assert_eq!(normalize_string("👍\\👍", Quote::Single, false), "👍👍");
+        assert_eq!(normalize_string("a\\a", None, Quote::Double, false), "aa");
         assert_eq!(
-            normalize_string("\\\u{2027}", Quote::Double, false),
+            normalize_string("👍\\👍", None, Quote::Single, false),
+            "👍👍"
+        );
+        assert_eq!(
+            normalize_string("\\\u{2027}", None, Quote::Double, false),
             "\u{2027}"
         );
         assert_eq!(
-            normalize_string("\\\u{2030}", Quote::Double, false),
+            normalize_string("\\\u{2030}", None, Quote::Double, false),
             "\u{2030}"
         );
 
-        assert_eq!(normalize_string("a\\a", Quote::Double, true), "a\\a");
-        assert_eq!(normalize_string("👍\\👍", Quote::Single, true), "👍\\👍");
+        assert_eq!(normalize_string("a\\a", None, Quote::Double, true), "a\\a");
+        assert_eq!(
+            normalize_string("👍\\👍", None, Quote::Single, true),
+            "👍\\👍"
+        );
     }
 
     #[test]
     fn normalize_quotes() {
-        assert_eq!(normalize_string("\"", Quote::Double, false), "\\\"");
-        assert_eq!(normalize_string("\'", Quote::Double, false), "'");
-        assert_eq!(normalize_string("\\'", Quote::Double, false), "'");
+        assert_eq!(normalize_string("\"", None, Quote::Double, false), "\\\"");
+        assert_eq!(normalize_string("\'", None, Quote::Double, false), "'");
+        assert_eq!(normalize_string("\\'", None, Quote::Double, false), "'");
 
-        assert_eq!(normalize_string("\"", Quote::Single, false), "\"");
-        assert_eq!(normalize_string("\\'", Quote::Single, false), "\\'");
-        assert_eq!(normalize_string("\\\"", Quote::Single, false), "\"");
+        assert_eq!(normalize_string("\"", None, Quote::Single, false), "\"");
+        assert_eq!(normalize_string("\\'", None, Quote::Single, false), "\\'");
+        assert_eq!(normalize_string("\\\"", None, Quote::Single, false), "\"");
     }
 }

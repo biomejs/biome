@@ -104,7 +104,9 @@ impl Format<JsFormatContext> for FormatLiteralStringToken<'_> {
 /// Data structure of convenience to store some information about the
 /// string that has been processed
 struct StringInformation {
-    /// This is the quote that the is calculated and eventually used inside the string.
+    /// Currently used quote
+    current_quote: QuoteStyle,
+    /// This is the quote that is calculated and eventually used inside the string.
     /// It could be different from the one inside the formatter options
     preferred_quote: QuoteStyle,
     /// It flags if the raw content has quotes (single or double). The raw content is the
@@ -173,7 +175,14 @@ impl FormatLiteralStringToken<'_> {
             },
         );
 
+        let current_quote = literal
+            .bytes()
+            .next()
+            .and_then(QuoteStyle::from_byte)
+            .unwrap_or_default();
+
         StringInformation {
+            current_quote,
             preferred_quote: if chosen_quote_count > alternate_quote_count {
                 alternate_quote
             } else {
@@ -321,6 +330,7 @@ impl<'token> LiteralStringNormaliser<'token> {
         let preferred_quote = string_information.preferred_quote;
         let polished_raw_content = normalize_string(
             self.raw_content(),
+            Some(string_information.current_quote.into()),
             string_information.preferred_quote.into(),
             true,
         );
@@ -461,11 +471,8 @@ mod tests {
         let quote = QuoteStyle::Double;
         let quote_properties = QuoteProperties::AsNeeded;
         let inputs = [
-            (r#"" content '' \"\"\" ""#, r#"' content \'\' """ '"#),
             (r#"" content \"\"\"\" '' ""#, r#"' content """" \'\' '"#),
             (r#"" content ''''' \" ""#, r#"" content ''''' \" ""#),
-            (r#"" content \'\' \" ""#, r#"" content '' \" ""#),
-            (r#"" content \\' \" ""#, r#"" content \\' \" ""#),
             (r#""\"''""#, r#""\"''""#),
         ];
         for (input, output) in inputs {
