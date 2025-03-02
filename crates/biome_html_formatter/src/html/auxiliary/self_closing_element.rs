@@ -1,4 +1,7 @@
-use crate::prelude::*;
+use crate::{
+    html::lists::attribute_list::FormatHtmlAttributeListOptions, prelude::*,
+    utils::metadata::is_canonical_html_tag,
+};
 use biome_formatter::write;
 use biome_html_syntax::{HtmlSelfClosingElement, HtmlSelfClosingElementFields};
 #[derive(Debug, Clone, Default)]
@@ -13,6 +16,8 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
             r_angle_token,
         } = node.as_fields();
         let bracket_same_line = f.options().bracket_same_line().value();
+        let name = name?;
+        let is_canonical_html_tag = is_canonical_html_tag(&name);
 
         write!(f, [l_angle_token.format(), name.format(), space()])?;
 
@@ -20,7 +25,13 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
         write!(
             f,
             [&group(&format_with(|f| {
-                attributes.format().fmt(f)?;
+                attributes
+                    .format()
+                    .with_options(FormatHtmlAttributeListOptions {
+                        is_canonical_html_element: is_canonical_html_tag,
+                        tag_name: Some(name.clone()),
+                    })
+                    .fmt(f)?;
 
                 // Whitespace sensitivity takes precedence over bracketSameLine for correctness.
                 //
