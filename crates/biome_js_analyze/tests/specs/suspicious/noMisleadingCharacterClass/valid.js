@@ -47,3 +47,8 @@ var cyrillicChars = /[\u200E\u2066-\u2069]/gu;
 // Unicode char outside the class
 /[a-z]👍/;
 /\[👍]/;
+
+// range operator in character class
+// Issue: https://github.com/biomejs/biome/issues/4950
+/[\u0300-\u0302]/;
+/[\u0302-]/;
