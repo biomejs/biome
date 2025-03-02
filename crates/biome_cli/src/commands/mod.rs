@@ -96,10 +96,6 @@ pub enum BiomeCommand {
             fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
         )]
         log_path: Utf8PathBuf,
-        /// Allows to set a custom file path to the configuration file,
-        /// or a custom directory path to find `biome.json` or `biome.jsonc`
-        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        config_path: Option<Utf8PathBuf>,
     },
 
     /// Stops the Biome daemon server process.
@@ -379,10 +375,6 @@ pub enum BiomeCommand {
             fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
         )]
         log_path: Utf8PathBuf,
-        /// Allows to set a custom file path to the configuration file,
-        /// or a custom directory path to find `biome.json` or `biome.jsonc`
-        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        config_path: Option<Utf8PathBuf>,
         /// Bogus argument to make the command work with vscode-languageclient
         #[bpaf(long("stdio"), hide, hide_usage, switch)]
         stdio: bool,
@@ -507,10 +499,6 @@ pub enum BiomeCommand {
 
         #[bpaf(long("stop-on-disconnect"), hide_usage)]
         stop_on_disconnect: bool,
-        /// Allows to set a custom file path to the configuration file,
-        /// or a custom directory path to find `biome.json` or `biome.jsonc`
-        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        config_path: Option<Utf8PathBuf>,
     },
     #[bpaf(command("__print_socket"), hide)]
     PrintSocket,

@@ -53,7 +53,6 @@ async fn try_connect() -> io::Result<UnixStream> {
 /// Spawn the daemon server process in the background
 fn spawn_daemon(
     stop_on_disconnect: bool,
-    config_path: Option<Utf8PathBuf>,
     log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> io::Result<Child> {
@@ -65,9 +64,6 @@ fn spawn_daemon(
 
     if stop_on_disconnect {
         cmd.arg("--stop-on-disconnect");
-    }
-    if let Some(config_path) = config_path {
-        cmd.arg(format!("--config-path={}", config_path));
     }
     if let Some(log_path) = log_path {
         cmd.arg(format!("--log-path={}", log_path));
@@ -124,7 +120,6 @@ pub(crate) async fn open_socket() -> io::Result<Option<(OwnedReadHalf, OwnedWrit
 /// to be started
 pub(crate) async fn ensure_daemon(
     stop_on_disconnect: bool,
-    config_path: Option<Utf8PathBuf>,
     log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> io::Result<bool> {
@@ -167,7 +162,6 @@ pub(crate) async fn ensure_daemon(
                     // it to become ready then retry the connection
                     current_child = Some(spawn_daemon(
                         stop_on_disconnect,
-                        config_path.clone(),
                         log_path.clone(),
                         log_file_name_prefix.clone(),
                     )?);
@@ -192,17 +186,14 @@ pub(crate) async fn ensure_daemon(
 /// Ensure the server daemon is running and ready to receive connections and
 /// print the global socket name in the standard output
 pub(crate) async fn print_socket() -> io::Result<()> {
-    ensure_daemon(true, None, None, None).await?;
+    ensure_daemon(true, None, None).await?;
     println!("{}", get_socket_name().as_str());
     Ok(())
 }
 
 /// Start listening on the global socket and accepting connections with the
 /// provided [ServerFactory]
-pub(crate) async fn run_daemon(
-    factory: ServerFactory,
-    config_path: Option<Utf8PathBuf>,
-) -> io::Result<Infallible> {
+pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible> {
     let path = get_socket_name();
 
     info!("Trying to connect to socket {}", path.as_str());
@@ -217,7 +208,7 @@ pub(crate) async fn run_daemon(
 
     loop {
         let (stream, _) = listener.accept().await?;
-        let connection = factory.create(config_path.clone());
+        let connection = factory.create();
         let span = tracing::trace_span!("run_server");
         tokio::spawn(run_server(connection, stream).instrument(span.or_current()));
     }

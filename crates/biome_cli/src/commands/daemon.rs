@@ -23,17 +23,11 @@ use tracing_tree::HierarchicalLayer;
 
 pub(crate) fn start(
     session: CliSession,
-    config_path: Option<Utf8PathBuf>,
     log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
-    let did_spawn = rt.block_on(ensure_daemon(
-        false,
-        config_path,
-        log_path,
-        log_file_name_prefix,
-    ))?;
+    let did_spawn = rt.block_on(ensure_daemon(false, log_path, log_file_name_prefix))?;
 
     if did_spawn {
         session.app.console.log(markup! {
@@ -74,7 +68,6 @@ pub(crate) fn stop(session: CliSession) -> Result<(), CliDiagnostic> {
 
 pub(crate) fn run_server(
     stop_on_disconnect: bool,
-    config_path: Option<Utf8PathBuf>,
     log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> Result<(), CliDiagnostic> {
@@ -87,7 +80,6 @@ pub(crate) fn run_server(
     let cancellation = factory.cancellation();
     let span = debug_span!("Running Server",
         pid = std::process::id(),
-        config_path = ?config_path.as_ref(),
         log_path = ?log_path.as_ref(),
         log_file_name_prefix = &log_file_name_prefix.as_deref(),
     );
@@ -99,7 +91,7 @@ pub(crate) fn run_server(
 
     rt.block_on(async move {
         tokio::select! {
-            res = run_daemon(factory, config_path).instrument(span) => {
+            res = run_daemon(factory).instrument(span) => {
                 match res {
                     Ok(never) => match never {},
                     Err(err) => Err(err.into()),
@@ -120,17 +112,11 @@ pub(crate) fn print_socket() -> Result<(), CliDiagnostic> {
 }
 
 pub(crate) fn lsp_proxy(
-    config_path: Option<Utf8PathBuf>,
     log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
-    rt.block_on(start_lsp_proxy(
-        &rt,
-        config_path,
-        log_path,
-        log_file_name_prefix,
-    ))?;
+    rt.block_on(start_lsp_proxy(&rt, log_path, log_file_name_prefix))?;
 
     Ok(())
 }
@@ -140,11 +126,10 @@ pub(crate) fn lsp_proxy(
 /// Copy to the process on `stdout` when the LSP responds to a message
 async fn start_lsp_proxy(
     rt: &Runtime,
-    config_path: Option<Utf8PathBuf>,
     log_path: Option<Utf8PathBuf>,
     log_file_name_prefix: Option<String>,
 ) -> Result<(), CliDiagnostic> {
-    ensure_daemon(true, config_path, log_path, log_file_name_prefix).await?;
+    ensure_daemon(true, log_path, log_file_name_prefix).await?;
 
     match open_socket().await? {
         Some((mut owned_read_half, mut owned_write_half)) => {

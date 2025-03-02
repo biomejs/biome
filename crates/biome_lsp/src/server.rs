@@ -13,7 +13,6 @@ use biome_service::workspace::{
     CloseProjectParams, OpenProjectParams, RageEntry, RageParams, RageResult,
 };
 use biome_service::{WatcherInstruction, WorkspaceServer};
-use camino::Utf8PathBuf;
 use crossbeam::channel::{Sender, bounded};
 use futures::FutureExt;
 use futures::future::ready;
@@ -592,17 +591,13 @@ impl ServerFactory {
     }
 
     /// Creates a new [ServerConnection] from this factory.
-    pub fn create(&self, config_path: Option<Utf8PathBuf>) -> ServerConnection {
+    pub fn create(&self) -> ServerConnection {
         let workspace = self.workspace.clone();
 
         let session_key = SessionKey(self.next_session_key.fetch_add(1, Ordering::Relaxed));
 
         let mut builder = LspService::build(move |client| {
-            let mut session =
-                Session::new(session_key, client, workspace, self.cancellation.clone());
-            if let Some(path) = config_path {
-                session.set_config_path(path);
-            }
+            let session = Session::new(session_key, client, workspace, self.cancellation.clone());
             let handle = Arc::new(session);
 
             let mut sessions = self.sessions.lock().unwrap();

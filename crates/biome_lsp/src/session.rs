@@ -85,8 +85,6 @@ pub(crate) struct Session {
     documents: HashMap<lsp_types::Url, Document, FxBuildHasher>,
 
     pub(crate) cancellation: Arc<Notify>,
-
-    pub(crate) config_path: Option<Utf8PathBuf>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -187,13 +185,8 @@ impl Session {
             documents: Default::default(),
             extension_settings: config,
             cancellation,
-            config_path: None,
             notified_broken_configuration: AtomicBool::new(false),
         }
-    }
-
-    pub(crate) fn set_config_path(&mut self, path: Utf8PathBuf) {
-        self.config_path = Some(path);
     }
 
     /// Initialize this session instance with the incoming initialization parameters from the client
@@ -486,12 +479,7 @@ impl Session {
     /// the root URI and update the workspace settings accordingly
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_workspace_settings(self: &Arc<Self>) {
-        // Providing a custom configuration path will not allow to support workspaces
-        if let Some(config_path) = &self.config_path {
-            let base_path = ConfigurationPathHint::FromUser(config_path.clone());
-            let status = self.load_biome_configuration_file(base_path).await;
-            self.set_configuration_status(status);
-        } else if let Some(config_path) = self
+        if let Some(config_path) = self
             .extension_settings
             .read()
             .ok()

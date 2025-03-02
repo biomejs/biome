@@ -219,10 +219,7 @@ pub(crate) async fn print_socket() -> io::Result<()> {
 
 /// Start listening on the global pipe and accepting connections with the
 /// provided [ServerFactory]
-pub(crate) async fn run_daemon(
-    factory: ServerFactory,
-    config_path: Option<Utf8PathBuf>,
-) -> io::Result<Infallible> {
+pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible> {
     let mut prev_server = ServerOptions::new()
         .first_pipe_instance(true)
         .create(get_pipe_name())?;
@@ -232,7 +229,7 @@ pub(crate) async fn run_daemon(
         let mut next_server = ServerOptions::new().create(get_pipe_name())?;
         swap(&mut prev_server, &mut next_server);
 
-        let connection = factory.create(config_path.clone());
+        let connection = factory.create();
         let span = tracing::trace_span!("run_server");
         tokio::spawn(run_server(connection, next_server).instrument(span.or_current()));
     }
