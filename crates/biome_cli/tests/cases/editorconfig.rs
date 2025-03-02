@@ -318,7 +318,7 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["format", "--write", "--config-path=foo",test_file.as_str()].as_slice()),
+        Args::from(["format", "--write", "--config-path=foo", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
