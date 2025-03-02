@@ -82,7 +82,6 @@ impl CommandRunner for FormatCommandPayload {
 
             formatter.enabled = Some(true.into());
         }
-
         if self.css_formatter.is_some() {
             let css = configuration.css.get_or_insert_with(Default::default);
             css.formatter.merge_with(self.css_formatter.clone());
