@@ -699,6 +699,39 @@ impl FromStr for BracketSameLine {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum Expand {
+    Always,
+    #[default]
+    FollowSource,
+}
+
+impl FromStr for Expand {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "always" => Ok(Self::Always),
+            "follow-source" => Ok(Self::FollowSource),
+            _ => Err(std::format!("unknown expand literal: {}", s)),
+        }
+    }
+}
+
+impl fmt::Display for Expand {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Expand::Always => std::write!(f, "Always"),
+            Expand::FollowSource => std::write!(f, "Follow Source"),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",

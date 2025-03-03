@@ -1,9 +1,9 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, ObjectWrap,
+    BracketSpacing, Expand, IndentStyle, IndentWidth, LineEnding, LineWidth, ObjectWrap,
 };
-use biome_json_formatter::context::{Expand, TrailingCommas};
+use biome_json_formatter::context::TrailingCommas;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 

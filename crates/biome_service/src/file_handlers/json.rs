@@ -31,12 +31,12 @@ use biome_configuration::json::{
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::Applicability;
 use biome_formatter::{
-    BracketSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, ObjectWrap,
-    Printed,
+    BracketSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth,
+    ObjectWrap, Printed,
 };
 use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::analyze;
-use biome_json_formatter::context::{Expand, JsonFormatOptions, TrailingCommas};
+use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
