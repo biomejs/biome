@@ -30,7 +30,6 @@ Line width: 80
 Trailing commas: None
 Expand: Auto
 Bracket spacing: true
-Object wrap: Preserve
 -----
 
 ```jsonc
@@ -53,7 +52,6 @@ Line width: 80
 Trailing commas: All
 Expand: Auto
 Bracket spacing: true
-Object wrap: Preserve
 -----
 
 ```jsonc
