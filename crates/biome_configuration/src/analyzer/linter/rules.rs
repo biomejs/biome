@@ -3258,6 +3258,10 @@ pub struct Nursery {
     #[doc = "Enforce the use of the directive \"use strict\" in script files."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_strict_mode: Option<RuleFixConfiguration<biome_js_analyze::options::UseStrictMode>>,
+    #[doc = "Require a description parameter for the Symbol()."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_symbol_description:
+        Option<RuleConfiguration<biome_js_analyze::options::UseSymbolDescription>>,
     #[doc = "Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight()."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_trim_start_end:
@@ -3335,6 +3339,7 @@ impl Nursery {
         "useParseIntRadix",
         "useSortedClasses",
         "useStrictMode",
+        "useSymbolDescription",
         "useTrimStartEnd",
         "useValidAutocomplete",
     ];
@@ -3427,6 +3432,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[64]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[65]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[66]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[67]),
     ];
 }
 impl RuleGroupExt for Nursery {
@@ -3763,14 +3769,19 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[64]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
+        if let Some(rule) = self.use_symbol_description.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[65]));
             }
         }
-        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[66]));
+            }
+        }
+        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[67]));
             }
         }
         index_set
@@ -4102,14 +4113,19 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[64]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
+        if let Some(rule) = self.use_symbol_description.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[65]));
             }
         }
-        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[66]));
+            }
+        }
+        if let Some(rule) = self.use_valid_autocomplete.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[67]));
             }
         }
         index_set
@@ -4400,6 +4416,10 @@ impl RuleGroupExt for Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useStrictMode" => self
                 .use_strict_mode
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useSymbolDescription" => self
+                .use_symbol_description
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useTrimStartEnd" => self

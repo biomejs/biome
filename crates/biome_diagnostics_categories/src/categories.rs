@@ -224,6 +224,7 @@ define_categories! {
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useSortedProperties": "https://biomejs.dev/linter/rules/use-sorted-properties",
     "lint/nursery/useStrictMode": "https://biomejs.dev/linter/rules/use-strict-mode",
+    "lint/nursery/useSymbolDescription": "https://biomejs.dev/linter/rules/use-symbol-description",
     "lint/nursery/useTrimStartEnd": "https://biomejs.dev/linter/rules/use-trim-start-end",
     "lint/nursery/useValidAutocomplete": "https://biomejs.dev/linter/rules/use-valid-autocomplete",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
