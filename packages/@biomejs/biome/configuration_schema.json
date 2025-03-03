@@ -2641,7 +2641,7 @@
 				"noOctalEscape": {
 					"description": "Disallow octal escape sequences in string literals",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
