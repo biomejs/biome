@@ -126,8 +126,12 @@ impl DependencyGraph {
             extensions: vec![
                 ".js".into(),
                 ".jsx".into(),
+                ".mjs".into(),
+                ".cjs".into(),
                 ".ts".into(),
                 ".tsx".into(),
+                ".mts".into(),
+                ".cts".into(),
                 ".json".into(),
                 ".node".into(),
             ],
