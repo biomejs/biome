@@ -130,11 +130,15 @@ Available options:
                               super languages) files. Defaults to 80.
         --json-formatter-trailing-commas=<none|all>  Print trailing commas wherever possible in
                               multi-line comma-separated syntactic structures. Defaults to "none".
-        --json-formatter-expand=<always|follow-source>  Whether to expand arrays and objects on
-                              multiple lines. When set to `always`, these literals are formatted on
-                              multiple lines, regardless of length of the list. When formatting
+        --json-formatter-expand=<auto|always|never>  Whether to expand arrays and objects on
+                              multiple lines. When set to `auto`, object literals are formatted on
+                              multiple lines if the first property has a newline, and array literals
+                              are formatted on a single line if it fits in the line. When set to
+                              `always`, these literals are formatted on multiple lines, regardless
+                              of length of the list. When set to `never`, these literals are
+                              formatted on a single line if it fits in the line. When formatting
                               `package.json`, Biome will use `always` unless configured otherwise.
-                              Defaults to "followSource".
+                              Defaults to "auto".
         --json-formatter-bracket-spacing=<true|false>  Whether to insert spaces around brackets in
                               object literals. Defaults to true.
         --json-formatter-object-wrap=<preserve|collapse>  Whether to enforce collapsing object
