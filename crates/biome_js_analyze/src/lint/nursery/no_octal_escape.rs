@@ -3,10 +3,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsLiteralMemberName, JsStringLiteralExpression, JsSyntaxToken};
-use biome_rowan::{BatchMutationExt, SyntaxResult, TextRange, declare_node_union};
+use biome_js_syntax::JsSyntaxToken;
+use biome_rowan::{BatchMutationExt, TextRange};
 
-use crate::JsRuleAction;
+use crate::{JsRuleAction, lint::correctness::no_nonoctal_decimal_escape::AnyJsStringLiteral};
 
 declare_lint_rule! {
     /// Disallow octal escape sequences in string literals
@@ -47,7 +47,7 @@ impl Rule for NoOctalEscape {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let token = ctx.query().value_token().ok()?;
+        let token = ctx.query().string_literal_token()?;
         let mut it = token.text_trimmed().bytes().enumerate();
         while let Some((index, byte)) = it.next() {
             if byte == b'\\' {
@@ -73,7 +73,7 @@ impl Rule for NoOctalEscape {
         ctx: &RuleContext<Self>,
         RuleState { index, len }: &Self::State,
     ) -> Option<RuleDiagnostic> {
-        let token = ctx.query().value_token().ok()?;
+        let token = ctx.query().string_literal_token()?;
         let escape_start = token
             .text_trimmed_range()
             .start()
@@ -91,7 +91,7 @@ impl Rule for NoOctalEscape {
         ctx: &RuleContext<Self>,
         RuleState { index, len }: &Self::State,
     ) -> Option<JsRuleAction> {
-        let token = ctx.query().value_token().ok()?;
+        let token = ctx.query().string_literal_token()?;
         let text = token.text_trimmed();
         let octal = &text[(index + 1)..(index + len)];
         let codepoint = u32::from_str_radix(octal, 8).ok()?;
@@ -117,19 +117,6 @@ impl Rule for NoOctalEscape {
             markup! { "Use "{unicode_or_hexa}" escape sequences instead." }.to_owned(),
             mutation,
         ))
-    }
-}
-
-declare_node_union! {
-    /// Any string literal excluding JsxString.
-    pub AnyJsStringLiteral = JsStringLiteralExpression | JsLiteralMemberName
-}
-impl AnyJsStringLiteral {
-    pub fn value_token(&self) -> SyntaxResult<JsSyntaxToken> {
-        match self {
-            AnyJsStringLiteral::JsStringLiteralExpression(node) => node.value_token(),
-            AnyJsStringLiteral::JsLiteralMemberName(node) => node.value(),
-        }
     }
 }
 
