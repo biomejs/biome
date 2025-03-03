@@ -37,7 +37,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        9 │ + → → "attributePosition":·"auto",
       10 │ + → → "bracketSameLine":·false,
       11 │ + → → "bracketSpacing":·true,
-      12 │ + → → "objectWrap":·"preserve",
+      12 │ + → → "expand":·"auto",
       13 │ + → → "useEditorconfig":·true
       14 │ + → },
       15 │ + → "javascript":·{
