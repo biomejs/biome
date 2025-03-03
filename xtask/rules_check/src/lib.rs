@@ -338,18 +338,17 @@ where
     let supression_reason = None;
 
     let settings = workspace_settings.get_settings(project_key);
-    let linter = settings.as_ref().map(|s| &s.linter);
-    let overrides = settings.as_ref().map(|s| &s.override_settings);
     let language_settings = settings
         .as_ref()
         .map(|s| L::lookup_settings(&s.languages))
         .map(|result| &result.linter);
 
+    let environment = L::resolve_environment(settings.as_ref());
+
     L::resolve_analyzer_options(
         settings.as_ref(),
-        linter,
-        overrides,
         language_settings,
+        environment,
         &path,
         file_source,
         supression_reason,

@@ -126,9 +126,8 @@ impl ServiceLanguage for HtmlLanguage {
 
     fn resolve_analyzer_options(
         _global: Option<&Settings>,
-        _linter: Option<&crate::settings::LinterSettings>,
-        _overrides: Option<&crate::settings::OverrideSettings>,
         _language: Option<&Self::LinterSettings>,
+        _environment: Option<&Self::EnvironmentSettings>,
         path: &biome_fs::BiomePath,
         _file_source: &super::DocumentFileSource,
         suppression_reason: Option<&str>,
@@ -173,6 +172,10 @@ impl ServiceLanguage for HtmlLanguage {
 
     fn linter_enabled_for_file_path(_settings: Option<&Settings>, _path: &Utf8Path) -> bool {
         false
+    }
+
+    fn resolve_environment(_settings: Option<&Settings>) -> Option<&Self::EnvironmentSettings> {
+        None
     }
 }
 

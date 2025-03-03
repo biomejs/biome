@@ -17,7 +17,7 @@ snapshot_kind: text
 	"assist": {
 		"actions": {
 			"source": {
-				"organizeImports": "off"
+				"organizeImports": "on"
 			}
 		}
 	},

@@ -7,8 +7,8 @@ use biome_json_factory::make::{
     json_member, json_member_list, json_member_name, json_object_value, json_string_literal,
     json_string_value, token,
 };
-use biome_json_syntax::{AnyJsonValue, JsonMember, T};
-use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPieceKind};
+use biome_json_syntax::{AnyJsonValue, JsonMember, JsonRoot, T};
+use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
 
 declare_migration! {
     pub(crate) OrganizeImports {
@@ -18,44 +18,53 @@ declare_migration! {
 }
 
 impl Rule for OrganizeImports {
-    type Query = Ast<JsonMember>;
-    type State = TextRange;
+    type Query = Ast<JsonRoot>;
+    type State = (JsonMember, bool);
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let name = node.name().ok()?;
-        let text = name.inner_string_text().ok()?;
+        let list = node
+            .value()
+            .ok()?
+            .as_json_object_value()?
+            .json_member_list();
 
-        if text.text() == "organizeImports" {
-            if let Some(object) = node.value().ok()?.as_json_object_value() {
-                for item in object.json_member_list().into_iter().flatten() {
-                    let name = item.name().ok()?;
-                    let text = name.inner_string_text().ok()?;
-                    if text.text() == "enabled" {
-                        let value = item
-                            .value()
-                            .ok()?
-                            .as_json_boolean_value()?
-                            .value_token()
-                            .ok()?;
-                        if value.text() == "false" {
-                            return Some(name.range());
+        for item in list.into_iter().flatten() {
+            let name = item.name().ok()?;
+            let text = name.inner_string_text().ok()?;
+
+            if text.text() == "organizeImports" {
+                if let Some(object) = item.value().ok()?.as_json_object_value() {
+                    for item in object.json_member_list().into_iter().flatten() {
+                        let name = item.name().ok()?;
+                        let name = name.inner_string_text().ok()?;
+                        if name.text() == "enabled" {
+                            let value = item
+                                .value()
+                                .ok()?
+                                .as_json_boolean_value()?
+                                .value_token()
+                                .ok()?;
+                            if value.text() == "false" {
+                                return Some((item, false));
+                            }
                         }
                     }
                 }
+                return Some((item, true));
             }
         }
 
         None
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_ctx: &RuleContext<Self>, (member, _): &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             category!("migrate"),
-            state,
+            member.range(),
             markup! {
                 "The "<Emphasis>"organizeImports"</Emphasis>" configuration has been moved."
             }
@@ -65,9 +74,13 @@ impl Rule for OrganizeImports {
         }))
     }
 
-    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<MigrationAction> {
-        let query = ctx.query();
+    fn action(ctx: &RuleContext<Self>, (member, enabled): &Self::State) -> Option<MigrationAction> {
         let mut mutation = ctx.root().begin();
+        let string_literal = if *enabled {
+            json_string_literal("on")
+        } else {
+            json_string_literal("off")
+        };
         let action_member = json_member(
             json_member_name(
                 json_string_literal("organizeImports").with_leading_trivia(vec![
@@ -76,7 +89,7 @@ impl Rule for OrganizeImports {
                 ]),
             ),
             token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
-            AnyJsonValue::JsonStringValue(json_string_value(json_string_literal("off"))),
+            AnyJsonValue::JsonStringValue(json_string_value(string_literal)),
         );
         let source_member = json_member(
             json_member_name(json_string_literal("source").with_leading_trivia(vec![
@@ -125,7 +138,7 @@ impl Rule for OrganizeImports {
             )),
         );
 
-        mutation.replace_node(query.clone(), assist_member);
+        mutation.replace_node(member.clone(), assist_member);
 
         Some(RuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),

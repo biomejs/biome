@@ -18,8 +18,12 @@ snapshot_kind: text
       "!**/packages/docs/.astro"
     ]
   },
-  "organizeImports": {
-    "enabled": true
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
   },
   "linter": {
     "enabled": true,
@@ -136,12 +140,8 @@ snapshot_kind: text
     },
     {
       "includes": ["**/packages/knip/fixtures/**"],
-      "assist": {
-        "actions": {
-          "source": {
-            "organizeImports": "off"
-          }
-        }
+      "organizeImports": {
+        "enabled": false
       },
       "linter": {
         "rules": {
