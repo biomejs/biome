@@ -25,6 +25,10 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::HtmlAttributeInitializerClause::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_ATTRIBUTE_NAME => {
+                    let $pattern = unsafe { $crate::HtmlAttributeName::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_CDATA_SECTION => {
                     let $pattern = unsafe { $crate::HtmlCdataSection::new_unchecked(node) };
                     $body
@@ -49,10 +53,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlElement::new_unchecked(node) };
                     $body
                 }
-                $crate::HtmlSyntaxKind::HTML_NAME => {
-                    let $pattern = unsafe { $crate::HtmlName::new_unchecked(node) };
-                    $body
-                }
                 $crate::HtmlSyntaxKind::HTML_OPENING_ELEMENT => {
                     let $pattern = unsafe { $crate::HtmlOpeningElement::new_unchecked(node) };
                     $body
@@ -67,6 +67,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::HtmlSyntaxKind::HTML_STRING => {
                     let $pattern = unsafe { $crate::HtmlString::new_unchecked(node) };
+                    $body
+                }
+                $crate::HtmlSyntaxKind::HTML_TAG_NAME => {
+                    let $pattern = unsafe { $crate::HtmlTagName::new_unchecked(node) };
                     $body
                 }
                 $crate::HtmlSyntaxKind::HTML_BOGUS => {

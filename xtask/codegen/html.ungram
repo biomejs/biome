@@ -76,7 +76,7 @@ AnyHtmlElement =
 // <a />
 HtmlSelfClosingElement =
 	'<'
-	name: HtmlName
+	name: HtmlTagName
 	attributes: HtmlAttributeList
 	'/'?
 	'>'
@@ -91,7 +91,7 @@ HtmlElement =
 // ^^        ^
 HtmlOpeningElement =
 	'<'
-	name: HtmlName
+	name: HtmlTagName
 	attributes: HtmlAttributeList
 	'>'
 
@@ -99,7 +99,7 @@ HtmlOpeningElement =
 HtmlClosingElement =
 	'<'
 	'/'
-	name: HtmlName
+	name: HtmlTagName
 	'>'
 
 // <!-- comment -->
@@ -126,7 +126,7 @@ AnyHtmlAttribute =
 	| HtmlBogusAttribute
 
 HtmlAttribute =
-	name: HtmlName
+	name: HtmlAttributeName
 	initializer: HtmlAttributeInitializerClause?
 
 
@@ -138,5 +138,6 @@ HtmlAttributeInitializerClause =
 
 
 HtmlString = value: 'html_string_literal'
-HtmlName = value: 'html_literal'
+HtmlTagName = value: 'html_literal'
+HtmlAttributeName = value: 'html_literal'
 HtmlContent = value: 'html_literal'

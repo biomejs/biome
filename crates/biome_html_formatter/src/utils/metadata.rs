@@ -1,4 +1,4 @@
-use biome_html_syntax::{AnyHtmlElement, HtmlName};
+use biome_html_syntax::{AnyHtmlElement, HtmlTagName};
 
 use crate::HtmlFormatter;
 
@@ -39,12 +39,12 @@ pub(crate) fn is_element_whitespace_sensitive_from_element(
 
 /// Whether an element should be considered whitespace sensitive, considering the element's tag name and the
 /// formatter's whitespace sensitivity options.
-pub(crate) fn is_element_whitespace_sensitive(f: &HtmlFormatter, tag_name: &HtmlName) -> bool {
+pub(crate) fn is_element_whitespace_sensitive(f: &HtmlFormatter, tag_name: &HtmlTagName) -> bool {
     let sensitivity = f.options().whitespace_sensitivity();
     sensitivity.is_css() && is_inline_element(tag_name) || sensitivity.is_strict()
 }
 
-pub(crate) fn is_inline_element(tag_name: &HtmlName) -> bool {
+pub(crate) fn is_inline_element(tag_name: &HtmlTagName) -> bool {
     let Ok(tag_name) = tag_name.value_token() else {
         return false;
     };
