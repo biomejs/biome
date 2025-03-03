@@ -174,7 +174,7 @@ impl Rule for NoShoutyConstants {
                         JsReferenceIdentifier::cast_ref(state.reference.syntax())?
                             .value_token()
                             .ok()?
-                            .text(),
+                            .text_trimmed(),
                         [],
                         [],
                     ),

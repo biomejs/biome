@@ -91,7 +91,7 @@ fn can_remove_string_raw(node: &JsTemplateExpression) -> bool {
             AnyJsTemplateElement::JsTemplateElement(_) => false,
             AnyJsTemplateElement::JsTemplateChunkElement(chunk) => {
                 match chunk.template_chunk_token() {
-                    Ok(token) => token.text().contains('\\'),
+                    Ok(token) => token.text_trimmed().contains('\\'),
                     Err(_) => {
                         // if found an error, return `true` means `String.raw` can't remove
                         true

@@ -89,7 +89,7 @@ impl Rule for NoNonoctalDecimalEscape {
         let Some(token) = node.value_token().ok() else {
             return result.into_boxed_slice();
         };
-        let text = token.text();
+        let text = token.text_trimmed();
         if !is_octal_escape_sequence(text) {
             return result.into_boxed_slice();
         }
@@ -207,7 +207,7 @@ impl Rule for NoNonoctalDecimalEscape {
         let node = ctx.query();
         let prev_token = node.value_token().ok()?;
         let replaced = safe_replace_by_range(
-            prev_token.text().to_string(),
+            prev_token.text_trimmed().to_string(),
             replace_string_range.clone(),
             replace_to,
         )?;

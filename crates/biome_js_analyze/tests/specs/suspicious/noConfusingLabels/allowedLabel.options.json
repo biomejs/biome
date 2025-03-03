@@ -1,0 +1,15 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"suspicious": {
+				"noConfusingLabels": {
+					"level": "error",
+					"options": {
+						"allowedLabels": ["DEV"]
+					}
+				}
+			}
+		}
+	}
+}

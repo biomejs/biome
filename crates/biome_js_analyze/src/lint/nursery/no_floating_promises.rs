@@ -316,8 +316,8 @@ fn is_callee_a_promise(callee: &AnyJsExpression, model: &SemanticModel) -> Optio
             let member = computed_member_expr.member().ok()?;
             let literal_expr = member.as_any_js_literal_expression()?;
             let string_literal = literal_expr.as_js_string_literal_expression()?;
-            let value_token = string_literal.inner_string_text().ok()?;
-            let value_text = value_token.text();
+            let value_token_text = string_literal.inner_string_text().ok()?;
+            let value_text = value_token_text.text();
 
             match object {
                 AnyJsExpression::JsIdentifierExpression(js_ident_expr) => {

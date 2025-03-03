@@ -240,7 +240,7 @@ fn is_exception_for_expect(node: &AnyJsExpression) -> Option<bool> {
 
     let parent = node.syntax().parent()?;
     let last_token = parent.last_token()?;
-    let last_token_text = last_token.text();
+    let last_token_text = last_token.text_trimmed();
 
     let member = node.get_callee_member_name()?;
     let member_text = member.text_trimmed();

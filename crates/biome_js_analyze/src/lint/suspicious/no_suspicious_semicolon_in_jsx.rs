@@ -96,9 +96,9 @@ fn has_suspicious_semicolon(node: &JsxChildList) -> Option<TextRange> {
         let jsx_text = c.as_jsx_text()?;
         let jsx_text_value = jsx_text.value_token().ok()?;
         // We should also check for \r and \r\n
-        if jsx_text_value.text().starts_with(";\n")
-            || jsx_text_value.text().starts_with(";\r")
-            || jsx_text_value.text().starts_with(";\r\n")
+        if jsx_text_value.text_trimmed().starts_with(";\n")
+            || jsx_text_value.text_trimmed().starts_with(";\r")
+            || jsx_text_value.text_trimmed().starts_with(";\r\n")
         {
             return Some(jsx_text_value.text_range());
         }

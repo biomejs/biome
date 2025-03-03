@@ -1709,6 +1709,10 @@ export interface Nursery {
 	 */
 	useStrictMode?: RuleFixConfiguration_for_Null;
 	/**
+	 * Require a description parameter for the Symbol().
+	 */
+	useSymbolDescription?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().
 	 */
 	useTrimStartEnd?: RuleFixConfiguration_for_Null;
@@ -2007,7 +2011,7 @@ export interface Suspicious {
 	/**
 	 * Disallow labeled statements that are not loops.
 	 */
-	noConfusingLabels?: RuleConfiguration_for_Null;
+	noConfusingLabels?: RuleConfiguration_for_NoConfusingLabelsOptions;
 	/**
 	 * Disallow void type outside of generic or return types.
 	 */
@@ -2341,6 +2345,9 @@ export type RuleFixConfiguration_for_NamingConventionOptions =
 export type RuleFixConfiguration_for_UseSelfClosingElementsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseSelfClosingElementsOptions;
+export type RuleConfiguration_for_NoConfusingLabelsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoConfusingLabelsOptions;
 export type RuleFixConfiguration_for_NoConsoleOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoConsoleOptions;
@@ -2638,6 +2645,16 @@ export interface RuleWithFixOptions_for_UseSelfClosingElementsOptions {
 	 */
 	options: UseSelfClosingElementsOptions;
 }
+export interface RuleWithOptions_for_NoConfusingLabelsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoConfusingLabelsOptions;
+}
 export interface RuleWithFixOptions_for_NoConsoleOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -2868,6 +2885,15 @@ export interface NamingConventionOptions {
  */
 export interface UseSelfClosingElementsOptions {
 	ignoreHtmlElements?: boolean;
+}
+/**
+ * Options for the rule `noConfusingLabels`
+ */
+export interface NoConfusingLabelsOptions {
+	/**
+	 * A list of (non-confusing) labels that should be allowed
+	 */
+	allowedLabels: string[];
 }
 export interface NoConsoleOptions {
 	/**
@@ -3252,6 +3278,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useStrictMode"
+	| "lint/nursery/useSymbolDescription"
 	| "lint/nursery/useTrimStartEnd"
 	| "lint/nursery/useValidAutocomplete"
 	| "lint/performance/noAccumulatingSpread"
