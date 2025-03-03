@@ -22,5 +22,5 @@ const obj = { foo: "bar" };
 
 When set to `always`, objects and arrays are always expanded.
 
-When set to `never`, objects and arrays are collapsed when they fit to a single line.
+When set to `never`, objects and arrays are never expanded when they fit in a single line.
 It is equivalent to Prettier's [Object Wrap](https://prettier.io/docs/options#object-wrap) option with `collapse`.

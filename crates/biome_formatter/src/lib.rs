@@ -708,12 +708,12 @@ impl FromStr for BracketSameLine {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum Expand {
     /// Objects are expanded when the first property has a leading newline. Arrays are always
-    /// expanded if it is shorter than the line width.
+    /// expanded if they are shorter than the line width.
     #[default]
     Auto,
     /// Objects and arrays are always expanded.
     Always,
-    /// Objects and arrays are never expanded, if it is shorter than the line width.
+    /// Objects and arrays are never expanded, if they are shorter than the line width.
     Never,
 }
 
