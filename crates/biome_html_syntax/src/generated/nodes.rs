@@ -371,8 +371,8 @@ impl HtmlElement {
     pub fn children(&self) -> HtmlElementList {
         support::list(&self.syntax, 1usize)
     }
-    pub fn closing_element(&self) -> SyntaxResult<HtmlClosingElement> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn closing_element(&self) -> Option<HtmlClosingElement> {
+        support::node(&self.syntax, 2usize)
     }
 }
 impl Serialize for HtmlElement {
@@ -387,7 +387,7 @@ impl Serialize for HtmlElement {
 pub struct HtmlElementFields {
     pub opening_element: SyntaxResult<HtmlOpeningElement>,
     pub children: HtmlElementList,
-    pub closing_element: SyntaxResult<HtmlClosingElement>,
+    pub closing_element: Option<HtmlClosingElement>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct HtmlName {
@@ -1114,7 +1114,7 @@ impl std::fmt::Debug for HtmlElement {
                 .field("children", &self.children())
                 .field(
                     "closing_element",
-                    &support::DebugSyntaxResult(self.closing_element()),
+                    &support::DebugOptionalElement(self.closing_element()),
                 )
                 .finish()
         } else {
