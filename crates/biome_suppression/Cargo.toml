@@ -15,7 +15,7 @@ version              = "0.5.7"
 biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
 biome_rowan       = { workspace = true }
-log               = "0.4.20"
+log               = "0.4.26"
 
 [lints]
 workspace = true
