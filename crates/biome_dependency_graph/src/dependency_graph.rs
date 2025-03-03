@@ -121,11 +121,18 @@ impl DependencyGraph {
             added_or_updated_paths,
             removed_paths,
         ));
-        let resolve_options = ResolveOptions::default()
-            .with_extension(".jsx")
-            .with_extension(".ts")
-            .with_extension(".tsx")
-            .with_force_extension(EnforceExtension::Disabled);
+        let resolve_options = ResolveOptions {
+            enforce_extension: EnforceExtension::Disabled,
+            extensions: vec![
+                ".js".into(),
+                ".jsx".into(),
+                ".ts".into(),
+                ".tsx".into(),
+                ".json".into(),
+                ".node".into(),
+            ],
+            ..Default::default()
+        };
         let resolver = ResolverGeneric::new_with_cache(resolver_cache.clone(), resolve_options);
 
         // Make sure all directories are registered for the added/updated paths.
