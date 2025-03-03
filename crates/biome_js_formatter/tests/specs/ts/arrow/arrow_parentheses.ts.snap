@@ -42,7 +42,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
-Object wrap: Preserve
+Expand lists: Auto
 -----
 
 ```ts
@@ -77,7 +77,7 @@ Arrow parentheses: As needed
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
-Object wrap: Preserve
+Expand lists: Auto
 -----
 
 ```ts

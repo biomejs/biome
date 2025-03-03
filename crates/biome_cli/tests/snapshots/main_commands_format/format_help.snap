@@ -21,8 +21,14 @@ Generic options applied to all files
                               apply to self closing elements).
         --bracket-spacing=<true|false>  Whether to insert spaces around brackets in object literals.
                               Defaults to true.
-        --object-wrap=<preserve|collapse>  Whether to enforce collapsing object literals when
-                              possible. Defaults to preserve.
+        --expand=<auto|always|never>  Whether to expand arrays and objects on multiple lines. When
+                              set to `auto`, object literals are formatted on multiple lines if the
+                              first property has a newline, and array literals are formatted on a
+                              single line if it fits in the line. When set to `always`, these
+                              literals are formatted on multiple lines, regardless of length of the
+                              list. When set to `never`, these literals are formatted on a single
+                              line if it fits in the line. When formatting `package.json`, Biome
+                              will use `always` unless configured otherwise. Defaults to "auto".
         --use-editorconfig=<true|false>  Use any `.editorconfig` files to configure the formatter.
                               Configuration in `biome.json` will override `.editorconfig`
                               configuration.
@@ -57,8 +63,15 @@ Formatting options specific to the JavaScript files
                               JSX elements. Defaults to auto.
         --javascript-formatter-bracket-spacing=<true|false>  Whether to insert spaces around
                               brackets in object literals. Defaults to true.
-        --javascript-formatter-object-wrap=<preserve|collapse>  Whether to enforce collapsing object
-                              literals when possible. Defaults to preserve.
+        --javascript-formatter-expand=<auto|always|never>  Whether to expand arrays and objects on
+                              multiple lines. When set to `auto`, object literals are formatted on
+                              multiple lines if the first property has a newline, and array literals
+                              are formatted on a single line if it fits in the line. When set to
+                              `always`, these literals are formatted on multiple lines, regardless
+                              of length of the list. When set to `never`, these literals are
+                              formatted on a single line if it fits in the line. When formatting
+                              `package.json`, Biome will use `always` unless configured otherwise.
+                              Defaults to "auto".
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
@@ -130,15 +143,17 @@ Available options:
                               super languages) files. Defaults to 80.
         --json-formatter-trailing-commas=<none|all>  Print trailing commas wherever possible in
                               multi-line comma-separated syntactic structures. Defaults to "none".
-        --json-formatter-expand=<always|follow-source>  Whether to expand arrays and objects on
-                              multiple lines. When set to `always`, these literals are formatted on
-                              multiple lines, regardless of length of the list. When formatting
+        --json-formatter-expand=<auto|always|never>  Whether to expand arrays and objects on
+                              multiple lines. When set to `auto`, object literals are formatted on
+                              multiple lines if the first property has a newline, and array literals
+                              are formatted on a single line if it fits in the line. When set to
+                              `always`, these literals are formatted on multiple lines, regardless
+                              of length of the list. When set to `never`, these literals are
+                              formatted on a single line if it fits in the line. When formatting
                               `package.json`, Biome will use `always` unless configured otherwise.
-                              Defaults to "followSource".
+                              Defaults to "auto".
         --json-formatter-bracket-spacing=<true|false>  Whether to insert spaces around brackets in
                               object literals. Defaults to true.
-        --json-formatter-object-wrap=<preserve|collapse>  Whether to enforce collapsing object
-                              literals when possible. Defaults to preserve.
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension

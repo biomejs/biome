@@ -699,48 +699,42 @@ impl FromStr for BracketSameLine {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub enum ObjectWrap {
+pub enum Expand {
+    /// Objects are expanded when the first property has a leading newline. Arrays are always
+    /// expanded if they are shorter than the line width.
     #[default]
-    Preserve,
-    Collapse,
+    Auto,
+    /// Objects and arrays are always expanded.
+    Always,
+    /// Objects and arrays are never expanded, if they are shorter than the line width.
+    Never,
 }
 
-impl ObjectWrap {
-    pub const fn is_preserve(&self) -> bool {
-        matches!(self, Self::Preserve)
-    }
-
-    pub const fn is_collapse(&self) -> bool {
-        matches!(self, Self::Collapse)
-    }
-}
-
-impl FromStr for ObjectWrap {
-    type Err = &'static str;
-
+impl FromStr for Expand {
+    type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "preserve" => Ok(Self::Preserve),
-            "contains" => Ok(Self::Collapse),
-            _ => Err(
-                "Value not supported for objectWrap. Supported values are 'preserve' and 'collapse'.",
-            ),
+            "auto" => Ok(Self::Auto),
+            "always" => Ok(Self::Always),
+            "never" => Ok(Self::Never),
+            _ => Err(std::format!("unknown expand literal: {}", s)),
         }
     }
 }
 
-impl Display for ObjectWrap {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl fmt::Display for Expand {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::Preserve => std::write!(f, "Preserve"),
-            Self::Collapse => std::write!(f, "Collapse"),
+            Expand::Auto => std::write!(f, "Auto"),
+            Expand::Always => std::write!(f, "Always"),
+            Expand::Never => std::write!(f, "Never"),
         }
     }
 }

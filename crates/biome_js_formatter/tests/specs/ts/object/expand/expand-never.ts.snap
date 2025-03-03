@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: ts/object/object-wrap/object-wrap-collapse.ts
+info: ts/object/expand/expand-never.ts
 ---
 # Input
 
@@ -64,7 +64,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
-Object wrap: Preserve
+Expand lists: Auto
 -----
 
 ```ts
@@ -123,7 +123,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
-Object wrap: Collapse
+Expand lists: Never
 -----
 
 ```ts

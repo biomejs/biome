@@ -1,0 +1,108 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/array/expand/expand-always.js
+---
+# Input
+
+```js
+const a = [
+	"value1",
+	"value2",
+];
+
+const b = [ "value1",
+	"value2",
+];
+
+const c = [
+	"value1", "value2",
+];
+
+const d = [
+	"value1", "value2", ];
+
+const e = [ "value1", "value2", ];
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Auto
+-----
+
+```js
+const a = ["value1", "value2"];
+
+const b = ["value1", "value2"];
+
+const c = ["value1", "value2"];
+
+const d = ["value1", "value2"];
+
+const e = ["value1", "value2"];
+```
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing commas: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+Attribute Position: Auto
+Expand lists: Always
+-----
+
+```js
+const a = [
+	"value1",
+	"value2",
+];
+
+const b = [
+	"value1",
+	"value2",
+];
+
+const c = [
+	"value1",
+	"value2",
+];
+
+const d = [
+	"value1",
+	"value2",
+];
+
+const e = [
+	"value1",
+	"value2",
+];
+```
