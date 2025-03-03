@@ -34,8 +34,8 @@ use biome_configuration::javascript::{
 };
 use biome_diagnostics::Applicability;
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, FormatError, IndentStyle, IndentWidth,
-    LineEnding, LineWidth, ObjectWrap, Printed, QuoteStyle,
+    AttributePosition, BracketSameLine, BracketSpacing, Expand, FormatError, IndentStyle,
+    IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
 };
 use biome_fs::BiomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
@@ -76,7 +76,7 @@ pub struct JsFormatterSettings {
     pub indent_style: Option<IndentStyle>,
     pub enabled: Option<JsFormatterEnabled>,
     pub attribute_position: Option<AttributePosition>,
-    pub object_wrap: Option<ObjectWrap>,
+    pub expand: Option<Expand>,
 }
 
 impl From<JsFormatterConfiguration> for JsFormatterSettings {
@@ -96,7 +96,7 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
             indent_width: value.indent_width,
             indent_style: value.indent_style,
             line_ending: value.line_ending,
-            object_wrap: value.object_wrap,
+            expand: value.expand,
         }
     }
 }
@@ -246,10 +246,10 @@ impl ServiceLanguage for JsLanguage {
                 .or(global.and_then(|g| g.attribute_position))
                 .unwrap_or_default(),
         )
-        .with_object_wrap(
+        .with_expand(
             language
-                .and_then(|l| l.object_wrap)
-                .or(global.and_then(|g| g.object_wrap))
+                .and_then(|l| l.expand)
+                .or(global.and_then(|g| g.expand))
                 .unwrap_or_default(),
         );
 

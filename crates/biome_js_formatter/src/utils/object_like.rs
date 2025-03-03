@@ -1,6 +1,6 @@
 use crate::JsFormatContext;
 use crate::prelude::*;
-use biome_formatter::write;
+use biome_formatter::{Expand, write};
 use biome_formatter::{Format, FormatResult};
 use biome_js_syntax::{
     JsFormalParameter, JsObjectExpression, JsSyntaxToken, TsObjectType, TsTypeAnnotation,
@@ -63,10 +63,13 @@ impl Format<JsFormatContext> for JsObjectLike {
             )?;
         } else {
             let should_insert_space_around_brackets = f.options().bracket_spacing().value();
-            let should_expand = f.options().object_wrap().is_preserve()
-                && self.members_have_leading_newline()
-                // const fn = ({ foo }: { foo: string }) => { ... };
-                //                      ^ do not break properties here
+            let should_expand = (f.options().expand() == Expand::Auto
+                && self.members_have_leading_newline())
+                || f.options().expand() == Expand::Always;
+
+            // const fn = ({ foo }: { foo: string }) => { ... };
+            //                      ^ do not break properties here
+            let should_expand = should_expand
                 && self
                     .parent::<TsTypeAnnotation>()
                     .is_none_or(|node| node.parent::<JsFormalParameter>().is_none());

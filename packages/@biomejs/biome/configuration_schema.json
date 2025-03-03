@@ -1463,6 +1463,10 @@
 				"enabled": {
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
+				"expand": {
+					"description": "Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"auto\".",
+					"anyOf": [{ "$ref": "#/definitions/Expand" }, { "type": "null" }]
+				},
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
@@ -1487,10 +1491,6 @@
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
-				},
-				"objectWrap": {
-					"description": "Whether to enforce collapsing object literals when possible. Defaults to preserve.",
-					"anyOf": [{ "$ref": "#/definitions/ObjectWrap" }, { "type": "null" }]
 				},
 				"useEditorconfig": {
 					"description": "Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.\n\nDefault: `false`.",
@@ -1921,6 +1921,10 @@
 					"description": "Control the formatter for JavaScript (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
+				"expand": {
+					"description": "Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"auto\".",
+					"anyOf": [{ "$ref": "#/definitions/Expand" }, { "type": "null" }]
+				},
 				"indentStyle": {
 					"description": "The indent style applied to JavaScript (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
@@ -1940,10 +1944,6 @@
 				"lineWidth": {
 					"description": "What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
-				},
-				"objectWrap": {
-					"description": "Whether to enforce collapsing object literals when possible. Defaults to preserve.",
-					"anyOf": [{ "$ref": "#/definitions/ObjectWrap" }, { "type": "null" }]
 				},
 				"quoteProperties": {
 					"description": "When properties in objects are quoted. Defaults to asNeeded.",
@@ -2079,10 +2079,6 @@
 				"lineWidth": {
 					"description": "What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
-				},
-				"objectWrap": {
-					"description": "Whether to enforce collapsing object literals when possible. Defaults to preserve.",
-					"anyOf": [{ "$ref": "#/definitions/ObjectWrap" }, { "type": "null" }]
 				},
 				"trailingCommas": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"none\".",
@@ -2987,7 +2983,6 @@
 				{ "description": "`{foo}`", "type": "string", "enum": ["shorthand"] }
 			]
 		},
-		"ObjectWrap": { "type": "string", "enum": ["preserve", "collapse"] },
 		"Options": {
 			"type": "object",
 			"properties": {
@@ -3041,6 +3036,10 @@
 				"enabled": {
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
+				"expand": {
+					"description": "Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"auto\".",
+					"anyOf": [{ "$ref": "#/definitions/Expand" }, { "type": "null" }]
+				},
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
@@ -3064,10 +3063,6 @@
 				"lineWidth": {
 					"description": "What's the max width of a line. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
-				},
-				"objectWrap": {
-					"description": "Whether to enforce collapsing object literals when possible. Defaults to preserve.",
-					"anyOf": [{ "$ref": "#/definitions/ObjectWrap" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false

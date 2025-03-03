@@ -23,8 +23,8 @@ use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::Merge;
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
-    LineWidth, ObjectWrap,
+    AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
+    LineEnding, LineWidth,
 };
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
@@ -250,7 +250,7 @@ pub struct FormatSettings {
     pub attribute_position: Option<AttributePosition>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub bracket_spacing: Option<BracketSpacing>,
-    pub object_wrap: Option<ObjectWrap>,
+    pub expand: Option<Expand>,
     /// List of included paths/files
     pub includes: Includes,
 }
@@ -276,7 +276,7 @@ pub struct OverrideFormatSettings {
     pub bracket_spacing: Option<BracketSpacing>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub attribute_position: Option<AttributePosition>,
-    pub object_wrap: Option<ObjectWrap>,
+    pub expand: Option<Expand>,
 }
 
 impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
@@ -291,7 +291,7 @@ impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
             bracket_spacing: conf.bracket_spacing,
             bracket_same_line: conf.bracket_same_line,
             attribute_position: conf.attribute_position,
-            object_wrap: conf.object_wrap,
+            expand: conf.expand,
         }
     }
 }
@@ -1445,7 +1445,7 @@ pub fn to_override_settings(
                 bracket_spacing: formatter.bracket_spacing,
                 bracket_same_line: formatter.bracket_same_line,
                 attribute_position: formatter.attribute_position,
-                object_wrap: formatter.object_wrap,
+                expand: formatter.expand,
             })
             .unwrap_or_default();
         let linter = pattern
@@ -1610,7 +1610,7 @@ pub fn to_format_settings(
         attribute_position: conf.attribute_position,
         bracket_same_line: conf.bracket_same_line,
         bracket_spacing: conf.bracket_spacing,
-        object_wrap: conf.object_wrap,
+        expand: conf.expand,
         includes: Includes::new(working_directory, conf.includes),
     })
 }
@@ -1635,7 +1635,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             attribute_position: Some(AttributePosition::default()),
             bracket_same_line: conf.bracket_same_line,
             bracket_spacing: Some(BracketSpacing::default()),
-            object_wrap: conf.object_wrap,
+            expand: conf.expand,
             format_with_errors: conf.format_with_errors,
             includes: Default::default(),
         })
