@@ -83,7 +83,9 @@ pub fn ensure_rustfmt() -> Result<()> {
 
     // e.g. "rustfmt 1.8.0-stable (4d91de4e48 2025-02-17)"
     let (_, version) = out.split_once(' ').unwrap_or_default();
-    let mut version = version.split('.').flat_map(|s| str::parse::<usize>(s).ok());
+    let mut version = version
+        .split('.')
+        .filter_map(|s| str::parse::<usize>(s).ok());
     let major = version.next();
     let minor = version.next();
     if major != Some(1) || minor.is_none_or(|minor| minor < 8) {
