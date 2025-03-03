@@ -56,11 +56,17 @@ impl CommandRunner for FormatCommandPayload {
             ..
         } = loaded_configuration;
         let editorconfig_search_path = configuration_path.clone();
-        let mut fs_configuration =
-            self.load_editor_config(editorconfig_search_path, &biome_configuration, fs, console)?;
-        // this makes biome configuration take precedence over editorconfig configuration
-        fs_configuration.merge_with(biome_configuration);
-        let mut configuration = fs_configuration;
+        let mut configuration;
+
+        if let Some(mut fs_configuration) =
+            self.load_editor_config(editorconfig_search_path, &biome_configuration, fs, console)?
+        {
+            // If both `biome.json` and `.editorconfig` exist, formatter settings from the biome.json take precedence.
+            fs_configuration.merge_with(biome_configuration);
+            configuration = fs_configuration;
+        } else {
+            configuration = biome_configuration;
+        }
 
         // merge formatter options
         if configuration
