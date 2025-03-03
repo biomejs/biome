@@ -1066,7 +1066,7 @@ async fn pull_quick_fixes() -> Result<()> {
 
     let expected_inline_suppression_action =
         lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
-            title: String::from("Suppress rule lint/suspicious/noCompareNegZero"),
+            title: String::from("Suppress rule lint/suspicious/noCompareNegZero for this line."),
             kind: Some(lsp::CodeActionKind::new(
                 "quickfix.suppressRule.inline.biome",
             )),
@@ -1125,9 +1125,9 @@ async fn pull_quick_fixes() -> Result<()> {
     assert_eq!(
         res,
         vec![
-            expected_top_level_suppression_action,
+            expected_code_action,
             expected_inline_suppression_action,
-            expected_code_action
+            expected_top_level_suppression_action,
         ]
     );
 
@@ -1446,7 +1446,7 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
 
     let expected_inline_suppression_action =
         lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
-            title: String::from("Suppress rule lint/suspicious/noDoubleEquals"),
+            title: String::from("Suppress rule lint/suspicious/noDoubleEquals for this line."),
             kind: Some(lsp::CodeActionKind::new(
                 "quickfix.suppressRule.inline.biome",
             )),
@@ -1503,9 +1503,9 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
     assert_eq!(
         res,
         vec![
-            expected_toplevel_suppression_action,
-            expected_inline_suppression_action,
             expected_code_action,
+            expected_inline_suppression_action,
+            expected_toplevel_suppression_action,
         ]
     );
 
