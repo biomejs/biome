@@ -707,17 +707,23 @@ impl FromStr for BracketSameLine {
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum Expand {
-    Always,
+    /// Objects are expanded when the first property has a leading newline. Arrays are always
+    /// expanded if it is shorter than the line width.
     #[default]
-    FollowSource,
+    Auto,
+    /// Objects and arrays are always expanded.
+    Always,
+    /// Objects and arrays are never expanded, if it is shorter than the line width.
+    Never,
 }
 
 impl FromStr for Expand {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "auto" => Ok(Self::Auto),
             "always" => Ok(Self::Always),
-            "follow-source" => Ok(Self::FollowSource),
+            "never" => Ok(Self::Never),
             _ => Err(std::format!("unknown expand literal: {}", s)),
         }
     }
@@ -726,8 +732,9 @@ impl FromStr for Expand {
 impl fmt::Display for Expand {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            Expand::Auto => std::write!(f, "Auto"),
             Expand::Always => std::write!(f, "Always"),
-            Expand::FollowSource => std::write!(f, "Follow Source"),
+            Expand::Never => std::write!(f, "Never"),
         }
     }
 }

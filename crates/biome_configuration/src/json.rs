@@ -94,13 +94,13 @@ pub struct JsonFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_commas: Option<TrailingCommas>,
 
-    /// Whether to expand arrays and objects on multiple lines. When set to `always`, these literals are formatted on multiple lines,
-    /// regardless of length of the list. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "followSource".
-    #[bpaf(
-        long("json-formatter-expand"),
-        argument("always|follow-source"),
-        optional
-    )]
+    /// Whether to expand arrays and objects on multiple lines.
+    /// When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
+    /// and array literals are formatted on a single line if it fits in the line.
+    /// When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
+    /// When set to `never`, these literals are formatted on a single line if it fits in the line.
+    /// When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+    #[bpaf(long("json-formatter-expand"), argument("auto|always|never"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expand: Option<Expand>,
 

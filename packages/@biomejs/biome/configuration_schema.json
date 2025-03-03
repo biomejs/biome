@@ -1306,7 +1306,25 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"Expand": { "type": "string", "enum": ["always", "followSource"] },
+		"Expand": {
+			"oneOf": [
+				{
+					"description": "Objects are expanded when the first property has a leading newline. Arrays are always expanded if it is shorter than the line width.",
+					"type": "string",
+					"enum": ["auto"]
+				},
+				{
+					"description": "Objects and arrays are always expanded.",
+					"type": "string",
+					"enum": ["always"]
+				},
+				{
+					"description": "Objects and arrays are never expanded, if it is shorter than the line width.",
+					"type": "string",
+					"enum": ["never"]
+				}
+			]
+		},
 		"FilenameCase": {
 			"description": "Supported cases for file names.",
 			"oneOf": [
@@ -2043,7 +2061,7 @@
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"expand": {
-					"description": "Whether to expand arrays and objects on multiple lines. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"followSource\".",
+					"description": "Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to \"auto\".",
 					"anyOf": [{ "$ref": "#/definitions/Expand" }, { "type": "null" }]
 				},
 				"indentStyle": {
