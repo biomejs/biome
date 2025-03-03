@@ -1394,7 +1394,7 @@ export interface Correctness {
 	/**
 	 * Disallow unused variables.
 	 */
-	noUnusedVariables?: RuleFixConfiguration_for_Null;
+	noUnusedVariables?: RuleFixConfiguration_for_NoUnusedVariablesOptions;
 	/**
 	 * This rules prevents void elements (AKA self-closing elements) from having children.
 	 */
@@ -2297,6 +2297,9 @@ export type RuleConfiguration_for_NoUndeclaredDependenciesOptions =
 export type RuleConfiguration_for_UndeclaredVariablesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UndeclaredVariablesOptions;
+export type RuleFixConfiguration_for_NoUnusedVariablesOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoUnusedVariablesOptions;
 export type RuleConfiguration_for_UseExhaustiveDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseExhaustiveDependenciesOptions;
@@ -2460,6 +2463,20 @@ export interface RuleWithOptions_for_UndeclaredVariablesOptions {
 	 * Rule's options
 	 */
 	options: UndeclaredVariablesOptions;
+}
+export interface RuleWithFixOptions_for_NoUnusedVariablesOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUnusedVariablesOptions;
 }
 export interface RuleWithOptions_for_UseExhaustiveDependenciesOptions {
 	/**
@@ -2749,6 +2766,12 @@ export interface UndeclaredVariablesOptions {
 	 * Check undeclared types.
 	 */
 	checkTypes?: boolean;
+}
+export interface NoUnusedVariablesOptions {
+	/**
+	 * Whether to ignore unused variables from an object desctructuring with a spread (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule).
+	 */
+	ignoreRestSiblings?: boolean;
 }
 /**
  * Options for the rule `useExhaustiveDependencies`
