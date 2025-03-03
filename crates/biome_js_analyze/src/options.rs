@@ -191,6 +191,7 @@ pub type NoPrototypeBuiltins =
     <lint::suspicious::no_prototype_builtins::NoPrototypeBuiltins as biome_analyze::Rule>::Options;
 pub type NoReExportAll =
     <lint::performance::no_re_export_all::NoReExportAll as biome_analyze::Rule>::Options;
+pub type NoReactDeps = <lint::nursery::no_react_deps::NoReactDeps as biome_analyze::Rule>::Options;
 pub type NoReactSpecificProps = < lint :: suspicious :: no_react_specific_props :: NoReactSpecificProps as biome_analyze :: Rule > :: Options ;
 pub type NoRedeclare =
     <lint::suspicious::no_redeclare::NoRedeclare as biome_analyze::Rule>::Options;
