@@ -11,7 +11,7 @@ use biome_fs::{BiomePath, FileSystem, PathKind};
 use biome_js_syntax::AnyJsRoot;
 use biome_project_layout::ProjectLayout;
 use camino::{Utf8Path, Utf8PathBuf};
-use oxc_resolver::{ResolveError, ResolveOptions, ResolverGeneric};
+use oxc_resolver::{EnforceExtension, ResolveError, ResolveOptions, ResolverGeneric};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
 
@@ -121,8 +121,12 @@ impl DependencyGraph {
             added_or_updated_paths,
             removed_paths,
         ));
-        let resolver =
-            ResolverGeneric::new_with_cache(resolver_cache.clone(), ResolveOptions::default());
+        let resolve_options = ResolveOptions::default()
+            .with_extension(".jsx")
+            .with_extension(".ts")
+            .with_extension(".tsx")
+            .with_force_extension(EnforceExtension::Disabled);
+        let resolver = ResolverGeneric::new_with_cache(resolver_cache.clone(), resolve_options);
 
         // Make sure all directories are registered for the added/updated paths.
         let path_info = self.path_info.pin();
