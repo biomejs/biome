@@ -9,9 +9,8 @@ use crate::file_handlers::{
     LintResults, ParserCapabilities,
 };
 use crate::settings::{
-    FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings, OverrideSettings,
-    ServiceLanguage, Settings, WorkspaceSettingsHandle, check_feature_activity,
-    check_override_feature_activity,
+    FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
+    Settings, WorkspaceSettingsHandle, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::{
     CodeAction, FixAction, FixFileMode, FixFileResult, GetSyntaxTreeResult, PullActionsResult,
@@ -206,9 +205,8 @@ impl ServiceLanguage for JsonLanguage {
 
     fn resolve_analyzer_options(
         global: Option<&Settings>,
-        _linter: Option<&LinterSettings>,
-        _overrides: Option<&OverrideSettings>,
         _language: Option<&Self::LinterSettings>,
+        _environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
         _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
@@ -311,6 +309,10 @@ impl ServiceLanguage for JsonLanguage {
             })
             .unwrap_or_default()
             .into()
+    }
+
+    fn resolve_environment(_settings: Option<&Settings>) -> Option<&Self::EnvironmentSettings> {
+        None
     }
 }
 
