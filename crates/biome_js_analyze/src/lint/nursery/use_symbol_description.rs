@@ -67,7 +67,7 @@ impl Rule for UseSymbolDescription {
                 let first_arg = args.into_iter().next()?.ok()?;
                 let first_arg = first_arg.as_any_js_expression()?;
 
-                is_expr_empty_string(&first_arg)
+                is_expr_empty_string(first_arg)
             }
             // native Symbol() can accept only one argument.
             _ => false,
