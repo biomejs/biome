@@ -2301,6 +2301,24 @@
 			},
 			"additionalProperties": false
 		},
+		"NoConfusingLabelsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoConfusingLabelsOptions" }
+			]
+		},
+		"NoConfusingLabelsOptions": {
+			"description": "Options for the rule `noConfusingLabels`",
+			"type": "object",
+			"properties": {
+				"allowedLabels": {
+					"description": "A list of (non-confusing) labels that should be allowed",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoConsoleConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3462,6 +3480,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoConfusingLabelsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoConfusingLabelsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoConsoleOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -4420,7 +4453,7 @@
 				"noConfusingLabels": {
 					"description": "Disallow labeled statements that are not loops.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoConfusingLabelsConfiguration" },
 						{ "type": "null" }
 					]
 				},
