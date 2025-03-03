@@ -761,6 +761,7 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_service",
+ "biome_string_case",
  "biome_suppression",
  "camino",
  "countme",
