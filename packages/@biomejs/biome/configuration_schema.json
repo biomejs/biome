@@ -1309,7 +1309,7 @@
 		"Expand": {
 			"oneOf": [
 				{
-					"description": "Objects are expanded when the first property has a leading newline. Arrays are always expanded if it is shorter than the line width.",
+					"description": "Objects are expanded when the first property has a leading newline. Arrays are always expanded if they are shorter than the line width.",
 					"type": "string",
 					"enum": ["auto"]
 				},
@@ -1319,7 +1319,7 @@
 					"enum": ["always"]
 				},
 				{
-					"description": "Objects and arrays are never expanded, if it is shorter than the line width.",
+					"description": "Objects and arrays are never expanded, if they are shorter than the line width.",
 					"type": "string",
 					"enum": ["never"]
 				}
