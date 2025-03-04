@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: noDoubleEquals.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -38,7 +37,7 @@ noDoubleEquals.jsx:3:51 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
   
   i Using == may be unsafe if you are relying on type coercion
   
-  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for this line.
   
     1 1 │   let a = <button
     2 2 │       className="SomeManyClasses"

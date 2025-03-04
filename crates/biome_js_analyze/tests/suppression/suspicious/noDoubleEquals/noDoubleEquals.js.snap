@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: noDoubleEquals.js
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -52,7 +51,7 @@ noDoubleEquals.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
   
   i Using == may be unsafe if you are relying on type coercion
   
-  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for this line.
   
      1  1 │   const foo = `
      2  2 │   text
@@ -93,7 +92,7 @@ noDoubleEquals.js:7:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
   
   i Using == may be unsafe if you are relying on type coercion
   
-  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for this line.
   
      5  5 │   
      6  6 │   // existing comment
@@ -134,7 +133,7 @@ noDoubleEquals.js:9:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
   
   i Using == may be unsafe if you are relying on type coercion
   
-  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for this line.
   
      7  7 │   a == b;
      8  8 │   
@@ -173,7 +172,7 @@ noDoubleEquals.js:14:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
   
   i Using == may be unsafe if you are relying on type coercion
   
-  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for this line.
   
     12 12 │   
     13 13 │   if (/** some weird comment
@@ -214,7 +213,7 @@ noDoubleEquals.js:19:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
   
   i Using == may be unsafe if you are relying on type coercion
   
-  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for this line.
   
     17 17 │   
     18 18 │   let a = `Output of "biome rage":
