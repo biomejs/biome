@@ -59,7 +59,7 @@ var cyrillicChars = /[\u200E\u2066-\u2069]/gu;
 /[\u0300-\u0302]/;
 
 // 2.The hyphen is treated as literal character in the character class
-// This regex is valid, it will match either '\u0300' or a literal hyphen '-'
+// This regex is valid, it will match '\u0300' or a literal hyphen '-'
 /[\u0300-]/;
 
 // 3. The hyphen is treated as a literal character outside a character class
