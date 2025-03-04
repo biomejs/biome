@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: noEmptyBlock.css
-snapshot_kind: text
 ---
 # Input
 ```css

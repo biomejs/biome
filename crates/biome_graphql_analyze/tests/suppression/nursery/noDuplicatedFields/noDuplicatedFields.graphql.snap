@@ -1,7 +1,6 @@
 ---
 source: crates/biome_graphql_analyze/tests/spec_tests.rs
 expression: noDuplicatedFields.graphql
-snapshot_kind: text
 ---
 # Input
 ```graphql

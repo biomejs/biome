@@ -30,12 +30,11 @@ use biome_configuration::json::{
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::Applicability;
 use biome_formatter::{
-    BracketSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, ObjectWrap,
-    Printed,
+    BracketSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
 };
 use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::analyze;
-use biome_json_formatter::context::{Expand, JsonFormatOptions, TrailingCommas};
+use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
@@ -56,7 +55,6 @@ pub struct JsonFormatterSettings {
     pub trailing_commas: Option<TrailingCommas>,
     pub expand: Option<Expand>,
     pub bracket_spacing: Option<BracketSpacing>,
-    pub object_wrap: Option<ObjectWrap>,
     pub enabled: Option<JsonFormatterEnabled>,
 }
 
@@ -70,7 +68,6 @@ impl From<JsonFormatterConfiguration> for JsonFormatterSettings {
             trailing_commas: configuration.trailing_commas,
             expand: configuration.expand,
             bracket_spacing: configuration.bracket_spacing,
-            object_wrap: configuration.object_wrap,
             enabled: configuration.enabled,
         }
     }
@@ -164,22 +161,20 @@ impl ServiceLanguage for JsonLanguage {
             language.and_then(|l| l.trailing_commas).unwrap_or_default()
         };
 
-        let expand_lists = language.and_then(|l| l.expand).unwrap_or_else(|| {
-            if path.file_name() == Some("package.json") {
-                Expand::Always
-            } else {
-                Expand::default()
-            }
-        });
+        let expand_lists = language
+            .and_then(|l| l.expand)
+            .or(global.and_then(|g| g.expand))
+            .unwrap_or_else(|| {
+                if path.file_name() == Some("package.json") {
+                    Expand::Always
+                } else {
+                    Expand::default()
+                }
+            });
 
         let bracket_spacing = language
             .and_then(|l| l.bracket_spacing)
             .or(global.and_then(|g| g.bracket_spacing))
-            .unwrap_or_default();
-
-        let object_wrap = language
-            .and_then(|l| l.object_wrap)
-            .or(global.and_then(|g| g.object_wrap))
             .unwrap_or_default();
 
         let file_source = document_file_source
@@ -193,8 +188,7 @@ impl ServiceLanguage for JsonLanguage {
             .with_line_width(line_width)
             .with_trailing_commas(trailing_commas)
             .with_expand(expand_lists)
-            .with_bracket_spacing(bracket_spacing)
-            .with_object_wrap(object_wrap);
+            .with_bracket_spacing(bracket_spacing);
 
         if let Some(overrides) = overrides {
             overrides.to_override_json_format_options(path, options)
