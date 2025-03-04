@@ -33,6 +33,9 @@ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
 var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
 
 /[\]👍]/;
+
+/[-\u0300]/;
+
 ```
 
 # Diagnostics
@@ -538,6 +541,8 @@ invalid.js:29:5 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
     28 │ 
   > 29 │ /[\]👍]/;
        │     ^^
+    30 │ 
+    31 │ /[-\u0300]/;
   
   i A surrogate pair forms a single codepoint, but is encoded as a pair of two characters. Without the unicode flag, the regex matches a single surrogate character.
   
@@ -545,5 +550,21 @@ invalid.js:29:5 lint/suspicious/noMisleadingCharacterClass  FIXABLE  ━━━�
   
     29 │ /[\]👍]/u;
        │         + 
+
+```
+
+```
+invalid.js:31:3 lint/suspicious/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A character class cannot match a character and a combining character.
+  
+    29 │ /[\]👍]/;
+    30 │ 
+  > 31 │ /[-\u0300]/;
+       │   ^^^^^^^
+    32 │ 
+  
+  i A character and a combining character forms a new character. Replace the character class with an alternation.
+  
 
 ```
