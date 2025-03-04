@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidBitwiseZeroOr.js
+---
+# Input
+```js
+let a = 4 | 0;
+```
+
+# Diagnostics
+```
+invalidBitwiseZeroOr.js:1:9 lint/nursery/noBitwise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of '| '.
+  
+  > 1 │ let a = 4 | 0;
+      │         ^^^^^
+  
+  i The use of bitwise operators in JavaScript is very rare and often & or | is simply a mistyped && or ||.
+  
+
+```

@@ -1449,6 +1449,10 @@ export interface Nursery {
 	 */
 	noAwaitInLoop?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noBitwise?: RuleConfiguration_for_NoBitwiseOptions;
+	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
 	noCommonJs?: RuleConfiguration_for_Null;
@@ -2302,6 +2306,9 @@ export type RuleConfiguration_for_DeprecatedHooksOptions =
 export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportExtensionsOptions;
+export type RuleConfiguration_for_NoBitwiseOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoBitwiseOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -2487,6 +2494,16 @@ export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	 * Rule's options
 	 */
 	options: UseImportExtensionsOptions;
+}
+export interface RuleWithOptions_for_NoBitwiseOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoBitwiseOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	/**
@@ -2759,6 +2776,13 @@ export interface UseImportExtensionsOptions {
 	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
 	 */
 	suggestedExtensions?: {};
+}
+/**
+ * Options for the `noBitwise` rule.
+ */
+export interface NoBitwiseOptions {
+	allow: string[];
+	int32Hint?: boolean;
 }
 /**
  * Options for the rule `noRestrictedImports`.
@@ -3163,6 +3187,7 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noAwaitInLoop"
+	| "lint/nursery/noBitwise"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"

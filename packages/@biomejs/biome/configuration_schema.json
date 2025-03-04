@@ -2301,6 +2301,21 @@
 			},
 			"additionalProperties": false
 		},
+		"NoBitwiseConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoBitwiseOptions" }
+			]
+		},
+		"NoBitwiseOptions": {
+			"description": "Options for the `noBitwise` rule.",
+			"type": "object",
+			"properties": {
+				"allow": { "type": "array", "items": { "type": "string" } },
+				"int32Hint": { "default": false, "type": "boolean" }
+			},
+			"additionalProperties": false
+		},
 		"NoConsoleConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2456,6 +2471,13 @@
 					"description": "Disallow await inside loops.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noBitwise": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoBitwiseConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3458,6 +3480,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NamingConventionOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoBitwiseOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoBitwiseOptions" }]
 				}
 			},
 			"additionalProperties": false
