@@ -1,7 +1,6 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: noEmptyBlock.css
-snapshot_kind: text
 ---
 # Input
 ```css
@@ -76,7 +75,7 @@ noEmptyBlock.css:2:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
      1  1 │   /* CssDeclarationOrRuleBlock */
      2    │ - a·{}
@@ -110,7 +109,7 @@ noEmptyBlock.css:3:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
      1  1 │   /* CssDeclarationOrRuleBlock */
      2  2 │   a {}
@@ -148,7 +147,7 @@ noEmptyBlock.css:4:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
      2  2 │   a {}
      3  3 │   a { }
@@ -183,7 +182,7 @@ noEmptyBlock.css:8:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
      6  6 │   }
      7  7 │   
@@ -215,7 +214,7 @@ noEmptyBlock.css:9:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
      7  7 │   
      8  8 │   .b {}
@@ -251,7 +250,7 @@ noEmptyBlock.css:10:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
      8  8 │   .b {}
      9  9 │   .b { }
@@ -283,7 +282,7 @@ noEmptyBlock.css:15:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
     13 13 │   
     14 14 │   /* CssRuleBlock */
@@ -319,7 +318,7 @@ noEmptyBlock.css:16:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
     14 14 │   /* CssRuleBlock */
     15 15 │   @media print {}
@@ -351,7 +350,7 @@ noEmptyBlock.css:19:18 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
     17 17 │   
     18 18 │   }
@@ -383,7 +382,7 @@ noEmptyBlock.css:22:30 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
     20 20 │   
     21 21 │   /* CssDeclarationBlock */
@@ -416,7 +415,7 @@ noEmptyBlock.css:23:12 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
     21 21 │   /* CssDeclarationBlock */
     22 22 │   @font-palette-values --ident {}
@@ -448,7 +447,7 @@ noEmptyBlock.css:26:20 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
     24 24 │   
     25 25 │   /* CssKeyframesBlock */
@@ -483,7 +482,7 @@ noEmptyBlock.css:28:10 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
     26 26 │   @keyframes slidein {}
     27 27 │   @keyframes slidein {
@@ -521,7 +520,7 @@ noEmptyBlock.css:38:13 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
     36 36 │   /* CssFontFeatureValuesBlock */
     37 37 │   @font-feature-values Font One {
@@ -555,7 +554,7 @@ noEmptyBlock.css:44:7 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
     42 42 │   
     43 43 │   /* CssPageAtRuleBlock */
@@ -589,7 +588,7 @@ noEmptyBlock.css:45:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
     43 43 │   /* CssPageAtRuleBlock */
     44 44 │   @page {}
@@ -621,7 +620,7 @@ noEmptyBlock.css:50:28 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
     48 48 │   
     49 49 │   /* CssDeclarationOrAtRuleBlock */
@@ -656,7 +655,7 @@ noEmptyBlock.css:52:16 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Consider removing the empty block or adding styles inside it.
   
-  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock
+  i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
   
     50 50 │   @page :left { @left-middle {} background: red; }
     51 51 │   @page {

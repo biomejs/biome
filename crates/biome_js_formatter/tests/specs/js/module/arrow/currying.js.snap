@@ -79,7 +79,7 @@ Arrow parentheses: Always
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
-Object wrap: Preserve
+Expand lists: Auto
 -----
 
 ```js
@@ -171,7 +171,7 @@ Arrow parentheses: As needed
 Bracket spacing: true
 Bracket same line: false
 Attribute Position: Auto
-Object wrap: Preserve
+Expand lists: Auto
 -----
 
 ```js

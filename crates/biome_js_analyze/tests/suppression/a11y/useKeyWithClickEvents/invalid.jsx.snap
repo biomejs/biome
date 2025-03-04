@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -26,7 +25,7 @@ invalid.jsx:2:5 lint/a11y/useKeyWithClickEvents  FIXABLE  ━━━━━━━�
   
   i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
   
-  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents
+  i Safe fix: Suppress rule lint/a11y/useKeyWithClickEvents for this line.
   
     1 1 │   <>
     2   │ - ····<div·onClick={()·=>·{}}·/>

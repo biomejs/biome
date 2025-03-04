@@ -1,9 +1,7 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::{
-    BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, ObjectWrap,
-};
-use biome_json_formatter::context::{Expand, TrailingCommas};
+use biome_formatter::{BracketSpacing, Expand, IndentStyle, IndentWidth, LineEnding, LineWidth};
+use biome_json_formatter::context::TrailingCommas;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -94,13 +92,13 @@ pub struct JsonFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_commas: Option<TrailingCommas>,
 
-    /// Whether to expand arrays and objects on multiple lines. When set to `always`, these literals are formatted on multiple lines,
-    /// regardless of length of the list. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "followSource".
-    #[bpaf(
-        long("json-formatter-expand"),
-        argument("always|follow-source"),
-        optional
-    )]
+    /// Whether to expand arrays and objects on multiple lines.
+    /// When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
+    /// and array literals are formatted on a single line if it fits in the line.
+    /// When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
+    /// When set to `never`, these literals are formatted on a single line if it fits in the line.
+    /// When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+    #[bpaf(long("json-formatter-expand"), argument("auto|always|never"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expand: Option<Expand>,
 
@@ -108,11 +106,6 @@ pub struct JsonFormatterConfiguration {
     #[bpaf(long("json-formatter-bracket-spacing"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
-
-    /// Whether to enforce collapsing object literals when possible. Defaults to preserve.
-    #[bpaf(long("json-formatter-object-wrap"), argument("preserve|collapse"))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub object_wrap: Option<ObjectWrap>,
 }
 
 impl JsonFormatterConfiguration {

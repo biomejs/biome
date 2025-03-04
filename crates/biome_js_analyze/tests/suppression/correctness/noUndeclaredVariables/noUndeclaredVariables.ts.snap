@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: noUndeclaredVariables.ts
-snapshot_kind: text
 ---
 # Input
 ```ts
@@ -27,7 +26,7 @@ noUndeclaredVariables.ts:1:50 lint/correctness/noUndeclaredVariables  FIXABLE  �
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
-  i Safe fix: Suppress rule lint/correctness/noUndeclaredVariables
+  i Safe fix: Suppress rule lint/correctness/noUndeclaredVariables for this line.
   
     1   │ - export·type·Invalid<S·extends·number>·=·`Hello·${T}`
       1 │ + export·type·Invalid<S·extends·number>·=·`Hello·${//·biome-ignore·lint/correctness/noUndeclaredVariables:·<explanation>
@@ -59,7 +58,7 @@ noUndeclaredVariables.ts:5:7 lint/correctness/noUndeclaredVariables  FIXABLE  �
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
-  i Safe fix: Suppress rule lint/correctness/noUndeclaredVariables
+  i Safe fix: Suppress rule lint/correctness/noUndeclaredVariables for this line.
   
     3 3 │   export type Invalid<S extends number> = `
     4 4 │       Hello

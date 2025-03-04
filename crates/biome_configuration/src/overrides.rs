@@ -9,8 +9,8 @@ use crate::{
 use biome_analyze::RuleDomain;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
-    LineWidth, ObjectWrap,
+    AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
+    LineEnding, LineWidth,
 };
 use bpaf::Bpaf;
 use rustc_hash::FxHashMap;
@@ -157,10 +157,15 @@ pub struct OverrideFormatterConfiguration {
     #[bpaf(long("bracket-spacing"), argument("true|false"))]
     pub bracket_spacing: Option<BracketSpacing>,
 
-    /// Whether to enforce collapsing object literals when possible. Defaults to preserve.
+    /// Whether to expand arrays and objects on multiple lines.
+    /// When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
+    /// and array literals are formatted on a single line if it fits in the line.
+    /// When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
+    /// When set to `never`, these literals are formatted on a single line if it fits in the line.
+    /// When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(long("object-wrap"), argument("preserve|collapse"))]
-    pub object_wrap: Option<ObjectWrap>,
+    #[bpaf(long("object-wrap"), argument("auto|always|never"))]
+    pub expand: Option<Expand>,
 }
 
 #[derive(Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
