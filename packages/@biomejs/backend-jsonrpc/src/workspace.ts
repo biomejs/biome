@@ -1538,7 +1538,7 @@ export interface Nursery {
 	/**
 	 * Disallow octal escape sequences in string literals
 	 */
-	noOctalEscape?: RuleConfiguration_for_Null;
+	noOctalEscape?: RuleFixConfiguration_for_Null;
 	/**
 	 * Restricts imports of "package private" exports.
 	 */

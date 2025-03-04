@@ -529,6 +529,9 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Read the settings type for this language from the [LanguageListSettings] map
     fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self>;
 
+    /// Retrieve the environment settings of the current language
+    fn resolve_environment(settings: Option<&Settings>) -> Option<&Self::EnvironmentSettings>;
+
     /// Resolve the formatter options from the global (workspace level),
     /// per-language and editor provided formatter settings
     fn resolve_format_options(
@@ -543,9 +546,8 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// per-language and editor provided formatter settings
     fn resolve_analyzer_options(
         global: Option<&Settings>,
-        linter: Option<&LinterSettings>,
-        overrides: Option<&OverrideSettings>,
         language: Option<&Self::LinterSettings>,
+        environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
         file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
@@ -893,16 +895,15 @@ impl WorkspaceSettingsHandle {
         L: ServiceLanguage,
     {
         let settings = self.settings();
-        let linter_settings = settings.map(|s| &s.linter);
-        let overrides = settings.map(|s| &s.override_settings);
         let editor_settings = settings
             .map(|s| L::lookup_settings(&s.languages))
             .map(|result| &result.linter);
+
+        let environment = L::resolve_environment(settings);
         L::resolve_analyzer_options(
             settings,
-            linter_settings,
-            overrides,
             editor_settings,
+            environment,
             path,
             file_source,
             suppression_reason,
@@ -1731,3 +1732,7 @@ pub(crate) fn check_override_feature_activity<const LANG: bool, const TOP: bool>
         // Then check the top level feature
         .or(top_level_feature_activity.map(|v| v.value().into()))
 }
+
+#[cfg(test)]
+#[path = "settings.tests.rs"]
+mod tests;

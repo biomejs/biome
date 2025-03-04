@@ -7,8 +7,7 @@ use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
 use crate::file_handlers::{FixAllParams, is_diagnostic_error};
 use crate::settings::{
-    LinterSettings, OverrideSettings, Settings, check_feature_activity,
-    check_override_feature_activity,
+    OverrideSettings, Settings, check_feature_activity, check_override_feature_activity,
 };
 use crate::workspace::DocumentFileSource;
 use crate::{
@@ -262,9 +261,8 @@ impl ServiceLanguage for JsLanguage {
 
     fn resolve_analyzer_options(
         global: Option<&Settings>,
-        _linter: Option<&LinterSettings>,
-        overrides: Option<&OverrideSettings>,
         _language: Option<&Self::LinterSettings>,
+        environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
         _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
@@ -299,15 +297,12 @@ impl ServiceLanguage for JsLanguage {
 
         let mut configuration = AnalyzerConfiguration::default();
         let mut globals = Vec::new();
-
+        let overrides = global.map(|global| &global.override_settings);
         if let (Some(overrides), Some(global)) = (overrides, global) {
             let jsx_runtime = match overrides.override_jsx_runtime(
                 path,
-                global
-                    .languages
-                    .javascript
-                    .environment
-                    .jsx_runtime
+                environment
+                    .and_then(|env| env.jsx_runtime)
                     .unwrap_or_default(),
             ) {
                 // In the future, we may wish to map an `Auto` variant to a concrete
@@ -462,6 +457,10 @@ impl ServiceLanguage for JsLanguage {
             })
             .unwrap_or_default()
             .into()
+    }
+
+    fn resolve_environment(global: Option<&Settings>) -> Option<&Self::EnvironmentSettings> {
+        global.map(|g| &g.languages.javascript.environment)
     }
 }
 

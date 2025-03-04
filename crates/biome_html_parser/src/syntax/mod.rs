@@ -82,7 +82,7 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
-    parse_literal(p).or_add_diagnostic(p, expected_element_name);
+    parse_literal(p, HTML_TAG_NAME).or_add_diagnostic(p, expected_element_name);
 
     AttributeList.parse_list(p);
 
@@ -144,7 +144,7 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     if should_be_self_closing {
         p.error(void_element_should_not_have_closing_tag(p, p.cur_range()).into_diagnostic(p));
     }
-    let _name = parse_literal(p);
+    let _name = parse_literal(p, HTML_TAG_NAME);
     p.bump_with_context(T![>], HtmlLexContext::OutsideTag);
     Present(m.complete(p, HTML_CLOSING_ELEMENT))
 }
@@ -226,7 +226,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-    parse_literal(p).or_add_diagnostic(p, expected_attribute);
+    parse_literal(p, HTML_ATTRIBUTE_NAME).or_add_diagnostic(p, expected_attribute);
     if p.at(T![=]) {
         parse_attribute_initializer(p).ok();
         Present(m.complete(p, HTML_ATTRIBUTE))
@@ -235,7 +235,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
     }
 }
 
-fn parse_literal(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_literal(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
     if !p.at(HTML_LITERAL) {
         return Absent;
     }
@@ -243,7 +243,7 @@ fn parse_literal(p: &mut HtmlParser) -> ParsedSyntax {
 
     p.bump(HTML_LITERAL);
 
-    Present(m.complete(p, HTML_NAME))
+    Present(m.complete(p, kind))
 }
 
 fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {

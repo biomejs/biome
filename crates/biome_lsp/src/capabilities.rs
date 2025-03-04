@@ -65,12 +65,14 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
                     // quickfix.suppressRule
                     CodeActionKind::from(SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY),
                     CodeActionKind::from(SUPPRESSION_INLINE_ACTION_CATEGORY),
-                    CodeActionKind::from("source.fixAll.biome"),
+                    // import sorting
                     CodeActionKind::from("source.organizeImports.biome"),
+                    // general refactors
                     CodeActionKind::from("refactor.biome"),
                     CodeActionKind::from("refactor.extract.biome"),
                     CodeActionKind::from("refactor.inline.biome"),
                     CodeActionKind::from("refactor.rewrite.biome"),
+                    // source actions
                     CodeActionKind::from("source.biome"),
                 ]),
                 ..Default::default()
