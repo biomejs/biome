@@ -24,7 +24,7 @@ noExplicitAny.ts:1:27 lint/suspicious/noExplicitAny  FIXABLE  ━━━━━━
   
   i any disables many type checking rules. Its use should be avoided.
   
-  i Safe fix: Suppress rule lint/suspicious/noExplicitAny
+  i Safe fix: Suppress rule lint/suspicious/noExplicitAny for this line.
   
       1 │ + //·biome-ignore·lint/suspicious/noExplicitAny:·<explanation>
     1 2 │   export function test(arg: any) {
@@ -33,9 +33,8 @@ noExplicitAny.ts:1:27 lint/suspicious/noExplicitAny  FIXABLE  ━━━━━━
   i Safe fix: Suppress rule lint/suspicious/noExplicitAny for the whole file.
   
       1 │ + /**·biome-ignore-all·lint/suspicious/noExplicitAny:·<explanation>·*/
-      2 │ + 
-    1 3 │   export function test(arg: any) {
-    2 4 │     const a: any = arg;
+    1 2 │   export function test(arg: any) {
+    2 3 │     const a: any = arg;
   
 
 ```
@@ -53,7 +52,7 @@ noExplicitAny.ts:2:12 lint/suspicious/noExplicitAny  FIXABLE  ━━━━━━
   
   i any disables many type checking rules. Its use should be avoided.
   
-  i Safe fix: Suppress rule lint/suspicious/noExplicitAny
+  i Safe fix: Suppress rule lint/suspicious/noExplicitAny for this line.
   
     1 1 │   export function test(arg: any) {
     2   │ - ··const·a:·any·=·arg;
@@ -65,9 +64,8 @@ noExplicitAny.ts:2:12 lint/suspicious/noExplicitAny  FIXABLE  ━━━━━━
   i Safe fix: Suppress rule lint/suspicious/noExplicitAny for the whole file.
   
       1 │ + /**·biome-ignore-all·lint/suspicious/noExplicitAny:·<explanation>·*/
-      2 │ + 
-    1 3 │   export function test(arg: any) {
-    2 4 │     const a: any = arg;
+    1 2 │   export function test(arg: any) {
+    2 3 │     const a: any = arg;
   
 
 ```

@@ -26,7 +26,7 @@ noDuplicateFontNames.css:1:56 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   
   i Remove duplicate font names within the property
   
-  i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames
+  i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for this line.
   
     1   │ - a·{·font-family:·"Lucida·Grande",·'Arial',·sans-serif,·sans-serif;·}
       1 │ + /*·biome-ignore·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
@@ -37,9 +37,8 @@ noDuplicateFontNames.css:1:56 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for the whole file.
   
       1 │ + /**·biome-ignore-all·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
-      2 │ + 
-    1 3 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
-    2 4 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
+    1 2 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
+    2 3 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
   
 
 ```
@@ -57,7 +56,7 @@ noDuplicateFontNames.css:2:44 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   
   i Remove duplicate font names within the property
   
-  i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames
+  i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for this line.
   
     1 1 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
     2   │ - a·{·font-family:·'Arial',·"Lucida·Grande",·Arial,·sans-serif;·}
@@ -69,9 +68,8 @@ noDuplicateFontNames.css:2:44 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for the whole file.
   
       1 │ + /**·biome-ignore-all·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
-      2 │ + 
-    1 3 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
-    2 4 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
+    1 2 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
+    2 3 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
   
 
 ```
@@ -90,7 +88,7 @@ noDuplicateFontNames.css:3:35 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   
   i Remove duplicate font names within the property
   
-  i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames
+  i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for this line.
   
     1 1 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
     2 2 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
@@ -103,9 +101,8 @@ noDuplicateFontNames.css:3:35 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for the whole file.
   
       1 │ + /**·biome-ignore-all·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
-      2 │ + 
-    1 3 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
-    2 4 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
+    1 2 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
+    2 3 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
   
 
 ```
@@ -124,7 +121,7 @@ noDuplicateFontNames.css:4:27 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   
   i Remove duplicate font names within the property
   
-  i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames
+  i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for this line.
   
     2 2 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
     3 3 │   a { fOnT-fAmIlY: "Lucida Grande", '  Lucida Grande ', sans-serif; }
@@ -137,9 +134,8 @@ noDuplicateFontNames.css:4:27 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for the whole file.
   
       1 │ + /**·biome-ignore-all·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
-      2 │ + 
-    1 3 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
-    2 4 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
+    1 2 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
+    2 3 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
   
 
 ```
@@ -157,7 +153,7 @@ noDuplicateFontNames.css:5:39 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   
   i Remove duplicate font names within the property
   
-  i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames
+  i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for this line.
   
     3 3 │   a { fOnT-fAmIlY: "Lucida Grande", '  Lucida Grande ', sans-serif; }
     4 4 │   a { font-family: 'Times', Times }
@@ -169,9 +165,8 @@ noDuplicateFontNames.css:5:39 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for the whole file.
   
       1 │ + /**·biome-ignore-all·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
-      2 │ + 
-    1 3 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
-    2 4 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
+    1 2 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
+    2 3 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
   
 
 ```
@@ -188,7 +183,7 @@ noDuplicateFontNames.css:6:75 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   
   i Remove duplicate font names within the property
   
-  i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames
+  i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for this line.
   
     4 4 │   a { font-family: 'Times', Times }
     5 5 │   a { FONT: italic 300 16px/30px Arial, " Arial", serif; }
@@ -199,9 +194,8 @@ noDuplicateFontNames.css:6:75 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for the whole file.
   
       1 │ + /**·biome-ignore-all·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
-      2 │ + 
-    1 3 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
-    2 4 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
+    1 2 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
+    2 3 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
   
 
 ```

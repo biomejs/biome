@@ -26,6 +26,6 @@ impl SuppressionAction for JsonSuppressionAction {
     }
 
     fn suppression_top_level_comment(&self, suppression_text: &str) -> String {
-        format!(r#""""\n {suppression_text}: <explanation> \n""""#)
+        format!("// {suppression_text}: <explanation> ")
     }
 }

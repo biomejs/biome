@@ -6,8 +6,9 @@ pub(crate) struct GraphqlSuppressionAction;
 
 impl SuppressionAction for GraphqlSuppressionAction {
     type Language = GraphqlLanguage;
+
     fn suppression_top_level_comment(&self, suppression_text: &str) -> String {
-        format!("/** {suppression_text}: <explanation> */")
+        format!("# {suppression_text}: <explanation> ")
     }
 
     fn find_token_for_inline_suppression(
