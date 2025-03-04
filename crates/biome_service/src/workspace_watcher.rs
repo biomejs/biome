@@ -27,6 +27,11 @@ pub enum WatcherInstruction {
     Stop,
 }
 
+/// Channel for receiving notifications when the watcher has processed events.
+pub struct WatcherNotificationChannel {
+    pub receiver: Receiver<()>,
+}
+
 /// Channel for sending instructions to the watcher.
 ///
 /// Only exposes the sender of the channel.
@@ -73,14 +78,20 @@ pub struct WorkspaceWatcher {
 
     /// Channel receiver for watch instructions.
     instruction_rx: Receiver<WatcherInstruction>,
+
+    /// Channel sender for sending notifications on the
+    /// [WatcherNotificationChannel].
+    notification_tx: Sender<()>,
 }
 
 impl WorkspaceWatcher {
     /// Constructor.
     ///
-    /// Returns both the watcher as well as the channel for sending instructions
-    /// to the watcher.
-    pub fn new() -> Result<(Self, WatcherInstructionChannel), WorkspaceError> {
+    /// Returns the watcher as well as two channel endpoints: one for sending
+    /// instructions to the watcher, and one for receiving notifications when
+    /// the watcher has processed events.
+    pub fn new()
+    -> Result<(Self, WatcherInstructionChannel, WatcherNotificationChannel), WorkspaceError> {
         // We use a bounded channel, because watchers are
         // [intrinsically unreliable](https://docs.rs/notify/latest/notify/#watching-large-directories).
         // If we block the sender, some events may get dropped, but that was
@@ -94,16 +105,21 @@ impl WorkspaceWatcher {
         let watcher = recommended_watcher(tx)?;
 
         let (instruction_tx, instruction_rx) = unbounded();
+        let (notification_tx, notification_rx) = bounded(1);
         let instruction_channel = WatcherInstructionChannel {
             sender: instruction_tx,
+        };
+        let notification_channel = WatcherNotificationChannel {
+            receiver: notification_rx,
         };
         let watcher = Self {
             watcher: Box::new(watcher),
             notify_rx: rx,
             instruction_rx,
+            notification_tx,
         };
 
-        Ok((watcher, instruction_channel))
+        Ok((watcher, instruction_channel, notification_channel))
     }
 
     /// Runs the watcher.
@@ -113,7 +129,7 @@ impl WorkspaceWatcher {
     /// end of the instructions channel) or the watcher (unexpectedly) stops.
     /// Under normal operation, neither should happen before the daemon
     /// terminates.
-    #[tracing::instrument(level = "debug", skip(self, workspace))]
+    //#[tracing::instrument(level = "debug", skip(self, workspace))]
     pub fn run(&mut self, workspace: &WorkspaceServer) {
         loop {
             crossbeam::channel::select! {
@@ -123,38 +139,47 @@ impl WorkspaceWatcher {
                             debug!(event = debug(&event), "watcher_event");
                         }
 
-                        let result = match event.kind {
-                            EventKind::Access(_) => Ok(()),
-                            EventKind::Create(create_kind) => match create_kind {
-                                CreateKind::Folder => workspace.open_folders_through_watcher(event.paths),
+                        let (is_processed, result) = match event.kind {
+                            EventKind::Access(_) => (false, Ok(())),
+                            EventKind::Create(create_kind) => (true, match create_kind {
+                                CreateKind::Folder => {
+                                    workspace.open_folders_through_watcher(event.paths)
+                                }
                                 _ => workspace.open_paths_through_watcher(event.paths),
-                            },
+                            }),
                             EventKind::Modify(modify_kind) => match modify_kind {
                                 // `ModifyKind::Any` needs to be included as a catch-all.
                                 // Without it, we'll miss events on Windows.
                                 ModifyKind::Data(_) | ModifyKind::Any => {
-                                    workspace.open_paths_through_watcher(event.paths)
+                                    (true, workspace.open_paths_through_watcher(event.paths))
                                 },
                                 ModifyKind::Name(RenameMode::From) => {
-                                    workspace.close_paths_through_watcher(event.paths)
-                                },
+                                    (true, workspace.close_paths_through_watcher(event.paths))
+                                }
                                 ModifyKind::Name(RenameMode::To) => {
-                                    workspace.open_paths_through_watcher(event.paths)
+                                    (true, workspace.open_paths_through_watcher(event.paths))
                                 },
                                 ModifyKind::Name(RenameMode::Both) => {
-                                    workspace.rename_path_through_watcher(&event.paths[0], &event.paths[1])
+                                    (true, workspace.rename_path_through_watcher(
+                                        &event.paths[0],
+                                        &event.paths[1]
+                                    ))
                                 },
-                                _ => Ok(()),
+                                _ => (false, Ok(())),
                             },
-                            EventKind::Remove(remove_kind) => match remove_kind {
+                            EventKind::Remove(remove_kind) => (true, match remove_kind {
                                 RemoveKind::File => workspace.close_files_through_watcher(event.paths),
                                 _ => workspace.close_paths_through_watcher(event.paths),
-                            },
-                            EventKind::Any | EventKind::Other => Ok(()),
+                            }),
+                            EventKind::Any | EventKind::Other => (false, Ok(())),
                         };
                         if let Err(error) = result {
                             // TODO: Improve error propagation.
                             warn!("Error processing watch event: {error}");
+                        }
+
+                        if is_processed {
+                            let _ = self.notification_tx.try_send(());
                         }
                     },
                     Ok(Err(error)) => {

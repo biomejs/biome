@@ -80,7 +80,7 @@ pub(crate) fn run_server(
 ) -> Result<(), CliDiagnostic> {
     setup_tracing_subscriber(log_path.as_deref(), log_file_name_prefix.as_deref());
 
-    let (mut watcher, instruction_channel) = WorkspaceWatcher::new()?;
+    let (mut watcher, instruction_channel, _) = WorkspaceWatcher::new()?;
 
     let rt = Runtime::new()?;
     let factory = ServerFactory::new(stop_on_disconnect, instruction_channel.sender.clone());
