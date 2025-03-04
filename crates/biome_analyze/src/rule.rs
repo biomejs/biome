@@ -1210,7 +1210,7 @@ pub trait Rule: RuleMeta + Sized {
 
             Some(SuppressAction {
                 mutation,
-                message: markup! { "Suppress rule " {rule_category} }.to_owned(),
+                message: markup! { "Suppress rule " {rule_category} " for this line."}.to_owned(),
             })
         } else {
             None
