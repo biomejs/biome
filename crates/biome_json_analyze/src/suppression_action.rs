@@ -1,29 +1,11 @@
 use biome_analyze::{ApplySuppression, SuppressionAction};
-use biome_json_syntax::{JsonLanguage, JsonSyntaxToken};
-use biome_rowan::{BatchMutation, SyntaxToken, TriviaPieceKind};
+use biome_json_syntax::JsonLanguage;
+use biome_rowan::{BatchMutation, SyntaxToken};
 
 pub(crate) struct JsonSuppressionAction;
 
 impl SuppressionAction for JsonSuppressionAction {
     type Language = JsonLanguage;
-
-    fn apply_top_level_suppression(
-        &self,
-        mutation: &mut BatchMutation<Self::Language>,
-        token: JsonSyntaxToken,
-        suppression_text: &str,
-    ) {
-        let new_token = token.with_leading_trivia([
-            (
-                TriviaPieceKind::SingleLineComment,
-                format!("/** {suppression_text}: <explanation> */").as_str(),
-            ),
-            (TriviaPieceKind::Newline, "\n"),
-            (TriviaPieceKind::Newline, "\n"),
-        ]);
-
-        mutation.replace_token_discard_trivia(token, new_token);
-    }
 
     fn find_token_for_inline_suppression(
         &self,
@@ -41,5 +23,9 @@ impl SuppressionAction for JsonSuppressionAction {
         _suppression_reason: &str,
     ) {
         unreachable!("find_token_to_apply_suppression return None")
+    }
+
+    fn suppression_top_level_comment(&self, suppression_text: &str) -> String {
+        format!(r#""""\n {suppression_text}: <explanation> \n""""#)
     }
 }

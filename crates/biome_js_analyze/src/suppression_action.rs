@@ -50,24 +50,6 @@ pub struct JsSuppressionAction;
 impl SuppressionAction for JsSuppressionAction {
     type Language = JsLanguage;
 
-    fn apply_top_level_suppression(
-        &self,
-        mutation: &mut BatchMutation<Self::Language>,
-        token: JsSyntaxToken,
-        suppression_text: &str,
-    ) {
-        let new_token = token.with_leading_trivia([
-            (
-                TriviaPieceKind::SingleLineComment,
-                format!("/** {suppression_text}: <explanation> */").as_str(),
-            ),
-            (TriviaPieceKind::Newline, "\n"),
-            (TriviaPieceKind::Newline, "\n"),
-        ]);
-
-        mutation.replace_token_discard_trivia(token, new_token);
-    }
-
     fn find_token_for_inline_suppression(
         &self,
         token: JsSyntaxToken,
@@ -277,5 +259,9 @@ impl SuppressionAction for JsSuppressionAction {
             };
             mutation.replace_token_transfer_trivia(token_to_apply_suppression, new_token);
         }
+    }
+
+    fn suppression_top_level_comment(&self, suppression_text: &str) -> String {
+        format!("/** {suppression_text}: <explanation> */")
     }
 }

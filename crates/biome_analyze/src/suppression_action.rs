@@ -1,5 +1,8 @@
 use crate::SuppressionCommentEmitterPayload;
-use biome_rowan::{BatchMutation, Language, SyntaxToken, TextRange, TokenAtOffset};
+use biome_rowan::{
+    BatchMutation, Language, SyntaxToken, TextLen, TextRange, TokenAtOffset, TriviaPiece,
+    TriviaPieceKind,
+};
 
 pub trait SuppressionAction {
     type Language: Language;
@@ -86,7 +89,65 @@ pub trait SuppressionAction {
         mutation: &mut BatchMutation<Self::Language>,
         token: SyntaxToken<Self::Language>,
         suppression_text: &str,
-    );
+    ) {
+        let has_comments = token
+            .leading_trivia()
+            .pieces()
+            .any(|trivia| trivia.is_comments());
+
+        if has_comments {
+            let mut new_trivia = vec![];
+            let mut after_comment = false;
+            let mut trivia_applied = false;
+            let pieces = token.leading_trivia().pieces();
+            let mut text = String::new();
+            for trivia in pieces {
+                if trivia.is_comments() {
+                    after_comment = true
+                }
+
+                if !trivia.is_comments() && after_comment && !trivia_applied {
+                    new_trivia.push(TriviaPiece::newline(1));
+                    text.push('\n');
+                    new_trivia.push(TriviaPiece::multi_line_comment(suppression_text.text_len()));
+                    text.push_str(suppression_text);
+                    after_comment = false;
+                    trivia_applied = true
+                }
+
+                new_trivia.push(TriviaPiece::new(trivia.kind(), trivia.text_len()));
+                text.push_str(trivia.text());
+            }
+            text.push_str(token.text_trimmed());
+            let new_token = SyntaxToken::new_detached(token.kind(), text.as_str(), new_trivia, [])
+                .with_trailing_trivia_pieces(token.trailing_trivia().pieces());
+            mutation.replace_token_discard_trivia(token, new_token);
+        } else {
+            let mut new_text = String::new();
+            let mut new_trivia = vec![
+                TriviaPiece::new(
+                    TriviaPieceKind::SingleLineComment,
+                    suppression_text.text_len(),
+                ),
+                TriviaPiece::newline(1),
+            ];
+            new_text.push_str(suppression_text);
+            new_text.push('\n');
+            for trivia in token.leading_trivia().pieces() {
+                new_trivia.push(TriviaPiece::new(trivia.kind(), trivia.text_len()));
+                new_text.push_str(trivia.text());
+            }
+            new_text.push_str(token.text_trimmed());
+
+            let new_token =
+                SyntaxToken::new_detached(token.kind(), new_text.as_str(), new_trivia, [])
+                    .with_trailing_trivia_pieces(token.trailing_trivia().pieces());
+            mutation.replace_token_discard_trivia(token, new_token);
+        }
+    }
+
+    /// Returns the whole top level comment, based on the language
+    fn suppression_top_level_comment(&self, _suppression_text: &str) -> String;
 }
 
 /// Convenient type to store useful information

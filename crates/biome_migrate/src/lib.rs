@@ -74,12 +74,8 @@ where
             unreachable!("")
         }
 
-        fn apply_top_level_suppression(
-            &self,
-            _: &mut BatchMutation<Self::Language>,
-            _: SyntaxToken<Self::Language>,
-            _: &str,
-        ) {
+        fn suppression_top_level_comment(&self, _suppression_text: &str) -> String {
+            unreachable!("")
         }
     }
     let mut analyzer = Analyzer::new(

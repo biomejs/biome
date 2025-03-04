@@ -55,7 +55,7 @@ pub(crate) fn code_actions(
     })?;
 
     if !file_features.supports_lint() && !file_features.supports_assist() {
-        info!("Linter, assist and organize imports are disabled");
+        info!("Linter and assist are disabled.");
         return Ok(Some(Vec::new()));
     }
     if session.workspace.is_path_ignored(IsPathIgnoredParams {
@@ -164,6 +164,7 @@ pub(crate) fn code_actions(
         .actions
         .into_iter()
         .filter_map(|action| {
+            debug!("Action: {:?}", &action.category);
             // Don't apply unsafe fixes when the code action is on-save quick-fixes
             if has_quick_fix && action.suggestion.applicability == Applicability::MaybeIncorrect {
                 return None;
@@ -206,6 +207,7 @@ pub(crate) fn code_actions(
             // Remove actions that do not match the categories requested by the
             // language client
             let matches_filters = filters.iter().any(|filter| action.category.matches(filter));
+
             if !filters.is_empty() && !matches_filters {
                 return None;
             }
