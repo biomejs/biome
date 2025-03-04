@@ -129,7 +129,7 @@ impl WorkspaceWatcher {
     /// end of the instructions channel) or the watcher (unexpectedly) stops.
     /// Under normal operation, neither should happen before the daemon
     /// terminates.
-    //#[tracing::instrument(level = "debug", skip(self, workspace))]
+    #[tracing::instrument(level = "debug", skip(self, workspace))]
     pub fn run(&mut self, workspace: &WorkspaceServer) {
         loop {
             crossbeam::channel::select! {
