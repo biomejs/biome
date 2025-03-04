@@ -66,10 +66,9 @@ impl<'app> CliSession<'app> {
             }
             BiomeCommand::Clean => commands::clean::clean(self),
             BiomeCommand::Start {
-                config_path,
                 log_path,
                 log_prefix_name,
-            } => commands::daemon::start(self, config_path, Some(log_path), Some(log_prefix_name)),
+            } => commands::daemon::start(self, Some(log_path), Some(log_prefix_name)),
             BiomeCommand::Stop => commands::daemon::stop(self),
             BiomeCommand::Check {
                 write,
@@ -210,11 +209,10 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
             BiomeCommand::Init(emit_jsonc) => commands::init::init(self, emit_jsonc),
             BiomeCommand::LspProxy {
-                config_path,
                 log_path,
                 log_prefix_name,
                 ..
-            } => commands::daemon::lsp_proxy(config_path, Some(log_path), Some(log_prefix_name)),
+            } => commands::daemon::lsp_proxy(Some(log_path), Some(log_prefix_name)),
             BiomeCommand::Migrate {
                 cli_options,
                 write,
@@ -253,12 +251,10 @@ impl<'app> CliSession<'app> {
             ),
             BiomeCommand::RunServer {
                 stop_on_disconnect,
-                config_path,
                 log_path,
                 log_prefix_name,
             } => commands::daemon::run_server(
                 stop_on_disconnect,
-                config_path,
                 Some(log_path),
                 Some(log_prefix_name),
             ),

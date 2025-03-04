@@ -396,7 +396,7 @@ where
 #[tokio::test]
 async fn basic_lifecycle() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -506,7 +506,7 @@ const EXPECTED_CST: &str = "0: JS_MODULE@0..57
 #[tokio::test]
 async fn document_lifecycle() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -566,7 +566,7 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
 
     // First connection:
     {
-        let (service, client) = factory.create(None).into_inner();
+        let (service, client) = factory.create().into_inner();
         let (stream, sink) = client.split();
         let mut server = Server::new(service);
 
@@ -618,7 +618,7 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
 
     // Second connection, the document will still be there:
     {
-        let (service, client) = factory.create(None).into_inner();
+        let (service, client) = factory.create().into_inner();
         let (stream, sink) = client.split();
         let mut server = Server::new(service);
 
@@ -666,7 +666,7 @@ async fn lifecycle_with_multiple_connections() -> Result<()> {
 #[tokio::test]
 async fn document_no_extension() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -737,7 +737,7 @@ async fn document_no_extension() -> Result<()> {
 #[tokio::test]
 async fn pull_diagnostics() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -819,7 +819,7 @@ async fn pull_diagnostics() -> Result<()> {
 #[tokio::test]
 async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -881,7 +881,7 @@ async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
 #[tokio::test]
 async fn pull_diagnostics_from_new_file() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -963,7 +963,7 @@ async fn pull_diagnostics_from_new_file() -> Result<()> {
 #[tokio::test]
 async fn pull_quick_fixes() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1142,7 +1142,7 @@ async fn pull_quick_fixes() -> Result<()> {
 #[tokio::test]
 async fn pull_biome_quick_fixes_ignore_unsafe() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1224,7 +1224,7 @@ async fn pull_biome_quick_fixes_ignore_unsafe() -> Result<()> {
 #[tokio::test]
 async fn pull_biome_quick_fixes() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1320,7 +1320,7 @@ async fn pull_biome_quick_fixes() -> Result<()> {
 #[tokio::test]
 async fn pull_quick_fixes_include_unsafe() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1520,7 +1520,7 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
 #[tokio::test]
 async fn pull_diagnostics_for_rome_json() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1602,7 +1602,7 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
     );
 
     let factory = ServerFactory::new_with_fs(Box::new(fs));
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
 
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -1673,7 +1673,7 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
 #[tokio::test]
 async fn no_code_actions_for_ignored_json_files() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1757,7 +1757,7 @@ async fn no_code_actions_for_ignored_json_files() -> Result<()> {
 #[tokio::test]
 async fn pull_code_actions_with_import_sorting() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -1970,7 +1970,7 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
     );
 
     let factory = ServerFactory::new_with_fs(Box::new(fs));
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2045,7 +2045,7 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
 #[tokio::test]
 async fn pull_refactors() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2155,7 +2155,7 @@ async fn pull_refactors() -> Result<()> {
 #[tokio::test]
 async fn pull_fix_all() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2258,7 +2258,7 @@ async fn pull_fix_all() -> Result<()> {
 #[tokio::test]
 async fn change_document_remove_line() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2343,7 +2343,7 @@ isSpreadAssignment;
 #[tokio::test]
 async fn format_with_syntax_errors() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2392,7 +2392,7 @@ async fn format_with_syntax_errors() -> Result<()> {
 #[tokio::test]
 async fn format_jsx_in_javascript_file() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2470,7 +2470,7 @@ async fn does_not_format_ignored_files() -> Result<()> {
     );
 
     let factory = ServerFactory::new_with_fs(Box::new(fs));
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2528,7 +2528,7 @@ async fn does_not_format_ignored_files() -> Result<()> {
 #[ignore = "Find a way to retrieve the last notification sent"]
 async fn pull_diagnostics_from_manifest() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2633,7 +2633,7 @@ async fn pull_diagnostics_from_manifest() -> Result<()> {
 #[tokio::test]
 async fn server_shutdown() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2658,7 +2658,7 @@ async fn server_shutdown() -> Result<()> {
 #[tokio::test]
 async fn multiple_projects() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2794,7 +2794,7 @@ async fn pull_source_assist_action() -> Result<()> {
     );
 
     let factory = ServerFactory::new_with_fs(Box::new(fs));
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -3001,7 +3001,7 @@ export function bar() {
         watcher.run(workspace.as_ref());
     });
 
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -3210,7 +3210,7 @@ export function bar() {
         watcher.run(workspace.as_ref());
     });
 
-    let (service, client) = factory.create(None).into_inner();
+    let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
