@@ -161,6 +161,10 @@ export interface FormatterConfiguration {
 	bracketSpacing?: BracketSpacing;
 	enabled?: Bool;
 	/**
+	 * Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+	 */
+	expand?: Expand;
+	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
 	 */
 	formatWithErrors?: Bool;
@@ -184,10 +188,6 @@ export interface FormatterConfiguration {
 	 * What's the max width of a line. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
-	/**
-	 * Whether to enforce collapsing object literals when possible. Defaults to preserve.
-	 */
-	objectWrap?: ObjectWrap;
 	/**
 	* Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.
 
@@ -414,6 +414,7 @@ export type AttributePosition = "auto" | "multiline";
  */
 export type BracketSameLine = boolean;
 export type BracketSpacing = boolean;
+export type Expand = "auto" | "always" | "never";
 export type IndentStyle = "tab" | "space";
 export type IndentWidth = number;
 export type LineEnding = "lf" | "crlf" | "cr";
@@ -423,7 +424,6 @@ export type LineEnding = "lf" | "crlf" | "cr";
 The allowed range of values is 1..=320 
 	 */
 export type LineWidth = number;
-export type ObjectWrap = "preserve" | "collapse";
 /**
  * Options that changes how the GraphQL linter behaves
  */
@@ -588,6 +588,10 @@ export interface JsFormatterConfiguration {
 	 */
 	enabled?: Bool;
 	/**
+	 * Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+	 */
+	expand?: Expand;
+	/**
 	 * The indent style applied to JavaScript (and its super languages) files.
 	 */
 	indentStyle?: IndentStyle;
@@ -607,10 +611,6 @@ export interface JsFormatterConfiguration {
 	 * What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
-	/**
-	 * Whether to enforce collapsing object literals when possible. Defaults to preserve.
-	 */
-	objectWrap?: ObjectWrap;
 	/**
 	 * When properties in objects are quoted. Defaults to asNeeded.
 	 */
@@ -679,7 +679,7 @@ export interface JsonFormatterConfiguration {
 	 */
 	enabled?: Bool;
 	/**
-	 * Whether to expand arrays and objects on multiple lines. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "followSource".
+	 * Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
 	 */
 	expand?: Expand;
 	/**
@@ -698,10 +698,6 @@ export interface JsonFormatterConfiguration {
 	 * What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
-	/**
-	 * Whether to enforce collapsing object literals when possible. Defaults to preserve.
-	 */
-	objectWrap?: ObjectWrap;
 	/**
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
 	 */
@@ -840,7 +836,6 @@ export type Semicolons = "always" | "asNeeded";
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
  */
 export type TrailingCommas = "all" | "es5" | "none";
-export type Expand = "always" | "followSource";
 export type TrailingCommas2 = "none" | "all";
 export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
 export type SeverityOrGroup_for_Complexity =
@@ -883,6 +878,10 @@ export interface OverrideFormatterConfiguration {
 	bracketSpacing?: BracketSpacing;
 	enabled?: Bool;
 	/**
+	 * Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+	 */
+	expand?: Expand;
+	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
 	 */
 	formatWithErrors?: Bool;
@@ -906,10 +905,6 @@ export interface OverrideFormatterConfiguration {
 	 * What's the max width of a line. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
-	/**
-	 * Whether to enforce collapsing object literals when possible. Defaults to preserve.
-	 */
-	objectWrap?: ObjectWrap;
 }
 export type OverrideGlobs = Glob[];
 export interface OverrideLinterConfiguration {
@@ -1449,7 +1444,7 @@ export interface Nursery {
 	 */
 	noAwaitInLoop?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow bitwise operators
 	 */
 	noBitwise?: RuleConfiguration_for_NoBitwiseOptions;
 	/**
@@ -1547,7 +1542,7 @@ export interface Nursery {
 	/**
 	 * Disallow octal escape sequences in string literals
 	 */
-	noOctalEscape?: RuleConfiguration_for_Null;
+	noOctalEscape?: RuleFixConfiguration_for_Null;
 	/**
 	 * Restricts imports of "package private" exports.
 	 */
@@ -1712,6 +1707,10 @@ export interface Nursery {
 	 * Enforce the use of the directive "use strict" in script files.
 	 */
 	useStrictMode?: RuleFixConfiguration_for_Null;
+	/**
+	 * Require a description parameter for the Symbol().
+	 */
+	useSymbolDescription?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().
 	 */
@@ -2011,7 +2010,7 @@ export interface Suspicious {
 	/**
 	 * Disallow labeled statements that are not loops.
 	 */
-	noConfusingLabels?: RuleConfiguration_for_Null;
+	noConfusingLabels?: RuleConfiguration_for_NoConfusingLabelsOptions;
 	/**
 	 * Disallow void type outside of generic or return types.
 	 */
@@ -2348,6 +2347,9 @@ export type RuleFixConfiguration_for_NamingConventionOptions =
 export type RuleFixConfiguration_for_UseSelfClosingElementsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseSelfClosingElementsOptions;
+export type RuleConfiguration_for_NoConfusingLabelsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoConfusingLabelsOptions;
 export type RuleFixConfiguration_for_NoConsoleOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoConsoleOptions;
@@ -2655,6 +2657,16 @@ export interface RuleWithFixOptions_for_UseSelfClosingElementsOptions {
 	 */
 	options: UseSelfClosingElementsOptions;
 }
+export interface RuleWithOptions_for_NoConfusingLabelsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoConfusingLabelsOptions;
+}
 export interface RuleWithFixOptions_for_NoConsoleOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -2892,6 +2904,15 @@ export interface NamingConventionOptions {
  */
 export interface UseSelfClosingElementsOptions {
 	ignoreHtmlElements?: boolean;
+}
+/**
+ * Options for the rule `noConfusingLabels`
+ */
+export interface NoConfusingLabelsOptions {
+	/**
+	 * A list of (non-confusing) labels that should be allowed
+	 */
+	allowedLabels: string[];
 }
 export interface NoConsoleOptions {
 	/**
@@ -3277,6 +3298,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useStrictMode"
+	| "lint/nursery/useSymbolDescription"
 	| "lint/nursery/useTrimStartEnd"
 	| "lint/nursery/useValidAutocomplete"
 	| "lint/performance/noAccumulatingSpread"

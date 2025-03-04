@@ -2642,9 +2642,15 @@ impl<'a, Context> BestFitting<'a, Context> {
     ///
     /// You're looking for a way to create a `BestFitting` object, use the `best_fitting![least_expanded, most_expanded]` macro.
     ///
+    /// This is intended to be only used in the `best_fitting!` macro. As we can't place tail
+    /// expressions in a block for temporary lifetime extension since Rust 2024, we can't use an
+    /// `unsafe` block in the macro. Thus, this function can't be marked as unsafe, but it shouldn't
+    /// be used from outside.
+    ///
     /// ## Safety
     /// The slice must contain at least two variants.
-    pub unsafe fn from_arguments_unchecked(variants: Arguments<'a, Context>) -> Self {
+    #[doc(hidden)]
+    pub fn from_arguments_unchecked(variants: Arguments<'a, Context>) -> Self {
         assert!(
             variants.0.len() >= 2,
             "Requires at least the least expanded and most expanded variants"

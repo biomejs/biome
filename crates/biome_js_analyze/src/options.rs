@@ -422,6 +422,8 @@ pub type UseSortedClasses =
     <lint::nursery::use_sorted_classes::UseSortedClasses as biome_analyze::Rule>::Options;
 pub type UseStrictMode =
     <lint::nursery::use_strict_mode::UseStrictMode as biome_analyze::Rule>::Options;
+pub type UseSymbolDescription =
+    <lint::nursery::use_symbol_description::UseSymbolDescription as biome_analyze::Rule>::Options;
 pub type UseTemplate = <lint::style::use_template::UseTemplate as biome_analyze::Rule>::Options;
 pub type UseThrowNewError =
     <lint::style::use_throw_new_error::UseThrowNewError as biome_analyze::Rule>::Options;

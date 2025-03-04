@@ -62,7 +62,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoUselessEscapeInString {
-    type Query = Ast<AnyString>;
+    type Query = Ast<AnyJsString>;
     type State = (JsSyntaxToken, usize);
     type Signals = Option<Self::State>;
     type Options = ();
@@ -70,12 +70,12 @@ impl Rule for NoUselessEscapeInString {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         match node {
-            AnyString::JsStringLiteralExpression(literal) => {
+            AnyJsString::JsStringLiteralExpression(literal) => {
                 let token = literal.value_token().ok()?;
                 let text = token.text_trimmed();
                 next_useless_escape(text, text.bytes().next()?).map(|index| (token, index))
             }
-            AnyString::JsTemplateExpression(template) => {
+            AnyJsString::JsTemplateExpression(template) => {
                 if template.tag().is_some() {
                     return None;
                 }
@@ -94,7 +94,7 @@ impl Rule for NoUselessEscapeInString {
                 }
                 None
             }
-            AnyString::JsLiteralMemberName(member_name) => {
+            AnyJsString::JsLiteralMemberName(member_name) => {
                 let Ok(token) = member_name.value() else {
                     return None;
                 };
@@ -141,7 +141,7 @@ impl Rule for NoUselessEscapeInString {
 
 declare_node_union! {
     /// Any string literal excluding JsxString.
-    pub AnyString = JsStringLiteralExpression | JsTemplateExpression | JsLiteralMemberName
+    pub AnyJsString = JsStringLiteralExpression | JsTemplateExpression | JsLiteralMemberName
 }
 
 /// Returns the index in `str` of the first useless escape.

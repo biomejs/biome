@@ -19,7 +19,7 @@ HtmlRoot {
     html: HtmlElementList [
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
-            name: HtmlName {
+            name: HtmlTagName {
                 value_token: HTML_LITERAL@1..4 "div" [] [],
             },
             attributes: HtmlAttributeList [],
@@ -40,7 +40,7 @@ HtmlRoot {
   2: HTML_ELEMENT_LIST@0..6
     0: HTML_SELF_CLOSING_ELEMENT@0..6
       0: L_ANGLE@0..1 "<" [] []
-      1: HTML_NAME@1..4
+      1: HTML_TAG_NAME@1..4
         0: HTML_LITERAL@1..4 "div" [] []
       2: HTML_ATTRIBUTE_LIST@4..4
       3: SLASH@4..5 "/" [] []

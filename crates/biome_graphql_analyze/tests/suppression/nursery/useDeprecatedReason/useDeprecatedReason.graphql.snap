@@ -1,7 +1,6 @@
 ---
 source: crates/biome_graphql_analyze/tests/spec_tests.rs
 expression: useDeprecatedReason.graphql
-snapshot_kind: text
 ---
 # Input
 ```graphql
@@ -42,7 +41,7 @@ useDeprecatedReason.graphql:2:10 lint/nursery/useDeprecatedReason  FIXABLE  ━�
   
   i Add a `reason` argument to the directive.
   
-  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason for this line.
   
      1  1 │   query {
      2    │ - ··member·@deprecated·{
@@ -74,7 +73,7 @@ useDeprecatedReason.graphql:8:10 lint/nursery/useDeprecatedReason  FIXABLE  ━�
   
   i Add a `reason` argument to the directive.
   
-  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason for this line.
   
      6  6 │   
      7  7 │   query {
@@ -108,7 +107,7 @@ useDeprecatedReason.graphql:13:3 lint/nursery/useDeprecatedReason  FIXABLE  ━�
   
   i Add a `reason` argument to the directive.
   
-  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason for this line.
   
     11 11 │   query {
     12 12 │     member

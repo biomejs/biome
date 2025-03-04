@@ -23,8 +23,8 @@ use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::Merge;
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
-    LineWidth, ObjectWrap,
+    AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
+    LineEnding, LineWidth,
 };
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
@@ -250,7 +250,7 @@ pub struct FormatSettings {
     pub attribute_position: Option<AttributePosition>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub bracket_spacing: Option<BracketSpacing>,
-    pub object_wrap: Option<ObjectWrap>,
+    pub expand: Option<Expand>,
     /// List of included paths/files
     pub includes: Includes,
 }
@@ -276,7 +276,7 @@ pub struct OverrideFormatSettings {
     pub bracket_spacing: Option<BracketSpacing>,
     pub bracket_same_line: Option<BracketSameLine>,
     pub attribute_position: Option<AttributePosition>,
-    pub object_wrap: Option<ObjectWrap>,
+    pub expand: Option<Expand>,
 }
 
 impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
@@ -291,7 +291,7 @@ impl From<OverrideFormatterConfiguration> for OverrideFormatSettings {
             bracket_spacing: conf.bracket_spacing,
             bracket_same_line: conf.bracket_same_line,
             attribute_position: conf.attribute_position,
-            object_wrap: conf.object_wrap,
+            expand: conf.expand,
         }
     }
 }
@@ -529,6 +529,9 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// Read the settings type for this language from the [LanguageListSettings] map
     fn lookup_settings(languages: &LanguageListSettings) -> &LanguageSettings<Self>;
 
+    /// Retrieve the environment settings of the current language
+    fn resolve_environment(settings: Option<&Settings>) -> Option<&Self::EnvironmentSettings>;
+
     /// Resolve the formatter options from the global (workspace level),
     /// per-language and editor provided formatter settings
     fn resolve_format_options(
@@ -543,9 +546,8 @@ pub trait ServiceLanguage: biome_rowan::Language {
     /// per-language and editor provided formatter settings
     fn resolve_analyzer_options(
         global: Option<&Settings>,
-        linter: Option<&LinterSettings>,
-        overrides: Option<&OverrideSettings>,
         language: Option<&Self::LinterSettings>,
+        environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
         file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
@@ -893,16 +895,15 @@ impl WorkspaceSettingsHandle {
         L: ServiceLanguage,
     {
         let settings = self.settings();
-        let linter_settings = settings.map(|s| &s.linter);
-        let overrides = settings.map(|s| &s.override_settings);
         let editor_settings = settings
             .map(|s| L::lookup_settings(&s.languages))
             .map(|result| &result.linter);
+
+        let environment = L::resolve_environment(settings);
         L::resolve_analyzer_options(
             settings,
-            linter_settings,
-            overrides,
             editor_settings,
+            environment,
             path,
             file_source,
             suppression_reason,
@@ -1445,7 +1446,7 @@ pub fn to_override_settings(
                 bracket_spacing: formatter.bracket_spacing,
                 bracket_same_line: formatter.bracket_same_line,
                 attribute_position: formatter.attribute_position,
-                object_wrap: formatter.object_wrap,
+                expand: formatter.expand,
             })
             .unwrap_or_default();
         let linter = pattern
@@ -1610,7 +1611,7 @@ pub fn to_format_settings(
         attribute_position: conf.attribute_position,
         bracket_same_line: conf.bracket_same_line,
         bracket_spacing: conf.bracket_spacing,
-        object_wrap: conf.object_wrap,
+        expand: conf.expand,
         includes: Includes::new(working_directory, conf.includes),
     })
 }
@@ -1635,7 +1636,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             attribute_position: Some(AttributePosition::default()),
             bracket_same_line: conf.bracket_same_line,
             bracket_spacing: Some(BracketSpacing::default()),
-            object_wrap: conf.object_wrap,
+            expand: conf.expand,
             format_with_errors: conf.format_with_errors,
             includes: Default::default(),
         })
@@ -1731,3 +1732,7 @@ pub(crate) fn check_override_feature_activity<const LANG: bool, const TOP: bool>
         // Then check the top level feature
         .or(top_level_feature_activity.map(|v| v.value().into()))
 }
+
+#[cfg(test)]
+#[path = "settings.tests.rs"]
+mod tests;

@@ -391,6 +391,9 @@ impl<'src> JsLexer<'src> {
             b'<' => self.eat_byte(T![<]),
             // `{`: empty jsx text, directly followed by an expression
             b'{' => self.eat_byte(T!['{']),
+            _ if self.options.should_parse_metavariables() && self.is_metavariable_start() => {
+                self.consume_metavariable(GRIT_METAVARIABLE)
+            }
             _ => {
                 while let Some(chr) = self.current_byte() {
                     // but not one of: { or < or > or }

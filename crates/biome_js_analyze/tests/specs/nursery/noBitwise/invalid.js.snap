@@ -37,7 +37,7 @@ x >>>= y;
 ```
 invalid.js:1:9 lint/nursery/noBitwise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of '| '.
+  i Unexpected use of '|'.
   
   > 1 │ let x = y | z;
       │         ^^^^^
@@ -52,7 +52,7 @@ invalid.js:1:9 lint/nursery/noBitwise ━━━━━━━━━━━━━━
 ```
 invalid.js:3:12 lint/nursery/noBitwise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of '& '.
+  i Unexpected use of '&'.
   
     1 │ let x = y | z;
     2 │ 
@@ -69,7 +69,7 @@ invalid.js:3:12 lint/nursery/noBitwise ━━━━━━━━━━━━━�
 ```
 invalid.js:5:12 lint/nursery/noBitwise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of '^ '.
+  i Unexpected use of '^'.
   
     3 │ const x1 = y & z;
     4 │ 
@@ -86,7 +86,7 @@ invalid.js:5:12 lint/nursery/noBitwise ━━━━━━━━━━━━━�
 ```
 invalid.js:7:12 lint/nursery/noBitwise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of '~ '.
+  i Unexpected use of '~'.
   
     5 │ const x2 = y ^ z;
     6 │ 
@@ -103,7 +103,7 @@ invalid.js:7:12 lint/nursery/noBitwise ━━━━━━━━━━━━━�
 ```
 invalid.js:9:12 lint/nursery/noBitwise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of '<< '.
+  i Unexpected use of '<<'.
   
      7 │ const x3 = ~ z;
      8 │ 
@@ -120,7 +120,7 @@ invalid.js:9:12 lint/nursery/noBitwise ━━━━━━━━━━━━━�
 ```
 invalid.js:11:12 lint/nursery/noBitwise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of '>> '.
+  i Unexpected use of '>>'.
   
      9 │ const x4 = y << z;
     10 │ 
@@ -137,7 +137,7 @@ invalid.js:11:12 lint/nursery/noBitwise ━━━━━━━━━━━━━�
 ```
 invalid.js:13:12 lint/nursery/noBitwise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of '>>> '.
+  i Unexpected use of '>>>'.
   
     11 │ const x5 = y >> z;
     12 │ 
@@ -154,7 +154,7 @@ invalid.js:13:12 lint/nursery/noBitwise ━━━━━━━━━━━━━�
 ```
 invalid.js:15:1 lint/nursery/noBitwise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of '|= '.
+  i Unexpected use of '|='.
   
     13 │ const x6 = y >>> z;
     14 │ 
@@ -171,7 +171,7 @@ invalid.js:15:1 lint/nursery/noBitwise ━━━━━━━━━━━━━�
 ```
 invalid.js:17:1 lint/nursery/noBitwise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of '&= '.
+  i Unexpected use of '&='.
   
     15 │ x |= y;
     16 │ 
@@ -188,7 +188,7 @@ invalid.js:17:1 lint/nursery/noBitwise ━━━━━━━━━━━━━�
 ```
 invalid.js:19:1 lint/nursery/noBitwise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of '^= '.
+  i Unexpected use of '^='.
   
     17 │ x &= y;
     18 │ 
@@ -205,7 +205,7 @@ invalid.js:19:1 lint/nursery/noBitwise ━━━━━━━━━━━━━�
 ```
 invalid.js:21:1 lint/nursery/noBitwise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of '<<= '.
+  i Unexpected use of '<<='.
   
     19 │ x ^= y;
     20 │ 
@@ -222,7 +222,7 @@ invalid.js:21:1 lint/nursery/noBitwise ━━━━━━━━━━━━━�
 ```
 invalid.js:23:1 lint/nursery/noBitwise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of '>>= '.
+  i Unexpected use of '>>='.
   
     21 │ x <<= y;
     22 │ 
@@ -239,7 +239,7 @@ invalid.js:23:1 lint/nursery/noBitwise ━━━━━━━━━━━━━�
 ```
 invalid.js:25:1 lint/nursery/noBitwise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of '>>>= '.
+  i Unexpected use of '>>>='.
   
     23 │ x >>= y;
     24 │ 
@@ -256,7 +256,7 @@ invalid.js:25:1 lint/nursery/noBitwise ━━━━━━━━━━━━━�
 ```
 invalid.js:27:1 lint/nursery/noBitwise ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Unexpected use of '| '.
+  i Unexpected use of '|'.
   
     25 │ x >>>= y;
     26 │ 

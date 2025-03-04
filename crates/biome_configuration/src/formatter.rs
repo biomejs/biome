@@ -1,8 +1,8 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
-    LineWidth, ObjectWrap,
+    AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
+    LineEnding, LineWidth,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -64,10 +64,15 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
 
-    /// Whether to enforce collapsing object literals when possible. Defaults to preserve.
-    #[bpaf(long("object-wrap"), argument("preserve|collapse"))]
+    /// Whether to expand arrays and objects on multiple lines.
+    /// When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
+    /// and array literals are formatted on a single line if it fits in the line.
+    /// When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
+    /// When set to `never`, these literals are formatted on a single line if it fits in the line.
+    /// When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+    #[bpaf(long("expand"), argument("auto|always|never"))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub object_wrap: Option<ObjectWrap>,
+    pub expand: Option<Expand>,
 
     /// Use any `.editorconfig` files to configure the formatter. Configuration
     /// in `biome.json` will override `.editorconfig` configuration.
@@ -117,8 +122,8 @@ impl FormatterConfiguration {
         self.bracket_spacing.unwrap_or_default()
     }
 
-    pub fn object_wrap_resolved(&self) -> ObjectWrap {
-        self.object_wrap.unwrap_or_default()
+    pub fn expand_resolved(&self) -> Expand {
+        self.expand.unwrap_or_default()
     }
 
     pub fn use_editorconfig_resolved(&self) -> bool {

@@ -74,7 +74,12 @@ jobs:
       - name: Free Disk Space
         uses: ./.github/actions/free-disk-space
       - name: Install toolchain
-        run: rustup toolchain install nightly
+        uses: moonrepo/setup-rust@ede6de059f8046a5e236c94046823e2af11ca670 # v1.2.2
+        with:
+          channel: nightly
+          cache: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install udeps
         run: cargo install cargo-udeps --locked
       - name: Detect unused dependencies using udeps
