@@ -3,6 +3,7 @@ mod tests;
 
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
+use biome_markdown_syntax::T;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
@@ -187,21 +188,15 @@ impl<'src> MarkdownLexer<'src> {
     fn consume_header(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
-        let mut level = 0;
-        while matches!(self.current_byte(), Some(b'#')) {
+        // Just consume a single hash character and return its token
+        if matches!(self.current_byte(), Some(b'#')) {
             self.advance(1);
-            level += 1;
+            return T![#];
         }
 
-        match level {
-            1 => MD_HEADER1,
-            2 => MD_HEADER2,
-            3 => MD_HEADER3,
-            4 => MD_HEADER4,
-            5 => MD_HEADER5,
-            6 => MD_HEADER6,
-            _ => ERROR_TOKEN,
-        }
+        // This shouldn't be reached if this function is called correctly
+        // but handle the error case anyway
+        self.consume_textual()
     }
 
     fn text_position(&self) -> TextSize {

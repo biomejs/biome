@@ -25,6 +25,8 @@ macro_rules! assert_lex {
             tokens.push((lexer.current(), lexer.current_range()));
         }
 
+        // TODO: remove this debug print
+        println!("tokens: {:#?}", tokens);
 
         $(
             assert_eq!(
@@ -145,7 +147,7 @@ fn whitespace() {
 fn heading_level_1() {
     assert_lex! {
         "# Heading 1",
-        MD_HEADER1:1,
+        HASH:1,
         WHITESPACE:1,
         MD_TEXTUAL_LITERAL:9,
     }
@@ -155,7 +157,7 @@ fn heading_level_1() {
 fn heading_level_1_with_newline() {
     assert_lex! {
         "# Heading 1\n",
-        MD_HEADER1:1,
+        HASH:1,
         WHITESPACE:1,
         MD_TEXTUAL_LITERAL:9,
         NEWLINE:1,
@@ -166,7 +168,8 @@ fn heading_level_1_with_newline() {
 fn heading_level_2() {
     assert_lex! {
         "## Heading 2",
-        MD_HEADER2:2,
+        HASH:1,
+        HASH:1,
         WHITESPACE:1,
         MD_TEXTUAL_LITERAL:9,
     }
@@ -176,7 +179,9 @@ fn heading_level_2() {
 fn heading_level_3() {
     assert_lex! {
         "### Heading 3",
-        MD_HEADER3:3,
+        HASH:1,
+        HASH:1,
+        HASH:1,
         WHITESPACE:1,
         MD_TEXTUAL_LITERAL:9,
     }
@@ -186,7 +191,10 @@ fn heading_level_3() {
 fn heading_level_4() {
     assert_lex! {
         "#### Heading 4",
-        MD_HEADER4:4,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
         WHITESPACE:1,
         MD_TEXTUAL_LITERAL:9,
     }
@@ -196,7 +204,11 @@ fn heading_level_4() {
 fn heading_level_5() {
     assert_lex! {
         "##### Heading 5",
-        MD_HEADER5:5,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
         WHITESPACE:1,
         MD_TEXTUAL_LITERAL:9,
     }
@@ -206,7 +218,12 @@ fn heading_level_5() {
 fn heading_level_6() {
     assert_lex! {
         "###### Heading 6",
-        MD_HEADER6:6,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
         WHITESPACE:1,
         MD_TEXTUAL_LITERAL:9,
     }
@@ -217,7 +234,20 @@ fn heading_level_6() {
 fn not_a_heading() {
     assert_lex! {
         "############## not-heading",
-        ERROR_TOKEN:14,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
+        HASH:1,
         WHITESPACE:1,
         MD_TEXTUAL_LITERAL:3,
         ERROR_TOKEN:1,
