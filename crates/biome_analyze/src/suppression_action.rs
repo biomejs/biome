@@ -95,12 +95,12 @@ pub trait SuppressionAction {
             .pieces()
             .any(|trivia| trivia.is_comments());
 
+        let mut text = String::new();
         if has_comments {
             let mut new_trivia = vec![];
             let mut after_comment = false;
             let mut trivia_applied = false;
             let pieces = token.leading_trivia().pieces();
-            let mut text = String::new();
             for trivia in pieces {
                 if trivia.is_comments() {
                     after_comment = true
@@ -119,11 +119,7 @@ pub trait SuppressionAction {
                 text.push_str(trivia.text());
             }
             text.push_str(token.text_trimmed());
-            let new_token = SyntaxToken::new_detached(token.kind(), text.as_str(), new_trivia, [])
-                .with_trailing_trivia_pieces(token.trailing_trivia().pieces());
-            mutation.replace_token_discard_trivia(token, new_token);
         } else {
-            let mut new_text = String::new();
             let mut new_trivia = vec![
                 TriviaPiece::new(
                     TriviaPieceKind::SingleLineComment,
@@ -131,19 +127,19 @@ pub trait SuppressionAction {
                 ),
                 TriviaPiece::newline(1),
             ];
-            new_text.push_str(suppression_text);
-            new_text.push('\n');
+            text.push_str(suppression_text);
+            text.push('\n');
             for trivia in token.leading_trivia().pieces() {
                 new_trivia.push(TriviaPiece::new(trivia.kind(), trivia.text_len()));
-                new_text.push_str(trivia.text());
+                text.push_str(trivia.text());
             }
-            new_text.push_str(token.text_trimmed());
-
-            let new_token =
-                SyntaxToken::new_detached(token.kind(), new_text.as_str(), new_trivia, [])
-                    .with_trailing_trivia_pieces(token.trailing_trivia().pieces());
-            mutation.replace_token_discard_trivia(token, new_token);
+            text.push_str(token.text_trimmed());
         }
+
+        let new_token =
+            SyntaxToken::new_detached(token.kind(), text.as_str(), new_trivia, [])
+                .with_trailing_trivia_pieces(token.trailing_trivia().pieces());
+        mutation.replace_token_discard_trivia(token, new_token);
     }
 
     /// Returns the whole top level comment, based on the language
