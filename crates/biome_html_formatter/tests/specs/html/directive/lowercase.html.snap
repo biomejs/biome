@@ -1,11 +1,11 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: example.html
+info: directive/lowercase.html
 ---
 # Input
 
 ```html
-<!DOCTYPE     html>
+<!doctype html>
 
 ```
 
@@ -28,5 +28,5 @@ Indent script and style: false
 -----
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 ```
