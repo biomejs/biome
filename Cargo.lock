@@ -388,7 +388,6 @@ dependencies = [
  "oxc_resolver",
  "papaya",
  "rustc-hash 2.1.1",
- "seize",
  "serde_json",
 ]
 
@@ -3071,9 +3070,9 @@ checksum = "c1b04fb49957986fdce4d6ee7a65027d55d4b6d2265e5848bbb507b58ccfdb6f"
 
 [[package]]
 name = "oxc_resolver"
-version = "4.0.0"
+version = "4.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0f82c2be3d07b2ac002fb4a414d6fab602b352a8d99ed9b59f6868a968c73ba"
+checksum = "b1c4d9cffbd24c3a874bd44cce4384cb73bf732c4fe4aa99c4406b2e0c4027bb"
 dependencies = [
  "cfg-if",
  "indexmap",
@@ -3091,9 +3090,9 @@ dependencies = [
 
 [[package]]
 name = "papaya"
-version = "0.1.9"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aeb8b9616002a83f9779ea70a2a44364fe804f8b532b96989d0790a34ad76479"
+checksum = "aab21828b6b5952fdadd6c377728ffae53ec3a21b2febc47319ab65741f7e2fd"
 dependencies = [
  "equivalent",
  "seize",
@@ -3774,9 +3773,9 @@ checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 
 [[package]]
 name = "seize"
-version = "0.4.9"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d84b0c858bdd30cb56f5597f8b3bf702ec23829e652cc636a1e5a7b9de46ae93"
+checksum = "e4b8d813387d566f627f3ea1b914c068aac94c40ae27ec43f5f33bde65abefe7"
 dependencies = [
  "libc",
  "windows-sys 0.52.0",

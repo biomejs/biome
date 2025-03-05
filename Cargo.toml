@@ -194,8 +194,8 @@ ignore               = "0.4.23"
 indexmap             = { version = "2.7.1" }
 insta                = "1.42.2"
 natord               = "1.0.9"
-oxc_resolver         = "4.0"
-papaya               = "0.1.9"
+oxc_resolver         = "4.2"
+papaya               = "0.2"
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
 proc-macro-error2    = { version = "2.0.1", default-features = false }
 proc-macro2          = "1.0.94"
