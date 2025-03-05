@@ -14,7 +14,6 @@ query {
 }
 
 query {
-  # biome-ignore lint/nursery/useDeprecatedReason: testing
   member @deprecated()
 }
 

@@ -79,6 +79,10 @@ where
         ) {
             unreachable!("")
         }
+
+        fn suppression_top_level_comment(&self, _suppression_text: &str) -> String {
+            unreachable!("")
+        }
     }
     let mut analyzer = Analyzer::new(
         METADATA.deref(),

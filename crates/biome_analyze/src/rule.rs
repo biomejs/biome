@@ -1163,10 +1163,12 @@ pub trait Rule: RuleMeta + Sized {
 
             if let Some(first_token) = root.syntax().first_token() {
                 let mut mutation = root.begin();
+                let comment =
+                    suppression_action.suppression_top_level_comment(suppression_text.as_str());
                 suppression_action.apply_top_level_suppression(
                     &mut mutation,
                     first_token,
-                    suppression_text.as_str(),
+                    comment.as_str(),
                 );
                 return Some(SuppressAction {
                     mutation,
