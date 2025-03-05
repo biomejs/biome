@@ -386,7 +386,7 @@ dependencies = [
  "cfg-if",
  "once_cell",
  "oxc_resolver",
- "papaya 0.2.0",
+ "papaya",
  "rustc-hash 2.1.1",
  "serde_json",
 ]
@@ -528,7 +528,7 @@ dependencies = [
  "directories",
  "enumflags2",
  "oxc_resolver",
- "papaya 0.2.0",
+ "papaya",
  "parking_lot",
  "path-absolutize",
  "rayon",
@@ -1075,7 +1075,7 @@ dependencies = [
  "camino",
  "crossbeam",
  "futures",
- "papaya 0.2.0",
+ "papaya",
  "rustc-hash 2.1.1",
  "serde",
  "serde_json",
@@ -1219,7 +1219,7 @@ dependencies = [
  "grit-pattern-matcher",
  "grit-util",
  "insta",
- "papaya 0.2.0",
+ "papaya",
  "rustc-hash 2.1.1",
  "serde",
 ]
@@ -1231,7 +1231,7 @@ dependencies = [
  "biome_package",
  "biome_parser",
  "camino",
- "papaya 0.2.0",
+ "papaya",
  "rustc-hash 2.1.1",
 ]
 
@@ -1305,7 +1305,7 @@ dependencies = [
  "ignore",
  "insta",
  "notify",
- "papaya 0.2.0",
+ "papaya",
  "rayon",
  "regex",
  "rustc-hash 2.1.1",
@@ -3070,17 +3070,17 @@ checksum = "c1b04fb49957986fdce4d6ee7a65027d55d4b6d2265e5848bbb507b58ccfdb6f"
 
 [[package]]
 name = "oxc_resolver"
-version = "4.0.0"
+version = "4.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0f82c2be3d07b2ac002fb4a414d6fab602b352a8d99ed9b59f6868a968c73ba"
+checksum = "b1c4d9cffbd24c3a874bd44cce4384cb73bf732c4fe4aa99c4406b2e0c4027bb"
 dependencies = [
  "cfg-if",
  "indexmap",
  "json-strip-comments",
  "once_cell",
- "papaya 0.1.9",
+ "papaya",
  "rustc-hash 2.1.1",
- "seize 0.4.9",
+ "seize",
  "serde",
  "serde_json",
  "simdutf8",
@@ -3090,22 +3090,12 @@ dependencies = [
 
 [[package]]
 name = "papaya"
-version = "0.1.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aeb8b9616002a83f9779ea70a2a44364fe804f8b532b96989d0790a34ad76479"
-dependencies = [
- "equivalent",
- "seize 0.4.9",
-]
-
-[[package]]
-name = "papaya"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "aab21828b6b5952fdadd6c377728ffae53ec3a21b2febc47319ab65741f7e2fd"
 dependencies = [
  "equivalent",
- "seize 0.5.0",
+ "seize",
 ]
 
 [[package]]
@@ -3780,16 +3770,6 @@ name = "scopeguard"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
-
-[[package]]
-name = "seize"
-version = "0.4.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d84b0c858bdd30cb56f5597f8b3bf702ec23829e652cc636a1e5a7b9de46ae93"
-dependencies = [
- "libc",
- "windows-sys 0.52.0",
-]
 
 [[package]]
 name = "seize"
