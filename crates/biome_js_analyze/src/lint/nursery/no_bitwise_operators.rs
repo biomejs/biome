@@ -54,7 +54,7 @@ declare_lint_rule! {
     ///         "allow": ["&", "|", "^", "~", "<<", ">>", ">>>"]
     ///     }
     /// }
-    /// ```    
+    /// ```
     ///
     pub NoBitwiseOperators {
         version: "next",
@@ -141,17 +141,25 @@ impl Rule for NoBitwiseOperators {
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
         let op = state.text_trimmed();
+        let suggested_op = match op {
+            "&" => Some("&&"),
+            "|" => Some("||"),
+            "^" => Some("??"),
+            _ => None,
+        };
+        let note_msg = match suggested_op {
+            Some(value) => format!("Did you mean {value} instead? If you want to use the bitwise operator, consider suppressing this diagnostic."),
+            None => "Bitwise operators are prohibited because their use can be confusing or unintended. If you did want to use the bitwise operator, consider suppressing this diagnostic.".to_string(),
+        };
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Don't use '"<Emphasis>{op}</Emphasis>"' operator."
+                    "Unexpected use of '"<Emphasis>{op}</Emphasis>"'."
                 },
             )
-            .note(markup! {
-                "Did you mean "<Emphasis>"&&"</Emphasis> " or " <Emphasis>"||"</Emphasis> " instead?"
-            }),
+            .note(note_msg),
         )
     }
 }
