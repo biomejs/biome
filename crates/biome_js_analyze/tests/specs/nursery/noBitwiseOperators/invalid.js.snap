@@ -31,6 +31,8 @@ x >>= y;
 x >>>= y;
 
 5 | 0;
+
+let k = 4 & (3 | 5);
 ```
 
 # Diagnostics
@@ -262,6 +264,38 @@ invalid.js:27:1 lint/nursery/noBitwiseOperators ━━━━━━━━━━�
     26 │ 
   > 27 │ 5 | 0;
        │ ^^^^^
+    28 │ 
+    29 │ let k = 4 & (3 | 5);
+  
+  i Did you mean && or || instead?
+  
+
+```
+
+```
+invalid.js:29:9 lint/nursery/noBitwiseOperators ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use '&' operator.
+  
+    27 │ 5 | 0;
+    28 │ 
+  > 29 │ let k = 4 & (3 | 5);
+       │         ^^^^^^^^^^^
+  
+  i Did you mean && or || instead?
+  
+
+```
+
+```
+invalid.js:29:14 lint/nursery/noBitwiseOperators ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use '|' operator.
+  
+    27 │ 5 | 0;
+    28 │ 
+  > 29 │ let k = 4 & (3 | 5);
+       │              ^^^^^
   
   i Did you mean && or || instead?
   
