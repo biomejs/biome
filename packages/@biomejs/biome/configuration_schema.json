@@ -2315,18 +2315,21 @@
 			},
 			"additionalProperties": false
 		},
-		"NoBitwiseConfiguration": {
+		"NoBitwiseOperatorsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithNoBitwiseOptions" }
+				{ "$ref": "#/definitions/RuleWithNoBitwiseOperatorsOptions" }
 			]
 		},
-		"NoBitwiseOptions": {
+		"NoBitwiseOperatorsOptions": {
 			"description": "Options for the `noBitwise` rule.",
 			"type": "object",
 			"properties": {
-				"allow": { "type": "array", "items": { "type": "string" } },
-				"int32Hint": { "default": false, "type": "boolean" }
+				"allow": {
+					"description": "Allows a list of bitwise operators to be used as exceptions.",
+					"type": "array",
+					"items": { "type": "string" }
+				}
 			},
 			"additionalProperties": false
 		},
@@ -2506,10 +2509,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noBitwise": {
-					"description": "Disallow bitwise operators",
+				"noBitwiseOperators": {
+					"description": "Disallow bitwise operators.",
 					"anyOf": [
-						{ "$ref": "#/definitions/NoBitwiseConfiguration" },
+						{ "$ref": "#/definitions/NoBitwiseOperatorsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3522,7 +3525,7 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithNoBitwiseOptions": {
+		"RuleWithNoBitwiseOperatorsOptions": {
 			"type": "object",
 			"required": ["level"],
 			"properties": {
@@ -3532,7 +3535,7 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/NoBitwiseOptions" }]
+					"allOf": [{ "$ref": "#/definitions/NoBitwiseOperatorsOptions" }]
 				}
 			},
 			"additionalProperties": false

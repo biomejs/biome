@@ -1444,9 +1444,9 @@ export interface Nursery {
 	 */
 	noAwaitInLoop?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow bitwise operators
+	 * Disallow bitwise operators.
 	 */
-	noBitwise?: RuleConfiguration_for_NoBitwiseOptions;
+	noBitwiseOperators?: RuleConfiguration_for_NoBitwiseOperatorsOptions;
 	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
@@ -2305,9 +2305,9 @@ export type RuleConfiguration_for_DeprecatedHooksOptions =
 export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportExtensionsOptions;
-export type RuleConfiguration_for_NoBitwiseOptions =
+export type RuleConfiguration_for_NoBitwiseOperatorsOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_NoBitwiseOptions;
+	| RuleWithOptions_for_NoBitwiseOperatorsOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -2497,7 +2497,7 @@ export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	 */
 	options: UseImportExtensionsOptions;
 }
-export interface RuleWithOptions_for_NoBitwiseOptions {
+export interface RuleWithOptions_for_NoBitwiseOperatorsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -2505,7 +2505,7 @@ export interface RuleWithOptions_for_NoBitwiseOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoBitwiseOptions;
+	options: NoBitwiseOperatorsOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	/**
@@ -2792,9 +2792,11 @@ export interface UseImportExtensionsOptions {
 /**
  * Options for the `noBitwise` rule.
  */
-export interface NoBitwiseOptions {
+export interface NoBitwiseOperatorsOptions {
+	/**
+	 * Allows a list of bitwise operators to be used as exceptions.
+	 */
 	allow: string[];
-	int32Hint?: boolean;
 }
 /**
  * Options for the rule `noRestrictedImports`.
@@ -3208,7 +3210,7 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noAwaitInLoop"
-	| "lint/nursery/noBitwise"
+	| "lint/nursery/noBitwiseOperators"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"

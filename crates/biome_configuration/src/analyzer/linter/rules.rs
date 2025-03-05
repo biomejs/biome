@@ -3024,9 +3024,10 @@ pub struct Nursery {
     #[doc = "Disallow await inside loops."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_await_in_loop: Option<RuleConfiguration<biome_js_analyze::options::NoAwaitInLoop>>,
-    #[doc = "Disallow bitwise operators"]
+    #[doc = "Disallow bitwise operators."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_bitwise: Option<RuleConfiguration<biome_js_analyze::options::NoBitwise>>,
+    pub no_bitwise_operators:
+        Option<RuleConfiguration<biome_js_analyze::options::NoBitwiseOperators>>,
     #[doc = "Disallow use of CommonJs module system in favor of ESM style imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_common_js: Option<RuleConfiguration<biome_js_analyze::options::NoCommonJs>>,
@@ -3278,7 +3279,7 @@ impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
     pub(crate) const GROUP_RULES: &'static [&'static str] = &[
         "noAwaitInLoop",
-        "noBitwise",
+        "noBitwiseOperators",
         "noCommonJs",
         "noConstantBinaryExpression",
         "noDescendingSpecificity",
@@ -3455,7 +3456,7 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
             }
         }
-        if let Some(rule) = self.no_bitwise.as_ref() {
+        if let Some(rule) = self.no_bitwise_operators.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
             }
@@ -3804,7 +3805,7 @@ impl RuleGroupExt for Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
             }
         }
-        if let Some(rule) = self.no_bitwise.as_ref() {
+        if let Some(rule) = self.no_bitwise_operators.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
             }
@@ -4178,8 +4179,8 @@ impl RuleGroupExt for Nursery {
                 .no_await_in_loop
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noBitwise" => self
-                .no_bitwise
+            "noBitwiseOperators" => self
+                .no_bitwise_operators
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noCommonJs" => self

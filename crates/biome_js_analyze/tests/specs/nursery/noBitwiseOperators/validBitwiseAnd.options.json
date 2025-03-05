@@ -3,10 +3,10 @@
 	"linter": {
 		"rules": {
 			"nursery": {
-				"noBitwise": {
+				"noBitwiseOperators": {
 					"level": "error",
 					"options": {
-						"int32Hint": true
+						"allow": ["&"]
 					}
 				}
 			}

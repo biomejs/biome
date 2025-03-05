@@ -2,4 +2,4 @@
 "@biomejs/biome": minor
 ---
 
-Add new rule `noBitwise`, which disallow bitwise operators
+Added new rule `noBitwiseOperators`, which disallows bitwise operators.
