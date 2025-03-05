@@ -2790,7 +2790,7 @@ export interface UseImportExtensionsOptions {
 	suggestedExtensions?: {};
 }
 /**
- * Options for the `noBitwise` rule.
+ * Rule's options
  */
 export interface NoBitwiseOperatorsOptions {
 	/**

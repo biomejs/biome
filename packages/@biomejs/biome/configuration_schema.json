@@ -2322,7 +2322,7 @@
 			]
 		},
 		"NoBitwiseOperatorsOptions": {
-			"description": "Options for the `noBitwise` rule.",
+			"description": "Rule's options",
 			"type": "object",
 			"properties": {
 				"allow": {

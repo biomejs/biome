@@ -156,7 +156,7 @@ impl Rule for NoBitwiseOperators {
     }
 }
 
-/// Options for the `noBitwise` rule.
+/// Rule's options
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
