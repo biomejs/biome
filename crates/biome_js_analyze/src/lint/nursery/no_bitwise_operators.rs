@@ -44,6 +44,9 @@ declare_lint_rule! {
     ///
     /// The rule provides the options described below.
     ///
+    /// ### allow
+    ///
+    /// Allows a list of bitwise operators to be used as exceptions.
     ///
     /// ```json,options
     /// {
@@ -51,10 +54,7 @@ declare_lint_rule! {
     ///         "allow": ["&", "|", "^", "~", "<<", ">>", ">>>"]
     ///     }
     /// }
-    /// ```
-    /// ### allow
-    ///
-    /// Allows a list of bitwise operators to be used as exceptions.
+    /// ```    
     ///
     pub NoBitwiseOperators {
         version: "next",
