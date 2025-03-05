@@ -196,11 +196,11 @@ pub(crate) async fn print_socket() -> io::Result<()> {
 pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible> {
     let path = get_socket_name();
 
-    info!("Trying to connect to socket {}", path.as_str());
+    info!("Trying to connect to socket {path}");
 
     // Try to remove the socket file if it already exists
     if path.exists() {
-        info!("Remove socket folder {}", path.as_str());
+        info!("Remove socket {path}");
         fs::remove_file(&path)?;
     }
 

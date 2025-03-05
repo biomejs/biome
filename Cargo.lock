@@ -1314,6 +1314,7 @@ dependencies = [
  "serde",
  "serde_json",
  "smallvec",
+ "tokio",
  "tracing",
 ]
 

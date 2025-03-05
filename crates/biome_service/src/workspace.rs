@@ -52,6 +52,7 @@
 //!     format a file with a language that does not have a formatter
 
 mod client;
+mod document;
 mod scanner;
 mod server;
 mod watcher;
@@ -81,12 +82,24 @@ use smallvec::SmallVec;
 use std::collections::HashMap;
 use std::time::Duration;
 use std::{borrow::Cow, panic::RefUnwindSafe};
+use tokio::sync::watch;
 use tracing::{debug, instrument};
 
 use crate::file_handlers::Capabilities;
 use crate::projects::ProjectKey;
 use crate::settings::WorkspaceSettingsHandle;
 use crate::{Deserialize, Serialize, WorkspaceError};
+
+/// Notification regarding a workspace's service data.
+#[derive(Clone, Copy, Debug)]
+pub enum ServiceDataNotification {
+    /// Notifies of any kind of update to the service data.
+    Updated,
+
+    /// Workspace watcher has stopped and no more service data updates are
+    /// expected.
+    Stop,
+}
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -1059,8 +1072,8 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     ///
     /// Follow-up calls may be much faster as they can reuse cached data.
     ///
-    /// TODO: This method also registers file watchers to make sure the cache
-    ///       remains up-to-date.
+    /// This method also registers file watchers to make sure the cache remains
+    /// up-to-date, if indicated in the `params`.
     fn scan_project_folder(
         &self,
         params: ScanProjectFolderParams,
@@ -1225,8 +1238,9 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
 /// Convenience function for constructing a server instance of [Workspace]
 pub fn server(fs: Box<dyn FileSystem>) -> Box<dyn Workspace> {
-    let (tx, _) = bounded(0);
-    Box::new(WorkspaceServer::new(fs, tx))
+    let (watcher_tx, _) = bounded(0);
+    let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
+    Box::new(WorkspaceServer::new(fs, watcher_tx, service_data_tx))
 }
 
 /// Convenience function for constructing a client instance of [Workspace]

@@ -52,6 +52,17 @@ macro_rules! url {
     };
 }
 
+macro_rules! clear_notifications {
+    ($channel:expr) => {
+        if $channel
+            .has_changed()
+            .expect("Channel should not be closed")
+        {
+            let _ = $channel.changed().await;
+        }
+    };
+}
+
 fn fixable_diagnostic(line: u32) -> Result<lsp::Diagnostic> {
     Ok(lsp::Diagnostic {
         range: Range {
@@ -2992,9 +3003,9 @@ export function bar() {
     fs.create_file("foo.ts", FOO_CONTENT);
     fs.create_file("bar.ts", BAR_CONTENT);
 
-    let (mut watcher, instruction_channel, notification_channel) = WorkspaceWatcher::new()?;
+    let (mut watcher, instruction_channel) = WorkspaceWatcher::new()?;
 
-    let factory = ServerFactory::new(true, instruction_channel.sender.clone());
+    let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
     tokio::task::spawn_blocking(move || {
@@ -3062,14 +3073,15 @@ export function bar() {
         "This import is part of a cycle."
     );
 
-    let _ = notification_channel.receiver.try_recv(); // Clear notification, if any.
+    clear_notifications!(factory.service_data_rx);
 
     // ARRANGE: Remove `bar.ts`.
     std::fs::remove_file(fs.working_directory.join("bar.ts")).expect("Cannot remove bar.ts");
 
-    notification_channel
-        .receiver
-        .recv()
+    factory
+        .service_data_rx
+        .changed()
+        .await
         .expect("Expected notification");
 
     // ACT: Pull diagnostics.
@@ -3094,13 +3106,14 @@ export function bar() {
     assert_eq!(result.diagnostics.len(), 0);
 
     // ARRANGE: Recreate `bar.ts`.
-    let _ = notification_channel.receiver.try_recv(); // Clear notification, if any.
+    clear_notifications!(factory.service_data_rx);
 
     fs.create_file("bar.ts", BAR_CONTENT);
 
-    notification_channel
-        .receiver
-        .recv()
+    factory
+        .service_data_rx
+        .changed()
+        .await
         .expect("Expected notification");
 
     // ACT: Pull diagnostics.
@@ -3129,13 +3142,14 @@ export function bar() {
     );
 
     // ARRANGE: Fix `bar.ts`.
-    let _ = notification_channel.receiver.try_recv(); // Clear notification, if any.
+    clear_notifications!(factory.service_data_rx);
 
     fs.create_file("bar.ts", BAR_CONTENT_FIXED);
 
-    notification_channel
-        .receiver
-        .recv()
+    factory
+        .service_data_rx
+        .changed()
+        .await
         .expect("Expected notification");
 
     // ACT: Pull diagnostics.
@@ -3159,7 +3173,6 @@ export function bar() {
     // ASSERT: Diagnostic should disappear again with a fixed `bar.ts`.
     assert_eq!(result.diagnostics.len(), 0);
 
-    let _ = instruction_channel.sender.send(WatcherInstruction::Stop);
     server.shutdown().await?;
     reader.abort();
 
@@ -3201,9 +3214,9 @@ export function bar() {
     fs.create_file("foo.ts", FOO_CONTENT);
     fs.create_file("utils/bar.ts", BAR_CONTENT);
 
-    let (mut watcher, instruction_channel, notification_channel) = WorkspaceWatcher::new()?;
+    let (mut watcher, instruction_channel) = WorkspaceWatcher::new()?;
 
-    let factory = ServerFactory::new(true, instruction_channel.sender.clone());
+    let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
 
     let workspace = factory.workspace();
     tokio::task::spawn_blocking(move || {
@@ -3271,7 +3284,7 @@ export function bar() {
         "This import is part of a cycle."
     );
 
-    let _ = notification_channel.receiver.try_recv(); // Clear notification, if any.
+    clear_notifications!(factory.service_data_rx);
 
     // ARRANGE: Move `utils` directory.
     std::fs::rename(
@@ -3280,9 +3293,10 @@ export function bar() {
     )
     .expect("Cannot move utils");
 
-    notification_channel
-        .receiver
-        .recv()
+    factory
+        .service_data_rx
+        .changed()
+        .await
         .expect("Expected notification");
 
     // ACT: Pull diagnostics.
@@ -3308,7 +3322,7 @@ export function bar() {
     assert_eq!(result.diagnostics.len(), 0);
 
     // ARRANGE: Move `utils` back.
-    let _ = notification_channel.receiver.try_recv(); // Clear notification, if any.
+    clear_notifications!(factory.service_data_rx);
 
     std::fs::rename(
         fs.working_directory.join("bin"),
@@ -3316,9 +3330,10 @@ export function bar() {
     )
     .expect("Cannot restore utils");
 
-    notification_channel
-        .receiver
-        .recv()
+    factory
+        .service_data_rx
+        .changed()
+        .await
         .expect("Expected notification");
 
     // ACT: Pull diagnostics.
@@ -3346,7 +3361,6 @@ export function bar() {
         "This import is part of a cycle."
     );
 
-    let _ = instruction_channel.sender.send(WatcherInstruction::Stop);
     server.shutdown().await?;
     reader.abort();
 

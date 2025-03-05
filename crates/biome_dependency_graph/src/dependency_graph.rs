@@ -149,7 +149,7 @@ impl DependencyGraph {
                     .is_err()
                 {
                     break;
-                };
+                }
                 parent = path.parent();
             }
         }

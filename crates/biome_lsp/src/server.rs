@@ -11,6 +11,7 @@ use biome_diagnostics::panic::PanicError;
 use biome_fs::{ConfigName, FileSystem, MemoryFileSystem, OsFileSystem};
 use biome_service::workspace::{
     CloseProjectParams, OpenProjectParams, RageEntry, RageParams, RageResult,
+    ServiceDataNotification,
 };
 use biome_service::{WatcherInstruction, WorkspaceServer};
 use crossbeam::channel::{Sender, bounded};
@@ -22,7 +23,7 @@ use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use tokio::io::{AsyncRead, AsyncWrite};
-use tokio::sync::Notify;
+use tokio::sync::{Notify, watch};
 use tokio::task::spawn_blocking;
 use tower_lsp::jsonrpc::Result as LspResult;
 use tower_lsp::{ClientSocket, lsp_types::*};
@@ -398,11 +399,7 @@ impl LanguageServer for LSPServer {
                 match result {
                     Ok(project_key) => {
                         self.session
-                            .insert_project(project_path.clone(), project_key);
-
-                        self.session
-                            .scan_project_folder(project_key, project_path)
-                            .await;
+                            .insert_and_scan_project(project_key, project_path.clone());
 
                         self.session.update_all_diagnostics().await;
                     }
@@ -553,6 +550,12 @@ pub struct ServerFactory {
     /// This shared flag is set to true once at least one sessions has been
     /// initialized on this server instance
     is_initialized: Arc<AtomicBool>,
+
+    /// Receiver for service data notifications.
+    ///
+    /// If we receive a notification here, diagnostics for open documents are
+    /// all refreshed.
+    service_data_rx: watch::Receiver<ServiceDataNotification>,
 }
 
 impl Default for ServerFactory {
@@ -564,29 +567,34 @@ impl Default for ServerFactory {
 impl ServerFactory {
     /// Regular constructor for use in the daemon.
     pub fn new(stop_on_disconnect: bool, instruction_tx: Sender<WatcherInstruction>) -> Self {
+        let (service_data_tx, service_data_rx) = watch::channel(ServiceDataNotification::Updated);
         Self {
             cancellation: Arc::default(),
             workspace: Arc::new(WorkspaceServer::new(
                 Box::new(OsFileSystem::default()),
                 instruction_tx,
+                service_data_tx,
             )),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect,
             is_initialized: Arc::default(),
+            service_data_rx,
         }
     }
 
     /// Constructor for use in tests.
     pub fn new_with_fs(fs: Box<dyn FileSystem>) -> Self {
-        let (tx, _) = bounded(0);
+        let (watcher_tx, _) = bounded(0);
+        let (service_data_tx, service_data_rx) = watch::channel(ServiceDataNotification::Updated);
         Self {
             cancellation: Arc::default(),
-            workspace: Arc::new(WorkspaceServer::new(fs, tx)),
+            workspace: Arc::new(WorkspaceServer::new(fs, watcher_tx, service_data_tx)),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect: true,
             is_initialized: Arc::default(),
+            service_data_rx,
         }
     }
 
@@ -597,7 +605,13 @@ impl ServerFactory {
         let session_key = SessionKey(self.next_session_key.fetch_add(1, Ordering::Relaxed));
 
         let mut builder = LspService::build(move |client| {
-            let session = Session::new(session_key, client, workspace, self.cancellation.clone());
+            let session = Session::new(
+                session_key,
+                client,
+                workspace,
+                self.cancellation.clone(),
+                self.service_data_rx.clone(),
+            );
             let handle = Arc::new(session);
 
             let mut sessions = self.sessions.lock().unwrap();

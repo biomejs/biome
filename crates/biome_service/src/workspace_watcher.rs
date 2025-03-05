@@ -8,7 +8,7 @@ use notify::{
 };
 use tracing::{debug, warn};
 
-use crate::{WorkspaceError, WorkspaceServer, diagnostics::WatchError};
+use crate::{IGNORE_ENTRIES, WorkspaceError, WorkspaceServer, diagnostics::WatchError};
 
 /// Instructions to let the watcher either watch or unwatch a given folder.
 #[derive(Debug, Eq, PartialEq)]
@@ -25,11 +25,6 @@ pub enum WatcherInstruction {
 
     /// Stops the watcher entirely.
     Stop,
-}
-
-/// Channel for receiving notifications when the watcher has processed events.
-pub struct WatcherNotificationChannel {
-    pub receiver: Receiver<()>,
 }
 
 /// Channel for sending instructions to the watcher.
@@ -78,20 +73,14 @@ pub struct WorkspaceWatcher {
 
     /// Channel receiver for watch instructions.
     instruction_rx: Receiver<WatcherInstruction>,
-
-    /// Channel sender for sending notifications on the
-    /// [WatcherNotificationChannel].
-    notification_tx: Sender<()>,
 }
 
 impl WorkspaceWatcher {
     /// Constructor.
     ///
-    /// Returns the watcher as well as two channel endpoints: one for sending
-    /// instructions to the watcher, and one for receiving notifications when
-    /// the watcher has processed events.
-    pub fn new()
-    -> Result<(Self, WatcherInstructionChannel, WatcherNotificationChannel), WorkspaceError> {
+    /// Returns the watcher as well as a channel for sending instructions to the
+    /// watcher.
+    pub fn new() -> Result<(Self, WatcherInstructionChannel), WorkspaceError> {
         // We use a bounded channel, because watchers are
         // [intrinsically unreliable](https://docs.rs/notify/latest/notify/#watching-large-directories).
         // If we block the sender, some events may get dropped, but that was
@@ -105,21 +94,16 @@ impl WorkspaceWatcher {
         let watcher = recommended_watcher(tx)?;
 
         let (instruction_tx, instruction_rx) = unbounded();
-        let (notification_tx, notification_rx) = bounded(1);
         let instruction_channel = WatcherInstructionChannel {
             sender: instruction_tx,
-        };
-        let notification_channel = WatcherNotificationChannel {
-            receiver: notification_rx,
         };
         let watcher = Self {
             watcher: Box::new(watcher),
             notify_rx: rx,
             instruction_rx,
-            notification_tx,
         };
 
-        Ok((watcher, instruction_channel, notification_channel))
+        Ok((watcher, instruction_channel))
     }
 
     /// Runs the watcher.
@@ -135,51 +119,54 @@ impl WorkspaceWatcher {
             crossbeam::channel::select! {
                 recv(self.notify_rx) -> event => match event {
                     Ok(Ok(event)) => {
+                        if event.paths.iter().all(|path| path
+                            .components()
+                            .any(|component| IGNORE_ENTRIES.contains(&component.as_os_str().as_encoded_bytes())))
+                        {
+                            continue;
+                        }
+
                         if !matches!(event.kind, EventKind::Access(_)) {
                             debug!(event = debug(&event), "watcher_event");
                         }
 
-                        let (is_processed, result) = match event.kind {
-                            EventKind::Access(_) => (false, Ok(())),
-                            EventKind::Create(create_kind) => (true, match create_kind {
+                        let result = match event.kind {
+                            EventKind::Access(_) => Ok(()),
+                            EventKind::Create(create_kind) => match create_kind {
                                 CreateKind::Folder => {
                                     workspace.open_folders_through_watcher(event.paths)
                                 }
                                 _ => workspace.open_paths_through_watcher(event.paths),
-                            }),
+                            },
                             EventKind::Modify(modify_kind) => match modify_kind {
                                 // `ModifyKind::Any` needs to be included as a catch-all.
                                 // Without it, we'll miss events on Windows.
                                 ModifyKind::Data(_) | ModifyKind::Any => {
-                                    (true, workspace.open_paths_through_watcher(event.paths))
+                                    workspace.open_paths_through_watcher(event.paths)
                                 },
                                 ModifyKind::Name(RenameMode::From) => {
-                                    (true, workspace.close_paths_through_watcher(event.paths))
+                                    workspace.close_paths_through_watcher(event.paths)
                                 }
                                 ModifyKind::Name(RenameMode::To) => {
-                                    (true, workspace.open_paths_through_watcher(event.paths))
+                                    workspace.open_paths_through_watcher(event.paths)
                                 },
                                 ModifyKind::Name(RenameMode::Both) => {
-                                    (true, workspace.rename_path_through_watcher(
+                                    workspace.rename_path_through_watcher(
                                         &event.paths[0],
                                         &event.paths[1]
-                                    ))
+                                    )
                                 },
-                                _ => (false, Ok(())),
+                                _ => Ok(()),
                             },
-                            EventKind::Remove(remove_kind) => (true, match remove_kind {
+                            EventKind::Remove(remove_kind) => match remove_kind {
                                 RemoveKind::File => workspace.close_files_through_watcher(event.paths),
                                 _ => workspace.close_paths_through_watcher(event.paths),
-                            }),
-                            EventKind::Any | EventKind::Other => (false, Ok(())),
+                            },
+                            EventKind::Any | EventKind::Other => Ok(()),
                         };
                         if let Err(error) = result {
                             // TODO: Improve error propagation.
                             warn!("Error processing watch event: {error}");
-                        }
-
-                        if is_processed {
-                            let _ = self.notification_tx.try_send(());
                         }
                     },
                     Ok(Err(error)) => {
@@ -222,6 +209,8 @@ impl WorkspaceWatcher {
                 }
             }
         }
+
+        workspace.watcher_stopped();
     }
 }
 
