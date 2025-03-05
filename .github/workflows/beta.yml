@@ -1,12 +1,9 @@
-# To keep it as emergency workflow until preview, beta and changesets releases are stable
-name: Release CLI
+name: Beta release CLI
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-    paths:
-      - packages/@biomejs/biome/package.json
 
 jobs:
   check:
@@ -17,29 +14,15 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Check nightly status
-        id: nightly
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        run: echo "nightly=true" >> $GITHUB_ENV
-
-      - name: Check version changes
-        uses: EndBug/version-check@36ff30f37c7deabe56a30caa043d127be658c425 # v2.1.5
-        id: version
-        with:
-          diff-search: true
-          file-name: packages/@biomejs/biome/package.json
-
-      - name: Set version name
-        if: steps.version.outputs.changed == 'true'
-        run: |
-          echo "Version change found! New version: ${{ steps.version.outputs.version }} (${{ steps.version.outputs.version_type }})"
-          echo "version=${{ steps.version.outputs.version }}" >> $GITHUB_ENV
+      - name: Check beta status
+        id: beta
+        if: github.event_name == 'workflow_dispatch'
+        run: echo "beta=true" >> $GITHUB_ENV
 
       - name: Set prerelease status
-        if: env.nightly == 'true'
         run: |
           echo "prerelease=true" >> $GITHUB_ENV
-          echo "version=$(node packages/@biomejs/biome/scripts/update-nightly-version.mjs)" >> $GITHUB_ENV
+          echo "version=$(node packages/@biomejs/biome/scripts/update-beta-version.mjs)" >> $GITHUB_ENV
 
   build:
     strategy:
@@ -74,7 +57,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     needs: check
-    if: needs.check.outputs.version_changed == 'true' || needs.check.outputs.nightly == 'true'
+    if: needs.check.outputs.version_changed == 'true' || needs.check.outputs.beta == 'true'
     env:
       version: ${{ needs.check.outputs.version }}
     outputs:
@@ -205,35 +188,25 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Set release infos
-        if: needs.build.outputs.prerelease == 'true'
-        run: node packages/@biomejs/biome/scripts/update-nightly-version.mjs
+        run: node packages/@biomejs/biome/scripts/update-beta-version.mjs
+
       - name: Generate npm packages
         run: node packages/@biomejs/biome/scripts/generate-packages.mjs
 
-      - name: Publish npm packages as latest
-        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package --tag latest --access public --provenance; fi; done
-        if: needs.build.outputs.prerelease != 'true'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Publish npm packages as nightly
-        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package --tag nightly --access public --provenance; fi; done
-        if: needs.build.outputs.prerelease == 'true'
+      - name: Publish npm packages as beta
+        run: for package in packages/@biomejs/*; do if [ $package != "packages/@biomejs/js-api" ]; then npm publish $package --tag beta --access public --provenance; fi; done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Extract changelog
-        run: |
-          bash scripts/print-changelog.sh ${{ needs.build.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
       - name: Create GitHub release and tag
         uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: CLI v${{ needs.build.outputs.version }}
-          tag_name: cli/v${{ needs.build.outputs.version }}
+          tag_name: "@biomejs/biome@${{ needs.build.outputs.version }}"
           draft: false
           prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
-          body_path: ${{ github.workspace }}/RELEASE_NOTES
           files: |
             biome-*
           fail_on_unmatched_files: true
