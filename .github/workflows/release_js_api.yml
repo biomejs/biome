@@ -1,8 +1,7 @@
+# To keep it as emergency workflow until preview, beta and changesets releases are stable
 name: Release JavaScript API
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * 2-6'
   push:
     branches:
       - main
