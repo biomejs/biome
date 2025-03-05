@@ -204,7 +204,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: CLI v${{ needs.build.outputs.version }}
-          tag_name: @biomejs/biome@${{ needs.build.outputs.version }}
+          tag_name: "@biomejs/biome@${{ needs.build.outputs.version }}"
           draft: false
           prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
           files: |
