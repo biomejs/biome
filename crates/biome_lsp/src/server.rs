@@ -260,7 +260,6 @@ impl LanguageServer for LSPServer {
             params.workspace_folders,
         );
 
-        //
         let init = InitializeResult {
             capabilities: server_capabilities,
             server_info: Some(ServerInfo {

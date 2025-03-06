@@ -34,6 +34,7 @@ use std::sync::Arc;
 use std::sync::RwLock;
 use std::sync::atomic::Ordering;
 use std::sync::atomic::{AtomicBool, AtomicU8};
+use tokio::spawn;
 use tokio::sync::Notify;
 use tokio::sync::OnceCell;
 use tokio::sync::watch;
@@ -572,31 +573,36 @@ impl Session {
         project_path: BiomePath,
     ) {
         let session = self.clone();
-        let scan_project = async move || {
+        let scan_project = move || {
             let result = session
                 .workspace
                 .scan_project_folder(ScanProjectFolderParams {
                     project_key,
                     path: Some(project_path),
                     watch: true,
+                    force: false,
                 });
 
             match result {
                 Ok(result) => {
-                    for diagnostic in result.diagnostics {
-                        let message = PrintDescription(&diagnostic).to_string();
+                    spawn(async move {
+                        for diagnostic in result.diagnostics {
+                            let message = PrintDescription(&diagnostic).to_string();
+                            session
+                                .client
+                                .log_message(MessageType::ERROR, message)
+                                .await;
+                        }
+                    });
+                }
+                Err(err) => {
+                    let message = PrintDescription(&err).to_string();
+                    spawn(async move {
                         session
                             .client
                             .log_message(MessageType::ERROR, message)
                             .await;
-                    }
-                }
-                Err(err) => {
-                    let message = PrintDescription(&err).to_string();
-                    session
-                        .client
-                        .log_message(MessageType::ERROR, message)
-                        .await;
+                    });
                 }
             }
         };

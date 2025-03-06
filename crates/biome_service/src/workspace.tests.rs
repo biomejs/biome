@@ -326,6 +326,7 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
             project_key,
             path: None,
             watch: false,
+            force: false,
         })
         .unwrap();
 
@@ -414,6 +415,7 @@ fn too_large_files_are_tracked_but_not_parsed() {
             project_key,
             path: None,
             watch: false,
+            force: false,
         })
         .unwrap();
 
@@ -470,6 +472,7 @@ fn plugins_are_loaded_and_used_during_analysis() {
             project_key,
             path: None,
             watch: false,
+            force: false,
         })
         .unwrap();
 

@@ -28,6 +28,7 @@ fn commonjs_file_rejects_import_statement() {
             project_key,
             path: Some(BiomePath::new("/")),
             watch: false,
+            force: false,
         })
         .unwrap();
 

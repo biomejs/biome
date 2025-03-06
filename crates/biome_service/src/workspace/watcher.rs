@@ -93,6 +93,7 @@ impl WorkspaceServer {
             project_key,
             path: Some(path.into()),
             watch: false, // It's already being watched.
+            force: true,
         })
         .map(|_| ())
     }
