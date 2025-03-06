@@ -144,7 +144,7 @@ impl Rule for NoBitwiseOperators {
         let suggested_op = match op {
             "&" => Some("&&"),
             "|" => Some("||"),
-            "^" => Some("??"),
+            "^" => Some("**"),
             _ => None,
         };
         let note_msg = match suggested_op {

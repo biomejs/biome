@@ -80,7 +80,7 @@ invalid.js:5:12 lint/nursery/noBitwiseOperators ━━━━━━━━━━�
     6 │ 
     7 │ const x3 = ~ z;
   
-  i Did you mean ?? instead? If you want to use the bitwise operator, consider suppressing this diagnostic.
+  i Did you mean ** instead? If you want to use the bitwise operator, consider suppressing this diagnostic.
   
 
 ```
