@@ -2315,6 +2315,24 @@
 			},
 			"additionalProperties": false
 		},
+		"NoBitwiseOperatorsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoBitwiseOperatorsOptions" }
+			]
+		},
+		"NoBitwiseOperatorsOptions": {
+			"description": "Rule's options",
+			"type": "object",
+			"properties": {
+				"allow": {
+					"description": "Allows a list of bitwise operators to be used as exceptions.",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoConfusingLabelsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2488,6 +2506,13 @@
 					"description": "Disallow await inside loops.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noBitwiseOperators": {
+					"description": "Disallow bitwise operators.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoBitwiseOperatorsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3496,6 +3521,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NamingConventionOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoBitwiseOperatorsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoBitwiseOperatorsOptions" }]
 				}
 			},
 			"additionalProperties": false

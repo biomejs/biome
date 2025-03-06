@@ -1444,6 +1444,10 @@ export interface Nursery {
 	 */
 	noAwaitInLoop?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow bitwise operators.
+	 */
+	noBitwiseOperators?: RuleConfiguration_for_NoBitwiseOperatorsOptions;
+	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
 	noCommonJs?: RuleConfiguration_for_Null;
@@ -2301,6 +2305,9 @@ export type RuleConfiguration_for_DeprecatedHooksOptions =
 export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportExtensionsOptions;
+export type RuleConfiguration_for_NoBitwiseOperatorsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoBitwiseOperatorsOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -2489,6 +2496,16 @@ export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	 * Rule's options
 	 */
 	options: UseImportExtensionsOptions;
+}
+export interface RuleWithOptions_for_NoBitwiseOperatorsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoBitwiseOperatorsOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	/**
@@ -2771,6 +2788,15 @@ export interface UseImportExtensionsOptions {
 	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
 	 */
 	suggestedExtensions?: {};
+}
+/**
+ * Rule's options
+ */
+export interface NoBitwiseOperatorsOptions {
+	/**
+	 * Allows a list of bitwise operators to be used as exceptions.
+	 */
+	allow: string[];
 }
 /**
  * Options for the rule `noRestrictedImports`.
@@ -3184,6 +3210,7 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noAwaitInLoop"
+	| "lint/nursery/noBitwiseOperators"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"
