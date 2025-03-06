@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::diagnostics::LspError;
 use crate::utils::apply_document_changes;
 use crate::{documents::Document, session::Session};
@@ -19,7 +21,7 @@ use tracing::{debug, error, field, info};
     )
 )]
 pub(crate) async fn did_open(
-    session: &Session,
+    session: &Arc<Session>,
     params: lsp_types::DidOpenTextDocumentParams,
 ) -> Result<(), LspError> {
     let url = params.text_document.uri;
@@ -41,7 +43,7 @@ pub(crate) async fn did_open(
                 path: parent_path.clone(),
                 open_uninitialized: true,
             })?;
-            session.insert_project(parent_path, project_key);
+            session.insert_and_scan_project(project_key, parent_path);
             project_key
         }
     };

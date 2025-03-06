@@ -24,14 +24,10 @@ use crate::diagnostics::Panic;
 use crate::projects::ProjectKey;
 use crate::workspace::{DocumentFileSource, FileContent, OpenFileParams};
 use crate::workspace_watcher::WatcherSignalKind;
-use crate::{Workspace, WorkspaceError};
+use crate::{IGNORE_ENTRIES, Workspace, WorkspaceError};
 
+use super::ServiceDataNotification;
 use super::server::WorkspaceServer;
-
-/// Entries that should be ignored even by the scanner.
-///
-/// These cannot (yet) be configured.
-pub const IGNORE_ENTRIES: &[&str] = &[".git", ".DS_Store"];
 
 pub(crate) struct ScanResult {
     /// Diagnostics reported while scanning the project.
@@ -108,7 +104,7 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
     for path in evaluated_paths {
         if path
             .file_name()
-            .is_some_and(|file_name| IGNORE_ENTRIES.contains(&file_name))
+            .is_some_and(|file_name| IGNORE_ENTRIES.contains(&file_name.as_bytes()))
         {
             continue;
         }
@@ -155,6 +151,11 @@ fn scan_folder(folder: &Utf8Path, ctx: ScanContext) -> Duration {
 
     ctx.workspace
         .update_dependency_graph(WatcherSignalKind::AddedOrChanged, &handleable_paths);
+
+    let _ = ctx
+        .workspace
+        .notification_tx
+        .send(ServiceDataNotification::Updated);
 
     start.elapsed()
 }

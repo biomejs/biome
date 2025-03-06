@@ -15,11 +15,11 @@ use biome_fs::{FileSystemDiagnostic, PathKind};
 use camino::Utf8Path;
 use papaya::{Compute, Operation};
 
-use crate::{WorkspaceError, workspace_watcher::WatcherSignalKind};
+use crate::{IGNORE_ENTRIES, WorkspaceError, workspace_watcher::WatcherSignalKind};
 
 use super::{
-    FileContent, OpenFileParams, ScanProjectFolderParams, Workspace, WorkspaceServer,
-    scanner::IGNORE_ENTRIES, server::Document,
+    FileContent, OpenFileParams, ScanProjectFolderParams, ServiceDataNotification, Workspace,
+    WorkspaceServer, document::Document,
 };
 
 impl WorkspaceServer {
@@ -63,7 +63,7 @@ impl WorkspaceServer {
 
         if path
             .components()
-            .any(|component| IGNORE_ENTRIES.contains(&component.as_str()))
+            .any(|component| IGNORE_ENTRIES.contains(&component.as_os_str().as_encoded_bytes()))
         {
             return Ok(());
         }
@@ -190,6 +190,11 @@ impl WorkspaceServer {
         self.open_path_through_watcher(to)?;
 
         Ok(())
+    }
+
+    /// Used by the watcher to indicate it has stopped.
+    pub fn watcher_stopped(&self) {
+        let _ = self.notification_tx.send(ServiceDataNotification::Stop);
     }
 }
 

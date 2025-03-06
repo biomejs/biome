@@ -70,6 +70,7 @@ schemars                = { workspace = true, optional = true }
 serde                   = { workspace = true, features = ["derive"] }
 serde_json              = { workspace = true, features = ["raw_value"] }
 smallvec                = { workspace = true, features = ["serde"] }
+tokio                   = { workspace = true, features = ["sync"] }
 tracing                 = { workspace = true, features = ["attributes", "log"] }
 
 [dev-dependencies]

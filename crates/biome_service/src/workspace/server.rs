@@ -1,26 +1,7 @@
-use super::{
-    ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
-    CloseProjectParams, FeatureName, FileContent, FixFileParams, FixFileResult, FormatFileParams,
-    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams,
-    ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
-    PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
-    ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
-    SupportsFeatureParams, UpdateSettingsParams, UpdateSettingsResult,
-};
-use crate::diagnostics::FileTooLarge;
-use crate::file_handlers::{
-    Capabilities, CodeActionsParams, DocumentFileSource, FixAllParams, LintParams, ParseResult,
-};
-use crate::projects::Projects;
-use crate::settings::WorkspaceSettingsHandle;
-use crate::workspace::{
-    FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, RageEntry, RageParams,
-    RageResult, ServerInfo,
-};
-use crate::workspace_watcher::WatcherSignalKind;
-use crate::{WatcherInstruction, is_dir};
-use crate::{Workspace, WorkspaceError, file_handlers::Features};
+use std::panic::RefUnwindSafe;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Mutex};
+
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::AnalyzerPluginVec;
 use biome_configuration::plugins::{PluginConfiguration, Plugins};
@@ -47,10 +28,34 @@ use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::{Compute, HashMap, Operation};
 use rustc_hash::{FxBuildHasher, FxHashMap};
-use std::panic::RefUnwindSafe;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
+use tokio::sync::watch;
 use tracing::{error, info, instrument, warn};
+
+use crate::diagnostics::FileTooLarge;
+use crate::file_handlers::{
+    Capabilities, CodeActionsParams, DocumentFileSource, Features, FixAllParams, LintParams,
+    ParseResult,
+};
+use crate::projects::Projects;
+use crate::settings::WorkspaceSettingsHandle;
+use crate::workspace::{
+    FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, RageEntry, RageParams,
+    RageResult, ServerInfo,
+};
+use crate::workspace_watcher::WatcherSignalKind;
+use crate::{WatcherInstruction, Workspace, WorkspaceError, is_dir};
+
+use super::document::Document;
+use super::{
+    ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams,
+    CloseProjectParams, FeatureName, FileContent, FixFileParams, FixFileResult, FormatFileParams,
+    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
+    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams,
+    ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
+    PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameResult,
+    ScanProjectFolderParams, ScanProjectFolderResult, SearchPatternParams, SearchResults,
+    ServiceDataNotification, SupportsFeatureParams, UpdateSettingsParams, UpdateSettingsResult,
+};
 
 pub struct WorkspaceServer {
     /// features available throughout the application
@@ -103,6 +108,9 @@ pub struct WorkspaceServer {
 
     /// Channel sender for instructions to the [crate::WorkspaceWatcher].
     watcher_tx: Sender<WatcherInstruction>,
+
+    /// Channel sender for sending notifications of service data updates.
+    pub(super) notification_tx: watch::Sender<ServiceDataNotification>,
 }
 
 /// The `Workspace` object is long-lived, so we want it to be able to cross
@@ -113,42 +121,13 @@ pub struct WorkspaceServer {
 /// could lead too hard to debug issues)
 impl RefUnwindSafe for WorkspaceServer {}
 
-#[derive(Clone, Debug)]
-pub(crate) struct Document {
-    /// Document content.
-    pub(crate) content: String,
-
-    /// The version of the document.
-    ///
-    /// A version is only specified when the document is opened by a client,
-    /// typically through the LSP. Documents that are only opened by the scanner
-    /// do not have a version.
-    pub(crate) version: Option<i32>,
-
-    /// The index of where the original file source is saved.
-    /// Use `WorkspaceServer#file_sources` to retrieve the file source that belongs to the document.
-    pub(crate) file_source_index: usize,
-
-    /// The result of the parser (syntax tree + diagnostics).
-    /// Types explained:
-    /// - `Option`: if the file can be read
-    /// - `Result`: if the file is read, but the  file is too large
-    /// - `AnyParse`: the result of the parsed file
-    pub(crate) syntax: Option<Result<AnyParse, FileTooLarge>>,
-
-    /// If `true`, this indicates the document has been opened by the scanner,
-    /// and should be unloaded only when the project is unregistered.
-    ///
-    /// Note the file can still *also* be opened explicitly by a client such as
-    /// the LSP Proxy. In that case `version` will be `Some` and
-    /// `opened_by_scanner` will be `true`, and the document will only be
-    /// unloaded when both are unset.
-    pub(super) opened_by_scanner: bool,
-}
-
 impl WorkspaceServer {
     /// Creates a new [Workspace].
-    pub fn new(fs: Box<dyn FileSystem>, watcher_tx: Sender<WatcherInstruction>) -> Self {
+    pub fn new(
+        fs: Box<dyn FileSystem>,
+        watcher_tx: Sender<WatcherInstruction>,
+        notification_tx: watch::Sender<ServiceDataNotification>,
+    ) -> Self {
         init_thread_pool();
 
         Self {
@@ -163,6 +142,7 @@ impl WorkspaceServer {
             node_cache: Default::default(),
             fs,
             watcher_tx,
+            notification_tx,
         }
     }
 
@@ -614,6 +594,7 @@ impl WorkspaceServer {
     }
 
     /// Updates the [ProjectLayout] for the given `path`.
+    #[instrument(level = "debug", skip(self))]
     pub(super) fn update_project_layout(
         &self,
         signal_kind: WatcherSignalKind,
@@ -644,6 +625,7 @@ impl WorkspaceServer {
     }
 
     /// Updates the [DependencyGraph] for the given `paths`.
+    #[instrument(level = "debug", skip(self))]
     pub(super) fn update_dependency_graph(
         &self,
         signal_kind: WatcherSignalKind,
@@ -683,11 +665,13 @@ impl WorkspaceServer {
         path: &Utf8Path,
     ) -> Result<(), WorkspaceError> {
         let path = BiomePath::from(path);
-        if path.is_manifest() {
+        if path.is_config() || path.is_manifest() {
             self.update_project_layout(signal_kind, &path)?;
         }
 
         self.update_dependency_graph(signal_kind, &[path]);
+
+        let _ = self.notification_tx.send(ServiceDataNotification::Updated);
 
         Ok(())
     }

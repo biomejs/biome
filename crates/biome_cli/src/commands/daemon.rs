@@ -5,7 +5,10 @@ use crate::{
 use biome_console::{ConsoleExt, markup};
 use biome_fs::OsFileSystem;
 use biome_lsp::ServerFactory;
-use biome_service::{TransportError, WorkspaceError, WorkspaceWatcher, workspace::WorkspaceClient};
+use biome_service::{
+    TransportError, WatcherInstruction, WorkspaceError, WorkspaceWatcher,
+    workspace::WorkspaceClient,
+};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::{env, fs};
 use tokio::io;
@@ -73,7 +76,7 @@ pub(crate) fn run_server(
 ) -> Result<(), CliDiagnostic> {
     setup_tracing_subscriber(log_path.as_deref(), log_file_name_prefix.as_deref());
 
-    let (mut watcher, instruction_channel, _) = WorkspaceWatcher::new()?;
+    let (mut watcher, instruction_channel) = WorkspaceWatcher::new()?;
 
     let rt = Runtime::new()?;
     let factory = ServerFactory::new(stop_on_disconnect, instruction_channel.sender.clone());
@@ -99,6 +102,7 @@ pub(crate) fn run_server(
             }
             _ = cancellation.notified() => {
                 tracing::info!("Received shutdown signal");
+                let _ = instruction_channel.sender.send(WatcherInstruction::Stop);
                 Ok(())
             }
         }
