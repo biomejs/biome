@@ -800,6 +800,7 @@ pub(crate) trait CommandRunner: Sized {
                 project_key,
                 path: Some(project_path),
                 watch: cli_options.use_server,
+                force: false, // TODO: Maybe we'll want a CLI flag for this.
             })?;
             for diagnostic in result.diagnostics {
                 if diagnostic.severity() >= Severity::Error {

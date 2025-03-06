@@ -3042,6 +3042,7 @@ export function bar() {
                 project_key,
                 path: None,
                 watch: true,
+                force: false,
             },
         )
         .await?
@@ -3253,6 +3254,7 @@ export function bar() {
                 project_key,
                 path: None,
                 watch: true,
+                force: false,
             },
         )
         .await?

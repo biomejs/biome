@@ -1029,6 +1029,9 @@ pub struct ScanProjectFolderParams {
     ///
     /// Does nothing if the watcher is already watching this path.
     pub watch: bool,
+
+    /// Forces scanning of the folder, even if it is already being watched.
+    pub force: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

@@ -1,6 +1,7 @@
 use std::panic::RefUnwindSafe;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 use append_only_vec::AppendOnlyVec;
 use biome_analyze::AnalyzerPluginVec;
@@ -26,7 +27,7 @@ use biome_project_layout::ProjectLayout;
 use biome_rowan::NodeCache;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
-use papaya::{Compute, HashMap, Operation};
+use papaya::{Compute, HashMap, HashSet, Operation};
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use tokio::sync::watch;
 use tracing::{error, info, instrument, warn};
@@ -109,6 +110,9 @@ pub struct WorkspaceServer {
     /// Channel sender for instructions to the [crate::WorkspaceWatcher].
     watcher_tx: Sender<WatcherInstruction>,
 
+    /// Set containing all the watched folders.
+    watched_folders: HashSet<Utf8PathBuf>,
+
     /// Channel sender for sending notifications of service data updates.
     pub(super) notification_tx: watch::Sender<ServiceDataNotification>,
 }
@@ -142,6 +146,7 @@ impl WorkspaceServer {
             node_cache: Default::default(),
             fs,
             watcher_tx,
+            watched_folders: Default::default(),
             notification_tx,
         }
     }
@@ -819,7 +824,23 @@ impl Workspace for WorkspaceServer {
             .or_else(|| self.projects.get_project_path(params.project_key))
             .ok_or_else(WorkspaceError::no_project)?;
 
+        let should_scan = params.force
+            || !self
+                .watched_folders
+                .pin()
+                .iter()
+                .any(|watched_folder| path.starts_with(watched_folder));
+        if !should_scan {
+            // No need to scan folders that are already being watched.
+            return Ok(ScanProjectFolderResult {
+                diagnostics: Vec::new(),
+                duration: Duration::from_millis(0),
+            });
+        }
+
         if params.watch {
+            self.watched_folders.pin().insert(path.clone());
+
             let _ = self
                 .watcher_tx
                 .try_send(WatcherInstruction::WatchFolder(path.clone()));
@@ -839,9 +860,16 @@ impl Workspace for WorkspaceServer {
             .get_project_path(params.project_key)
             .ok_or_else(WorkspaceError::no_project)?;
 
-        let _ = self
-            .watcher_tx
-            .try_send(WatcherInstruction::UnwatchFolder(project_path.clone()));
+        self.watched_folders.pin().retain(|watched_folder| {
+            if watched_folder.starts_with(&project_path) {
+                let _ = self
+                    .watcher_tx
+                    .try_send(WatcherInstruction::UnwatchFolder(watched_folder.clone()));
+                false
+            } else {
+                true
+            }
+        });
 
         // Limit the scope of the pin and the lock inside.
         {
