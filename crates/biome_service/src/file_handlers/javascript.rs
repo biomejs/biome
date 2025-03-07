@@ -552,7 +552,7 @@ fn parse(
     }
 
     let mut file_source = file_source.to_js_file_source().unwrap_or_default();
-    if jsx_everywhere {
+    if jsx_everywhere && !file_source.is_typescript() {
         file_source = file_source.with_variant(LanguageVariant::Jsx);
     }
     let parse = biome_js_parser::parse_js_with_cache(text, file_source, options, cache);
@@ -1028,3 +1028,7 @@ fn rename(
         ))
     }
 }
+
+#[cfg(test)]
+#[path = "javascript.tests.rs"]
+mod tests;
