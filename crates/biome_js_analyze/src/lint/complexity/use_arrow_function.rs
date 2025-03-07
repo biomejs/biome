@@ -355,10 +355,12 @@ fn to_arrow_body(body: JsFunctionBody) -> AnyJsFunctionBody {
         // To keep comments, we keep the regular function body
         return early_result;
     }
-    if matches!(
-        return_arg,
-        AnyJsExpression::JsSequenceExpression(_) | AnyJsExpression::JsObjectExpression(_)
-    ) {
+    if matches!(return_arg, AnyJsExpression::JsSequenceExpression(_))
+        || return_arg
+            .syntax()
+            .first_token()
+            .is_some_and(|token| token.kind() == T!['{'])
+    {
         // () => (first, second)
         // () => ({ ... })
         return AnyJsFunctionBody::AnyJsExpression(make::parenthesized(return_arg).into());
