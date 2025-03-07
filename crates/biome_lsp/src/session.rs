@@ -116,6 +116,8 @@ pub(crate) enum ConfigurationStatus {
     EditorConfigError = 3,
     /// Currently loading the configuration
     Loading = 4,
+    /// The configuration file is correct, but the plugins cannot be loaded
+    PluginError = 5,
 }
 
 impl ConfigurationStatus {
@@ -125,6 +127,10 @@ impl ConfigurationStatus {
 
     pub(crate) const fn is_editorconfig_error(&self) -> bool {
         matches!(self, ConfigurationStatus::EditorConfigError)
+    }
+
+    pub(crate) const fn is_plugin_error(&self) -> bool {
+        matches!(self, ConfigurationStatus::PluginError)
     }
 
     pub(crate) const fn is_loaded(&self) -> bool {
@@ -142,6 +148,7 @@ impl TryFrom<u8> for ConfigurationStatus {
             2 => Ok(Self::Error),
             3 => Ok(Self::EditorConfigError),
             4 => Ok(Self::Loading),
+            5 => Ok(Self::PluginError),
             _ => Err(()),
         }
     }
@@ -378,6 +385,9 @@ impl Session {
                 self.client
                     .show_message(MessageType::WARNING, "The configuration file has errors. Biome will report only parsing errors until the configuration is fixed.")
                     .await;
+            } else if self.configuration_status().is_plugin_error() {
+                self.set_notified_broken_configuration();
+                self.client.show_message(MessageType::WARNING, "The plugin loading has failed. Biome will report only parsing errors until the file is fixed or its usage is disabled.").await
             }
         }
 
@@ -709,7 +719,11 @@ impl Session {
 
         self.insert_and_scan_project(project_key, path.into());
 
-        if let Err(error) = result {
+        if let Err(WorkspaceError::PluginErrors(error)) = result {
+            error!("Failed to load plugins: {:?}", error);
+            // self.client.log_message(MessageType::ERROR, &error).await;
+            ConfigurationStatus::PluginError
+        } else if let Err(error) = result {
             error!("Failed to set workspace settings: {error}");
             self.client.log_message(MessageType::ERROR, &error).await;
             ConfigurationStatus::Error
@@ -799,7 +813,9 @@ impl Session {
                 .read()
                 .unwrap()
                 .requires_configuration(),
-            ConfigurationStatus::Error | ConfigurationStatus::EditorConfigError => false,
+            ConfigurationStatus::Error
+            | ConfigurationStatus::EditorConfigError
+            | ConfigurationStatus::PluginError => false,
             ConfigurationStatus::Loading => true,
         }
     }
