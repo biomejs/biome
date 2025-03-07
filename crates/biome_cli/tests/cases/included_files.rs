@@ -1,7 +1,7 @@
-use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
+use crate::{run_cli, run_cli_with_dyn_fs};
 use biome_console::BufferConsole;
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 use bpaf::Args;
 use camino::Utf8Path;
 
@@ -210,4 +210,40 @@ fn does_not_handle_included_files_if_overridden_by_organize_imports() {
         console,
         result,
     ));
+}
+
+#[test]
+fn does_not_handle_files_inside_ignored_folder() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("does_not_handle_files_inside_ignored_folder");
+    let file_path = Utf8Path::new("biome.json");
+    fs.create_file(
+        file_path.as_str(),
+        r#"{
+            "formatter": { "enabled": true, "includes": ["**", "!**/ignored"] },
+            "linter": { "enabled": false }
+        }"#,
+    );
+
+    let test = Utf8Path::new("test.js");
+    fs.create_file(test.as_str(), UNFORMATTED);
+
+    let test2 = Utf8Path::new("ignored/test2.js");
+    fs.create_file(test2.as_str(), UNFORMATTED);
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["check", "--write", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let working_dir = fs.working_directory;
+
+    let test_content = std::fs::read_to_string(working_dir.join(test)).unwrap();
+    assert_eq!(test_content, FORMATTED);
+
+    let test2_content = std::fs::read_to_string(working_dir.join(test2)).unwrap();
+    assert_eq!(test2_content, UNFORMATTED);
 }

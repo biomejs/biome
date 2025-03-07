@@ -459,7 +459,7 @@ impl WorkspaceServer {
     }
 
     /// Checks whether a file is ignored in the top-level config's
-    /// `files.ignore`/`files.include` or in the feature's `ignore`/`include`.
+    /// `files.includes` or in the feature's `includes`.
     #[instrument(level = "debug", skip(self), fields(ignored))]
     fn is_ignored(&self, project_key: ProjectKey, path: &Utf8Path, features: FeatureName) -> bool {
         let file_name = path.file_name();
@@ -474,11 +474,11 @@ impl WorkspaceServer {
             }
             ignored
         };
-        // Never ignore Biome's config file regardless `include`/`ignore`
+        // Never ignore Biome's config file regardless of `includes`
         let ignored = (file_name != Some(ConfigName::biome_json()) || file_name != Some(ConfigName::biome_jsonc())) &&
-            // Apply top-level `include`/`ignore`
+            // Apply top-level `includes`
             (self.is_ignored_by_top_level_config(project_key, path) ||
-                // Apply feature-level `include`/`ignore`
+                // Apply feature-level `includes`
                 ignored_by_features);
 
         tracing::Span::current().record("ignored", ignored);
@@ -486,7 +486,7 @@ impl WorkspaceServer {
         ignored
     }
 
-    /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
+    /// Check whether a file is ignored in the top-level config `files.includes`
     fn is_ignored_by_top_level_config(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
         let Some(files_settings) = self.projects.get_files_settings(project_key) else {
             return false;
