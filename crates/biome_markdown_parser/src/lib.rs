@@ -2,7 +2,7 @@ use crate::parser::MarkdownParser;
 use biome_markdown_factory::MarkdownSyntaxFactory;
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
 pub use biome_parser::prelude::*;
-use biome_parser::{tree_sink::LosslessTreeSink, AnyParse};
+use biome_parser::{AnyParse, tree_sink::LosslessTreeSink};
 use biome_rowan::{AstNode, NodeCache, TextRange, TextSize};
 
 mod lexer;

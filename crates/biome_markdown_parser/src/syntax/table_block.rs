@@ -1,7 +1,7 @@
-use biome_markdown_syntax::{kind::MarkdownSyntaxKind::*, T};
+use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
 use biome_parser::{
-    prelude::ParsedSyntax::{self, *},
     Parser,
+    prelude::ParsedSyntax::{self, *},
 };
 
 use crate::MarkdownParser;
