@@ -4,9 +4,9 @@ use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, CstFormatContext, FormatContext,
-    FormatElement, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, ObjectWrap,
-    QuoteStyle, TransformSourceMap,
+    AttributePosition, BracketSameLine, BracketSpacing, CstFormatContext, Expand, FormatContext,
+    FormatElement, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
+    TransformSourceMap,
 };
 use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
 use std::fmt;
@@ -174,8 +174,8 @@ pub struct JsFormatOptions {
     /// Attribute position style. By default auto.
     attribute_position: AttributePosition,
 
-    /// Whether to enforce collapsing object literals when possible. Defaults to "preserve".
-    object_wrap: ObjectWrap,
+    /// Whether to expand object and array literals to multiple lines. Defaults to "auto".
+    expand: Expand,
 }
 
 impl JsFormatOptions {
@@ -195,7 +195,7 @@ impl JsFormatOptions {
             bracket_spacing: BracketSpacing::default(),
             bracket_same_line: BracketSameLine::default(),
             attribute_position: AttributePosition::default(),
-            object_wrap: ObjectWrap::default(),
+            expand: Expand::default(),
         }
     }
 
@@ -264,8 +264,8 @@ impl JsFormatOptions {
         self
     }
 
-    pub fn with_object_wrap(mut self, object_wrap: ObjectWrap) -> Self {
-        self.object_wrap = object_wrap;
+    pub fn with_expand(mut self, expand: Expand) -> Self {
+        self.expand = expand;
         self
     }
 
@@ -317,8 +317,8 @@ impl JsFormatOptions {
         self.attribute_position = attribute_position;
     }
 
-    pub fn set_object_wrap(&mut self, object_wrap: ObjectWrap) {
-        self.object_wrap = object_wrap;
+    pub fn set_expand(&mut self, expand: Expand) {
+        self.expand = expand;
     }
 
     pub fn set_semicolons(&mut self, semicolons: Semicolons) {
@@ -369,8 +369,8 @@ impl JsFormatOptions {
         self.attribute_position
     }
 
-    pub fn object_wrap(&self) -> ObjectWrap {
-        self.object_wrap
+    pub fn expand(&self) -> Expand {
+        self.expand
     }
 }
 
@@ -411,7 +411,7 @@ impl fmt::Display for JsFormatOptions {
         writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
         writeln!(f, "Bracket same line: {}", self.bracket_same_line.value())?;
         writeln!(f, "Attribute Position: {}", self.attribute_position)?;
-        writeln!(f, "Object wrap: {}", self.object_wrap)
+        writeln!(f, "Expand lists: {}", self.expand)
     }
 }
 
@@ -480,7 +480,9 @@ impl FromStr for Semicolons {
         match s {
             "as-needed" => Ok(Self::AsNeeded),
             "always" => Ok(Self::Always),
-            _ => Err("Value not supported for Semicolons. Supported values are 'as-needed' and 'always'."),
+            _ => Err(
+                "Value not supported for Semicolons. Supported values are 'as-needed' and 'always'.",
+            ),
         }
     }
 }
@@ -523,9 +525,11 @@ impl FromStr for ArrowParentheses {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "as-needed"  => Ok(Self::AsNeeded),
-            "always"  => Ok(Self::Always),
-            _ => Err("Value not supported for Arrow parentheses. Supported values are 'as-needed' and 'always'."),
+            "as-needed" => Ok(Self::AsNeeded),
+            "always" => Ok(Self::Always),
+            _ => Err(
+                "Value not supported for Arrow parentheses. Supported values are 'as-needed' and 'always'.",
+            ),
         }
     }
 }

@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
-use biome_formatter::{write, CstFormatContext};
+use biome_formatter::{CstFormatContext, write};
 use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeValue, AnyJsxElementName, JsSyntaxToken, JsxAttributeList,
     JsxOpeningElement, JsxSelfClosingElement, JsxString, TsTypeArguments,
 };
-use biome_rowan::{declare_node_union, SyntaxResult};
+use biome_rowan::{SyntaxResult, declare_node_union};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatJsxOpeningElement;
@@ -250,6 +250,6 @@ fn as_string_literal_attribute_value(attribute: &AnyJsxAttribute) -> Option<JsxS
                     _ => None,
                 })
         }
-        JsxSpreadAttribute(_) => None,
+        JsxSpreadAttribute(_) | JsMetavariable(_) => None,
     }
 }

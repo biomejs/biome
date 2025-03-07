@@ -14,9 +14,9 @@ use crate::projects::ProjectKey;
 use crate::{Workspace, WorkspaceError};
 
 use super::{
-    server, CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
+    CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult, FileGuard,
     GetFileContentParams, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
-    PullDiagnosticsParams, ScanProjectFolderParams, UpdateSettingsParams,
+    PullDiagnosticsParams, ScanProjectFolderParams, UpdateSettingsParams, server,
 };
 
 fn create_server() -> (Box<dyn Workspace>, ProjectKey) {
@@ -43,8 +43,7 @@ fn debug_control_flow() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("file.js"),
-            content: FileContent::FromClient(SOURCE.into()),
-            version: 0,
+            content: FileContent::from_client(SOURCE),
             document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
             persist_node_cache: false,
         },
@@ -66,8 +65,7 @@ fn recognize_typescript_definition_file() {
             project_key,
             path: BiomePath::new("file.d.ts"),
             // the following code snippet can be correctly parsed in .d.ts file but not in .ts file
-            content: FileContent::FromClient("export const foo: number".into()),
-            version: 0,
+            content: FileContent::from_client("export const foo: number"),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -87,8 +85,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("a.json"),
-            content: FileContent::FromClient(r#"{"a": 42}"#.into()),
-            version: 0,
+            content: FileContent::from_client(r#"{"a": 42}"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -102,8 +99,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("b.json"),
-            content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
-            version: 0,
+            content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -117,8 +113,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("c.json"),
-            content: FileContent::FromClient(r#"{"a": 42,}"#.into()),
-            version: 0,
+            content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -132,8 +127,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("d.jsonc"),
-            content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
-            version: 0,
+            content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -147,8 +141,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("e.jsonc"),
-            content: FileContent::FromClient(r#"{"a": 42,}"#.into()),
-            version: 0,
+            content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -162,8 +155,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new(".eslintrc.json"),
-            content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
-            version: 0,
+            content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -177,8 +169,7 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("project/.vscode/settings.json"),
-            content: FileContent::FromClient(r#"{"a": 42}//comment"#.into()),
-            version: 0,
+            content: FileContent::from_client(r#"{"a": 42}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -192,16 +183,17 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("dir/.eslintrc.json"),
-            content: FileContent::FromClient(r#"{"a": 42,}"#.into()),
-            version: 0,
+            content: FileContent::from_client(r#"{"a": 42,}"#),
             document_file_source: None,
             persist_node_cache: false,
         },
     )
     .unwrap();
-    assert!(well_known_json_with_comments_file_with_trailing_commas
-        .format_file()
-        .is_err());
+    assert!(
+        well_known_json_with_comments_file_with_trailing_commas
+            .format_file()
+            .is_err()
+    );
 
     // well-known json-with-comments-and-trailing-commas file allows comments and trailing commas
     let well_known_json_with_comments_and_trailing_commas_file = FileGuard::open(
@@ -209,16 +201,17 @@ fn correctly_handle_json_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("tsconfig.json"),
-            content: FileContent::FromClient(r#"{"a": 42,}//comment"#.into()),
-            version: 0,
+            content: FileContent::from_client(r#"{"a": 42,}//comment"#),
             document_file_source: None,
             persist_node_cache: false,
         },
     )
     .unwrap();
-    assert!(well_known_json_with_comments_and_trailing_commas_file
-        .format_file()
-        .is_ok());
+    assert!(
+        well_known_json_with_comments_and_trailing_commas_file
+            .format_file()
+            .is_ok()
+    );
 }
 
 #[test]
@@ -230,7 +223,7 @@ fn correctly_parses_graphql_files() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("file.graphql"),
-            content: FileContent::FromClient(
+            content: FileContent::from_client(
                 r#"type Query {
   me: User
 }
@@ -238,10 +231,8 @@ fn correctly_parses_graphql_files() {
 type User {
   id: ID
   name: String
-}"#
-                .into(),
+}"#,
             ),
-            version: 0,
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -263,13 +254,11 @@ fn correctly_pulls_lint_diagnostics() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("file.graphql"),
-            content: FileContent::FromClient(
+            content: FileContent::from_client(
                 r#"query {
   member @deprecated(abc: 123)
-}"#
-                .into(),
+}"#,
             ),
-            version: 0,
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -298,13 +287,11 @@ fn pull_grit_debug_info() {
         OpenFileParams {
             project_key,
             path: BiomePath::new("file.grit"),
-            content: FileContent::FromClient(
+            content: FileContent::from_client(
                 r#"`function ($args) { $body }` where {
   $args <: contains `x`
-}"#
-                .into(),
+}"#,
             ),
-            version: 0,
             document_file_source: None,
             persist_node_cache: false,
         },
@@ -338,6 +325,8 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
         .scan_project_folder(ScanProjectFolderParams {
             project_key,
             path: None,
+            watch: false,
+            force: false,
         })
         .unwrap();
 
@@ -362,7 +351,6 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
             project_key,
             path: BiomePath::new("/project/a.ts"),
             content: FileContent::FromServer,
-            version: 0,
             document_file_source: None,
             persist_node_cache: false,
         })
@@ -383,12 +371,14 @@ fn files_loaded_by_the_scanner_are_only_unloaded_when_the_project_is_unregistere
         .close_project(CloseProjectParams { project_key })
         .unwrap();
 
-    assert!(workspace
-        .get_file_content(GetFileContentParams {
-            project_key,
-            path: BiomePath::new("/project/a.ts"),
-        })
-        .is_err_and(|error| matches!(error, WorkspaceError::NotFound(_))));
+    assert!(
+        workspace
+            .get_file_content(GetFileContentParams {
+                project_key,
+                path: BiomePath::new("/project/a.ts"),
+            })
+            .is_err_and(|error| matches!(error, WorkspaceError::NotFound(_)))
+    );
 }
 
 #[test]
@@ -416,8 +406,6 @@ fn too_large_files_are_tracked_but_not_parsed() {
                 }),
                 ..Default::default()
             },
-            vcs_base_path: None,
-            gitignore_matches: Vec::new(),
             workspace_directory: None,
         })
         .unwrap();
@@ -426,15 +414,19 @@ fn too_large_files_are_tracked_but_not_parsed() {
         .scan_project_folder(ScanProjectFolderParams {
             project_key,
             path: None,
+            watch: false,
+            force: false,
         })
         .unwrap();
 
-    assert!(workspace
-        .get_syntax_tree(GetSyntaxTreeParams {
-            project_key,
-            path: BiomePath::new("/project/a.ts"),
-        })
-        .is_err_and(|error| matches!(error, WorkspaceError::FileIgnored(_))));
+    assert!(
+        workspace
+            .get_syntax_tree(GetSyntaxTreeParams {
+                project_key,
+                path: BiomePath::new("/project/a.ts"),
+            })
+            .is_err_and(|error| matches!(error, WorkspaceError::FileIgnored(_)))
+    );
 }
 
 #[test]
@@ -471,8 +463,6 @@ fn plugins_are_loaded_and_used_during_analysis() {
                 )])),
                 ..Default::default()
             },
-            vcs_base_path: None,
-            gitignore_matches: Vec::new(),
             workspace_directory: Some(BiomePath::new("/project")),
         })
         .unwrap();
@@ -481,6 +471,8 @@ fn plugins_are_loaded_and_used_during_analysis() {
         .scan_project_folder(ScanProjectFolderParams {
             project_key,
             path: None,
+            watch: false,
+            force: false,
         })
         .unwrap();
 

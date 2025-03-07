@@ -1,8 +1,8 @@
 //! Events emitted by the Parser which are then constructed into a syntax tree
 
-use crate::parser::rewrite_parser::{RewriteParser, RewriteToken};
-use crate::parser::JsParserCheckpoint;
 use crate::JsParser;
+use crate::parser::JsParserCheckpoint;
+use crate::parser::rewrite_parser::{RewriteParser, RewriteToken};
 use biome_js_syntax::JsSyntaxKind;
 use biome_parser::tree_sink::TreeSink;
 use biome_parser::{event::process, prelude::*};

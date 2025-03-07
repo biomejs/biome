@@ -20,44 +20,53 @@ mod overrides;
 pub mod plugins;
 pub mod vcs;
 
-use crate::analyzer::assist::{assist_configuration, Actions, AssistConfiguration, Source};
 use crate::analyzer::RuleAssistConfiguration;
+use crate::analyzer::assist::{Actions, AssistConfiguration, Source, assist_configuration};
 use crate::bool::Bool;
 use crate::css::{CssFormatterConfiguration, CssLinterConfiguration, CssParserConfiguration};
 pub use crate::diagnostics::BiomeDiagnostic;
 pub use crate::diagnostics::CantLoadExtendFile;
 pub use crate::generated::{push_to_analyzer_assist, push_to_analyzer_rules};
 use crate::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
-pub use crate::grit::{grit_configuration, GritConfiguration};
+pub use crate::grit::{GritConfiguration, grit_configuration};
 use crate::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use crate::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
 use crate::markdown::{markdown_configuration, MarkdownConfiguration};
 use crate::max_size::MaxSize;
-use crate::vcs::{vcs_configuration, VcsConfiguration};
+use crate::vcs::{VcsConfiguration, vcs_configuration};
 pub use analyzer::{
-    linter_configuration, LinterConfiguration, RuleConfiguration, RuleFixConfiguration,
-    RulePlainConfiguration, RuleWithFixOptions, RuleWithOptions, Rules,
+    LinterConfiguration, RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration,
+    RuleWithFixOptions, RuleWithOptions, Rules, linter_configuration,
 };
 use biome_console::fmt::{Display, Formatter};
-use biome_deserialize::Deserialized;
+use biome_console::{KeyValuePair, markup};
+use biome_deserialize::{
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
+    DeserializationDiagnostic, DeserializationVisitor, Deserialized, Text, TextRange,
+};
 use biome_deserialize_macros::{Deserializable, Merge};
+use biome_diagnostics::Severity;
 use biome_formatter::{IndentStyle, QuoteStyle};
 use bpaf::Bpaf;
 use camino::Utf8PathBuf;
-pub use css::{css_configuration, CssConfiguration};
-pub use formatter::{formatter_configuration, FormatterConfiguration};
-pub use graphql::{graphql_configuration, GraphqlConfiguration};
-pub use html::{html_configuration, HtmlConfiguration};
-pub use javascript::{js_configuration, JsConfiguration};
-pub use json::{json_configuration, JsonConfiguration};
+pub use css::{CssConfiguration, css_configuration};
+pub use formatter::{FormatterConfiguration, formatter_configuration};
+pub use graphql::{GraphqlConfiguration, graphql_configuration};
+pub use html::{HtmlConfiguration, html_configuration};
+pub use javascript::{JsConfiguration, js_configuration};
+pub use json::{JsonConfiguration, json_configuration};
 pub use overrides::{
     OverrideAssistConfiguration, OverrideFormatterConfiguration, OverrideGlobs,
     OverrideLinterConfiguration, OverridePattern, Overrides,
 };
 use plugins::Plugins;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
+use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::num::NonZeroU64;
+use std::str::FromStr;
+use std::sync::LazyLock;
 use vcs::VcsClientKind;
 
 pub const VERSION: &str = match option_env!("BIOME_VERSION") {
@@ -81,7 +90,7 @@ pub struct Configuration {
     #[serde(rename = "$schema")]
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub schema: Option<Box<str>>,
+    pub schema: Option<Schema>,
 
     /// Indicates whether this configuration file is at the root of a Biome
     /// project. By default, this is `true`.
@@ -272,7 +281,7 @@ impl Configuration {
     }
 
     pub fn is_vcs_enabled(&self) -> bool {
-        self.assist.as_ref().is_some_and(|f| f.is_enabled())
+        self.vcs.as_ref().is_some_and(|v| v.is_enabled())
     }
 
     /// Whether Biome should check for `.editorconfig` file
@@ -328,6 +337,140 @@ impl Configuration {
             .and_then(|lang| lang.linter.as_ref())
             .cloned()
             .unwrap_or_default()
+    }
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Bpaf, Merge)]
+#[serde(deny_unknown_fields, default, rename_all = "camelCase")]
+pub struct Schema(String);
+
+impl FromStr for Schema {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(s.into())
+    }
+}
+
+impl From<String> for Schema {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
+impl From<&str> for Schema {
+    fn from(value: &str) -> Self {
+        Self(value.into())
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for Schema {
+    fn schema_name() -> String {
+        "Schema".into()
+    }
+
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        String::json_schema(generator)
+    }
+}
+
+static SCHEMA_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"https://biomejs.dev/schemas/([\d.]+)/schema.json").unwrap());
+
+impl Deserializable for Schema {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = Schema;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::STR;
+
+            fn visit_str(
+                self,
+                ctx: &mut impl DeserializationContext,
+                value: Text,
+                range: TextRange,
+                _name: &str,
+            ) -> Option<Self::Output> {
+                if let Some(captures) = SCHEMA_REGEX.captures(value.text()) {
+                    if let Some(config_version_match) = captures.get(1) {
+                        let cli_version = Version::new(VERSION);
+                        let config_version_str = Version::new(config_version_match.as_str());
+                        match config_version_str.cmp(&cli_version) {
+                            Ordering::Less | Ordering::Greater => {
+                                ctx.report(
+                                    DeserializationDiagnostic::new(
+                                        markup!(<Warn>"The configuration schema version does not match the CLI version " {VERSION}</Warn>),
+                                    )
+                                        .with_range(range)
+                                        .with_custom_severity(Severity::Warning)
+                                        .with_note(markup!(
+                                        {KeyValuePair("Expected", markup!({VERSION}))}
+                                        {KeyValuePair("Found", markup!({config_version_str}))}
+                                    ))
+                                        .with_note(markup!("Run the command "<Emphasis>"biome migrate"</Emphasis>" to migrate the configuration file."))
+                                )
+
+
+                            }
+                            _ => {},
+                        }
+                    }
+                }
+
+                Some(Schema(value.text().into()))
+            }
+        }
+
+        value.deserialize(ctx, Visitor, name)
+    }
+}
+
+#[derive(PartialEq, Eq)]
+pub struct Version<'a>(&'a str);
+
+impl<'a> Version<'a> {
+    pub fn new(version: &'a str) -> Self {
+        Version(version)
+    }
+
+    fn parse_version(&self) -> Vec<u32> {
+        self.0
+            .split('.')
+            .filter_map(|part| part.parse::<u32>().ok())
+            .collect()
+    }
+}
+
+impl PartialOrd for Version<'_> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Version<'_> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let self_parts = self.parse_version();
+        let other_parts = other.parse_version();
+
+        for (a, b) in self_parts.iter().zip(other_parts.iter()) {
+            match a.cmp(b) {
+                Ordering::Equal => continue,
+                non_eq => return non_eq,
+            }
+        }
+
+        self_parts.len().cmp(&other_parts.len())
+    }
+}
+
+impl Display for Version<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::io::Error> {
+        write!(f, "{}", self.0)
     }
 }
 

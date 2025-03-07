@@ -1,7 +1,7 @@
 //! Here, we put test cases where lint rules are enabled via package.json dependencies
 
 use crate::run_cli_with_dyn_fs;
-use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::TemporaryFs;
 use bpaf::Args;

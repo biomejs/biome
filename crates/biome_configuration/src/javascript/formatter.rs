@@ -1,11 +1,11 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, BracketSpacing, IndentStyle, IndentWidth, LineEnding,
-    LineWidth, ObjectWrap, QuoteStyle,
+    AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
+    LineEnding, LineWidth, QuoteStyle,
 };
 use biome_js_formatter::context::{
-    trailing_commas::TrailingCommas, ArrowParentheses, QuoteProperties, Semicolons,
+    ArrowParentheses, QuoteProperties, Semicolons, trailing_commas::TrailingCommas,
 };
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -107,13 +107,15 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_spacing: Option<BracketSpacing>,
 
-    /// Whether to enforce collapsing object literals when possible. Defaults to preserve.
-    #[bpaf(
-        long("javascript-formatter-object-wrap"),
-        argument("preserve|collapse")
-    )]
+    /// Whether to expand arrays and objects on multiple lines.
+    /// When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
+    /// and array literals are formatted on a single line if it fits in the line.
+    /// When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
+    /// When set to `never`, these literals are formatted on a single line if it fits in the line.
+    /// When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+    #[bpaf(long("javascript-formatter-expand"), argument("auto|always|never"))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub object_wrap: Option<ObjectWrap>,
+    pub expand: Option<Expand>,
 }
 
 impl JsFormatterConfiguration {
@@ -149,7 +151,7 @@ impl JsFormatterConfiguration {
         self.quote_style.unwrap_or_default()
     }
 
-    pub fn object_wrap_resolved(&self) -> ObjectWrap {
-        self.object_wrap.unwrap_or_default()
+    pub fn expand_resolved(&self) -> Expand {
+        self.expand.unwrap_or_default()
     }
 }

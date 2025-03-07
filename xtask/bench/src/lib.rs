@@ -4,7 +4,7 @@ mod test_case;
 use crate::language::FormatNode;
 pub use crate::language::Parse;
 pub use crate::test_case::TestCase;
-use biome_diagnostics::{print_diagnostic_to_string, Error};
+use biome_diagnostics::{Error, print_diagnostic_to_string};
 use biome_formatter::Printed;
 use biome_rowan::NodeCache;
 use criterion::measurement::WallTime;

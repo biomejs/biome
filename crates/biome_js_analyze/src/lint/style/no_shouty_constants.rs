@@ -1,5 +1,5 @@
-use crate::{services::semantic::Semantic, utils::batch::JsBatchMutation, JsRuleAction};
-use biome_analyze::{context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic};
+use crate::{JsRuleAction, services::semantic::Semantic, utils::batch::JsBatchMutation};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_factory::make::{js_literal_member_name, js_property_object_member};
 use biome_js_semantic::{Reference, ReferencesExtensions};
@@ -174,7 +174,7 @@ impl Rule for NoShoutyConstants {
                         JsReferenceIdentifier::cast_ref(state.reference.syntax())?
                             .value_token()
                             .ok()?
-                            .text(),
+                            .text_trimmed(),
                         [],
                         [],
                     ),

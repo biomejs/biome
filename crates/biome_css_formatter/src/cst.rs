@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_css_syntax::{map_syntax_node, CssSyntaxNode};
+use biome_css_syntax::{CssSyntaxNode, map_syntax_node};
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult};
 
 #[derive(Debug, Copy, Clone, Default)]

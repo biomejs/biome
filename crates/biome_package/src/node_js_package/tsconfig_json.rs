@@ -5,8 +5,8 @@ use std::{
 
 use crate::{LanguageRoot, Manifest};
 use biome_deserialize::{
-    json::{deserialize_from_json_ast, deserialize_from_json_str},
     Deserializable, DeserializableValue, DeserializationContext,
+    json::{deserialize_from_json_ast, deserialize_from_json_str},
 };
 use biome_deserialize::{DeserializableType, Deserialized};
 use biome_deserialize_macros::Deserializable;

@@ -1,11 +1,11 @@
+use crate::JsFormatter;
 use crate::prelude::*;
 use crate::utils::jsx::{
-    is_meaningful_jsx_text, is_whitespace_jsx_expression, jsx_split_children, JsxChild,
-    JsxChildrenIterator, JsxRawSpace, JsxSpace,
+    JsxChild, JsxChildrenIterator, JsxRawSpace, JsxSpace, is_meaningful_jsx_text,
+    is_whitespace_jsx_expression, jsx_split_children,
 };
-use crate::JsFormatter;
 use biome_formatter::format_element::tag::{GroupMode, Tag};
-use biome_formatter::{format_args, write, CstFormatContext, FormatRuleWithOptions, VecBuffer};
+use biome_formatter::{CstFormatContext, FormatRuleWithOptions, VecBuffer, format_args, write};
 use biome_js_syntax::{AnyJsxChild, JsxChildList};
 use std::cell::RefCell;
 
@@ -353,8 +353,8 @@ impl FormatJsxChildList {
     /// [JsxText] and [JsxExpressionChild] and instead, formats the nodes itself.
     #[cfg(debug_assertions)]
     fn disarm_debug_assertions(&self, node: &JsxChildList, f: &mut JsFormatter) {
-        use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression};
         use AnyJsxChild::*;
+        use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression};
 
         for child in node {
             match child {
@@ -739,7 +739,10 @@ impl FlatBuilder {
     }
 
     fn finish(self) -> FormatResult<FormatFlatChildren> {
-        assert!(!self.disabled, "The flat builder has been disabled and thus, does no longer store any elements. Make sure you don't call disable if you later intend to format the flat content.");
+        assert!(
+            !self.disabled,
+            "The flat builder has been disabled and thus, does no longer store any elements. Make sure you don't call disable if you later intend to format the flat content."
+        );
 
         Ok(FormatFlatChildren {
             elements: RefCell::new(self.result?),

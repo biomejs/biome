@@ -11,8 +11,8 @@ use biome_text_size::{TextLen, TextRange, TextSize};
 use unicode_width::UnicodeWidthChar;
 
 use crate::{
-    location::{BorrowedSourceCode, LineIndex},
     LineIndexBuf, Location,
+    location::{BorrowedSourceCode, LineIndex},
 };
 
 /// A const Option::unwrap without nightly features:
@@ -725,7 +725,7 @@ impl FusedIterator for IntoIter {}
 mod tests {
     use std::num::NonZeroUsize;
 
-    use super::{calculate_print_width, OneIndexed};
+    use super::{OneIndexed, calculate_print_width};
 
     #[test]
     fn print_width() {

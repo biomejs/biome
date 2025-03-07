@@ -5,9 +5,9 @@ use biome_js_factory::{
 };
 use biome_js_formatter::{context::JsFormatOptions, format_node};
 use biome_rowan::AstNode;
-use biome_service::workspace_types::{generate_type, methods, ModuleQueue};
+use biome_service::workspace_types::{ModuleQueue, generate_type, methods};
 use quote::{format_ident, quote};
-use schemars::gen::{SchemaGenerator, SchemaSettings};
+use schemars::r#gen::{SchemaGenerator, SchemaSettings};
 use std::{env, fs, io, path::PathBuf};
 
 fn main() -> io::Result<()> {

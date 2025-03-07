@@ -8,24 +8,24 @@ use crate::syntax::class::{
     empty_decorator_list, parse_initializer_clause, parse_parameter_decorators,
 };
 use crate::syntax::expr::{
-    is_nth_at_identifier, parse_assignment_expression_or_higher, ExpressionContext,
+    ExpressionContext, is_nth_at_identifier, parse_assignment_expression_or_higher,
 };
 use crate::syntax::js_parse_error;
 use crate::syntax::js_parse_error::{
     decorators_not_allowed, expected_binding, expected_parameter, expected_parameters,
 };
-use crate::syntax::stmt::{is_semi, parse_block_impl, semi, StatementContext};
+use crate::syntax::stmt::{StatementContext, is_semi, parse_block_impl, semi};
 use crate::syntax::typescript::ts_parse_error::ts_only_syntax_error;
 use crate::syntax::typescript::{
-    is_nth_at_type_parameter_modifier, parse_ts_return_type_annotation, parse_ts_type_annotation,
-    parse_ts_type_parameters, try_parse, TypeContext,
+    TypeContext, is_nth_at_type_parameter_modifier, parse_ts_return_type_annotation,
+    parse_ts_type_annotation, parse_ts_type_parameters, try_parse,
 };
 
 use crate::JsSyntaxFeature::TypeScript;
 use crate::ParsedSyntax::{Absent, Present};
 use crate::{JsParser, JsSyntaxFeature, ParseRecoveryTokenSet};
 use biome_js_syntax::JsSyntaxKind::*;
-use biome_js_syntax::{JsSyntaxKind, TextRange, T};
+use biome_js_syntax::{JsSyntaxKind, T, TextRange};
 use biome_parser::ParserProgress;
 use biome_rowan::SyntaxKind;
 

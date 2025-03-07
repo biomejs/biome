@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_css_syntax::{AnyCssAtRule, AnyCssRule, CssImportAtRule, CssRuleList};

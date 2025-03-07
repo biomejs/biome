@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -45,7 +45,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-useless-escape")],
         recommended: true,
-        severity: Severity::Error,
+        severity: Severity::Warning,
         fix_kind: FixKind::Safe,
     }
 }
@@ -225,16 +225,17 @@ impl Rule for NoUselessEscapeInRegex {
         // To compute the correct text range, we need the byte length of the escaped character.
         // To get that, we take a string slice from the escaped character and iterate until thenext character.
         // The index of the next character corresponds to the byte length of the escaped character.
-        let (escaped_byte_len, _) = &node.value_token().ok()?.text_trimmed()
+        let escaped_char = &node.value_token().ok()?.text_trimmed()
             [(adjusted_backslash_index as usize + 1)..]
-            .char_indices()
-            .nth(1)?;
+            .chars()
+            .next()?;
         let diag = RuleDiagnostic::new(
             rule_category!(),
-            TextRange::at(backslash_position, (1 + *escaped_byte_len as u32).into()),
-            markup! {
-                "The character doesn't need to be escaped."
-            },
+            TextRange::at(
+                backslash_position,
+                (1 + escaped_char.len_utf8() as u32).into(),
+            ),
+            "The character doesn't need to be escaped.",
         );
         Some(if matches!(escaped, b'p' | b'P' | b'k') {
             diag.note("The escape sequence is only useful if the regular expression is unicode-aware. To be unicode-aware, the `u` or `v` flag should be used.")

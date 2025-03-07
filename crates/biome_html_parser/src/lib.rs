@@ -6,8 +6,8 @@ mod token_source;
 use crate::parser::{HtmlLosslessTreeSink, HtmlParser};
 use crate::syntax::parse_root;
 use biome_html_syntax::{HtmlRoot, HtmlSyntaxNode};
-use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::AnyParse;
+use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::{AstNode, NodeCache};
 
 /// Parses the provided string as HTML program using the provided node cache.

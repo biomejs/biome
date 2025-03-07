@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{write, AttributePosition};
+use biome_formatter::{AttributePosition, write};
 use biome_html_syntax::HtmlAttributeList;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlAttributeList;

@@ -25,14 +25,9 @@
       "**/benchmark/**",
       "!**/crates/**",
       "!**/dist/**",
-      "!**/.astro/**",
-      "!**/assets/**",
       "!**/packages/@biomejs/backend-jsonrpc/src/workspace.ts",
-      "!**/public/**",
       "!**/__snapshots__",
       "!**/undefined/**",
-      "!**/_fonts/**",
-      "!**/packages/@biomejs/wasm-*",
       "!**/benchmark/target/**"
     ]
   },
@@ -80,6 +75,9 @@
       },
       "suspicious": {
         "noVar": "on"
+      },
+      "nursery": {
+        "noImportCycles": "error"
       }
     }
   },

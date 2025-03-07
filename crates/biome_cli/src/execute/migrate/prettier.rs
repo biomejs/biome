@@ -1,14 +1,14 @@
 use super::{eslint_eslint::ShorthandVec, node};
-use crate::diagnostics::MigrationDiagnostic;
 use crate::CliDiagnostic;
+use crate::diagnostics::MigrationDiagnostic;
 use biome_configuration::javascript::JsFormatterConfiguration;
-use biome_console::{markup, Console, ConsoleExt};
+use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_formatter::{
-    AttributePosition, BracketSpacing, IndentWidth, LineEnding, LineWidth,
-    ObjectWrap as BiomeObjectWrap, ParseFormatNumberError, QuoteStyle,
+    AttributePosition, BracketSpacing, Expand, IndentWidth, LineEnding, LineWidth,
+    ParseFormatNumberError, QuoteStyle,
 };
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
@@ -198,11 +198,11 @@ impl From<QuoteProps> for QuoteProperties {
     }
 }
 
-impl From<ObjectWrap> for BiomeObjectWrap {
+impl From<ObjectWrap> for Expand {
     fn from(value: ObjectWrap) -> Self {
         match value {
-            ObjectWrap::Preserve => Self::Preserve,
-            ObjectWrap::Collapse => Self::Collapse,
+            ObjectWrap::Preserve => Self::Auto,
+            ObjectWrap::Collapse => Self::Never,
         }
     }
 }
@@ -227,7 +227,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             bracket_same_line: Some(value.bracket_line.into()),
             attribute_position: Some(AttributePosition::default()),
             bracket_spacing: Some(BracketSpacing::default()),
-            object_wrap: Some(value.object_wrap.into()),
+            expand: Some(value.object_wrap.into()),
             format_with_errors: Some(false.into()),
             includes: None,
             enabled: Some(true.into()),
@@ -257,7 +257,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             line_width: None,
             indent_style: None,
             line_ending: None,
-            object_wrap: None,
+            expand: None,
             enabled: None,
             // js ones
             bracket_same_line: Some(value.bracket_line.into()),
@@ -479,7 +479,7 @@ fn load_config(
                 reason: format!(
                     "Prettier configuration ending with the extension `{ext}` are not supported."
                 ),
-            }))
+            }));
         }
     };
     let path_str = path.to_string();

@@ -26,7 +26,6 @@ once_cell            = "1"                  # Use `std::sync::OnceLock::get_or_t
 oxc_resolver         = { workspace = true }
 papaya               = { workspace = true }
 rustc-hash           = { workspace = true }
-seize                = "0.4.9"              # Remove when https://github.com/ibraheemdev/papaya/issues/46 is resolved
 serde_json           = { workspace = true }
 
 [dev-dependencies]

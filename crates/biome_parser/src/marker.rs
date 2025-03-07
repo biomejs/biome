@@ -1,7 +1,7 @@
+use crate::Parser;
 use crate::event::Event;
 use crate::event::Event::Token;
 use crate::token_source::TokenSource;
-use crate::Parser;
 
 use biome_rowan::{SyntaxKind, TextRange, TextSize};
 use drop_bomb::DebugDropBomb;
@@ -27,7 +27,9 @@ impl Marker {
             start,
             old_start: pos,
             child_idx: None,
-            bomb: DebugDropBomb::new("Marker must either be `completed` or `abandoned` to avoid that children are implicitly attached to a marker's parent."),
+            bomb: DebugDropBomb::new(
+                "Marker must either be `completed` or `abandoned` to avoid that children are implicitly attached to a marker's parent.",
+            ),
         }
     }
 

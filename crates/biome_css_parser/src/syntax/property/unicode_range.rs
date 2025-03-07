@@ -5,11 +5,11 @@ use biome_css_syntax::CssSyntaxKind::{
     CSS_UNICODE_CODEPOINT, CSS_UNICODE_CODEPOINT_LITERAL, CSS_UNICODE_RANGE,
     CSS_UNICODE_RANGE_INTERVAL, CSS_UNICODE_RANGE_WILDCARD, CSS_UNICODE_RANGE_WILDCARD_LITERAL,
 };
-use biome_css_syntax::{TextRange, T};
-use biome_parser::diagnostic::{expected_any, expected_node, ParseDiagnostic};
+use biome_css_syntax::{T, TextRange};
+use biome_parser::diagnostic::{ParseDiagnostic, expected_any, expected_node};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser, TokenSet};
+use biome_parser::{Parser, TokenSet, token_set};
 
 const UNICODE: TokenSet<CssSyntaxKind> = token_set![
     // u+;

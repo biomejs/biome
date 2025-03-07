@@ -3,7 +3,7 @@ use biome_css_syntax::{
     CssRoot, CssSyntaxNode,
 };
 use biome_rowan::{
-    declare_node_union, SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText,
+    SyntaxNodeText, SyntaxResult, TextRange, TextSize, TokenText, declare_node_union,
 };
 use rustc_hash::FxHashMap;
 use std::hash::Hash;
@@ -53,14 +53,14 @@ impl SemanticModel {
                 .range_to_rule
                 .iter()
                 .rev()
-                .find(|(&range, _)| range.contains_range(target_range))
+                .find(|&(&range, _)| range.contains_range(target_range))
                 .map(|(_, rule)| rule)
         } else {
             self.data
                 .range_to_rule
                 .range(..=target_range)
                 .rev()
-                .find(|(&range, _)| range.contains_range(target_range))
+                .find(|&(&range, _)| range.contains_range(target_range))
                 .map(|(_, rule)| rule)
         }
     }

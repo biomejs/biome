@@ -1,0 +1,6 @@
+.a::after {
+    content: "\""
+}
+.b::after {
+    content: "\t"
+}

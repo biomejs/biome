@@ -97,8 +97,8 @@ impl schemars::JsonSchema for Backtrace {
         String::from("Backtrace")
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <Vec<SerializedFrame>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <Vec<SerializedFrame>>::json_schema(generator)
     }
 }
 

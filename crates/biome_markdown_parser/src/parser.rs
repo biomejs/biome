@@ -1,9 +1,9 @@
 use biome_markdown_syntax::MarkdownSyntaxKind;
+use biome_parser::ParserContext;
 use biome_parser::event::Event;
 use biome_parser::prelude::*;
 use biome_parser::token_source::Trivia;
-use biome_parser::ParserContext;
-use biome_parser::{diagnostic::merge_diagnostics, ParserContextCheckpoint};
+use biome_parser::{ParserContextCheckpoint, diagnostic::merge_diagnostics};
 
 use crate::token_source::{MarkdownTokenSource, MarkdownTokenSourceCheckpoint};
 

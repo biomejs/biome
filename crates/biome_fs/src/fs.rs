@@ -1,5 +1,5 @@
 use crate::{BiomePath, PathInterner};
-use biome_diagnostics::{console, Advices, Diagnostic, IoError, LogCategory, Visit};
+use biome_diagnostics::{Advices, Diagnostic, IoError, LogCategory, Visit, console};
 use biome_diagnostics::{Error, Severity};
 use camino::{Utf8Path, Utf8PathBuf};
 pub use memory::{ErrorEntry, MemoryFileSystem};
@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::fmt::{Debug, Display, Formatter};
 use std::panic::RefUnwindSafe;
+use std::path::Path;
 use std::sync::Arc;
 use std::{fmt, io};
 use tracing::{error, info};
@@ -74,7 +75,7 @@ impl From<PathKind> for oxc_resolver::FileMetadata {
 pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// It opens a file with the given set of options
     fn open_with_options(&self, path: &Utf8Path, options: OpenOptions)
-        -> io::Result<Box<dyn File>>;
+    -> io::Result<Box<dyn File>>;
 
     /// Initiate a traversal of the filesystem
     ///
@@ -135,9 +136,9 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
                 Ok(content) => {
                     if is_searching_in_parent_dir {
                         info!(
-                                "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
-                                current_search_dir
-                            );
+                            "Biome auto discovered the file at the following path that isn't in the working directory:\n{:?}",
+                            current_search_dir
+                        );
                     }
                     return Some(AutoSearchResult {
                         content,
@@ -447,6 +448,17 @@ pub struct FileSystemDiagnostic {
 impl Display for FileSystemDiagnostic {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         Diagnostic::description(self, f)
+    }
+}
+
+impl FileSystemDiagnostic {
+    pub fn non_utf8_path(path: &Path) -> Self {
+        Self {
+            severity: Severity::Error,
+            path: path.display().to_string(),
+            error_kind: FsErrorKind::NonUtf8Path,
+            source: None,
+        }
     }
 }
 

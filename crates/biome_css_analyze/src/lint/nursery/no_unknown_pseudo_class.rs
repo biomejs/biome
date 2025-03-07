@@ -3,7 +3,7 @@ use crate::{
     utils::{is_custom_selector, is_known_pseudo_class, is_page_pseudo_class, vendor_prefixed},
 };
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_css_syntax::{
@@ -14,7 +14,7 @@ use biome_css_syntax::{
     CssPseudoClassFunctionValueList, CssPseudoClassIdentifier, CssPseudoElementSelector,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::{declare_node_union, AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {

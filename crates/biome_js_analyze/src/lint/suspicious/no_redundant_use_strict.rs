@@ -1,12 +1,12 @@
 use crate::JsRuleAction;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClass, JsDirective, JsDirectiveList, JsFileSource, JsFunctionBody, JsModule, JsScript,
 };
 
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutationExt};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, declare_node_union};
 
 declare_lint_rule! {
  /// Prevents from having redundant `"use strict"`.

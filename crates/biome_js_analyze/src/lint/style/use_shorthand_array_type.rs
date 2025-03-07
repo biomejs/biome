@@ -1,8 +1,8 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyTsType, JsSyntaxKind, JsSyntaxToken, TsReferenceType, TsTypeArguments, T,
+    AnyTsType, JsSyntaxKind, JsSyntaxToken, T, TsReferenceType, TsTypeArguments,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TriviaPiece};
 

@@ -1,7 +1,7 @@
+use super::GritParser;
 use super::parse_error::{expected_list_pattern, expected_map_element, expected_pattern};
 use super::parse_name;
 use super::patterns::{parse_maybe_curly_pattern, parse_pattern};
-use super::GritParser;
 use crate::constants::*;
 use biome_grit_syntax::GritSyntaxKind::{self, *};
 use biome_grit_syntax::T;

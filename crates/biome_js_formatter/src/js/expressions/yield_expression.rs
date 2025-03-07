@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
 use biome_formatter::write;
-use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsYieldExpression;
 use biome_js_syntax::JsYieldExpressionFields;
+use biome_js_syntax::parentheses::NeedsParentheses;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsYieldExpression;

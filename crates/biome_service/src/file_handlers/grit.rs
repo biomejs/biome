@@ -6,8 +6,8 @@ use super::{
 use crate::settings::{check_feature_activity, check_override_feature_activity};
 use crate::workspace::GetSyntaxTreeResult;
 use crate::{
-    settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
     WorkspaceError,
+    settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
 };
 use biome_analyze::{AnalyzerOptions, QueryMatch};
 use biome_configuration::grit::{
@@ -127,9 +127,8 @@ impl ServiceLanguage for GritLanguage {
 
     fn resolve_analyzer_options(
         _global: Option<&crate::settings::Settings>,
-        _linter: Option<&crate::settings::LinterSettings>,
-        _overrides: Option<&crate::settings::OverrideSettings>,
         _language: Option<&Self::LinterSettings>,
+        _environment: Option<&Self::EnvironmentSettings>,
         path: &BiomePath,
         _file_source: &DocumentFileSource,
         suppression_reason: Option<&str>,
@@ -224,6 +223,10 @@ impl ServiceLanguage for GritLanguage {
             })
             .unwrap_or_default()
             .into()
+    }
+
+    fn resolve_environment(_settings: Option<&Settings>) -> Option<&Self::EnvironmentSettings> {
+        None
     }
 }
 

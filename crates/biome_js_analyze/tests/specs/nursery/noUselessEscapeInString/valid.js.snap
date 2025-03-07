@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+var s = {
+    '\0\'': "\n\"",
+    "abc\u42efg": tagged` test ${1} \a`,
+    key: `\``
+};
+```

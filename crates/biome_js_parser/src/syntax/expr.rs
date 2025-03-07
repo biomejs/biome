@@ -7,18 +7,20 @@ use std::ops::{BitOr, BitOrAssign, Sub};
 
 use super::metavariable::{is_at_metavariable, parse_metavariable};
 use super::typescript::*;
+use crate::JsSyntaxFeature::{Jsx, StrictMode, TypeScript};
+use crate::ParsedSyntax::{Absent, Present};
 use crate::lexer::{JsLexContext, JsReLexContext};
 use crate::parser::rewrite_parser::{RewriteMarker, RewriteParser};
 use crate::parser::{JsParserCheckpoint, RecoveryResult};
 use crate::prelude::*;
-use crate::rewrite::rewrite_events;
 use crate::rewrite::RewriteParseEvents;
-use crate::syntax::assignment::parse_assignment;
+use crate::rewrite::rewrite_events;
 use crate::syntax::assignment::AssignmentExprPrecedence;
+use crate::syntax::assignment::parse_assignment;
 use crate::syntax::assignment::{expression_to_assignment, expression_to_assignment_pattern};
 use crate::syntax::class::{parse_class_expression, parse_decorators};
 use crate::syntax::function::{
-    is_at_async_function, parse_arrow_function_expression, parse_function_expression, LineBreak,
+    LineBreak, is_at_async_function, parse_arrow_function_expression, parse_function_expression,
 };
 use crate::syntax::js_parse_error;
 use crate::syntax::js_parse_error::{decorators_not_allowed, expected_simple_assignment_target};
@@ -28,16 +30,14 @@ use crate::syntax::js_parse_error::{
 };
 use crate::syntax::jsx::parse_jsx_tag_expression;
 use crate::syntax::object::parse_object_expression;
-use crate::syntax::stmt::{is_semi, STMT_RECOVERY_SET};
+use crate::syntax::stmt::{STMT_RECOVERY_SET, is_semi};
 use crate::syntax::typescript::ts_parse_error::{expected_ts_type, ts_only_syntax_error};
-use crate::JsSyntaxFeature::{Jsx, StrictMode, TypeScript};
-use crate::ParsedSyntax::{Absent, Present};
-use crate::{syntax, JsParser, ParseRecoveryTokenSet, ParsedSyntax};
+use crate::{JsParser, ParseRecoveryTokenSet, ParsedSyntax, syntax};
 use biome_js_syntax::{JsSyntaxKind::*, *};
+use biome_parser::ParserProgress;
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::ParseSeparatedList;
-use biome_parser::ParserProgress;
-use enumflags2::{bitflags, make_bitflags, BitFlags};
+use enumflags2::{BitFlags, bitflags, make_bitflags};
 
 pub const EXPR_RECOVERY_SET: TokenSet<JsSyntaxKind> =
     token_set![VAR_KW, R_PAREN, L_PAREN, L_BRACK, R_BRACK];
@@ -1647,7 +1647,7 @@ pub(crate) fn parse_template_elements<P>(
                 let m = p.start();
                 p.bump_with_context(TEMPLATE_CHUNK, JsLexContext::TemplateElement { tagged });
                 m.complete(p, chunk_kind);
-            },
+            }
             DOLLAR_CURLY => {
                 let e = p.start();
                 p.bump(DOLLAR_CURLY);
@@ -1656,7 +1656,11 @@ pub(crate) fn parse_template_elements<P>(
                 if !p.at(T!['}']) {
                     p.error(expected_token(T!['}']));
                     // Seems there's more. For example a `${a a}`. We must eat all tokens away to avoid a panic because of an unexpected token
-                    let _ =  ParseRecoveryTokenSet::new(JS_BOGUS, token_set![T!['}'], TEMPLATE_CHUNK, DOLLAR_CURLY, ERROR_TOKEN, BACKTICK]).recover(p);
+                    let _ = ParseRecoveryTokenSet::new(
+                        JS_BOGUS,
+                        token_set![T!['}'], TEMPLATE_CHUNK, DOLLAR_CURLY, ERROR_TOKEN, BACKTICK],
+                    )
+                    .recover(p);
                     if !p.at(T!['}']) {
                         e.complete(p, element_kind);
                         // Failed to fully recover, unclear where we are now, exit
@@ -1668,11 +1672,14 @@ pub(crate) fn parse_template_elements<P>(
                 e.complete(p, element_kind);
             }
             ERROR_TOKEN => {
-                let err = p.err_builder("Invalid template literal",p.cur_range(), );
+                let err = p.err_builder("Invalid template literal", p.cur_range());
                 p.error(err);
                 p.bump_with_context(p.cur(), JsLexContext::TemplateElement { tagged });
             }
-            t => unreachable!("Anything not template chunk or dollarcurly should have been eaten by the lexer, but {:?} was found", t),
+            t => unreachable!(
+                "Anything not template chunk or dollarcurly should have been eaten by the lexer, but {:?} was found",
+                t
+            ),
         };
     }
 }

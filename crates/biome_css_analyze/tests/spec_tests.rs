@@ -1,16 +1,16 @@
 use biome_analyze::{
     AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never, RuleFilter,
 };
-use biome_css_parser::{parse_css, CssParserOptions};
+use biome_css_parser::{CssParserOptions, parse_css};
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
-    write_analyzer_snapshot, CheckActionType,
+    CheckActionType, assert_errors_are_absent, code_fix_to_string, create_analyzer_options,
+    diagnostic_to_string, has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker,
+    scripts_from_json, write_analyzer_snapshot,
 };
 use camino::Utf8Path;
 use std::ops::Deref;

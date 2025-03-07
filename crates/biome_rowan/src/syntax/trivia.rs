@@ -1,4 +1,4 @@
-use crate::{cursor, Language, SyntaxToken};
+use crate::{Language, SyntaxToken, cursor};
 use biome_text_size::{TextRange, TextSize};
 use std::fmt;
 use std::fmt::Formatter;

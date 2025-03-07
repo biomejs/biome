@@ -6,8 +6,11 @@ mod paragraph_block;
 mod table_block;
 mod thematic_break_block;
 
-use biome_markdown_syntax::{kind::MarkdownSyntaxKind::*, T};
-use biome_parser::{prelude::ParsedSyntax, Parser};
+use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
+use biome_parser::{
+    Parser,
+    prelude::ParsedSyntax::{self},
+};
 use blockquote_block::{at_blockquote, parse_blockquote};
 use code_block::{
     at_fenced_code_block, at_indent_code_block, parse_fenced_code_block, parse_indent_code_block,

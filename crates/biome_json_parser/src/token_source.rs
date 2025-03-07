@@ -1,5 +1,5 @@
-use crate::lexer::{Lexer, Token};
 use crate::JsonParserOptions;
+use crate::lexer::{Lexer, Token};
 use biome_json_syntax::JsonSyntaxKind::{EOF, TOMBSTONE};
 use biome_json_syntax::{JsonSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;

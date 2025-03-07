@@ -1,11 +1,11 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    inner_string_text, AnyJsExpression, AnyJsObjectMember, AnyJsObjectMemberName,
+    AnyJsExpression, AnyJsObjectMember, AnyJsObjectMemberName, inner_string_text,
 };
 use biome_rowan::AstNode;
 use serde::{Deserialize, Serialize};

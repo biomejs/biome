@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{
@@ -8,12 +8,12 @@ use biome_js_syntax::{
     TsAccessibilityModifier, TsPropertyParameter,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt,
-    SyntaxNodeOptionExt, TextRange,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TextRange,
+    declare_node_union,
 };
 use rustc_hash::FxHashSet;
 
-use crate::{utils::is_node_equal, JsRuleAction};
+use crate::{JsRuleAction, utils::is_node_equal};
 
 declare_lint_rule! {
     /// Disallow unused private class members

@@ -1,5 +1,5 @@
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
-use biome_grit_formatter::{context::GritFormatOptions, GritFormatLanguage};
+use biome_grit_formatter::{GritFormatLanguage, context::GritFormatOptions};
 use camino::Utf8Path;
 
 mod language {

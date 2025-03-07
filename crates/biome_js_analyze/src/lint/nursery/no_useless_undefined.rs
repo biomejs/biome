@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make::{self, js_function_body};
@@ -8,7 +8,7 @@ use biome_js_syntax::{
     JsFormalParameter, JsObjectBindingPatternShorthandProperty, JsReturnStatement,
     JsVariableStatement, JsYieldArgument, T,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange, TokenText};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText, declare_node_union};
 
 use crate::JsRuleAction;
 

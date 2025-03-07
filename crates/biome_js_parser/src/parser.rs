@@ -217,8 +217,8 @@ pub struct JsParserCheckpoint {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
     use crate::JsParserOptions;
+    use crate::prelude::*;
     use biome_js_syntax::{JsFileSource, JsSyntaxKind};
 
     #[test]

@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -50,6 +49,9 @@ let x = "\01\8"
 let x = "\0\1\8"
 let x = "\0\\n\8"
 
+let x = {
+    "\8": 0,
+}
 ```
 
 # Diagnostics
@@ -1370,6 +1372,7 @@ invalid.js:44:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
   > 44 │ let x = "\0\\n\8"
        │               ^^
     45 │ 
+    46 │ let x = {
   
   i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
   
@@ -1380,6 +1383,26 @@ invalid.js:44:15 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━
     44    │ - let·x·=·"\0\\n\8"
        44 │ + let·x·=·"\0\\n8"
     45 45 │   
+    46 46 │   let x = {
   
+
+```
+
+```
+invalid.js:47:6 lint/correctness/noNonoctalDecimalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use `\8` and `\9` escape sequences in string literals.
+  
+    46 │ let x = {
+  > 47 │     "\8": 0,
+       │      ^^
+    48 │ }
+  
+  i The nonoctal decimal escape is a deprecated syntax that is left for compatibility and should not be used.
+  
+  i Unsafe fix: Replace \8 with 8. This maintains the current functionality.
+  
+    47 │ ····"\8":·0,
+       │      -      
 
 ```

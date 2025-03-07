@@ -1,14 +1,14 @@
+use crate::WorkspaceError;
 use crate::file_handlers::{
-    javascript, AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities,
-    EnabledForPath, ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults,
-    ParseResult, ParserCapabilities,
+    AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
+    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
+    ParserCapabilities, javascript,
 };
 use crate::settings::WorkspaceSettingsHandle;
 use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
-use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_parser::{parse_js_with_cache, JsParserOptions};
+use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{EmbeddingKind, JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
@@ -16,14 +16,14 @@ use regex::{Match, Regex};
 use std::sync::LazyLock;
 use tracing::debug;
 
-use super::{parse_lang_from_script_opening_tag, SearchCapabilities};
+use super::{SearchCapabilities, parse_lang_from_script_opening_tag};
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct SvelteFileHandler;
 
 // https://regex101.com/r/E4n4hh/6
 pub static SVELTE_FENCE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n(?<script>(?U:.*))</script>"#).unwrap()
+    Regex::new(r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n?(?<script>(?U:.*))</script>"#).unwrap()
 });
 
 impl SvelteFileHandler {

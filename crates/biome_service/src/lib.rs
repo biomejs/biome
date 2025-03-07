@@ -4,6 +4,7 @@ pub mod file_handlers;
 pub mod projects;
 pub mod settings;
 pub mod workspace;
+mod workspace_watcher;
 
 pub mod configuration;
 pub mod diagnostics;
@@ -18,9 +19,15 @@ use std::ops::Deref;
 use biome_console::Console;
 use biome_fs::{FileSystem, OsFileSystem};
 
-pub use diagnostics::{extension_error, TransportError, WorkspaceError};
+pub use diagnostics::{TransportError, WorkspaceError, extension_error};
 pub use file_handlers::JsFormatterSettings;
-pub use workspace::Workspace;
+pub use workspace::{Workspace, WorkspaceServer};
+pub use workspace_watcher::{WatcherInstruction, WorkspaceWatcher};
+
+/// Path entries that should be ignored in the workspace, even by the scanner.
+///
+/// These cannot (yet) be configured.
+const IGNORE_ENTRIES: &[&[u8]] = &[b".git", b".timestamp", b".DS_Store"];
 
 /// This is the main entrypoint of the application.
 pub struct App<'app> {

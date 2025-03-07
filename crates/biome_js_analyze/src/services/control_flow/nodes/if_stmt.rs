@@ -3,8 +3,8 @@ use biome_js_syntax::{JsElseClause, JsIfStatement};
 use biome_rowan::{AstNode, SyntaxResult};
 
 use crate::services::control_flow::{
-    visitor::{NodeVisitor, StatementStack},
     FunctionBuilder,
+    visitor::{NodeVisitor, StatementStack},
 };
 
 pub(in crate::services::control_flow) struct IfVisitor {

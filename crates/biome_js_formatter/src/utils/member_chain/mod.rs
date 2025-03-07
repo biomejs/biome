@@ -103,6 +103,7 @@ mod chain_member;
 mod groups;
 mod simple_argument;
 
+use crate::JsLabels;
 use crate::context::TabWidth;
 use crate::prelude::*;
 use crate::utils::is_long_curried_call;
@@ -111,8 +112,7 @@ use crate::utils::member_chain::groups::{
     MemberChainGroup, MemberChainGroupsBuilder, TailChainGroups,
 };
 pub use crate::utils::member_chain::simple_argument::SimpleArgument;
-use crate::JsLabels;
-use biome_formatter::{write, Buffer};
+use biome_formatter::{Buffer, write};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsCallExpression,
     JsIdentifierExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsThisExpression,

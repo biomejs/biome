@@ -1,6 +1,6 @@
 use crate::services::semantic::Semantic;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
@@ -240,7 +240,7 @@ fn is_exception_for_expect(node: &AnyJsExpression) -> Option<bool> {
 
     let parent = node.syntax().parent()?;
     let last_token = parent.last_token()?;
-    let last_token_text = last_token.text();
+    let last_token_text = last_token.text_trimmed();
 
     let member = node.get_callee_member_name()?;
     let member_text = member.text_trimmed();

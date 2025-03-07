@@ -1,20 +1,20 @@
 use crate::commands::daemon::read_most_recent_log_file;
 use crate::service::enumerate_pipes;
-use crate::{service, CliDiagnostic, CliSession, VERSION};
+use crate::{CliDiagnostic, CliSession, VERSION, service};
 use biome_configuration::{ConfigurationPathHint, Rules};
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{
-    fmt, markup, ConsoleExt, DebugDisplay, DisplayOption, HorizontalLine, KeyValuePair, Padding,
-    SOFT_LINE,
+    ConsoleExt, DebugDisplay, DisplayOption, HorizontalLine, KeyValuePair, Padding, SOFT_LINE, fmt,
+    markup,
 };
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
-use biome_diagnostics::{termcolor, PrintDescription};
+use biome_diagnostics::{PrintDescription, termcolor};
 use biome_flags::biome_env;
 use biome_fs::{FileSystem, OsFileSystem};
-use biome_service::configuration::{load_configuration, LoadedConfiguration};
-use biome_service::settings::Settings;
-use biome_service::workspace::{client, RageEntry, RageParams};
 use biome_service::Workspace;
+use biome_service::configuration::{LoadedConfiguration, load_configuration};
+use biome_service::settings::Settings;
+use biome_service::workspace::{RageEntry, RageParams, client};
 use camino::Utf8PathBuf;
 use std::{env, io, ops::Deref};
 use terminal_size::terminal_size;
@@ -220,7 +220,7 @@ impl Display for RageConfiguration<'_> {
                     let vcs_enabled = configuration.is_vcs_enabled();
                     let mut settings = Settings::default();
                     settings
-                        .merge_with_configuration(configuration.clone(), None, None, &[])
+                        .merge_with_configuration(configuration.clone(), None)
                         .unwrap();
 
                     let status = if !diagnostics.is_empty() {

@@ -1,16 +1,16 @@
 use std::ops::{Deref, Range};
 
 use crate::{
+    JsRuleAction,
     services::{control_flow::AnyJsControlFlowRoot, semantic::Semantic},
     utils::{
         rename::{AnyJsRenamableDeclaration, RenameSymbolExtensions},
         restricted_regex::RestrictedRegex,
     },
-    JsRuleAction,
 };
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize::{
@@ -19,16 +19,16 @@ use biome_deserialize::{
 use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, AnyJsClassMember, AnyJsObjectMember,
-    AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource, JsIdentifierBinding,
-    JsLiteralExportName, JsLiteralMemberName, JsMethodModifierList, JsModuleItemList,
-    JsPrivateClassMemberName, JsPropertyModifierList, JsSyntaxKind, JsSyntaxToken,
-    JsVariableDeclarator, JsVariableKind, Modifier, TsDeclarationModule, TsIdentifierBinding,
-    TsIndexSignatureModifierList, TsLiteralEnumMemberName, TsMethodSignatureModifierList,
-    TsPropertySignatureModifierList, TsTypeParameterName,
+    AnyJsClassMember, AnyJsObjectMember, AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource,
+    JsIdentifierBinding, JsLiteralExportName, JsLiteralMemberName, JsMethodModifierList,
+    JsModuleItemList, JsPrivateClassMemberName, JsPropertyModifierList, JsSyntaxKind,
+    JsSyntaxToken, JsVariableDeclarator, JsVariableKind, Modifier, TsDeclarationModule,
+    TsIdentifierBinding, TsIndexSignatureModifierList, TsLiteralEnumMemberName,
+    TsMethodSignatureModifierList, TsPropertySignatureModifierList, TsTypeParameterName,
+    binding_ext::AnyJsBindingDeclaration,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, BatchMutationExt, SyntaxResult, TextRange, TextSize,
+    AstNode, BatchMutationExt, SyntaxResult, TextRange, TextSize, declare_node_union,
 };
 use biome_string_case::{Case, Cases};
 use biome_unicode_table::is_js_ident;
@@ -852,7 +852,7 @@ impl Rule for UseNamingConvention {
                         "This "<Emphasis>{format_args!("{convention_selector}")}</Emphasis>" name"{trimmed_info}" should be in "<Emphasis>{expected_case_names}</Emphasis>"."
                     },
                 ))
-            },
+            }
         }
     }
 
@@ -919,7 +919,7 @@ impl Rule for UseNamingConvention {
                 return Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
-                     markup! { "Rename this symbol in "<Emphasis>{preferred_case.to_string()}</Emphasis>"." }.to_owned(),
+                    markup! { "Rename this symbol in "<Emphasis>{preferred_case.to_string()}</Emphasis>"." }.to_owned(),
                     mutation,
                 ));
             }
@@ -1374,7 +1374,7 @@ impl Selector {
                 } else {
                     Some(Kind::IndexParameter.into())
                 }
-            },
+            }
             AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => Some(Selector::with_scope(Kind::ImportNamespace, Scope::Global)),
             AnyJsBindingDeclaration::JsFunctionDeclaration(_)
             | AnyJsBindingDeclaration::JsFunctionExpression(_)
@@ -1854,8 +1854,8 @@ impl JsonSchema for Modifiers {
         "Modifiers".to_string()
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <std::collections::HashSet<RestrictedModifier>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <std::collections::HashSet<RestrictedModifier>>::json_schema(generator)
     }
 }
 impl From<JsMethodModifierList> for Modifiers {
@@ -2049,8 +2049,8 @@ impl JsonSchema for Formats {
     fn schema_name() -> String {
         "Formats".to_string()
     }
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <std::collections::HashSet<Format>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <std::collections::HashSet<Format>>::json_schema(generator)
     }
 }
 

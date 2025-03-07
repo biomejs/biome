@@ -3,11 +3,11 @@ use super::tag::Tag;
 use crate::format_element::tag::DedentMode;
 use crate::prelude::tag::GroupMode;
 use crate::prelude::*;
-use crate::{format, write};
 use crate::{
     BufferExtensions, Format, FormatContext, FormatElement, FormatOptions, FormatResult, Formatter,
     IndentStyle, IndentWidth, LineEnding, LineWidth, PrinterOptions, TransformSourceMap,
 };
+use crate::{format, write};
 use biome_rowan::TextSize;
 use rustc_hash::FxHashMap;
 use std::ops::Deref;
@@ -738,8 +738,8 @@ mod tests {
     use biome_js_syntax::JsSyntaxToken;
     use biome_rowan::TextSize;
 
-    use crate::prelude::*;
     use crate::SimpleFormatContext;
+    use crate::prelude::*;
     use crate::{format, format_args, write};
 
     #[test]

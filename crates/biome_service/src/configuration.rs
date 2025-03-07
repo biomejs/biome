@@ -1,11 +1,11 @@
-use crate::settings::Settings;
 use crate::WorkspaceError;
+use crate::settings::Settings;
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::{CantLoadExtendFile, EditorConfigDiagnostic};
-use biome_configuration::{push_to_analyzer_assist, Configuration, VERSION};
 use biome_configuration::{
-    push_to_analyzer_rules, BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload,
+    BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload, push_to_analyzer_rules,
 };
+use biome_configuration::{Configuration, VERSION, push_to_analyzer_assist};
 use biome_console::markup;
 use biome_css_analyze::METADATA as css_lint_metadata;
 use biome_deserialize::json::deserialize_from_json_str;
@@ -19,7 +19,7 @@ use biome_graphql_analyze::METADATA as graphql_lint_metadata;
 use biome_js_analyze::METADATA as js_lint_metadata;
 use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
-use biome_json_parser::{parse_json, JsonParserOptions};
+use biome_json_parser::{JsonParserOptions, parse_json};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::ffi::OsStr;
 use std::fmt::Debug;
@@ -342,7 +342,7 @@ pub fn create_config(
         let schema_path = Utf8Path::new("./node_modules/@biomejs/biome/configuration_schema.json");
         let options = OpenOptions::default().read(true);
         if fs.open_with_options(schema_path, options).is_ok() {
-            configuration.schema = Some(Box::from(schema_path.as_str()));
+            configuration.schema = Some(schema_path.to_string().into());
         }
     } else {
         configuration.schema =
@@ -401,12 +401,6 @@ pub trait ConfigurationExt {
     ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError>;
 
     fn migrate_deprecated_fields(&mut self);
-
-    fn retrieve_gitignore_matches(
-        &self,
-        fs: &dyn FileSystem,
-        vcs_base_path: Option<&Utf8Path>,
-    ) -> Result<(Option<Utf8PathBuf>, Vec<String>), WorkspaceError>;
 }
 
 impl ConfigurationExt for Configuration {
@@ -520,11 +514,10 @@ impl ConfigurationExt for Configuration {
             let mut content = String::new();
             file.read_to_string(&mut content).map_err(|err| {
                 CantLoadExtendFile::new(extend_configuration_file_path.to_string(), err.to_string()).with_verbose_advice(
-                    markup!{
+                    markup! {
                         "It's possible that the file was created with a different user/group. Make sure you have the rights to read the file."
                     }
                 )
-
             })?;
             let deserialized = deserialize_from_json_str::<Configuration>(
                 content.as_str(),
@@ -544,47 +537,6 @@ impl ConfigurationExt for Configuration {
     /// Checks for the presence of deprecated fields and updates the
     /// configuration to apply them to the new schema.
     fn migrate_deprecated_fields(&mut self) {}
-
-    /// This function checks if the VCS integration is enabled, and if so, it will attempts to resolve the
-    /// VCS root directory and the `.gitignore` file.
-    ///
-    /// ## Returns
-    ///
-    /// A tuple with VCS root folder and the contents of the `.gitignore` file
-    fn retrieve_gitignore_matches(
-        &self,
-        fs: &dyn FileSystem,
-        vcs_base_path: Option<&Utf8Path>,
-    ) -> Result<(Option<Utf8PathBuf>, Vec<String>), WorkspaceError> {
-        let Some(vcs) = &self.vcs else {
-            return Ok((None, vec![]));
-        };
-        if vcs.is_enabled() {
-            let vcs_base_path = match (vcs_base_path, &vcs.root) {
-                (Some(vcs_base_path), Some(root)) => vcs_base_path.join(root),
-                (None, Some(root)) => Utf8PathBuf::from(root),
-                (Some(vcs_base_path), None) => Utf8PathBuf::from(vcs_base_path),
-                (None, None) => return Err(WorkspaceError::vcs_disabled()),
-            };
-            if let Some(client_kind) = &vcs.client_kind {
-                if vcs.should_use_ignore_file() {
-                    let result = fs.auto_search_file(&vcs_base_path, client_kind.ignore_file());
-
-                    if let Some(result) = result {
-                        return Ok((
-                            result.file_path.parent().map(Utf8PathBuf::from),
-                            result
-                                .content
-                                .lines()
-                                .map(String::from)
-                                .collect::<Vec<String>>(),
-                        ));
-                    }
-                }
-            }
-        }
-        Ok((None, vec![]))
-    }
 }
 
 #[cfg(test)]

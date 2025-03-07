@@ -1,5 +1,5 @@
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
-use biome_html_formatter::{context::HtmlFormatOptions, HtmlFormatLanguage};
+use biome_html_formatter::{HtmlFormatLanguage, context::HtmlFormatOptions};
 use biome_html_syntax::HtmlFileSource;
 use camino::Utf8Path;
 

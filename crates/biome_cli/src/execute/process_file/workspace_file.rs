@@ -1,6 +1,6 @@
 use crate::execute::diagnostics::{ResultExt, ResultIoExt};
 use crate::execute::process_file::SharedTraversalOptions;
-use biome_diagnostics::{category, Error};
+use biome_diagnostics::{Error, category};
 use biome_fs::{BiomePath, File, OpenOptions};
 use biome_service::workspace::{FileContent, FileGuard, OpenFileParams};
 use biome_service::{Workspace, WorkspaceError};
@@ -37,8 +37,7 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
                 project_key: ctx.project_key,
                 document_file_source: None,
                 path: path.clone(),
-                version: 0,
-                content: FileContent::FromClient(input.clone()),
+                content: FileContent::from_client(&input),
                 persist_node_cache: false,
             },
         )

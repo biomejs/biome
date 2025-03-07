@@ -6,11 +6,12 @@ use std::{
     env,
     fmt::Display,
     path::{Path, PathBuf},
+    sync::OnceLock,
 };
 
 pub use crate::glue::{pushd, pushenv};
 
-pub use anyhow::{anyhow, bail, ensure, Context as _, Error, Result};
+pub use anyhow::{Context as _, Error, Result, anyhow, bail, ensure};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Mode {
@@ -58,14 +59,20 @@ pub fn reformat_without_preamble(text: impl Display) -> Result<String> {
     let _e = pushenv("RUSTUP_TOOLCHAIN", "stable");
     ensure_rustfmt()?;
     let output = run!(
-        "rustfmt --config newline_style=Unix";
+        "rustfmt --config newline_style=Unix --config style_edition=2024";
         <text.to_string().as_bytes()
     )?;
 
     Ok(format!("{output}\n"))
 }
 
+static IS_RUSTFMT_CHECKED: OnceLock<()> = OnceLock::new();
+
 pub fn ensure_rustfmt() -> Result<()> {
+    if IS_RUSTFMT_CHECKED.get().is_some() {
+        return Ok(());
+    }
+
     let out = run!("rustfmt --version")?;
     if !out.contains("stable") {
         bail!(
@@ -73,5 +80,23 @@ pub fn ensure_rustfmt() -> Result<()> {
              Please run `rustup component add rustfmt --toolchain stable` to install it.",
         )
     }
+
+    // e.g. "rustfmt 1.8.0-stable (4d91de4e48 2025-02-17)"
+    let (_, version) = out.split_once(' ').unwrap_or_default();
+    let mut version = version
+        .split('.')
+        .filter_map(|s| str::parse::<usize>(s).ok());
+    let major = version.next();
+    let minor = version.next();
+    if major != Some(1) || minor.is_none_or(|minor| minor < 8) {
+        // `--style_edition=2024` requires 1.8.0 or later.
+        bail!(
+            "The installed rustfmt is outdated, 1.8.0 or later is required. \
+             Please run `rustup update stable` to update it.",
+        )
+    }
+
+    IS_RUSTFMT_CHECKED.get_or_init(|| ());
+
     Ok(())
 }

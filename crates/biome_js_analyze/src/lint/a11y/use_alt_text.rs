@@ -1,9 +1,9 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::{fmt::Display, fmt::Formatter, markup};
 use biome_diagnostics::Severity;
-use biome_js_syntax::{jsx_ext::AnyJsxElement, static_value::StaticValue, TextRange};
+use biome_js_syntax::{TextRange, jsx_ext::AnyJsxElement, static_value::StaticValue};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -180,7 +180,7 @@ fn has_valid_alt_text(element: &AnyJsxElement) -> bool {
 
             attribute
                 .as_static_value()
-                .map_or(true, |value| !value.is_null_or_undefined())
+                .is_none_or(|value| !value.is_null_or_undefined())
         })
 }
 
@@ -191,7 +191,7 @@ fn has_valid_label(element: &AnyJsxElement, name_to_lookup: &str) -> bool {
             if attribute.initializer().is_none() {
                 return false;
             }
-            attribute.as_static_value().map_or(true, |value| {
+            attribute.as_static_value().is_none_or(|value| {
                 !value.is_null_or_undefined() && value.is_not_string_constant("")
             })
         })
@@ -201,11 +201,9 @@ fn is_aria_hidden(element: &AnyJsxElement) -> bool {
     element
         .find_attribute_by_name("aria-hidden")
         .is_some_and(|attribute| {
-            attribute
-                .as_static_value()
-                .map_or(true, |value| match value {
-                    StaticValue::Boolean(token) => token.text_trimmed() == "true",
-                    _ => false,
-                })
+            attribute.as_static_value().is_none_or(|value| match value {
+                StaticValue::Boolean(token) => token.text_trimmed() == "true",
+                _ => false,
+            })
         })
 }

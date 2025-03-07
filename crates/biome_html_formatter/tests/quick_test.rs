@@ -1,7 +1,7 @@
 use biome_formatter::{AttributePosition, IndentStyle, LineWidth};
 use biome_formatter_test::check_reformat::CheckReformat;
 use biome_html_formatter::context::HtmlFormatOptions;
-use biome_html_formatter::{format_node, HtmlFormatLanguage};
+use biome_html_formatter::{HtmlFormatLanguage, format_node};
 use biome_html_parser::parse_html;
 use biome_html_syntax::HtmlFileSource;
 

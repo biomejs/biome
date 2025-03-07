@@ -1,12 +1,12 @@
 use crate::{services::semantic::SemanticServices, utils::restricted_regex::RestrictedRegex};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    Rule, RuleDiagnostic, RuleSource, RuleSourceKind, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_deserialize::DeserializationContext;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
-    binding_ext::AnyJsIdentifierBinding, AnyJsIdentifierUsage, JsExportNamedSpecifier,
+    AnyJsIdentifierUsage, JsExportNamedSpecifier, binding_ext::AnyJsIdentifierBinding,
 };
 use biome_rowan::{AstNode, TextRange};
 use biome_string_case::{Case, Cases};
@@ -491,8 +491,8 @@ impl schemars::JsonSchema for FilenameCases {
     fn schema_name() -> String {
         "FilenameCases".to_string()
     }
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <std::collections::HashSet<FilenameCase>>::json_schema(gen)
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        <std::collections::HashSet<FilenameCase>>::json_schema(generator)
     }
 }
 impl Default for FilenameCases {

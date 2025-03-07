@@ -1,12 +1,12 @@
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{CssSyntaxKind, TextRange, T};
-use biome_parser::diagnostic::{expect_one_of, ParseDiagnostic};
+use biome_css_syntax::{CssSyntaxKind, T, TextRange};
+use biome_parser::diagnostic::{ParseDiagnostic, expect_one_of};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::ToDiagnostic;
-use biome_parser::{parsed_syntax::ParsedSyntax, token_set, Parser};
+use biome_parser::{Parser, parsed_syntax::ParsedSyntax, token_set};
 
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{expected_component_value, expected_identifier};

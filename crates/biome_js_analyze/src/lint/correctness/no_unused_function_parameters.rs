@@ -1,13 +1,13 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
-    binding_ext::{AnyJsBindingDeclaration, AnyJsParameterParentFunction},
     JsIdentifierBinding, JsSyntaxKind,
+    binding_ext::{AnyJsBindingDeclaration, AnyJsParameterParentFunction},
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction};
 
-use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions, JsRuleAction};
+use crate::{JsRuleAction, services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 
 declare_lint_rule! {
     /// Disallow unused function parameters.
@@ -129,7 +129,7 @@ impl Rule for NoUnusedFunctionParameters {
             AnyJsBindingDeclaration::JsFormalParameter(parameter) => parameter.parent_function(),
             AnyJsBindingDeclaration::JsRestParameter(parameter) => parameter.parent_function(),
             AnyJsBindingDeclaration::JsBogusParameter(_) => {
-                return Some(SuggestedFix::NoSuggestion)
+                return Some(SuggestedFix::NoSuggestion);
             }
             _ => return None,
         };

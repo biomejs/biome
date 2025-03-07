@@ -1,8 +1,8 @@
 use crate::parser::MarkdownParser;
 use biome_markdown_syntax::{MarkdownSyntaxKind::*, T};
 use biome_parser::{
-    prelude::ParsedSyntax::{self, *},
     Parser,
+    prelude::ParsedSyntax::{self, *},
 };
 
 pub fn at_thematic_break_block(p: &mut MarkdownParser) -> bool {

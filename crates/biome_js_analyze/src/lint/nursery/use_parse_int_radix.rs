@@ -1,12 +1,12 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    global_identifier, numbers::parse_js_number, AnyJsCallArgument, AnyJsExpression,
-    AnyJsLiteralExpression, JsCallArgumentList, JsCallExpression, T,
+    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsCallArgumentList,
+    JsCallExpression, T, global_identifier, numbers::parse_js_number,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 
@@ -23,9 +23,21 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// parseInt("071");
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
     /// parseInt(someValue);
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
     /// parseInt("071", "abc");
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
     /// parseInt("071", 37);
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
     /// parseInt();
     /// ```
     ///
@@ -58,12 +70,12 @@ impl Rule for UseParseIntRadix {
 
         let object_name = call_expression.callee().ok()?.get_callee_object_name()?;
 
-        if !matches!(object_name.text(), "Number" | "parseInt") {
+        if !matches!(object_name.text_trimmed(), "Number" | "parseInt") {
             return None;
         }
 
         let member_name = call_expression.callee().ok()?.get_callee_member_name()?;
-        if member_name.text() != "parseInt" {
+        if member_name.text_trimmed() != "parseInt" {
             return None;
         }
 

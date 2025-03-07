@@ -1,5 +1,5 @@
 use crate::GraphqlCommentStyle;
-use biome_formatter::{prelude::*, AttributePosition, BracketSpacing, IndentWidth, QuoteStyle};
+use biome_formatter::{AttributePosition, BracketSpacing, IndentWidth, QuoteStyle, prelude::*};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TransformSourceMap,

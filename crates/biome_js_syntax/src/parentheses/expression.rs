@@ -1,13 +1,8 @@
 use std::borrow::Cow;
 
-use biome_rowan::{match_ast, AstNode, AstNodeList, SyntaxResult};
+use biome_rowan::{AstNode, AstNodeList, SyntaxResult, match_ast};
 
 use crate::{
-    assign_ext::AnyJsMemberAssignment,
-    binary_like_expression::{
-        should_flatten, AnyJsBinaryLikeExpression, AnyJsBinaryLikeLeftExpression,
-    },
-    expression_left_side::AnyJsExpressionLeftSide,
     AnyJsAssignmentPattern, AnyJsComputedMember, AnyJsExpression, AnyJsForInitializer,
     AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsStatement,
     JsArrayExpression, JsArrowFunctionExpression, JsAssignmentExpression, JsAwaitExpression,
@@ -23,6 +18,11 @@ use crate::{
     JsThisExpression, JsUnaryExpression, JsUnaryOperator, JsYieldExpression, JsxTagExpression,
     TsAsExpression, TsInstantiationExpression, TsNonNullAssertionExpression, TsSatisfiesExpression,
     TsTypeAssertionExpression,
+    assign_ext::AnyJsMemberAssignment,
+    binary_like_expression::{
+        AnyJsBinaryLikeExpression, AnyJsBinaryLikeLeftExpression, should_flatten,
+    },
+    expression_left_side::AnyJsExpressionLeftSide,
 };
 
 use super::NeedsParentheses;

@@ -1,6 +1,6 @@
 use crate::syntax::SyntaxKind;
 use crate::{
-    chain_trivia_pieces, AstNode, Language, SyntaxElement, SyntaxNode, SyntaxSlot, SyntaxToken,
+    AstNode, Language, SyntaxElement, SyntaxNode, SyntaxSlot, SyntaxToken, chain_trivia_pieces,
 };
 use biome_text_edit::{TextEdit, TextEditBuilder};
 use biome_text_size::TextRange;
@@ -555,8 +555,8 @@ where
 #[cfg(test)]
 pub mod test {
     use crate::{
-        raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
         AstNode, BatchMutationExt, SyntaxNodeCast,
+        raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
     };
 
     /// ```

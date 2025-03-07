@@ -1,9 +1,9 @@
 use crate::changed::{get_changed_files, get_staged_files};
-use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
+use crate::cli_options::{CliOptions, CliReporter, ColorsArg, cli_options};
 use crate::execute::{ReportMode, Stdin};
 use crate::logging::LoggingKind;
 use crate::{
-    execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, LoggingLevel, VERSION,
+    CliDiagnostic, CliSession, Execution, LoggingLevel, VERSION, execute_mode, setup_cli_subscriber,
 };
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::analyzer::{LinterEnabled, RuleSelector};
@@ -14,22 +14,21 @@ use biome_configuration::javascript::{JsFormatterConfiguration, JsLinterConfigur
 use biome_configuration::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
 use biome_configuration::markdown::MarkdownLinterConfiguration;
 use biome_configuration::vcs::VcsConfiguration;
+use biome_configuration::{BiomeDiagnostic, Configuration};
 use biome_configuration::{
-    configuration, css::css_formatter_configuration, css::css_linter_configuration,
-    files_configuration, formatter_configuration, graphql::graphql_formatter_configuration,
+    FilesConfiguration, FormatterConfiguration, LinterConfiguration, configuration,
+    css::css_formatter_configuration, css::css_linter_configuration, files_configuration,
+    formatter_configuration, graphql::graphql_formatter_configuration,
     graphql::graphql_linter_configuration, javascript::js_formatter_configuration,
     javascript::js_linter_configuration, json::json_formatter_configuration,
     json::json_linter_configuration, linter_configuration, markdown::markdown_linter_configuration,
-    vcs::vcs_configuration, FilesConfiguration, FormatterConfiguration, LinterConfiguration,
+    vcs::vcs_configuration,
 };
-use biome_configuration::{BiomeDiagnostic, Configuration};
-use biome_console::{markup, Console, ConsoleExt};
+use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
-use biome_service::configuration::{
-    load_configuration, load_editorconfig, ConfigurationExt, LoadedConfiguration,
-};
+use biome_service::configuration::{LoadedConfiguration, load_configuration, load_editorconfig};
 use biome_service::documentation::Doc;
 use biome_service::projects::ProjectKey;
 use biome_service::workspace::{
@@ -99,10 +98,6 @@ pub enum BiomeCommand {
             fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
         )]
         log_path: Utf8PathBuf,
-        /// Allows to set a custom file path to the configuration file,
-        /// or a custom directory path to find `biome.json` or `biome.jsonc`
-        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        config_path: Option<Utf8PathBuf>,
     },
 
     /// Stops the Biome daemon server process.
@@ -385,10 +380,6 @@ pub enum BiomeCommand {
             fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
         )]
         log_path: Utf8PathBuf,
-        /// Allows to set a custom file path to the configuration file,
-        /// or a custom directory path to find `biome.json` or `biome.jsonc`
-        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        config_path: Option<Utf8PathBuf>,
         /// Bogus argument to make the command work with vscode-languageclient
         #[bpaf(long("stdio"), hide, hide_usage, switch)]
         stdio: bool,
@@ -513,10 +504,6 @@ pub enum BiomeCommand {
 
         #[bpaf(long("stop-on-disconnect"), hide_usage)]
         stop_on_disconnect: bool,
-        /// Allows to set a custom file path to the configuration file,
-        /// or a custom directory path to find `biome.json` or `biome.jsonc`
-        #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        config_path: Option<Utf8PathBuf>,
     },
     #[bpaf(command("__print_socket"), hide)]
     PrintSocket,
@@ -792,9 +779,6 @@ pub(crate) trait CommandRunner: Sized {
         );
         let configuration_path = loaded_configuration.directory_path.clone();
         let configuration = self.merge_configuration(loaded_configuration, fs, console)?;
-        let vcs_base_path = configuration_path.clone().or(fs.working_directory());
-        let (vcs_base_path, gitignore_matches) =
-            configuration.retrieve_gitignore_matches(fs, vcs_base_path.as_deref())?;
         let paths = self.get_files_to_process(fs, &configuration)?;
         let project_path = fs
             .working_directory()
@@ -809,8 +793,6 @@ pub(crate) trait CommandRunner: Sized {
             project_key,
             workspace_directory: configuration_path.map(BiomePath::from),
             configuration,
-            vcs_base_path: vcs_base_path.map(BiomePath::from),
-            gitignore_matches,
         })?;
         for diagnostic in &result.diagnostics {
             console.log(markup! {{PrintDiagnostic::simple(diagnostic)}});
@@ -822,9 +804,11 @@ pub(crate) trait CommandRunner: Sized {
             let result = workspace.scan_project_folder(ScanProjectFolderParams {
                 project_key,
                 path: Some(project_path),
+                watch: cli_options.use_server,
+                force: false, // TODO: Maybe we'll want a CLI flag for this.
             })?;
             for diagnostic in result.diagnostics {
-                if diagnostic.severity() == Severity::Fatal {
+                if diagnostic.severity() >= Severity::Error {
                     console.log(markup! {{PrintDiagnostic::simple(&diagnostic)}});
                 }
             }
@@ -946,14 +930,16 @@ mod tests {
 
     #[test]
     fn incompatible_arguments() {
-        assert!(check_fix_incompatible_arguments(FixFileModeOptions {
-            write: true,
-            fix: true,
-            unsafe_: false,
-            suppress: false,
-            suppression_reason: None
-        })
-        .is_err());
+        assert!(
+            check_fix_incompatible_arguments(FixFileModeOptions {
+                write: true,
+                fix: true,
+                unsafe_: false,
+                suppress: false,
+                suppression_reason: None
+            })
+            .is_err()
+        );
     }
 
     #[test]

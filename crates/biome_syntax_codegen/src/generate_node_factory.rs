@@ -1,5 +1,5 @@
-use crate::ast::{AstSrc, Field};
 use crate::LanguageSrc;
+use crate::ast::{AstSrc, Field};
 use anyhow::Result;
 use biome_string_case::Case;
 use proc_macro2::{Ident, Span};

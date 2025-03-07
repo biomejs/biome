@@ -2,9 +2,9 @@ use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_block;
 use biome_css_syntax::{CssSyntaxKind::*, T};
 use biome_parser::{
+    Parser,
     parsed_syntax::ParsedSyntax::{self, Present},
     prelude::ParsedSyntax::Absent,
-    Parser,
 };
 
 #[inline]

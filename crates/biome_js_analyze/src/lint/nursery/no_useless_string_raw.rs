@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsTemplateElement, JsTemplateExpression};
 use biome_rowan::{AstNode, AstNodeList};
@@ -91,7 +91,7 @@ fn can_remove_string_raw(node: &JsTemplateExpression) -> bool {
             AnyJsTemplateElement::JsTemplateElement(_) => false,
             AnyJsTemplateElement::JsTemplateChunkElement(chunk) => {
                 match chunk.template_chunk_token() {
-                    Ok(token) => token.text().contains('\\'),
+                    Ok(token) => token.text_trimmed().contains('\\'),
                     Err(_) => {
                         // if found an error, return `true` means `String.raw` can't remove
                         true

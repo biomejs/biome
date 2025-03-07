@@ -52,22 +52,21 @@
 //!     format a file with a language that does not have a formatter
 
 mod client;
+mod document;
 mod scanner;
 mod server;
+mod watcher;
 
-pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
-use crate::file_handlers::Capabilities;
 pub use crate::file_handlers::DocumentFileSource;
-use crate::projects::ProjectKey;
-use crate::settings::WorkspaceSettingsHandle;
-use crate::{Deserialize, Serialize, WorkspaceError};
-use biome_analyze::ActionCategory;
-pub use biome_analyze::RuleCategories;
-use biome_configuration::analyzer::RuleSelector;
+pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
+pub use server::WorkspaceServer;
+
+use biome_analyze::{ActionCategory, RuleCategories};
 use biome_configuration::Configuration;
-use biome_console::{markup, Markup, MarkupBuf};
-use biome_diagnostics::serde::Diagnostic;
+use biome_configuration::analyzer::RuleSelector;
+use biome_console::{Markup, MarkupBuf, markup};
 use biome_diagnostics::CodeSuggestion;
+use biome_diagnostics::serde::Diagnostic;
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
@@ -75,14 +74,32 @@ use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use core::str;
-use enumflags2::{bitflags, BitFlags};
+use crossbeam::channel::bounded;
+use enumflags2::{BitFlags, bitflags};
 #[cfg(feature = "schema")]
-use schemars::{gen::SchemaGenerator, schema::Schema};
+use schemars::{r#gen::SchemaGenerator, schema::Schema};
 use smallvec::SmallVec;
 use std::collections::HashMap;
 use std::time::Duration;
-use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
+use std::{borrow::Cow, panic::RefUnwindSafe};
+use tokio::sync::watch;
 use tracing::{debug, instrument};
+
+use crate::file_handlers::Capabilities;
+use crate::projects::ProjectKey;
+use crate::settings::WorkspaceSettingsHandle;
+use crate::{Deserialize, Serialize, WorkspaceError};
+
+/// Notification regarding a workspace's service data.
+#[derive(Clone, Copy, Debug)]
+pub enum ServiceDataNotification {
+    /// Notifies of any kind of update to the service data.
+    Updated,
+
+    /// Workspace watcher has stopped and no more service data updates are
+    /// expected.
+    Stop,
+}
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -443,6 +460,19 @@ impl std::fmt::Display for FeatureKind {
 )]
 pub struct FeatureName(BitFlags<FeatureKind>);
 
+impl std::fmt::Display for FeatureName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut iter = self.0.iter();
+        if let Some(first) = iter.next() {
+            write!(f, "{}", first)?;
+            for kind in iter {
+                write!(f, ", {}", kind)?;
+            }
+        }
+        Ok(())
+    }
+}
+
 impl FeatureName {
     pub fn iter(&self) -> enumflags2::Iter<FeatureKind> {
         self.0.iter()
@@ -479,8 +509,8 @@ impl schemars::JsonSchema for FeatureName {
         String::from("FeatureName")
     }
 
-    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
-        <Vec<FeatureKind>>::json_schema(gen)
+    fn json_schema(generator: &mut SchemaGenerator) -> Schema {
+        <Vec<FeatureKind>>::json_schema(generator)
     }
 }
 
@@ -523,10 +553,6 @@ impl FeaturesBuilder {
 pub struct UpdateSettingsParams {
     pub project_key: ProjectKey,
     pub configuration: Configuration,
-    // @ematipico TODO: have a better data structure for this
-    pub vcs_base_path: Option<BiomePath>,
-    // @ematipico TODO: have a better data structure for this
-    pub gitignore_matches: Vec<String>,
     pub workspace_directory: Option<BiomePath>,
 }
 
@@ -555,7 +581,6 @@ pub struct OpenFileParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub content: FileContent,
-    pub version: i32,
     pub document_file_source: Option<DocumentFileSource>,
 
     /// Set to `true` to persist the node cache used during parsing, in order to
@@ -569,13 +594,22 @@ pub struct OpenFileParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", tag = "type", content = "content")]
+#[serde(rename_all = "camelCase", tag = "type")]
 pub enum FileContent {
     /// The client has loaded the content and submits it to the server.
-    FromClient(String),
+    FromClient { content: String, version: i32 },
 
     /// The server will be responsible for loading the content from the file system.
     FromServer,
+}
+
+impl FileContent {
+    pub fn from_client(content: impl Into<String>) -> Self {
+        Self::FromClient {
+            content: content.into(),
+            version: 0,
+        }
+    }
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -990,6 +1024,14 @@ pub struct ScanProjectFolderParams {
     /// which part of the project they are interested in. The server may or may
     /// not use this to avoid scanning parts that are irrelevant to clients.
     pub path: Option<BiomePath>,
+
+    /// Whether the watcher should watch this path.
+    ///
+    /// Does nothing if the watcher is already watching this path.
+    pub watch: bool,
+
+    /// Forces scanning of the folder, even if it is already being watched.
+    pub force: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1033,8 +1075,8 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     ///
     /// Follow-up calls may be much faster as they can reuse cached data.
     ///
-    /// TODO: This method also registers file watchers to make sure the cache
-    ///       remains up-to-date.
+    /// This method also registers file watchers to make sure the cache remains
+    /// up-to-date, if indicated in the `params`.
     fn scan_project_folder(
         &self,
         params: ScanProjectFolderParams,
@@ -1199,12 +1241,9 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
 /// Convenience function for constructing a server instance of [Workspace]
 pub fn server(fs: Box<dyn FileSystem>) -> Box<dyn Workspace> {
-    Box::new(server::WorkspaceServer::new(fs))
-}
-
-/// Convenience function for constructing a server instance of [Workspace]
-pub fn server_sync(fs: Box<dyn FileSystem>) -> Arc<dyn Workspace> {
-    Arc::new(server::WorkspaceServer::new(fs))
+    let (watcher_tx, _) = bounded(0);
+    let (service_data_tx, _) = watch::channel(ServiceDataNotification::Updated);
+    Box::new(WorkspaceServer::new(fs, watcher_tx, service_data_tx))
 }
 
 /// Convenience function for constructing a client instance of [Workspace]

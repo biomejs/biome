@@ -1,9 +1,9 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsFormalParameter, JsInitializerClause, JsSyntaxToken, TsPropertyParameter};
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, Direction};
+use biome_rowan::{AstNode, BatchMutationExt, Direction, declare_node_union};
 
 use crate::JsRuleAction;
 

@@ -1,13 +1,13 @@
+use crate::JsRuleAction;
 use crate::react::{jsx_member_name_is_react_fragment, jsx_reference_identifier_is_fragment};
 use crate::services::semantic::Semantic;
-use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make::{
-    js_string_literal_expression, jsx_expression_attribute_value, jsx_expression_child, jsx_string,
-    jsx_string_literal, jsx_tag_expression, token, JsxExpressionChildBuilder,
+    JsxExpressionChildBuilder, js_string_literal_expression, jsx_expression_attribute_value,
+    jsx_expression_child, jsx_string, jsx_string_literal, jsx_tag_expression, token,
 };
 use biome_js_syntax::{
     AnyJsExpression, AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsLogicalExpression,
@@ -15,7 +15,7 @@ use biome_js_syntax::{
     JsxElement, JsxExpressionAttributeValue, JsxExpressionChild, JsxFragment, JsxTagExpression,
     JsxText, T,
 };
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt};
+use biome_rowan::{AstNode, AstNodeList, BatchMutation, BatchMutationExt, declare_node_union};
 
 declare_lint_rule! {
     /// Disallow unnecessary fragments
@@ -265,7 +265,9 @@ impl Rule for NoUselessFragments {
                     AnyJsxElementName::JsxReferenceIdentifier(identifier) => {
                         jsx_reference_identifier_is_fragment(&identifier, model)?
                     }
-                    AnyJsxElementName::JsxName(_) | AnyJsxElementName::JsxNamespaceName(_) => false,
+                    AnyJsxElementName::JsxName(_)
+                    | AnyJsxElementName::JsxNamespaceName(_)
+                    | AnyJsxElementName::JsMetavariable(_) => false,
                 };
 
                 if is_valid_react_fragment {
@@ -413,7 +415,7 @@ impl Rule for NoUselessFragments {
                     // can't apply a code action because it will create invalid syntax
                     // for example `<>{...foo}</>` would become `{...foo}` which would produce
                     // a syntax error
-                    AnyJsxChild::JsxSpreadChild(_) => return None,
+                    AnyJsxChild::JsxSpreadChild(_) | AnyJsxChild::JsMetavariable(_) => return None,
                 };
                 if let Some(new_node) = new_node {
                     mutation.replace_element(parent.into(), new_node.into());

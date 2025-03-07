@@ -37,6 +37,7 @@ biome_rowan              = { workspace = true, features = ["serde"] }
 bpaf                     = { workspace = true }
 camino                   = { workspace = true }
 oxc_resolver             = { workspace = true }
+regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }

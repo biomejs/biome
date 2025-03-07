@@ -1,4 +1,4 @@
-use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
+use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 
 use crate::{
     AnyJsBindingPattern, AnyJsDeclarationClause, AnyJsExportClause, AnyJsExportDefaultDeclaration,
@@ -316,8 +316,8 @@ impl AnyJsExportNamedSpecifier {
 
 #[cfg(test)]
 mod tests {
-    use biome_js_factory::syntax::{JsExport, JsSyntaxKind::*};
     use biome_js_factory::JsSyntaxTreeBuilder;
+    use biome_js_factory::syntax::{JsExport, JsSyntaxKind::*};
     use biome_rowan::AstNode;
 
     #[test]

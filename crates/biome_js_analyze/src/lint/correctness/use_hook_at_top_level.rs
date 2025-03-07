@@ -1,9 +1,9 @@
 use crate::react::hooks::{is_react_component, is_react_hook, is_react_hook_call};
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, AddVisitor, FromServices, MissingServicesDiagnostic,
-    Phase, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey, ServiceBag, Visitor,
-    VisitorContext, VisitorFinishContext,
+    AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryMatch, Queryable,
+    Rule, RuleDiagnostic, RuleKey, ServiceBag, Visitor, VisitorContext, VisitorFinishContext,
+    context::RuleContext, declare_lint_rule,
 };
 use biome_analyze::{RuleDomain, RuleSource};
 use biome_console::markup;
@@ -19,7 +19,7 @@ use biome_js_syntax::{
     JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSyntaxKind, JsSyntaxNode,
     JsTryFinallyStatement, TextRange,
 };
-use biome_rowan::{declare_node_union, AstNode, Language, SyntaxNode, WalkEvent};
+use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent, declare_node_union};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};

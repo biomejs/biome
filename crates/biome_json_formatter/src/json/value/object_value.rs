@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{format_args, write, FormatContext};
+use biome_formatter::{Expand, FormatContext, format_args, write};
 use biome_json_syntax::JsonObjectValue;
 use biome_rowan::AstNode;
 
@@ -9,10 +9,10 @@ pub(crate) struct FormatJsonObjectValue;
 impl FormatNodeRule<JsonObjectValue> for FormatJsonObjectValue {
     fn fmt_fields(&self, node: &JsonObjectValue, f: &mut JsonFormatter) -> FormatResult<()> {
         let should_insert_space_around_brackets = f.context().options().bracket_spacing().value();
-        let should_expand = (f.context().options().object_wrap().is_preserve()
+        let should_expand = (f.context().options().expand() == Expand::Auto
             && node.json_member_list().syntax().has_leading_newline())
-            || f.comments().has_dangling_comments(node.syntax())
-            || f.context().options().expand();
+            || f.context().options().expand() == Expand::Always
+            || f.comments().has_dangling_comments(node.syntax());
 
         let list = format_with(|f| {
             write!(

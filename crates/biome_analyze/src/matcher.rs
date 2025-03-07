@@ -200,16 +200,16 @@ where
 mod tests {
     use super::MatchQueryParams;
     use crate::{
-        signals::DiagnosticSignal, Analyzer, AnalyzerContext, AnalyzerSignal, ApplySuppression,
-        ControlFlow, MetadataRegistry, Never, Phases, QueryMatcher, RuleKey, ServiceBag,
-        SignalEntry, SuppressionAction, SyntaxVisitor,
+        Analyzer, AnalyzerContext, AnalyzerSignal, ApplySuppression, ControlFlow, MetadataRegistry,
+        Never, Phases, QueryMatcher, RuleKey, ServiceBag, SignalEntry, SuppressionAction,
+        SyntaxVisitor, signals::DiagnosticSignal,
     };
     use crate::{AnalyzerOptions, AnalyzerSuppression};
-    use biome_diagnostics::{category, DiagnosticExt};
     use biome_diagnostics::{Diagnostic, Severity};
+    use biome_diagnostics::{DiagnosticExt, category};
     use biome_rowan::{
-        raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
         AstNode, BatchMutation, SyntaxNode, SyntaxToken, TextRange, TextSize, TriviaPiece,
+        raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
     };
     use std::convert::Infallible;
 
@@ -392,6 +392,10 @@ mod tests {
                 _: SyntaxToken<Self::Language>,
                 _: &str,
             ) {
+                unreachable!("")
+            }
+
+            fn suppression_top_level_comment(&self, _suppression_text: &str) -> String {
                 unreachable!("")
             }
         }

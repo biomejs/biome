@@ -13,8 +13,8 @@ use crate::cst::FormatGraphqlSyntaxNode;
 use biome_formatter::comments::Comments;
 use biome_formatter::prelude::*;
 use biome_formatter::{
-    write, CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
-    FormatToken, TransformSourceMap,
+    CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
+    FormatToken, TransformSourceMap, write,
 };
 use biome_formatter::{Formatted, Printed};
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlSyntaxNode, GraphqlSyntaxToken};

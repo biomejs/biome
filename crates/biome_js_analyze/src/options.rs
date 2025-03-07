@@ -21,6 +21,8 @@ pub type NoBannedTypes =
     <lint::complexity::no_banned_types::NoBannedTypes as biome_analyze::Rule>::Options;
 pub type NoBarrelFile =
     <lint::performance::no_barrel_file::NoBarrelFile as biome_analyze::Rule>::Options;
+pub type NoBitwiseOperators =
+    <lint::nursery::no_bitwise_operators::NoBitwiseOperators as biome_analyze::Rule>::Options;
 pub type NoBlankTarget =
     <lint::a11y::no_blank_target::NoBlankTarget as biome_analyze::Rule>::Options;
 pub type NoCatchAssign =
@@ -266,6 +268,7 @@ pub type NoUselessElse =
     <lint::style::no_useless_else::NoUselessElse as biome_analyze::Rule>::Options;
 pub type NoUselessEmptyExport = < lint :: complexity :: no_useless_empty_export :: NoUselessEmptyExport as biome_analyze :: Rule > :: Options ;
 pub type NoUselessEscapeInRegex = < lint :: nursery :: no_useless_escape_in_regex :: NoUselessEscapeInRegex as biome_analyze :: Rule > :: Options ;
+pub type NoUselessEscapeInString = < lint :: nursery :: no_useless_escape_in_string :: NoUselessEscapeInString as biome_analyze :: Rule > :: Options ;
 pub type NoUselessFragments =
     <lint::complexity::no_useless_fragments::NoUselessFragments as biome_analyze::Rule>::Options;
 pub type NoUselessLabel =
@@ -347,6 +350,8 @@ pub type UseExportsLast =
 pub type UseFilenamingConvention = < lint :: style :: use_filenaming_convention :: UseFilenamingConvention as biome_analyze :: Rule > :: Options ;
 pub type UseFlatMap = <lint::complexity::use_flat_map::UseFlatMap as biome_analyze::Rule>::Options;
 pub type UseFocusableInteractive = < lint :: a11y :: use_focusable_interactive :: UseFocusableInteractive as biome_analyze :: Rule > :: Options ;
+pub type UseForComponent =
+    <lint::nursery::use_for_component::UseForComponent as biome_analyze::Rule>::Options;
 pub type UseForOf = <lint::style::use_for_of::UseForOf as biome_analyze::Rule>::Options;
 pub type UseFragmentSyntax =
     <lint::style::use_fragment_syntax::UseFragmentSyntax as biome_analyze::Rule>::Options;
@@ -418,6 +423,8 @@ pub type UseSortedClasses =
     <lint::nursery::use_sorted_classes::UseSortedClasses as biome_analyze::Rule>::Options;
 pub type UseStrictMode =
     <lint::nursery::use_strict_mode::UseStrictMode as biome_analyze::Rule>::Options;
+pub type UseSymbolDescription =
+    <lint::nursery::use_symbol_description::UseSymbolDescription as biome_analyze::Rule>::Options;
 pub type UseTemplate = <lint::style::use_template::UseTemplate as biome_analyze::Rule>::Options;
 pub type UseThrowNewError =
     <lint::style::use_throw_new_error::UseThrowNewError as biome_analyze::Rule>::Options;

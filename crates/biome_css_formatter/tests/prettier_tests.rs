@@ -1,4 +1,4 @@
-use biome_css_formatter::{context::CssFormatOptions, CssFormatLanguage};
+use biome_css_formatter::{CssFormatLanguage, context::CssFormatOptions};
 use biome_formatter::{IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
 use camino::Utf8Path;

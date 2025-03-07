@@ -1,3 +1,6 @@
+use std::str::FromStr;
+
+use camino::Utf8PathBuf;
 use serde::{Deserialize, Serialize};
 use serde_json::{Error, Value};
 use tracing::debug;
@@ -18,6 +21,9 @@ pub struct WorkspaceSettings {
 
     /// Only run Biome if a `biome.json` configuration file exists.
     pub require_configuration: Option<bool>,
+
+    /// Path to the configuration file to prefer over the default `biome.json`.
+    pub configuration_path: Option<String>,
 
     /// Experimental settings
     pub experimental: Option<ExperimentalSettings>,
@@ -67,5 +73,12 @@ impl ExtensionSettings {
 
     pub(crate) fn requires_configuration(&self) -> bool {
         self.settings.require_configuration.unwrap_or_default()
+    }
+
+    pub(crate) fn configuration_path(&self) -> Option<Utf8PathBuf> {
+        self.settings
+            .configuration_path
+            .as_deref()
+            .map(|config_path| Utf8PathBuf::from_str(config_path).unwrap()) // infallible
     }
 }

@@ -28,3 +28,4 @@ mod reporter_summary;
 mod rules_via_dependencies;
 mod suppressions;
 mod unknown_files;
+mod vcs_ignored_files;

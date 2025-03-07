@@ -8,7 +8,7 @@ use biome_js_syntax::{
     AnyJsTemplateElement, AnyTsTemplateElement, JsLanguage, JsTemplateElementList,
     TsTemplateElementList,
 };
-use biome_rowan::{declare_node_union, AstNodeListIterator};
+use biome_rowan::{AstNodeListIterator, declare_node_union};
 use std::iter::FusedIterator;
 
 #[derive(Debug, Clone, Default)]

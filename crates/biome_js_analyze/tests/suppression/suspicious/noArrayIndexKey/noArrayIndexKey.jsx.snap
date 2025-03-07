@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: noArrayIndexKey.jsx
-snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -143,7 +142,7 @@ noArrayIndexKey.jsx:4:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━�
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
       2   2 │   
       3   3 │   something.forEach((Element, index) => {
@@ -156,9 +155,8 @@ noArrayIndexKey.jsx:4:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━�
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -188,7 +186,7 @@ noArrayIndexKey.jsx:7:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━�
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
       5   5 │   });
       6   6 │   something.forEach((element, index, array) => {
@@ -201,9 +199,8 @@ noArrayIndexKey.jsx:7:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━�
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -233,7 +230,7 @@ noArrayIndexKey.jsx:10:31 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
       8   8 │   });
       9   9 │   things.filter((thing, index) => {
@@ -246,9 +243,8 @@ noArrayIndexKey.jsx:10:31 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -277,7 +273,7 @@ noArrayIndexKey.jsx:14:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      12  12 │   
      13  13 │   something.forEach((Element, index) => {
@@ -290,9 +286,8 @@ noArrayIndexKey.jsx:14:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -322,7 +317,7 @@ noArrayIndexKey.jsx:17:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      15  15 │   });
      16  16 │   something.forEach((element, index, array) => {
@@ -335,9 +330,8 @@ noArrayIndexKey.jsx:17:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -367,7 +361,7 @@ noArrayIndexKey.jsx:20:31 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      18  18 │   });
      19  19 │   things.filter((thing, index) => {
@@ -380,9 +374,8 @@ noArrayIndexKey.jsx:20:31 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -412,7 +405,7 @@ noArrayIndexKey.jsx:23:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      21  21 │   });
      22  22 │   things.reduce(
@@ -425,9 +418,8 @@ noArrayIndexKey.jsx:23:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -456,7 +448,7 @@ noArrayIndexKey.jsx:28:35 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      26  26 │   
      27  27 │   React.Children.map(this.props.children, (child, index) =>
@@ -469,9 +461,8 @@ noArrayIndexKey.jsx:28:35 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -500,7 +491,7 @@ noArrayIndexKey.jsx:32:42 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      30  30 │   
      31  31 │   React.Children.forEach(this.props.children, function (child, index) {
@@ -513,9 +504,8 @@ noArrayIndexKey.jsx:32:42 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -544,7 +534,7 @@ noArrayIndexKey.jsx:36:29 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      34  34 │   
      35  35 │   Children.map(this.props.children, (child, index) =>
@@ -557,9 +547,8 @@ noArrayIndexKey.jsx:36:29 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -588,7 +577,7 @@ noArrayIndexKey.jsx:40:36 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      38  38 │   
      39  39 │   Children.forEach(this.props.children, function (child, index) {
@@ -601,9 +590,8 @@ noArrayIndexKey.jsx:40:36 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -632,7 +620,7 @@ noArrayIndexKey.jsx:44:41 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      42  42 │   
      43  43 │   Children.forEach(this.props.children, function (child, index) {
@@ -645,9 +633,8 @@ noArrayIndexKey.jsx:44:41 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -676,7 +663,7 @@ noArrayIndexKey.jsx:50:37 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      48  48 │   function Test(props) {
      49  49 │   	return Children.map(props.children, function (child, index) {
@@ -689,9 +676,8 @@ noArrayIndexKey.jsx:50:37 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -721,7 +707,7 @@ noArrayIndexKey.jsx:54:63 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      52  52 │   }
      53  53 │   
@@ -732,9 +718,8 @@ noArrayIndexKey.jsx:54:63 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -763,7 +748,7 @@ noArrayIndexKey.jsx:57:25 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      55  55 │   
      56  56 │   things.flatMap((thing, index) => {
@@ -776,9 +761,8 @@ noArrayIndexKey.jsx:57:25 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -807,7 +791,7 @@ noArrayIndexKey.jsx:61:25 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      59  59 │   
      60  60 │   Array.from(things, (thing, index) => {
@@ -820,9 +804,8 @@ noArrayIndexKey.jsx:61:25 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -850,7 +833,7 @@ noArrayIndexKey.jsx:65:54 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      63  63 │   
      64  64 │   const mapping = {
@@ -863,9 +846,8 @@ noArrayIndexKey.jsx:65:54 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -893,7 +875,7 @@ noArrayIndexKey.jsx:69:64 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      67  67 │   
      68  68 │   class A extends React.Component {
@@ -906,9 +888,8 @@ noArrayIndexKey.jsx:69:64 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -938,7 +919,7 @@ noArrayIndexKey.jsx:72:67 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      70  70 │   }
      71  71 │   
@@ -949,9 +930,8 @@ noArrayIndexKey.jsx:72:67 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -981,7 +961,7 @@ noArrayIndexKey.jsx:74:67 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      72  72 │   const Component1 = () => things.map((_, index) => <Component key={index} />);
      73  73 │   
@@ -992,9 +972,8 @@ noArrayIndexKey.jsx:74:67 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -1022,7 +1001,7 @@ noArrayIndexKey.jsx:77:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      75  75 │   
      76  76 │   function Component3() {
@@ -1035,9 +1014,8 @@ noArrayIndexKey.jsx:77:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -1065,7 +1043,7 @@ noArrayIndexKey.jsx:81:58 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      79  79 │   
      80  80 │   function Component4() {
@@ -1078,9 +1056,8 @@ noArrayIndexKey.jsx:81:58 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -1110,7 +1087,7 @@ noArrayIndexKey.jsx:83:55 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      81  81 │   	let elements = things.map((_, index) => <Component key={index} />);
      82  82 │   	if (condition) {
@@ -1123,9 +1100,8 @@ noArrayIndexKey.jsx:83:55 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -1155,7 +1131,7 @@ noArrayIndexKey.jsx:90:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      88  88 │   function Component5({ things }) {
      89  89 │   	const elements = useMemo(
@@ -1168,9 +1144,8 @@ noArrayIndexKey.jsx:90:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -1200,7 +1175,7 @@ noArrayIndexKey.jsx:98:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
      96  96 │   function Component6({ things }) {
      97  97 │   	const elements = useMemo(
@@ -1213,9 +1188,8 @@ noArrayIndexKey.jsx:98:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```
@@ -1245,7 +1219,7 @@ noArrayIndexKey.jsx:107:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━�
   
   i Check the React documentation. 
   
-  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey
+  i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for this line.
   
     105 105 │   	return (
     106 106 │   		<HoC>
@@ -1258,9 +1232,8 @@ noArrayIndexKey.jsx:107:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━�
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
           1 │ + /**·biome-ignore-all·lint/suspicious/noArrayIndexKey:·<explanation>·*/
-          2 │ + 
-      1   3 │   import { Children, cloneElement } from "react";
-      2   4 │   
+      1   2 │   import { Children, cloneElement } from "react";
+      2   3 │   
   
 
 ```

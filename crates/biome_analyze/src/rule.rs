@@ -5,7 +5,7 @@ use crate::{
     Phase, Phases, Queryable, SourceActionKind, SuppressionAction, SuppressionCommentEmitterPayload,
 };
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{markup, MarkupBuf, Padding};
+use biome_console::{MarkupBuf, Padding, markup};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::{
@@ -85,7 +85,7 @@ impl biome_console::fmt::Display for RuleMetadata {
 
         if self.domains.is_empty() && self.recommended {
             fmt.write_markup(markup! {
-                "- This rule is not recommended"
+                "- This rule is recommended"
             })?;
         }
 
@@ -1163,10 +1163,12 @@ pub trait Rule: RuleMeta + Sized {
 
             if let Some(first_token) = root.syntax().first_token() {
                 let mut mutation = root.begin();
+                let comment =
+                    suppression_action.suppression_top_level_comment(suppression_text.as_str());
                 suppression_action.apply_top_level_suppression(
                     &mut mutation,
                     first_token,
-                    suppression_text.as_str(),
+                    comment.as_str(),
                 );
                 return Some(SuppressAction {
                     mutation,
@@ -1210,7 +1212,7 @@ pub trait Rule: RuleMeta + Sized {
 
             Some(SuppressAction {
                 mutation,
-                message: markup! { "Suppress rule " {rule_category} }.to_owned(),
+                message: markup! { "Suppress rule " {rule_category} " for this line."}.to_owned(),
             })
         } else {
             None

@@ -14,9 +14,7 @@ export interface FileFeaturesResult {
 }
 export interface UpdateSettingsParams {
 	configuration: Configuration;
-	gitignoreMatches: string[];
 	projectKey: ProjectKey;
-	vcsBasePath?: BiomePath;
 	workspaceDirectory?: BiomePath;
 }
 /**
@@ -26,7 +24,7 @@ export interface Configuration {
 	/**
 	 * A field for the [JSON schema](https://json-schema.org/) specification
 	 */
-	$schema?: string;
+	$schema?: Schema;
 	/**
 	 * Specific configuration for assists
 	 */
@@ -88,6 +86,7 @@ export interface Configuration {
 	 */
 	vcs?: VcsConfiguration;
 }
+export type Schema = string;
 export interface AssistConfiguration {
 	/**
 	 * Whether Biome should fail in CLI if the assist were not applied to the code.
@@ -162,6 +161,10 @@ export interface FormatterConfiguration {
 	bracketSpacing?: BracketSpacing;
 	enabled?: Bool;
 	/**
+	 * Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+	 */
+	expand?: Expand;
+	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
 	 */
 	formatWithErrors?: Bool;
@@ -185,10 +188,6 @@ export interface FormatterConfiguration {
 	 * What's the max width of a line. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
-	/**
-	 * Whether to enforce collapsing object literals when possible. Defaults to preserve.
-	 */
-	objectWrap?: ObjectWrap;
 	/**
 	* Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration.
 
@@ -415,6 +414,7 @@ export type AttributePosition = "auto" | "multiline";
  */
 export type BracketSameLine = boolean;
 export type BracketSpacing = boolean;
+export type Expand = "auto" | "always" | "never";
 export type IndentStyle = "tab" | "space";
 export type IndentWidth = number;
 export type LineEnding = "lf" | "crlf" | "cr";
@@ -424,7 +424,6 @@ export type LineEnding = "lf" | "crlf" | "cr";
 The allowed range of values is 1..=320 
 	 */
 export type LineWidth = number;
-export type ObjectWrap = "preserve" | "collapse";
 /**
  * Options that changes how the GraphQL linter behaves
  */
@@ -589,6 +588,10 @@ export interface JsFormatterConfiguration {
 	 */
 	enabled?: Bool;
 	/**
+	 * Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+	 */
+	expand?: Expand;
+	/**
 	 * The indent style applied to JavaScript (and its super languages) files.
 	 */
 	indentStyle?: IndentStyle;
@@ -608,10 +611,6 @@ export interface JsFormatterConfiguration {
 	 * What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
-	/**
-	 * Whether to enforce collapsing object literals when possible. Defaults to preserve.
-	 */
-	objectWrap?: ObjectWrap;
 	/**
 	 * When properties in objects are quoted. Defaults to asNeeded.
 	 */
@@ -680,7 +679,7 @@ export interface JsonFormatterConfiguration {
 	 */
 	enabled?: Bool;
 	/**
-	 * Whether to expand arrays and objects on multiple lines. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "followSource".
+	 * Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
 	 */
 	expand?: Expand;
 	/**
@@ -699,10 +698,6 @@ export interface JsonFormatterConfiguration {
 	 * What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
-	/**
-	 * Whether to enforce collapsing object literals when possible. Defaults to preserve.
-	 */
-	objectWrap?: ObjectWrap;
 	/**
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "none".
 	 */
@@ -841,7 +836,6 @@ export type Semicolons = "always" | "asNeeded";
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
  */
 export type TrailingCommas = "all" | "es5" | "none";
-export type Expand = "always" | "followSource";
 export type TrailingCommas2 = "none" | "all";
 export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
 export type SeverityOrGroup_for_Complexity =
@@ -884,6 +878,10 @@ export interface OverrideFormatterConfiguration {
 	bracketSpacing?: BracketSpacing;
 	enabled?: Bool;
 	/**
+	 * Whether to expand arrays and objects on multiple lines. When set to `auto`, object literals are formatted on multiple lines if the first property has a newline, and array literals are formatted on a single line if it fits in the line. When set to `always`, these literals are formatted on multiple lines, regardless of length of the list. When set to `never`, these literals are formatted on a single line if it fits in the line. When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+	 */
+	expand?: Expand;
+	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
 	 */
 	formatWithErrors?: Bool;
@@ -907,10 +905,6 @@ export interface OverrideFormatterConfiguration {
 	 * What's the max width of a line. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
-	/**
-	 * Whether to enforce collapsing object literals when possible. Defaults to preserve.
-	 */
-	objectWrap?: ObjectWrap;
 }
 export type OverrideGlobs = Glob[];
 export interface OverrideLinterConfiguration {
@@ -1450,6 +1444,10 @@ export interface Nursery {
 	 */
 	noAwaitInLoop?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow bitwise operators.
+	 */
+	noBitwiseOperators?: RuleConfiguration_for_NoBitwiseOperatorsOptions;
+	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
 	noCommonJs?: RuleConfiguration_for_Null;
@@ -1544,7 +1542,7 @@ export interface Nursery {
 	/**
 	 * Disallow octal escape sequences in string literals
 	 */
-	noOctalEscape?: RuleConfiguration_for_Null;
+	noOctalEscape?: RuleFixConfiguration_for_Null;
 	/**
 	 * Restricts imports of "package private" exports.
 	 */
@@ -1610,6 +1608,10 @@ export interface Nursery {
 	 */
 	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow unnecessary escapes in string literals.
+	 */
+	noUselessEscapeInString?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow unnecessary String.raw function in template string literals without any escape sequence.
 	 */
 	noUselessStringRaw?: RuleConfiguration_for_Null;
@@ -1670,6 +1672,10 @@ export interface Nursery {
 	 */
 	useExportsLast?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce using Solid's \<For /> component for mapping an array to JSX elements.
+	 */
+	useForComponent?: RuleConfiguration_for_Null;
+	/**
 	 * Enforces the use of a recommended display strategy with Google Fonts.
 	 */
 	useGoogleFontDisplay?: RuleConfiguration_for_Null;
@@ -1701,6 +1707,10 @@ export interface Nursery {
 	 * Enforce the use of the directive "use strict" in script files.
 	 */
 	useStrictMode?: RuleFixConfiguration_for_Null;
+	/**
+	 * Require a description parameter for the Symbol().
+	 */
+	useSymbolDescription?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().
 	 */
@@ -2000,7 +2010,7 @@ export interface Suspicious {
 	/**
 	 * Disallow labeled statements that are not loops.
 	 */
-	noConfusingLabels?: RuleConfiguration_for_Null;
+	noConfusingLabels?: RuleConfiguration_for_NoConfusingLabelsOptions;
 	/**
 	 * Disallow void type outside of generic or return types.
 	 */
@@ -2014,7 +2024,7 @@ export interface Suspicious {
 	 */
 	noConstEnum?: RuleFixConfiguration_for_Null;
 	/**
-	 * Prevents from having control characters and some escape sequences that match control characters in regular expressions.
+	 * Prevents from having control characters and some escape sequences that match control characters in regular expression literals.
 	 */
 	noControlCharactersInRegex?: RuleConfiguration_for_Null;
 	/**
@@ -2295,6 +2305,9 @@ export type RuleConfiguration_for_DeprecatedHooksOptions =
 export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportExtensionsOptions;
+export type RuleConfiguration_for_NoBitwiseOperatorsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoBitwiseOperatorsOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -2334,6 +2347,9 @@ export type RuleFixConfiguration_for_NamingConventionOptions =
 export type RuleFixConfiguration_for_UseSelfClosingElementsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseSelfClosingElementsOptions;
+export type RuleConfiguration_for_NoConfusingLabelsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoConfusingLabelsOptions;
 export type RuleFixConfiguration_for_NoConsoleOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoConsoleOptions;
@@ -2480,6 +2496,16 @@ export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	 * Rule's options
 	 */
 	options: UseImportExtensionsOptions;
+}
+export interface RuleWithOptions_for_NoBitwiseOperatorsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoBitwiseOperatorsOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	/**
@@ -2631,6 +2657,16 @@ export interface RuleWithFixOptions_for_UseSelfClosingElementsOptions {
 	 */
 	options: UseSelfClosingElementsOptions;
 }
+export interface RuleWithOptions_for_NoConfusingLabelsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoConfusingLabelsOptions;
+}
 export interface RuleWithFixOptions_for_NoConsoleOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -2754,6 +2790,15 @@ export interface UseImportExtensionsOptions {
 	suggestedExtensions?: {};
 }
 /**
+ * Rule's options
+ */
+export interface NoBitwiseOperatorsOptions {
+	/**
+	 * Allows a list of bitwise operators to be used as exceptions.
+	 */
+	allow: string[];
+}
+/**
  * Options for the rule `noRestrictedImports`.
  */
 export interface RestrictedImportsOptions {
@@ -2861,6 +2906,15 @@ export interface NamingConventionOptions {
  */
 export interface UseSelfClosingElementsOptions {
 	ignoreHtmlElements?: boolean;
+}
+/**
+ * Options for the rule `noConfusingLabels`
+ */
+export interface NoConfusingLabelsOptions {
+	/**
+	 * A list of (non-confusing) labels that should be allowed
+	 */
+	allowedLabels: string[];
 }
 export interface NoConsoleOptions {
 	/**
@@ -3156,11 +3210,13 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noAwaitInLoop"
+	| "lint/nursery/noBitwiseOperators"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noConstantBinaryExpression"
 	| "lint/nursery/noDescendingSpecificity"
+	| "lint/nursery/noDestructuredProps"
 	| "lint/nursery/noDocumentCookie"
 	| "lint/nursery/noDocumentImportInPage"
 	| "lint/nursery/noDoneCallback"
@@ -3191,7 +3247,6 @@ export type Category =
 	| "lint/nursery/noPackagePrivateImports"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noProcessGlobal"
-	| "lint/nursery/noDestructuredProps"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
@@ -3216,6 +3271,7 @@ export type Category =
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessEscapeInRegex"
+	| "lint/nursery/noUselessEscapeInString"
 	| "lint/nursery/noUselessStringRaw"
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noValueAtRule"
@@ -3232,6 +3288,7 @@ export type Category =
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useExportsLast"
+	| "lint/nursery/useForComponent"
 	| "lint/nursery/useGoogleFontDisplay"
 	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useGuardForIn"
@@ -3243,6 +3300,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useSortedProperties"
 	| "lint/nursery/useStrictMode"
+	| "lint/nursery/useSymbolDescription"
 	| "lint/nursery/useTrimStartEnd"
 	| "lint/nursery/useValidAutocomplete"
 	| "lint/performance/noAccumulatingSpread"
@@ -3523,12 +3581,12 @@ This should only be enabled if reparsing is to be expected, such as when the fil
 	 */
 	persistNodeCache?: boolean;
 	projectKey: ProjectKey;
-	version: number;
 }
 export type FileContent =
-	| { content: string; type: "fromClient" }
+	| { content: string; type: "fromClient"; version: number }
 	| { type: "fromServer" };
 export type DocumentFileSource =
+	| "Ignore"
 	| "Unknown"
 	| { Js: JsFileSource }
 	| { Json: JsonFileSource }

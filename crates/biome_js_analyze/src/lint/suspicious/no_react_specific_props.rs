@@ -1,7 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
-    declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make::{jsx_ident, jsx_name};

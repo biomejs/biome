@@ -1,5 +1,5 @@
-use crate::arc::{Arc, HeaderSlice, ThinArc};
 use crate::TriviaPiece;
+use crate::arc::{Arc, HeaderSlice, ThinArc};
 use biome_text_size::TextSize;
 use countme::Count;
 use std::fmt::Formatter;
@@ -132,21 +132,24 @@ impl GreenTrivia {
     }
 
     pub(crate) unsafe fn from_raw(ptr: *mut GreenTriviaData) -> Self {
-        if let Some(ptr) = ptr.as_ref() {
-            let arc = Arc::from_raw(&ptr.data as *const ReprThin);
-            let arc = mem::transmute::<Arc<ReprThin>, ThinArc<GreenTriviaHead, TriviaPiece>>(arc);
-            Self { ptr: Some(arc) }
-        } else {
-            Self { ptr: None }
+        unsafe {
+            if let Some(ptr) = ptr.as_ref() {
+                let arc = Arc::from_raw(&ptr.data as *const ReprThin);
+                let arc =
+                    mem::transmute::<Arc<ReprThin>, ThinArc<GreenTriviaHead, TriviaPiece>>(arc);
+                Self { ptr: Some(arc) }
+            } else {
+                Self { ptr: None }
+            }
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::TriviaPiece;
     use crate::green::trivia::{GreenTrivia, GreenTriviaHead};
     use crate::syntax::TriviaPieceKind;
-    use crate::TriviaPiece;
     use biome_text_size::TextSize;
 
     impl GreenTrivia {

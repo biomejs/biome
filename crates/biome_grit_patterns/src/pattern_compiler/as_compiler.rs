@@ -1,15 +1,15 @@
 use super::{
-    compilation_context::NodeCompilationContext, snippet_compiler::split_snippet,
-    variable_compiler::VariableCompiler, PatternCompiler,
+    PatternCompiler, compilation_context::NodeCompilationContext, snippet_compiler::split_snippet,
+    variable_compiler::VariableCompiler,
 };
 use crate::{
-    diagnostics::CompilerDiagnostic, grit_context::GritQueryContext, grit_node::GritNode,
-    CompileError,
+    CompileError, diagnostics::CompilerDiagnostic, grit_context::GritQueryContext,
+    grit_node::GritNode,
 };
 use biome_grit_syntax::{AnyGritPattern, GritPatternAs, GritSyntaxKind};
 use biome_rowan::AstNode as _;
 use grit_pattern_matcher::pattern::{Container, Match, Pattern, Predicate, Where};
-use grit_util::{traverse, AstNode, Language, Order};
+use grit_util::{AstNode, Language, Order, traverse};
 
 pub(crate) struct AsCompiler;
 

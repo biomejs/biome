@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_semantic::HasClosureAstNode;
@@ -15,7 +15,7 @@ use biome_js_syntax::{
     TsDeclareFunctionExportDefaultDeclaration, TsGetterSignatureClassMember,
     TsMethodSignatureClassMember, TsMethodSignatureTypeMember,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxNode, SyntaxNodeOptionExt, TextRange};
+use biome_rowan::{AstNode, SyntaxNode, SyntaxNodeOptionExt, TextRange, declare_node_union};
 
 declare_lint_rule! {
     /// Require explicit return types on functions and class methods.

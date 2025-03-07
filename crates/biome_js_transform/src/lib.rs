@@ -79,6 +79,10 @@ where
         ) {
             unreachable!("")
         }
+
+        fn suppression_top_level_comment(&self, _suppression_text: &str) -> String {
+            unreachable!("")
+        }
     }
     let mut analyzer = Analyzer::new(
         METADATA.deref(),
@@ -126,11 +130,11 @@ pub(crate) type JsBatchMutation = BatchMutation<JsLanguage>;
 #[cfg(test)]
 mod tests {
     use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
-    use biome_js_parser::{parse, JsParserOptions};
+    use biome_js_parser::{JsParserOptions, parse};
     use biome_js_syntax::JsFileSource;
     use std::slice;
 
-    use crate::{transform, AnalysisFilter, ControlFlow};
+    use crate::{AnalysisFilter, ControlFlow, transform};
 
     #[ignore]
     #[test]

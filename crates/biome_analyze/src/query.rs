@@ -2,7 +2,7 @@ use std::any::TypeId;
 
 use biome_rowan::{Language, SyntaxKindSet, TextRange};
 
-use crate::{registry::Phase, services::FromServices, Phases, ServiceBag, Visitor};
+use crate::{Phases, ServiceBag, Visitor, registry::Phase, services::FromServices};
 
 /// Trait implemented for types that lint rules can query in order to emit diagnostics or code actions.
 pub trait Queryable: Sized {

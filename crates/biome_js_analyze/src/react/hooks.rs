@@ -1,4 +1,4 @@
-use crate::react::{is_react_call_api, ReactLibrary};
+use crate::react::{ReactLibrary, is_react_call_api};
 
 use biome_console::markup;
 use biome_deserialize::{
@@ -9,9 +9,9 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{
-    binding_ext::AnyJsIdentifierBinding, static_value::StaticValue, AnyJsExpression,
-    AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression, JsFunctionExpression,
-    TextRange,
+    AnyJsExpression, AnyJsMemberExpression, JsArrowFunctionExpression, JsCallExpression,
+    JsFunctionExpression, TextRange, binding_ext::AnyJsIdentifierBinding,
+    static_value::StaticValue,
 };
 use biome_js_syntax::{JsArrayBindingPatternElement, JsSyntaxToken};
 use biome_rowan::AstNode;
@@ -62,7 +62,7 @@ impl TryFrom<AnyJsExpression> for AnyJsFunctionExpression {
 impl ReactCallWithDependencyResult {
     /// Returns all [Reference] captured by the closure argument of the React hook.
     /// See [react_hook_with_dependency].
-    pub fn all_captures(&self, model: &SemanticModel) -> impl Iterator<Item = Capture> {
+    pub fn all_captures(&self, model: &SemanticModel) -> impl Iterator<Item = Capture> + use<> {
         self.closure_node
             .as_ref()
             .and_then(|node| AnyJsFunctionExpression::try_from(node.clone()).ok())
@@ -80,7 +80,7 @@ impl ReactCallWithDependencyResult {
 
     /// Returns all dependencies of a React hook.
     /// See [react_hook_with_dependency]
-    pub fn all_dependencies(&self) -> impl Iterator<Item = AnyJsExpression> {
+    pub fn all_dependencies(&self) -> impl Iterator<Item = AnyJsExpression> + use<> {
         self.dependencies_node
             .as_ref()
             .and_then(|x| Some(x.as_js_array_expression()?.elements().into_iter()))
@@ -275,7 +275,7 @@ impl JsonSchema for StableHookResult {
         "StableHookResult".to_owned()
     }
 
-    fn json_schema(_gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+    fn json_schema(_generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
         use schemars::schema::*;
         Schema::Object(SchemaObject {
             subschemas: Some(Box::new(SubschemaValidation {
@@ -505,7 +505,7 @@ mod test {
     use super::*;
     use crate::react::hooks::is_react_hook_call;
     use biome_js_parser::JsParserOptions;
-    use biome_js_semantic::{semantic_model, SemanticModelOptions};
+    use biome_js_semantic::{SemanticModelOptions, semantic_model};
     use biome_js_syntax::JsFileSource;
 
     #[test]

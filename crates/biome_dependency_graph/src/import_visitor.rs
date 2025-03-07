@@ -50,15 +50,15 @@ impl<'a> ImportVisitor<'a> {
             return;
         };
 
-        let import = Import {
-            resolved_path: self
-                .resolver
-                .resolve(self.directory, specifier.text())
+        let specifier = specifier.text();
+        let resolved_path =
+            self.resolver
+                .resolve(self.directory, specifier)
                 .and_then(|resolution| {
                     Utf8PathBuf::from_path_buf(resolution.into_path_buf())
                         .map_err(|path| ResolveError::NotFound(path.to_string_lossy().to_string()))
-                }),
-        };
+                });
+        let import = Import { resolved_path };
 
         match node {
             AnyJsImportLike::JsModuleSource(_) => {

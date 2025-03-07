@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsArrayAssignmentPattern;
 use biome_js_syntax::JsArrayAssignmentPatternFields;
+use biome_js_syntax::parentheses::NeedsParentheses;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsArrayAssignmentPattern;

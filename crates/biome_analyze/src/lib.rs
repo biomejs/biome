@@ -30,8 +30,8 @@ pub use biome_diagnostics::category_concat;
 pub use crate::analyzer_plugin::{AnalyzerPlugin, AnalyzerPluginSlice, AnalyzerPluginVec};
 pub use crate::categories::{
     ActionCategory, OtherActionCategory, RefactorKind, RuleCategories, RuleCategoriesBuilder,
-    RuleCategory, SourceActionKind, SUPPRESSION_INLINE_ACTION_CATEGORY,
-    SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
+    RuleCategory, SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
+    SourceActionKind,
 };
 pub use crate::diagnostics::{AnalyzerDiagnostic, AnalyzerSuppressionDiagnostic, RuleError};
 pub use crate::matcher::{InspectMatcher, MatchQueryParams, QueryMatcher, RuleKey, SignalEntry};
@@ -52,7 +52,7 @@ pub use crate::signals::{
 use crate::suppressions::Suppressions;
 pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
-use biome_diagnostics::{category, Diagnostic, DiagnosticExt};
+use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
     AstNode, BatchMutation, Direction, Language, SyntaxElement, SyntaxToken, TextRange, TextSize,
     TokenAtOffset, TriviaPieceKind, WalkEvent,
@@ -280,9 +280,9 @@ where
                     )
                 } else {
                     AnalyzerSuppressionDiagnostic::new(
-                    category!("suppressions/unused"),
-                    suppression.comment_span,
-                    "Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.",
+                        category!("suppressions/unused"),
+                        suppression.comment_span,
+                        "Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.",
                     )
                 }
             });
@@ -610,7 +610,7 @@ where
 }
 
 fn range_match(filter: Option<TextRange>, range: TextRange) -> bool {
-    filter.map_or(true, |filter| filter.intersect(range).is_some())
+    filter.is_none_or(|filter| filter.intersect(range).is_some())
 }
 
 /// Signature for a suppression comment parser function
@@ -894,7 +894,7 @@ impl<'analysis> AnalysisFilter<'analysis> {
     /// Return `true` if the group `G` matches this filter
     pub fn match_group<G: RuleGroup>(&self) -> bool {
         self.match_category::<G::Category>()
-            && self.enabled_rules.map_or(true, |enabled_rules| {
+            && self.enabled_rules.is_none_or(|enabled_rules| {
                 enabled_rules.iter().any(|filter| filter.match_group::<G>())
             })
             && !self
@@ -906,7 +906,7 @@ impl<'analysis> AnalysisFilter<'analysis> {
     /// Return `true` if the rule `R` matches this filter
     pub fn match_rule<R: Rule>(&self) -> bool {
         self.match_category::<<R::Group as RuleGroup>::Category>()
-            && self.enabled_rules.map_or(true, |enabled_rules| {
+            && self.enabled_rules.is_none_or(|enabled_rules| {
                 enabled_rules.iter().any(|filter| filter.match_rule::<R>())
             })
             && !self

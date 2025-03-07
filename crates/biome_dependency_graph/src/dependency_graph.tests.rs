@@ -186,6 +186,7 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
     );
 
     let added_paths = vec![
+        BiomePath::new(format!("{fixtures_path}/frontend/src/bar.ts")),
         BiomePath::new(format!("{fixtures_path}/frontend/src/index.ts")),
         BiomePath::new(format!(
             "{fixtures_path}/frontend/node_modules/shared/dist/index.js"
@@ -216,6 +217,14 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
         Some(&Import {
             resolved_path: Ok(Utf8PathBuf::from(format!(
                 "{fixtures_path}/shared/dist/index.js"
+            )))
+        })
+    );
+    assert_eq!(
+        file_imports.static_imports.get("./bar"),
+        Some(&Import {
+            resolved_path: Ok(Utf8PathBuf::from(format!(
+                "{fixtures_path}/frontend/src/bar.ts"
             )))
         })
     );

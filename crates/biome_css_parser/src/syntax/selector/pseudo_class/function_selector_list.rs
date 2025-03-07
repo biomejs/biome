@@ -1,12 +1,12 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_selector;
-use crate::syntax::selector::{eat_or_recover_selector_function_close_token, SelectorList};
+use crate::syntax::selector::{SelectorList, eat_or_recover_selector_function_close_token};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, Parser, TokenSet};
+use biome_parser::{Parser, TokenSet, token_set};
 
 const PSEUDO_CLASS_FUNCTION_SELECTOR_LIST_SET: TokenSet<CssSyntaxKind> =
     token_set![T![matches], T![not], T![is], T![where]];

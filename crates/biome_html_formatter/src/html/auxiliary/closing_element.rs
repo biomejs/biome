@@ -1,5 +1,5 @@
 use crate::{prelude::*, utils::metadata::is_element_whitespace_sensitive};
-use biome_formatter::{write, FormatRuleWithOptions};
+use biome_formatter::{FormatRuleWithOptions, write};
 use biome_html_syntax::{HtmlClosingElement, HtmlClosingElementFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlClosingElement {

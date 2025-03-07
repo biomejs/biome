@@ -2,9 +2,9 @@ use crate::js::declarations::function_declaration::should_group_function_paramet
 use crate::prelude::*;
 
 use biome_formatter::write;
-use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::TsFunctionType;
 use biome_js_syntax::TsFunctionTypeFields;
+use biome_js_syntax::parentheses::NeedsParentheses;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsFunctionType;

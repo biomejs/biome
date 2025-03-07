@@ -2,9 +2,9 @@ use biome_graphql_parser::parse_graphql;
 use biome_graphql_syntax::GraphqlFragmentDefinition;
 use biome_graphql_syntax::GraphqlFragmentSpread;
 
-use crate::semantic_model;
 use crate::HasDeclarationAstNode;
 use crate::IsBindingAstNode;
+use crate::semantic_model;
 
 use super::assert_nodes_eq;
 use super::extract_node;

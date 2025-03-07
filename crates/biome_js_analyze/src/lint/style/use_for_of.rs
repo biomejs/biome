@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
@@ -9,7 +9,7 @@ use biome_js_syntax::{
     JsShorthandPropertyObjectMember, JsSyntaxKind, JsSyntaxToken, JsUnaryOperator,
     JsVariableDeclarator,
 };
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
 
 use crate::{services::semantic::Semantic, utils::is_node_equal};
 
@@ -295,7 +295,7 @@ fn is_less_than_length_expression(binary_expression: &JsBinaryExpression) -> Opt
 
     Some(
         matches!(operator, JsBinaryOperator::LessThan)
-            && member.value_token().ok()?.text() == "length"
+            && member.value_token().ok()?.text_trimmed() == "length"
             && !matches!(object.syntax().kind(), JsSyntaxKind::JS_THIS_EXPRESSION),
     )
 }

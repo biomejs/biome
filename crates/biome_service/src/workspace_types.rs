@@ -5,13 +5,13 @@ use std::collections::VecDeque;
 use biome_js_syntax::{AnyJsDeclaration, AnyTsTupleTypeElement};
 use rustc_hash::FxHashSet;
 use schemars::{
-    gen::{SchemaGenerator, SchemaSettings},
-    schema::{InstanceType, RootSchema, Schema, SchemaObject, SingleOrVec},
     JsonSchema,
+    r#gen::{SchemaGenerator, SchemaSettings},
+    schema::{InstanceType, RootSchema, Schema, SchemaObject, SingleOrVec},
 };
 use serde_json::Value;
 
-use crate::{workspace::*, WorkspaceError};
+use crate::{WorkspaceError, workspace::*};
 use biome_js_factory::{
     make,
     syntax::{AnyJsObjectMemberName, AnyTsName, AnyTsType, AnyTsTypeMember, T},
@@ -308,7 +308,7 @@ pub fn generate_type<'a>(
     match root_name {
         "Null" => return AnyTsType::TsVoidType(make::ts_void_type(make::token(T![void]))),
         "Boolean" => {
-            return AnyTsType::TsBooleanType(make::ts_boolean_type(make::token(T![boolean])))
+            return AnyTsType::TsBooleanType(make::ts_boolean_type(make::token(T![boolean])));
         }
         "String" => return AnyTsType::TsStringType(make::ts_string_type(make::token(T![string]))),
         _ => {}

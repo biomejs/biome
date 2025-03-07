@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsxTag, JsxChildList};
@@ -96,9 +96,9 @@ fn has_suspicious_semicolon(node: &JsxChildList) -> Option<TextRange> {
         let jsx_text = c.as_jsx_text()?;
         let jsx_text_value = jsx_text.value_token().ok()?;
         // We should also check for \r and \r\n
-        if jsx_text_value.text().starts_with(";\n")
-            || jsx_text_value.text().starts_with(";\r")
-            || jsx_text_value.text().starts_with(";\r\n")
+        if jsx_text_value.text_trimmed().starts_with(";\n")
+            || jsx_text_value.text_trimmed().starts_with(";\r")
+            || jsx_text_value.text_trimmed().starts_with(";\r\n")
         {
             return Some(jsx_text_value.text_range());
         }

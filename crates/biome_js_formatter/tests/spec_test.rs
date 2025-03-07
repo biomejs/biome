@@ -1,5 +1,5 @@
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
-use biome_js_formatter::{context::JsFormatOptions, JsFormatLanguage};
+use biome_js_formatter::{JsFormatLanguage, context::JsFormatOptions};
 use biome_js_syntax::{JsFileSource, LanguageVariant, ModuleKind};
 use camino::Utf8Path;
 

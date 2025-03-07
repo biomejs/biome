@@ -1,5 +1,5 @@
 use crate::fmt::{Display, Formatter};
-use crate::{markup, Markup};
+use crate::{Markup, markup};
 use std::io;
 
 /// It displays a type that implements [std::fmt::Display]

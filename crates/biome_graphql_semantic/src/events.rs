@@ -1,5 +1,6 @@
 //! Events emitted by the [SemanticEventExtractor] which are then constructed into the Semantic Model
 
+use GraphqlSyntaxKind::*;
 use biome_graphql_syntax::{
     AnyGraphqlTypeDefinition, AnyGraphqlTypeExtension, GraphqlFragmentDefinition,
     GraphqlNameBinding, GraphqlNameReference, GraphqlOperationDefinition, GraphqlSyntaxKind,
@@ -8,7 +9,6 @@ use biome_graphql_syntax::{
 use biome_rowan::{AstNode, TokenText};
 use rustc_hash::FxHashMap;
 use std::collections::{HashSet, VecDeque};
-use GraphqlSyntaxKind::*;
 
 /// Events emitted by the [SemanticEventExtractor].
 /// These events are later made into the Semantic Model.

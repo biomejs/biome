@@ -1,13 +1,13 @@
 use std::collections::BTreeMap;
 
 use crate::{
+    CompileError,
     grit_context::GritQueryContext,
     pattern_compiler::{
-        compilation_context::{DefinitionInfo, NodeCompilationContext},
         FunctionDefinitionCompiler, PatternDefinitionCompiler, PredicateDefinitionCompiler,
+        compilation_context::{DefinitionInfo, NodeCompilationContext},
     },
     util::TextRangeGritExt,
-    CompileError,
 };
 use biome_grit_syntax::{AnyGritDefinition, GritDefinitionList, GritVariableList};
 use biome_rowan::AstNode;

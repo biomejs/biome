@@ -1,5 +1,5 @@
 use crate::snap_test::SnapshotPayload;
-use crate::{assert_cli_snapshot, run_cli, FORMATTED};
+use crate::{FORMATTED, assert_cli_snapshot, run_cli};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
 use bpaf::Args;

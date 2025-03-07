@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use biome_css_syntax::CssNumber;
-use biome_formatter::token::number::{format_number_token, NumberFormatOptions};
+use biome_formatter::token::number::{NumberFormatOptions, format_number_token};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssNumber;

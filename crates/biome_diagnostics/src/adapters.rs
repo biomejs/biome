@@ -10,7 +10,7 @@ use biome_console::{
     markup,
 };
 
-use crate::{category, Category, Diagnostic};
+use crate::{Category, Diagnostic, category};
 
 /// Implements [Diagnostic] over types implementing [std::error::Error].
 #[cfg(feature = "std")]

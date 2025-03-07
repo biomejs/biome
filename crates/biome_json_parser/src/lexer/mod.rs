@@ -3,9 +3,9 @@
 #[rustfmt::skip]
 mod tests;
 
-use biome_json_syntax::{JsonSyntaxKind, JsonSyntaxKind::*, TextLen, TextRange, TextSize, T};
+use biome_json_syntax::{JsonSyntaxKind, JsonSyntaxKind::*, T, TextLen, TextRange, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_unicode_table::{is_js_id_continue, is_js_id_start, lookup_byte, Dispatch::*};
+use biome_unicode_table::{Dispatch::*, is_js_id_continue, is_js_id_start, lookup_byte};
 use std::iter::FusedIterator;
 use std::ops::Add;
 use unicode_bom::Bom;
@@ -462,28 +462,28 @@ impl<'src> Lexer<'src> {
             LexNumberState::Invalid { position, reason } => {
                 let diagnostic = match reason {
                     InvalidNumberReason::Fraction => ParseDiagnostic::new(
-
                         "Invalid fraction part",
                         position..position + TextSize::from(1),
                     ),
                     InvalidNumberReason::Exponent => ParseDiagnostic::new(
-
                         "Invalid exponent part",
                         position..position + TextSize::from(1),
                     ),
                     InvalidNumberReason::Octal => ParseDiagnostic::new(
-
                         "The JSON standard doesn't allow octal number notation (numbers starting with zero)",
                         position..position + TextSize::from(1),
                     ),
                     InvalidNumberReason::MissingExponent => {
-                        ParseDiagnostic::new( "Missing exponent", start..position)
-                            .with_detail(position..position + TextSize::from(1), "Expected a digit as the exponent")
+                        ParseDiagnostic::new("Missing exponent", start..position).with_detail(
+                            position..position + TextSize::from(1),
+                            "Expected a digit as the exponent",
+                        )
                     }
-                    InvalidNumberReason::MissingFraction => {
-                        ParseDiagnostic::new( "Missing fraction", position..position + TextSize::from(1))
-                            .with_hint("Remove the `.`")
-                    }
+                    InvalidNumberReason::MissingFraction => ParseDiagnostic::new(
+                        "Missing fraction",
+                        position..position + TextSize::from(1),
+                    )
+                    .with_hint("Remove the `.`"),
                 };
 
                 self.diagnostics.push(diagnostic);

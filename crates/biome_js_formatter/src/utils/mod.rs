@@ -18,13 +18,13 @@ mod quickcheck_utils;
 pub(crate) mod test_each_template;
 mod typescript;
 
-use crate::context::trailing_commas::FormatTrailingCommas;
 use crate::context::Semicolons;
+use crate::context::trailing_commas::FormatTrailingCommas;
 use crate::prelude::*;
 pub(crate) use assignment_like::{
-    with_assignment_layout, AnyJsAssignmentLike, AssignmentLikeLayout,
+    AnyJsAssignmentLike, AssignmentLikeLayout, with_assignment_layout,
 };
-use biome_formatter::{format_args, write, Buffer};
+use biome_formatter::{Buffer, format_args, write};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsStatement, JsCallExpression, JsInitializerClause, JsLanguage, Modifier,
 };

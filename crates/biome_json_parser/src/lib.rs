@@ -5,7 +5,7 @@ use crate::syntax::parse_root;
 use biome_json_factory::JsonSyntaxFactory;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 pub use biome_parser::prelude::*;
-use biome_parser::{tree_sink::LosslessTreeSink, AnyParse};
+use biome_parser::{AnyParse, tree_sink::LosslessTreeSink};
 use biome_rowan::{AstNode, NodeCache};
 pub use parser::JsonParserOptions;
 

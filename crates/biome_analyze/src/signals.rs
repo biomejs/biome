@@ -2,15 +2,15 @@ use crate::categories::{
     SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
 };
 use crate::{
+    AnalyzerDiagnostic, AnalyzerOptions, OtherActionCategory, Queryable, RuleGroup, ServiceBag,
+    SuppressionAction,
     categories::ActionCategory,
     context::RuleContext,
     registry::{RuleLanguage, RuleRoot},
     rule::Rule,
-    AnalyzerDiagnostic, AnalyzerOptions, OtherActionCategory, Queryable, RuleGroup, ServiceBag,
-    SuppressionAction,
 };
 use biome_console::MarkupBuf;
-use biome_diagnostics::{advice::CodeSuggestionAdvice, Applicability, CodeSuggestion, Error};
+use biome_diagnostics::{Applicability, CodeSuggestion, Error, advice::CodeSuggestionAdvice};
 use biome_rowan::{BatchMutation, Language};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;

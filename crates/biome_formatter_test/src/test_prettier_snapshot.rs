@@ -1,7 +1,7 @@
+use crate::TestFormatLanguage;
 use crate::check_reformat::CheckReformat;
 use crate::snapshot_builder::{SnapshotBuilder, SnapshotOutput};
-use crate::utils::{get_prettier_diff, strip_prettier_placeholders, PrettierDiff};
-use crate::TestFormatLanguage;
+use crate::utils::{PrettierDiff, get_prettier_diff, strip_prettier_placeholders};
 use biome_formatter::{FormatLanguage, FormatOptions};
 use biome_parser::AnyParse;
 use biome_rowan::{TextRange, TextSize};

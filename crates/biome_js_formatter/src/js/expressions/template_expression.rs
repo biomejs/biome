@@ -5,7 +5,7 @@ use biome_formatter::write;
 use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{AnyJsExpression, JsTemplateExpression, TsTemplateLiteralType};
 use biome_js_syntax::{JsSyntaxToken, TsTypeArguments};
-use biome_rowan::{declare_node_union, SyntaxResult};
+use biome_rowan::{SyntaxResult, declare_node_union};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsTemplateExpression;

@@ -1,11 +1,12 @@
 use biome_graphql_syntax::{GraphqlSyntaxKind::*, T};
 use biome_parser::{
-    parsed_syntax::ParsedSyntax, prelude::ParsedSyntax::*, CompletedMarker, Parser,
+    CompletedMarker, Parser, parsed_syntax::ParsedSyntax, prelude::ParsedSyntax::*,
 };
 
 use super::{
+    GraphqlParser,
     parse_error::{expected_named_or_list_type, expected_type},
-    parse_reference, GraphqlParser,
+    parse_reference,
 };
 
 #[inline]

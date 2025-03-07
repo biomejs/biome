@@ -1,8 +1,8 @@
-use crate::comments::{FormatJsonLeadingComment, JsonComments};
 use crate::JsonCommentStyle;
+use crate::comments::{FormatJsonLeadingComment, JsonComments};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::separated::TrailingSeparator;
-use biome_formatter::{prelude::*, BracketSpacing, IndentWidth, ObjectWrap};
+use biome_formatter::{BracketSpacing, Expand, IndentWidth, prelude::*};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TransformSourceMap,
@@ -68,7 +68,6 @@ pub struct JsonFormatOptions {
     trailing_commas: TrailingCommas,
     expand: Expand,
     bracket_spacing: BracketSpacing,
-    object_wrap: ObjectWrap,
     /// The kind of file
     file_source: JsonFileSource,
 }
@@ -105,39 +104,6 @@ impl fmt::Display for TrailingCommas {
         match self {
             TrailingCommas::None => std::write!(f, "None"),
             TrailingCommas::All => std::write!(f, "All"),
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub enum Expand {
-    Always,
-    #[default]
-    FollowSource,
-}
-
-impl FromStr for Expand {
-    type Err = String;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "always" => Ok(Self::Always),
-            "follow-source" => Ok(Self::FollowSource),
-            _ => Err(std::format!("unknown expand literal: {}", s)),
-        }
-    }
-}
-
-impl fmt::Display for Expand {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Expand::Always => std::write!(f, "Always"),
-            Expand::FollowSource => std::write!(f, "Follow Source"),
         }
     }
 }
@@ -185,11 +151,6 @@ impl JsonFormatOptions {
         self
     }
 
-    pub fn with_object_wrap(mut self, object_wrap: ObjectWrap) -> Self {
-        self.object_wrap = object_wrap;
-        self
-    }
-
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -219,16 +180,12 @@ impl JsonFormatOptions {
         self.expand = expand;
     }
 
-    pub fn set_object_wrap(&mut self, object_wrap: ObjectWrap) {
-        self.object_wrap = object_wrap;
-    }
-
     pub fn bracket_spacing(&self) -> BracketSpacing {
         self.bracket_spacing
     }
 
-    pub fn object_wrap(&self) -> ObjectWrap {
-        self.object_wrap
+    pub fn expand(&self) -> Expand {
+        self.expand
     }
 
     pub(crate) fn to_trailing_separator(&self) -> TrailingSeparator {
@@ -240,10 +197,6 @@ impl JsonFormatOptions {
 
     pub(crate) fn file_source(&self) -> &JsonFileSource {
         &self.file_source
-    }
-
-    pub(crate) const fn expand(&self) -> bool {
-        matches!(self.expand, Expand::Always)
     }
 }
 
@@ -278,7 +231,6 @@ impl fmt::Display for JsonFormatOptions {
         writeln!(f, "Trailing commas: {}", self.trailing_commas)?;
         writeln!(f, "Expand: {}", self.expand)?;
         writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
-        writeln!(f, "Object wrap: {}", self.object_wrap)?;
 
         Ok(())
     }

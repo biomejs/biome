@@ -1,8 +1,8 @@
 use std::{ops::Deref, path::Path, str::FromStr};
 
 use biome_deserialize::{
-    json::deserialize_from_json_ast, Deserializable, DeserializableTypes, DeserializableValue,
-    DeserializationContext, DeserializationVisitor, Deserialized, Text,
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
+    DeserializationVisitor, Deserialized, Text, json::deserialize_from_json_ast,
 };
 use biome_json_syntax::JsonLanguage;
 use biome_json_value::{JsonObject, JsonString, JsonValue};
@@ -185,10 +185,11 @@ impl oxc_resolver::PackageJson for PackageJson {
     }
 
     fn directory(&self) -> &Path {
-        debug_assert!(self
-            .canonicalized_path
-            .file_name()
-            .is_some_and(|x| x == "package.json"));
+        debug_assert!(
+            self.canonicalized_path
+                .file_name()
+                .is_some_and(|x| x == "package.json")
+        );
         self.canonicalized_path
             .parent()
             .map(Utf8Path::as_std_path)

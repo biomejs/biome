@@ -1,11 +1,11 @@
 use crate::prelude::*;
 use biome_diagnostics::category;
 use biome_formatter::comments::{
-    is_alignable_comment, CommentKind, CommentPlacement, CommentStyle, Comments, DecoratedComment,
-    SourceComment,
+    CommentKind, CommentPlacement, CommentStyle, Comments, DecoratedComment, SourceComment,
+    is_alignable_comment,
 };
 use biome_formatter::formatter::Formatter;
-use biome_formatter::{write, FormatResult, FormatRule};
+use biome_formatter::{FormatResult, FormatRule, write};
 use biome_json_syntax::{JsonArrayValue, JsonLanguage, JsonObjectValue, JsonSyntaxKind, TextLen};
 use biome_rowan::SyntaxTriviaPieceComments;
 use biome_suppression::parse_suppression_comment;

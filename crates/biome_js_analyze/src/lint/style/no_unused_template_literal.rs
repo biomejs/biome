@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
@@ -83,7 +83,7 @@ impl Rule for NoUnusedTemplateLiteral {
                 AnyJsTemplateElement::JsTemplateChunkElement(ele) => {
                     // Safety: if `ele.template_chunk_token()` is `Err` variant, [can_convert_to_string_lit] should return false,
                     // thus `run` will return None
-                    acc += ele.template_chunk_token().unwrap().text();
+                    acc += ele.template_chunk_token().unwrap().text_trimmed();
                     acc
                 }
                 AnyJsTemplateElement::JsTemplateElement(_) => {
@@ -127,7 +127,7 @@ fn can_convert_to_string_literal(node: &JsTemplateExpression) -> bool {
                     Ok(token) => {
                         // if token text has any special character
                         token
-                            .text()
+                            .text_trimmed()
                             .bytes()
                             .any(|byte| matches!(byte, b'\n' | b'\'' | b'"'))
                     }

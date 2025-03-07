@@ -4,7 +4,7 @@ use std::{
     cmp::Ordering,
     hash::{Hash, Hasher},
     marker::PhantomData,
-    mem::{self, offset_of, ManuallyDrop},
+    mem::{self, ManuallyDrop, offset_of},
     ops::Deref,
     ptr::{self, NonNull},
     sync::atomic::{
@@ -53,11 +53,14 @@ impl<T> Arc<T> {
     /// It is recommended to use OffsetArc for this
     #[inline]
     pub(crate) unsafe fn from_raw(ptr: *const T) -> Self {
-        // To find the corresponding pointer to the `ArcInner` we need
-        // to subtract the offset of the `data` field from the pointer.
-        let ptr = (ptr as *const u8).sub(offset_of!(ArcInner<T>, data));
+        let ptr = unsafe {
+            // To find the corresponding pointer to the `ArcInner` we need
+            // to subtract the offset of the `data` field from the pointer.
+            let ptr = (ptr as *const u8).sub(offset_of!(ArcInner<T>, data));
+            NonNull::new_unchecked(ptr as *mut ArcInner<T>)
+        };
         Arc {
-            p: ptr::NonNull::new_unchecked(ptr as *mut ArcInner<T>),
+            p: ptr,
             phantom: PhantomData,
         }
     }
@@ -77,7 +80,7 @@ impl<T: ?Sized> Arc<T> {
     // Non-inlined part of `drop`. Just invokes the destructor.
     #[inline(never)]
     unsafe fn drop_slow(&mut self) {
-        let _ = Box::from_raw(self.ptr());
+        let _ = unsafe { Box::from_raw(self.ptr()) };
     }
 
     /// Test pointer equality between the two Arcs, i.e. they must be the _same_
