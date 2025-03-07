@@ -36,17 +36,35 @@ pub(crate) fn parse_document(p: &mut MarkdownParser) {
     let mut has_content = false;
 
     while !p.at(T![EOF]) {
+        // Skip any blank lines (just newlines)
+        if p.at(NEWLINE) {
+            p.bump(NEWLINE);
+            continue;
+        }
+
+        // Try to parse any block
         if parse_any_block(p).is_present() {
             has_content = true;
             continue;
         }
 
-        // If we can't parse a block, create a paragraph with a textual node
+        // If we can't parse a block, create a paragraph with textual nodes
+        // This ensures we don't create bogus nodes for unparseable content
         let para_m = p.start();
         let item_list = p.start();
-        let text_m = p.start();
-        p.bump_any();
-        text_m.complete(p, MD_TEXTUAL);
+
+        // Parse tokens as textual until newline or EOF
+        while !p.at(NEWLINE) && !p.at(T![EOF]) {
+            let text_m = p.start();
+            p.bump_any();
+            text_m.complete(p, MD_TEXTUAL);
+        }
+
+        // Consume the newline if present
+        if p.at(NEWLINE) {
+            p.bump(NEWLINE);
+        }
+
         item_list.complete(p, MD_PARAGRAPH_ITEM_LIST);
         para_m.complete(p, MD_PARAGRAPH);
         has_content = true;
@@ -69,101 +87,64 @@ pub(crate) fn parse_document(p: &mut MarkdownParser) {
 }
 
 pub(crate) fn parse_any_block(p: &mut MarkdownParser) -> ParsedSyntax {
-    if at_indent_code_block(p) {
-        parse_indent_code_block(p)
-    } else if at_fenced_code_block(p) {
-        parse_fenced_code_block(p)
-    } else if at_thematic_break_block(p) {
-        let break_block = try_parse(p, |p| {
-            let break_block = parse_thematic_break_block(p);
-            if break_block.is_absent() {
-                return Err(());
-            }
-            Ok(break_block)
-        });
-        if break_block.is_err() {
-            // Try to parse as paragraph
-            parse_paragraph(p)
-        } else {
-            break_block.unwrap()
-        }
-    } else if at_header_block(p) {
-        // Special handling for invalid headers to ensure diagnostics are emitted
+    // Try each block type in sequence
+
+    // Try thematic break block
+    if at_thematic_break_block(p) {
         let checkpoint = p.checkpoint();
-        let header_block = parse_header_block(p);
-
-        if header_block.is_present() {
-            header_block
-        } else {
-            // Instead of using try_parse which would discard diagnostics,
-            // we rewind manually and fallback to paragraph parsing
-            p.rewind(checkpoint);
-            parse_paragraph(p)
+        let break_block = parse_thematic_break_block(p);
+        if break_block.is_present() {
+            return break_block;
         }
-    } else if at_list_block(p) {
-        let list_block = try_parse(p, |p| {
-            let list_block = parse_list_block(p);
-            if list_block.is_absent() {
-                return Err(());
-            }
-            Ok(list_block)
-        });
-        if list_block.is_err() {
-            // Try to parse as paragraph
-            parse_paragraph(p)
-        } else {
-            list_block.unwrap()
-        }
-    } else if at_blockquote(p) {
-        let blockquote = try_parse(p, |p| {
-            let blockquote = parse_blockquote(p);
-            if blockquote.is_absent() {
-                return Err(());
-            }
-            Ok(blockquote)
-        });
-        if blockquote.is_err() {
-            // Try to parse as paragraph
-            parse_paragraph(p)
-        } else {
-            blockquote.unwrap()
-        }
-    } else if at_table(p) {
-        let table = try_parse(p, |p| {
-            let table = parse_table(p);
-            if table.is_absent() {
-                return Err(());
-            }
-            Ok(table)
-        });
-        if table.is_err() {
-            // Try to parse as paragraph
-            parse_paragraph(p)
-        } else {
-            table.unwrap()
-        }
-    } else {
-        // Try to parse as paragraph
-        parse_paragraph(p)
-    }
-}
-
-/// Attempt to parse some input with the given parsing function. If parsing
-/// succeeds, `Ok` is returned with the result of the parse and the state is
-/// preserved. If parsing fails, this function rewinds the parser back to
-/// where it was before attempting the parse and the `Err` value is returned.
-#[must_use = "The result of try_parse contains information about whether the parse succeeded and should not be ignored"]
-pub(crate) fn try_parse<T, E>(
-    p: &mut MarkdownParser,
-    func: impl FnOnce(&mut MarkdownParser) -> Result<T, E>,
-) -> Result<T, E> {
-    let checkpoint = p.checkpoint();
-
-    let res = func(p);
-
-    if res.is_err() {
         p.rewind(checkpoint);
     }
 
-    res
+    // Try header block
+    if at_header_block(p) {
+        let checkpoint = p.checkpoint();
+        let header_block = parse_header_block(p);
+        if header_block.is_present() {
+            return header_block;
+        }
+        p.rewind(checkpoint);
+    }
+
+    // Try other block types
+    if at_indent_code_block(p) {
+        return parse_indent_code_block(p);
+    }
+
+    if at_fenced_code_block(p) {
+        return parse_fenced_code_block(p);
+    }
+
+    if at_list_block(p) {
+        let checkpoint = p.checkpoint();
+        let list_block = parse_list_block(p);
+        if list_block.is_present() {
+            return list_block;
+        }
+        p.rewind(checkpoint);
+    }
+
+    if at_blockquote(p) {
+        let checkpoint = p.checkpoint();
+        let blockquote = parse_blockquote(p);
+        if blockquote.is_present() {
+            return blockquote;
+        }
+        p.rewind(checkpoint);
+    }
+
+    if at_table(p) {
+        let checkpoint = p.checkpoint();
+        let table = parse_table(p);
+        if table.is_present() {
+            return table;
+        }
+        p.rewind(checkpoint);
+    }
+
+    // If everything else fails, parse as paragraph
+    parse_paragraph(p)
 }
