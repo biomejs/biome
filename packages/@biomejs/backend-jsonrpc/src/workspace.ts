@@ -650,7 +650,9 @@ export interface JsParserConfiguration {
 	 */
 	gritMetavariables?: Bool;
 	/**
-	 * When enabled, files like `.js`/`.ts` can contain JSX syntax. Defaults to `true`.
+	* When enabled, files like `.js`/`.mjs`/`.cjs` may contain JSX syntax.
+
+Defaults to `true`. 
 	 */
 	jsxEverywhere?: Bool;
 	/**

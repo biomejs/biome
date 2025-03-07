@@ -1990,7 +1990,7 @@
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"jsxEverywhere": {
-					"description": "When enabled, files like `.js`/`.ts` can contain JSX syntax. Defaults to `true`.",
+					"description": "When enabled, files like `.js`/`.mjs`/`.cjs` may contain JSX syntax.\n\nDefaults to `true`.",
 					"anyOf": [{ "$ref": "#/definitions/Bool" }, { "type": "null" }]
 				},
 				"unsafeParameterDecoratorsEnabled": {
