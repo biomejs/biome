@@ -1617,7 +1617,6 @@ async fn pull_diagnostics_for_rome_json() -> Result<()> {
 
 #[tokio::test]
 async fn plugin_load_error_show_message() -> Result<()> {
-    let factory = ServerFactory::default();
     let mut fs = MemoryFileSystem::default();
     let config = r#"{
         "css": {
@@ -1641,7 +1640,8 @@ xx"#;
         INVALID_PLUGIN_CONTENT,
     );
 
-    let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
+    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let (service, client) = factory.create().into_inner();
 
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
