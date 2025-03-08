@@ -479,7 +479,7 @@ impl RuleSourceKind {
 }
 
 /// Rule domains
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 #[cfg_attr(
     feature = "serde",
     derive(
