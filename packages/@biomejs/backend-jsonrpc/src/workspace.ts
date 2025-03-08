@@ -12,6 +12,12 @@ export type FeatureKind = "format" | "lint" | "search" | "assist" | "debug";
 export interface FileFeaturesResult {
 	featuresSupported: Map<FeatureKind, SupportKind>;
 }
+export type SupportKind =
+	| "supported"
+	| "ignored"
+	| "protected"
+	| "featureNotEnabled"
+	| "fileNotSupported";
 export interface UpdateSettingsParams {
 	configuration: Configuration;
 	projectKey: ProjectKey;
@@ -295,7 +301,7 @@ export interface LinterConfiguration {
 	/**
 	 * An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.
 	 */
-	domains?: Record<RuleDomain, RuleDomainValue>;
+	domains?: RuleDomains;
 	/**
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
@@ -727,6 +733,7 @@ export interface JsonParserConfiguration {
 	 */
 	allowTrailingCommas?: Bool;
 }
+export type RuleDomains = Record<RuleDomain, RuleDomainValue>;
 export interface Rules {
 	a11y?: SeverityOrGroup_for_A11y;
 	complexity?: SeverityOrGroup_for_Complexity;
@@ -839,6 +846,11 @@ export type Semicolons = "always" | "asNeeded";
  */
 export type TrailingCommas = "all" | "es5" | "none";
 export type TrailingCommas2 = "none" | "all";
+/**
+ * Rule domains
+ */
+export type RuleDomain = "react" | "test" | "solid" | "next";
+export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
 export type SeverityOrGroup_for_Complexity =
 	| GroupPlainConfiguration
@@ -913,7 +925,7 @@ export interface OverrideLinterConfiguration {
 	/**
 	 * List of rules
 	 */
-	domains?: Record<RuleDomain, RuleDomainValue>;
+	domains?: RuleDomains;
 	/**
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
@@ -2789,7 +2801,7 @@ export interface UseImportExtensionsOptions {
 	/**
 	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
 	 */
-	suggestedExtensions?: {};
+	suggestedExtensions?: Record<string, SuggestedExtensionMapping>;
 }
 /**
  * Rule's options
@@ -2807,10 +2819,10 @@ export interface RestrictedImportsOptions {
 	/**
 	 * A list of import paths that should trigger the rule.
 	 */
-	paths: {};
+	paths: Record<string, CustomRestrictedImport>;
 }
 export interface NoRestrictedTypesOptions {
-	types?: {};
+	types?: Record<string, CustomRestrictedType>;
 }
 export interface NoSecretsOptions {
 	/**
@@ -2967,6 +2979,18 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult?: StableHookResult;
 }
+export interface SuggestedExtensionMapping {
+	/**
+	 * Extension that should be used for component file imports
+	 */
+	component?: string;
+	/**
+	 * Extension that should be used for module imports
+	 */
+	module?: string;
+}
+export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
+export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type Accessibility = "noPublic" | "explicit" | "none";
 export type ObjectPropertySyntax = "explicit" | "shorthand";
 export type ConsistentArrayType = "shorthand" | "generic";
@@ -2987,6 +3011,24 @@ export interface Convention {
 	selector: Selector;
 }
 export type StableHookResult = boolean | number[];
+export interface CustomRestrictedImportOptions {
+	/**
+	 * Names of the exported members that allowed to be not be used.
+	 */
+	allowImportNames: string[];
+	/**
+	 * Names of the exported members that should not be used.
+	 */
+	importNames: string[];
+	/**
+	 * The message to display when this module is imported.
+	 */
+	message: string;
+}
+export interface CustomRestrictedTypeOptions {
+	message?: string;
+	use?: string;
+}
 /**
  * Supported cases for file names.
  */
@@ -3488,17 +3530,20 @@ export type DiagnosticTags = DiagnosticTag[];
 See the [Visitor] trait for additional documentation on all the supported advice types. 
 	 */
 export type Advice =
-	| { log: [LogCategory, MarkupBuf] }
-	| { list: MarkupBuf[] }
-	| { frame: Location }
-	| { diff: TextEdit }
-	| { backtrace: [MarkupBuf, Backtrace] }
-	| { command: string }
-	| { group: [MarkupBuf, Advices] };
+	| ({ log: [LogCategory, MarkupBuf] } & Record<string, never>)
+	| ({ list: MarkupBuf[] } & Record<string, never>)
+	| ({ frame: Location } & Record<string, never>)
+	| ({ diff: TextEdit } & Record<string, never>)
+	| ({ backtrace: [MarkupBuf, Backtrace] } & Record<string, never>)
+	| ({ command: string } & Record<string, never>)
+	| ({ group: [MarkupBuf, Advices] } & Record<string, never>);
 /**
  * Represents the resource a diagnostic is associated with.
  */
-export type Resource_for_String = "argv" | "memory" | { file: string };
+export type Resource_for_String =
+	| "argv"
+	| "memory"
+	| ({ file: string } & Record<string, never>);
 export type TextRange = [TextSize, TextSize];
 export interface MarkupNodeBuf {
 	content: string;
@@ -3538,10 +3583,10 @@ export type MarkupElement =
 	| "Debug"
 	| "Trace"
 	| "Inverse"
-	| { Hyperlink: { href: string } };
+	| ({ Hyperlink: { href: string } } & Record<string, never>);
 export type CompressedOp =
-	| { diffOp: DiffOp }
-	| { equalLines: { line_count: number } };
+	| ({ diffOp: DiffOp } & Record<string, never>)
+	| ({ equalLines: { line_count: number } } & Record<string, never>);
 /**
  * Serializable representation of a backtrace frame.
  */
@@ -3550,9 +3595,9 @@ export interface BacktraceFrame {
 	symbols: BacktraceSymbol[];
 }
 export type DiffOp =
-	| { equal: { range: TextRange } }
-	| { insert: { range: TextRange } }
-	| { delete: { range: TextRange } };
+	| ({ equal: { range: TextRange } } & Record<string, never>)
+	| ({ insert: { range: TextRange } } & Record<string, never>)
+	| ({ delete: { range: TextRange } } & Record<string, never>);
 /**
  * Serializable representation of a backtrace frame symbol.
  */
@@ -3590,12 +3635,12 @@ export type FileContent =
 export type DocumentFileSource =
 	| "Ignore"
 	| "Unknown"
-	| { Js: JsFileSource }
-	| { Json: JsonFileSource }
-	| { Css: CssFileSource }
-	| { Graphql: GraphqlFileSource }
-	| { Html: HtmlFileSource }
-	| { Grit: GritFileSource };
+	| ({ Js: JsFileSource } & Record<string, never>)
+	| ({ Json: JsonFileSource } & Record<string, never>)
+	| ({ Css: CssFileSource } & Record<string, never>)
+	| ({ Graphql: GraphqlFileSource } & Record<string, never>)
+	| ({ Html: HtmlFileSource } & Record<string, never>)
+	| ({ Grit: GritFileSource } & Record<string, never>);
 export interface JsFileSource {
 	/**
 	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
@@ -3626,7 +3671,7 @@ export interface GritFileSource {
 export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
 	| "javaScript"
-	| { typeScript: { definition_file: boolean } };
+	| ({ typeScript: { definition_file: boolean } } & Record<string, never>);
 /**
  * Is the source file an ECMAScript Module or Script. Changes the parsing semantic.
  */
@@ -3736,10 +3781,10 @@ export interface CodeAction {
 [CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind 
 	 */
 export type ActionCategory =
-	| { quickFix: string }
-	| { refactor: RefactorKind }
-	| { source: SourceActionKind }
-	| { other: OtherActionCategory };
+	| ({ quickFix: string } & Record<string, never>)
+	| ({ refactor: RefactorKind } & Record<string, never>)
+	| ({ source: SourceActionKind } & Record<string, never>)
+	| ({ other: OtherActionCategory } & Record<string, never>);
 /**
  * A Suggestion that is provided by Biome's linter, and can be reported to the user, and can be automatically applied if it has the right [`Applicability`].
  */
@@ -3760,7 +3805,7 @@ export type RefactorKind =
 	| "extract"
 	| "inline"
 	| "rewrite"
-	| { other: string };
+	| ({ other: string } & Record<string, never>);
 /**
  * The sub-category of a source code action
  */
@@ -3768,11 +3813,11 @@ export type SourceActionKind =
 	| "fixAll"
 	| "none"
 	| "organizeImports"
-	| { other: string };
+	| ({ other: string } & Record<string, never>);
 export type OtherActionCategory =
 	| "inlineSuppression"
 	| "toplevelSuppression"
-	| { generic: string };
+	| ({ generic: string } & Record<string, never>);
 /**
  * Indicates how a tool should manage this suggestion.
  */
@@ -3896,17 +3941,6 @@ export interface SearchResults {
 export interface DropPatternParams {
 	pattern: PatternId;
 }
-export type SupportKind =
-	| "supported"
-	| "ignored"
-	| "protected"
-	| "featureNotEnabled"
-	| "fileNotSupported";
-/**
- * Rule domains
- */
-export type RuleDomain = "react" | "test" | "solid" | "next";
-export type RuleDomainValue = "all" | "none" | "recommended";
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;
