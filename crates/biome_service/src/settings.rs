@@ -1,8 +1,8 @@
 use crate::WorkspaceError;
 use crate::workspace::DocumentFileSource;
-use biome_analyze::{AnalyzerOptions, AnalyzerRules, RuleDomain};
+use biome_analyze::{AnalyzerOptions, AnalyzerRules};
 use biome_configuration::analyzer::assist::{Actions, AssistConfiguration, AssistEnabled};
-use biome_configuration::analyzer::{LinterEnabled, RuleDomainValue};
+use biome_configuration::analyzer::{LinterEnabled, RuleDomains};
 use biome_configuration::bool::Bool;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
@@ -41,7 +41,6 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
-use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::ops::Deref;
 use tracing::instrument;
@@ -177,10 +176,7 @@ impl Settings {
     }
 
     /// Extract the domains applied to the given `path`, by looking that the base `domains`, and the once applied by `overrides`
-    pub fn as_linter_domains(
-        &self,
-        path: &Utf8Path,
-    ) -> Option<Cow<FxHashMap<RuleDomain, RuleDomainValue>>> {
+    pub fn as_linter_domains(&self, path: &Utf8Path) -> Option<Cow<RuleDomains>> {
         let mut result = self.linter.domains.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
@@ -309,7 +305,7 @@ pub struct LinterSettings {
     pub includes: Includes,
 
     /// Rule domains
-    pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
+    pub domains: Option<RuleDomains>,
 }
 
 impl LinterSettings {
@@ -328,7 +324,7 @@ pub struct OverrideLinterSettings {
     pub rules: Option<Rules>,
 
     /// List of domains
-    pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
+    pub domains: Option<RuleDomains>,
 }
 
 /// Linter settings for the entire workspace

@@ -12,6 +12,12 @@ export type FeatureKind = "format" | "lint" | "search" | "assist" | "debug";
 export interface FileFeaturesResult {
 	featuresSupported: Map<FeatureKind, SupportKind>;
 }
+export type SupportKind =
+	| "supported"
+	| "ignored"
+	| "protected"
+	| "featureNotEnabled"
+	| "fileNotSupported";
 export interface UpdateSettingsParams {
 	configuration: Configuration;
 	projectKey: ProjectKey;
@@ -295,7 +301,7 @@ export interface LinterConfiguration {
 	/**
 	 * An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.
 	 */
-	domains?: Record<RuleDomain, RuleDomainValue>;
+	domains?: RuleDomains;
 	/**
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
@@ -727,6 +733,7 @@ export interface JsonParserConfiguration {
 	 */
 	allowTrailingCommas?: Bool;
 }
+export type RuleDomains = Record<RuleDomain, RuleDomainValue>;
 export interface Rules {
 	a11y?: SeverityOrGroup_for_A11y;
 	complexity?: SeverityOrGroup_for_Complexity;
@@ -839,6 +846,11 @@ export type Semicolons = "always" | "asNeeded";
  */
 export type TrailingCommas = "all" | "es5" | "none";
 export type TrailingCommas2 = "none" | "all";
+/**
+ * Rule domains
+ */
+export type RuleDomain = "react" | "test" | "solid" | "next";
+export type RuleDomainValue = "all" | "none" | "recommended";
 export type SeverityOrGroup_for_A11y = GroupPlainConfiguration | A11y;
 export type SeverityOrGroup_for_Complexity =
 	| GroupPlainConfiguration
@@ -913,7 +925,7 @@ export interface OverrideLinterConfiguration {
 	/**
 	 * List of rules
 	 */
-	domains?: Record<RuleDomain, RuleDomainValue>;
+	domains?: RuleDomains;
 	/**
 	 * if `false`, it disables the feature and the linter won't be executed. `true` by default
 	 */
@@ -2789,7 +2801,7 @@ export interface UseImportExtensionsOptions {
 	/**
 	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
 	 */
-	suggestedExtensions?: {};
+	suggestedExtensions?: Record<string, SuggestedExtensionMapping>;
 }
 /**
  * Rule's options
@@ -2807,10 +2819,10 @@ export interface RestrictedImportsOptions {
 	/**
 	 * A list of import paths that should trigger the rule.
 	 */
-	paths: {};
+	paths: Record<string, CustomRestrictedImport>;
 }
 export interface NoRestrictedTypesOptions {
-	types?: {};
+	types?: Record<string, CustomRestrictedType>;
 }
 export interface NoSecretsOptions {
 	/**
@@ -2967,6 +2979,18 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult?: StableHookResult;
 }
+export interface SuggestedExtensionMapping {
+	/**
+	 * Extension that should be used for component file imports
+	 */
+	component?: string;
+	/**
+	 * Extension that should be used for module imports
+	 */
+	module?: string;
+}
+export type CustomRestrictedImport = string | CustomRestrictedImportOptions;
+export type CustomRestrictedType = string | CustomRestrictedTypeOptions;
 export type Accessibility = "noPublic" | "explicit" | "none";
 export type ObjectPropertySyntax = "explicit" | "shorthand";
 export type ConsistentArrayType = "shorthand" | "generic";
@@ -2987,6 +3011,24 @@ export interface Convention {
 	selector: Selector;
 }
 export type StableHookResult = boolean | number[];
+export interface CustomRestrictedImportOptions {
+	/**
+	 * Names of the exported members that allowed to be not be used.
+	 */
+	allowImportNames: string[];
+	/**
+	 * Names of the exported members that should not be used.
+	 */
+	importNames: string[];
+	/**
+	 * The message to display when this module is imported.
+	 */
+	message: string;
+}
+export interface CustomRestrictedTypeOptions {
+	message?: string;
+	use?: string;
+}
 /**
  * Supported cases for file names.
  */
@@ -3896,17 +3938,6 @@ export interface SearchResults {
 export interface DropPatternParams {
 	pattern: PatternId;
 }
-export type SupportKind =
-	| "supported"
-	| "ignored"
-	| "protected"
-	| "featureNotEnabled"
-	| "fileNotSupported";
-/**
- * Rule domains
- */
-export type RuleDomain = "react" | "test" | "solid" | "next";
-export type RuleDomainValue = "all" | "none" | "recommended";
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<UpdateSettingsResult>;

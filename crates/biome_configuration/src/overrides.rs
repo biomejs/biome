@@ -1,19 +1,17 @@
 use crate::analyzer::assist::AssistEnabled;
-use crate::analyzer::{LinterEnabled, RuleDomainValue};
+use crate::analyzer::{LinterEnabled, RuleDomains};
 use crate::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use crate::html::HtmlConfiguration;
 use crate::{
     CssConfiguration, GraphqlConfiguration, GritConfiguration, JsConfiguration, JsonConfiguration,
     Rules,
 };
-use biome_analyze::RuleDomain;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, Expand, IndentStyle, IndentWidth,
     LineEnding, LineWidth,
 };
 use bpaf::Bpaf;
-use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
@@ -184,8 +182,8 @@ pub struct OverrideLinterConfiguration {
 
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(pure(FxHashMap::default()), optional, hide)]
-    pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
+    #[bpaf(pure(Default::default()), optional, hide)]
+    pub domains: Option<RuleDomains>,
 }
 
 #[derive(Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
