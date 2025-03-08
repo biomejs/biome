@@ -103,24 +103,14 @@ fn instance_type<'a>(
                         _ => Some(schema),
                     });
 
-            // If `additionalProperties` is not empty, add a `Record<K, V>` type
+            // If `additionalProperties` is not empty, add a mapped or record type.
             let additional_properties_type = additional_properties.map(|schema| {
-                // If `propertyNames` is not empty, use as the key type
-                let key_type = object.property_names.as_deref().map_or_else(
-                    || {
-                        // Otherwise, use `string` as the key type
-                        make::ts_reference_type(
-                            make::js_reference_identifier(make::ident("string")).into(),
-                        )
-                        .build()
-                        .into()
-                    },
-                    |schema| {
-                        let (ts_type, optional, _) = schema_type(queue, root_schema, schema);
-                        assert!(!optional, "optional nested types are not supported");
-                        ts_type
-                    },
-                );
+                // If `propertyNames` is not empty, use it as the key type.
+                let key_type = object.property_names.as_deref().map(|schema| {
+                    let (ts_type, optional, _) = schema_type(queue, root_schema, schema);
+                    assert!(!optional, "optional nested types are not supported");
+                    ts_type
+                });
 
                 let value_type = {
                     let (ts_type, optional, _) = schema_type(queue, root_schema, schema);
@@ -128,14 +118,48 @@ fn instance_type<'a>(
                     ts_type
                 };
 
-                make::ts_reference_type(make::js_reference_identifier(make::ident("Record")).into())
+                if let Some(key_type) = key_type {
+                    // Use a mapped type for the key type and the value type. All keys are optional.
+                    // e.g. `{ [K in Key]?: Value }`.
+                    // TODO: Support `required` keys here when needed.
+                    make::ts_mapped_type(
+                        make::token(T!['{']),
+                        make::token(T!['[']),
+                        make::ts_type_parameter_name(make::ident("K")),
+                        make::token(T![in]),
+                        key_type,
+                        make::token(T![']']),
+                        make::token(T!['}']),
+                    )
+                    .with_optional_modifier(
+                        make::ts_mapped_type_optional_modifier_clause(make::token(T![?])).build(),
+                    )
+                    .with_mapped_type(make::ts_type_annotation(make::token(T![:]), value_type))
+                    .build()
+                    .into()
+                } else {
+                    // Use `Record<string, Value>` otherwise.
+                    make::ts_reference_type(
+                        make::js_reference_identifier(make::ident("Record")).into(),
+                    )
                     .with_type_arguments(make::ts_type_arguments(
                         make::token(T![<]),
-                        make::ts_type_argument_list([key_type, value_type], [make::token(T![,])]),
+                        make::ts_type_argument_list(
+                            [
+                                make::ts_reference_type(
+                                    make::js_reference_identifier(make::ident("string")).into(),
+                                )
+                                .build()
+                                .into(),
+                                value_type,
+                            ],
+                            [make::token(T![,])],
+                        ),
                         make::token(T![>]),
                     ))
                     .build()
                     .into()
+                }
             });
 
             // If both `properties` and `additionalProperties` are provided, turn into an

@@ -733,7 +733,7 @@ export interface JsonParserConfiguration {
 	 */
 	allowTrailingCommas?: Bool;
 }
-export type RuleDomains = Record<RuleDomain, RuleDomainValue>;
+export type RuleDomains = { [K in RuleDomain]?: RuleDomainValue };
 export interface Rules {
 	a11y?: SeverityOrGroup_for_A11y;
 	complexity?: SeverityOrGroup_for_Complexity;
