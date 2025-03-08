@@ -93,36 +93,42 @@ fn instance_type<'a>(
                 .into()
             });
 
-            // If `additionalProperties` is not empty, add a `Record<K, V>` type
-            let additional_properties_type =
-                object.additional_properties.as_deref().map(|schema| {
-                    // If `propertyNames` is not empty, use as the key type
-                    let key_type = object
-                        .property_names
-                        .as_deref()
-                        .map(|schema| {
-                            let (ts_type, optional, _) = schema_type(queue, root_schema, schema);
-                            assert!(!optional, "optional nested types are not supported");
-                            ts_type
-                        })
-                        .unwrap_or_else(|| {
-                            // Otherwise, use `string` as the key type
-                            make::ts_reference_type(
-                                make::js_reference_identifier(make::ident("string")).into(),
-                            )
-                            .build()
-                            .into()
-                        });
+            // Don't use `additionalProperties: false` here.
+            let additional_properties =
+                object
+                    .additional_properties
+                    .as_deref()
+                    .and_then(|schema| match schema {
+                        Schema::Bool(false) => None,
+                        _ => Some(schema),
+                    });
 
-                    let value_type = {
+            // If `additionalProperties` is not empty, add a `Record<K, V>` type
+            let additional_properties_type = additional_properties.map(|schema| {
+                // If `propertyNames` is not empty, use as the key type
+                let key_type = object.property_names.as_deref().map_or_else(
+                    || {
+                        // Otherwise, use `string` as the key type
+                        make::ts_reference_type(
+                            make::js_reference_identifier(make::ident("string")).into(),
+                        )
+                        .build()
+                        .into()
+                    },
+                    |schema| {
                         let (ts_type, optional, _) = schema_type(queue, root_schema, schema);
                         assert!(!optional, "optional nested types are not supported");
                         ts_type
-                    };
+                    },
+                );
 
-                    make::ts_reference_type(
-                        make::js_reference_identifier(make::ident("Record")).into(),
-                    )
+                let value_type = {
+                    let (ts_type, optional, _) = schema_type(queue, root_schema, schema);
+                    assert!(!optional, "optional nested types are not supported");
+                    ts_type
+                };
+
+                make::ts_reference_type(make::js_reference_identifier(make::ident("Record")).into())
                     .with_type_arguments(make::ts_type_arguments(
                         make::token(T![<]),
                         make::ts_type_argument_list([key_type, value_type], [make::token(T![,])]),
@@ -130,7 +136,7 @@ fn instance_type<'a>(
                     ))
                     .build()
                     .into()
-                });
+            });
 
             // If both `properties` and `additionalProperties` are provided, turn into an
             // intersection type. Pick one for the final type otherwise.
@@ -387,7 +393,7 @@ pub fn generate_type<'a>(
                 .is_none_or(|additional_properties| {
                     matches!(additional_properties, Schema::Bool(false))
                 })
-        }) && schema.instance_type.as_ref().map_or(true, |instance_type| {
+        }) && schema.instance_type.as_ref().is_none_or(|instance_type| {
             if let SingleOrVec::Single(instance_type) = instance_type {
                 matches!(**instance_type, InstanceType::Object)
             } else {

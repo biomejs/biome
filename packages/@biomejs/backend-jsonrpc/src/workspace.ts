@@ -3530,20 +3530,17 @@ export type DiagnosticTags = DiagnosticTag[];
 See the [Visitor] trait for additional documentation on all the supported advice types. 
 	 */
 export type Advice =
-	| ({ log: [LogCategory, MarkupBuf] } & Record<string, never>)
-	| ({ list: MarkupBuf[] } & Record<string, never>)
-	| ({ frame: Location } & Record<string, never>)
-	| ({ diff: TextEdit } & Record<string, never>)
-	| ({ backtrace: [MarkupBuf, Backtrace] } & Record<string, never>)
-	| ({ command: string } & Record<string, never>)
-	| ({ group: [MarkupBuf, Advices] } & Record<string, never>);
+	| { log: [LogCategory, MarkupBuf] }
+	| { list: MarkupBuf[] }
+	| { frame: Location }
+	| { diff: TextEdit }
+	| { backtrace: [MarkupBuf, Backtrace] }
+	| { command: string }
+	| { group: [MarkupBuf, Advices] };
 /**
  * Represents the resource a diagnostic is associated with.
  */
-export type Resource_for_String =
-	| "argv"
-	| "memory"
-	| ({ file: string } & Record<string, never>);
+export type Resource_for_String = "argv" | "memory" | { file: string };
 export type TextRange = [TextSize, TextSize];
 export interface MarkupNodeBuf {
 	content: string;
@@ -3583,10 +3580,10 @@ export type MarkupElement =
 	| "Debug"
 	| "Trace"
 	| "Inverse"
-	| ({ Hyperlink: { href: string } } & Record<string, never>);
+	| { Hyperlink: { href: string } };
 export type CompressedOp =
-	| ({ diffOp: DiffOp } & Record<string, never>)
-	| ({ equalLines: { line_count: number } } & Record<string, never>);
+	| { diffOp: DiffOp }
+	| { equalLines: { line_count: number } };
 /**
  * Serializable representation of a backtrace frame.
  */
@@ -3595,9 +3592,9 @@ export interface BacktraceFrame {
 	symbols: BacktraceSymbol[];
 }
 export type DiffOp =
-	| ({ equal: { range: TextRange } } & Record<string, never>)
-	| ({ insert: { range: TextRange } } & Record<string, never>)
-	| ({ delete: { range: TextRange } } & Record<string, never>);
+	| { equal: { range: TextRange } }
+	| { insert: { range: TextRange } }
+	| { delete: { range: TextRange } };
 /**
  * Serializable representation of a backtrace frame symbol.
  */
@@ -3635,12 +3632,12 @@ export type FileContent =
 export type DocumentFileSource =
 	| "Ignore"
 	| "Unknown"
-	| ({ Js: JsFileSource } & Record<string, never>)
-	| ({ Json: JsonFileSource } & Record<string, never>)
-	| ({ Css: CssFileSource } & Record<string, never>)
-	| ({ Graphql: GraphqlFileSource } & Record<string, never>)
-	| ({ Html: HtmlFileSource } & Record<string, never>)
-	| ({ Grit: GritFileSource } & Record<string, never>);
+	| { Js: JsFileSource }
+	| { Json: JsonFileSource }
+	| { Css: CssFileSource }
+	| { Graphql: GraphqlFileSource }
+	| { Html: HtmlFileSource }
+	| { Grit: GritFileSource };
 export interface JsFileSource {
 	/**
 	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
@@ -3671,7 +3668,7 @@ export interface GritFileSource {
 export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
 	| "javaScript"
-	| ({ typeScript: { definition_file: boolean } } & Record<string, never>);
+	| { typeScript: { definition_file: boolean } };
 /**
  * Is the source file an ECMAScript Module or Script. Changes the parsing semantic.
  */
@@ -3781,10 +3778,10 @@ export interface CodeAction {
 [CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind 
 	 */
 export type ActionCategory =
-	| ({ quickFix: string } & Record<string, never>)
-	| ({ refactor: RefactorKind } & Record<string, never>)
-	| ({ source: SourceActionKind } & Record<string, never>)
-	| ({ other: OtherActionCategory } & Record<string, never>);
+	| { quickFix: string }
+	| { refactor: RefactorKind }
+	| { source: SourceActionKind }
+	| { other: OtherActionCategory };
 /**
  * A Suggestion that is provided by Biome's linter, and can be reported to the user, and can be automatically applied if it has the right [`Applicability`].
  */
@@ -3805,7 +3802,7 @@ export type RefactorKind =
 	| "extract"
 	| "inline"
 	| "rewrite"
-	| ({ other: string } & Record<string, never>);
+	| { other: string };
 /**
  * The sub-category of a source code action
  */
@@ -3813,11 +3810,11 @@ export type SourceActionKind =
 	| "fixAll"
 	| "none"
 	| "organizeImports"
-	| ({ other: string } & Record<string, never>);
+	| { other: string };
 export type OtherActionCategory =
 	| "inlineSuppression"
 	| "toplevelSuppression"
-	| ({ generic: string } & Record<string, never>);
+	| { generic: string };
 /**
  * Indicates how a tool should manage this suggestion.
  */
