@@ -339,7 +339,9 @@ fn handle_attr_init_clause(
     match node {
         AnyJsxAttributeValue::AnyJsxTag(_) => Some(CurlyBraceResolution::AddBraces),
         AnyJsxAttributeValue::JsxExpressionAttributeValue(node) => {
-            if has_curly_braces && contains_string_literal(&node) {
+            if has_curly_braces && contains_single_space(&node) {
+                None
+            } else if has_curly_braces && contains_string_literal(&node) {
                 Some(CurlyBraceResolution::RemoveBraces)
             } else if !has_curly_braces && contains_jsx_tag(&node) {
                 Some(CurlyBraceResolution::AddBraces)
@@ -353,18 +355,25 @@ fn handle_attr_init_clause(
 
 fn handle_jsx_child(child: &AnyJsxChild, has_curly_braces: bool) -> Option<CurlyBraceResolution> {
     match child {
-        AnyJsxChild::JsxExpressionChild(child) => child
-            .expression()
-            .as_ref()
-            .and_then(|node| node.as_any_js_literal_expression())
-            .and_then(|node| node.as_js_string_literal_expression())
-            .and({
-                if has_curly_braces {
-                    Some(CurlyBraceResolution::RemoveBraces)
-                } else {
-                    None
+        AnyJsxChild::JsxExpressionChild(child) => {
+            if let Some(AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(literal),
+            )) = child.expression().as_ref()
+            {
+                // Don't suggest removing braces for single space
+                if literal
+                    .inner_string_text()
+                    .is_ok_and(|text| text.text() == " ")
+                {
+                    return None;
                 }
-            }),
+
+                if has_curly_braces {
+                    return Some(CurlyBraceResolution::RemoveBraces);
+                }
+            }
+            None
+        }
         AnyJsxChild::JsxText(_) => None,
         _ => None,
     }
@@ -374,8 +383,7 @@ fn has_curly_braces(node: &AnyJsxCurlyQuery) -> bool {
     match node {
         AnyJsxCurlyQuery::JsxAttributeInitializerClause(node) => {
             node.value()
-                .map(|node| matches!(node, AnyJsxAttributeValue::JsxExpressionAttributeValue(attr) if attr.l_curly_token().is_ok() || attr.r_curly_token().is_ok()))
-                .unwrap_or(false)
+                .is_ok_and(|node| matches!(node, AnyJsxAttributeValue::JsxExpressionAttributeValue(attr) if attr.l_curly_token().is_ok() || attr.r_curly_token().is_ok()))
         }
         AnyJsxCurlyQuery::AnyJsxChild(node) => match node {
             AnyJsxChild::JsxExpressionChild(node) => node.l_curly_token().is_ok() || node.r_curly_token().is_ok(),
@@ -399,4 +407,15 @@ fn contains_string_literal(node: &JsxExpressionAttributeValue) -> bool {
 fn contains_jsx_tag(node: &JsxExpressionAttributeValue) -> bool {
     node.expression()
         .is_ok_and(|expr| matches!(expr, AnyJsExpression::JsxTagExpression(_)))
+}
+
+fn contains_single_space(node: &JsxExpressionAttributeValue) -> bool {
+    node.expression().is_ok_and(|expr| {
+        matches!(
+            expr,
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(literal)
+            ) if literal.inner_string_text().is_ok_and(|text| text.text() == " ")
+        )
+    })
 }
