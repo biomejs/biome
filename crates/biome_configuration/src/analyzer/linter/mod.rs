@@ -8,6 +8,7 @@ use bpaf::Bpaf;
 pub use rules::*;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
+use std::ops::Deref;
 
 pub type LinterEnabled = Bool<true>;
 
@@ -36,7 +37,7 @@ pub struct LinterConfiguration {
     /// An object where the keys are the names of the domains, and the values are `all`, `recommended`, or `none`.
     #[bpaf(hide, pure(Default::default()))]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub domains: Option<FxHashMap<RuleDomain, RuleDomainValue>>,
+    pub domains: Option<RuleDomains>,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize, Merge)]
@@ -49,6 +50,38 @@ pub enum RuleDomainValue {
     None,
     /// It enables only the recommended rules for this domain
     Recommended,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize, Merge)]
+pub struct RuleDomains(FxHashMap<RuleDomain, RuleDomainValue>);
+
+impl Deref for RuleDomains {
+    type Target = FxHashMap<RuleDomain, RuleDomainValue>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for RuleDomains {
+    fn schema_name() -> String {
+        "RuleDomains".to_string()
+    }
+
+    fn json_schema(generator: &mut schemars::r#gen::SchemaGenerator) -> schemars::schema::Schema {
+        use schemars::schema::*;
+
+        Schema::Object(SchemaObject {
+            instance_type: Some(InstanceType::Object.into()),
+            object: Some(Box::new(ObjectValidation {
+                property_names: Some(Box::new(generator.subschema_for::<RuleDomain>())),
+                additional_properties: Some(Box::new(generator.subschema_for::<RuleDomainValue>())),
+                ..Default::default()
+            })),
+            ..Default::default()
+        })
+    }
 }
 
 impl LinterConfiguration {

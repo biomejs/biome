@@ -1,4 +1,5 @@
 {
+  "$schema": "../../../../packages/@biomejs/biome/configuration_schema.json",
   "linter": {
     "domains": {
       "DO_NOT_EXISTS": true
