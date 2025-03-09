@@ -30,30 +30,22 @@ info: html/case/case.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,28 +1,24 @@
+@@ -1,4 +1,4 @@
 -<!doctype html>
--<html class="no-js mY-ClAsS">
--  <head>
--    <meta charset="utf-8" />
--    <title>My tITlE</title>
--    <meta name="description" content="My CoNtEnT" />
--  </head>
 +<!DOCTYPE html>
-+<HTML CLASS="no-js mY-ClAsS">
-+  <HEAD>
-+    <META CHARSET="utf-8" />
-+    <TITLE>My tITlE</TITLE>
-+    <META NAME="description" content="My CoNtEnT" />
-+  </HEAD>
+ <html class="no-js mY-ClAsS">
+   <head>
+     <meta charset="utf-8" />
+@@ -7,17 +7,13 @@
+   </head>
    <body>
--    <p>
+     <p>
 -      Hello world!<br />
-+    <P>
 +      Hello world!
-+      <BR />
++      <br />
        This is HTML5 Boilerplate.
--    </p>
--    <script>
+     </p>
+     <script>
 -      window.ga = function () {
 -        ga.q.push(arguments);
 -      };
@@ -61,53 +53,40 @@ info: html/case/case.html
 -      ga.l = +new Date();
 -      ga("create", "UA-XXXXX-Y", "auto");
 -      ga("send", "pageview");
--    </script>
--    <script
-+    </P>
-+    <SCRIPT>
 +      window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
 +      ga('create', 'UA-XXXXX-Y', 'auto'); ga('send', 'pageview')
-+    </SCRIPT>
-+    <SCRIPT
+     </script>
+     <script
        src="https://www.google-analytics.com/analytics.js"
--      async
--      defer
--    ></script>
-+      ASYNC
-+      DEFER
-+    ></SCRIPT>
-   </body>
--</html>
-+</HTML>
 ```
 
 # Output
 
 ```html
 <!DOCTYPE html>
-<HTML CLASS="no-js mY-ClAsS">
-  <HEAD>
-    <META CHARSET="utf-8" />
-    <TITLE>My tITlE</TITLE>
-    <META NAME="description" content="My CoNtEnT" />
-  </HEAD>
+<html class="no-js mY-ClAsS">
+  <head>
+    <meta charset="utf-8" />
+    <title>My tITlE</title>
+    <meta name="description" content="My CoNtEnT" />
+  </head>
   <body>
-    <P>
+    <p>
       Hello world!
-      <BR />
+      <br />
       This is HTML5 Boilerplate.
-    </P>
-    <SCRIPT>
+    </p>
+    <script>
       window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
       ga('create', 'UA-XXXXX-Y', 'auto'); ga('send', 'pageview')
-    </SCRIPT>
-    <SCRIPT
+    </script>
+    <script
       src="https://www.google-analytics.com/analytics.js"
-      ASYNC
-      DEFER
-    ></SCRIPT>
+      async
+      defer
+    ></script>
   </body>
-</HTML>
+</html>
 ```
 
 # Lines exceeding max width of 80 characters
