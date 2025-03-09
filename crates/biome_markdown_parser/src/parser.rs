@@ -20,6 +20,10 @@ impl<'source> MarkdownParser<'source> {
         }
     }
 
+    pub fn parse_document(&mut self) {
+        crate::syntax::parse_document(self);
+    }
+
     pub fn checkpoint(&self) -> MarkdownParserCheckpoint {
         MarkdownParserCheckpoint {
             context: self.context.checkpoint(),
