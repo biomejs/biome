@@ -24,11 +24,11 @@ declare_source_rule! {
     ///
     /// ## Examples
     ///
-    /// ```js,expect_diff
+    /// ```jsx,expect_diff
     /// <Hello lastName="Smith" firstName="John" />;
     /// ```
     ///
-    /// ```js,expect_diff
+    /// ```jsx,expect_diff
     /// <Hello lastName="Smith" firstName="John" {...this.props} tel="0000" address="111 Main Street"  {...another.props} lastName="Smith" />;
     /// ```
     ///
