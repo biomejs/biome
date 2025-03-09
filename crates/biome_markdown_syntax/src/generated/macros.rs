@@ -40,6 +40,30 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdHeader::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MD_HEADER1 => {
+                    let $pattern = unsafe { $crate::MdHeader1::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_HEADER2 => {
+                    let $pattern = unsafe { $crate::MdHeader2::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_HEADER3 => {
+                    let $pattern = unsafe { $crate::MdHeader3::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_HEADER4 => {
+                    let $pattern = unsafe { $crate::MdHeader4::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_HEADER5 => {
+                    let $pattern = unsafe { $crate::MdHeader5::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MD_HEADER6 => {
+                    let $pattern = unsafe { $crate::MdHeader6::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_HTML_BLOCK => {
                     let $pattern = unsafe { $crate::MdHtmlBlock::new_unchecked(node) };
                     $body
