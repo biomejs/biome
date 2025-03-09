@@ -479,7 +479,7 @@ impl RuleSourceKind {
 }
 
 /// Rule domains
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 #[cfg_attr(
     feature = "serde",
     derive(
@@ -510,6 +510,19 @@ impl Display for RuleDomain {
             RuleDomain::Solid => fmt.write_str("solid"),
             RuleDomain::Next => fmt.write_str("next"),
         }
+    }
+}
+
+impl Ord for RuleDomain {
+    fn cmp(&self, other: &Self) -> Ordering {
+        // Rule domains should be in alphabetical order
+        format!("{self:?}").cmp(&format!("{other:?}"))
+    }
+}
+
+impl PartialOrd for RuleDomain {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
