@@ -1,0 +1,43 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+snapshot_kind: text
+---
+## `.editorconfig`
+
+```editorconfig
+
+[*]
+indent_style = space
+indent_size = 8
+
+```
+
+## `foo/biome.json`
+
+```json
+
+{
+    "formatter": {
+        "lineWidth": 60
+    }
+}
+
+```
+
+## `foo/test.js`
+
+```js
+if (foo) {
+	console.log(
+		"this is a very long console file, and it should not be indented with spaces",
+	);
+}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```
