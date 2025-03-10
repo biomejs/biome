@@ -26,7 +26,7 @@ biome_rowan              = { workspace = true }
 biome_text_size          = { workspace = true }
 camino                   = { workspace = true }
 indexmap                 = { workspace = true }
-node-semver              = "2.1.0"
+node-semver              = "2.2.0"
 oxc_resolver             = { workspace = true }
 rustc-hash               = { workspace = true }
 serde                    = { workspace = true }
