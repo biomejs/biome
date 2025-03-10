@@ -1,4 +1,8 @@
-use crate::{prelude::*, utils::metadata::is_element_whitespace_sensitive};
+use crate::{
+    html::lists::attribute_list::FormatHtmlAttributeListOptions,
+    prelude::*,
+    utils::metadata::{is_canonical_html_tag, is_element_whitespace_sensitive},
+};
 use biome_formatter::{FormatRuleWithOptions, GroupId, write};
 use biome_html_syntax::{HtmlOpeningElement, HtmlOpeningElementFields};
 #[derive(Debug, Clone, Default)]
@@ -43,6 +47,7 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
 
         let name = name?;
         let is_whitespace_sensitive = is_element_whitespace_sensitive(f, &name);
+        let is_canonical_html_tag = is_canonical_html_tag(&name);
 
         let bracket_same_line = f.options().bracket_same_line().value();
         write!(f, [l_angle_token.format(), name.format()])?;
@@ -50,7 +55,13 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
         write!(
             f,
             [&group(&format_with(|f| {
-                attributes.format().fmt(f)?;
+                attributes
+                    .format()
+                    .with_options(FormatHtmlAttributeListOptions {
+                        is_canonical_html_element: is_canonical_html_tag,
+                        tag_name: Some(name.clone()),
+                    })
+                    .fmt(f)?;
 
                 // Whitespace sensitivity takes precedence over bracketSameLine for correctness.
                 //
