@@ -210,9 +210,6 @@ pub enum BiomeCommand {
         #[bpaf(external(graphql_linter_configuration), optional, hide_usage, hide)]
         graphql_linter: Option<GraphqlLinterConfiguration>,
 
-        #[bpaf(external(markdown_linter_configuration), optional, hide_usage, hide)]
-        markdown_linter: Option<MarkdownLinterConfiguration>,
-
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 

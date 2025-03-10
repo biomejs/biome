@@ -7,7 +7,6 @@ use biome_configuration::css::CssLinterConfiguration;
 use biome_configuration::graphql::GraphqlLinterConfiguration;
 use biome_configuration::javascript::JsLinterConfiguration;
 use biome_configuration::json::JsonLinterConfiguration;
-use biome_configuration::markdown::MarkdownLinterConfiguration;
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::{Configuration, FilesConfiguration, LinterConfiguration};
 use biome_console::Console;
@@ -38,7 +37,6 @@ pub(crate) struct LintCommandPayload {
     pub(crate) json_linter: Option<JsonLinterConfiguration>,
     pub(crate) css_linter: Option<CssLinterConfiguration>,
     pub(crate) graphql_linter: Option<GraphqlLinterConfiguration>,
-    pub(crate) markdown_linter: Option<MarkdownLinterConfiguration>,
 }
 
 impl CommandRunner for LintCommandPayload {
@@ -84,13 +82,6 @@ impl CommandRunner for LintCommandPayload {
                 .graphql
                 .get_or_insert_with(Default::default);
             graphql.linter.merge_with(self.graphql_linter.clone());
-        }
-
-        if self.markdown_linter.is_some() {
-            let markdown = fs_configuration
-                .markdown
-                .get_or_insert_with(Default::default);
-            markdown.linter.merge_with(self.markdown_linter.clone());
         }
 
         if self.javascript_linter.is_some() {

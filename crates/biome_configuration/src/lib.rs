@@ -14,7 +14,6 @@ pub mod grit;
 pub mod html;
 pub mod javascript;
 pub mod json;
-pub mod markdown;
 pub mod max_size;
 mod overrides;
 pub mod plugins;
@@ -31,7 +30,6 @@ use crate::graphql::{GraphqlFormatterConfiguration, GraphqlLinterConfiguration};
 pub use crate::grit::{GritConfiguration, grit_configuration};
 use crate::javascript::{JsFormatterConfiguration, JsLinterConfiguration};
 use crate::json::{JsonFormatterConfiguration, JsonLinterConfiguration};
-use crate::markdown::{MarkdownConfiguration, markdown_configuration};
 use crate::max_size::MaxSize;
 use crate::vcs::{VcsConfiguration, vcs_configuration};
 pub use analyzer::{
@@ -152,11 +150,6 @@ pub struct Configuration {
     #[bpaf(external(html_configuration), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub html: Option<HtmlConfiguration>,
-
-    /// Specific configuration for the Markdown language
-    #[bpaf(external(markdown_configuration), optional)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub markdown: Option<MarkdownConfiguration>,
 
     /// A list of granular patterns that should be applied only to a sub set of files
     #[bpaf(hide, pure(Default::default()))]
