@@ -667,7 +667,7 @@ impl Session {
                 let search_path = configuration_path
                     .clone()
                     .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
-                match load_editorconfig(fs, search_path) {
+                match load_editorconfig(fs, search_path, None) {
                     Ok(result) => result,
                     Err(error) => {
                         error!("Failed load the `.editorconfig` file. Reason: {error}");

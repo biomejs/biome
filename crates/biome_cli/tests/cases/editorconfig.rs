@@ -30,11 +30,50 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
+        Args::from(["format", "--write", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_use_editorconfig",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn shoud_not_use_editorconfig() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+[*]
+indent_style = space
+indent_size = 2
+"#,
+    );
+
+    let test_file = Utf8Path::new("test.js");
+    let contents = r#"function setName(name) {
+ currentName = name;
+}
+"#;
+    fs.insert(test_file.into(), contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
         Args::from(
             [
                 "format",
                 "--write",
-                "--use-editorconfig=true",
+                "--use-editorconfig=false",
                 test_file.as_str(),
             ]
             .as_slice(),
@@ -45,7 +84,7 @@ indent_size = 8
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "should_use_editorconfig",
+        "should_not_use_editorconfig",
         fs,
         console,
         result,
@@ -127,7 +166,7 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["check", "--use-editorconfig=true", test_file.as_str()].as_slice()),
+        Args::from(["check", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -226,15 +265,7 @@ indent_style = tab
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                "--use-editorconfig=true",
-                test_file.as_str(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -242,6 +273,59 @@ indent_style = tab
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_have_biome_override_editorconfig",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_not_use_higher_editorconfig_when_find_biome_conf() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+[*]
+indent_style = space
+indent_size = 2
+"#,
+    );
+
+    let biome_config_path = Utf8Path::new("foo/biome.json");
+    fs.insert(
+        biome_config_path.into(),
+        r#"
+{
+    "formatter": {
+        "lineWidth": 60
+    }
+}
+"#,
+    );
+    let test_file = Utf8Path::new("foo/test.js");
+    fs.insert(
+        test_file.into(),
+        r#"
+    if (foo) {
+        console.log("test 123");
+    }
+    "#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", "--config-path=foo", test_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_use_higher_editorconfig_when_find_biome_conf",
         fs,
         console,
         result,
@@ -275,15 +359,7 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--indent-width=4",
-                "--use-editorconfig=true",
-                test_file.as_str(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", "--indent-width=4", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -336,15 +412,7 @@ indent_style = space
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "check",
-                "--use-editorconfig=true",
-                test_file.as_str(),
-                test_file2.as_str(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["check", test_file.as_str(), test_file2.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -383,7 +451,7 @@ indent_size = 8
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["ci", "--use-editorconfig=true", test_file.as_str()].as_slice()),
+        Args::from(["ci", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -467,15 +535,7 @@ insert_final_newline = false
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "format",
-                "--write",
-                "--use-editorconfig=true",
-                test_file.as_str(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["format", "--write", test_file.as_str()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

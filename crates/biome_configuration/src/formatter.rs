@@ -8,7 +8,7 @@ use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 pub type FormatterEnabled = Bool<true>;
-pub type UseEditorconfigEnabled = Bool<false>;
+pub type UseEditorconfigEnabled = Bool<true>;
 pub type FormatWithErrorsEnabled = Bool<false>;
 
 /// Generic options applied to all files
@@ -77,7 +77,7 @@ pub struct FormatterConfiguration {
     /// Use any `.editorconfig` files to configure the formatter. Configuration
     /// in `biome.json` will override `.editorconfig` configuration.
     ///
-    /// Default: `false`.
+    /// Default: `true`.
     #[bpaf(long("use-editorconfig"), argument("true|false"))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_editorconfig: Option<UseEditorconfigEnabled>,
