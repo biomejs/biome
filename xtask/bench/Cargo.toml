@@ -31,7 +31,7 @@ biome_rowan             = { workspace = true }
 camino                  = { workspace = true }
 
 ansi_rgb                  = "0.2.0"
-codspeed-criterion-compat = { version = "2.7.2", optional = true }
+codspeed-criterion-compat = { version = "2.8.1", optional = true }
 criterion                 = "0.5.1"
 ureq                      = "3.0.8"
 url                       = "2.5.4"
