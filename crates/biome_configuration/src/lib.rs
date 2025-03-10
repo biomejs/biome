@@ -281,8 +281,7 @@ impl Configuration {
     pub fn use_editorconfig(&self) -> bool {
         self.formatter
             .as_ref()
-            .and_then(|f| f.use_editorconfig)
-            .is_some_and(|editorconfig| editorconfig.value())
+            .is_some_and(|c| c.use_editorconfig_resolved())
     }
 
     pub fn get_json_linter_configuration(&self) -> JsonLinterConfiguration {
