@@ -292,12 +292,13 @@ fn load_user_config(
     }
 }
 
+// judge if path a is parent path for path b.
 fn is_parent_of(a: Utf8PathBuf, b: Utf8PathBuf) -> bool {
     if a == b {
         return false;
     }
 
-    if let Some(relative_path) = b.strip_prefix(a).ok() {
+    if let Ok(relative_path) = b.strip_prefix(a) {
         !relative_path.has_root()
     } else {
         false
