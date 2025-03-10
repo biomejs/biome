@@ -251,6 +251,276 @@ pub struct MdHeaderFields {
     pub after: MdHashList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdHeader1 {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdHeader1 {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdHeader1Fields {
+        MdHeader1Fields {
+            before: self.before(),
+            md_paragraph: self.md_paragraph(),
+            after: self.after(),
+        }
+    }
+    pub fn before(&self) -> MdHashList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn md_paragraph(&self) -> Option<MdParagraph> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn after(&self) -> MdHashList {
+        support::list(&self.syntax, 2usize)
+    }
+}
+impl Serialize for MdHeader1 {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdHeader1Fields {
+    pub before: MdHashList,
+    pub md_paragraph: Option<MdParagraph>,
+    pub after: MdHashList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdHeader2 {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdHeader2 {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdHeader2Fields {
+        MdHeader2Fields {
+            before: self.before(),
+            md_paragraph: self.md_paragraph(),
+            after: self.after(),
+        }
+    }
+    pub fn before(&self) -> MdHashList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn md_paragraph(&self) -> Option<MdParagraph> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn after(&self) -> MdHashList {
+        support::list(&self.syntax, 2usize)
+    }
+}
+impl Serialize for MdHeader2 {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdHeader2Fields {
+    pub before: MdHashList,
+    pub md_paragraph: Option<MdParagraph>,
+    pub after: MdHashList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdHeader3 {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdHeader3 {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdHeader3Fields {
+        MdHeader3Fields {
+            before: self.before(),
+            md_paragraph: self.md_paragraph(),
+            after: self.after(),
+        }
+    }
+    pub fn before(&self) -> MdHashList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn md_paragraph(&self) -> Option<MdParagraph> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn after(&self) -> MdHashList {
+        support::list(&self.syntax, 2usize)
+    }
+}
+impl Serialize for MdHeader3 {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdHeader3Fields {
+    pub before: MdHashList,
+    pub md_paragraph: Option<MdParagraph>,
+    pub after: MdHashList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdHeader4 {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdHeader4 {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdHeader4Fields {
+        MdHeader4Fields {
+            before: self.before(),
+            md_paragraph: self.md_paragraph(),
+            after: self.after(),
+        }
+    }
+    pub fn before(&self) -> MdHashList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn md_paragraph(&self) -> Option<MdParagraph> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn after(&self) -> MdHashList {
+        support::list(&self.syntax, 2usize)
+    }
+}
+impl Serialize for MdHeader4 {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdHeader4Fields {
+    pub before: MdHashList,
+    pub md_paragraph: Option<MdParagraph>,
+    pub after: MdHashList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdHeader5 {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdHeader5 {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdHeader5Fields {
+        MdHeader5Fields {
+            before: self.before(),
+            md_paragraph: self.md_paragraph(),
+            after: self.after(),
+        }
+    }
+    pub fn before(&self) -> MdHashList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn md_paragraph(&self) -> Option<MdParagraph> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn after(&self) -> MdHashList {
+        support::list(&self.syntax, 2usize)
+    }
+}
+impl Serialize for MdHeader5 {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdHeader5Fields {
+    pub before: MdHashList,
+    pub md_paragraph: Option<MdParagraph>,
+    pub after: MdHashList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdHeader6 {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdHeader6 {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdHeader6Fields {
+        MdHeader6Fields {
+            before: self.before(),
+            md_paragraph: self.md_paragraph(),
+            after: self.after(),
+        }
+    }
+    pub fn before(&self) -> MdHashList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn md_paragraph(&self) -> Option<MdParagraph> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn after(&self) -> MdHashList {
+        support::list(&self.syntax, 2usize)
+    }
+}
+impl Serialize for MdHeader6 {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdHeader6Fields {
+    pub before: MdHashList,
+    pub md_paragraph: Option<MdParagraph>,
+    pub after: MdHashList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdHtmlBlock {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1276,6 +1546,318 @@ impl From<MdHeader> for SyntaxNode {
 }
 impl From<MdHeader> for SyntaxElement {
     fn from(n: MdHeader) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdHeader1 {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_HEADER1 as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_HEADER1
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdHeader1 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdHeader1")
+                .field("before", &self.before())
+                .field(
+                    "md_paragraph",
+                    &support::DebugOptionalElement(self.md_paragraph()),
+                )
+                .field("after", &self.after())
+                .finish()
+        } else {
+            f.debug_struct("MdHeader1").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdHeader1> for SyntaxNode {
+    fn from(n: MdHeader1) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MdHeader1> for SyntaxElement {
+    fn from(n: MdHeader1) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdHeader2 {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_HEADER2 as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_HEADER2
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdHeader2 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdHeader2")
+                .field("before", &self.before())
+                .field(
+                    "md_paragraph",
+                    &support::DebugOptionalElement(self.md_paragraph()),
+                )
+                .field("after", &self.after())
+                .finish()
+        } else {
+            f.debug_struct("MdHeader2").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdHeader2> for SyntaxNode {
+    fn from(n: MdHeader2) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MdHeader2> for SyntaxElement {
+    fn from(n: MdHeader2) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdHeader3 {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_HEADER3 as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_HEADER3
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdHeader3 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdHeader3")
+                .field("before", &self.before())
+                .field(
+                    "md_paragraph",
+                    &support::DebugOptionalElement(self.md_paragraph()),
+                )
+                .field("after", &self.after())
+                .finish()
+        } else {
+            f.debug_struct("MdHeader3").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdHeader3> for SyntaxNode {
+    fn from(n: MdHeader3) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MdHeader3> for SyntaxElement {
+    fn from(n: MdHeader3) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdHeader4 {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_HEADER4 as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_HEADER4
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdHeader4 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdHeader4")
+                .field("before", &self.before())
+                .field(
+                    "md_paragraph",
+                    &support::DebugOptionalElement(self.md_paragraph()),
+                )
+                .field("after", &self.after())
+                .finish()
+        } else {
+            f.debug_struct("MdHeader4").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdHeader4> for SyntaxNode {
+    fn from(n: MdHeader4) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MdHeader4> for SyntaxElement {
+    fn from(n: MdHeader4) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdHeader5 {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_HEADER5 as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_HEADER5
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdHeader5 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdHeader5")
+                .field("before", &self.before())
+                .field(
+                    "md_paragraph",
+                    &support::DebugOptionalElement(self.md_paragraph()),
+                )
+                .field("after", &self.after())
+                .finish()
+        } else {
+            f.debug_struct("MdHeader5").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdHeader5> for SyntaxNode {
+    fn from(n: MdHeader5) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MdHeader5> for SyntaxElement {
+    fn from(n: MdHeader5) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdHeader6 {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_HEADER6 as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MD_HEADER6
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdHeader6 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdHeader6")
+                .field("before", &self.before())
+                .field(
+                    "md_paragraph",
+                    &support::DebugOptionalElement(self.md_paragraph()),
+                )
+                .field("after", &self.after())
+                .finish()
+        } else {
+            f.debug_struct("MdHeader6").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdHeader6> for SyntaxNode {
+    fn from(n: MdHeader6) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MdHeader6> for SyntaxElement {
+    fn from(n: MdHeader6) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -2509,6 +3091,36 @@ impl std::fmt::Display for MdHash {
     }
 }
 impl std::fmt::Display for MdHeader {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdHeader1 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdHeader2 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdHeader3 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdHeader4 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdHeader5 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdHeader6 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
