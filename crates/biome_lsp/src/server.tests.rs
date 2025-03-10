@@ -357,6 +357,40 @@ const CHANNEL_BUFFER_SIZE: usize = 8;
 #[derive(Debug, PartialEq, Eq)]
 enum ServerNotification {
     PublishDiagnostics(PublishDiagnosticsParams),
+    ShowMessage(ShowMessageParams),
+}
+impl ServerNotification {
+    pub fn is_publish_diagnostics(&self) -> bool {
+        matches!(self, ServerNotification::PublishDiagnostics(_))
+    }
+
+    pub fn is_show_message(&self) -> bool {
+        matches!(self, ServerNotification::ShowMessage(_))
+    }
+}
+
+async fn wait_for_notification(
+    receiver: &mut (impl futures::stream::Stream<Item = ServerNotification> + Unpin),
+    check: impl Fn(&ServerNotification) -> bool,
+) -> Option<ServerNotification> {
+    loop {
+        let notification = tokio::select! {
+            msg = receiver.next() => msg,
+            _ = sleep(Duration::from_secs(1)) => {
+                panic!("timed out waiting for the server to send diagnostics")
+            }
+        };
+
+        match notification {
+            Some(notification) => {
+                if check(&notification) {
+                    return Some(notification);
+                }
+                continue;
+            }
+            None => break None,
+        }
+    }
 }
 
 /// Basic handler for requests and notifications coming from the server for tests
@@ -372,10 +406,16 @@ where
     O: Sink<Response> + Unpin,
 {
     while let Some(req) = stream.next().await {
-        if req.method() == "textDocument/publishDiagnostics" {
-            let params = req.params().expect("invalid request");
-            let diagnostics = from_value(params.clone()).expect("invalid params");
-            let notification = ServerNotification::PublishDiagnostics(diagnostics);
+        let params = req.params().expect("invalid request").clone();
+        if let Some(notification) = match req.method() {
+            "textDocument/publishDiagnostics" => Some(ServerNotification::PublishDiagnostics(
+                from_value(params).expect("invalid params"),
+            )),
+            "window/showMessage" => Some(ServerNotification::ShowMessage(
+                from_value(params).expect("invalid params"),
+            )),
+            _ => None,
+        } {
             match notify.send(notification).await {
                 Ok(_) => continue,
                 Err(_) => break,
@@ -760,12 +800,7 @@ async fn pull_diagnostics() -> Result<()> {
 
     server.open_document("if(a == b) {}").await?;
 
-    let notification = tokio::select! {
-        msg = receiver.next() => msg,
-        _ = sleep(Duration::from_secs(1)) => {
-            panic!("timed out waiting for the server to send diagnostics")
-        }
-    };
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
 
     assert_eq!(
         notification,
@@ -842,12 +877,7 @@ async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
 
     server.open_document("class A { #foo; #foo }").await?;
 
-    let notification = tokio::select! {
-        msg = receiver.next() => msg,
-        _ = sleep(Duration::from_secs(1)) => {
-            panic!("timed out waiting for the server to send diagnostics")
-        }
-    };
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
 
     assert_eq!(
         notification,
@@ -904,12 +934,7 @@ async fn pull_diagnostics_from_new_file() -> Result<()> {
 
     server.open_untitled_document("if(a == b) {}").await?;
 
-    let notification = tokio::select! {
-        msg = receiver.next() => msg,
-        _ = sleep(Duration::from_secs(1)) => {
-            panic!("timed out waiting for the server to send diagnostics")
-        }
-    };
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
 
     assert_eq!(
         notification,
@@ -1550,12 +1575,7 @@ async fn pull_diagnostics_for_rome_json() -> Result<()> {
         .open_named_document(incorrect_config, url!("biome.json"), "json")
         .await?;
 
-    let notification = tokio::select! {
-        msg = receiver.next() => msg,
-        _ = sleep(Duration::from_secs(1)) => {
-            panic!("timed out waiting for the server to send diagnostics")
-        }
-    };
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
 
     assert_eq!(
         notification,
@@ -1586,6 +1606,64 @@ async fn pull_diagnostics_for_rome_json() -> Result<()> {
             }
         ))
     );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn plugin_load_error_show_message() -> Result<()> {
+    let mut fs = MemoryFileSystem::default();
+    let config = r#"{
+        "css": {
+            "linter": { "enabled": true }
+        },
+        "plugins": ["./plugin"],
+        "linter": {
+            "rules": { "correctness": { "noUnknownProperty": "error" } }
+        }
+    }"#;
+
+    const INVALID_PLUGIN_CONTENT: &[u8] = br#"foo"#;
+
+    fs.insert(
+        Utf8PathBuf::from_path_buf(url!("biome.json").to_file_path().unwrap()).unwrap(),
+        config,
+    );
+    fs.insert(
+        Utf8PathBuf::from_path_buf(url!("plugin").to_file_path().unwrap()).unwrap(),
+        INVALID_PLUGIN_CONTENT,
+    );
+
+    let factory = ServerFactory::new_with_fs(Box::new(fs));
+    let (service, client) = factory.create().into_inner();
+
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.load_configuration().await?;
+
+    let incorrect_config = r#"a {colr: blue;}"#;
+    server
+        .open_named_document(incorrect_config, url!("document.css"), "css")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_show_message()).await;
+
+    assert_eq!(notification, Some(ServerNotification::ShowMessage(ShowMessageParams {
+        typ: MessageType::WARNING,
+        message: "The plugin loading has failed. Biome will report only parsing errors until the file is fixed or its usage is disabled.".to_string(),
+    })));
 
     server.close_document().await?;
 
@@ -1631,12 +1709,7 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
         .open_named_document(incorrect_config, url!("document.css"), "css")
         .await?;
 
-    let notification = tokio::select! {
-        msg = receiver.next() => msg,
-        _ = sleep(Duration::from_secs(1)) => {
-            panic!("timed out waiting for the server to send diagnostics")
-        }
-    };
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
 
     assert_eq!(
         notification,
@@ -1705,12 +1778,7 @@ async fn no_code_actions_for_ignored_json_files() -> Result<()> {
         )
         .await?;
 
-    let notification = tokio::select! {
-        msg = receiver.next() => msg,
-        _ = sleep(Duration::from_secs(1)) => {
-            panic!("timed out waiting for the server to send diagnostics")
-        }
-    };
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
 
     assert_eq!(
         notification,
@@ -2574,12 +2642,7 @@ async fn pull_diagnostics_from_manifest() -> Result<()> {
         .open_document(r#"import "lodash"; import "react"; "#)
         .await?;
 
-    let notification = tokio::select! {
-        msg = receiver.next() => msg,
-        _ = sleep(Duration::from_secs(1)) => {
-            panic!("timed out waiting for the server to send diagnostics")
-        }
-    };
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
 
     assert_eq!(
         notification,
