@@ -36,7 +36,7 @@ mod merge;
 mod validator;
 
 use biome_diagnostics::{Error, Severity};
-pub use biome_rowan::TextRange;
+pub use biome_rowan::{Text, TextRange};
 pub use diagnostics::{
     DeserializableType, DeserializableTypes, DeserializationAdvice, DeserializationDiagnostic,
 };

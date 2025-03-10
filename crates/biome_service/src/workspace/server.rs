@@ -642,7 +642,7 @@ impl WorkspaceServer {
             WatcherSignalKind::Removed => (no_paths, paths),
         };
 
-        self.dependency_graph.update_imports_for_js_paths(
+        self.dependency_graph.update_graph_for_js_paths(
             self.fs.as_ref(),
             &self.project_layout,
             added_or_changed_paths,

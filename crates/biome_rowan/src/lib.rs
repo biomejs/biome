@@ -31,6 +31,7 @@ pub mod raw_language;
 #[cfg(feature = "serde")]
 mod serde_impls;
 mod syntax_factory;
+mod text;
 mod token_text;
 mod tree_builder;
 
@@ -49,6 +50,7 @@ pub use crate::{
     },
     syntax_factory::*,
     syntax_node_text::SyntaxNodeText,
+    text::Text,
     token_text::TokenText,
     tree_builder::{Checkpoint, TreeBuilder},
     utility_types::{Direction, NodeOrToken, TokenAtOffset, WalkEvent},

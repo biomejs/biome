@@ -538,7 +538,7 @@ mod tests {
 
         assert_eq!(token_hash(&t1), token_hash(&t2));
 
-        let t3 = GreenToken::new(kind, "let");
+        let t3 = GreenToken::new_raw(kind, "let");
         assert_ne!(token_hash(&t1), token_hash(&t3));
 
         let t4 = GreenToken::with_trivia(
