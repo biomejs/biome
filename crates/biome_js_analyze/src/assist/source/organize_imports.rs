@@ -160,7 +160,7 @@ declare_source_rule! {
         language: "js",
         recommended: true,
         fix_kind: FixKind::Safe,
-     }
+    }
 }
 
 impl Rule for OrganizeImports {
