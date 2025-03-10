@@ -214,7 +214,7 @@ smallvec             = { version = "1.13.2", features = ["union", "const_new", "
 static_assertions    = "1.1"
 syn                  = "1.0.109"
 termcolor            = "1.4.1"
-terminal_size        = "0.4.1"
+terminal_size        = "0.4.2"
 tokio                = "1.43.0"
 tracing              = { version = "0.1.41", default-features = false, features = ["std", "attributes"] }
 tracing-subscriber   = "0.3.19"
