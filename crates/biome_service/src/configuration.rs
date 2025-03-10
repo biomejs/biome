@@ -320,11 +320,9 @@ pub fn load_editorconfig(
             ..
         } = auto_search_result;
         let editorconfig = parse_str(&content)?;
-        println!("editorconfig {:?}", editorconfig);
         if let Some(config_path) = config_path {
             // if `.edirotconfig` is higher than `biome.json`
             if is_parent_of(directory_path, config_path) {
-                println!("hahah");
                 Ok((None, vec![]))
             } else {
                 Ok(editorconfig.to_biome())
