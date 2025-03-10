@@ -25,23 +25,23 @@ div {
 
     /* <line-width> */
     border : ThIn;
-    border: 
+    border:
     medium
     ;
     border:   100px;
 
     /* <color> */
-    border: 
+    border:
     #fff;
 
     /* combinations */
     border: 2px
     dotted;
     border  :   outset   #f33;
-    border:#000 medium  
-     
+    border:#000 medium
+
     dashed
-        
+
         ;
 }
 
@@ -69,7 +69,9 @@ div {
 	border: inherit;
 
 	border: zzz-unknown-value;
-	border: a, value list;
+	border:
+		a,
+		value list;
 
 	/* <line-style> */
 	border: SOLID;
