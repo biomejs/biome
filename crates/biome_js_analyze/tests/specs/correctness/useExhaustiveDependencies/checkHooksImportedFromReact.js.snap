@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: checkHooksImportedFromReact.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -30,7 +29,7 @@ function MyComponent2() {
 
 # Diagnostics
 ```
-checkHooksImportedFromReact.js:3:9 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+checkHooksImportedFromReact.js:3:9 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━
 
   × This hook does not specify all of its dependencies: a
   
@@ -52,5 +51,9 @@ checkHooksImportedFromReact.js:3:9 lint/correctness/useExhaustiveDependencies �
   
   i Either include it or remove the dependency array
   
+  i Unsafe fix: Add the missing dependencies to the list.
+  
+    5 │ ··},·[a]);
+      │       +   
 
 ```

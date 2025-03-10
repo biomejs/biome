@@ -1,7 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
-snapshot_kind: text
 ---
 ## `package.json`
 
@@ -43,7 +42,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-/test.jsx:6:20 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+/test.jsx:6:20 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This hook specifies more dependencies than necessary: local
   
@@ -63,6 +62,10 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
      9 │ }
     10 │     
   
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    8 │ ····},·[local,·local]);
+      │              -------   
 
 ```
 

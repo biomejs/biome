@@ -1,7 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: extraDependenciesInvalid.js
-snapshot_kind: text
 ---
 # Input
 ```js
@@ -49,7 +48,7 @@ function MyComponent3() {
 
 # Diagnostics
 ```
-extraDependenciesInvalid.js:5:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━
+extraDependenciesInvalid.js:5:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━
 
   × This hook specifies more dependencies than necessary: a
   
@@ -69,11 +68,15 @@ extraDependenciesInvalid.js:5:3 lint/correctness/useExhaustiveDependencies ━�
     6 │ }
     7 │ 
   
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    5 │ ··useEffect(()·=>·{},·[a]);
+      │                        -   
 
 ```
 
 ```
-extraDependenciesInvalid.js:12:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━
+extraDependenciesInvalid.js:12:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━
 
   × This hook specifies more dependencies than necessary: a, b
   
@@ -102,11 +105,15 @@ extraDependenciesInvalid.js:12:3 lint/correctness/useExhaustiveDependencies ━�
     13 │ }
     14 │ 
   
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    12 │ ··useEffect(()·=>·{},·[a,·b]);
+       │                        ----   
 
 ```
 
 ```
-extraDependenciesInvalid.js:19:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━
+extraDependenciesInvalid.js:19:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━
 
   × This hook specifies more dependencies than necessary: a
   
@@ -126,6 +133,10 @@ extraDependenciesInvalid.js:19:3 lint/correctness/useExhaustiveDependencies ━�
     20 │ }
     21 │ 
   
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    19 │ ··useEffect(()·=>·{},·[a]);
+       │                        -   
 
 ```
 
@@ -163,7 +174,7 @@ extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies ━�
 ```
 
 ```
-extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━
+extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━
 
   × This hook does not specify all of its dependencies: someObj
   
@@ -183,11 +194,15 @@ extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies ━�
     30 │   }, [someObj.id]);
     31 │ }
   
+  i Unsafe fix: Add the missing dependencies to the list.
+  
+    30 │ ··},·[someObj.id,·someObj]);
+       │                 +++++++++   
 
 ```
 
 ```
-extraDependenciesInvalid.js:36:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━
+extraDependenciesInvalid.js:36:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━
 
   × This hook specifies more dependencies than necessary: outer
   
@@ -207,5 +222,9 @@ extraDependenciesInvalid.js:36:3 lint/correctness/useExhaustiveDependencies ━�
     39 │ }
     40 │ 
   
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    38 │ ··},·[outer]);
+       │       -----   
 
 ```
