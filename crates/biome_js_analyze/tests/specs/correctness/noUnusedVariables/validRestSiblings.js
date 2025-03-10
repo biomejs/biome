@@ -1,4 +1,4 @@
-// Default behavior (ignoreRestSiblings: true)
+// With ignoreRestSiblings: true, unused variables should be ignored
 const car = { brand: "Tesla", year: 2019, countryCode: "US" };
 const { brand, year, ...other } = car;
 console.log(other);

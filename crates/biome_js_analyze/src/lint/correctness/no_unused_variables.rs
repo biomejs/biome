@@ -31,7 +31,7 @@ pub struct NoUnusedVariablesOptions {
 impl Default for NoUnusedVariablesOptions {
     fn default() -> Self {
         Self {
-            ignore_rest_siblings: true,
+            ignore_rest_siblings: false,
         }
     }
 }
@@ -64,12 +64,12 @@ declare_lint_rule! {
     /// ```json,options
     /// {
     ///   "options": {
-    ///     "ignoreRestSiblings": false
+    ///     "ignoreRestSiblings": true
     ///   }
     /// }
     /// ```
     ///
-    /// - `ignoreRestSiblings`: Whether to ignore unused variables from an object desctructuring with a spread (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule). Defaults to `true`.
+    /// - `ignoreRestSiblings`: Whether to ignore unused variables from an object desctructuring with a spread (i.e.: whether `a` and `b` in `const { a, b, ...rest } = obj` should be ignored by this rule). Defaults to `false`.
     ///
     /// ## Examples
     ///
@@ -106,7 +106,7 @@ declare_lint_rule! {
     /// export function f<T>() {}
     /// ```
     ///
-    /// ```js,expect_diagnostic,use_options
+    /// ```js,expect_diagnostic
     /// // With `ignoreRestSiblings: false`
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand, ...other } = car;
@@ -135,14 +135,14 @@ declare_lint_rule! {
     /// used_overloaded();
     /// ```
     ///
-    /// ```js,use_options
+    /// ```js
     /// // With `ignoreRestSiblings: false`
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand: _brand, ...other } = car;
     /// console.log(other);
     /// ```
     ///
-    /// ```js
+    /// ```js,use_options
     /// // With `ignoreRestSiblings: true`
     /// const car = { brand: "Tesla", year: 2019, countryCode: "US" };
     /// const { brand, ...other } = car;
@@ -196,6 +196,25 @@ fn is_function_that_is_ok_parameter_not_be_used(
     )
 }
 
+/// Returns `true` if the binding is part of an object pattern with a rest element as a sibling
+fn is_rest_spread_sibling(decl: &AnyJsBindingDeclaration) -> bool {
+    if let node @ (AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
+    | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)) = decl
+    {
+        node.syntax()
+            .siblings(Direction::Next)
+            .last()
+            .is_some_and(|last_sibling| {
+                matches!(
+                    last_sibling.kind(),
+                    JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
+                )
+            })
+    } else {
+        false
+    }
+}
+
 fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
     if binding.is_under_object_pattern_binding()? {
         Some(SuggestedFix::NoSuggestion)
@@ -212,24 +231,8 @@ fn suggested_fix_if_unused(
 ) -> Option<SuggestedFix> {
     let decl = binding.declaration()?;
     // It is fine to ignore unused rest spread siblings if the option is enabled
-    if options.ignore_rest_siblings {
-        if let node @ (AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
-        | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)) = &decl
-        {
-            if node
-                .syntax()
-                .siblings(Direction::Next)
-                .last()
-                .is_some_and(|last_sibling| {
-                    matches!(
-                        last_sibling.kind(),
-                        JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
-                    )
-                })
-            {
-                return None;
-            }
-        }
+    if options.ignore_rest_siblings && is_rest_spread_sibling(&decl) {
+        return None;
     }
 
     match decl.parent_binding_pattern_declaration().unwrap_or(decl) {
@@ -477,9 +480,18 @@ impl Rule for NoUnusedVariables {
             },
         );
 
-        let diag = diag.note(
+        let mut diag = diag.note(
             markup! {"Unused variables usually are result of incomplete refactoring, typos and other source of bugs."},
         );
+
+        // Check if this binding is part of an object pattern with a rest element
+        if let Some(decl) = binding.declaration() {
+            if is_rest_spread_sibling(&decl) {
+                diag = diag.note(
+                    markup! {"You can use the 'ignoreRestSiblings' option to ignore unused variables in an object destructuring with a spread."},
+                );
+            }
+        }
 
         Some(diag)
     }

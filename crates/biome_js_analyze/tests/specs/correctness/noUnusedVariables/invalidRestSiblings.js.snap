@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalidRestSiblings.js
 ---
 # Input
@@ -32,6 +31,8 @@ invalidRestSiblings.js:3:9 lint/correctness/noUnusedVariables ━━━━━━
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
+  i You can use the 'ignoreRestSiblings' option to ignore unused variables in an object destructuring with a spread.
+  
 
 ```
 
@@ -48,6 +49,8 @@ invalidRestSiblings.js:3:16 lint/correctness/noUnusedVariables ━━━━━�
     5 │ 
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i You can use the 'ignoreRestSiblings' option to ignore unused variables in an object destructuring with a spread.
   
 
 ```
@@ -66,6 +69,8 @@ invalidRestSiblings.js:8:14 lint/correctness/noUnusedVariables ━━━━━�
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
   
+  i You can use the 'ignoreRestSiblings' option to ignore unused variables in an object destructuring with a spread.
+  
 
 ```
 
@@ -82,6 +87,8 @@ invalidRestSiblings.js:8:31 lint/correctness/noUnusedVariables ━━━━━�
     10 │ 
   
   i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i You can use the 'ignoreRestSiblings' option to ignore unused variables in an object destructuring with a spread.
   
 
 ```

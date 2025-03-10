@@ -6,7 +6,7 @@
         "noUnusedVariables": {
           "level": "error",
           "options": {
-            "ignoreRestSiblings": false
+            "ignoreRestSiblings": true
           }
         }
       }
