@@ -1,0 +1,35 @@
+/* or */
+/* No valid container query after `and` */
+@container (width > 300px) or {
+}
+
+/* No valid container query after `and missing {` */
+@container (width > 300px) or
+}
+
+/* 200px is not a valid container query start */
+@container (width > 300px) or 200px {
+}
+
+/* The final `or` is missing its sub-query */
+@container (width > 300px) or (height > 200px) or {
+}
+
+/* Missing parenthesis  */
+@container (width > 300px) or width > 200px or (height > 200px) {
+}
+
+/* There's an extra `or` that has no query immediately following it. */
+@container (width > 300px) or or (height > 200px) {
+}
+
+/* Invalid query name */
+@container (width > 300px) or randomname or (height > 200px) {
+}
+
+/* not */
+@container name not invalid {
+}
+
+@container name not invalid
+}
