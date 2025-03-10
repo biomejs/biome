@@ -1628,8 +1628,7 @@ async fn plugin_load_error_show_message() -> Result<()> {
         }
     }"#;
 
-    const INVALID_PLUGIN_CONTENT: &[u8] = br#"
-xx"#;
+    const INVALID_PLUGIN_CONTENT: &[u8] = br#"foo"#;
 
     fs.insert(
         Utf8PathBuf::from_path_buf(url!("biome.json").to_file_path().unwrap()).unwrap(),

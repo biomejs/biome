@@ -721,7 +721,9 @@ impl Session {
 
         if let Err(WorkspaceError::PluginErrors(error)) = result {
             error!("Failed to load plugins: {:?}", error);
-            // self.client.log_message(MessageType::ERROR, &error).await;
+            self.client
+                .log_message(MessageType::ERROR, format!("{:?}", error))
+                .await;
             ConfigurationStatus::PluginError
         } else if let Err(error) = result {
             error!("Failed to set workspace settings: {error}");
